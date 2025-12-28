@@ -19,12 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
   canvas.renderAll();
 });
 
-// const mode = localStorage.getItem('mode') || 'dark-mode';
-// if (mode === 'dark-mode') {
   canvas.backgroundColor = "gray";
-// }else{
-//   canvas.backgroundColor = "white";
-// }
 
 var svgPagging = 20;
 document.addEventListener('DOMContentLoaded', function() {

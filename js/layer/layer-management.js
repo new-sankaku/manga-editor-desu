@@ -31,7 +31,7 @@ function updateLayerPanel() {
 
 function executeUpdate() {
   isExecuting = true;
-  console.time('updateLayerPanel');
+  // console.time('updateLayerPanel');
 
   var layers = canvas.getObjects().slice().reverse();
   var layerContent = $("layer-content");
@@ -197,7 +197,7 @@ function executeUpdate() {
     }
   });
 
-  console.timeEnd('updateLayerPanel');
+  // console.timeEnd('updateLayerPanel');
   
   lastUpdateTime = Date.now();
   isExecuting = false;

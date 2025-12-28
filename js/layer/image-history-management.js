@@ -163,7 +163,7 @@ function saveState() {
     if(notSave()){
         return ;
     }
-    console.log("saveState start");
+    // console.log("saveState start");
     // console.trace();
     if (currentStateIndex < stateStack.length - 1) {
         stateStack.splice(currentStateIndex + 1);

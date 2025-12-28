@@ -16,18 +16,17 @@
 //マージされるので日付単位で分けて入れたらOK
 const resources = {
 "20250413": {
-  "ja": {"upscaleButton": "画像を高解像度化します", "cropButton": "Crop"},
-  "en": {"upscaleButton": "Upscale image", "cropButton": "Crop"},
-  "ko": {"upscaleButton": "이미지 확대", "cropButton": "자르기"},
-  "fr": {"upscaleButton": "Améliorer l'image", "cropButton": "Rogner"},
-  "zh": {"upscaleButton": "提升图像分辨率", "cropButton": "裁剪"},
-  "ru": {"upscaleButton": "Увеличить разрешение", "cropButton": "Обрезка"},
-  "es": {"upscaleButton": "Mejorar resolución", "cropButton": "Recorte"},
-  "pt": {"upscaleButton": "Aumentar resolução", "cropButton": "Cortar"},
-  "th": {"upscaleButton": "เพิ่มความละเอียดภาพ", "cropButton": "ครอป"},
-  "de": {"upscaleButton": "Bild verbessern", "cropButton": "Zuschneiden"}
+  "ja": {"upscaleButton": "画像を高解像度化します", "cropButton": "Crop", "importButton": "インポート", "exitModeButton": "モード解除"},
+  "en": {"upscaleButton": "Upscale image", "cropButton": "Crop", "importButton": "Import", "exitModeButton": "Exit Mode"},
+  "ko": {"upscaleButton": "이미지 확대", "cropButton": "자르기", "importButton": "가져오기", "exitModeButton": "모드 해제"},
+  "fr": {"upscaleButton": "Améliorer l'image", "cropButton": "Rogner", "importButton": "Importer", "exitModeButton": "Quitter le mode"},
+  "zh": {"upscaleButton": "提升图像分辨率", "cropButton": "裁剪", "importButton": "导入", "exitModeButton": "退出模式"},
+  "ru": {"upscaleButton": "Увеличить разрешение", "cropButton": "Обрезка", "importButton": "Импорт", "exitModeButton": "Выйти из режима"},
+  "es": {"upscaleButton": "Mejorar resolución", "cropButton": "Recorte", "importButton": "Importar", "exitModeButton": "Salir del modo"},
+  "pt": {"upscaleButton": "Aumentar resolução", "cropButton": "Cortar", "importButton": "Importar", "exitModeButton": "Sair do modo"},
+  "th": {"upscaleButton": "เพิ่มความละเอียดภาพ", "cropButton": "ครอป", "importButton": "นำเข้า", "exitModeButton": "ออกจากโหมด"},
+  "de": {"upscaleButton": "Bild verbessern", "cropButton": "Zuschneiden", "importButton": "Importieren", "exitModeButton": "Modus beenden"}
 },
-
 
 "20250322": {
 ja: {missingNode:"ノード情報無し", missingDescription:"ComfyUI接続未経験かノード無し。WorkflowをダウンロードしてComfyUIに適用してComfyUI ManagerからInstall Missing Custom Nodesを実行してください"},
