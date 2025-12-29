@@ -214,7 +214,7 @@ function loadSettingsLocalStrage() {
       }
     });
 
-    var nowExternalMode = localSettings.externalAI || apis.A1111;
+    var nowExternalMode = localSettings.externalAI || apis.COMFYUI;
     console.log("nowExternalMode, " + nowExternalMode);
     if( nowExternalMode === apis.A1111 ){
       changeExternalAPI( $("sdWebUIButton") );

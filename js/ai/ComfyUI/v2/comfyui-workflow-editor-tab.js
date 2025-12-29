@@ -12,7 +12,9 @@ class ComfyUIWorkflowTab {
     if (id) {
       this.id = id;
     } else {
-      this.id = `workflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      this.id = `workflow-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
     }
     this.contentElement = null;
     this.hiddenNodeTypes = ["Note", undefined];
@@ -21,13 +23,14 @@ class ComfyUIWorkflowTab {
     this.resizeObserver = null;
     this.buttonElement = null;
   }
- 
 
   markNodeAsUnsaved(nodeId) {
     this.unsavedNodes.add(nodeId);
-    const nodeElement = this.contentElement.querySelector(`[data-node-id="${nodeId}"]`).closest('.comfui-node-wrapper');
+    const nodeElement = this.contentElement
+      .querySelector(`[data-node-id="${nodeId}"]`)
+      .closest(".comfui-node-wrapper");
     if (nodeElement) {
-      nodeElement.classList.add('unsaved');
+      nodeElement.classList.add("unsaved");
     }
   }
 
@@ -40,31 +43,29 @@ class ComfyUIWorkflowTab {
     const enabled = this.enabled === true;
 
     button.innerHTML = `
-      <label class="comfui-custom-radio">
-        <input type="radio" name="enabled-${currentType}" data-type="${currentType}" class="comfui-tab-enabled-radio" ${
+<label class="comfui-custom-radio">
+<input type="radio" name="enabled-${currentType}" data-type="${currentType}" class="comfui-tab-enabled-radio" ${
       enabled ? "checked" : ""
     }>
-        <span class="comfui-custom-radio-label"></span>
-      </label>
-      <select class="comfui-tab-type-dropdown" title="Type">
-        ${comfyuiTypes
-          .map(
-            (option) =>
-              `<option value="${option}" ${
-                option === currentType ? "selected" : ""
-              }>${option}</option>`
-          )
-          .join("")}
-      </select>
-      <span class="comfui-tab-name" title="${this.file.name}">${
-      this.file.name
-    }</span>
-      <div class="comfui-tab-actions">
-        <span class="comfui-tab-save" title="Save">Save</span>
-        <span class="comfui-tab-download" title="Download">↓</span>
-        <span class="comfui-tab-close" title="Close">Delete</span>
-      </div>
-    `;
+<span class="comfui-custom-radio-label"></span>
+</label>
+<select class="comfui-tab-type-dropdown" title="Type">
+${comfyuiTypes
+  .map(
+    (option) =>
+      `<option value="${option}" ${
+        option === currentType ? "selected" : ""
+      }>${option}</option>`
+  )
+  .join("")}
+</select>
+<span class="comfui-tab-name" title="${this.file.name}">${this.file.name}</span>
+<div class="comfui-tab-actions">
+<span class="comfui-tab-save" title="Save">Save</span>
+<span class="comfui-tab-download" title="Download">Download</span>
+<span class="comfui-tab-close" title="Close">Delete</span>
+</div>
+`;
 
     const radioBtn = button.querySelector(".comfui-tab-enabled-radio");
     radioBtn.addEventListener("click", async (e) => {
@@ -137,15 +138,16 @@ class ComfyUIWorkflowTab {
       });
   }
   clearUnsavedState() {
-    this.unsavedNodes.forEach(nodeId => {
-      const nodeElement = this.contentElement.querySelector(`[data-node-id="${nodeId}"]`).closest('.comfui-node-wrapper');
+    this.unsavedNodes.forEach((nodeId) => {
+      const nodeElement = this.contentElement
+        .querySelector(`[data-node-id="${nodeId}"]`)
+        .closest(".comfui-node-wrapper");
       if (nodeElement) {
-        nodeElement.classList.remove('unsaved');
+        nodeElement.classList.remove("unsaved");
       }
     });
     this.unsavedNodes.clear();
   }
-
 
   createContent() {
     const content = document.createElement("div");
@@ -206,9 +208,8 @@ class ComfyUIWorkflowTab {
   }
 
   createMissingInput() {
-
-    let missingNode = getText('missingNode');
-    let missingDescription = getText('missingDescription');
+    let missingNode = getText("missingNode");
+    let missingDescription = getText("missingDescription");
 
     return `<div class="comfui-input-container"> <label class="comfui-input-label" >${missingNode}</label> <textarea rows="4" oninput="this.style.height = ''; if(this.value.length > 100) { this.rows = 5; } else { this.rows = 4; } this.style.height = Math.min(this.scrollHeight, 120) + 'px'" style="resize: none; overflow-y: auto; font-size: 12px; padding: 2px;"> ${missingDescription} </textarea> </div>`;
   }
@@ -225,48 +226,48 @@ class ComfyUIWorkflowTab {
 
     if (config.image_upload === true) {
       return `<div class="comfui-input-container">
-      <label class="comfui-input-label" for="${id}">${inputName}</label>
-      <select id="${id}" data-node-id="${nodeId}" data-input-name="${inputName}">
-        ${inputDef[0]
-          .map(
-            (option) =>
-              `<option value="${option}" ${
-                value === option ? "selected" : ""
-              }>${option}</option>`
-          )
-          .join("")}
-      </select>
-      <div class="comfui-image-upload-area">
-        <label class="comfui-upload-button" for="file-${id}">
-          + Add Image
-          <input type="file" 
-            id="file-${id}"
-            accept="image/*"
-            data-node-id="${nodeId}"
-            data-input-name="${inputName}"
-            data-preview-target="${nodeId}-${inputName}-preview">
-        </label>
-        <div class="comfui-image-preview hidden" data-preview-id="${nodeId}-${inputName}-preview">
-          <img src="" alt="プレビュー" class="comfui-preview-image">
-        </div>
-      </div>
-    </div>`;
+<label class="comfui-input-label" for="${id}">${inputName}</label>
+<select id="${id}" data-node-id="${nodeId}" data-input-name="${inputName}">
+${inputDef[0]
+  .map(
+    (option) =>
+      `<option value="${option}" ${
+        value === option ? "selected" : ""
+      }>${option}</option>`
+  )
+  .join("")}
+</select>
+<div class="comfui-image-upload-area">
+<label class="comfui-upload-button" for="file-${id}">
++ Add Image
+<input type="file" 
+id="file-${id}"
+accept="image/*"
+data-node-id="${nodeId}"
+data-input-name="${inputName}"
+data-preview-target="${nodeId}-${inputName}-preview">
+</label>
+<div class="comfui-image-preview hidden" data-preview-id="${nodeId}-${inputName}-preview">
+<img src="" alt="プレビュー" class="comfui-preview-image">
+</div>
+</div>
+</div>`;
     }
 
     if (Array.isArray(inputDef[0])) {
       return `<div class="comfui-input-container">
-      <label class="comfui-input-label" for="${id}">${inputName}</label>
-      <select id="${id}" data-node-id="${nodeId}" data-input-name="${inputName}">
-        ${inputDef[0]
-          .map(
-            (option) =>
-              `<option value="${option}" ${
-                value === option ? "selected" : ""
-              }>${option}</option>`
-          )
-          .join("")}
-      </select>
-    </div>`;
+<label class="comfui-input-label" for="${id}">${inputName}</label>
+<select id="${id}" data-node-id="${nodeId}" data-input-name="${inputName}">
+${inputDef[0]
+  .map(
+    (option) =>
+      `<option value="${option}" ${
+        value === option ? "selected" : ""
+      }>${option}</option>`
+  )
+  .join("")}
+</select>
+</div>`;
     }
 
     const isMultiline = config.multiline === true;
@@ -275,25 +276,25 @@ class ComfyUIWorkflowTab {
 
     if (isMultiline) {
       return `<div class="comfui-input-container">
-      <label class="comfui-input-label" for="${id}">${inputName}</label>
-      <textarea id="${id}"
-        data-node-id="${nodeId}"
-        data-input-name="${inputName}"
-        rows="4"
-        oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
-        style="resize: none; overflow: hidden;">${value}</textarea>
-    </div>`;
+<label class="comfui-input-label" for="${id}">${inputName}</label>
+<textarea id="${id}"
+data-node-id="${nodeId}"
+data-input-name="${inputName}"
+rows="4"
+oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
+style="resize: none; overflow: hidden;">${value}</textarea>
+</div>`;
     }
 
     return `<div class="comfui-input-container">
-    <label class="comfui-input-label" for="${id}">${inputName}</label>
-    <input type="${type}" id="${id}" value="${value}"
-      ${config.min !== undefined ? `min="${config.min}"` : ""}
-      ${config.max !== undefined ? `max="${config.max}"` : ""}
-      ${config.step !== undefined ? `step="${config.step}"` : ""}
-      data-node-id="${nodeId}"
-      data-input-name="${inputName}">
-   </div>`;
+<label class="comfui-input-label" for="${id}">${inputName}</label>
+<input type="${type}" id="${id}" value="${value}"
+${config.min !== undefined ? `min="${config.min}"` : ""}
+${config.max !== undefined ? `max="${config.max}"` : ""}
+${config.step !== undefined ? `step="${config.step}"` : ""}
+data-node-id="${nodeId}"
+data-input-name="${inputName}">
+ </div>`;
   }
 
   initMasonry() {
@@ -308,7 +309,7 @@ class ComfyUIWorkflowTab {
       fitWidth: true,
       transitionDuration: 0,
       initLayout: false,
-      resize: true
+      resize: true,
     };
 
     setTimeout(() => {
@@ -390,21 +391,22 @@ class ComfyUIWorkflowTab {
           node,
           apiNode,
           inputCount,
-          class_type
+          class_type,
         };
       })
       .sort((a, b) => b.inputCount - a.inputCount);
 
-
     nodes.forEach(({ id, node, apiNode, class_type }) => {
       const nodeElement = document.createElement("div");
       nodeElement.className = "comfui-node-wrapper";
-      
+
       const nodeTitle = node._meta?.title || node.class_type;
-      let nodeTypeDisplay = '';
-      if( notExistsWorkflowNodeVsComfyUI(class_type) ){
-        nodeTypeDisplay = `<div class="comfui-node-title comfui-node-title-warning">${id}: ${nodeTitle}</div>` + this.createMissingInput();
-      }else{
+      let nodeTypeDisplay = "";
+      if (notExistsWorkflowNodeVsComfyUI(class_type)) {
+        nodeTypeDisplay =
+          `<div class="comfui-node-title comfui-node-title-warning">${id}: ${nodeTitle}</div>` +
+          this.createMissingInput();
+      } else {
         nodeTypeDisplay = `<div class="comfui-node-title comfui-node-title-normal">${id}: ${nodeTitle}</div>`;
       }
 
@@ -433,145 +435,153 @@ class ComfyUIWorkflowTab {
   }
 
   setupInputListeners() {
-    this.contentElement.querySelectorAll('input[type="text"], input[type="number"], select, textarea').forEach((input) => {
-      const nodeId = input.dataset.nodeId;
-      const inputName = input.dataset.inputName;
-   
-      if (nodeId && inputName && this.workflow[nodeId]) {
-        this.workflow[nodeId].inputs[inputName] = input.value;
-      }
-   
-      input.addEventListener("change", async (e) => {
-        const nodeId = e.target.dataset.nodeId;
-        const inputName = e.target.dataset.inputName;
-        if (this.workflow[nodeId] && inputName) {
-          this.workflow[nodeId].inputs[inputName] = e.target.value;
-          this.markNodeAsUnsaved(nodeId);
-   
-          if (e.target.tagName.toLowerCase() === "select") {
-            const selectedValue = e.target.value;
-            const previewTargetId = `${nodeId}-${inputName}-preview`;
-            const previewContainer = this.contentElement.querySelector(`[data-preview-id="${previewTargetId}"]`);
-   
-            if (previewContainer) {
-              const previewImage = previewContainer.querySelector("img");
-              if (previewImage) {
-                console.log("selectedValue", selectedValue);
-                const imageUrl = await comfyui_view_image_v2(selectedValue);
-                if (imageUrl) {
-                  previewImage.src = imageUrl;
-                  previewContainer.classList.remove("hidden");
-   
-                  previewImage.onload = () => {
-                    if (this.masonry) {
-                      this.masonry.layout();
-                    }
-                    URL.revokeObjectURL(imageUrl);
-                  };
-                }
-              }
-            }
-          }
+    this.contentElement
+      .querySelectorAll(
+        'input[type="text"], input[type="number"], select, textarea'
+      )
+      .forEach((input) => {
+        const nodeId = input.dataset.nodeId;
+        const inputName = input.dataset.inputName;
+
+        if (nodeId && inputName && this.workflow[nodeId]) {
+          this.workflow[nodeId].inputs[inputName] = input.value;
         }
-      });
-   
-      if (input.tagName.toLowerCase() === "textarea") {
-        let timeoutId;
-        input.addEventListener("input", () => {
-          if (timeoutId) {
-            clearTimeout(timeoutId);
-          }
-          timeoutId = setTimeout(() => {
-            if (this.masonry && this.isActive) {
-              this.masonry.layout();
-            }
-          }, 5);
-   
-          const nodeId = input.dataset.nodeId;
-          const inputName = input.dataset.inputName;
-          if (nodeId && inputName && this.workflow[nodeId]) {
-            this.workflow[nodeId].inputs[inputName] = input.value;
+
+        input.addEventListener("change", async (e) => {
+          const nodeId = e.target.dataset.nodeId;
+          const inputName = e.target.dataset.inputName;
+          if (this.workflow[nodeId] && inputName) {
+            this.workflow[nodeId].inputs[inputName] = e.target.value;
             this.markNodeAsUnsaved(nodeId);
-          }
-        });
-   
-        if (this.resizeObserver) {
-          this.resizeObserver.disconnect();
-        }
-   
-        this.resizeObserver = new ResizeObserver(() => {
-          if (this.masonry) {
-            window.dispatchEvent(new Event("resize"));
-            this.masonry.layout();
-          }
-        });
-   
-        this.resizeObserver.observe(input);
-      }
-    });
-   
-    this.contentElement.querySelectorAll('input[type="file"]').forEach((input) => {
-      input.addEventListener("change", async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-   
-        const nodeId = e.target.dataset.nodeId;
-        const inputName = e.target.dataset.inputName;
-        const previewTargetId = e.target.dataset.previewTarget;
-   
-        if (this.workflow[nodeId] && inputName) {
-          try {
-            const uploadResult = await comfyui_uploadImage_v2(file);
-            if (uploadResult.success) {
-              this.workflow[nodeId].inputs[inputName] = uploadResult.name;
-              this.markNodeAsUnsaved(nodeId);
-   
-              const select = this.contentElement.querySelector(
-                `select[data-node-id="${nodeId}"][data-input-name="${inputName}"]`
+
+            if (e.target.tagName.toLowerCase() === "select") {
+              const selectedValue = e.target.value;
+              const previewTargetId = `${nodeId}-${inputName}-preview`;
+              const previewContainer = this.contentElement.querySelector(
+                `[data-preview-id="${previewTargetId}"]`
               );
-              if (select) {
-                const exists = Array.from(select.options).some(
-                  (option) => option.value === uploadResult.name
-                );
-                if (!exists) {
-                  const option = new Option(
-                    uploadResult.name,
-                    uploadResult.name,
-                    true,
-                    true
-                  );
-                  select.add(option);
+
+              if (previewContainer) {
+                const previewImage = previewContainer.querySelector("img");
+                if (previewImage) {
+                  console.log("selectedValue", selectedValue);
+                  const imageUrl = await comfyui_view_image_v2(selectedValue);
+                  if (imageUrl) {
+                    previewImage.src = imageUrl;
+                    previewContainer.classList.remove("hidden");
+
+                    previewImage.onload = () => {
+                      if (this.masonry) {
+                        this.masonry.layout();
+                      }
+                      URL.revokeObjectURL(imageUrl);
+                    };
+                  }
                 }
-                select.value = uploadResult.name;
               }
             }
-          } catch (error) {
-            console.error("アップロードエラー:", error);
           }
-   
-          const reader = new FileReader();
-          const previewContainer = this.contentElement.querySelector(
-            `[data-preview-id="${previewTargetId}"]`
-          );
-          const previewImage = previewContainer?.querySelector("img");
-   
-          if (!previewContainer || !previewImage) return;
-   
-          reader.onload = (e) => {
-            previewImage.src = e.target.result;
-            previewContainer.classList.remove("hidden");
-            previewImage.onload = () => {
-              if (this.masonry) {
+        });
+
+        if (input.tagName.toLowerCase() === "textarea") {
+          let timeoutId;
+          input.addEventListener("input", () => {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(() => {
+              if (this.masonry && this.isActive) {
                 this.masonry.layout();
               }
-            };
-          };
-   
-          reader.readAsDataURL(file);
+            }, 5);
+
+            const nodeId = input.dataset.nodeId;
+            const inputName = input.dataset.inputName;
+            if (nodeId && inputName && this.workflow[nodeId]) {
+              this.workflow[nodeId].inputs[inputName] = input.value;
+              this.markNodeAsUnsaved(nodeId);
+            }
+          });
+
+          if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+          }
+
+          this.resizeObserver = new ResizeObserver(() => {
+            if (this.masonry) {
+              window.dispatchEvent(new Event("resize"));
+              this.masonry.layout();
+            }
+          });
+
+          this.resizeObserver.observe(input);
         }
       });
-    });
-   }
+
+    this.contentElement
+      .querySelectorAll('input[type="file"]')
+      .forEach((input) => {
+        input.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const nodeId = e.target.dataset.nodeId;
+          const inputName = e.target.dataset.inputName;
+          const previewTargetId = e.target.dataset.previewTarget;
+
+          if (this.workflow[nodeId] && inputName) {
+            try {
+              const uploadResult = await comfyui_uploadImage_v2(file);
+              if (uploadResult.success) {
+                this.workflow[nodeId].inputs[inputName] = uploadResult.name;
+                this.markNodeAsUnsaved(nodeId);
+
+                const select = this.contentElement.querySelector(
+                  `select[data-node-id="${nodeId}"][data-input-name="${inputName}"]`
+                );
+                if (select) {
+                  const exists = Array.from(select.options).some(
+                    (option) => option.value === uploadResult.name
+                  );
+                  if (!exists) {
+                    const option = new Option(
+                      uploadResult.name,
+                      uploadResult.name,
+                      true,
+                      true
+                    );
+                    select.add(option);
+                  }
+                  select.value = uploadResult.name;
+                }
+              }
+            } catch (error) {
+              console.error("アップロードエラー:", error);
+            }
+
+            const reader = new FileReader();
+            const previewContainer = this.contentElement.querySelector(
+              `[data-preview-id="${previewTargetId}"]`
+            );
+            const previewImage = previewContainer?.querySelector("img");
+
+            if (!previewContainer || !previewImage) return;
+
+            reader.onload = (e) => {
+              previewImage.src = e.target.result;
+              previewContainer.classList.remove("hidden");
+              previewImage.onload = () => {
+                if (this.masonry) {
+                  this.masonry.layout();
+                }
+              };
+            };
+
+            reader.readAsDataURL(file);
+          }
+        });
+      });
+  }
 
   downloadWorkflow() {
     const jsonStr = JSON.stringify(this.workflow, null, 2);
