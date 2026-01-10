@@ -1,25 +1,8 @@
-const workflowInitStore = localforage.createInstance({
-name: 'workflowInitStorage',
-storeName: 'initStatus'
-});
-
 class ComfyUIWorkflowEditor {
 constructor() {
 this.tabs = new Map();
 this.nodeTypes = null;
 this.activeTabId = null;
-}
-
-
-async checkWorkflowInitialized(workflowName) {
-const initializedWorkflows = await workflowInitStore.getItem('initialized_workflows') || {};
-return initializedWorkflows[workflowName] === true;
-}
-
-async setWorkflowInitialized(workflowName) {
-const initializedWorkflows = await workflowInitStore.getItem('initialized_workflows') || {};
-initializedWorkflows[workflowName] = true;
-await workflowInitStore.setItem('initialized_workflows', initializedWorkflows);
 }
 
 async updateObjectInfoAndWorkflows() {
@@ -122,8 +105,8 @@ this.updateObjectInfoAndWorkflows();
 
 async addDefaultWorkflows() {
 for (const workflow of comfyuiDefaultWorkflows) {
-const isInitialized = await this.checkWorkflowInitialized(workflow.name);
-if (!isInitialized) {
+const exists = await comfyUIWorkflowRepository.existsByName(workflow.name);
+if (!exists) {
 const id = `workflow-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
 await comfyUIWorkflowRepository.saveWorkflow(
@@ -133,8 +116,6 @@ workflow.name,
 workflow.workflow,
 workflow.enabled
 );
-
-await this.setWorkflowInitialized(workflow.name);
 }
 }
 }

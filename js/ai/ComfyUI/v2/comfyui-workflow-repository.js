@@ -156,6 +156,22 @@ console.error("Failed to retrieve enabled workflow by type:", error);
 return null;
 }
 },
+
+async existsByName(name) {
+try {
+let exists = false;
+await this.store.iterate((value) => {
+if (value.name === name) {
+exists = true;
+return false;
+}
+});
+return exists;
+} catch (error) {
+console.error("Failed to check workflow existence:", error);
+return false;
+}
+},
 };
 
 comfyUIWorkflowRepository.init();

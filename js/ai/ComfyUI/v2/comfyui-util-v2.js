@@ -170,11 +170,48 @@ return null;
 }
 }
 
+async function comfyui_fixWorkflowTypes_v2(workflow) {
+const objectInfo = await objectInfoRepository.getObjectInfo();
+if (!objectInfo) {
+console.warn("ObjectInfo not available, skipping type fix");
+return workflow;
+}
+const fixed = JSON.parse(JSON.stringify(workflow));
+for (const nodeId in fixed) {
+const node = fixed[nodeId];
+const classType = node.class_type;
+const nodeInfo = objectInfo[classType];
+if (!nodeInfo || !nodeInfo.input) continue;
+const allInputDefs = {...(nodeInfo.input.required || {}), ...(nodeInfo.input.optional || {})};
+for (const inputName in node.inputs) {
+const inputDef = allInputDefs[inputName];
+if (!inputDef) continue;
+const currentValue = node.inputs[inputName];
+if (Array.isArray(currentValue)) continue;
+const expectedType = inputDef[0];
+if (expectedType === 'INT') {
+const parsed = parseInt(currentValue, 10);
+node.inputs[inputName] = isNaN(parsed) ? currentValue : parsed;
+} else if (expectedType === 'FLOAT') {
+const parsed = parseFloat(currentValue);
+node.inputs[inputName] = isNaN(parsed) ? currentValue : parsed;
+} else if (expectedType === 'BOOLEAN') {
+if (currentValue === 'true' || currentValue === true) {
+node.inputs[inputName] = true;
+} else if (currentValue === 'false' || currentValue === false) {
+node.inputs[inputName] = false;
+}
+}
+}
+}
+return fixed;
+}
 
 async function comfyui_put_queue_v2(workflow) {
-logger.trace("comfyui_put_queue_v2 workflow", workflow);
+const fixedWorkflow = await comfyui_fixWorkflowTypes_v2(workflow);
+logger.trace("comfyui_put_queue_v2 fixedWorkflow", fixedWorkflow);
 
-var response = await comfyui_queue_prompt_v2(workflow);
+var response = await comfyui_queue_prompt_v2(fixedWorkflow);
 if (!response) return null;
 processing_prompt = true;
 var prompt_id = response.prompt_id;
@@ -377,5 +414,4 @@ return result;
 console.log("comfyui_isError_v2 return false");
 return false;
 }
-
 

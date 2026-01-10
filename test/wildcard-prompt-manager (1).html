@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Wildcard Prompt Manager</title>
+<script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.31.3/tagify.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.31.3/tagify.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg-base:#121214;
+--bg-surface:#1a1a1e;
+--bg-elevated:#222226;
+--bg-input:#2a2a2e;
+--border:#333338;
+--border-hover:#48484d;
+--text:#e4e4e7;
+--text-dim:#8b8b92;
+--text-muted:#5c5c63;
+--accent:#7c7cf9;
+--accent-dim:#5c5cd6;
+--success:#4ade80;
+--error:#f87171;
+--radius:6px;
+}
+body{
+font-family:'Inter',system-ui,sans-serif;
+background:var(--bg-base);
+color:var(--text);
+min-height:100vh;
+font-size:13px;
+line-height:1.5;
+}
+.app{
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+.header{
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:12px 20px;
+border-bottom:1px solid var(--border);
+background:var(--bg-surface);
+}
+.logo{
+display:flex;
+align-items:center;
+gap:10px;
+font-weight:600;
+font-size:14px;
+}
+.logo-mark{
+width:24px;
+height:24px;
+background:linear-gradient(135deg,#7c7cf9,#a78bfa);
+border-radius:5px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+}
+.header-actions{
+display:flex;
+gap:6px;
+}
+.btn{
+padding:5px 10px;
+border-radius:4px;
+border:1px solid var(--border);
+background:transparent;
+color:var(--text-dim);
+cursor:pointer;
+font-family:inherit;
+font-size:12px;
+font-weight:500;
+transition:all 0.15s;
+display:inline-flex;
+align-items:center;
+gap:5px;
+}
+.btn:hover{
+background:var(--bg-elevated);
+color:var(--text);
+border-color:var(--border-hover);
+}
+.btn-primary{
+background:var(--accent);
+border-color:var(--accent);
+color:#fff;
+}
+.btn-primary:hover{
+background:var(--accent-dim);
+border-color:var(--accent-dim);
+color:#fff;
+}
+.btn-danger{
+color:var(--error);
+border-color:var(--error);
+}
+.btn-danger:hover{
+background:var(--error);
+color:#fff;
+}
+.main{
+display:grid;
+grid-template-columns:280px 1fr;
+flex:1;
+overflow:hidden;
+}
+.sidebar{
+background:var(--bg-surface);
+border-right:1px solid var(--border);
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+.sidebar-header{
+padding:12px;
+border-bottom:1px solid var(--border);
+display:flex;
+gap:8px;
+}
+.search-input{
+flex:1;
+padding:6px 10px;
+background:var(--bg-input);
+border:1px solid var(--border);
+border-radius:4px;
+color:var(--text);
+font-size:12px;
+font-family:inherit;
+}
+.search-input:focus{
+outline:none;
+border-color:var(--accent);
+}
+.search-input::placeholder{
+color:var(--text-muted);
+}
+.wildcard-list{
+flex:1;
+overflow-y:auto;
+padding:8px;
+}
+.wc-item{
+display:flex;
+align-items:center;
+gap:10px;
+padding:8px 10px;
+border-radius:4px;
+cursor:pointer;
+transition:background 0.1s;
+}
+.wc-item:hover{
+background:var(--bg-elevated);
+}
+.wc-info{
+flex:1;
+min-width:0;
+}
+.wc-name{
+font-family:'IBM Plex Mono',monospace;
+font-size:12px;
+color:var(--text);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+.wc-meta{
+font-size:11px;
+color:var(--text-muted);
+}
+.content{
+display:flex;
+flex-direction:column;
+overflow:hidden;
+}
+.prompt-section{
+flex:1;
+padding:20px;
+overflow-y:auto;
+}
+.section-label{
+font-size:11px;
+font-weight:600;
+color:var(--text-muted);
+text-transform:uppercase;
+letter-spacing:0.5px;
+margin-bottom:8px;
+}
+.prompt-textarea{
+width:100%;
+min-height:160px;
+padding:12px;
+background:var(--bg-input);
+border:1px solid var(--border);
+border-radius:var(--radius);
+color:var(--text);
+font-family:'IBM Plex Mono',monospace;
+font-size:13px;
+line-height:1.7;
+resize:vertical;
+}
+.prompt-textarea:focus{
+outline:none;
+border-color:var(--accent);
+}
+.syntax-hint{
+margin-top:8px;
+font-size:11px;
+color:var(--text-muted);
+}
+.syntax-hint code{
+background:var(--bg-input);
+padding:1px 5px;
+border-radius:3px;
+font-family:'IBM Plex Mono',monospace;
+color:var(--accent);
+}
+.prompt-actions{
+display:flex;
+align-items:center;
+gap:8px;
+margin-top:12px;
+}
+.output-section{
+border-top:1px solid var(--border);
+background:var(--bg-surface);
+max-height:40%;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+}
+.output-header{
+padding:10px 16px;
+border-bottom:1px solid var(--border);
+display:flex;
+align-items:center;
+justify-content:space-between;
+font-size:11px;
+font-weight:600;
+color:var(--text-muted);
+text-transform:uppercase;
+}
+.output-list{
+flex:1;
+overflow-y:auto;
+}
+.output-item{
+padding:10px 16px;
+border-bottom:1px solid var(--border);
+font-family:'IBM Plex Mono',monospace;
+font-size:12px;
+display:flex;
+align-items:flex-start;
+gap:10px;
+}
+.output-item:hover{
+background:var(--bg-elevated);
+}
+.output-text{
+flex:1;
+line-height:1.6;
+word-break:break-word;
+}
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.6);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:100;
+opacity:0;
+visibility:hidden;
+transition:all 0.2s;
+}
+.modal-overlay.active{
+opacity:1;
+visibility:visible;
+}
+.modal{
+background:var(--bg-surface);
+border:1px solid var(--border);
+border-radius:8px;
+width:90%;
+max-width:500px;
+max-height:85vh;
+display:flex;
+flex-direction:column;
+transform:translateY(-10px);
+transition:transform 0.2s;
+}
+.modal-overlay.active .modal{
+transform:translateY(0);
+}
+.modal-header{
+padding:14px 16px;
+border-bottom:1px solid var(--border);
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+.modal-title{
+font-size:14px;
+font-weight:600;
+}
+.modal-close{
+width:26px;
+height:26px;
+background:none;
+border:none;
+color:var(--text-muted);
+cursor:pointer;
+font-size:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:4px;
+}
+.modal-close:hover{
+background:var(--bg-elevated);
+color:var(--text);
+}
+.modal-body{
+padding:16px;
+overflow-y:auto;
+flex:1;
+}
+.modal-footer{
+padding:12px 16px;
+border-top:1px solid var(--border);
+display:flex;
+justify-content:flex-end;
+gap:8px;
+}
+.form-group{
+margin-bottom:16px;
+}
+.form-label{
+display:block;
+font-size:11px;
+font-weight:600;
+color:var(--text-muted);
+text-transform:uppercase;
+letter-spacing:0.5px;
+margin-bottom:6px;
+}
+.form-input{
+width:100%;
+padding:8px 10px;
+background:var(--bg-input);
+border:1px solid var(--border);
+border-radius:4px;
+color:var(--text);
+font-size:13px;
+font-family:'IBM Plex Mono',monospace;
+}
+.form-input:focus{
+outline:none;
+border-color:var(--accent);
+}
+.form-textarea{
+min-height:200px;
+resize:vertical;
+line-height:1.7;
+}
+.import-textarea{
+width:100%;
+min-height:250px;
+padding:12px;
+background:var(--bg-input);
+border:1px solid var(--border);
+border-radius:4px;
+color:var(--text);
+font-family:'IBM Plex Mono',monospace;
+font-size:12px;
+resize:vertical;
+}
+.toast{
+position:fixed;
+bottom:16px;
+right:16px;
+padding:10px 14px;
+background:var(--bg-elevated);
+border:1px solid var(--border);
+border-radius:4px;
+font-size:12px;
+transform:translateY(60px);
+opacity:0;
+transition:all 0.2s;
+z-index:200;
+}
+.toast.active{
+transform:translateY(0);
+opacity:1;
+}
+.toast.success{border-left:3px solid var(--success)}
+.toast.error{border-left:3px solid var(--error)}
+.empty{
+padding:40px 20px;
+text-align:center;
+color:var(--text-muted);
+font-size:12px;
+}
+.tagify{
+--tags-border-color:var(--border);
+--tags-hover-border-color:var(--border-hover);
+--tags-focus-border-color:var(--accent);
+--tag-bg:var(--bg-elevated);
+--tag-text-color:var(--accent);
+--placeholder-color:var(--text-muted);
+--input-color:var(--text);
+background:var(--bg-input);
+border-radius:var(--radius);
+min-height:160px;
+align-items:flex-start;
+align-content:flex-start;
+}
+.tagify__tag{
+background:var(--bg-elevated);
+border:1px solid var(--border);
+}
+.tagify__tag>div{
+color:var(--accent);
+font-family:'IBM Plex Mono',monospace;
+font-size:12px;
+}
+.tagify__input{
+font-family:'IBM Plex Mono',monospace;
+font-size:13px;
+line-height:1.7;
+}
+.tagify__dropdown{
+background:var(--bg-elevated);
+border:1px solid var(--border);
+border-radius:var(--radius);
+box-shadow:0 8px 30px rgba(0,0,0,0.4);
+}
+.tagify__dropdown__wrapper{
+border:none;
+background:none;
+}
+.tagify__dropdown__item{
+padding:8px 12px;
+color:var(--text);
+margin:0;
+border-radius:0;
+font-size:12px;
+font-family:'IBM Plex Mono',monospace;
+cursor:pointer;
+}
+.tagify__dropdown__item:hover,
+.tagify__dropdown__item--active{
+background:var(--accent) !important;
+color:#fff !important;
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<div class="logo">
+<div class="logo-mark">W</div>
+<span>Wildcard Prompt Manager</span>
+</div>
+<div class="header-actions">
+<button class="btn" onclick="openImportModal()">Import</button>
+<button class="btn" onclick="exportData()">Export</button>
+<button class="btn btn-danger" onclick="clearAllData()">Clear</button>
+</div>
+</header>
+<div class="main">
+<aside class="sidebar">
+<div class="sidebar-header">
+<input type="text" class="search-input" id="searchInput" placeholder="Search..." oninput="filterWildcards()">
+<button class="btn btn-primary" onclick="openEditorModal()">+ New</button>
+</div>
+<div class="wildcard-list" id="wildcardList"></div>
+</aside>
+<div class="content">
+<div class="prompt-section">
+<div class="section-label">Prompt Template</div>
+<textarea class="prompt-textarea" id="promptInput" placeholder="Enter prompt with wildcards...&#10;Example: A __colors__ __clothing__ in __background__"></textarea>
+<div class="syntax-hint">
+<code>__name__</code> wildcard
+<code>__path/name__</code> hierarchical
+<code>__name*__</code> glob
+<code>{a|b|c}</code> variant
+</div>
+<div class="prompt-actions">
+<button class="btn btn-primary" onclick="replacePrompt()">Replace</button>
+<button class="btn" onclick="clearOutput()">Clear</button>
+</div>
+</div>
+<div class="output-section" id="outputSection" style="display:none">
+<div class="output-header">
+<span>Output</span>
+<button class="btn" onclick="copyAllOutput()">Copy All</button>
+</div>
+<div class="output-list" id="outputList"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="editorModal">
+<div class="modal">
+<div class="modal-header">
+<span class="modal-title" id="editorTitle">New Wildcard</span>
+<button class="modal-close" onclick="closeEditorModal()">×</button>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label class="form-label">Name</label>
+<input type="text" class="form-input" id="editName" placeholder="e.g. colors, artists/japanese">
+</div>
+<div class="form-group">
+<label class="form-label">Values (one per line)</label>
+<textarea class="form-input form-textarea" id="editValues" placeholder="red&#10;blue&#10;green"></textarea>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-danger" id="editorDelete" onclick="deleteWildcard()" style="margin-right:auto;display:none">Delete</button>
+<button class="btn" onclick="closeEditorModal()">Cancel</button>
+<button class="btn btn-primary" onclick="saveWildcard()">Save</button>
+</div>
+</div>
+</div>
+<div class="modal-overlay" id="importModal">
+<div class="modal">
+<div class="modal-header">
+<span class="modal-title">Import Wildcards</span>
+<button class="modal-close" onclick="closeImportModal()">×</button>
+</div>
+<div class="modal-body">
+<textarea class="import-textarea" id="importData" placeholder='{"version":1,"wildcards":{"colors":["red","blue"]}}'></textarea>
+</div>
+<div class="modal-footer">
+<button class="btn" onclick="closeImportModal()">Cancel</button>
+<button class="btn btn-primary" onclick="importData()">Import</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+</div>
+<script>
+var store=localforage.createInstance({name:'WildcardPM',storeName:'wildcards'});
+var wildcards=[];
+var editing=null;
+var tagify=null;
+var DEFAULTS={
+colors:["red","blue","green","yellow","purple","orange","pink","black","white","cyan","gold","silver"],
+quality:["masterpiece","best quality","high quality","detailed","sharp focus","8k","ultra detailed"],
+background:["forest","city","beach","mountain","space","indoor","abstract","sunset","garden","underwater"],
+lighting:["soft lighting","dramatic lighting","backlight","natural light","neon","golden hour","cinematic lighting"]
+};
+function init(){
+store.keys().then(function(keys){
+if(keys.length===0){
+var promises=[];
+for(var n in DEFAULTS){
+if(DEFAULTS.hasOwnProperty(n)){
+var entry={id:uid(),name:n,values:DEFAULTS[n],createdAt:Date.now(),updatedAt:Date.now()};
+promises.push(store.setItem(n,entry));
+}
+}
+Promise.all(promises).then(function(){
+refresh();
+initTagify();
+});
+}else{
+refresh();
+initTagify();
+}
+});
+}
+function uid(){
+return Date.now().toString(36)+Math.random().toString(36).substr(2,9);
+}
+function refresh(){
+wildcards=[];
+return store.iterate(function(v){
+wildcards.push(v);
+}).then(function(){
+wildcards.sort(function(a,b){return a.name.localeCompare(b.name)});
+render();
+updateTagifyWhitelist();
+return wildcards;
+});
+}
+function updateTagifyWhitelist(){
+if(tagify){
+tagify.whitelist=wildcards.map(function(w){
+return{value:'__'+w.name+'__',count:w.values.length};
+});
+}
+}
+function render(){
+var c=document.getElementById('wildcardList');
+var q=document.getElementById('searchInput').value.toLowerCase();
+var list=wildcards.filter(function(w){return w.name.toLowerCase().indexOf(q)!==-1});
+if(list.length===0){
+c.innerHTML='<div class="empty">No wildcards</div>';
+return;
+}
+var html='';
+for(var i=0;i<list.length;i++){
+var w=list[i];
+html+='<div class="wc-item" onclick="openEditorModal(\''+w.name+'\')">';
+html+='<div class="wc-info">';
+html+='<div class="wc-name">__'+w.name+'__</div>';
+html+='<div class="wc-meta">'+w.values.length+' values</div>';
+html+='</div></div>';
+}
+c.innerHTML=html;
+}
+function filterWildcards(){
+render();
+}
+function openEditorModal(name){
+if(name){
+var w=null;
+for(var i=0;i<wildcards.length;i++){
+if(wildcards[i].name===name){w=wildcards[i];break;}
+}
+if(!w)return;
+editing=w;
+document.getElementById('editName').value=w.name;
+document.getElementById('editValues').value=w.values.join('\n');
+document.getElementById('editorTitle').textContent='Edit Wildcard';
+document.getElementById('editorDelete').style.display='inline-flex';
+}else{
+editing=null;
+document.getElementById('editName').value='';
+document.getElementById('editValues').value='';
+document.getElementById('editorTitle').textContent='New Wildcard';
+document.getElementById('editorDelete').style.display='none';
+}
+document.getElementById('editorModal').classList.add('active');
+setTimeout(function(){document.getElementById('editName').focus()},100);
+}
+function closeEditorModal(){
+document.getElementById('editorModal').classList.remove('active');
+editing=null;
+}
+function saveWildcard(){
+var name=document.getElementById('editName').value.trim();
+var valuesText=document.getElementById('editValues').value;
+var lines=valuesText.split('\n');
+var values=[];
+for(var i=0;i<lines.length;i++){
+var v=lines[i].trim();
+if(v.length>0)values.push(v);
+}
+if(!name){
+toast('Name is required','error');
+return;
+}
+if(values.length===0){
+toast('At least one value is required','error');
+return;
+}
+var oldName=editing?editing.name:null;
+var p=Promise.resolve();
+if(oldName&&oldName!==name){
+p=store.removeItem(oldName);
+}
+p.then(function(){
+var entry={
+id:editing?editing.id:uid(),
+name:name,
+values:values,
+createdAt:editing?editing.createdAt:Date.now(),
+updatedAt:Date.now()
+};
+return store.setItem(name,entry);
+}).then(function(){
+closeEditorModal();
+return refresh();
+}).then(function(){
+toast('Saved successfully','success');
+}).catch(function(e){
+toast('Save failed: '+e.message,'error');
+});
+}
+function deleteWildcard(){
+if(!editing)return;
+if(!confirm('Delete "'+editing.name+'"?'))return;
+store.removeItem(editing.name).then(function(){
+closeEditorModal();
+return refresh();
+}).then(function(){
+toast('Deleted','success');
+}).catch(function(){
+toast('Delete failed','error');
+});
+}
+function initTagify(){
+var input=document.getElementById('promptInput');
+tagify=new Tagify(input,{
+mode:'mix',
+pattern:/__/,
+tagTextProp:'value',
+duplicates:true,
+mixTagsInterpolator:['[[',']]'],
+dropdown:{
+enabled:0,
+position:'text',
+highlightFirst:true,
+maxItems:50
+},
+templates:{
+tag:function(tv){
+return'<tag title="'+tv.value+'" contenteditable="false" spellcheck="false" class="tagify__tag" '+this.getAttributes(tv)+'><x title="" class="tagify__tag__removeBtn" role="button" aria-label="remove tag"></x><div><span class="tagify__tag-text">'+tv.value+'</span></div></tag>';
+},
+dropdownItem:function(item){
+return'<div class="tagify__dropdown__item" '+this.getAttributes(item)+'>'+item.value+' <span style="opacity:0.5;margin-left:8px">('+item.count+')</span></div>';
+}
+}
+});
+tagify.on('input',function(e){
+if(e.detail.prefix==='__'){
+updateTagifyWhitelist();
+tagify.dropdown.show(e.detail.value);
+}
+});
+tagify.DOM.input.addEventListener('paste',function(e){
+e.preventDefault();
+var pastedText=(e.clipboardData||window.clipboardData).getData('text');
+pastedText=pastedText.replace(/\r?\n/g,' ').trim();
+var converted=pastedText.replace(/__([a-zA-Z0-9_\/]+)__/g,function(m,name){
+for(var i=0;i<wildcards.length;i++){
+if(wildcards[i].name===name){
+return'[['+m+']]';
+}
+}
+return m;
+});
+document.execCommand('insertText',false,converted);
+setTimeout(function(){
+var content=tagify.DOM.input.textContent;
+tagify.DOM.input.innerHTML=tagify.parseMixTags(content);
+tagify.update();
+},0);
+});
+updateTagifyWhitelist();
+}
+function getWildcard(name){
+return store.getItem(name);
+}
+function searchWildcards(pattern){
+var regexStr='^'+pattern.replace(/\*\*/g,'.*').replace(/\*/g,'[^/]*')+'$';
+var re=new RegExp(regexStr);
+var result=[];
+for(var i=0;i<wildcards.length;i++){
+if(re.test(wildcards[i].name))result.push(wildcards[i]);
+}
+return result;
+}
+function reloadWildcards(){
+wildcards=[];
+return store.iterate(function(v){
+wildcards.push(v);
+}).then(function(){
+wildcards.sort(function(a,b){return a.name.localeCompare(b.name)});
+updateTagifyWhitelist();
+return wildcards;
+});
+}
+function processPrompt(text,depth){
+if(depth>20)return Promise.reject(new Error('Max depth'));
+return reloadWildcards().then(function(){
+var result=text;
+result=result.replace(/\{([^{}]+)\}/g,function(match,content){
+var options=content.split('|');
+return options[Math.floor(Math.random()*options.length)];
+});
+var wcRegex=/__([a-zA-Z0-9_*\/]+)__/g;
+var matches=[];
+var m;
+while((m=wcRegex.exec(result))!==null){
+matches.push({full:m[0],name:m[1],index:m.index});
+}
+if(matches.length===0){
+return result;
+}
+var promises=[];
+for(var i=0;i<matches.length;i++){
+(function(match){
+var p=match.name;
+if(p.indexOf('*')!==-1){
+var found=searchWildcards(p);
+var vals=[];
+for(var j=0;j<found.length;j++){
+vals=vals.concat(found[j].values);
+}
+promises.push(Promise.resolve({match:match,values:vals}));
+}else{
+promises.push(getWildcard(p).then(function(w){
+return{match:match,values:w?w.values:[]};
+}));
+}
+})(matches[i]);
+}
+return Promise.all(promises).then(function(results){
+for(var i=results.length-1;i>=0;i--){
+var r=results[i];
+if(r.values.length>0){
+var selected=r.values[Math.floor(Math.random()*r.values.length)];
+result=result.replace(r.match.full,selected);
+}
+}
+if(result!==text&&(result.indexOf('__')!==-1||result.indexOf('{')!==-1)){
+return processPrompt(result,depth+1);
+}
+return result;
+});
+});
+}
+function replacePrompt(){
+var parts=[];
+var inputEl=tagify.DOM.input;
+var nodes=inputEl.childNodes;
+for(var i=0;i<nodes.length;i++){
+var node=nodes[i];
+if(node.nodeType===3){
+var t=node.textContent.replace(/\u200B/g,'');
+if(t)parts.push({type:'text',value:t});
+}else if(node.classList&&node.classList.contains('tagify__tag')){
+var tagText=node.querySelector('.tagify__tag-text');
+if(tagText)parts.push({type:'tag',value:tagText.textContent});
+}
+}
+var text='';
+for(var i=0;i<parts.length;i++){
+var part=parts[i];
+if(part.type==='tag'){
+text+=part.value;
+var next=parts[i+1];
+if(next){
+if(next.type==='tag'){
+text+=', ';
+}else if(next.type==='text'&&!next.value.match(/^\s*,/)&&!next.value.match(/^\s*$/)){
+text+=', ';
+}
+}
+}else{
+text+=part.value;
+}
+}
+text=text.trim();
+if(!text){
+toast('Enter a prompt','error');
+return;
+}
+processPrompt(text,0).then(function(result){
+renderOutput(result);
+}).catch(function(e){
+toast(e.message,'error');
+});
+}
+function renderOutput(text){
+document.getElementById('outputSection').style.display='flex';
+var escaped=escapeHtml(text);
+document.getElementById('outputList').innerHTML='<div class="output-item"><span class="output-text">'+escaped+'</span><button class="btn" onclick="copyText(this)">Copy</button></div>';
+}
+function clearOutput(){
+document.getElementById('outputSection').style.display='none';
+document.getElementById('outputList').innerHTML='';
+}
+function copyAllOutput(){
+var items=document.querySelectorAll('.output-text');
+var texts=[];
+for(var i=0;i<items.length;i++){
+texts.push(items[i].textContent);
+}
+navigator.clipboard.writeText(texts.join('\n')).then(function(){toast('Copied all','success')});
+}
+function copyText(btn){
+var text=btn.parentElement.querySelector('.output-text').textContent;
+navigator.clipboard.writeText(text).then(function(){toast('Copied','success')});
+}
+function escapeHtml(text){
+var div=document.createElement('div');
+div.textContent=text;
+return div.innerHTML;
+}
+function openImportModal(){
+document.getElementById('importModal').classList.add('active');
+}
+function closeImportModal(){
+document.getElementById('importModal').classList.remove('active');
+document.getElementById('importData').value='';
+}
+function importData(){
+try{
+var json=document.getElementById('importData').value;
+var data=JSON.parse(json);
+if(!data.wildcards)throw new Error('Invalid format');
+var promises=[];
+var count=0;
+for(var name in data.wildcards){
+if(data.wildcards.hasOwnProperty(name)){
+var values=data.wildcards[name];
+var entry={
+id:uid(),
+name:name,
+values:Array.isArray(values)?values:[values],
+createdAt:Date.now(),
+updatedAt:Date.now()
+};
+promises.push(store.setItem(name,entry));
+count++;
+}
+}
+Promise.all(promises).then(function(){
+closeImportModal();
+return refresh();
+}).then(function(){
+toast('Imported '+count+' wildcards','success');
+});
+}catch(e){
+toast('Import failed: '+e.message,'error');
+}
+}
+function exportData(){
+var data={version:1,wildcards:{}};
+store.iterate(function(v,k){
+data.wildcards[k]=v.values;
+}).then(function(){
+var json=JSON.stringify(data,null,2);
+var blob=new Blob([json],{type:'application/json'});
+var url=URL.createObjectURL(blob);
+var a=document.createElement('a');
+a.href=url;
+a.download='wildcards.json';
+a.click();
+URL.revokeObjectURL(url);
+toast('Exported','success');
+});
+}
+function clearAllData(){
+if(!confirm('Delete all wildcards?'))return;
+store.clear().then(function(){
+return refresh();
+}).then(function(){
+toast('All data cleared','success');
+});
+}
+function toast(msg,type){
+var t=document.getElementById('toast');
+t.textContent=msg;
+t.className='toast '+type+' active';
+setTimeout(function(){t.classList.remove('active')},2500);
+}
+init();
+</script>
+</body>
+</html>

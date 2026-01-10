@@ -281,12 +281,9 @@ await Comfyui_uploadImage(layer, uploadFilename);
 requestData["uploadFileName"] = uploadFilename;
 }
 
-
-workflowlLogger.trace("comfyuiQueue Before Workflow", JSON.stringify(workflow));
 var workflow = Comfyui_replace_placeholders(selected_workflow, requestData, Type);
-workflowlLogger.trace("comfyuiQueue After Workflow", JSON.stringify(workflow));
 
-return comfyuiQueue.add(async () => Comfyui_put_queue(workflow))
+return comfyuiQueue.add(async () => comfyui_put_queue(workflow))
 .then(async (result) => {
 if (result && result.error) {
 createToastError("Generation Error", result.message);
@@ -305,7 +302,7 @@ layer.visible = false;
 replaceImageObject(layer, result, Type);
 }
 } else {
-throw new Error("Unexpected error: No result returned from Comfyui_put_queue");
+throw new Error("Unexpected error: No result returned from comfyui_put_queue");
 }
 })
 .catch((error) => {
@@ -318,7 +315,8 @@ removeSpinner(spinnerId);
 });
 }
 
-async function Comfyui_put_queue(workflow) {
+async function comfyui_put_queue(workflow) {
+workflow = await comfyui_fixWorkflowTypes_v2(workflow);
 
 var response = await Comfyui_queue_prompt(workflow);
 if (!response) return null;
@@ -329,7 +327,7 @@ await Comfyui_track_prompt_progress(prompt_id);
 response = await Comfyui_get_history(prompt_id);
 if (!response) return { error: true, message: "Unknown error", details: "Please check ComfyUI console.",};
 
-workflowlLogger.trace("Comfyui_put_queue response:", JSON.stringify(response));
+workflowlLogger.trace("comfyui_put_queue response:", JSON.stringify(response));
 
 if (Comfyui_isError(response)) {
 const errorMessage = Comfyui_getErrorMessage(response);
@@ -386,13 +384,23 @@ throw error;
 }
 
 
+function extractComboOptions(inputDef) {
+if (Array.isArray(inputDef)) {
+if (Array.isArray(inputDef[0])) {
+return inputDef[0];
+}
+if (inputDef[0] === "COMBO" && inputDef[1] && Array.isArray(inputDef[1].options)) {
+return inputDef[1].options;
+}
+}
+return [];
+}
+
 async function Comfyui_FetchSampler() {
 try {
 const data = await Comfyui_FetchObjectInfo("KSampler");
-
-const models = data.KSampler.input.required.sampler_name[0].map((name) => ({
-name: name,
-}));
+const options = extractComboOptions(data.KSampler.input.required.sampler_name);
+const models = options.map((name) => ({ name: name }));
 updateSamplerDropdown(models);
 } catch (error) {
 console.error("Comfyui_FetchSampler: Fetch error", error);
@@ -402,9 +410,8 @@ console.error("Comfyui_FetchSampler: Fetch error", error);
 async function Comfyui_FetchUpscaler() {
 try {
 const data = await Comfyui_FetchObjectInfo("UpscaleModelLoader");
-const models = data.UpscaleModelLoader.input.required.model_name[0].map(
-(name) => ({ name: name })
-);
+const options = extractComboOptions(data.UpscaleModelLoader.input.required.model_name);
+const models = options.map((name) => ({ name: name }));
 updateUpscalerDropdown(models);
 } catch (error) {
 console.error("Comfyui_FetchUpscaler: Fetch error", error);
@@ -414,16 +421,12 @@ console.error("Comfyui_FetchUpscaler: Fetch error", error);
 async function Comfyui_FetchModels() {
 try {
 const data = await Comfyui_FetchObjectInfo("CheckpointLoaderSimple");
-// console.log("Comfyui_FetchModels CheckpointLoaderSimple:", data);
-const models = data.CheckpointLoaderSimple.input.required.ckpt_name[0].map(
-(name) => ({ title: name, model_name: name })
-);
+const ckptOptions = extractComboOptions(data.CheckpointLoaderSimple.input.required.ckpt_name);
+const models = ckptOptions.map((name) => ({ title: name, model_name: name }));
 
 const dataUnet = await Comfyui_FetchObjectInfo("UNETLoader");
-// console.log("Comfyui_FetchModels UNETLoader:", dataUnet);
-const modelsUnet = dataUnet.UNETLoader.input.required.unet_name[0].map(
-(name) => ({ title: name, model_name: name })
-);
+const unetOptions = extractComboOptions(dataUnet.UNETLoader.input.required.unet_name);
+const modelsUnet = unetOptions.map((name) => ({ title: name, model_name: name }));
 
 const allModels = [...models, ...modelsUnet].sort((a, b) => {
 return a.title.localeCompare(b.title);
@@ -438,11 +441,8 @@ console.error("Comfyui_FetchModels: Fetch error", error);
 async function Comfyui_ClipModels() {
 try {
 const data = await Comfyui_FetchObjectInfo("DualCLIPLoader");
-// console.log("Comfyui_FetchModels Comfyui_ClipModels:", JSON.stringify(data));
-const results = data.DualCLIPLoader.input.required.clip_name1[0].map(
-(name) => ({ n: name, p: 0 })
-);
-
+const options = extractComboOptions(data.DualCLIPLoader.input.required.clip_name1);
+const results = options.map((name) => ({ n: name, p: 0 }));
 updateTagifyDropdown("clipDropdownId", results);
 } catch (error) {
 console.error("Comfyui_ClipModels: Fetch error", error);
@@ -451,11 +451,8 @@ console.error("Comfyui_ClipModels: Fetch error", error);
 async function Comfyui_VaeLoader() {
 try {
 const dataUnet = await Comfyui_FetchObjectInfo("VAELoader");
-// console.log("Comfyui_FetchModels Comfyui_VaeLoader:", JSON.stringify(dataUnet) );
-const results = dataUnet.VAELoader.input.required.vae_name[0].map(
-(name) => ({ name: name })
-);
-
+const options = extractComboOptions(dataUnet.VAELoader.input.required.vae_name);
+const results = options.map((name) => ({ name: name }));
 updateVaeDropdown(results);
 } catch (error) {
 console.error("Comfyui_VaeLoader: Fetch error", error);

@@ -19,6 +19,18 @@ const comfyuiDefaultWorkflows = [
     enabled: false
   },
   {
+    name: "SDXL_faceDetailer.json",
+    type: "T2I",
+    workflow: ComfyUI_T2I_BySDXL_faceDetailer,
+    enabled: false
+  },
+  {
+    name: "SDXL_faceDetailer_Lora.json",
+    type: "T2I",
+    workflow: ComfyUI_T2I_BySDXL_faceDetailer_Lora,
+    enabled: false
+  },
+  {
     name: "SDXL_Refiner.json",
     type: "T2I",
     workflow: ComfyUI_T2I_BySDXL_Refiner,
