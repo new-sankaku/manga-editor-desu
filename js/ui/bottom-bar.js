@@ -70,11 +70,11 @@ const image=document.createElement("img");
 image.src=imageLink.href;
 image.className="btm-image";
 image.dataset.index=guid;
-image.addEventListener("click",()=>{
+image.addEventListener("click",async ()=>{
 if (stateStack.length>2) {
-btmSaveProjectFile().then(()=>{});
+await btmSaveProjectFile();
 }
-chengeCanvasByGuid(guid);
+await chengeCanvasByGuid(guid);
 });
 
 const moveRightBtn=document.createElement("button");

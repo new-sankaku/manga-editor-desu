@@ -80,7 +80,7 @@ let hash=file.name.split('.')[0];
 imageMap.set(hash,imgDataUrlStr);
 }
 } catch (error) {
-console.error("Failed to load file:",fileName,error);
+console.error("Failed to load file:",file.name,error);
 }
 }));
 
@@ -93,7 +93,7 @@ let jsonStr=ArrayBufferUtils.fromArrayBufferToString(file.data);
 return JSON.parse(jsonStr);
 }
 } catch (error) {
-console.error("Failed to load file:",fileName,error);
+console.error("Failed to load file:",file.name,error);
 }
 });
 
@@ -165,13 +165,13 @@ reader.readAsText(previewBlob);
 const binaryReader=new FileReader();
 binaryReader.readAsArrayBuffer(previewBlob);
 
-const jsonBufferFiles=bufferFileLz4List.filter(file=>
-file.name.startsWith('state_')&&file.name.endsWith('.json')
+const jsonBufferFiles=projectFileList.filter(f=>
+f.name.startsWith('state_')&&f.name.endsWith('.json')
 );
 let canvasGuid=null;
 
 for (const jsonBuffer of jsonBufferFiles) {
-let jsonStr=ArrayBufferUtils.fromArrayBufferToString(jsonBuffer);
+let jsonStr=ArrayBufferUtils.fromArrayBufferToString(jsonBuffer.data);
 
 try {
 const state=JSON.parse(jsonStr);
