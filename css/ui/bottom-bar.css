@@ -25,6 +25,7 @@ transform:rotate(360deg)
 .btm-drawer:not(.btm-closed) {
   width: 100%;
   left: 0;
+  transform: translateY(0);
 }
 
 .btm-drawer-handle {

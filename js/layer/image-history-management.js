@@ -138,7 +138,7 @@ imageMap.set(hash,dataUrl);
 function customToJSON() {
 const json=canvas.toJSON(commonProperties);
 json.objects=json.objects.map(obj=>{
-if (obj.type==='image'&&(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))) {
+if (obj.type==='image'&&obj.src&&typeof obj.src==='string'&&(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))) {
 const hash=generateHash(obj.src);
 if (!imageMap.has(hash)) {
 imageMap.set(hash,obj.src);
@@ -146,19 +146,14 @@ imageMap.set(hash,obj.src);
 obj.src=hash;
 }
 
-
 if(obj.speechBubbleGrid&&typeof obj.speechBubbleGrid==='object'){
-const hash=generateHash(obj.speechBubbleGrid);
+const gridStr=JSON.stringify(obj.speechBubbleGrid);
+const hash=generateHash(gridStr);
 if (!imageMap.has(hash)) {
-imageMap.set(hash,obj.speechBubbleGrid);
+imageMap.set(hash,gridStr);
 }
 obj.speechBubbleGrid="GUID:"+hash;
 }
-
-// if (obj.speechBubbleGrid) {
-//     console.log('Type:', typeof obj.speechBubbleGrid);
-//     console.log('Value:', obj.speechBubbleGrid);
-// }
 
 return obj;
 });
@@ -172,9 +167,20 @@ parsedJson.objects=parsedJson.objects.map(obj=>{
 if (obj.type==='image'&&imageMap.has(obj.src)) {
 obj.src=imageMap.get(obj.src);
 }
-if (obj.speechBubbleGrid) {
-obj.speechBubbleGrid=obj.speechBubbleGrid.replace('GUID:','');
-obj.speechBubbleGrid=imageMap.get(obj.speechBubbleGrid);
+if (obj.speechBubbleGrid&&typeof obj.speechBubbleGrid==='string') {
+const hash=obj.speechBubbleGrid.replace('GUID:','');
+const gridData=imageMap.get(hash);
+if(gridData){
+if(typeof gridData==='string'){
+try{
+obj.speechBubbleGrid=JSON.parse(gridData);
+}catch(e){
+obj.speechBubbleGrid=gridData;
+}
+}else{
+obj.speechBubbleGrid=gridData;
+}
+}
 }
 if (obj.textBaseline==='alphabetical') {
 obj.textBaseline='alphabetic';

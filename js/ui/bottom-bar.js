@@ -9,6 +9,7 @@ const btmScrollRightBtn=$("btm-scroll-right");
 
 let btmScrollPosition=0;
 let btmIsDragging=false;
+let btmIgnoreClose=false;
 
 function btmToggleDrawer() {
 btmDrawer.classList.toggle("btm-closed");
@@ -112,8 +113,11 @@ btmImageContainer.appendChild(imageWrapper);
 btmProjectsMap.set(guid,{imageLink,blob});
 }
 
+btmDrawer.style.display="block";
 if (btmDrawer.classList.contains("btm-closed")) {
+btmIgnoreClose=true;
 btmToggleDrawer();
+setTimeout(()=>{btmIgnoreClose=false;},200);
 } else {
 btmUpdateScrollButtons();
 }
@@ -235,7 +239,8 @@ document.addEventListener("mouseup",function (event) {
 if (
 !btmDrawer.contains(event.target)&&
 !btmDrawer.classList.contains("btm-closed")&&
-!btmIsDragging
+!btmIsDragging&&
+!btmIgnoreClose
 ) {
 btmCloseDrawer();
 }
