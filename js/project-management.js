@@ -112,7 +112,9 @@ await multiLoadLz4(bufferFileLz4List);
 
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step4',substep: 'UnLz4',progress: 85});
 } else {
-console.log("unsupported file");
+let title=getText("unsupportedProjectFileFormat");
+let message=getText("unsupportedProjectFileFormatMessage");
+createToastError(title,message,4000);
 }
 }
 } catch (error) {
