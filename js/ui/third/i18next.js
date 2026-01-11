@@ -27,6 +27,18 @@ const resources = {
 "th": {"unsupportedProjectFileFormat": "รูปแบบไฟล์ไม่รองรับ", "unsupportedProjectFileFormatMessage": "กรุณาเลือกไฟล์ .zip หรือ .lz4", "OutlinePen": "เส้นขอบคู่", "outline1-color": "สีขอบ1", "outline2-color": "สีขอบ2", "outline1-size": "ความกว้างขอบ1", "outline2-size": "ความกว้างขอบ2", "outline1-opacity": "ความทึบขอบ1", "outline2-opacity": "ความทึบขอบ2"},
 "de": {"unsupportedProjectFileFormat": "Nicht unterstütztes Dateiformat", "unsupportedProjectFileFormatMessage": "Bitte wählen Sie eine .zip- oder .lz4-Datei", "OutlinePen": "Doppelumriss", "outline1-color": "Umriss1 Farbe", "outline2-color": "Umriss2 Farbe", "outline1-size": "Umriss1 Breite", "outline2-size": "Umriss2 Breite", "outline1-opacity": "Umriss1 Deckkraft", "outline2-opacity": "Umriss2 Deckkraft"}
 },
+"20260112": {
+"ja": {"op_cancel": "キャンセル", "op_cancelling": "キャンセル中...", "op_cancelled": "キャンセル済み", "op_waitingTask": "現在のタスクを待機中..."},
+"en": {"op_cancel": "Cancel", "op_cancelling": "Cancelling...", "op_cancelled": "Cancelled", "op_waitingTask": "Waiting for current task..."},
+"ko": {"op_cancel": "취소", "op_cancelling": "취소 중...", "op_cancelled": "취소됨", "op_waitingTask": "현재 작업 대기 중..."},
+"fr": {"op_cancel": "Annuler", "op_cancelling": "Annulation...", "op_cancelled": "Annulé", "op_waitingTask": "En attente de la tâche en cours..."},
+"zh": {"op_cancel": "取消", "op_cancelling": "取消中...", "op_cancelled": "已取消", "op_waitingTask": "等待当前任务..."},
+"ru": {"op_cancel": "Отмена", "op_cancelling": "Отмена...", "op_cancelled": "Отменено", "op_waitingTask": "Ожидание текущей задачи..."},
+"es": {"op_cancel": "Cancelar", "op_cancelling": "Cancelando...", "op_cancelled": "Cancelado", "op_waitingTask": "Esperando tarea actual..."},
+"pt": {"op_cancel": "Cancelar", "op_cancelling": "Cancelando...", "op_cancelled": "Cancelado", "op_waitingTask": "Aguardando tarefa atual..."},
+"th": {"op_cancel": "ยกเลิก", "op_cancelling": "กำลังยกเลิก...", "op_cancelled": "ยกเลิกแล้ว", "op_waitingTask": "รอการทำงานปัจจุบัน..."},
+"de": {"op_cancel": "Abbrechen", "op_cancelling": "Abbrechen...", "op_cancelled": "Abgebrochen", "op_waitingTask": "Warte auf aktuelle Aufgabe..."}
+},
 "20250413": {
 "ja": {"upscaleButton": "画像を高解像度化します", "cropButton": "Crop", "importButton": "インポート", "exitModeButton": "モード解除"},
 "en": {"upscaleButton": "Upscale image", "cropButton": "Crop", "importButton": "Import", "exitModeButton": "Exit Mode"},

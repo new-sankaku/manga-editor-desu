@@ -25,10 +25,18 @@ if(sdQueueStatus.total>0){
 return true;
 }
 
-const comfyuiQueueStatus=sdQueue.getStatus();
+const comfyuiQueueStatus=comfyuiQueue.getStatus();
 if(comfyuiQueueStatus.total>0){
 return true;
 }
+return false;
+}
+
+function clearAllQueues() {
+const sdCleared=sdQueue.clearQueue();
+const comfyCleared=comfyuiQueue.clearQueue();
+logger.info(`All queues cleared: SD=${sdCleared}, ComfyUI=${comfyCleared}`);
+return sdCleared+comfyCleared;
 }
 
 
