@@ -50,7 +50,7 @@ this.element.innerHTML=`
 </div>
 <button id="comfyUIFwGenerateButton" class="comfui-sidebar-button">${testGenerate}</button>
 <div id="generatedImageContainer" class="comfui-generated-image-container">
- <img id="generatedImage" class="comfui-preview-image hidden">
+ <img id="generatedImage" class="comfui-preview-image hidden" style="cursor:pointer;" title="Click to open in new tab">
 </div>
 
 <div>
@@ -65,6 +65,11 @@ document.body.appendChild(this.element);
 
 const closeButton=this.element.querySelector("#closeButton");
 closeButton.addEventListener("click",()=>this.hide());
+
+const generatedImage=this.element.querySelector("#generatedImage");
+generatedImage.addEventListener("click",()=>{
+if(generatedImage.src)window.open(generatedImage.src,"_blank");
+});
 
 this.setupEventListeners();
 }
@@ -119,6 +124,7 @@ height: `${event.rect.height}px`,
 });
 
 const comfyUIFwGenerateButton=this.element.querySelector("#comfyUIFwGenerateButton");
+const testGenerateText=getText("comfyUI_testGenerate");
 comfyUIFwGenerateButton.addEventListener("click",async ()=>{
 const tabId=comfyUIWorkflowEditor.activeTabId;
 if (!tabId) return;
@@ -126,14 +132,20 @@ if (!tabId) return;
 const tab=comfyUIWorkflowEditor.tabs.get(tabId);
 if (!tab) return;
 
-// console.log("comfyuiQueue Workflow", JSON.stringify(tab.workflow));
+comfyUIFwGenerateButton.disabled=true;
+comfyUIFwGenerateButton.innerHTML='<span class="spinner-border spinner-border-sm text-light"></span>';
 
+try{
 const img=await comfyui_put_queue_v2(tab.workflow);
-if (!img) return;
-
+if(img){
 const generatedImage=this.element.querySelector("#generatedImage");
 generatedImage.src=img;
 generatedImage.classList.remove("hidden");
+}
+}finally{
+comfyUIFwGenerateButton.disabled=false;
+comfyUIFwGenerateButton.textContent=testGenerateText;
+}
 });
 }
 

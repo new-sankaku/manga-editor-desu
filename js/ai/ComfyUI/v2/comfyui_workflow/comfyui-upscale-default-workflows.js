@@ -50,6 +50,7 @@ const ComfyUI_Upscaler={
 "inputs": {
 "upscale_method": "lanczos",
 "megapixels": 4.000000000000001,
+"resolution_steps":10,
 "image": [
 "5",
 0
