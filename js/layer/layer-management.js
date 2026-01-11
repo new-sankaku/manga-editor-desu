@@ -253,7 +253,8 @@ var tempCanvas=document.createElement("canvas");
 tempCanvas.width=canvasSize;
 tempCanvas.height=canvasSize;
 var tempCtx=tempCanvas.getContext("2d");
-tempCtx.fillStyle="#ffcccc";
+tempCtx.fillStyle="#e0e0e0";
+tempCtx.fillRect(0,0,canvasSize,canvasSize);
 
 var nowVisible=layer.visible;
 layer.visible=true;

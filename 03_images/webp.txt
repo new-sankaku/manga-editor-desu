@@ -1,1 +1,1 @@
-ffmpeg -i Circle.png -vf scale=100:40 Circle.webp
+ffmpeg -i OutlinePen.png -vf OutlnePen.webp

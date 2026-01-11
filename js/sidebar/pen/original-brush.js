@@ -1,3 +1,232 @@
+fabric.DoubleOutlineBrush=fabric.util.createClass(fabric.BaseBrush,{
+type: "DoubleOutlineBrush",
+initialize: function(canvas){
+this.canvas=canvas;
+this.color="#FFFFFF";
+this.width=10;
+this.outline1Color="#000000";
+this.outline1Width=2;
+this.outline1Opacity=1;
+this.outline2Color="#FF0000";
+this.outline2Width=1;
+this.outline2Opacity=1;
+this.isDrawing=false;
+this.currentPathData=null;
+this.points=[];
+this.pathDataArray=[];
+this.outlineImage=null;
+this.offscreenCanvas=null;
+this.offscreenCtx=null;
+},
+_initOffscreen: function(){
+if(!this.offscreenCanvas){
+this.offscreenCanvas=document.createElement("canvas");
+this.offscreenCanvas.width=this.canvas.width;
+this.offscreenCanvas.height=this.canvas.height;
+this.offscreenCtx=this.offscreenCanvas.getContext("2d");
+}
+},
+onMouseDown: function(pointer){
+this._initOffscreen();
+this.isDrawing=true;
+this.points=[pointer];
+this.currentPathData={
+path:[["M",pointer.x,pointer.y],["L",pointer.x,pointer.y]],
+stroke: this.color,
+strokeWidth: this.width,
+outline1Color: this.outline1Color,
+outline1Width: this.outline1Width,
+outline1Opacity: this.outline1Opacity,
+outline2Color: this.outline2Color,
+outline2Width: this.outline2Width,
+outline2Opacity: this.outline2Opacity,
+};
+this._render();
+},
+onMouseMove: function(pointer){
+if(this.isDrawing&&this.currentPathData){
+this.points.push(pointer);
+if(this.points.length>3){
+var lastIndex=this.points.length-1;
+var controlX=(this.points[lastIndex].x+this.points[lastIndex-1].x)/2;
+var controlY=(this.points[lastIndex].y+this.points[lastIndex-1].y)/2;
+this.currentPathData.path.push(["Q",this.points[lastIndex-1].x,this.points[lastIndex-1].y,controlX,controlY]);
+this.points.shift();
+}else{
+this.currentPathData.path[1]=["L",pointer.x,pointer.y];
+}
+this._render();
+}
+},
+onMouseUp: function(){
+if(this.isDrawing){
+this.isDrawing=false;
+this.pathDataArray.push(this.currentPathData);
+this.currentPathData=null;
+this.points=[];
+this._processOutlines();
+}
+},
+_render: function(){
+this.offscreenCtx.clearRect(0,0,this.offscreenCanvas.width,this.offscreenCanvas.height);
+var allPaths=this.pathDataArray.slice();
+if(this.currentPathData){
+allPaths.push(this.currentPathData);
+}
+var self=this;
+allPaths.forEach(function(pathData){
+if(pathData.outline2Width>0){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth+2*pathData.outline1Width+2*pathData.outline2Width,pathData.outline2Color,pathData.outline2Opacity);
+}
+});
+allPaths.forEach(function(pathData){
+if(pathData.outline1Width>0){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth+2*pathData.outline1Width,pathData.outline1Color,pathData.outline1Opacity);
+}
+});
+allPaths.forEach(function(pathData){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth,pathData.stroke,1);
+});
+var ctx=this.canvas.contextTop;
+ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+ctx.drawImage(this.offscreenCanvas,0,0);
+},
+_drawStroke: function(pathData,ctx,width,color,opacity){
+ctx.save();
+ctx.beginPath();
+ctx.strokeStyle=color;
+ctx.globalAlpha=opacity;
+ctx.lineWidth=width;
+ctx.lineCap="round";
+ctx.lineJoin="round";
+pathData.path.forEach(function(segment){
+if(segment[0]==="M"){
+ctx.moveTo(segment[1],segment[2]);
+}else if(segment[0]==="L"){
+ctx.lineTo(segment[1],segment[2]);
+}else if(segment[0]==="Q"){
+ctx.quadraticCurveTo(segment[1],segment[2],segment[3],segment[4]);
+}
+});
+if(pathData.path.length===1){
+ctx.lineTo(pathData.path[0][1],pathData.path[0][2]);
+}
+ctx.stroke();
+ctx.restore();
+},
+_processOutlines: function(){
+this.offscreenCtx.clearRect(0,0,this.offscreenCanvas.width,this.offscreenCanvas.height);
+var self=this;
+this.pathDataArray.forEach(function(pathData){
+if(pathData.outline2Width>0){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth+2*pathData.outline1Width+2*pathData.outline2Width,pathData.outline2Color,pathData.outline2Opacity);
+}
+});
+this.pathDataArray.forEach(function(pathData){
+if(pathData.outline1Width>0){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth+2*pathData.outline1Width,pathData.outline1Color,pathData.outline1Opacity);
+}
+});
+this.pathDataArray.forEach(function(pathData){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth,pathData.stroke,1);
+});
+if(this.outlineImage){
+this.canvas.remove(this.outlineImage);
+}
+var tempCanvas=document.createElement("canvas");
+tempCanvas.width=this.offscreenCanvas.width;
+tempCanvas.height=this.offscreenCanvas.height;
+tempCanvas.getContext("2d").drawImage(this.offscreenCanvas,0,0);
+this.outlineImage=new fabric.Image(tempCanvas,{
+left: 0,
+top: 0,
+selectable: false,
+evented: false,
+});
+this.canvas.add(this.outlineImage);
+this.canvas.contextTop.clearRect(0,0,this.canvas.width,this.canvas.height);
+this.canvas.renderAll();
+},
+mergeDrawings: function(){
+if(this.pathDataArray.length===0){
+if(this.outlineImage){
+this.canvas.remove(this.outlineImage);
+this.outlineImage=null;
+}
+return;
+}
+this._initOffscreen();
+this.offscreenCtx.clearRect(0,0,this.offscreenCanvas.width,this.offscreenCanvas.height);
+var self=this;
+this.pathDataArray.forEach(function(pathData){
+if(pathData.outline2Width>0){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth+2*pathData.outline1Width+2*pathData.outline2Width,pathData.outline2Color,pathData.outline2Opacity);
+}
+});
+this.pathDataArray.forEach(function(pathData){
+if(pathData.outline1Width>0){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth+2*pathData.outline1Width,pathData.outline1Color,pathData.outline1Opacity);
+}
+});
+this.pathDataArray.forEach(function(pathData){
+self._drawStroke(pathData,self.offscreenCtx,pathData.strokeWidth,pathData.stroke,1);
+});
+var imageData=this.offscreenCtx.getImageData(0,0,this.offscreenCanvas.width,this.offscreenCanvas.height);
+var data=imageData.data;
+var minX=this.offscreenCanvas.width;
+var minY=this.offscreenCanvas.height;
+var maxX=0;
+var maxY=0;
+for(var y=0;y<this.offscreenCanvas.height;y++){
+for(var x=0;x<this.offscreenCanvas.width;x++){
+var alpha=data[(y*this.offscreenCanvas.width+x)*4+3];
+if(alpha>0){
+minX=Math.min(minX,x);
+minY=Math.min(minY,y);
+maxX=Math.max(maxX,x);
+maxY=Math.max(maxY,y);
+}
+}
+}
+if(maxX<minX||maxY<minY){
+changeDoNotSaveHistory();
+if(this.outlineImage){
+this.canvas.remove(this.outlineImage);
+this.outlineImage=null;
+}
+this.pathDataArray=[];
+changeDoSaveHistory();
+return;
+}
+var width=maxX-minX+1;
+var height=maxY-minY+1;
+var croppedCanvas=document.createElement("canvas");
+croppedCanvas.width=width;
+croppedCanvas.height=height;
+var croppedCtx=croppedCanvas.getContext("2d");
+croppedCtx.drawImage(this.offscreenCanvas,minX,minY,width,height,0,0,width,height);
+var mergedImage=croppedCanvas.toDataURL();
+fabric.Image.fromURL(mergedImage,function(img){
+img.set({
+left: minX,
+top: minY,
+selectable: false,
+scaleX: 1,
+scaleY: 1
+});
+changeDoNotSaveHistory();
+if(self.outlineImage){
+self.canvas.remove(self.outlineImage);
+self.outlineImage=null;
+}
+self.pathDataArray=[];
+changeDoSaveHistory();
+self.canvas.add(img);
+self.canvas.renderAll();
+});
+}
+});
+
 fabric.MosaicBrush=fabric.util.createClass(fabric.BaseBrush,{
 initialize: function (canvas) {
 this.canvas=canvas;
@@ -113,7 +342,9 @@ ctx.moveTo(startX,y);
 ctx.lineTo(endX,y);
 ctx.stroke();
 }
-}
+},
+
+_render: function(){}
 
 });
 

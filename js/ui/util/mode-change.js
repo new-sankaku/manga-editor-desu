@@ -62,6 +62,7 @@ if(MODE_PEN_MOSAIC==type) return true;
 if(MODE_PEN_CRAYON==type) return true;
 if(MODE_PEN_INK==type)    return true;
 if(MODE_PEN_MARKER==type) return true;
+if(MODE_PEN_OUTLINE==type) return true;
 }
 
 

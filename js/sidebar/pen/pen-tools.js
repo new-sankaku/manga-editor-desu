@@ -34,7 +34,7 @@ canvas.freeDrawingBrush.drawPreviewCircle({x: canvas.width/2,y: canvas.height/2}
 setupContextTopBrush(new fabric.PencilBrush(canvas));
 
 } else if (type===MODE_PEN_OUTLINE) {
-setupContextTopBrush(new fabric.DoubleOutlineBrush(canvas));
+canvas.freeDrawingBrush=new fabric.DoubleOutlineBrush(canvas);
 
 } else if (type===MODE_PEN_TEXTURE) {
 setupContextTopBrush(new fabric.PatternBrush(canvas));
@@ -119,7 +119,7 @@ break;
 case MODE_PEN_OUTLINE:
 settingsHTML+=addColor(MODE_PEN_OUTLINE+'-main-color','color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-color','#000000'));
 settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline1-color','outline1-color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-color','#FFFFFF'));
-settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline2-color','outline2-color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-color','#000000'));
+settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline2-color','outline2-color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-color','#FF0000'));
 
 settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-main-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-main-width',10));
 settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline1-width','outline1-size',1,150,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-width',2));
@@ -358,7 +358,7 @@ canvas.freeDrawingBrush.strokeDashArray=[brushWidth,brushWidth*4];
 function clearPenActiveButton() {
 console.log("clearPenActiveButton is call");
 $(MODE_PEN_PENCIL+'Button').classList.remove('active-button');
-// $(MODE_PEN_OUTLINE + 'Button').classList.remove('active-button');
+$(MODE_PEN_OUTLINE+'Button').classList.remove('active-button');
 $(MODE_PEN_CIRCLE+'Button').classList.remove('active-button');
 $(MODE_PEN_CRAYON+'Button').classList.remove('active-button');
 $(MODE_PEN_INK+'Button').classList.remove('active-button');
