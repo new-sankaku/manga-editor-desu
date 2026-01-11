@@ -1,6 +1,7 @@
 
 async function generateProjectFileBufferList() {
 saveState();
+await convertImageMapBlobUrls();
 const fileBufferList=[];
 
 const promises=[

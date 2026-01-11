@@ -107,6 +107,33 @@ function generateHash(imageData) {
 return CryptoJS.SHA256(imageData).toString(CryptoJS.enc.Hex);
 }
 
+async function blobUrlToDataUrl(blobUrl){
+try{
+const response=await fetch(blobUrl);
+const blob=await response.blob();
+return new Promise((resolve,reject)=>{
+const reader=new FileReader();
+reader.onloadend=()=>resolve(reader.result);
+reader.onerror=reject;
+reader.readAsDataURL(blob);
+});
+}catch(e){
+console.error("Failed to convert blob URL:",blobUrl,e);
+return null;
+}
+}
+
+async function convertImageMapBlobUrls(){
+const entries=Array.from(imageMap.entries());
+for(const [hash,value] of entries){
+if(typeof value==='string'&&value.startsWith('blob:')){
+const dataUrl=await blobUrlToDataUrl(value);
+if(dataUrl){
+imageMap.set(hash,dataUrl);
+}
+}
+}
+}
 
 function customToJSON() {
 const json=canvas.toJSON(commonProperties);
@@ -148,6 +175,9 @@ obj.src=imageMap.get(obj.src);
 if (obj.speechBubbleGrid) {
 obj.speechBubbleGrid=obj.speechBubbleGrid.replace('GUID:','');
 obj.speechBubbleGrid=imageMap.get(obj.speechBubbleGrid);
+}
+if (obj.textBaseline==='alphabetical') {
+obj.textBaseline='alphabetic';
 }
 commonProperties.forEach(prop=>{
 if (obj[prop]!==undefined) {
