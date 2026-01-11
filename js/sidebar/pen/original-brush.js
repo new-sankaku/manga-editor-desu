@@ -228,39 +228,57 @@ self.canvas.renderAll();
 });
 
 fabric.MosaicBrush=fabric.util.createClass(fabric.BaseBrush,{
-initialize: function (canvas) {
+initialize: function(canvas){
 this.canvas=canvas;
 this.mosaicSize=10;
 this.circleSize=40;
 this.isDrawing=false;
-this.lastPointer={x: this.canvas.width/2,y: this.canvas.height/2};
+this.lastPointer={x:this.canvas.width/2,y:this.canvas.height/2};
 this.images=[];
+this._offscreenCanvas=null;
+this._offscreenCtx=null;
 },
 
-onMouseDown: function (pointer) {
+_initOffscreen: function(){
+if(!this._offscreenCanvas){
+this._offscreenCanvas=document.createElement("canvas");
+this._offscreenCanvas.width=this.canvas.width;
+this._offscreenCanvas.height=this.canvas.height;
+this._offscreenCtx=this._offscreenCanvas.getContext("2d");
+}
+},
+
+_copyToContextTop: function(){
+var ctx=this.canvas.contextTop;
+ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+ctx.drawImage(this._offscreenCanvas,0,0);
+},
+
+onMouseDown: function(pointer){
+this._initOffscreen();
+this._offscreenCtx.clearRect(0,0,this._offscreenCanvas.width,this._offscreenCanvas.height);
 this.isDrawing=true;
 this.lastPointer=pointer;
-this.canvas.contextTop.clearRect(0,0,this.canvas.width,this.canvas.height);
 this.drawMosaic(pointer);
 },
 
-onMouseMove: function (pointer) {
+onMouseMove: function(pointer){
 this.lastPointer=pointer;
-if (this.isDrawing) {
+if(this.isDrawing){
 this.drawMosaic(pointer);
-} else {
+}else{
 this.drawPreviewCircle(pointer);
 }
 },
 
-onMouseUp: function () {
+onMouseUp: function(){
 this.isDrawing=false;
 this.commitDrawing();
 this.drawPreviewCircle(this.lastPointer);
 },
 
-drawMosaic: function (pointer) {
-var ctx=this.canvas.contextTop;
+drawMosaic: function(pointer){
+var ctx=this._offscreenCtx;
 var mainCtx=this.canvas.getContext('2d');
 
 var mosaicSize=this.mosaicSize;
@@ -274,12 +292,12 @@ var endGridY=Math.ceil(Math.min(this.canvas.height,pointer.y+circleRadius)/mosai
 var scaleX=mainCtx.getTransform().a;
 var scaleY=mainCtx.getTransform().d;
 
-for (var gridX=startGridX;gridX<endGridX;gridX++) {
-for (var gridY=startGridY;gridY<endGridY;gridY++) {
+for(var gridX=startGridX;gridX<endGridX;gridX++){
+for(var gridY=startGridY;gridY<endGridY;gridY++){
 var cellCenterX=(gridX+0.5)*mosaicSize;
 var cellCenterY=(gridY+0.5)*mosaicSize;
 
-if (this.isInsideCircle(pointer.x,pointer.y,cellCenterX,cellCenterY,circleRadius)) {
+if(this.isInsideCircle(pointer.x,pointer.y,cellCenterX,cellCenterY,circleRadius)){
 var x=gridX*mosaicSize;
 var y=gridY*mosaicSize;
 var imageData=mainCtx.getImageData(x*scaleX,y*scaleY,mosaicSize*scaleX,mosaicSize*scaleY);
@@ -287,7 +305,7 @@ var imageData=mainCtx.getImageData(x*scaleX,y*scaleY,mosaicSize*scaleX,mosaicSiz
 var data=imageData.data;
 var r=0,g=0,b=0,a=0,count=0;
 
-for (var i=0;i<data.length;i+=4) {
+for(var i=0;i<data.length;i+=4){
 r+=data[i];
 g+=data[i+1];
 b+=data[i+2];
@@ -299,20 +317,21 @@ g=Math.floor(g/count);
 b=Math.floor(b/count);
 a=Math.floor(a/count);
 
-ctx.fillStyle=`rgba(${r},${g},${b},${a / 255})`;
+ctx.fillStyle=`rgba(${r},${g},${b},${a/255})`;
 ctx.fillRect(x,y,mosaicSize,mosaicSize);
 }
 }
 }
+this._copyToContextTop();
 },
 
-isInsideCircle: function (cx,cy,x,y,radius) {
+isInsideCircle: function(cx,cy,x,y,radius){
 var dx=cx-x;
 var dy=cy-y;
-return (dx*dx+dy*dy<=radius*radius);
+return(dx*dx+dy*dy<=radius*radius);
 },
 
-drawPreviewCircle: function (pointer) {
+drawPreviewCircle: function(pointer){
 var ctx=this.canvas.contextTop;
 ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 
@@ -329,14 +348,14 @@ var startY=Math.floor(pointer.y-this.circleSize/2);
 var endX=startX+this.circleSize;
 var endY=startY+this.circleSize;
 
-for (var x=startX;x<=endX;x+=this.mosaicSize) {
+for(var x=startX;x<=endX;x+=this.mosaicSize){
 ctx.beginPath();
 ctx.moveTo(x,startY);
 ctx.lineTo(x,endY);
 ctx.stroke();
 }
 
-for (var y=startY;y<=endY;y+=this.mosaicSize) {
+for(var y=startY;y<=endY;y+=this.mosaicSize){
 ctx.beginPath();
 ctx.moveTo(startX,y);
 ctx.lineTo(endX,y);
@@ -353,46 +372,23 @@ _render: function(){}
 function enhanceBrush(brush,keepOriginalMethod) {
 brush.images=[];
 
-brush.commitDrawing=function () {
+brush.commitDrawing=function(){
 var ctx=this.canvas.contextTop;
-var scaleX=1/ctx.getTransform().a;
-var scaleY=1/ctx.getTransform().d;
-var dataURL=ctx.canvas.toDataURL();
+var sourceCanvas=this._offscreenCanvas||ctx.canvas;
+var dataURL=sourceCanvas.toDataURL();
 fabric.Image.fromURL(dataURL,(img)=>{
 img.set({
-left: 0,
-top: 0,
-selectable: false,
-evented: false,
-scaleX: scaleX,
-scaleY: scaleY,
+left:0,
+top:0,
+selectable:false,
+evented:false,
+scaleX:1,
+scaleY:1,
 });
 this.canvas.add(img);
 this.canvas.renderAll();
 this.images.push(img);
-ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-});
-};
-
-
-brush.commitDrawing=function () {
-var ctx=this.canvas.contextTop;
-var scaleX=1/ctx.getTransform().a;
-var scaleY=1/ctx.getTransform().d;
-var dataURL=ctx.canvas.toDataURL();
-fabric.Image.fromURL(dataURL,(img)=>{
-img.set({
-left: 0,
-top: 0,
-selectable: false,
-evented: false,
-scaleX: scaleX,
-scaleY: scaleY,
-});
-this.canvas.add(img);
-this.canvas.renderAll();
-this.images.push(img);
-ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
 });
 };
 

@@ -17,6 +17,8 @@ _latestStrokeLength: 0,
 _point: null,
 _sep: 5,
 _size: 0,
+_offscreenCanvas: null,
+_offscreenCtx: null,
 
 initialize: function(canvas,opt) {
 opt=opt||{};
@@ -28,6 +30,15 @@ this.opacity=opt.opacity||canvas.contextTop.globalAlpha;
 this._point=new fabric.Point(0,0);
 },
 
+_initOffscreen: function(){
+if(!this._offscreenCanvas){
+this._offscreenCanvas=document.createElement("canvas");
+this._offscreenCanvas.width=this.canvas.width;
+this._offscreenCanvas.height=this.canvas.height;
+this._offscreenCtx=this._offscreenCanvas.getContext("2d");
+}
+},
+
 changeColor: function(color){
 this.color=color;
 },
@@ -37,23 +48,32 @@ this.opacity=value;
 },
 
 onMouseDown: function(pointer){
-this.canvas.contextTop.globalAlpha=this.opacity;
+this._initOffscreen();
+this._offscreenCtx.clearRect(0,0,this._offscreenCanvas.width,this._offscreenCanvas.height);
+this._offscreenCtx.globalAlpha=this.opacity;
 this._size=this.width/2+this._baseWidth;
 this.set(pointer);
 },
 
 onMouseMove: function(pointer){
 this.update(pointer);
-this.draw(this.canvas.contextTop);
+this.draw(this._offscreenCtx);
+this._copyToContextTop();
 },
 
 onMouseUp: function(pointer){
 },
 
+_copyToContextTop: function(){
+var ctx=this.canvas.contextTop;
+ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+ctx.drawImage(this._offscreenCanvas,0,0);
+},
+
 set: function(p) {
-if (this._latest) {
+if(this._latest){
 this._latest.setFromPoint(this._point);
-} else {
+}else{
 this._latest=new fabric.Point(p.x,p.y);
 }
 fabric.Point.prototype.setFromPoint.call(this._point,p);
@@ -80,8 +100,8 @@ range=this._size/2;
 ctx.save();
 ctx.fillStyle=this.color;
 ctx.beginPath();
-for (i=0;i<dotNum;i++) {
-for (j=0;j<stepNum;j++) {
+for(i=0;i<dotNum;i++){
+for(j=0;j<stepNum;j++){
 p=this._latest.add(v.multiply(j));
 r=fabric.util.getRandom(range);
 c=fabric.util.getRandom(Math.PI*2);
