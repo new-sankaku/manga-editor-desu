@@ -7,7 +7,7 @@ var conf=null;
 var lines=null;
 
 function focusLineStart() {
-console.log("focusLineStart");
+effectLogger.debug("focusLineStart");
 var activeObject=getLastObject();
 tmpCanvasFL=document.createElement("canvas");
 
@@ -33,7 +33,7 @@ crMin: 30,
 color: "#000000",
 };
 
-console.log("focusLineStart updateFocusLine");
+effectLogger.debug("focusLineStart updateFocusLine");
 updateFocusLine();
 }
 
@@ -172,7 +172,7 @@ conf.crMin,
 conf.color
 );
 
-console.log("updateFCFabricCanvas start");
+effectLogger.debug("updateFCFabricCanvas start");
 updateFCFabricCanvas();
 }
 
@@ -188,7 +188,7 @@ MODE_FOCUSING_LINE+"-center-y",
 MODE_FOCUSING_LINE+"-line-width-expand",
 ].forEach((id)=>{
 $(id).addEventListener("input",()=>{
-console.log("addFCEventListener updateFocusLine");
+effectLogger.debug("addFCEventListener updateFocusLine");
 
 updateFocusLine();
 });

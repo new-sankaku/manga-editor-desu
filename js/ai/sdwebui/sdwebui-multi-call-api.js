@@ -11,7 +11,7 @@ headers: {
 initTagify(data.ad_model);
 })
 .catch(error=>{
-console.error('Error:',error);
+sdwebuiLogger.error('Error:',error);
 alert('APIからデータを取得できませんでした。');
 });
 }
@@ -43,7 +43,7 @@ alert('Failed to apply the model.');
 
 async function sendModelToServer() {
 const modelValue=basePrompt.text2img_model;
-console.log("sendModelToServer",$("basePrompt_model").value);
+sdwebuiLogger.debug("sendModelToServer",$("basePrompt_model").value);
 
 const data=JSON.stringify({
 sd_model_checkpoint: modelValue
@@ -87,7 +87,7 @@ return path.replace(/\\/g,'/').split('/').pop();
 }
 
 } catch (error) {
-console.error('Failed to fetch data:',error);
+sdwebuiLogger.error('Failed to fetch data:',error);
 }
 }
 

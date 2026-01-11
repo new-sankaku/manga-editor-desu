@@ -170,7 +170,7 @@ T2I(activeObject,spinner);
 
 $("text2img_prompt").addEventListener("input",function () {
 layer.text2img_prompt=this.value;
-console.log("layer.text2img_prompt:",layer.text2img_prompt);
+uiLogger.debug("layer.text2img_prompt:",layer.text2img_prompt);
 });
 
 $("text2img_negative").addEventListener("input",function () {

@@ -12,7 +12,7 @@ opacity=opacity/100;
 var fillColorRgba=hexToRgba(fillColor,opacity);
 var strokeColorRgba=hexToRgba(strokeColor,1.0);
 
-console.log("changeSpeechBubbleSVG:",bubbleStrokewidht,fillColorRgba,strokeColorRgba,opacity);
+textLogger.debug("changeSpeechBubbleSVG:",bubbleStrokewidht,fillColorRgba,strokeColorRgba,opacity);
 
 var activeObject=canvas.getActiveObject();
 if (activeObject) {
@@ -33,7 +33,7 @@ return;
 }
 });
 
-console.log("isExistsFillArea:",isExistsFillArea)
+textLogger.debug("isExistsFillArea:",isExistsFillArea)
 
 activeObject.forEachObject((obj)=>{
 if(isExistsFillArea){
@@ -49,7 +49,7 @@ stroke: strokeColorRgba ,
 fill:strokeColorRgba,
 strokeWidth:bubbleStrokewidht
 });
-console.log("obj.fill:",obj.fill);
+textLogger.debug("obj.fill:",obj.fill);
 
 }
 }else{
@@ -190,7 +190,7 @@ img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
 img.addEventListener("click",async function () {
-console.log("new panel");
+panelLogger.debug("new panel");
 
 const loading=OP_showLoading({
 icon: 'process',step: 'Step1',substep: 'New Page',progress: 0
@@ -224,7 +224,7 @@ img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
 img.addEventListener("click",async function () {
-console.log("new panel");
+panelLogger.debug("new panel");
 const loading=OP_showLoading({
 icon: 'process',step: 'Step1',substep: 'New Page',progress: 0
 });

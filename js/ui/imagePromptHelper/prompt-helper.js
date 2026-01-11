@@ -56,7 +56,7 @@ updateLanguageDropdown();
 iphInitializeUI();
 })
 .catch(error=>{
-console.error('Failed to initialize i18next:',error);
+uiLogger.error('Failed to initialize i18next:',error);
 });
 }
 
@@ -68,7 +68,7 @@ updateLanguageDropdown();
 saveSettings();
 })
 .catch(error=>{
-console.error('Failed to change language:',error);
+uiLogger.error('Failed to change language:',error);
 });
 });
 
@@ -106,7 +106,7 @@ customSet['Custom Set']={
 };
 
 localStorage.setItem('CustomSet',JSON.stringify(customSet));
-console.log("custom set",JSON.stringify(customSet));
+uiLogger.debug("custom set",JSON.stringify(customSet));
 
 iphInitializeUI();
 });

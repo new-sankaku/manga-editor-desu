@@ -2,9 +2,9 @@
 async function safeLoad(loadFunction,...args) {
 try {
 await loadFunction(...args);
-console.log(`Successfully loaded: ${args[0]}`);
+logger.debug(`Successfully loaded: ${args[0]}`);
 } catch (error) {
-console.error(`Failed to load: ${args[0]}`,error);
+logger.error(`Failed to load: ${args[0]}`,error);
 }
 }
 

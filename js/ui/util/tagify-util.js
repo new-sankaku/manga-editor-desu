@@ -47,7 +47,7 @@ value: tag.n,// valueプロパティを明示的に設定
 n: tag.n,
 p: tag.p
 }));
-console.log("updateTagifyDropdown selectedTags",selectedTags);
+uiLogger.debug("updateTagifyDropdown selectedTags",selectedTags);
 updatedTagify.addTags(selectedTags);
 }
 }

@@ -57,7 +57,7 @@ function comfyuiConnect() {
 try {
 socket=new WebSocket(comfyUIUrls.ws+'?clientId='+comfyUIuuid);
 socket.addEventListener("open",(event)=>{
-console.log("ComfyUIへの接続に成功しました。");
+comfyuiLogger.info("ComfyUIへの接続に成功しました。");
 });
 socket.addEventListener("close",(event)=>{
 socket=null;
@@ -192,7 +192,7 @@ throw new Error("Unexpected error: No result returned from comfyui_put_queue_v2"
 .catch((error)=>{
 let help=getText("comfyUI_workflowErrorHelp");
 createToastError("Generation Error",[error.message,help],8000);
-console.error("Error:",error);
+comfyuiLogger.error("Error:",error);
 })
 .finally(()=>{
 removeSpinner(spinnerId);
@@ -231,7 +231,7 @@ const result=await response.json();
 // console.log("Upload successful:", result);
 return result;
 } catch (error) {
-console.error("Error uploading image:",error);
+comfyuiLogger.error("Error uploading image:",error);
 throw error;
 }
 }
@@ -256,7 +256,7 @@ const options=extractComboOptions(data.KSampler.input.required.sampler_name);
 const models=options.map((name)=>({name: name}));
 updateSamplerDropdown(models);
 } catch (error) {
-console.error("comfyuiFetchSampler: Fetch error",error);
+comfyuiLogger.error("comfyuiFetchSampler: Fetch error",error);
 }
 }
 
@@ -267,7 +267,7 @@ const options=extractComboOptions(data.UpscaleModelLoader.input.required.model_n
 const models=options.map((name)=>({name: name}));
 updateUpscalerDropdown(models);
 } catch (error) {
-console.error("comfyuiFetchUpscaler: Fetch error",error);
+comfyuiLogger.error("comfyuiFetchUpscaler: Fetch error",error);
 }
 }
 
@@ -287,7 +287,7 @@ return a.title.localeCompare(b.title);
 
 updateModelDropdown(allModels);
 } catch (error) {
-console.error("comfyuiFetchModels: Fetch error",error);
+comfyuiLogger.error("comfyuiFetchModels: Fetch error",error);
 }
 }
 
@@ -298,7 +298,7 @@ const options=extractComboOptions(data.DualCLIPLoader.input.required.clip_name1)
 const results=options.map((name)=>({n: name,p: 0}));
 updateTagifyDropdown("clipDropdownId",results);
 } catch (error) {
-console.error("comfyuiClipModels: Fetch error",error);
+comfyuiLogger.error("comfyuiClipModels: Fetch error",error);
 }
 }
 async function comfyuiVaeLoader() {
@@ -308,7 +308,7 @@ const options=extractComboOptions(dataUnet.VAELoader.input.required.vae_name);
 const results=options.map((name)=>({name: name}));
 updateVaeDropdown(results);
 } catch (error) {
-console.error("comfyuiVaeLoader: Fetch error",error);
+comfyuiLogger.error("comfyuiVaeLoader: Fetch error",error);
 }
 }
 
@@ -324,7 +324,7 @@ const data=await response.json();
 // console.log("comfyuiFetchObjectInfo:", data);
 return data;
 } catch (error) {
-console.error("Comfyui_Fetch: Fetch error",nodeName);
+comfyuiLogger.error("Comfyui_Fetch: Fetch error",nodeName);
 }
 }
 
@@ -342,7 +342,7 @@ const nodeNames=Object.keys(data);
 comfyObjectInfoList=nodeNames;
 return nodeNames;
 } catch (error) {
-console.error("comfyuiFetchObjectInfoOnly: Fetch error:",error);
+comfyuiLogger.error("comfyuiFetchObjectInfoOnly: Fetch error:",error);
 return [];
 }
 }

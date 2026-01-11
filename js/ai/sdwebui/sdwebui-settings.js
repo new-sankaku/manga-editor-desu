@@ -73,13 +73,13 @@ seed=layer.text2img_seed;
 if(isImage(layer)){
 width=layer.width*layer.scaleX*layer.img2imgScale;
 height=layer.height*layer.scaleY*layer.img2imgScale;
-console.log("widthLayer",layer.width);
-console.log("scaleX",layer.scaleX);
-console.log("heightLayer",layer.height);
-console.log("scaleY",layer.caleY);
-console.log("layer.img2imgScale",layer.img2imgScale);
-console.log("width",width);
-console.log("height",height);
+sdwebuiLogger.debug("widthLayer",layer.width);
+sdwebuiLogger.debug("scaleX",layer.scaleX);
+sdwebuiLogger.debug("heightLayer",layer.height);
+sdwebuiLogger.debug("scaleY",layer.caleY);
+sdwebuiLogger.debug("layer.img2imgScale",layer.img2imgScale);
+sdwebuiLogger.debug("width",width);
+sdwebuiLogger.debug("height",height);
 
 }else{
 if (layer.text2img_width<=0) {
@@ -112,7 +112,7 @@ const requestData={
 
 if($("AdetailerCheck").checked){
 const adModels=getAdetailerList();
-console.log("adModels",JSON.stringify(adModels));
+sdwebuiLogger.debug("adModels",JSON.stringify(adModels));
 if (adModels.length>0) {
 const adPromptElement=document.getElementById('AdetilerModelsPrompt');
 const adNegativePromptElement=document.getElementById('AdetilerModelsNegative');

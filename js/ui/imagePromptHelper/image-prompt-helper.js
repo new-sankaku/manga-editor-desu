@@ -12,13 +12,13 @@ const resources=window[`trans_${language}`];
 callback(null,resources);
 })
 .catch(error=>{
-console.error(`Error loading language file for ${language}:`,error);
+uiLogger.error(`Error loading language file for ${language}:`,error);
 callback(error,null);
 });
 }
 
 function initI18next(lang) {
-console.log("lang",lang);
+uiLogger.debug("lang",lang);
 return i18next
 .use({
 type: 'backend',
@@ -54,7 +54,7 @@ if (iphSelectedTagGroups.length>0) {
 const content=iphSelectedTagGroups.join(',');
 navigator.clipboard.writeText(content).then(()=>{
 }).catch(err=>{
-console.error('クリップボードへのコピーに失敗しました:',err);
+uiLogger.error('クリップボードへのコピーに失敗しました:',err);
 });
 }
 });
@@ -120,9 +120,9 @@ if (language==='en') {
 iphData=iphFilterEnglishData(iphData);
 }
 
-console.log('Data loaded successfully');
+uiLogger.debug('Data loaded successfully');
 } catch (error) {
-console.error('Error loading data:',error);
+uiLogger.error('Error loading data:',error);
 }
 }
 

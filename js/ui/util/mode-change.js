@@ -22,7 +22,7 @@ var cropActiveObject;
 let nowPencil="";
 
 function operationModeClear(){
-console.log("operationModeClear start")
+uiLogger.debug("operationModeClear start")
 cropModeClear();
 knifeModeClear();
 editModeClear();
@@ -35,7 +35,7 @@ sbClearControlePoints();
 }
 
 function pencilModeClear(type) {
-console.log("pencilModeClear type nowPencil | ",type,nowPencil);
+uiLogger.debug("pencilModeClear type nowPencil | ",type,nowPencil);
 type=type||nowPencil;
 
 changeDefaultCursor();

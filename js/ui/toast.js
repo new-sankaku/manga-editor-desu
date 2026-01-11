@@ -1,17 +1,17 @@
 function createToast(title,messages,time=4000) {
-console.log("createToast",time);
+uiLogger.debug("createToast",time);
 
 return showToast(title,messages,false,time);
 }
 function createToastError(title,messages,time=4000) {
-console.log("createToastError",time);
+uiLogger.debug("createToastError",time);
 
 return showToast(title,messages,true,time);
 }
 function showToast(title,messages,isError,time) {
 const container=$('sp-manga-toastContainer');
 if (!container) {
-console.error('Toast container not found');
+uiLogger.error('Toast container not found');
 return;
 }
 

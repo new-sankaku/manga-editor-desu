@@ -2,7 +2,7 @@
 function comfyuiReplacePlaceholders(workflow,requestData,Type='T2I') {
 const builder=createWorkflowBuilder(workflow);
 
-workflowlLogger.trace("requestData[seed]",requestData["seed"]);
+workflowLogger.trace("requestData[seed]",requestData["seed"]);
 
 builder.updateNodesByInputName({
 seed:       requestData["seed"]=="-1"||requestData["seed"]=="0" ? Math.floor(Math.random()*50000000) :        requestData["seed"],
@@ -50,7 +50,7 @@ const milliseconds=String(now.getMilliseconds()).padStart(3,'0');
 
 var filename=`temp_${year}${month}${day}${hours}${minutes}${seconds}_${milliseconds}_${generateFilenameIndex}.png`;
 generateFilenameIndex++;
-console.log("filename:",filename);
+comfyuiLogger.debug("filename:",filename);
 return filename;
 }
 

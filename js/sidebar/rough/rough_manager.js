@@ -452,13 +452,13 @@ checkRoughTarget();
 return;
 }
 
-console.log("roughenSelectedObject aaa");
+effectLogger.debug("roughenSelectedObject aaa");
 if (!roughManager.isRoughenable(activeObject)) {
-console.log("roughenSelectedObject bbb");
+effectLogger.debug("roughenSelectedObject bbb");
 checkRoughTarget();
 return;
 }
-console.log("roughenSelectedObject ccc");
+effectLogger.debug("roughenSelectedObject ccc");
 
 const roughObj=await roughManager.roughenObject(activeObject);
 if (roughObj) {

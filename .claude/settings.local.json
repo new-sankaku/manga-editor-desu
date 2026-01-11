@@ -10,7 +10,18 @@
       "Bash(node --version)",
       "Bash(node test-remove-spaces.js:*)",
       "Bash(npm run format:*)",
-      "Bash(dir \"C:\\\\Windows\\\\Media\\\\*.wav\" /b)"
+      "Bash(dir \"C:\\\\Windows\\\\Media\\\\*.wav\" /b)",
+      "Bash(gh issue list:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(git add:*)",
+      "Bash(git push)",
+      "Bash(python 99_server.py:*)",
+      "Bash(timeout:*)",
+      "Bash(git checkout:*)",
+      "Bash(curl:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(ls:*)"
     ]
   },
   "hooks": {

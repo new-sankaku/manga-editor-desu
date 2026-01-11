@@ -118,7 +118,7 @@ reader.onerror=reject;
 reader.readAsDataURL(blob);
 });
 }catch(e){
-console.error("Failed to convert blob URL:",blobUrl,e);
+layerLogger.error("Failed to convert blob URL:",blobUrl,e);
 return null;
 }
 }

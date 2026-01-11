@@ -264,7 +264,7 @@ return;
 
 imageLayerListTemp=imageLayerList;
 
-console.log("handleBlend start",imageLayerList.length);
+layerLogger.debug("handleBlend start",imageLayerList.length);
 addImagePreviewsToFloatingWindow(imageLayerList);
 $("blendFloatingWindow").style.display="block";
 
@@ -396,7 +396,7 @@ const directionElement=$('gradientDirection');
 const ctx=directionElement.getContext('2d');
 const gradient=ctx.createLinearGradient(startX,startY,endX,endY);
 
-console.log("$('gradientStart').value:",$('gradientStart').value);
+layerLogger.debug("$('gradientStart').value:",$('gradientStart').value);
 gradient.addColorStop(0,$('gradientStart').value);
 gradient.addColorStop(1,$('gradientEnd').value);
 ctx.fillStyle=gradient;

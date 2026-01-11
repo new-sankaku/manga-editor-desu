@@ -52,7 +52,7 @@ return false;
 
 let isOnline=false;
 async function comfyui_monitorConnection_v2() {
-console.log("comfyui_monitorConnection_v2");
+comfyuiLogger.debug("comfyui_monitorConnection_v2");
 while (true) {
 const currentStatus=await comfyui_apiHeartbeat_v2();
 if (currentStatus!==isOnline) {
@@ -143,7 +143,7 @@ workflow[nodeId].inputs[inputName]=uploadResult.name;
 }
 }
 } catch (error) {
-console.error("ファイルアップロードエラー:",error);
+comfyuiLogger.error("ファイルアップロードエラー:",error);
 }
 }
 
@@ -165,7 +165,7 @@ throw new Error(`HTTPエラー! ステータス: ${response.status}`);
 const blob=await response.blob();
 return URL.createObjectURL(blob);
 } catch (error) {
-console.error("画像取得エラー:",error);
+comfyuiLogger.error("画像取得エラー:",error);
 return null;
 }
 }
@@ -173,7 +173,7 @@ return null;
 async function comfyui_fixWorkflowTypes_v2(workflow) {
 const objectInfo=await objectInfoRepository.getObjectInfo();
 if (!objectInfo) {
-console.warn("ObjectInfo not available, skipping type fix");
+comfyuiLogger.warn("ObjectInfo not available, skipping type fix");
 return workflow;
 }
 const fixed=JSON.parse(JSON.stringify(workflow));
@@ -255,7 +255,7 @@ subfolder: imageDataToReceive.subfolder,
 type: imageDataToReceive.type,
 });
 const response=await fetch(comfyUIUrls.view+"?"+params.toString());
-console.log("画像データをサーバーから取得しました。",
+comfyuiLogger.debug("画像データをサーバーから取得しました。",
 imageDataToReceive.filename,
 imageDataToReceive.subfolder,
 imageDataToReceive.type,);
@@ -266,11 +266,11 @@ throw new Error(`HTTPエラー! ステータス: ${response.status}`);
 
 const blob=await response.blob();
 const imageSrc=URL.createObjectURL(blob);
-console.log("画像ソース:",imageSrc);
+comfyuiLogger.debug("画像ソース:",imageSrc);
 
 return imageSrc;
 } catch (error) {
-console.error("画像取得エラー:",error);
+comfyuiLogger.error("画像取得エラー:",error);
 return null;
 }
 }
@@ -307,10 +307,10 @@ errorMessage.traceback=Array.isArray(errorDetails.traceback)
 }
 }
 
-console.log("comfyui_getErrorMessage_v2 returning:",errorMessage);
+comfyuiLogger.debug("comfyui_getErrorMessage_v2 returning:",errorMessage);
 return errorMessage;
 }
-console.log("comfyui_getErrorMessage_v2 returning null");
+comfyuiLogger.debug("comfyui_getErrorMessage_v2 returning null");
 return null;
 }
 
@@ -346,14 +346,14 @@ errorMessage+=error.message;
 errorMessage+="check COMFYUI!";
 }
 
-console.error("Error details:",error);
+comfyuiLogger.error("Error details:",error);
 createToastError(errorMessage);
 return null;
 }
 }
 
 async function comfyui_get_history_v2(promptId) {
-console.log(
+comfyuiLogger.debug(
 "comfyui_get_history_v2関数が呼び出されました。プロンプトID:",
 promptId
 );
@@ -364,12 +364,12 @@ headers: {
 accept: "application/json",
 },
 });
-console.log("サーバーに履歴データをリクエストしました。");
+comfyuiLogger.debug("サーバーに履歴データをリクエストしました。");
 const data=await response.json();
-console.log("履歴データ:",data);
+comfyuiLogger.debug("履歴データ:",data);
 return data;
 } catch (error) {
-console.log("Text2Imageエラー:",error);
+comfyuiLogger.error("Text2Imageエラー:",error);
 createToastError("Text2Image Error.","check COMFYUI!");
 return null;
 }
@@ -409,11 +409,11 @@ const promptId=Object.keys(response)[0];
 if (promptId&&response[promptId]&&response[promptId].status) {
 const status=response[promptId].status;
 const result=status.status_str==="error";
-console.log("comfyui_isError_v2 return",result);
+comfyuiLogger.debug("comfyui_isError_v2 return",result);
 return result;
 }
 }
-console.log("comfyui_isError_v2 return false");
+comfyuiLogger.debug("comfyui_isError_v2 return false");
 return false;
 }
 

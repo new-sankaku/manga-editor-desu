@@ -11,7 +11,7 @@ const theme = "light";
 
 function addTooltipByElement(element, translationKey) {
   if (!element) {
-    console.warn(`Element with ID ${elementId} not found`);
+    uiLogger.warn(`Element with ID ${elementId} not found`);
     return;
   }
   const tooltipText = getText(translationKey);
@@ -29,7 +29,7 @@ function addTooltipByElement(element, translationKey) {
 function addTooltip(elementId, translationKey) {
   const element = $(elementId);
   if (!element) {
-    console.warn(`Element with ID ${elementId} not found`);
+    uiLogger.warn(`Element with ID ${elementId} not found`);
     return;
   }
 
@@ -47,7 +47,7 @@ function addTooltip(elementId, translationKey) {
 
 function setLanguage(language) {
   i18next.changeLanguage(language, () => {
-    console.log("setLanguage start");
+    uiLogger.debug("setLanguage start");
     removeTooltips();
 
     addTooltip('inputImageFile', 'inputImageFile');

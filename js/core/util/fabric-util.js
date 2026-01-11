@@ -251,7 +251,7 @@ updateLayerPanel();
 
 function getGUID(activeObject) {
 if (!activeObject) {
-console.log("ERROR, getGUID activeObject is null.")
+canvasLogger.error("ERROR, getGUID activeObject is null.")
 return null;
 }
 
@@ -335,7 +335,7 @@ logger.trace("BEFORE",`Starting ${action} process for shape "${activeObject.name
 let clipPath=activeObject.clipPath;
 if (!clipPath||!clipPath.points) {
 logger.trace("ERROR",`ClipPath or clipPath.points not found for shape "${activeObject.name}"`);
-console.error('ClipPath or clipPath.points not found');
+canvasLogger.error('ClipPath or clipPath.points not found');
 return;
 }
 
@@ -604,7 +604,7 @@ reconstructClipPath(activeObject,newPoints,clipPath,newLeft,newTop);
 break;
 default:
 logger.trace("ERROR",`Unknown action "${action}" for shape "${activeObject.name}"`);
-console.error(`[removeClipPath] Error: Unknown action "${action}"`);
+canvasLogger.error(`[removeClipPath] Error: Unknown action "${action}"`);
 return;
 }
 if(activeObject.removeSettings){
@@ -722,9 +722,9 @@ left=transform.left;
 if(transform.top!=transform.initTop){
 top=transform.top;
 }
-console.log("calculateTransformedPath transform.initLeft, transform.initTop",transform.initLeft,transform.initTop);
-console.log("calculateTransformedPath transform.left, transform.top",transform.left,transform.top);
-console.log("calculateTransformedPath left, top",left,top);
+canvasLogger.debug("calculateTransformedPath transform.initLeft, transform.initTop",transform.initLeft,transform.initTop);
+canvasLogger.debug("calculateTransformedPath transform.left, transform.top",transform.left,transform.top);
+canvasLogger.debug("calculateTransformedPath left, top",left,top);
 
 return {
 fullTransformMatrix: transform.calcTransformMatrix(),

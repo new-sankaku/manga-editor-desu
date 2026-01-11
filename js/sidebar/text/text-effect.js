@@ -193,7 +193,7 @@ var selectedFont=fontManager.getSelectedFont("fontSelector");
 var fontsize=$("fontSizeSlider").value
 var fontStrokeWidth=$("fontStrokeWidthSlider").value
 
-console.log("selectedFont",selectedFont)
+textLogger.debug("selectedFont",selectedFont)
 const selectedValue=getSelectedValueByGroup("align_group");
 var textbox=new fabric.Textbox("New",{
 top: 50,

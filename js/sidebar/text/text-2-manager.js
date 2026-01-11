@@ -302,7 +302,7 @@ case MODE_T2_SHADOW:
 t2_shadow_updateAll();
 break;
 default:
-console.error("unknown type",type);
+textLogger.error("unknown type",type);
 break;
 }
 }
@@ -349,7 +349,7 @@ t2_shadow_createSvg();
 nowImageTextObject=nowT2ShadowStr;
 break;
 default:
-console.error("unknown type",type);
+textLogger.error("unknown type",type);
 break;
 }
 }
@@ -393,7 +393,7 @@ case MODE_T2_SHADOW:
 t2_shadow_deleteSvg();
 break;
 default:
-console.error("unknown type",type);
+textLogger.error("unknown type",type);
 break;
 }
 }

@@ -1,6 +1,6 @@
 
 async function processQueue(layer,spinnerId,fetchFunction,imageName) {
-console.log(`Processing queue for ${imageName}`);
+sdwebuiLogger.debug(`Processing queue for ${imageName}`);
 try {
 const {img,responseData}=await sdQueue.add(()=>sdwebuiGenerateImage(layer,fetchFunction));
 if (img) {
@@ -9,7 +9,7 @@ await handleSuccessfulGeneration(img,responseData,layer,imageName);
 createToastError("Generation error","");
 }
 } catch (error) {
-console.error("processQueue",error);
+sdwebuiLogger.error("processQueue",error);
 } finally {
 removeSpinner(spinnerId);
 }
@@ -42,13 +42,13 @@ const requestData={
 init_images: [base64Image.split(',')[1]],
 denoising_strength: layer.img2img_denoise
 };
-console.log("sdwebuiFetchImage2Image requestData",requestData);
+sdwebuiLogger.debug("sdwebuiFetchImage2Image requestData",requestData);
 return post(sdWebUIUrls.i2i,requestData);
 }
 
 async function post(url,requestData) {
 try {
-console.log("requestData:",requestData);
+sdwebuiLogger.debug("requestData:",requestData);
 const response=await fetch(url,{
 method: 'POST',
 headers: {
@@ -80,7 +80,7 @@ img ? resolve({img,responseData}) : reject(new Error('Failed to create a fabric.
 }
 
 async function sdwebuiRembgProcessQueue(layer,spinnerId) {
-console.log("Processing queue for rembg");
+sdwebuiLogger.debug("Processing queue for rembg");
 try {
 const responseData=await sdQueue.add(()=>sdwebuiRemoveBackground(layer));
 if (responseData&&typeof responseData==='string') {
@@ -89,7 +89,7 @@ await handleSuccessfulRembg(responseData,layer);
 createToastError("Invalid background removal response","");
 }
 } catch (error) {
-console.error("sdwebuiRembgProcessQueue",error);
+sdwebuiLogger.error("sdwebuiRembgProcessQueue",error);
 } finally {
 removeSpinner(spinnerId);
 }

@@ -143,7 +143,7 @@ return;
 
 const matrix=fabricObj.calcTransformMatrix();
 if(!fabricObj.points){
-console.log("ERROR ERROR ERROR polygonObj.points",JSON.stringify(fabricObj.points));
+canvasLogger.error("ERROR polygonObj.points",JSON.stringify(fabricObj.points));
 return;
 }
 
@@ -317,7 +317,7 @@ drawLine(startKnifeX,startKnifeY,endX,endY);
 
 canvas.on('path:created',function (opt) {
 eventLogger.trace('23: path:created');
-console.log("push");
+canvasLogger.debug("push");
 currentPaths.push(opt.path);
 });
 
@@ -404,7 +404,7 @@ const geometry=createJSTSPolygon(points);
 if (geometry&&geometry.isValid()) {
 createSpeechBubble(mergeOverlappingShapes(geometry));
 } else {
-console.log("jsts up error");
+canvasLogger.warn("jsts up error");
 }
 
 points=[];
@@ -423,7 +423,7 @@ if (geometry&&geometry.isValid()) {
 createSpeechBubble(mergeOverlappingShapes(geometry));
 points=[];
 } else {
-console.log("jsts up error");
+canvasLogger.warn("jsts up error");
 }
 updateObjectSelectability();
 requestAnimationFrame(()=>canvas.renderAll());

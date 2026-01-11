@@ -9,7 +9,7 @@ const wasmBuffer=this.base64ToArrayBuffer(wasmBase64);
 const initResult=lz4init({wasmBinary: wasmBuffer});
 this.lz4Module=await initResult;
 } catch (e) {
-console.log("initialize error:",JSON.stringify(e));
+compressionLogger.error("initialize error:",JSON.stringify(e));
 }
 }
 
@@ -54,7 +54,7 @@ return true;
 return false;
 }
 } catch (e) {
-console.log("isLz4 error:",JSON.stringify(e));
+compressionLogger.error("isLz4 error:",JSON.stringify(e));
 return false;
 }
 }
@@ -211,7 +211,7 @@ a.click();
 URL.revokeObjectURL(url);
 }
 } catch (e) {
-console.log("error:",JSON.stringify(e));
+compressionLogger.error("error:",JSON.stringify(e));
 }
 }
 }

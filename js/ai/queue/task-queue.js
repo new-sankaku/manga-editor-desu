@@ -21,10 +21,10 @@ const task=this.queue.shift();
 this.activeCount++;
 
 try {
-console.log("task is run.");
+logger.debug("task is run.");
 await task();
 } catch (error) {
-console.error("Task error:",error);
+logger.error("Task error:",error);
 } finally {
 this.activeCount--;
 this.processQueue();

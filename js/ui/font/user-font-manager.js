@@ -81,7 +81,7 @@ document.head.appendChild(style);
           const fontName = file.name.replace(/\.[^/.]+$/, "");
           await fontManager.registerFontFromBuffer(buffer, fontName);
         } catch (error) {
-          console.error("error, ", error);
+          fontLogger.error("error, ", error);
         }
       }
     });

@@ -53,7 +53,7 @@ layer.text2img_negative=layer.text2img_negative.replace(new RegExp(prompt.old,'g
 });
 });
 
-console.log("applyChanges","saveState");
+uiLogger.debug("applyChanges","saveState");
 saveState();
 }
 

@@ -197,7 +197,7 @@ const objBottom=objRect.top+objRect.height;
 if (newRight<objLeft||objRight<newLeft||newBottom<objTop||objBottom<newTop) return;
 
 if(obj.isSpeechBubble&&!obj.jstsGeom){
-console.log("mergeOverlappingShapes updateJSTSGeometryByObj 再作成");
+textLogger.debug("mergeOverlappingShapes updateJSTSGeometryByObj 再作成");
 updateJSTSGeometryByObj(obj);
 }
 

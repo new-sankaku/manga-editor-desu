@@ -161,7 +161,7 @@ y: bbox.height/4 // 中央に配置
 setAttributes(t2_water_textSvg,dims);
 
 } catch (error) {
-console.error('SVG size update error:',error);
+textLogger.error('SVG size update error:',error);
 }
 }
 function t2_water_addSvg(left,top){

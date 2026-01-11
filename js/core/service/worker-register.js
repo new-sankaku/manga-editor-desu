@@ -27,11 +27,11 @@ navigator.serviceWorker
 .register("/SP-MangaEditer/service-worker.js")
 .then(function (reg) {
 registration=reg;
-console.log("Service Worker Register Success:",registration.scope);
+serviceLogger.info("Service Worker Register Success:",registration.scope);
 checkInstallState();
 })
 .catch(function (error) {
-console.log("Service Worker Register Failed:",error);
+serviceLogger.error("Service Worker Register Failed:",error);
 });
 }
 });
@@ -55,7 +55,7 @@ const keys=await caches.keys();
 await Promise.all(keys.map((key)=>caches.delete(key)));
 return true;
 } catch (err) {
-console.error("Cache clear failed:",err);
+serviceLogger.error("Cache clear failed:",err);
 return false;
 }
 }

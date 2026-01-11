@@ -45,7 +45,7 @@ var snowToneSnowAngle=null;
 
 
 function addSnowToneEventListener() {
-console.log("addSnowToneEventListener start");
+effectLogger.debug("addSnowToneEventListener start");
 snowToneSnowDensity=$(MODE_TONE_SNOW+'-density');
 snowToneFrontSnowSize=$(MODE_TONE_SNOW+'-frontSize');
 snowToneBackSnowSize=$(MODE_TONE_SNOW+'-backSize');

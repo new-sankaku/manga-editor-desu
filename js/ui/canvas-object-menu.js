@@ -134,9 +134,9 @@ let strokeWidth=createObjectMenuSlider(labelAndId,min,max,step,value);
 min=7,max=150,step=1,value=activeObject.fontSize,labelAndId='com-fontSize';
 let fontSize=createObjectMenuSlider(labelAndId,min,max,step,value);
 
-console.log("fillTemp",fillTemp);
+uiLogger.debug("fillTemp",fillTemp);
 let fillColor=createObjectMenuColor("com-fill",rgbaToHex(fillTemp),fillTemp);
-console.log("fillColor",fillColor);
+uiLogger.debug("fillColor",fillColor);
 let strokeColor=createObjectMenuColor("com-strokeColor",rgbaToHex(strokeTemp),strokeTemp);
 
 if (isPanel(activeObject)) {

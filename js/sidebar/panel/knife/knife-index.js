@@ -17,4 +17,4 @@
 // 追加のエクスポート処理は不要です。
 
 // 初期化ログ（デバッグ用、本番環境では削除可）
-console.log('[Knife] Knife tool modules loaded successfully');
+panelLogger.debug('[Knife] Knife tool modules loaded successfully');

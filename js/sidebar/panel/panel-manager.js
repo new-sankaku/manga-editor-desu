@@ -50,7 +50,7 @@ var webpFile;
 try {
 webpFile=await imgFile2webpFile(file);
 } catch (error) {
-console.error("Failed to convert to WebP",error);
+panelLogger.error("Failed to convert to WebP",error);
 return;
 }
 
@@ -59,7 +59,7 @@ reader.onload=function (f) {
 var data=f.target.result;
 
 fabric.Image.fromURL(data,function (img) {
-console.log("drop stateStack.length",stateStack.length);
+panelLogger.debug("drop stateStack.length",stateStack.length);
 if (stateStack.length>=2&&getObjectCount()>0) {
 var canvasX=x/canvasContinerScale;
 var canvasY=y/canvasContinerScale;
@@ -112,7 +112,7 @@ scaleX: oldDisplayWidth/newImageObject.width,
 scaleY: oldDisplayHeight/newImageObject.height,
 });
 
-console.log("newImageObject,",newImageObject);
+panelLogger.debug("newImageObject,",newImageObject);
 }else{
 newImageObject.set({
 left: oldImageObject.left,
@@ -155,7 +155,7 @@ canvas.add(obj);
 }
 
 var targetFrameIndex=targetLayer?canvas.getObjects().indexOf(targetLayer):findTargetFrame(x,y);
-console.log("targetFrameIndex",targetFrameIndex);
+panelLogger.debug("targetFrameIndex",targetFrameIndex);
 if (targetFrameIndex!==-1) {
 var targetFrame=canvas.item(targetFrameIndex);
 var frameCenterX=targetFrame.left+(targetFrame.width*targetFrame.scaleX)/2;

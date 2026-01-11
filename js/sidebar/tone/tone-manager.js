@@ -76,7 +76,7 @@ speedLineStart();
 addSppedLineEventListener();
 updateDrawingSpeedlines();
 } else {
-console.error("unknown type",type);
+effectLogger.error("unknown type",type);
 }
 
 clearActiveToneButton();

@@ -16,7 +16,7 @@ throw new Error("Workflow ID is required for saving.");
 }
 
 if (enabled) {
-console.log("saveWorkflow: disableWorkflowsByType");
+comfyuiLogger.debug("saveWorkflow: disableWorkflowsByType");
 await this.disableWorkflowsByType(type);
 }
 
@@ -53,7 +53,7 @@ enabled,
 });
 return true;
 } catch (error) {
-console.error("Failed to save workflow:",error);
+comfyuiLogger.error("Failed to save workflow:",error);
 return false;
 }
 },
@@ -66,7 +66,7 @@ throw new Error(`Workflow with ID ${id} not found.`);
 }
 return workflowData;
 } catch (error) {
-console.error("Failed to retrieve workflow:",error);
+comfyuiLogger.error("Failed to retrieve workflow:",error);
 return null;
 }
 },
@@ -79,7 +79,7 @@ workflows.push({id: key,...value});
 });
 return workflows;
 } catch (error) {
-console.error("Failed to retrieve workflow list:",error);
+comfyuiLogger.error("Failed to retrieve workflow list:",error);
 return [];
 }
 },
@@ -89,7 +89,7 @@ try {
 await this.store.removeItem(id);
 return true;
 } catch (error) {
-console.error("Failed to delete workflow:",error);
+comfyuiLogger.error("Failed to delete workflow:",error);
 return false;
 }
 },
@@ -115,7 +115,7 @@ existing.enabled=enabled;
 await this.store.setItem(name,existing);
 return true;
 } catch (error) {
-console.error("Failed to update workflow:",error);
+comfyuiLogger.error("Failed to update workflow:",error);
 return false;
 }
 },
@@ -135,7 +135,7 @@ await this.store.setItem(key,value);
 }
 return true;
 } catch (error) {
-console.error("Failed to disable workflows by type:",error);
+comfyuiLogger.error("Failed to disable workflows by type:",error);
 return false;
 }
 },
@@ -144,7 +144,7 @@ async getEnabledWorkflowByType(type) {
 try {
 let enabledWorkflow=null;
 await this.store.iterate((value)=>{
-console.log("value.type value.enabled",value.type,value.enabled);
+comfyuiLogger.debug("value.type value.enabled",value.type,value.enabled);
 if (value.type===type&&value.enabled) {
 enabledWorkflow=value;
 return false;
@@ -152,7 +152,7 @@ return false;
 });
 return enabledWorkflow.workflowJson;
 } catch (error) {
-console.error("Failed to retrieve enabled workflow by type:",error);
+comfyuiLogger.error("Failed to retrieve enabled workflow by type:",error);
 return null;
 }
 },
@@ -168,7 +168,7 @@ return false;
 });
 return exists;
 } catch (error) {
-console.error("Failed to check workflow existence:",error);
+comfyuiLogger.error("Failed to check workflow existence:",error);
 return false;
 }
 },

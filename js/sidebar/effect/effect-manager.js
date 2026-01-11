@@ -94,7 +94,7 @@ return;
 setGlfxI18NextLabel();
 glfxAddEvent();
 } else {
-console.error("unknown type",type);
+effectLogger.error("unknown type",type);
 }
 
 addEffectEventListener();
@@ -173,7 +173,7 @@ effectEnhanceDarkSubmit.addEventListener('click',()=>{
 if (nowEffect==MODE_EFFECT_ENHANCE_DARK) {
 const selectedObject=canvas.getActiveObject();
 if (selectedObject) {
-console.log("enhanceDarkImage","start");
+effectLogger.debug("enhanceDarkImage","start");
 enhanceDarkImage();
 } else {
 createToast("Check image!")
@@ -210,7 +210,7 @@ createToast("Check image!")
 }
 });
 } else {
-console.log("element is null");
+effectLogger.debug("element is null");
 }
 });
 }

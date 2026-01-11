@@ -50,7 +50,7 @@ if (value!==null&&value!==undefined&&value!=="") {
 validInputs[key]=value;
 }
 });
-workflowlLogger.trace("validInputs, " ,validInputs);
+workflowLogger.trace("validInputs, " ,validInputs);
 
 if (Object.keys(validInputs).length>0) {
 Object.entries(this.workflowCopy).forEach(([id,node])=>{
@@ -61,11 +61,11 @@ const originalValue=typeof node.inputs[inputKey];
 const newValue=typeof validInputs[inputKey];
 
 if (originalValue===newValue){
-workflowlLogger.trace("validInputs, replase1 " ,originalValue,newValue);
+workflowLogger.trace("validInputs, replase1 " ,originalValue,newValue);
 node.inputs[inputKey]=validInputs[inputKey];
 
 }else if ((isNumericType(node.inputs[inputKey])&&isNumericType(validInputs[inputKey]))){
-workflowlLogger.trace("validInputs, replase2 " ,originalValue,newValue);
+workflowLogger.trace("validInputs, replase2 " ,originalValue,newValue);
 node.inputs[inputKey]=validInputs[inputKey];
 
 }

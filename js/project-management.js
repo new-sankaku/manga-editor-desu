@@ -51,8 +51,8 @@ document.body.removeChild(a);
 window.URL.revokeObjectURL(url);
 })
 .catch((error)=>{
-console.log("error",error);
-console.log("error json,",JSON.stringify(error));
+projectLogger.error("error",error);
+projectLogger.error("error json,",JSON.stringify(error));
 })
 .finally(()=>{
 OP_hideLoading(loading);
@@ -118,7 +118,7 @@ createToastError(title,message,4000);
 }
 }
 } catch (error) {
-console.error("error:",error);
+projectLogger.error("error:",error);
 } finally {
 OP_hideLoading(loading);
 }
@@ -167,11 +167,11 @@ style.textContent='.settings-highlight{outline:3px solid #ff6b00 !important;box-
 document.head.appendChild(style);
 }
 applyHighlightClass(true);
-console.log('Settings highlight: ON');
+projectLogger.debug('Settings highlight: ON');
 }else{
 if(existingStyle)existingStyle.remove();
 applyHighlightClass(false);
-console.log('Settings highlight: OFF');
+projectLogger.debug('Settings highlight: OFF');
 }
 return flag;
 }

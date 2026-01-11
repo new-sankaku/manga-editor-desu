@@ -289,7 +289,7 @@ const projectData=btmProjectsMap.get(guid);
 try {
 await loadLz4BlobProjectFile(projectData.blob,guid);
 } catch (error) {
-console.error("Error loading ZIP:",error);
+uiLogger.error("Error loading ZIP:",error);
 throw error;
 }
 }
@@ -438,7 +438,7 @@ btmSaveProjectFile().then(()=>{
 const currentIndex=btmGetGuidIndex(guid);
 const newGuid=getCanvasGUID();
 
-console.log("newGuid",newGuid);
+uiLogger.debug("newGuid",newGuid);
 if (selectedSize==="a4-portrait") {
 loadBookSize(210,297,true);
 } else if (selectedSize==="a4-landscape") {
@@ -450,7 +450,7 @@ loadBookSize(364,257,true);
 }
 
 btmSaveProjectFile(newGuid).then(()=>{
-console.log("reorderImages前");
+uiLogger.debug("reorderImages前");
 reorderImages(currentIndex+1,newGuid);
 updateAllPageNumbers();
 });

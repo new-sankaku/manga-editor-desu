@@ -41,7 +41,7 @@ const ctx=blendedCanvas.getContext('2d');
 const imageData=ctx.getImageData(0,0,blendedCanvas.width,blendedCanvas.height);
 const bounds=findNonTransparentBounds(imageData);
 if (bounds.minX>bounds.maxX||bounds.minY>bounds.maxY) {
-console.warn('The image is completely transparent');
+imageLogger.warn('The image is completely transparent');
 return;
 }
 const clippedCanvas=createClippedCanvas(blendedCanvas,bounds);
@@ -68,7 +68,7 @@ try {
 var compressedFile=await imageCompression(file,options);
 return compressedFile;
 } catch (error) {
-console.error(error);
+imageLogger.error(error);
 throw error;
 }
 }
@@ -166,7 +166,7 @@ return true;
 }
 
 if(isImage(canvas.getActiveObject())){
-console.log("canvas.getActiveObject().type",canvas.getActiveObject().type);
+imageLogger.debug("canvas.getActiveObject().type",canvas.getActiveObject().type);
 }else{
 createToast("Select Image!",canvas.getActiveObject().type);
 $("crop").style.display="none";
@@ -469,7 +469,7 @@ quality: scale
 
 return base64Image;
 } catch (error) {
-console.error("Error converting image object to Base64:",error);
+imageLogger.error("Error converting image object to Base64:",error);
 return null;
 }
 }
@@ -492,8 +492,8 @@ return null;
 
 
 function imageObject2DataURLByCrop(activeObject) {
-console.log("Function start: imageObject2DataURLByCrop");
-console.log("activeObject:",activeObject);
+imageLogger.debug("Function start: imageObject2DataURLByCrop");
+imageLogger.debug("activeObject:",activeObject);
 
 if (activeObject&&activeObject.isPanel) {
 var dataURL=canvas2DataURL(3,"png");
@@ -514,8 +514,8 @@ var objectHeight=activeObject.height*activeObject.scaleY;
 var objectLeft=activeObject.left;
 var objectTop=activeObject.top;
 
-console.log("objectWidth  activeObject.strokeWidth",objectWidth,activeObject.strokeWidth);
-console.log("objectHeight activeObject.strokeWidth",objectHeight,activeObject.strokeWidth);
+imageLogger.debug("objectWidth  activeObject.strokeWidth",objectWidth,activeObject.strokeWidth);
+imageLogger.debug("objectHeight activeObject.strokeWidth",objectHeight,activeObject.strokeWidth);
 
 var scaleX=tempCanvas.width/activeObject.canvas.width;
 var scaleY=tempCanvas.height/activeObject.canvas.height;
@@ -533,12 +533,12 @@ resolve(croppedDataURL);
 };
 
 image.onerror=function(err) {
-console.error("Image loading error:",err);
+imageLogger.error("Image loading error:",err);
 reject(err);
 };
 });
 }
-console.log("Function end: imageObject2DataURLByCrop (no valid activeObject)");
+imageLogger.debug("Function end: imageObject2DataURLByCrop (no valid activeObject)");
 return Promise.resolve(null);
 }
 
@@ -727,7 +727,7 @@ resolve();
 });
 
 } catch(err) {
-console.error('Process error:',err);
+imageLogger.error('Process error:',err);
 } finally {
 OP_hideLoading(loading);
 }

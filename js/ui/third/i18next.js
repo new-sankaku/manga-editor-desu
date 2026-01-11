@@ -458,7 +458,7 @@ document.querySelectorAll("[data-i18n]").forEach(function (element) {
       element.innerHTML = translation;
     }
   } else {
-    console.warn(`Translation for key "${key}" not found.`);
+    uiLogger.warn(`Translation for key "${key}" not found.`);
   }
 });
 document.querySelectorAll("[data-i18n-label]").forEach(function (element) {
@@ -483,7 +483,7 @@ i18next.changeLanguage(lng, function (err, t) {
       showObjectMenu(lastClickType);
     }
   } else {
-    console.error("Failed to change language:", err);
+    uiLogger.error("Failed to change language:", err);
   }
 });
 recreateFloatingWindow();

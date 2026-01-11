@@ -81,7 +81,7 @@ let hash=file.name.split('.')[0];
 imageMap.set(hash,imgDataUrlStr);
 }
 } catch (error) {
-console.error("Failed to load file:",file.name,error);
+compressionLogger.error("Failed to load file:",file.name,error);
 }
 }));
 
@@ -94,7 +94,7 @@ let jsonStr=ArrayBufferUtils.fromArrayBufferToString(file.data);
 return JSON.parse(jsonStr);
 }
 } catch (error) {
-console.error("Failed to load file:",file.name,error);
+compressionLogger.error("Failed to load file:",file.name,error);
 }
 });
 
@@ -184,7 +184,7 @@ btmAddImage({href: previewImageUrl},lz4Blob,canvasGuid);
 break;
 }
 } catch (error) {
-console.error("Error parsing JSON:",error);
+compressionLogger.error("Error parsing JSON:",error);
 }
 }
 
@@ -226,7 +226,7 @@ btmAddImage({href: previewImageUrl},zipContent,canvasGuid);
 break;
 }
 } catch (error) {
-console.error("Error parsing JSON:",error);
+compressionLogger.error("Error parsing JSON:",error);
 }
 }
 
@@ -273,7 +273,7 @@ btmAddImage({href: previewImageUrl},lz4Blob,canvasGuid);
 break;
 }
 } catch (error) {
-console.error("Error parsing JSON:",error);
+compressionLogger.error("Error parsing JSON:",error);
 }
 }
 
@@ -319,7 +319,7 @@ let hash=fileName.split('.')[0];
 imageMap.set(hash,content);
 }
 } catch (error) {
-console.error("Failed to load file:",fileName,error);
+compressionLogger.error("Failed to load file:",fileName,error);
 }
 }));
 
@@ -332,7 +332,7 @@ const content=await zip.file(fileName).async("string");
 return JSON.parse(content);
 }
 } catch (error) {
-console.error("Failed to load file:",fileName,error);
+compressionLogger.error("Failed to load file:",fileName,error);
 }
 });
 

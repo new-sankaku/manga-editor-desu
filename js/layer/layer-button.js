@@ -12,11 +12,11 @@ if (croppedDataURL) {
 link=getLink(croppedDataURL);
 link.click();
 } else {
-console.log("No valid activeObject");
+layerLogger.warn("No valid activeObject");
 }
 })
 .catch((err)=>{
-console.error("Error cropping image:",err);
+layerLogger.error("Error cropping image:",err);
 });
 };
 
@@ -300,6 +300,7 @@ button.innerHTML='<i class="material-icons">control_camera</i>';
 }
 
 button.onclick=function (e) {
+e.stopPropagation();
 moveLockChange(layer);
 };
 addTooltipByElement(button,"moveLockButton");

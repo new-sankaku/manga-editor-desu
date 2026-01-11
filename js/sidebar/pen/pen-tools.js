@@ -302,7 +302,7 @@ brush.outline2Opacity=parseInt(drawingOutline2Opacity.value)/100;
 if (drawingWidth) {
 brush.width=parseInt(drawingWidth.value,10)||1;
 }else{
-console.log("drawingWidth is null");
+canvasLogger.debug("drawingWidth is null");
 }
 
 if (drawingColor) {
@@ -356,7 +356,7 @@ canvas.freeDrawingBrush.strokeDashArray=[brushWidth,brushWidth*4];
 
 
 function clearPenActiveButton() {
-console.log("clearPenActiveButton is call");
+uiLogger.debug("clearPenActiveButton is call");
 $(MODE_PEN_PENCIL+'Button').classList.remove('active-button');
 $(MODE_PEN_OUTLINE+'Button').classList.remove('active-button');
 $(MODE_PEN_CIRCLE+'Button').classList.remove('active-button');

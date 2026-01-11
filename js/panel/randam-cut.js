@@ -82,7 +82,7 @@ icon: 'process',step: 'Step2',substep: 'Page:'+page,progress: 50
 });
 await new Promise(requestAnimationFrame);
 
-console.log("----- "+page+" -----")
+panelLogger.debug("----- "+page+" -----")
 if(selectedValue==='mA4H'){
 await loadBookSize(210,297,true,newPage);
 rundomPanelCut();

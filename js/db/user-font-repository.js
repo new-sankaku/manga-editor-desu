@@ -17,7 +17,7 @@ type: 'upload'
 });
 return true;
 } catch (error) {
-console.error('Failed to save font:',error);
+dbLogger.error('Failed to save font:',error);
 return false;
 }
 },
@@ -26,7 +26,7 @@ async getFont(name) {
 try {
 return await this.store.getItem(name);
 } catch (error) {
-console.error('Failed to retrieve font:',error);
+dbLogger.error('Failed to retrieve font:',error);
 return null;
 }
 },
@@ -39,7 +39,7 @@ fonts.push(value);
 });
 return fonts;
 } catch (error) {
-console.error('Failed to retrieve font list:',error);
+dbLogger.error('Failed to retrieve font list:',error);
 return [];
 }
 },
@@ -49,7 +49,7 @@ try {
 await this.store.removeItem(name);
 return true;
 } catch (error) {
-console.error('Failed to delete font:',error);
+dbLogger.error('Failed to delete font:',error);
 return false;
 }
 },
@@ -62,7 +62,7 @@ type: 'local'
 });
 return true;
 } catch (error) {
-console.error('Failed to save local font:',error);
+dbLogger.error('Failed to save local font:',error);
 return false;
 }
 },
@@ -76,7 +76,7 @@ type: 'web'
 });
 return true;
 } catch (error) {
-console.error('Failed to save web font:',error);
+dbLogger.error('Failed to save web font:',error);
 return false;
 }
 }

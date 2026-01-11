@@ -117,7 +117,7 @@ return button;
 }
 
 async saveWorkflow() {
-console.log("saveWorkflow() start");
+comfyuiLogger.debug("saveWorkflow() start");
 const cleanWorkflow={...this.workflow};
 
 await comfyUIWorkflowRepository
@@ -129,11 +129,11 @@ cleanWorkflow,
 this.enabled
 )
 .then(()=>{
-console.log("Workflow saved successfully");
+comfyuiLogger.debug("Workflow saved successfully");
 this.clearUnsavedState();
 })
 .catch((error)=>{
-console.error("Workflowの保存に失敗しました:",error);
+comfyuiLogger.error("Workflowの保存に失敗しました:",error);
 });
 }
 clearUnsavedState() {
@@ -372,7 +372,7 @@ URL.revokeObjectURL(imageUrl);
 };
 }
 } catch (error) {
-console.error("画像プレビューの読み込みエラー:",error);
+comfyuiLogger.error("画像プレビューの読み込みエラー:",error);
 }
 }
 }
@@ -464,7 +464,7 @@ const previewContainer=this.contentElement.querySelector(`[data-preview-id="${pr
 if (previewContainer) {
 const previewImage=previewContainer.querySelector("img");
 if (previewImage) {
-console.log("selectedValue",selectedValue);
+comfyuiLogger.debug("selectedValue",selectedValue);
 const imageUrl=await comfyui_view_image_v2(selectedValue);
 if (imageUrl) {
 previewImage.src=imageUrl;
@@ -554,7 +554,7 @@ select.value=uploadResult.name;
 }
 }
 } catch (error) {
-console.error("アップロードエラー:",error);
+comfyuiLogger.error("アップロードエラー:",error);
 }
 
 const reader=new FileReader();

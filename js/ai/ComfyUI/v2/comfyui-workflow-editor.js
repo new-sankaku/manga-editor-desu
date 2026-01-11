@@ -14,13 +14,13 @@ throw new Error(`ObjectInfo取得失敗: ステータス ${response.status}`);
 
 this.nodeTypes=await response.json();
 await objectInfoRepository.saveObjectInfo(this.nodeTypes);
-console.log("updateObjectInfoAndWorkflows --------------",);
+comfyuiLogger.debug("updateObjectInfoAndWorkflows --------------",);
 
 this.tabs.forEach((tab)=>{
 tab.renderNodes();
 });
 } catch (error) {
-console.error("ObjectInfoとWorkflowの更新中にエラー:",error);
+comfyuiLogger.error("ObjectInfoとWorkflowの更新中にエラー:",error);
 }
 }
 
@@ -60,7 +60,7 @@ if (!firstTabId) {
 firstTabId=id;
 }
 } catch (error) {
-console.error(`ワークフロー "${name}" の読み込みに失敗しました:`,error);
+comfyuiLogger.error(`ワークフロー "${name}" の読み込みに失敗しました:`,error);
 }
 }
 
@@ -163,7 +163,7 @@ this.activateTab(tab.id);
 tab.renderNodes();
 this.renderTabs();
 } catch (error) {
-console.error("タブ作成エラー:",error);
+comfyuiLogger.error("タブ作成エラー:",error);
 }
 }
 
@@ -219,7 +219,7 @@ newTab.activate();
 async closeTab(tabId) {
 const tab=this.tabs.get(tabId);
 if (!tab){
-console.log("closeTab tab is null");
+comfyuiLogger.warn("closeTab tab is null");
 return;
 }
 
@@ -227,7 +227,7 @@ try {
 if (tabId) {
 const result=await comfyUIWorkflowRepository.deleteWorkflow(tabId);
 if (!result) {
-console.error(`Workflow delete is fail. ${tabId}`);
+comfyuiLogger.error(`Workflow delete is fail. ${tabId}`);
 return;
 }
 }
@@ -244,7 +244,7 @@ this.activateTab(nextTab);
 
 this.renderTabs();
 } catch (error) {
-console.error('タブの削除中にエラーが発生しました:',error);
+comfyuiLogger.error('タブの削除中にエラーが発生しました:',error);
 }
 }
 

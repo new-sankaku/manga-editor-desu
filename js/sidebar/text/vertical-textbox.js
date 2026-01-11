@@ -56,7 +56,7 @@ let newWidth=Math.max(this.minWidth,Math.min(textWidth,this.maxWidth));
 let newHeight=Math.max(this.minHeight,Math.min(textHeight,this.maxHeight));
 if(this.width!==newWidth||this.height!==newHeight){const oldRight=this.left+oldWidth;
 const calculatedLeft=oldRight-newWidth;
-if(calculatedLeft<-10000||calculatedLeft>10000){console.error('異常なleft値検出:',calculatedLeft);
+if(calculatedLeft<-10000||calculatedLeft>10000){textLogger.error('異常なleft値検出:',calculatedLeft);
 console.trace()};
 this.set({left:calculatedLeft,width:newWidth,height:newHeight*1.35});
 this.setCoords();

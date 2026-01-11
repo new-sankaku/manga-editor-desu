@@ -1,5 +1,5 @@
 function createGrid(svgData,pixelRatio=1) {
-console.log("createGrid start");
+imageLogger.debug("createGrid start");
 
 const {viewBox,pathData}=svgData;
 const gridWidth=Math.floor(viewBox.width*pixelRatio);
@@ -50,7 +50,7 @@ return {grid,scale,viewBox};
 }
 
 function findLargestRectangle(grid) {
-console.log("findLargestRectangle start");
+imageLogger.debug("findLargestRectangle start");
 
 const heights=Array(grid[0].length).fill(0);
 let maxRect={x: 0,y: 0,width: 0,height: 0};

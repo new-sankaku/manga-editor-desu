@@ -311,5 +311,19 @@ default: return 'unknown';
 }
 
 const logger=SimpleLogger('main',LogLevel.INFO);
-const workflowlLogger=SimpleLogger('workflow',LogLevel.INFO);
+const workflowLogger=SimpleLogger('workflow',LogLevel.INFO);
 const eventLogger=SimpleLogger('event',LogLevel.INFO);
+const comfyuiLogger=SimpleLogger('comfyui',LogLevel.INFO);
+const sdwebuiLogger=SimpleLogger('sdwebui',LogLevel.INFO);
+const dbLogger=SimpleLogger('db',LogLevel.INFO);
+const canvasLogger=SimpleLogger('canvas',LogLevel.INFO);
+const projectLogger=SimpleLogger('project',LogLevel.INFO);
+const layerLogger=SimpleLogger('layer',LogLevel.INFO);
+const fontLogger=SimpleLogger('font',LogLevel.INFO);
+const uiLogger=SimpleLogger('ui',LogLevel.INFO);
+const effectLogger=SimpleLogger('effect',LogLevel.INFO);
+const textLogger=SimpleLogger('text',LogLevel.INFO);
+const imageLogger=SimpleLogger('image',LogLevel.INFO);
+const panelLogger=SimpleLogger('panel',LogLevel.INFO);
+const compressionLogger=SimpleLogger('compression',LogLevel.INFO);
+const serviceLogger=SimpleLogger('service',LogLevel.INFO);

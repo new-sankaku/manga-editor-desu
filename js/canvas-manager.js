@@ -4,7 +4,7 @@ var aspectRatio=0;
 
 let resizeTimer;
 function initResizeCanvas(event) {
-console.log("initResizeCanvas");
+canvasLogger.debug("initResizeCanvas");
 if(event){
 event.stopPropagation();
 event.preventDefault();
@@ -220,13 +220,13 @@ var data=f.target.result;
 fabric.Image.fromURL(data,function(img) {
 
 if (stateStack.length>2) {
-console.log("imageInput stateStack.length > 2");
+canvasLogger.debug("imageInput stateStack.length > 2");
 var scaleFactor=Math.min(canvas.width/img.width,canvas.height/img.height);
 img.scale(scaleFactor);
 canvas.add(img);
 canvas.renderAll();
 }else{
-console.log("imageInput resizeCanvasByNum ");
+canvasLogger.debug("imageInput resizeCanvasByNum ");
 resizeCanvasByNum(img.width,img.height);
 canvas.add(img);
 canvas.renderAll();

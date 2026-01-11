@@ -32,7 +32,7 @@ if (svgContent) {
 displaySVG(svgContent,iconURL,iconName);
 }
 })
-.catch(error=>console.error(`Error fetching initial icons: ${error}`));
+.catch(error=>uiLogger.error(`Error fetching initial icons: ${error}`));
 });
 }
 
@@ -70,7 +70,7 @@ if (svgContent) {
 displaySVG(svgContent,iconURL,iconName);
 }
 })
-.catch(error=>console.error(`Error fetching icons: ${error}`));
+.catch(error=>uiLogger.error(`Error fetching icons: ${error}`));
 });
 } else {
 const noResultsDiv=document.createElement('div');
@@ -147,7 +147,7 @@ svgElement.setAttribute('stroke-width',lineWidth);
 
 const serializer=new XMLSerializer();
 const newSvgContent=serializer.serializeToString(svgElement);
-console.log("newSvgContent",newSvgContent);
+uiLogger.debug("newSvgContent",newSvgContent);
 
 // Add to Fabric.js canvas
 fabric.loadSVGFromString(newSvgContent,function (objects,options) {
@@ -170,5 +170,5 @@ canvas.setActiveObject(obj);
 canvas.add(obj).renderAll();
 });
 })
-.catch(error=>console.error(`Error fetching SVG: ${error}`));
+.catch(error=>uiLogger.error(`Error fetching SVG: ${error}`));
 }
