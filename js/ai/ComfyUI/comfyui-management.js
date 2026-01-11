@@ -176,11 +176,11 @@ throw new Error(result.message);
 
 if(isPanel(layer)){
 var center=calculateCenter(layer);
-putImageInFrame(result,center.centerX,center.centerY);
+putImageInFrame(result,center.centerX,center.centerY,false,false,true,layer);
 }else if(layer.clipPath){
 layer.visible=false;
 var center=calculateCenter(layer);
-putImageInFrame(result,center.centerX,center.centerY);
+putImageInFrame(result,center.centerX,center.centerY,false,false,true,layer);
 }else{
 layer.visible=false;
 replaceImageObject(layer,result,Type);

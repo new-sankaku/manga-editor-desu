@@ -210,7 +210,7 @@ activeObject.left+
 const y=
 activeObject.top+
 (activeObject.height*activeObject.scaleY)/2;
-putImageInFrame(img,x,y);
+putImageInFrame(img,x,y,false,false,true,activeObject);
 } else {
 isActive=false;
 const canvasWidth=canvas.width/2;

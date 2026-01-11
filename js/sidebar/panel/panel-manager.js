@@ -129,20 +129,20 @@ updateLayerPanel();
 }
 
 
-function putImageInFrame(imgOrSvg,x,y,isNotActive=false,notReplace=false,isFit=true) {
+function putImageInFrame(imgOrSvg,x,y,isNotActive=false,notReplace=false,isFit=true,targetLayer=null) {
 let obj;
 
 if (typeof imgOrSvg==='string'&&imgOrSvg.startsWith('<svg')) {
 fabric.loadSVGFromString(imgOrSvg,function(objects,options) {
 obj=fabric.util.groupSVGElements(objects,options);
-placeObject(obj,x,y,isNotActive,true,isFit);
+placeObject(obj,x,y,isNotActive,true,isFit,targetLayer);
 });
 } else {
 obj=imgOrSvg;
-placeObject(obj,x,y,isNotActive,notReplace,isFit);
+placeObject(obj,x,y,isNotActive,notReplace,isFit,targetLayer);
 }
 
-function placeObject(obj,x,y,isNotActive,notReplace,isFit) {
+function placeObject(obj,x,y,isNotActive,notReplace,isFit,targetLayer) {
 if(isFit){
 obj.set({left: x,top: y});
 }
@@ -154,7 +154,7 @@ if(notReplace){
 canvas.add(obj);
 }
 
-var targetFrameIndex=findTargetFrame(x,y);
+var targetFrameIndex=targetLayer?canvas.getObjects().indexOf(targetLayer):findTargetFrame(x,y);
 console.log("targetFrameIndex",targetFrameIndex);
 if (targetFrameIndex!==-1) {
 var targetFrame=canvas.item(targetFrameIndex);

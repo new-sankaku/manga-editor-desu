@@ -20,7 +20,7 @@ const webpImg=await img2webp(img);
 webpImg.name=imageName;
 setImage2ImageInitPrompt(webpImg);
 const {centerX,centerY}=calculateCenter(layer);
-putImageInFrame(webpImg,centerX,centerY);
+putImageInFrame(webpImg,centerX,centerY,false,false,true,layer);
 
 const infoObject=JSON.parse(responseData.info);
 layer.tempSeed=infoObject.seed;
@@ -120,7 +120,7 @@ return new Promise((resolve,reject)=>{
 fabric.Image.fromURL(responseData,(img)=>{
 if (img) {
 const {centerX,centerY}=calculateCenter(layer);
-putImageInFrame(img,centerX,centerY);
+putImageInFrame(img,centerX,centerY,false,false,true,layer);
 resolve(img);
 visibleChange(layer);
 } else {

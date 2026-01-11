@@ -139,7 +139,7 @@ var activeObject=getLastObject();
 if (isPanel(activeObject)) {
 var canvasX=activeObject.left+(activeObject.width*activeObject.scaleX)/2;
 var canvasY=activeObject.top+(activeObject.height*activeObject.scaleY)/2;
-putImageInFrame(img,canvasX,canvasY,true);
+putImageInFrame(img,canvasX,canvasY,true,false,true,activeObject);
 img.name='Tone Noise';
 nowToneNoise=img;
 }else{
