@@ -98,7 +98,7 @@ return items.length>0?items[Math.floor(Math.random()*items.length)]:null;
 }
 }
 
-const promptMultiKeyMap = new PromptMultiKeyMap();
+const promptMultiKeyMap=new PromptMultiKeyMap();
 promptMultiKeyMap.add({storyOrder:100000,type: "opening",subtype: "grab",name: "集団に胸揉まれる",positive: "clothed_male_nude_female, multiple boys, 1girl, group, grabbing_another's_breast, groping, grabbing from behind,looking_at_another,completely_nude, Teary-eyed, sad, looking_down,",negative: "sex, insertion, kiss, grin, grinding, ",play: "M->F"});
 promptMultiKeyMap.add({storyOrder:200000,type: "solo",subtype: "masturbation",name: "オナニー",positive: "male masturbation",negative: "0",play: "M->F"});
 promptMultiKeyMap.add({storyOrder:200000,type: "solo",subtype: "masturbation",name: "オナニー",positive: "female masturbation",negative: "0",play: "F->M"});

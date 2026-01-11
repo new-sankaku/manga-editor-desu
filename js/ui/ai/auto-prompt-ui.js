@@ -1,10 +1,10 @@
-let promptIndex = 100000;
+let promptIndex=100000;
 
-function showT2IPrompts(layer) { 
-  // console.log("showT2IPrompts layer.text2img_prompt:", layer.text2img_prompt);
+function showT2IPrompts(layer) {
+// console.log("showT2IPrompts layer.text2img_prompt:", layer.text2img_prompt);
 
-  var otherControlsMini = $("other-controls-mini");
-  otherControlsMini.innerHTML = `
+var otherControlsMini=$("other-controls-mini");
+otherControlsMini.innerHTML=`
 <div class="control textarea-control">
     <div class="textarea-label-wrapper">
         <label class="textarea-label" for="textarea">Prompt</label>
@@ -62,48 +62,48 @@ function showT2IPrompts(layer) {
     `;
 
 
-  $("promptRun").addEventListener("click", function () {
-    if (!layer) {
-      return;
-    }
-    var spinner = createSpinner(promptIndex);
-    T2I( layer, spinner );
-  });
-  
+$("promptRun").addEventListener("click",function () {
+if (!layer) {
+return;
+}
+var spinner=createSpinner(promptIndex);
+T2I(layer,spinner);
+});
 
-  $("text2img_prompt").addEventListener("input", function () {
-    layer.text2img_prompt = this.value;
-  });
 
-  $("text2img_negative").addEventListener("input", function () {
-    layer.text2img_negative = this.value;
-  });
+$("text2img_prompt").addEventListener("input",function () {
+layer.text2img_prompt=this.value;
+});
 
-  $("text2img_seed").addEventListener("input", function () {
-    layer.text2img_seed = this.value;
-  });
+$("text2img_negative").addEventListener("input",function () {
+layer.text2img_negative=this.value;
+});
 
-  $("text2img_height").addEventListener("blur", function () {
-    var value = parseInt(this.value);
-    if (value !== -1) {
-      this.value = Math.round(value / 8) * 8;
-    }
-    layer.text2img_height = this.value;
-  });
-  $("text2img_width").addEventListener("blur", function () {
-    var value = parseInt(this.value);
-    if (value !== -1) {
-      this.value = Math.round(value / 8) * 8;
-    }
-    layer.text2img_width = this.value;
-  });
+$("text2img_seed").addEventListener("input",function () {
+layer.text2img_seed=this.value;
+});
 
-  setAutoSizeingControlMini();
+$("text2img_height").addEventListener("blur",function () {
+var value=parseInt(this.value);
+if (value!==-1) {
+this.value=Math.round(value/8)*8;
+}
+layer.text2img_height=this.value;
+});
+$("text2img_width").addEventListener("blur",function () {
+var value=parseInt(this.value);
+if (value!==-1) {
+this.value=Math.round(value/8)*8;
+}
+layer.text2img_width=this.value;
+});
+
+setAutoSizeingControlMini();
 }
 
 function showI2IPrompts(layer) {
-  var otherControlsMini = $("other-controls-mini");
-  otherControlsMini.innerHTML = `
+var otherControlsMini=$("other-controls-mini");
+otherControlsMini.innerHTML=`
 <div class="control textarea-control">
     <div class="textarea-label-wrapper">
         <label class="textarea-label" for="textarea">Prompt</label>
@@ -159,47 +159,47 @@ function showI2IPrompts(layer) {
 </div>
   `;
 
-  $("promptRun").addEventListener("click", function () {
-    if (layer) {
-      return;
-    }
-    var spinner = createSpinner(promptIndex);
-    T2I( activeObject, spinner );
-  });
+$("promptRun").addEventListener("click",function () {
+if (layer) {
+return;
+}
+var spinner=createSpinner(promptIndex);
+T2I(activeObject,spinner);
+});
 
 
-  $("text2img_prompt").addEventListener("input", function () {
-    layer.text2img_prompt = this.value;
-    console.log("layer.text2img_prompt:", layer.text2img_prompt);
-  });
+$("text2img_prompt").addEventListener("input",function () {
+layer.text2img_prompt=this.value;
+console.log("layer.text2img_prompt:",layer.text2img_prompt);
+});
 
-  $("text2img_negative").addEventListener("input", function () {
-    layer.text2img_negative = this.value;
-  });
+$("text2img_negative").addEventListener("input",function () {
+layer.text2img_negative=this.value;
+});
 
-  $("text2img_seed").addEventListener("input", function () {
-    layer.text2img_seed = this.value;
-  });
-  $("img2imgScale").addEventListener("input", function () {
-    layer.img2imgScale = this.value;
-  });
-  $("img2img_denoise").addEventListener("input", function () {
-    layer.img2img_denoise = this.value;
-  });
+$("text2img_seed").addEventListener("input",function () {
+layer.text2img_seed=this.value;
+});
+$("img2imgScale").addEventListener("input",function () {
+layer.img2imgScale=this.value;
+});
+$("img2img_denoise").addEventListener("input",function () {
+layer.img2img_denoise=this.value;
+});
 
-  setAutoSizeingControlMini();
+setAutoSizeingControlMini();
 }
 
 function adjustToMultipleOfEight(elementId) {
-  var inputElement = $(elementId);
-  var value = parseInt(inputElement.value);
-  if (value !== -1) {
-    inputElement.value = Math.round(value / 8) * 8;
-  }
+var inputElement=$(elementId);
+var value=parseInt(inputElement.value);
+if (value!==-1) {
+inputElement.value=Math.round(value/8)*8;
+}
 }
 
 function noShowPrompt() {
-  var otherControlsMini = $("other-controls-mini");
-  otherControlsMini.innerHTML = `<label>Text or Image Prpmpt…</label>`;
-  setAutoSizeingControlMini();
+var otherControlsMini=$("other-controls-mini");
+otherControlsMini.innerHTML=`<label>Text or Image Prpmpt…</label>`;
+setAutoSizeingControlMini();
 }

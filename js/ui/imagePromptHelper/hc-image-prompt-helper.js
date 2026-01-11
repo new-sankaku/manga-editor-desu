@@ -1,4 +1,4 @@
-const iphHtmlContent = `
+const iphHtmlContent=`
   <div class="iph-container">
     <div class="iph-top-bar">
       <input type="text" id="iph-name-input" data-i18n="[placeholder]name">

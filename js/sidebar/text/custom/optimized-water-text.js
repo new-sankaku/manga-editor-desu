@@ -15,48 +15,48 @@ setAttributes(t2_water_filter,{
 "filterUnits":"objectBoundingBox","primitiveUnits":"userSpaceOnUse","color-interpolation-filters":"sRGB"
 });
 const filterElements=[
-  {type:"feTurbulence",attrs:{
-    type:"fractalNoise",  // turbulenceからfractalNoiseに変更
-    baseFrequency:"0.04 0.06",  // 周波数調整
-    numOctaves:"3",  // オクターブ数増加
-    seed:"5",
-    stitchTiles:"stitch",
-    result:"turbulence"
-  }},
-  {type:"feDisplacementMap", attrs:{  // 新しく追加
-    in:"SourceGraphic",
-    in2:"turbulence",
-    scale:"15",
-    xChannelSelector:"R",
-    yChannelSelector:"G",
-    result:"displacement"
-  }},
-  {type:"feGaussianBlur",attrs:{
-    stdDeviation:"2 2",
-    in:"displacement",
-    result:"blur1"
-  }},
-  {type:"feSpecularLighting",attrs:{
-    surfaceScale:"5",  // 値を増加
-    specularConstant:"1.5",  // 値を増加
-    specularExponent:"35",
-    "lighting-color":t2_fillColor.value,
-    in:"blur1",
-    result:"specularLighting"
-  },
-  child:{type:"fePointLight",attrs:{x:"150",y:"60",z:"20"}}},  // z値を調整
-  {type:"feComposite",attrs:{
-    in:"specularLighting",
-    in2:"displacement",  // SourceGraphicから変更
-    operator:"in",
-    result:"composite2"
-  }},
-  {type:"feBlend",attrs:{
-    mode:"screen",  // ブレンドモード変更
-    in:"composite2",
-    in2:"SourceGraphic",
-    result:"blend"
-  }}
+{type:"feTurbulence",attrs:{
+type:"fractalNoise",// turbulenceからfractalNoiseに変更
+baseFrequency:"0.04 0.06",// 周波数調整
+numOctaves:"3",// オクターブ数増加
+seed:"5",
+stitchTiles:"stitch",
+result:"turbulence"
+}},
+{type:"feDisplacementMap",attrs:{// 新しく追加
+in:"SourceGraphic",
+in2:"turbulence",
+scale:"15",
+xChannelSelector:"R",
+yChannelSelector:"G",
+result:"displacement"
+}},
+{type:"feGaussianBlur",attrs:{
+stdDeviation:"2 2",
+in:"displacement",
+result:"blur1"
+}},
+{type:"feSpecularLighting",attrs:{
+surfaceScale:"5",// 値を増加
+specularConstant:"1.5",// 値を増加
+specularExponent:"35",
+"lighting-color":t2_fillColor.value,
+in:"blur1",
+result:"specularLighting"
+},
+child:{type:"fePointLight",attrs:{x:"150",y:"60",z:"20"}}},// z値を調整
+{type:"feComposite",attrs:{
+in:"specularLighting",
+in2:"displacement",// SourceGraphicから変更
+operator:"in",
+result:"composite2"
+}},
+{type:"feBlend",attrs:{
+mode:"screen",// ブレンドモード変更
+in:"composite2",
+in2:"SourceGraphic",
+result:"blend"
+}}
 ];
 filterElements.forEach(({type,attrs,child})=>
 t2_water_filter.appendChild(createFilterOneElement(type,attrs,child)));
@@ -143,27 +143,27 @@ if(isVertical)totalHeight+=fontSize*lineHeight;
 t2_water_updateSvgSize();
 }
 function t2_water_updateSvgSize() {
-  try {
-    const bbox = t2_water_mainText.getBBox();
-    const padding = 10;
-    // y座標を0を基準に調整
-    const dims = {
-      viewBox: `${-padding} ${-bbox.height/2 - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`,
-      width: bbox.width + padding*2, 
-      height: bbox.height + padding*2
-    };
- 
-    setAttributes(t2_water_mainText, {
-      x: bbox.width/2,
-      y: bbox.height/4 // 中央に配置
-    });
- 
-    setAttributes(t2_water_textSvg, dims);
- 
-  } catch (error) {
-    console.error('SVG size update error:', error);
-  }
- }
+try {
+const bbox=t2_water_mainText.getBBox();
+const padding=10;
+// y座標を0を基準に調整
+const dims={
+viewBox: `${-padding} ${-bbox.height/2 - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`,
+width: bbox.width+padding*2,
+height: bbox.height+padding*2
+};
+
+setAttributes(t2_water_mainText,{
+x: bbox.width/2,
+y: bbox.height/4 // 中央に配置
+});
+
+setAttributes(t2_water_textSvg,dims);
+
+} catch (error) {
+console.error('SVG size update error:',error);
+}
+}
 function t2_water_addSvg(left,top){
 const svgString=new XMLSerializer().serializeToString(t2_water_textSvg);
 const reader=new FileReader();
@@ -171,7 +171,7 @@ reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
 Object.assign(img,{left,top});
 nowT2WaterStr=img;
-img.text = getFirstNCharsDefault(t2_text);
+img.text=getFirstNCharsDefault(t2_text);
 canvas.add(img).setActiveObject(img).renderAll();
 },{crossOrigin:'anonymous'});
 };

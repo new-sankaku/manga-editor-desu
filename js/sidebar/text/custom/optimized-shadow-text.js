@@ -78,8 +78,8 @@ const textAttrs=isVertical?{
 "dominant-baseline":"hanging","text-anchor":getSelectedValueByGroup("t2Align")
 };
 setAttributes(t2_shadow_mainText,textAttrs);
-const baseStyles = {
-  "font-family": baseStylesDefault
+const baseStyles={
+"font-family": baseStylesDefault
 };
 
 // console.log("baseStyles", JSON.stringify(baseStyles));
@@ -108,8 +108,8 @@ fontSize:`${t2_fontSize.value}px`,fill:t2_fillColor.value,
 fillOpacity:t2_fillOpacity.value,letterSpacing:`${t2_letterSpacing.value}em`
 });
 if(t2_shadow_primaryShadowFlood){
-  // console.log("t2_shadow1Opacity.value", t2_shadow1Opacity);
-  // console.log("t2_shadow1Color.value  ", t2_shadow1Color);
+// console.log("t2_shadow1Opacity.value", t2_shadow1Opacity);
+// console.log("t2_shadow1Color.value  ", t2_shadow1Color);
 
 setAttributes(t2_shadow_primaryShadowFlood,{"flood-opacity":t2_shadow1Opacity.value,"flood-color":t2_shadow1Color.value});
 }
@@ -133,12 +133,12 @@ t2_shadow_updateSvgSize();
 }
 function t2_shadow_updateSvgSize(){
 try{
-const bbox = t2_shadow_mainText.getBBox();
-const padding = Math.max(20, bbox.width * 0.1); 
-const dims = {
-  viewBox: `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`,
-  width: bbox.width + padding*2,
-  height: bbox.height + padding*2
+const bbox=t2_shadow_mainText.getBBox();
+const padding=Math.max(20,bbox.width*0.1);
+const dims={
+viewBox: `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`,
+width: bbox.width+padding*2,
+height: bbox.height+padding*2
 };
 setAttributes(t2_shadow_textSvg,dims);
 }catch(error){}
@@ -150,7 +150,7 @@ reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
 Object.assign(img,{left,top});
 nowT2ShadowStr=img;
-img.text = getFirstNCharsDefault(t2_text);
+img.text=getFirstNCharsDefault(t2_text);
 canvas.add(img).setActiveObject(img).renderAll();
 },{crossOrigin:'anonymous'});
 };

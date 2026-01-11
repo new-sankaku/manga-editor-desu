@@ -1,25 +1,25 @@
-Map.prototype.getOrDefault = function (key, defaultValue) {
-  return this.has(key) ? this.get(key) : defaultValue;
+Map.prototype.getOrDefault=function (key,defaultValue) {
+return this.has(key) ? this.get(key) : defaultValue;
 };
 
-const sidebarValueMap = new Map();
-const penValueMap = new Map();
-const effectValueMap = new Map();
+const sidebarValueMap=new Map();
+const penValueMap=new Map();
+const effectValueMap=new Map();
 
 function savePenValueMap(element) {
-  penValueMap.set(element.id, element.value);
+penValueMap.set(element.id,element.value);
 }
 function saveEffectValueMap(element) {
-  effectValueMap.set(element.id, element.value);
+effectValueMap.set(element.id,element.value);
 }
 
 function saveValueMap(element) {
-  sidebarValueMap.set(element.id, element.value);
+sidebarValueMap.set(element.id,element.value);
 }
 
-function addNumber(id, label, min, max, value, step=1) {
-  const transLavel = getText(label);
-  return `
+function addNumber(id,label,min,max,value,step=1) {
+const transLavel=getText(label);
+return `
       <div class="pen-input-2group">
           <label for="${id}" data-i18n="${label}">${transLavel}</label>
           <input type="number" id="${id}" min="${min}" max="${max}" value="${value}" step="${step}">
@@ -28,8 +28,8 @@ function addNumber(id, label, min, max, value, step=1) {
 }
 
 function addSimpleSubmitButton(id) {
-  const transLavel = getText("submit");
-  return `
+const transLavel=getText("submit");
+return `
     <div class="input-group-multi-mini">
       <a style="visibility: hidden;"></a>
       <a style="visibility: hidden;"></a>
@@ -43,8 +43,8 @@ function addSimpleSubmitButton(id) {
 
 
 function addSubmitButton(id) {
-  const transLavel = getText("submit");
-  return `
+const transLavel=getText("submit");
+return `
     <div class="input-group-multi-mini">
       <a style="visibility: hidden;"></a>
       <a style="visibility: hidden;"></a>
@@ -56,9 +56,9 @@ function addSubmitButton(id) {
 }
 
 
-function addColor(id, label, value) {
-  const transLavel = getText(label);
-  return `
+function addColor(id,label,value) {
+const transLavel=getText(label);
+return `
       <div class="pen-input-2group">
           <label for="${id}" data-i18n="${label}">${transLavel}</label>
           <input id="${id}" value="${value}" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)">
@@ -66,19 +66,19 @@ function addColor(id, label, value) {
   `;
 }
 
-function addSlider(id, label, min, max, value, step=1) {
-  const transLavel = getText(label);
-  return `
+function addSlider(id,label,min,max,value,step=1) {
+const transLavel=getText(label);
+return `
       <div class="input-container-leftSpace" data-label="${transLavel}">
           <input type="range" id="${id}" min="${min}" max="${max}" value="${value}" step="${step}">
       </div>
   `;
 }
 
-function addCheckBox(id, label, value) {
-  const transLabel = getText(label);
-  const checkedAttribute = value ? 'checked' : '';
-  return `
+function addCheckBox(id,label,value) {
+const transLabel=getText(label);
+const checkedAttribute=value ? 'checked' : '';
+return `
 <div class="pen-input-2group">
 <label for="${id}" data-i18n="${label}">${transLabel}</label>
 <input type="checkbox" id="${id}" ${checkedAttribute}>
@@ -88,7 +88,7 @@ function addCheckBox(id, label, value) {
 
 
 function addAlignTypeButton(prefixId) {
-  return `
+return `
   <div class="input-group-multi" data-group="t2Align">
     <button id="T2-align-left" data-value="start" class="selected" onclick="changeSelected(this)">
         <i class="material-icons">format_align_left</i>
@@ -114,7 +114,7 @@ return `<div class="input-group-multi" data-group="orientation_group">
 }
 
 function addOneSelectBox(id) {
-  return `
+return `
       <div class="input-group_one">
         <select id="${id}">
         </select>
@@ -122,101 +122,101 @@ function addOneSelectBox(id) {
   `;
 }
 
-function addDropDownBySpeedLine(id, label) {
+function addDropDownBySpeedLine(id,label) {
 
-  var i18n_horizontal = getText("horizontal");
-  var i18n_vertical = getText("vertical");
-  var i18n_cross = getText("cross");
-  var i18n_label = getText(label);
+var i18nHorizontal=getText("horizontal");
+var i18nVertical=getText("vertical");
+var i18nCross=getText("cross");
+var i18nLabel=getText(label);
 
-  return `
+return `
       <div class="input-2group">
-      <label for="speed-line-style" data-i18n="${label}">${i18n_label}</label>
+      <label for="speed-line-style" data-i18n="${label}">${i18nLabel}</label>
       <select id="${id}">
-          <option data-i18n="horizontal" value="horizontal">${i18n_horizontal}</option>
-          <option data-i18n="vertical"   value="vertical">${i18n_vertical}</option>
-          <option data-i18n="cross"      value="cross">${i18n_cross}</option>
-      </select>
-      </div>`;
-    }
-
-function addDropDownByStyle(id, label) {
-
-  var i18n_solid = getText("solid");
-  var i18n_dashed = getText("dashed");
-  var i18n_dotted = getText("dotted");
-  var i18n_line_style = getText("line-style");
-
-  return `
-      <div class="input-2group">
-      <label for="line-style" data-i18n="${label}">${i18n_line_style}</label>
-      <select id="${id}">
-          <option data-i18n="solid" value="solid">${i18n_solid}</option>
-          <option data-i18n="dashed" value="dashed">${i18n_dashed}</option>
-          <option data-i18n="dotted" value="dotted">${i18n_dotted}</option>
+          <option data-i18n="horizontal" value="horizontal">${i18nHorizontal}</option>
+          <option data-i18n="vertical"   value="vertical">${i18nVertical}</option>
+          <option data-i18n="cross"      value="cross">${i18nCross}</option>
       </select>
       </div>`;
 }
 
-function addDropDownByDot(id, label) {
+function addDropDownByStyle(id,label) {
 
-  var i18n_circle = getText("circle");
-  var i18n_square = getText("square");
-  var i18n_triangle = getText("triangle");
-  var i18n_star = getText("star");
-  var i18n_cross = getText("cross");
-  var i18n_heart = getText("heart");
-  var i18n_label = getText(label);
+var i18nSolid=getText("solid");
+var i18nDashed=getText("dashed");
+var i18nDotted=getText("dotted");
+var i18nLineStyle=getText("line-style");
 
-  return `
+return `
+      <div class="input-2group">
+      <label for="line-style" data-i18n="${label}">${i18nLineStyle}</label>
+      <select id="${id}">
+          <option data-i18n="solid" value="solid">${i18nSolid}</option>
+          <option data-i18n="dashed" value="dashed">${i18nDashed}</option>
+          <option data-i18n="dotted" value="dotted">${i18nDotted}</option>
+      </select>
+      </div>`;
+}
+
+function addDropDownByDot(id,label) {
+
+var i18nCircle=getText("circle");
+var i18nSquare=getText("square");
+var i18nTriangle=getText("triangle");
+var i18nStar=getText("star");
+var i18nCross=getText("cross");
+var i18nHeart=getText("heart");
+var i18nLabel=getText(label);
+
+return `
         <div class="control-group">
-            <label data-i18n="${label}" for="dotShape">${i18n_label}</label>
+            <label data-i18n="${label}" for="dotShape">${i18nLabel}</label>
             <select id="${id}">
-                <option data-i18n="circle" value="circle">${i18n_circle}</option>
-                <option data-i18n="square" value="square">${i18n_square}</option>
-                <option data-i18n="triangle" value="triangle">${i18n_triangle}</option>
-                <option data-i18n="star" value="star">${i18n_star}</option>
-                <option data-i18n="cross" value="cross">${i18n_cross}</option>
-                <option data-i18n="heart" value="heart">${i18n_heart}</option>
+                <option data-i18n="circle" value="circle">${i18nCircle}</option>
+                <option data-i18n="square" value="square">${i18nSquare}</option>
+                <option data-i18n="triangle" value="triangle">${i18nTriangle}</option>
+                <option data-i18n="star" value="star">${i18nStar}</option>
+                <option data-i18n="cross" value="cross">${i18nCross}</option>
+                <option data-i18n="heart" value="heart">${i18nHeart}</option>
             </select>
         </div>`;
 }
 
 
 
-function addDropDownByGrad(id, label) {
-  var i18n_tb = getText("top-bottom");
-  var i18n_bt = getText("bottom-top");
-  var i18n_lr = getText("left-right");
-  var i18n_rl = getText("right-left");
+function addDropDownByGrad(id,label) {
+var i18nTb=getText("top-bottom");
+var i18nBt=getText("bottom-top");
+var i18nLr=getText("left-right");
+var i18nRl=getText("right-left");
 
-  return `
+return `
         <div class="control-group">
             <label data-i18n="${label}" for="gradientDirection"></label>
             <select id="${id}">
-                <option data-i18n="top-bottom" value="top-bottom">${i18n_tb}</option>
-                <option data-i18n="bottom-top" value="bottom-top">${i18n_bt}</option>
-                <option data-i18n="left-right" value="left-right">${i18n_lr}</option>
-                <option data-i18n="right-left" value="right-left">${i18n_rl}</option>
+                <option data-i18n="top-bottom" value="top-bottom">${i18nTb}</option>
+                <option data-i18n="bottom-top" value="bottom-top">${i18nBt}</option>
+                <option data-i18n="left-right" value="left-right">${i18nLr}</option>
+                <option data-i18n="right-left" value="right-left">${i18nRl}</option>
             </select>
         </div>`;
 }
 
 
 
-function addTextArea(id, label) {
-  const transLavel = getText(label);
-  if( transLavel ){
-    return `
+function addTextArea(id,label) {
+const transLavel=getText(label);
+if(transLavel){
+return `
     <div class="input-group_one">
         <textarea id="${id}" rows="4">${transLavel}</textarea>
     </div>
 `;
-  }else{
-    return `
+}else{
+return `
     <div class="input-group_one">
         <textarea id="${id}" rows="4">New Text</textarea>
     </div>
 `;
-  }
+}
 }

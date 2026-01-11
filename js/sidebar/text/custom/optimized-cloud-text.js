@@ -105,13 +105,13 @@ t2_cloud_updateSvgSize();
 }
 function t2_cloud_updateSvgSize(){
 try{
-  const bbox=t2_cloud_mainText.getBBox();
-  const padding = Math.max(20, bbox.width * 0.1); 
-  const dims = {
-    viewBox: `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`,
-    width: bbox.width + padding*2,
-    height: bbox.height + padding*2
-  };  
+const bbox=t2_cloud_mainText.getBBox();
+const padding=Math.max(20,bbox.width*0.1);
+const dims={
+viewBox: `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + padding*2} ${bbox.height + padding*2}`,
+width: bbox.width+padding*2,
+height: bbox.height+padding*2
+};
 
 setAttributes(t2_cloud_textSvg,dims);
 }catch(error){}
@@ -123,7 +123,7 @@ reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
 Object.assign(img,{left,top});
 nowT2CloudStr=img;
-img.text = getFirstNCharsDefault(t2_text);
+img.text=getFirstNCharsDefault(t2_text);
 canvas.add(img).setActiveObject(img).renderAll();
 },{crossOrigin:'anonymous'});
 };

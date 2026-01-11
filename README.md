@@ -105,8 +105,27 @@ https://github.com/user-attachments/assets/6f1dae5f-b50f-4b04-8875-f0b07111f2ab
 - **Canvas Zoom In/Zoom Out**: Basic pen and eraser tools, change line width, color, line style, shadow. Erase lines or parts of images.
 
 # Installation
-https://github.com/new-sankaku/manga-editor-desu.git  
+https://github.com/new-sankaku/manga-editor-desu.git
 <img src="https://new-sankaku.github.io/SP-MangaEditer-docs/02_.webp" width="700">
+
+## Development
+
+### ESLint (Code Quality)
+```bash
+# Install dependencies
+npm install
+
+# Run lint check
+npm run lint
+
+# Auto-fix issues
+npm run lint:fix
+```
+
+#### Naming Conventions
+- Functions/Variables: `camelCase`
+- Classes: `PascalCase`
+- Constants: `UPPER_SNAKE_CASE` or `camelCase`
 
 ## How to Contribute
 - **Bug Reports**: If you find a bug, please create a new issue in [Issues](https://github.com/new-sankaku/manga-editor-desu/issues) and include **[Bug]** in the title.

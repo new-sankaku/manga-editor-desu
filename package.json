@@ -1,0 +1,15 @@
+{
+  "name": "manga-editor-desu",
+  "version": "1.0.0",
+  "description": "Manga Editor",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint js/ --ext .js",
+    "lint:fix": "eslint js/ --ext .js --fix",
+    "format": "node scripts/remove-spaces.cjs"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "@eslint/js": "^8.57.0"
+  }
+}

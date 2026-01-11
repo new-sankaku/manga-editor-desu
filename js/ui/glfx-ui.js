@@ -1,4 +1,4 @@
-let gpifHTML = `
+let gpifHTML=`
 <div class="control-content glfxControls">
     <select id="glfxFilter">
         <option value="" data-i18n="select">Select</option>
@@ -194,44 +194,43 @@ let gpifHTML = `
 
 
 function setGlfxI18NextLabel() {
-    const parentElement = document.getElementById('manga-effect-settings');
-    const controlsDiv = parentElement.querySelector('.control-content.glfxControls');
-    
-    if (controlsDiv) {
-      applyLabelTranslations(controlsDiv);
-    }
-    
-    const sliders2 = document.querySelectorAll('.input-container input[type="range"]');
-    sliders2.forEach(slider => {
-      setupSlider(slider, '.input-container');
-    });
-  }
-  
+const parentElement=document.getElementById('manga-effect-settings');
+const controlsDiv=parentElement.querySelector('.control-content.glfxControls');
 
-  
+if (controlsDiv) {
+applyLabelTranslations(controlsDiv);
+}
 
-  function applyLabelTranslations(container) {
-    const labelElements = container.querySelectorAll('[data-i18n-label]');
-    labelElements.forEach(element => {
-      const key = element.getAttribute('data-i18n-label');
-      const translatedText = getText(key);
-      if (translatedText) {
-        element.setAttribute('data-label', translatedText);
-      }
-    });
-  
-    const i18nElements = container.querySelectorAll('[data-i18n]');
-    i18nElements.forEach(element => {
-      const key = element.getAttribute('data-i18n');
-      const translatedText = getText(key);
-      if (translatedText) {
-        if (element.tagName.toLowerCase() === 'option') {
-          element.textContent = translatedText;
-        } else {
-          element.setAttribute('data-label', translatedText);
-        }
-      }
-    });
-  }
-  
-  
+const sliders2=document.querySelectorAll('.input-container input[type="range"]');
+sliders2.forEach(slider=>{
+setupSlider(slider,'.input-container');
+});
+}
+
+
+
+
+function applyLabelTranslations(container) {
+const labelElements=container.querySelectorAll('[data-i18n-label]');
+labelElements.forEach(element=>{
+const key=element.getAttribute('data-i18n-label');
+const translatedText=getText(key);
+if (translatedText) {
+element.setAttribute('data-label',translatedText);
+}
+});
+
+const i18nElements=container.querySelectorAll('[data-i18n]');
+i18nElements.forEach(element=>{
+const key=element.getAttribute('data-i18n');
+const translatedText=getText(key);
+if (translatedText) {
+if (element.tagName.toLowerCase()==='option') {
+element.textContent=translatedText;
+} else {
+element.setAttribute('data-label',translatedText);
+}
+}
+});
+}
+
