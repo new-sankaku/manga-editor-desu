@@ -73,6 +73,22 @@ type: "T2I",
 workflow: ComfyUI_T2I_ByFluxDiffusion,
 enabled: false
 },
+
+{
+name: "Z_Image_turbo.json",
+type: "T2I",
+workflow: ComfyUI_T2I_Z_Image_turbo,
+enabled: false
+},
+{
+name: "Qwen_Image_gguf.json",
+type: "T2I",
+workflow: ComfyUI_T2I_Qwen_Image_gguf,
+enabled: false
+},
+
+
+
 {
 name: "SD15_SDXL.json",
 type: "I2I",

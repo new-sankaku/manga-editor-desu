@@ -1,3 +1,279 @@
+const ComfyUI_T2I_Z_Image_turbo={
+"3": {
+"inputs": {
+"seed": 4963536264065,
+"steps": 9,
+"cfg": 1,
+"sampler_name": "euler",
+"scheduler": "simple",
+"denoise": 1,
+"model": [
+"16",
+0
+],
+"positive": [
+"6",
+0
+],
+"negative": [
+"7",
+0
+],
+"latent_image": [
+"13",
+0
+]
+},
+"class_type": "KSampler",
+"_meta": {
+"title": "KSampler"
+}
+},
+"6": {
+"inputs": {
+"text": "%prompt%",
+"clip": [
+"18",
+0
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIP Text Encode (Positive Prompt)"
+}
+},
+"7": {
+"inputs": {
+"text": "%negative%",
+"clip": [
+"18",
+0
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIP Text Encode (Negative Prompt)"
+}
+},
+"8": {
+"inputs": {
+"samples": [
+"3",
+0
+],
+"vae": [
+"17",
+0
+]
+},
+"class_type": "VAEDecode",
+"_meta": {
+"title": "VAE Decode"
+}
+},
+"9": {
+"inputs": {
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
+"images": [
+"8",
+0
+]
+},
+"class_type": "SaveImage",
+"_meta": {
+"title": "Save Image"
+}
+},
+"13": {
+"inputs": {
+"width": 848,
+"height": 1264,
+"batch_size": 1
+},
+"class_type": "EmptySD3LatentImage",
+"_meta": {
+"title": "EmptySD3LatentImage"
+}
+},
+"16": {
+"inputs": {
+"unet_name": "divingZImageTurboReal_v20Fp16.safetensors",
+"weight_dtype": "default"
+},
+"class_type": "UNETLoader",
+"_meta": {
+"title": "Load Diffusion Model"
+}
+},
+"17": {
+"inputs": {
+"vae_name": "ae.safetensors"
+},
+"class_type": "VAELoader",
+"_meta": {
+"title": "Load VAE"
+}
+},
+"18": {
+"inputs": {
+"clip_name": "qwen_3_4b.safetensors",
+"type": "lumina2",
+"device": "default"
+},
+"class_type": "CLIPLoader",
+"_meta": {
+"title": "Load CLIP"
+}
+}
+};
+
+
+
+const ComfyUI_T2I_Qwen_Image_gguf={
+"3": {
+"inputs": {
+"seed": 135839686362908,
+"steps": 20,
+"cfg": 2.5,
+"sampler_name": "euler",
+"scheduler": "simple",
+"denoise": 1,
+"model": [
+"66",
+0
+],
+"positive": [
+"6",
+0
+],
+"negative": [
+"7",
+0
+],
+"latent_image": [
+"58",
+0
+]
+},
+"class_type": "KSampler",
+"_meta": {
+"title": "KSampler"
+}
+},
+"6": {
+"inputs": {
+"text": "%prompt%",
+"clip": [
+"38",
+0
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIP Text Encode (Positive Prompt)"
+}
+},
+"7": {
+"inputs": {
+"text": "%negative%",
+"clip": [
+"38",
+0
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIP Text Encode (Negative Prompt)"
+}
+},
+"8": {
+"inputs": {
+"samples": [
+"3",
+0
+],
+"vae": [
+"39",
+0
+]
+},
+"class_type": "VAEDecode",
+"_meta": {
+"title": "VAE Decode"
+}
+},
+"38": {
+"inputs": {
+"clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors",
+"type": "qwen_image",
+"device": "default"
+},
+"class_type": "CLIPLoader",
+"_meta": {
+"title": "Load CLIP"
+}
+},
+"39": {
+"inputs": {
+"vae_name": "qwen_image_vae.safetensors"
+},
+"class_type": "VAELoader",
+"_meta": {
+"title": "Load VAE"
+}
+},
+"58": {
+"inputs": {
+"width": 1328,
+"height": 1328,
+"batch_size": 1
+},
+"class_type": "EmptySD3LatentImage",
+"_meta": {
+"title": "EmptySD3LatentImage"
+}
+},
+"60": {
+"inputs": {
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
+"images": [
+"8",
+0
+]
+},
+"class_type": "SaveImage",
+"_meta": {
+"title": "Save Image"
+}
+},
+"66": {
+"inputs": {
+"shift": 3.1000000000000005,
+"model": [
+"76",
+0
+]
+},
+"class_type": "ModelSamplingAuraFlow",
+"_meta": {
+"title": "ModelSamplingAuraFlow"
+}
+},
+"76": {
+"inputs": {
+"unet_name": "qwen-image-Q4_K_S.gguf"
+},
+"class_type": "UnetLoaderGGUF",
+"_meta": {
+"title": "Unet Loader (GGUF)"
+}
+}
+};
+
+
+
+
+
 const ComfyUI_T2I_BySDXL_faceDetailer_Lora={
 "3": {
 "inputs": {
@@ -80,7 +356,7 @@ const ComfyUI_T2I_BySDXL_faceDetailer_Lora={
 },
 "9": {
 "inputs": {
-"filename_prefix": "after",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "32",
 0
@@ -233,7 +509,7 @@ const ComfyUI_T2I_BySDXL_faceDetailer_Lora={
 },
 "36": {
 "inputs": {
-"filename_prefix": "before",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "8",
 0
@@ -350,7 +626,7 @@ const ComfyUI_T2I_BySDXL_faceDetailer={
 },
 "9": {
 "inputs": {
-"filename_prefix": "after",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "32",
 0
@@ -503,7 +779,7 @@ const ComfyUI_T2I_BySDXL_faceDetailer={
 },
 "36": {
 "inputs": {
-"filename_prefix": "before",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "8",
 0
@@ -568,7 +844,7 @@ title: "VAE Decode",
 },
 28: {
 inputs: {
-filename_prefix: "ComfyUI",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 images: ["8",0],
 },
 class_type: "SaveImage",
@@ -675,7 +951,7 @@ title: "SDXL LoRA",
 },
 23: {
 inputs: {
-filename_prefix: "ComfyUI",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 images: ["8",0],
 },
 class_type: "SaveImage",
@@ -737,7 +1013,7 @@ title: "VAE Decode",
 },
 28: {
 inputs: {
-filename_prefix: "ComfyUI",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 images: ["8",0],
 },
 class_type: "SaveImage",
@@ -937,7 +1213,7 @@ title: "VAE Decode",
 },
 9: {
 inputs: {
-filename_prefix: "Result",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 images: ["8",0],
 },
 class_type: "SaveImage",
@@ -1017,7 +1293,7 @@ title: "VAE Decode",
 },
 9: {
 inputs: {
-filename_prefix: "Result",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 images: ["8",0],
 },
 class_type: "SaveImage",
@@ -1130,7 +1406,7 @@ const ComfyUI_T2I_BySD15_Lora={
 },
 "9": {
 "inputs": {
-"filename_prefix": "Result",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "8",
 0
@@ -1245,7 +1521,7 @@ const ComfyUI_I2I_BySD15SDXL={
 },
 "9": {
 "inputs": {
-"filename_prefix": "ComfyUI",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "8",
 0
@@ -1292,3 +1568,438 @@ const ComfyUI_I2I_BySD15SDXL={
 }
 }
 };
+
+
+
+const ComfyUI_T2I_ByFluxDiffusion={
+"6": {
+"inputs": {
+"text":"%prompt%",
+"clip": [
+"11",
+0
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIPTextEncode_Prompt"
+}
+},
+"8": {
+"inputs": {
+"samples": [
+"13",
+0
+],
+"vae": [
+"10",
+0
+]
+},
+"class_type": "VAEDecode",
+"_meta": {
+"title": "VAE Decode"
+}
+},
+"9": {
+"inputs": {
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
+"images": [
+"8",
+0
+]
+},
+"class_type": "SaveImage",
+"_meta": {
+"title": "Save Image"
+}
+},
+"10": {
+"inputs": {
+"vae_name": "ae.safetensors"
+},
+"class_type": "VAELoader",
+"_meta": {
+"title": "Load VAE"
+}
+},
+"11": {
+"inputs": {
+"clip_name1": "t5xxl_fp16.safetensors",
+"clip_name2": "clip_l.safetensors",
+"type": "flux"
+},
+"class_type": "DualCLIPLoader",
+"_meta": {
+"title": "DualCLIPLoader"
+}
+},
+"12": {
+"inputs": {
+"unet_name": "%model%",
+"weight_dtype": "default"
+},
+"class_type": "UNETLoader",
+"_meta": {
+"title": "Load Diffusion Model"
+}
+},
+"13": {
+"inputs": {
+"noise": [
+"25",
+0
+],
+"guider": [
+"22",
+0
+],
+"sampler": [
+"16",
+0
+],
+"sigmas": [
+"17",
+0
+],
+"latent_image": [
+"27",
+0
+]
+},
+"class_type": "SamplerCustomAdvanced",
+"_meta": {
+"title": "SamplerCustomAdvanced"
+}
+},
+"16": {
+"inputs": {
+"sampler_name": "%sampler%"
+},
+"class_type": "KSamplerSelect",
+"_meta": {
+"title": "KSamplerSelect"
+}
+},
+"17": {
+"inputs": {
+"scheduler": "simple",
+"steps":"25",
+"denoise": 1,
+"model": [
+"30",
+0
+]
+},
+"class_type": "BasicScheduler",
+"_meta": {
+"title": "BasicScheduler"
+}
+},
+"22": {
+"inputs": {
+"model": [
+"30",
+0
+],
+"conditioning": [
+"26",
+0
+]
+},
+"class_type": "BasicGuider",
+"_meta": {
+"title": "BasicGuider"
+}
+},
+"25": {
+"inputs": {
+"noise_seed": "100"
+},
+"class_type": "RandomNoise",
+"_meta": {
+"title": "RandomNoise"
+}
+},
+"26": {
+"inputs": {
+"guidance": 3.5,
+"conditioning": [
+"6",
+0
+]
+},
+"class_type": "FluxGuidance",
+"_meta": {
+"title": "FluxGuidance"
+}
+},
+"27": {
+"inputs": {
+"width":"1024",
+"height":"1024",
+"batch_size": 1
+},
+"class_type": "EmptySD3LatentImage",
+"_meta": {
+"title": "EmptySD3LatentImage"
+}
+},
+"30": {
+"inputs": {
+"max_shift": 1.15,
+"base_shift": 0.5,
+"width":"1024",
+"height":"1024",
+"model": [
+"12",
+0
+]
+},
+"class_type": "ModelSamplingFlux",
+"_meta": {
+"title": "ModelSamplingFlux"
+}
+}
+};
+
+const ComfyUI_T2I_ByFluxNF4={
+"6": {
+"inputs": {
+"text":"%prompt%",
+"clip": [
+"37",
+1
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIPTextEncode_Prompt"
+}
+},
+"8": {
+"inputs": {
+"samples": [
+"31",
+0
+],
+"vae": [
+"37",
+2
+]
+},
+"class_type": "VAEDecode",
+"_meta": {
+"title": "VAE Decode"
+}
+},
+"9": {
+"inputs": {
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
+"images": [
+"8",
+0
+]
+},
+"class_type": "SaveImage",
+"_meta": {
+"title": "Save Image"
+}
+},
+"27": {
+"inputs": {
+"width":"1024",
+"height":"1024",
+"batch_size": 1
+},
+"class_type": "EmptySD3LatentImage",
+"_meta": {
+"title": "EmptySD3LatentImage"
+}
+},
+"31": {
+"inputs": {
+"seed":"100",
+"steps":"25",
+"cfg":"5.0",
+"sampler_name":"%sampler%",
+"scheduler": "simple",
+"denoise": 1,
+"model": [
+"37",
+0
+],
+"positive": [
+"35",
+0
+],
+"negative": [
+"33",
+0
+],
+"latent_image": [
+"27",
+0
+]
+},
+"class_type": "KSampler",
+"_meta": {
+"title": "KSampler"
+}
+},
+"33": {
+"inputs": {
+"text":"%prompt%",
+"clip": [
+"37",
+1
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIPTextEncode_Prompt"
+}
+},
+"35": {
+"inputs": {
+"guidance": 3.5,
+"conditioning": [
+"6",
+0
+]
+},
+"class_type": "FluxGuidance",
+"_meta": {
+"title": "FluxGuidance"
+}
+},
+"37": {
+"inputs": {
+"ckpt_name": "Flux\\fluxDevSchnellBaseUNET_fluxSchnellFLANFP8.safetensors"
+},
+"class_type": "CheckpointLoaderNF4",
+"_meta": {
+"title": "CheckpointLoaderNF4"
+}
+}
+};
+
+const ComfyUI_T2I_ByFluxSimple={
+"6": {
+"inputs": {
+"text":"%prompt%",
+"clip": [
+"30",
+1
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIPTextEncode_Prompt"
+}
+},
+"8": {
+"inputs": {
+"samples": [
+"31",
+0
+],
+"vae": [
+"30",
+2
+]
+},
+"class_type": "VAEDecode",
+"_meta": {
+"title": "VAE Decode"
+}
+},
+"9": {
+"inputs": {
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
+"images": [
+"8",
+0
+]
+},
+"class_type": "SaveImage",
+"_meta": {
+"title": "Save Image"
+}
+},
+"27": {
+"inputs": {
+"width":"1024",
+"height":"1024",
+"batch_size": 1
+},
+"class_type": "EmptySD3LatentImage",
+"_meta": {
+"title": "EmptySD3LatentImage"
+}
+},
+"30": {
+"inputs":{"ckpt_name":"%model%"},
+"class_type": "CheckpointLoaderSimple",
+"_meta": {
+"title": "Load Checkpoint"
+}
+},
+"31": {
+"inputs": {
+"seed":"100",
+"steps":"25",
+"cfg":"5.0",
+"sampler_name":"%sampler%",
+"scheduler": "simple",
+"denoise": 1,
+"model": [
+"30",
+0
+],
+"positive": [
+"35",
+0
+],
+"negative": [
+"33",
+0
+],
+"latent_image": [
+"27",
+0
+]
+},
+"class_type": "KSampler",
+"_meta": {
+"title": "KSampler"
+}
+},
+"33": {
+"inputs": {
+"text":"%prompt%",
+"clip": [
+"30",
+1
+]
+},
+"class_type": "CLIPTextEncode",
+"_meta": {
+"title": "CLIPTextEncode_Prompt"
+}
+},
+"35": {
+"inputs": {
+"guidance": 3.5,
+"conditioning": [
+"6",
+0
+]
+},
+"class_type": "FluxGuidance",
+"_meta": {
+"title": "FluxGuidance"
+}
+}
+};
+

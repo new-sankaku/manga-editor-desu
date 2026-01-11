@@ -24,7 +24,7 @@ const ComfyUI_Rembg_ByInspyrenet={
 },
 "30": {
 "inputs": {
-"filename_prefix": "rembg_inspyrenet",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "23",
 0

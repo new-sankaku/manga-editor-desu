@@ -208,7 +208,9 @@ return fixed;
 }
 
 async function comfyui_put_queue_v2(workflow) {
-const fixedWorkflow=await comfyui_fixWorkflowTypes_v2(workflow);
+const builder=new ComfyUIWorkflowBuilder(workflow);
+builder.replaceDatePlaceholders();
+const fixedWorkflow=await comfyui_fixWorkflowTypes_v2(builder.build());
 logger.trace("comfyui_put_queue_v2 fixedWorkflow",fixedWorkflow);
 
 var response=await comfyui_queue_prompt_v2(fixedWorkflow);

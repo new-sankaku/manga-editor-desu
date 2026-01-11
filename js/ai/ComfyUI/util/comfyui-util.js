@@ -1,51 +1,4 @@
 
-function comfyuiIsError(response) {
-if (response&&typeof response==='object') {
-const promptId=Object.keys(response)[0];
-if (promptId&&response[promptId]&&response[promptId].status) {
-const status=response[promptId].status;
-const result=status.status_str==="error";
-console.log('comfyuiIsError return',result);
-return result;
-}
-}
-console.log('comfyuiIsError return false');
-return false;
-}
-function comfyuiGetErrorMessage(response) {
-console.log('comfyuiGetErrorMessage called with:',JSON.stringify(response));
-
-if (comfyuiIsError(response)) {
-const promptId=Object.keys(response)[0];
-const status=response[promptId].status;
-const errorMessage={
-status_str: status.status_str||'Unknown error',
-completed: status.completed,
-exception_type: 'Unknown',
-exception_message: 'An error occurred',
-traceback: []
-};
-
-if (Array.isArray(status.messages)&&status.messages.length>0) {
-const lastMessage=status.messages[status.messages.length-1];
-if (Array.isArray(lastMessage)&&lastMessage.length>1&&typeof lastMessage[1]==='object') {
-const errorDetails=lastMessage[1];
-errorMessage.exception_type=errorDetails.exception_type||errorMessage.exception_type;
-errorMessage.exception_message=errorDetails.exception_message||errorMessage.exception_message;
-errorMessage.traceback=Array.isArray(errorDetails.traceback) ? errorDetails.traceback : errorMessage.traceback;
-}
-}
-
-console.log('comfyuiGetErrorMessage returning:',errorMessage);
-return errorMessage;
-}
-console.log('comfyuiGetErrorMessage returning null');
-return null;
-}
-
-
-
-
 function comfyuiReplacePlaceholders(workflow,requestData,Type='T2I') {
 const builder=createWorkflowBuilder(workflow);
 
@@ -66,6 +19,7 @@ image: requestData["uploadFileName"]
 
 builder.updateValueByTargetValue("%prompt%",requestData["prompt"]);
 builder.updateValueByTargetValue("%negative%",requestData["negative_prompt"]);
+builder.replaceDatePlaceholders();
 
 const newWorkflow=builder.build();
 return newWorkflow;

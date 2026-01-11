@@ -102,6 +102,42 @@ replaceValueInObject(node);
 return this;
 }
 
+replaceDatePlaceholders() {
+this.initialize();
+
+const formatDate=(format)=>{
+const now=new Date();
+const pad2=(n)=>String(n).padStart(2,'0');
+const pad3=(n)=>String(n).padStart(3,'0');
+return format
+.replace(/yyyy/g,now.getFullYear())
+.replace(/yy/g,String(now.getFullYear()).slice(-2))
+.replace(/MM/g,pad2(now.getMonth()+1))
+.replace(/dd/g,pad2(now.getDate()))
+.replace(/HH/g,pad2(now.getHours()))
+.replace(/mm/g,pad2(now.getMinutes()))
+.replace(/ss/g,pad2(now.getSeconds()))
+.replace(/SSS/g,pad3(now.getMilliseconds()));
+};
+
+const replaceDateInObject=(obj)=>{
+for (let key in obj) {
+if (obj[key]===null||obj[key]===undefined) continue;
+if (typeof obj[key]==='object') {
+replaceDateInObject(obj[key]);
+} else if (typeof obj[key]==='string') {
+obj[key]=obj[key].replace(/%date:([^%]+)%/g,(match,fmt)=>formatDate(fmt));
+}
+}
+};
+
+Object.entries(this.workflowCopy).forEach(([id,node])=>{
+replaceDateInObject(node);
+});
+
+return this;
+}
+
 build() {
 if (!this.hasInitialized) {
 return this.originalWorkflow;

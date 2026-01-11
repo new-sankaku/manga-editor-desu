@@ -187,7 +187,7 @@ $('marginFromPanel').value=localSettings.canvasMarginFromPanel||20;
 $('sdWebUIPageUrl').value=localSettings.sdWebUIPageUrl||'http://127.0.0.1:7860';
 $('comfyUIPageUrl').value=localSettings.comfyUIPageUrl||'http://127.0.0.1:8188';
 
-$('apiHeartbeatCheckbox').checked=localSettings.apiHeartbeatCheckbox;
+$('apiHeartbeatCheckbox').checked=localSettings.apiHeartbeatCheckbox??true;
 svgPagging=localSettings.canvasMarginFromPanel||20;
 $('basePrompt_model').value=localSettings.basePrompt_text2img_model||basePrompt.text2img_model;
 $('basePrompt_samplingMethod').value=localSettings.basePrompt_text2img_samplingMethod||basePrompt.text2img_samplingMethod;

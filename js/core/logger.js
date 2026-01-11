@@ -310,6 +310,6 @@ default: return 'unknown';
 };
 }
 
-const logger=SimpleLogger('main',LogLevel.INFO);
-const workflowlLogger=SimpleLogger('workflow',LogLevel.INFO);
-const eventLogger=SimpleLogger('event',LogLevel.INFO);
+const logger=SimpleLogger('main',LogLevel.TRACE);
+const workflowlLogger=SimpleLogger('workflow',LogLevel.TRACE);
+const eventLogger=SimpleLogger('event',LogLevel.TRACE);

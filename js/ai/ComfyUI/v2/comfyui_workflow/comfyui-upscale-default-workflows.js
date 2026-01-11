@@ -35,7 +35,7 @@ const ComfyUI_Upscaler={
 },
 "6": {
 "inputs": {
-"filename_prefix": "Upscale",
+filename_prefix: "%date:yyyy-MM-dd%/ComfyUI_%date:yyyyMMdd_hhmmss_SSS%",
 "images": [
 "7",
 0
