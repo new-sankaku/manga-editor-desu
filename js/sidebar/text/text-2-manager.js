@@ -1,4 +1,3 @@
-const t2Map=new Map();
 const MODE_T2_SHADOW="shadow";
 const MODE_T2_aurora="aurora";
 const MODE_T2_broken="broken";
@@ -67,19 +66,19 @@ var cName="";
 // cName = "fontT2Selector";
 // settingsHTML += "<div id='fontT2Selector'></div>"
 cName="Text";
-settingsHTML+=addTextArea(type+'-'+cName,cName,t2Map.getOrDefault(type+'-'+cName,'New Text'));
+settingsHTML+=addTextArea(type+'-'+cName,cName,sidebarValueMap.getOrDefault(type+'-'+cName,'New Text'));
 cName="FontSize";
-settingsHTML+=addSlider(type+'-'+cName,cName,1,300,t2Map.getOrDefault(type+'-'+cName,40));
+settingsHTML+=addSlider(type+'-'+cName,cName,1,300,sidebarValueMap.getOrDefault(type+'-'+cName,40));
 cName="LineHeight";
-settingsHTML+=addSlider(type+'-'+cName,cName,0.1,5,t2Map.getOrDefault(type+'-'+cName,1.2),0.1);
+settingsHTML+=addSlider(type+'-'+cName,cName,0.1,5,sidebarValueMap.getOrDefault(type+'-'+cName,1.2),0.1);
 cName="LetterSpacing";
-settingsHTML+=addSlider(type+'-'+cName,cName,-0.5,2,t2Map.getOrDefault(type+'-'+cName,0.4),0.1);
+settingsHTML+=addSlider(type+'-'+cName,cName,-0.5,2,sidebarValueMap.getOrDefault(type+'-'+cName,0.4),0.1);
 settingsHTML+=addAlignTypeButton(type);
 settingsHTML+=addOrientationButton(type);
 cName="TextColor";
-settingsHTML+=addColor(type+'-'+cName,cName,t2Map.getOrDefault(type+'-'+cName,'#35322a'));
+settingsHTML+=addColor(type+'-'+cName,cName,sidebarValueMap.getOrDefault(type+'-'+cName,'#35322a'));
 cName="FillOpacity";
-settingsHTML+=addSlider(type+'-'+cName,cName,0,1,t2Map.getOrDefault(type+'-'+cName,1),0.1);
+settingsHTML+=addSlider(type+'-'+cName,cName,0,1,sidebarValueMap.getOrDefault(type+'-'+cName,1),0.1);
 
 
 
@@ -109,18 +108,18 @@ break;
 
 case MODE_T2_SHADOW:
 cName="ShadowSize1";
-settingsHTML+=addSlider(type+'-'+cName,cName,0,3,t2Map.getOrDefault(type+'-'+cName,1));
+settingsHTML+=addSlider(type+'-'+cName,cName,0,3,sidebarValueMap.getOrDefault(type+'-'+cName,1));
 cName="ShadowOpacity1";
-settingsHTML+=addSlider(type+'-'+cName,cName,0,1,t2Map.getOrDefault(type+'-'+cName,1),0.1);
+settingsHTML+=addSlider(type+'-'+cName,cName,0,1,sidebarValueMap.getOrDefault(type+'-'+cName,1),0.1);
 cName="ShadowColor1";
-settingsHTML+=addColor(type+'-'+cName,cName,t2Map.getOrDefault(type+'-'+cName,'#ebe7e0'));
+settingsHTML+=addColor(type+'-'+cName,cName,sidebarValueMap.getOrDefault(type+'-'+cName,'#ebe7e0'));
 
 cName="ShadowSize2";
-settingsHTML+=addSlider(type+'-'+cName,cName,0,5,t2Map.getOrDefault(type+'-'+cName,5));
+settingsHTML+=addSlider(type+'-'+cName,cName,0,5,sidebarValueMap.getOrDefault(type+'-'+cName,5));
 cName="ShadowOpacity2";
-settingsHTML+=addSlider(type+'-'+cName,cName,0,1,t2Map.getOrDefault(type+'-'+cName,1),0.1);
+settingsHTML+=addSlider(type+'-'+cName,cName,0,1,sidebarValueMap.getOrDefault(type+'-'+cName,1),0.1);
 cName="ShadowColor2";
-settingsHTML+=addColor(type+'-'+cName,cName,t2Map.getOrDefault(type+'-'+cName,'#35322a'));
+settingsHTML+=addColor(type+'-'+cName,cName,sidebarValueMap.getOrDefault(type+'-'+cName,'#35322a'));
 break;
 }
 

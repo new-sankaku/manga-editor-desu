@@ -96,13 +96,13 @@ clearPenSettings();
 let settingsHTML='';
 switch (type) {
 case MODE_PEN_PENCIL:
-settingsHTML+=addColor(MODE_PEN_PENCIL+'-color','color',penValueMap.getOrDefault(MODE_PEN_PENCIL+'-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_PENCIL+'-line-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_PENCIL+'-line-width',5));
-settingsHTML+=addSlider(MODE_PEN_PENCIL+'-opacity','opacity',1,100,penValueMap.getOrDefault(MODE_PEN_PENCIL+'-opacity',100));
-settingsHTML+=addColor(MODE_PEN_PENCIL+'-shadow-color','shadow',penValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_PENCIL+'-shadow-line-width','size',0,150,penValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-line-width',0));
-settingsHTML+=addSlider(MODE_PEN_PENCIL+'-shadow-offset-x','svg_icon_shadow_offset_x',1,150,penValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-offset-x',5));
-settingsHTML+=addSlider(MODE_PEN_PENCIL+'-shadow-offset-y','svg_icon_shadow_offset_y',1,150,penValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-offset-y',5));
+settingsHTML+=addColor(MODE_PEN_PENCIL+'-color','color',sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_PENCIL+'-line-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-line-width',5));
+settingsHTML+=addSlider(MODE_PEN_PENCIL+'-opacity','opacity',1,100,sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-opacity',100));
+settingsHTML+=addColor(MODE_PEN_PENCIL+'-shadow-color','shadow',sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_PENCIL+'-shadow-line-width','size',0,150,sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-line-width',0));
+settingsHTML+=addSlider(MODE_PEN_PENCIL+'-shadow-offset-x','svg_icon_shadow_offset_x',1,150,sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-offset-x',5));
+settingsHTML+=addSlider(MODE_PEN_PENCIL+'-shadow-offset-y','svg_icon_shadow_offset_y',1,150,sidebarValueMap.getOrDefault(MODE_PEN_PENCIL+'-shadow-offset-y',5));
 settingsHTML+=addDropDownByStyle('line-style','lineStyle');
 $('tool-settings').innerHTML=settingsHTML;
 
@@ -117,16 +117,16 @@ drawingLineStyle=$("line-style");
 
 break;
 case MODE_PEN_OUTLINE:
-settingsHTML+=addColor(MODE_PEN_OUTLINE+'-main-color','color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-color','#000000'));
-settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline1-color','outline1-color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-color','#FFFFFF'));
-settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline2-color','outline2-color',penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-color','#FF0000'));
+settingsHTML+=addColor(MODE_PEN_OUTLINE+'-main-color','color',sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-color','#000000'));
+settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline1-color','outline1-color',sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-color','#FFFFFF'));
+settingsHTML+=addColor(MODE_PEN_OUTLINE+'-outline2-color','outline2-color',sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-color','#FF0000'));
 
-settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-main-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-main-width',10));
-settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline1-width','outline1-size',1,150,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-width',2));
-settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline2-width','outline2-size',1,150,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-width',1));
+settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-main-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-main-width',10));
+settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline1-width','outline1-size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-width',2));
+settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline2-width','outline2-size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-width',1));
 
-settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline1-opacity','outline1-opacity',1,100,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-opacity',100));
-settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline2-opacity','outline2-opacity',1,100,penValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-opacity',100));
+settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline1-opacity','outline1-opacity',1,100,sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline1-opacity',100));
+settingsHTML+=addSlider(MODE_PEN_OUTLINE+'-outline2-opacity','outline2-opacity',1,100,sidebarValueMap.getOrDefault(MODE_PEN_OUTLINE+'-outline2-opacity',100));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingMainColor=$(MODE_PEN_OUTLINE+'-main-color');
@@ -140,12 +140,12 @@ drawingOutline1Opacity=$(MODE_PEN_OUTLINE+'-outline1-opacity');
 drawingOutline2Opacity=$(MODE_PEN_OUTLINE+'-outline2-opacity');
 break;
 case MODE_PEN_CIRCLE:
-settingsHTML+=addColor(MODE_PEN_CIRCLE+'-color','color',penValueMap.getOrDefault(MODE_PEN_CIRCLE+'-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-line-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_CIRCLE+'-line-width',5));
-settingsHTML+=addColor(MODE_PEN_CIRCLE+'-shadow-color','shadow',penValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-shadow-line-width','size',0,150,penValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-line-width',0));
-settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-shadow-offset-x','svg_icon_shadow_offset_x',1,150,penValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-offset-x',5));
-settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-shadow-offset-y','svg_icon_shadow_offset_y',1,150,penValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-offset-y',5));
+settingsHTML+=addColor(MODE_PEN_CIRCLE+'-color','color',sidebarValueMap.getOrDefault(MODE_PEN_CIRCLE+'-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-line-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_CIRCLE+'-line-width',5));
+settingsHTML+=addColor(MODE_PEN_CIRCLE+'-shadow-color','shadow',sidebarValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-shadow-line-width','size',0,150,sidebarValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-line-width',0));
+settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-shadow-offset-x','svg_icon_shadow_offset_x',1,150,sidebarValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-offset-x',5));
+settingsHTML+=addSlider(MODE_PEN_CIRCLE+'-shadow-offset-y','svg_icon_shadow_offset_y',1,150,sidebarValueMap.getOrDefault(MODE_PEN_CIRCLE+'-shadow-offset-y',5));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingColor=$(MODE_PEN_CIRCLE+'-color');
@@ -156,9 +156,9 @@ drawingShadowOffsetX=$(MODE_PEN_CIRCLE+'-shadow-offset-x');
 drawingShadowOffsetY=$(MODE_PEN_CIRCLE+'-shadow-offset-y');
 break;
 case MODE_PEN_CRAYON:
-settingsHTML+=addColor(MODE_PEN_CRAYON+'-color','color',penValueMap.getOrDefault(MODE_PEN_CRAYON+'-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_CRAYON+'-line-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_CRAYON+'-line-width',5));
-settingsHTML+=addSlider(MODE_PEN_CRAYON+'-opacity','opacity',1,100,penValueMap.getOrDefault(MODE_PEN_CRAYON+'-opacity',100));
+settingsHTML+=addColor(MODE_PEN_CRAYON+'-color','color',sidebarValueMap.getOrDefault(MODE_PEN_CRAYON+'-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_CRAYON+'-line-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_CRAYON+'-line-width',5));
+settingsHTML+=addSlider(MODE_PEN_CRAYON+'-opacity','opacity',1,100,sidebarValueMap.getOrDefault(MODE_PEN_CRAYON+'-opacity',100));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingColor=$(MODE_PEN_CRAYON+'-color');
@@ -166,17 +166,17 @@ drawingWidth=$(MODE_PEN_CRAYON+'-line-width');
 drawingOpacity=$(MODE_PEN_CRAYON+'-opacity');
 break;
 case MODE_PEN_INK:
-settingsHTML+=addColor(MODE_PEN_INK+'-color','color',penValueMap.getOrDefault(MODE_PEN_INK+'-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_INK+'-line-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_INK+'-line-width',5));
+settingsHTML+=addColor(MODE_PEN_INK+'-color','color',sidebarValueMap.getOrDefault(MODE_PEN_INK+'-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_INK+'-line-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_INK+'-line-width',5));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingColor=$(MODE_PEN_INK+'-color');
 drawingWidth=$(MODE_PEN_INK+'-line-width');
 break;
 case MODE_PEN_MARKER:
-settingsHTML+=addColor(MODE_PEN_MARKER+'-color','color',penValueMap.getOrDefault(MODE_PEN_MARKER+'-color','#000000'));
-settingsHTML+=addSlider(MODE_PEN_MARKER+'-line-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_MARKER+'-line-width',5));
-settingsHTML+=addSlider(MODE_PEN_MARKER+'-opacity','opacity',1,100,penValueMap.getOrDefault(MODE_PEN_MARKER+'-opacity',100));
+settingsHTML+=addColor(MODE_PEN_MARKER+'-color','color',sidebarValueMap.getOrDefault(MODE_PEN_MARKER+'-color','#000000'));
+settingsHTML+=addSlider(MODE_PEN_MARKER+'-line-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_MARKER+'-line-width',5));
+settingsHTML+=addSlider(MODE_PEN_MARKER+'-opacity','opacity',1,100,sidebarValueMap.getOrDefault(MODE_PEN_MARKER+'-opacity',100));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingColor=$(MODE_PEN_MARKER+'-color');
@@ -184,15 +184,15 @@ drawingWidth=$(MODE_PEN_MARKER+'-line-width');
 drawingOpacity=$(MODE_PEN_MARKER+'-opacity');
 break;
 case MODE_PEN_MOSAIC:
-settingsHTML+=addSlider(MODE_PEN_MOSAIC+'-circle-size','circle-size',1,250,penValueMap.getOrDefault(MODE_PEN_MOSAIC+'-circle-size',40));
-settingsHTML+=addSlider(MODE_PEN_MOSAIC+'-size','mosaic-size',1,250,penValueMap.getOrDefault(MODE_PEN_MOSAIC+'-size',8));
+settingsHTML+=addSlider(MODE_PEN_MOSAIC+'-circle-size','circle-size',1,250,sidebarValueMap.getOrDefault(MODE_PEN_MOSAIC+'-circle-size',40));
+settingsHTML+=addSlider(MODE_PEN_MOSAIC+'-size','mosaic-size',1,250,sidebarValueMap.getOrDefault(MODE_PEN_MOSAIC+'-size',8));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingMosaicSize=$(MODE_PEN_MOSAIC+'-size');
 drawingMosaicCircleSize=$(MODE_PEN_MOSAIC+'-circle-size');
 break;
 case MODE_PEN_ERASER:
-settingsHTML+=addSlider(MODE_PEN_ERASER+'-line-width','size',1,150,penValueMap.getOrDefault(MODE_PEN_ERASER+'-line-width',5));
+settingsHTML+=addSlider(MODE_PEN_ERASER+'-line-width','size',1,150,sidebarValueMap.getOrDefault(MODE_PEN_ERASER+'-line-width',5));
 $('tool-settings').innerHTML=settingsHTML;
 
 drawingWidth=$(MODE_PEN_ERASER+'-line-width');

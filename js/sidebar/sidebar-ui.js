@@ -3,15 +3,6 @@ return this.has(key) ? this.get(key) : defaultValue;
 };
 
 const sidebarValueMap=new Map();
-const penValueMap=new Map();
-const effectValueMap=new Map();
-
-function savePenValueMap(element) {
-penValueMap.set(element.id,element.value);
-}
-function saveEffectValueMap(element) {
-effectValueMap.set(element.id,element.value);
-}
 
 function saveValueMap(element) {
 sidebarValueMap.set(element.id,element.value);
