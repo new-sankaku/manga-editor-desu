@@ -398,17 +398,20 @@ ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
 
 
 brush.mergeDrawings=function () {
+var existingImages=this.images.filter((img)=>this.canvas.contains(img));
+
+if (existingImages.length==0) {
+this.images=[];
+return;
+}
+
 var tempCanvas=document.createElement('canvas');
 var tempCtx=tempCanvas.getContext('2d');
 
 tempCanvas.width=this.canvas.width;
 tempCanvas.height=this.canvas.height;
 
-if (this.images.length==0) {
-return;
-}
-
-this.images.forEach((img)=>{
+existingImages.forEach((img)=>{
 tempCtx.drawImage(
 img.getElement(),
 img.left,
@@ -460,7 +463,7 @@ scaleX: 1,
 scaleY: 1
 });
 this.canvas.add(img);
-this.images.forEach((image)=>{
+existingImages.forEach((image)=>{
 this.canvas.remove(image);
 });
 this.images=[];
