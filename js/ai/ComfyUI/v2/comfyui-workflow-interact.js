@@ -50,7 +50,7 @@ this.element.innerHTML=`
 </div>
 <button id="comfyUIFwGenerateButton" class="comfui-sidebar-button">${testGenerate}</button>
 <div id="generatedImageContainer" class="comfui-generated-image-container">
- <img id="generatedImage" class="comfui-preview-image hidden" style="cursor:pointer;" title="Click to open in new tab">
+ <img id="generatedImage" class="comfui-preview-image hidden" style="cursor:pointer;" title="Click to enlarge">
 </div>
 
 <div>
@@ -68,7 +68,15 @@ closeButton.addEventListener("click",()=>this.hide());
 
 const generatedImage=this.element.querySelector("#generatedImage");
 generatedImage.addEventListener("click",()=>{
-if(generatedImage.src)window.open(generatedImage.src,"_blank");
+if(!generatedImage.src)return;
+const overlay=document.createElement("div");
+overlay.style.cssText="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer;";
+const img=document.createElement("img");
+img.src=generatedImage.src;
+img.style.cssText="max-width:95%;max-height:95%;object-fit:contain;";
+overlay.appendChild(img);
+overlay.addEventListener("click",()=>overlay.remove());
+document.body.appendChild(overlay);
 });
 
 this.setupEventListeners();
