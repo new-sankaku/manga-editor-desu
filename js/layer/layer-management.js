@@ -75,7 +75,7 @@ const topLevelLayers=layers.filter(layer=>{
 const isChildOfAnotherLayer=layers.some(parentLayer=>
 parentLayer.guids&&parentLayer.guids.includes(layer.guid)
 );
-return (layer.isPanel||isSpeechBubbleSVG(layer))&&!isChildOfAnotherLayer;
+return (layer.isPanel||isSpeechBubbleSVG(layer)||isFreehandBubblePath(layer))&&!isChildOfAnotherLayer;
 });
 
 topLevelLayers.forEach(layer=>{

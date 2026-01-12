@@ -1111,6 +1111,20 @@ function getElementClasses(element) {
                         <button id="sbMoveButton" data-i18n="sbMoveMode">Move Point</button>
                         <button id="sbDeleteButton" data-i18n="sbDeleteMode">Delete Point</button>
                     </div>
+                    <div class="input-group-multi" data-group="sbFreehandTextGroup">
+                        <button id="sbFreehandNothingText" onclick="sbFreehandTextChange('Nothing', this)" data-value="Nothing">
+                            <i class="material-icons">do_not_disturb</i>
+                            <i class="material-icons">text_fields</i>
+                        </button>
+                        <button id="sbFreehandHorizontalText" onclick="sbFreehandTextChange('Horizontal', this)" class="selected" data-value="Horizontal">
+                            <i class="material-icons">east</i>
+                            <i class="material-icons">text_fields</i>
+                        </button>
+                        <button id="sbFreehandVerticalText" onclick="sbFreehandTextChange('Vertical', this)" data-value="Vertical">
+                            <i class="material-icons">south</i>
+                            <i class="material-icons">text_fields</i>
+                        </button>
+                    </div>
                     <hr>
                     <div class="input-group">
                         <label for="sbStrokeColor" data-i18n="line">Line</label>
@@ -1140,7 +1154,7 @@ function getElementClasses(element) {
 
 
                     <div class="input-container-leftSpace" data-i18n-label="cornerRadius">
-                        <input type="range" id="sbSornerRadius" min="0" max="15" value="0">
+                        <input type="range" id="sbSornerRadius" min="0" max="15" value="2">
                     </div>
                     <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
                         <input type="range" id="sbFillOpacity" min="0" max="100" value="100">

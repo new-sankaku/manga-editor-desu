@@ -31,7 +31,16 @@ clearPenActiveButton();
 nonActiveClearButton();
 currentMode="select";
 setSBActiveButton(sbSelectButton);
+sbClear();
 sbClearControlePoints();
+canvas.forEachObject(obj=>{
+if(obj.customType==="freehandBubbleRect"){
+obj.set({selectable:false,evented:false});
+return;
+}
+obj.set({selectable:true,evented:true});
+});
+canvas.selection=true;
 }
 
 function pencilModeClear(type) {

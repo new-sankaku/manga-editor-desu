@@ -405,6 +405,7 @@ if (geometry&&geometry.isValid()) {
 createSpeechBubble(mergeOverlappingShapes(geometry));
 } else {
 canvasLogger.warn("jsts up error");
+sbClear();
 }
 
 points=[];
@@ -424,6 +425,7 @@ createSpeechBubble(mergeOverlappingShapes(geometry));
 points=[];
 } else {
 canvasLogger.warn("jsts up error");
+sbClear();
 }
 updateObjectSelectability();
 requestAnimationFrame(()=>canvas.renderAll());
@@ -493,9 +495,53 @@ canvas.remove(rect);
 event.target.targetObject.customType="";
 canvas.requestRenderAll();
 }
+if (isFreehandBubblePath(event.target)) {
+const rect=getFreehandBubbleRectByPath(event.target);
+const textbox=getFreehandBubbleTextByPath(event.target);
+canvas.remove(rect);
+canvas.remove(textbox);
+canvas.requestRenderAll();
+}
+if (isFreehandBubbleText(event.target)) {
+const rect=getFreehandBubbleRectByPath(event.target.targetObject);
+canvas.remove(rect);
+event.target.targetObject.customType="";
+canvas.requestRenderAll();
+}
 });
 
+canvas.on("object:moving",function (event) {
+if (isFreehandBubblePath(event.target)) {
+eventLogger.trace('object:moving freehandBubble');
+updateFreehandBubblePositions(event.target);
+canvas.requestRenderAll();
+}
+});
 
+canvas.on("mouse:up",function (event) {
+if (isFreehandBubblePath(event.target)) {
+eventLogger.trace('mouse:up freehandBubble');
+updateFreehandBubblePositions(event.target);
+}
+});
+
+canvas.on("text:changed",function (event) {
+if (isFreehandBubbleText(event.target)) {
+eventLogger.trace('text:changed freehandBubble');
+requestAnimationFrame(()=>{
+freehandBubbleTextChanged(event.target);
+});
+}
+});
+
+canvas.on("object:scaling",function (event) {
+if (isFreehandBubblePath(event.target)) {
+eventLogger.trace('object:scaling freehandBubble');
+event.target.baseScaleX=event.target.scaleX;
+event.target.baseScaleY=event.target.scaleY;
+updateFreehandBubbleMetrics(event.target);
+}
+});
 
 
 
