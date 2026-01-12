@@ -28,6 +28,20 @@ python 99_server.py
 - インデントは禁止（タブやスペースによる字下げをしない）
 - 無くても良い半角スペースは削除する
 
+## 履歴管理（Undo/Redo）に関する注意事項
+- 画像の削除と追加を連続で行う場合、中間状態が履歴に残らないようにすること
+- `changeDoNotSaveHistory()`と`changeDoSaveHistory()`で履歴保存を一時的に無効化する
+- 最終結果のみ`saveStateByManual()`で履歴に保存する
+- 例: オブジェクトを置き換える場合
+```javascript
+changeDoNotSaveHistory();
+canvas.remove(oldObject);
+canvas.add(newObject);
+changeDoSaveHistory();
+saveStateByManual();
+```
+- `activeObject.saveHistory = false;`でオブジェクト単位で履歴保存を無効化することも可能
+
 ## 画像データの保存に関する注意事項
 - `imageMap`に保存するデータは必ず`data:` URLまたはJSON文字列にすること
 - `blob:` URLは一時的な参照であり、セッション終了後やオリジン変更時に無効になる

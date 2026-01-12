@@ -717,11 +717,14 @@ scaleX: originalScaleX,
 scaleY: originalScaleY
 });
 copy(activeObject,img);
+changeDoNotSaveHistory();
 canvas.remove(activeObject);
 canvas.add(img);
+changeDoSaveHistory();
 canvas.setActiveObject(img);
 canvas.renderAll();
 updateLayerPanel();
+saveStateByManual();
 resolve();
 });
 });
