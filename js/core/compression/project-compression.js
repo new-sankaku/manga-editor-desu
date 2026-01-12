@@ -110,12 +110,12 @@ setCanvasGUID(guid);
 }
 }
 
-async function btmSaveProjectFile(guid=null) {
+async function btmSaveProjectFile(guid=null,openDrawer=true) {
 try {
 guid=guid||getCanvasGUID();
 const previewLink=getCropAndDownloadLinkByMultiplier(1,"jpeg");
 const lz4Blob=await generateBlobProjectFile();
-btmAddImage(previewLink,lz4Blob,guid);
+btmAddImage(previewLink,lz4Blob,guid,openDrawer);
 return;
 } catch (error) {
 throw error;

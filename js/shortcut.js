@@ -24,6 +24,8 @@ moveLeftFast: 'shift+left',
 moveRightFast: 'shift+right',
 moveUpFast: 'shift+up',
 moveDownFast: 'shift+down',
+projectSave:!isMacOs ? 'ctrl+s' : 'command+s',
+projectLoad:!isMacOs ? 'ctrl+o' : 'command+o',
 }
 
 var isLongPressDirection=false;
@@ -158,6 +160,22 @@ e.preventDefault();
 hotkeys(hotkeysMap.layerDown,'all',function (e) {
 if (canvas.getActiveObject()) {
 LayersDown();
+e.preventDefault();
+}
+});
+
+// bind project save shortcut
+hotkeys(hotkeysMap.projectSave,'all',function (e) {
+if (!isEditableTagsActive()) {
+$('projectSave').click();
+e.preventDefault();
+}
+});
+
+// bind project load shortcut
+hotkeys(hotkeysMap.projectLoad,'all',function (e) {
+if (!isEditableTagsActive()) {
+$('projectLoad').click();
 e.preventDefault();
 }
 });

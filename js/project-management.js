@@ -32,7 +32,7 @@ return;
 
 const loading=OP_showLoading({icon: 'process',step: 'Step1',substep: 'Save Project',progress: 0});
 
-btmSaveProjectFile().then(async ()=>{
+btmSaveProjectFile(null,false).then(async ()=>{
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step2',substep: 'Process 1',progress: 20});
 
 const lz4BlobList=Array.from(btmProjectsMap.values()).map(data=>data.blob);

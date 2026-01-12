@@ -27,7 +27,7 @@ btmDrawerHandle.textContent=btmDrawer.classList.contains("btm-closed") ? "OPEN" 
 }
 
 
-function btmAddImage(imageLink,blob,guid) {
+function btmAddImage(imageLink,blob,guid,openDrawer=true) {
 const projectData=btmProjectsMap.get(guid);
 
 if (projectData) {
@@ -114,12 +114,14 @@ btmProjectsMap.set(guid,{imageLink,blob});
 }
 
 btmDrawer.style.display="block";
+if (openDrawer) {
 if (btmDrawer.classList.contains("btm-closed")) {
 btmIgnoreClose=true;
 btmToggleDrawer();
 setTimeout(()=>{btmIgnoreClose=false;},200);
 } else {
 btmUpdateScrollButtons();
+}
 }
 }
 
