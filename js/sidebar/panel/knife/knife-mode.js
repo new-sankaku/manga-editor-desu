@@ -30,6 +30,12 @@ knifeModeButton.textContent=isKnifeMode
 : getText("knifeOn");
 
 if (isKnifeMode) {
+if(currentMode==="freehand"||currentMode==="point"){
+sbClear();
+sbClearControlePoints();
+points=[];
+}
+currentMode="select";
 activeClearButton();
 knifeModeButton.classList.add("selected");
 changeCursor("knife");

@@ -36,6 +36,55 @@ selectable: false
 }
 });
 
+var shiftTempDisabledMode=null;
+var shiftTempDisabledKnife=false;
+
+document.addEventListener("keydown",function(e){
+if(e.key!=="Shift"||shiftTempDisabledMode!==null||shiftTempDisabledKnife)return;
+if(currentMode==="freehand"||currentMode==="point"){
+shiftTempDisabledMode=currentMode;
+currentMode="select";
+canvas.selection=true;
+canvas.forEachObject(function(obj){
+if(obj.excludeFromLayerPanel)return;
+obj.set({selectable:true,evented:true});
+});
+changeDefaultCursor();
+canvas.renderAll();
+}else if(isKnifeMode){
+shiftTempDisabledKnife=true;
+canvas.selection=true;
+canvas.forEachObject(function(obj){
+if(obj.excludeFromLayerPanel)return;
+obj.set({selectable:true,evented:true});
+});
+changeDefaultCursor();
+canvas.renderAll();
+}
+});
+
+document.addEventListener("keyup",function(e){
+if(e.key!=="Shift")return;
+if(shiftTempDisabledMode!==null){
+currentMode=shiftTempDisabledMode;
+shiftTempDisabledMode=null;
+canvas.selection=false;
+canvas.forEachObject(function(obj){
+obj.set({selectable:false,evented:false});
+});
+changeCursor(currentMode);
+canvas.renderAll();
+}else if(shiftTempDisabledKnife){
+shiftTempDisabledKnife=false;
+canvas.selection=false;
+canvas.forEachObject(function(obj){
+obj.set({selectable:false,evented:false});
+});
+changeCursor("knife");
+canvas.renderAll();
+}
+});
+
 canvas.on("object:modified",(e)=>{
 eventLogger.trace('5: object:modified');
 const obj=e.target;
@@ -250,7 +299,7 @@ highlightActiveLayerByCanvas(e.target);
 
 canvas.on("mouse:down",function (options) {
 eventLogger.trace('20: mouse:down');
-if (!isKnifeMode) return;
+if (!isKnifeMode||shiftTempDisabledKnife) return;
 
 var pointer=canvas.getPointer(options.e);
 var selectedPolygon=getPolygonAtPoint(pointer);
@@ -269,7 +318,7 @@ canvas.discardActiveObject().renderAll();
 
 canvas.on("mouse:up",function (options) {
 eventLogger.trace('21: mouse:up');
-if (!isKnifeMode||!isKnifeDrawing) return;
+if (!isKnifeMode||!isKnifeDrawing||shiftTempDisabledKnife) return;
 
 isKnifeDrawing=false;
 
@@ -282,7 +331,7 @@ currentKnifeLine=null;
 });
 
 canvas.on("mouse:move",function (options) {
-if (!isKnifeMode||!isKnifeDrawing) return;
+if (!isKnifeMode||!isKnifeDrawing||shiftTempDisabledKnife) return;
 eventLogger.trace('22: mouse:move');
 
 var pointer=canvas.getPointer(options.e);

@@ -460,6 +460,10 @@ requestAnimationFrame(()=>canvas.renderAll());
 
 function setDrawingMode(button) {
 freehandBubbleLogger.debug("setDrawingMode called, currentMode="+currentMode);
+if(isKnifeMode){
+isKnifeMode=false;
+updateKnifeMode();
+}
 canvas.selection=false;
 setSBActiveButton(button);
 sbClear();
@@ -481,6 +485,10 @@ freehandBubbleLogger.debug("setDrawingMode completed");
 }
 
 function setSelectionMode(button) {
+if(isKnifeMode){
+isKnifeMode=false;
+updateKnifeMode();
+}
 setSBActiveButton(button);
 canvas.selection=currentMode==="select";
 if (editingGroup) canvas.remove(editingGroup);
