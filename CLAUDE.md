@@ -28,6 +28,13 @@ python 99_server.py
 - インデントは禁止（タブやスペースによる字下げをしない）
 - 無くても良い半角スペースは削除する
 
+## ログ出力に関する注意事項
+- `console.log`は使用禁止。代わりに`js/core/logger.js`のLoggerを使用すること
+- 各モジュールで`SimpleLogger`を使ってロガーを作成する
+- 例: `var canvasLogger = new SimpleLogger('canvas', LogLevel.DEBUG);`
+- ログレベル: TRACE, DEBUG, INFO, WARN, ERROR, SILENT
+- 使用例: `canvasLogger.debug("message");`, `canvasLogger.error("error message");`
+
 ## 履歴管理（Undo/Redo）に関する注意事項
 - 画像の削除と追加を連続で行う場合、中間状態が履歴に残らないようにすること
 - `changeDoNotSaveHistory()`と`changeDoSaveHistory()`で履歴保存を一時的に無効化する

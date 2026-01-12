@@ -34,10 +34,7 @@ putImageInFrame(svgText,canvasX,canvasY);
 // SVGをFabric.jsのCanvasに読み込む
 fabric.loadSVGFromString(svgText,function(objects,options) {
 var loadedObject=fabric.util.groupSVGElements(objects,options);
-resizeCanvasByNum(loadedObject.width,loadedObject.height);
-initialPutImage(loadedObject,0,0);
-canvas.add(loadedObject);
-canvas.renderAll();
+addInitialImageToCanvas(loadedObject);
 });
 }
 };
@@ -65,9 +62,7 @@ var canvasX=x/canvasContinerScale;
 var canvasY=y/canvasContinerScale;
 putImageInFrame(img,canvasX,canvasY);
 } else {
-// console.log("drop img.width, img.height", img.width, img.height);
-resizeCanvasByNum(img.width,img.height);
-initialPutImage(img,0,0);
+addInitialImageToCanvas(img);
 }
 
 setImage2ImageInitPrompt(img);

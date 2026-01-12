@@ -97,9 +97,7 @@ newHeight=windowWidth/aspectRatio;
 
 if (forced) {
 //next
-// console.log( "adjustCanvasSize forced true" );
 } else if (newWidth==canvas.getWidth()&&newHeight==canvas.getHeight()) {
-// console.log( "adjustCanvasSize forced false" );
 return;
 }
 
@@ -107,6 +105,28 @@ resizeCanvas(newWidth,newHeight);
 }
 
 window.addEventListener("resize",adjustCanvasSize);
+
+function adjustCanvasSizeWithContainer(windowWidth,windowHeight) {
+const windowAspectRatio=windowWidth/windowHeight;
+let newWidth,newHeight;
+if (windowAspectRatio>aspectRatio) {
+newHeight=windowHeight;
+newWidth=windowHeight*aspectRatio;
+} else {
+newWidth=windowWidth;
+newHeight=windowWidth/aspectRatio;
+}
+resizeCanvas(newWidth,newHeight);
+}
+
+function addInitialImageToCanvas(img) {
+var container=$("canvas-container");
+var containerWidth=container.clientWidth;
+var containerHeight=container.clientHeight;
+resizeCanvasByNum(img.width,img.height);
+initialPutImage(img);
+adjustCanvasSizeWithContainer(containerWidth,containerHeight);
+}
 
 
 function resizeCanvasToObject(objectWidth,objectHeight) {
@@ -227,9 +247,7 @@ canvas.add(img);
 canvas.renderAll();
 }else{
 canvasLogger.debug("imageInput resizeCanvasByNum ");
-resizeCanvasByNum(img.width,img.height);
-canvas.add(img);
-canvas.renderAll();
+addInitialImageToCanvas(img);
 }
 });
 };

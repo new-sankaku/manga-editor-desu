@@ -397,7 +397,7 @@ return allPassed;
 }
 
 document.addEventListener('DOMContentLoaded',function(){
-verifyLoggers();
+// verifyLoggers();
 });
 
 window.runAllTests=runAllTests;
