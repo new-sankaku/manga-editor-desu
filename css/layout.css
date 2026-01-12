@@ -179,6 +179,14 @@
  max-width: var(--max-width-150);
  width: var(--width-50);
 }
+.A1111_api_content,
+.Comfyui_api_content {
+  padding: 8px 12px;
+}
+.A1111_api_content li,
+.Comfyui_api_content li {
+  padding: 4px 0;
+}
 .A1111_api_content li a {
   width: 280px;
   display: block;
