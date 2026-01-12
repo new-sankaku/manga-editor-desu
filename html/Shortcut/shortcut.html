@@ -1,273 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="title">Shortcut Function Introduction</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        .container {
-            width: 90%;
-            margin: auto;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        h1, h2 {
-            color: #333;
-        }
-        p, td {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.6;
-        }
-        code {
-            display: block;
-            background-color: #eee;
-            padding: 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            margin: 10px 0;
-            overflow-x: auto;
-        }
-        strong {
-            color: #333;
-        }
-        select {
-            font-family: Arial, sans-serif;
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            margin: 10px 0;
-            font-size: 16px;
-        }
-        .btn-group {
-            margin-bottom: 20px;
-        }
-    </style>
-    <script src="../../third/i18next/i18next.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="title">Keyboard Shortcuts</title>
+<link rel="stylesheet" href="../common.css">
+<script src="../../third/i18next/i18next.min.js"></script>
 </head>
 <body>
-    <div>Translation is Chat GPT4. English 日本語 한국어 中文 Français</div>
-    <div class="container">
-        <div class="btn-group" role="group" aria-label="Language switcher">
-            <button type="button" class="btn btn-primary" onclick="changeLanguage('en')">English</button>
-            <button type="button" class="btn btn-secondary" onclick="changeLanguage('ja')">日本語</button>
-            <button type="button" class="btn btn-secondary" onclick="changeLanguage('ko')">한국어</button>
-            <button type="button" class="btn btn-secondary" onclick="changeLanguage('zh')">中文</button>
-            <button type="button" class="btn btn-secondary" onclick="changeLanguage('fr')">Français</button>
-        </div>
-        <h1 data-i18n="title">Shortcut Function Introduction</h1>
-        <p data-i18n="description">This page introduces the shortcut key functions available on the canvas.</p>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn" onclick="changeLanguage('en')">English</button>
+<button class="lang-btn active" onclick="changeLanguage('ja')">日本語</button>
+<button class="lang-btn" onclick="changeLanguage('ko')">한국어</button>
+<button class="lang-btn" onclick="changeLanguage('zh')">中文</button>
+<button class="lang-btn" onclick="changeLanguage('fr')">Français</button>
+</div>
 
-        <h2 data-i18n="shortcutListTitle">Shortcut Key List</h2>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th data-i18n="shortcutKeys">Shortcut Keys</th>
-                    <th data-i18n="function">Function</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Ctrl + G</td>
-                    <td data-i18n="toggleGrid">Toggle grid display</td>
-                </tr>
-                <tr>
-                    <td>Ctrl(⌘) + Z</td>
-                    <td data-i18n="undo">Undo</td>
-                </tr>
-                <tr>
-                    <td>Ctrl(⌘) + Y</td>
-                    <td data-i18n="redo">Redo</td>
-                </tr>
-                <tr>
-                    <td>Ctrl(⌘) + C</td>
-                    <td data-i18n="copy">Copy( When Image is selected )</td>
-                </tr>
-                <tr>
-                    <td>Ctrl(⌘) + V</td>
-                    <td data-i18n="paste">When a panel is selected: Copy image to place the image inside the panel. When something other than a panel is selected: Copy image to place the image inside the Canvas.</td>
-                </tr>
-                <tr>
-                    <td>Delete / Backspace</td>
-                    <td data-i18n="deleteLayer">Delete selected layer</td>
-                </tr>
-                <tr>
-                    <td data-i18n="arrowKeys">Arrow Keys</td>
-                    <td data-i18n="moveObject">Move selected object</td>
-                </tr>
-                <tr>
-                    <td>Ctrl + L</td>
-                    <td data-i18n="toggleLayerPanel">Toggle layer panel display</td>
-                </tr>
-                <tr>
-                    <td>Ctrl + K</td>
-                    <td data-i18n="toggleControls">Toggle controls display</td>
-                </tr>
-                <tr>
-                    <td>Ctrl + 8</td>
-                    <td data-i18n="Ctril8">Zoom in canvas.</td>
-                </tr>
-                <tr>
-                    <td>Ctrl + 9</td>
-                    <td data-i18n="Ctril9">Zoom out canvas.</td>
-                </tr>
-                <tr>
-                    <td>Ctrl + 0</td>
-                    <td data-i18n="Ctril0">Zoom reset canvas.</td>
-                </tr>
+<h1 data-i18n="title">Keyboard Shortcuts</h1>
+<p data-i18n="description">Available keyboard shortcuts on the canvas.</p>
 
-            </tbody>
-        </table>
-    </div>
+<div class="card">
+<table>
+<thead>
+<tr>
+<th data-i18n="shortcutKeys">Shortcut</th>
+<th data-i18n="function">Function</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>Ctrl + G</td><td data-i18n="toggleGrid">Toggle grid</td></tr>
+<tr><td>Ctrl(⌘) + Z</td><td data-i18n="undo">Undo</td></tr>
+<tr><td>Ctrl(⌘) + Y</td><td data-i18n="redo">Redo</td></tr>
+<tr><td>Ctrl(⌘) + C</td><td data-i18n="copy">Copy</td></tr>
+<tr><td>Ctrl(⌘) + V</td><td data-i18n="paste">Paste</td></tr>
+<tr><td>Delete / Backspace</td><td data-i18n="deleteLayer">Delete layer</td></tr>
+<tr><td data-i18n="arrowKeys">Arrow Keys</td><td data-i18n="moveObject">Move object</td></tr>
+<tr><td>Ctrl + L</td><td data-i18n="toggleLayerPanel">Toggle layer panel</td></tr>
+<tr><td>Ctrl + K</td><td data-i18n="toggleControls">Toggle controls</td></tr>
+<tr><td>Ctrl + 8</td><td data-i18n="Ctril8">Zoom in</td></tr>
+<tr><td>Ctrl + 9</td><td data-i18n="Ctril9">Zoom out</td></tr>
+<tr><td>Ctrl + 0</td><td data-i18n="Ctril0">Reset zoom</td></tr>
+<tr><td>Escape</td><td data-i18n="deselect">Deselect</td></tr>
+<tr><td>Ctrl(⌘) + ↑</td><td data-i18n="layerUp">Layer forward</td></tr>
+<tr><td>Ctrl(⌘) + ↓</td><td data-i18n="layerDown">Layer backward</td></tr>
+<tr><td data-i18n="shiftArrowKeys">Shift + Arrow</td><td data-i18n="moveObjectFast">Move (10px)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
 
-    <script>
-        const resources = {
-            en: {
-                translation: {
-                    "Ctril8": "Zoom in canvas.",
-                    "Ctril9": "Zoom out canvas.",
-                    "Ctril0": "Zoom reset canvas.",
+<script>
+const resources = {
+en: {
+translation: {
+"Ctril8": "Zoom in",
+"Ctril9": "Zoom out",
+"Ctril0": "Reset zoom",
+"title": "Keyboard Shortcuts",
+"description": "Available keyboard shortcuts on the canvas.",
+"shortcutKeys": "Shortcut",
+"function": "Function",
+"toggleGrid": "Toggle grid",
+"undo": "Undo",
+"redo": "Redo",
+"copy": "Copy",
+"paste": "Paste",
+"deleteLayer": "Delete layer",
+"arrowKeys": "Arrow Keys",
+"moveObject": "Move object",
+"toggleLayerPanel": "Toggle layer panel",
+"toggleControls": "Toggle controls",
+"deselect": "Deselect",
+"layerUp": "Layer forward",
+"layerDown": "Layer backward",
+"shiftArrowKeys": "Shift + Arrow",
+"moveObjectFast": "Move (10px)"
+}
+},
+ja: {
+translation: {
+"Ctril8": "拡大",
+"Ctril9": "縮小",
+"Ctril0": "ズームリセット",
+"title": "ショートカット一覧",
+"description": "キャンバスで使用できるショートカットキーです。",
+"shortcutKeys": "キー",
+"function": "機能",
+"toggleGrid": "グリッド切替",
+"undo": "元に戻す",
+"redo": "やり直す",
+"copy": "コピー",
+"paste": "ペースト",
+"deleteLayer": "レイヤー削除",
+"arrowKeys": "矢印キー",
+"moveObject": "オブジェクト移動",
+"toggleLayerPanel": "レイヤーパネル切替",
+"toggleControls": "コントロール切替",
+"deselect": "選択解除",
+"layerUp": "レイヤーを前面へ",
+"layerDown": "レイヤーを背面へ",
+"shiftArrowKeys": "Shift + 矢印",
+"moveObjectFast": "移動（10px）"
+}
+},
+ko: {
+translation: {
+"Ctril8": "확대",
+"Ctril9": "축소",
+"Ctril0": "줌 리셋",
+"title": "단축키 목록",
+"description": "캔버스에서 사용 가능한 단축키입니다.",
+"shortcutKeys": "단축키",
+"function": "기능",
+"toggleGrid": "그리드 전환",
+"undo": "실행 취소",
+"redo": "다시 실행",
+"copy": "복사",
+"paste": "붙여넣기",
+"deleteLayer": "레이어 삭제",
+"arrowKeys": "화살표 키",
+"moveObject": "객체 이동",
+"toggleLayerPanel": "레이어 패널 전환",
+"toggleControls": "컨트롤 전환",
+"deselect": "선택 해제",
+"layerUp": "레이어 앞으로",
+"layerDown": "레이어 뒤로",
+"shiftArrowKeys": "Shift + 방향키",
+"moveObjectFast": "이동 (10px)"
+}
+},
+zh: {
+translation: {
+"Ctril8": "放大",
+"Ctril9": "缩小",
+"Ctril0": "重置缩放",
+"title": "快捷键列表",
+"description": "画布上可用的快捷键。",
+"shortcutKeys": "快捷键",
+"function": "功能",
+"toggleGrid": "切换网格",
+"undo": "撤销",
+"redo": "重做",
+"copy": "复制",
+"paste": "粘贴",
+"deleteLayer": "删除图层",
+"arrowKeys": "方向键",
+"moveObject": "移动对象",
+"toggleLayerPanel": "切换图层面板",
+"toggleControls": "切换控件",
+"deselect": "取消选择",
+"layerUp": "图层前移",
+"layerDown": "图层后移",
+"shiftArrowKeys": "Shift + 方向键",
+"moveObjectFast": "移动（10px）"
+}
+},
+fr: {
+translation: {
+"Ctril8": "Zoom avant",
+"Ctril9": "Zoom arrière",
+"Ctril0": "Réinitialiser zoom",
+"title": "Raccourcis clavier",
+"description": "Raccourcis disponibles sur le canevas.",
+"shortcutKeys": "Raccourci",
+"function": "Fonction",
+"toggleGrid": "Basculer grille",
+"undo": "Annuler",
+"redo": "Rétablir",
+"copy": "Copier",
+"paste": "Coller",
+"deleteLayer": "Supprimer calque",
+"arrowKeys": "Flèches",
+"moveObject": "Déplacer objet",
+"toggleLayerPanel": "Basculer panneau",
+"toggleControls": "Basculer contrôles",
+"deselect": "Désélectionner",
+"layerUp": "Calque avant",
+"layerDown": "Calque arrière",
+"shiftArrowKeys": "Shift + Flèches",
+"moveObjectFast": "Déplacer (10px)"
+}
+}
+};
 
-                    "title": "Shortcut Function Introduction",
-                    "description": "This page introduces the shortcut key functions available on the canvas.",
-                    "shortcutListTitle": "Shortcut Key List",
-                    "shortcutKeys": "Shortcut Keys",
-                    "function": "Function",
-                    "toggleGrid": "Toggle grid display",
-                    "undo": "Undo",
-                    "redo": "Redo",
-                    "copy": "Copy( When Image is selected )",
-                    "paste": "When a panel is selected: Copy image to place the image inside the panel. When something other than a panel is selected: Copy image to place the image inside the Canvas.",
-                    "deleteLayer": "Delete selected layer",
-                    "arrowKeys": "Arrow Keys",
-                    "moveObject": "Move selected object",
-                    "toggleLayerPanel": "Toggle layer panel display",
-                    "toggleControls": "Toggle controls display"
-                }
-            },
-            ja: {
-                translation: {
-                    "Ctril8": "キャンバスを拡大。",
-                    "Ctril9": "キャンバスを縮小。",
-                    "Ctril0": "キャンバスのズームをリセット。",
+i18next.init({
+lng: 'ja',
+resources: resources
+}, function(err, t) {
+updateContent();
+});
 
-                    "title": "ショートカット機能の紹介",
-                    "description": "このページでは、キャンバス上で使用できるショートカットキーの機能を紹介します。",
-                    "shortcutListTitle": "ショートカットキー一覧",
-                    "shortcutKeys": "ショートカットキー",
-                    "function": "機能",
-                    "toggleGrid": "グリッドの表示/非表示を切り替える",
-                    "undo": "元に戻す",
-                    "redo": "やり直す",
-                    "copy": "コピー(画像選択時)",
-                    "paste": "パネルが選択されている場合: 画像をコピーして、パネル内に画像を配置します。 パネル以外が選択されている場合: 画像をコピーして、キャンバス内に画像を配置します。",
-                    "deleteLayer": "選択したレイヤーを削除する",
-                    "arrowKeys": "矢印キー",
-                    "moveObject": "選択したオブジェクトを移動する",
-                    "toggleLayerPanel": "レイヤーパネルの表示/非表示を切り替える",
-                    "toggleControls": "コントロールの表示/非表示を切り替える"
-                }
-            },
-            ko: {
-                translation: {
-                    "Ctril8": "캔버스 확대하기.",
-                    "Ctril9": "캔버스 축소하기.",
-                    "Ctril0": "캔버스 줌 리셋.",
+function updateContent() {
+document.title = i18next.t('title');
+document.querySelectorAll('[data-i18n]').forEach(function(elem) {
+elem.textContent = i18next.t(elem.getAttribute('data-i18n'));
+});
+}
 
-                    "title": "단축키 기능 소개",
-                    "description": "이 페이지에서는 캔버스에서 사용할 수 있는 단축키 기능을 소개합니다.",
-                    "shortcutListTitle": "단축키 목록",
-                    "shortcutKeys": "단축키",
-                    "function": "기능",
-                    "toggleGrid": "그리드 표시 전환",
-                    "undo": "실행 취소",
-                    "redo": "다시 실행",
-                    "copy": "복사( When Image is selected )",
-                    "paste": "패널을 선택한 경우: 이미지를 복사하여 패널에 이미지를 배치합니다. 패널 이외를 선택한 경우: 이미지를 복사하여 캔버스에 이미지를 배치합니다.",
-                    "deleteLayer": "선택한 레이어 삭제",
-                    "arrowKeys": "화살표 키",
-                    "moveObject": "선택한 객체 이동",
-                    "toggleLayerPanel": "레이어 패널 표시 전환",
-                    "toggleControls": "컨트롤 표시 전환"
-                }
-            },
-            zh: {
-                translation: {
-                    "Ctril8": "放大画布。",
-                    "Ctril9": "缩小画布。",
-                    "Ctril0": "重置画布缩放。",
-
-                    "title": "快捷键功能介绍",
-                    "description": "本页面介绍了画布上可用的快捷键功能。",
-                    "shortcutListTitle": "快捷键列表",
-                    "shortcutKeys": "快捷键",
-                    "function": "功能",
-                    "toggleGrid": "切换网格显示",
-                    "undo": "撤销",
-                    "redo": "重做",
-                    "copy": "复制( When Image is selected )",
-                    "paste": "如果选择了面板：复制图像并将图像放置在面板内。 如果选择面板以外的其他内容：复制图像并将其放置在画布内。",
-                    "deleteLayer": "删除选定的图层",
-                    "arrowKeys": "方向键",
-                    "moveObject": "移动选定的对象",
-                    "toggleLayerPanel": "切换图层面板显示",
-                    "toggleControls": "切换控件显示"
-                }
-            },
-            fr: {
-                translation: {
-                    "Ctril8": "Agrandir le canevas.",
-                    "Ctril9": "Réduire le canevas.",
-                    "Ctril0": "Réinitialiser le zoom du canevas.",
-
-                    "title": "Présentation des fonctions de raccourcis",
-                    "description": "Cette page présente les fonctions des raccourcis clavier disponibles sur le canevas.",
-                    "shortcutListTitle": "Liste des raccourcis clavier",
-                    "shortcutKeys": "Raccourcis clavier",
-                    "function": "Fonction",
-                    "toggleGrid": "Basculer l'affichage de la grille",
-                    "undo": "Annuler",
-                    "redo": "Rétablir",
-                    "copy": "Copier( When Image is selected )",
-                    "paste": "Si un panneau est sélectionné : copiez l'image et placez l'image à l'intérieur du panneau. Si quelque chose autre qu'un panneau est sélectionné : copiez l'image et placez-la à l'intérieur du canevas.",
-                    "deleteLayer": "Supprimer le calque sélectionné",
-                    "arrowKeys": "Touches fléchées",
-                    "moveObject": "Déplacer l'objet sélectionné",
-                    "toggleLayerPanel": "Basculer l'affichage du panneau des calques",
-                    "toggleControls": "Basculer l'affichage des contrôles"
-                }
-            }
-        };
-
-        i18next.init({
-            lng: 'en', // 初期言語設定
-            debug: true,
-            resources: resources
-        }, function(err, t) {
-            // 初期化完了後にコンテンツを更新
-            updateContent();
-        });
-
-        function updateContent() {
-            document.title = i18next.t('title');
-            document.querySelectorAll('[data-i18n]').forEach(function(elem) {
-                elem.textContent = i18next.t(elem.getAttribute('data-i18n'));
-            });
-        }
-
-        // 言語切り替え機能
-        function changeLanguage(lng) {
-            i18next.changeLanguage(lng, function(err, t) {
-                updateContent();
-            });
-        }
-    </script>
+function changeLanguage(lng) {
+document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+i18next.changeLanguage(lng, function(err, t) {
+updateContent();
+});
+}
+</script>
 </body>
 </html>

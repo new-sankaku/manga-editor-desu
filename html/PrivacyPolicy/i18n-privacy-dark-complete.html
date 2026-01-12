@@ -1,346 +1,165 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Privacy Policy</title>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/23.8.2/i18next.min.js"></script>
- <style>
-   :root {
-     --bg-color: #1a1a1a;
-     --text-color: #e0e0e0;
-     --accent-color: #7c4dff;
-     --secondary-bg: #2d2d2d;
-     --hover-color: #9e7bff;
-     --notice-bg: #2d2d2d;
-     --notice-border: #3d3d3d;
-   }
-
-   body {
-     font-family: 'Segoe UI', Arial, sans-serif;
-     line-height: 1.8;
-     max-width: 800px;
-     margin: 0 auto;
-     padding: 20px;
-     background-color: var(--bg-color);
-     color: var(--text-color);
-   }
-
-   .lang-buttons {
-     margin-bottom: 40px;
-     text-align: center;
-     display: flex;
-     flex-wrap: wrap;
-     gap: 10px;
-     justify-content: center;
-   }
-
-   .lang-button {
-     padding: 10px 20px;
-     border: 1px solid var(--accent-color);
-     border-radius: 8px;
-     background: transparent;
-     color: var(--text-color);
-     cursor: pointer;
-     transition: all 0.3s ease;
-     font-size: 0.9rem;
-     letter-spacing: 0.5px;
-   }
-
-   .lang-button:hover {
-     background: var(--hover-color);
-     transform: translateY(-2px);
-   }
-
-   .lang-button.active {
-     background: var(--accent-color);
-     color: white;
-     box-shadow: 0 4px 12px rgba(124, 77, 255, 0.2);
-   }
-
-   .notice {
-     background-color: var(--notice-bg);
-     border: 1px solid var(--notice-border);
-     padding: 20px;
-     margin-bottom: 40px;
-     border-radius: 12px;
-     font-size: 0.95rem;
-     line-height: 1.6;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   }
-
-   .policy-content {
-     background: var(--secondary-bg);
-     padding: 30px;
-     border-radius: 12px;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   }
-
-   h2 {
-     color: var(--accent-color);
-     font-size: 1.8rem;
-     margin-bottom: 30px;
-     border-bottom: 2px solid var(--accent-color);
-     padding-bottom: 10px;
-   }
-
-   h3 {
-     color: var(--hover-color);
-     font-size: 1.3rem;
-     margin-top: 30px;
-     margin-bottom: 20px;
-   }
-
-   ul {
-     padding-left: 20px;
-     margin-bottom: 30px;
-   }
-
-   li {
-     margin-bottom: 10px;
-     position: relative;
-   }
-
-   li::before {
-     content: "•";
-     color: var(--accent-color);
-     font-weight: bold;
-     position: absolute;
-     left: -15px;
-   }
-
-   p {
-     margin-bottom: 20px;
-     opacity: 0.9;
-   }
-
-   @media (max-width: 600px) {
-     body {
-       padding: 15px;
-     }
-
-     .policy-content {
-       padding: 20px;
-     }
-
-     h2 {
-       font-size: 1.5rem;
-     }
-
-     .lang-button {
-       padding: 8px 16px;
-     }
-   }
- </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy</title>
+<link rel="stylesheet" href="../common.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/23.8.2/i18next.min.js"></script>
 </head>
 <body>
- <div class="lang-buttons">
-   <button class="lang-button" data-lang="ja">日本語</button>
-   <button class="lang-button" data-lang="en">English</button>
-   <button class="lang-button" data-lang="zh">中文</button>
-   <button class="lang-button" data-lang="ko">한국어</button>
-   <button class="lang-button" data-lang="fr">Français</button>
-   <button class="lang-button" data-lang="de">Deutsch</button>
- </div>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn active" data-lang="ja">日本語</button>
+<button class="lang-btn" data-lang="en">English</button>
+<button class="lang-btn" data-lang="zh">中文</button>
+<button class="lang-btn" data-lang="ko">한국어</button>
+<button class="lang-btn" data-lang="fr">Français</button>
+<button class="lang-btn" data-lang="de">Deutsch</button>
+</div>
 
- <div class="notice" data-i18n="notice"></div>
+<p class="notice" data-i18n="notice"></p>
 
- <div class="policy-content">
-   <h2 data-i18n="privacy.title"></h2>
-   
-   <h3 data-i18n="privacy.collection.title"></h3>
-   <p data-i18n="privacy.collection.description"></p>
-   <p data-i18n="privacy.collection.items"></p>
-   <ul>
-     <li data-i18n="privacy.collection.list.source"></li>
-     <li data-i18n="privacy.collection.list.pages"></li>
-     <li data-i18n="privacy.collection.list.device"></li>
-     <li data-i18n="privacy.collection.list.duration"></li>
-   </ul>
+<div class="card">
+<h1 data-i18n="privacy.title"></h1>
 
-   <h3 data-i18n="privacy.analytics.title"></h3>
-   <p data-i18n="privacy.analytics.description"></p>
-   <p data-i18n="privacy.analytics.cookie"></p>
- </div>
+<h2 data-i18n="privacy.collection.title"></h2>
+<p data-i18n="privacy.collection.description"></p>
+<p data-i18n="privacy.collection.items"></p>
+<ul>
+<li data-i18n="privacy.collection.list.source"></li>
+<li data-i18n="privacy.collection.list.pages"></li>
+<li data-i18n="privacy.collection.list.device"></li>
+<li data-i18n="privacy.collection.list.duration"></li>
+</ul>
 
- <script>
-   const resources = {
-     ja: {
-       translation: {
-         notice: "※ 各言語版に相違がある場合は、日本語版が優先されます。",
-         privacy: {
-           title: "プライバシーポリシー",
-           collection: {
-             title: "1. 情報の収集と利用目的",
-             description: "当サイトでは、Google アナリティクスを使用してサイトの利用状況を確認しています。",
-             items: "これにより以下の情報が収集されます：",
-             list: {
-               source: "アクセス元情報",
-               pages: "閲覧したページの情報",
-               device: "使用したデバイスの情報",
-               duration: "滞在時間などの利用状況"
-             }
-           },
-           analytics: {
-             title: "2. Google アナリティクスの使用について",
-             description: "Google アナリティクスは完全に匿名な形で利用情報を収集します、個人が特定されることはありません。",
-             cookie: "データの収集のためにCookieを使用します。"
-           }
-         }
-       }
-     },
-     en: {
-       translation: {
-         notice: "* In case of any discrepancy between language versions, the Japanese version shall prevail.",
-         privacy: {
-           title: "Privacy Policy",
-           collection: {
-             title: "1. Information Collection and Purpose",
-             description: "This website uses Google Analytics to monitor site usage.",
-             items: "The following information is collected:",
-             list: {
-               source: "Access source information",
-               pages: "Viewed page information",
-               device: "Device information",
-               duration: "Usage data such as duration of visit"
-             }
-           },
-           analytics: {
-             title: "2. Use of Google Analytics",
-             description: "Google Analytics collects usage information completely anonymously, and individuals cannot be identified.",
-             cookie: "Cookies are used for data collection."
-           }
-         }
-       }
-     },
-     zh: {
-       translation: {
-         notice: "* 如果语言版本之间存在差异，以日文版本为准。",
-         privacy: {
-           title: "隐私政策",
-           collection: {
-             title: "1. 信息收集和使用目的",
-             description: "本网站使用Google Analytics来监控网站使用情况。",
-             items: "收集以下信息：",
-             list: {
-               source: "访问来源信息",
-               pages: "浏览页面信息",
-               device: "设备信息",
-               duration: "访问时长等使用数据"
-             }
-           },
-           analytics: {
-             title: "2. Google Analytics的使用",
-             description: "Google Analytics完全匿名收集使用信息，不会识别个人身份。",
-             cookie: "数据收集使用Cookie。"
-           }
-         }
-       }
-     },
-     ko: {
-       translation: {
-         notice: "* 언어 버전 간 차이가 있는 경우 일본어 버전이 우선됩니다.",
-         privacy: {
-           title: "개인정보 처리방침",
-           collection: {
-             title: "1. 정보 수집 및 이용 목적",
-             description: "본 웹사이트는 Google 애널리틱스를 사용하여 사이트 이용 현황을 모니터링합니다.",
-             items: "다음과 같은 정보가 수집됩니다:",
-             list: {
-               source: "접속 출처 정보",
-               pages: "조회한 페이지 정보",
-               device: "사용 기기 정보",
-               duration: "체류 시간 등 이용 데이터"
-             }
-           },
-           analytics: {
-             title: "2. Google 애널리틱스 사용에 대하여",
-             description: "Google 애널리틱스는 완전히 익명으로 이용 정보를 수집하며, 개인을 식별할 수 없습니다.",
-             cookie: "데이터 수집을 위해 쿠키를 사용합니다."
-           }
-         }
-       }
-     },
-     fr: {
-       translation: {
-         notice: "* En cas de divergence entre les versions linguistiques, la version japonaise prévaut.",
-         privacy: {
-           title: "Politique de Confidentialité",
-           collection: {
-             title: "1. Collecte d'Informations et Objectif",
-             description: "Ce site utilise Google Analytics pour surveiller l'utilisation du site.",
-             items: "Les informations suivantes sont collectées :",
-             list: {
-               source: "Informations sur la source d'accès",
-               pages: "Informations sur les pages consultées",
-               device: "Informations sur l'appareil",
-               duration: "Données d'utilisation telles que la durée de visite"
-             }
-           },
-           analytics: {
-             title: "2. Utilisation de Google Analytics",
-             description: "Google Analytics collecte les informations d'utilisation de manière totalement anonyme, et les individus ne peuvent pas être identifiés.",
-             cookie: "Des cookies sont utilisés pour la collecte de données."
-           }
-         }
-       }
-     },
-     de: {
-       translation: {
-         notice: "* Bei Abweichungen zwischen den Sprachversionen ist die japanische Version maßgebend.",
-         privacy: {
-           title: "Datenschutzerklärung",
-           collection: {
-             title: "1. Informationserfassung und Zweck",
-             description: "Diese Website verwendet Google Analytics zur Überwachung der Websitenutzung.",
-             items: "Folgende Informationen werden erfasst:",
-             list: {
-               source: "Zugriffsquelleninformationen",
-               pages: "Informationen zu aufgerufenen Seiten",
-               device: "Geräteinformationen",
-               duration: "Nutzungsdaten wie Besuchsdauer"
-             }
-           },
-           analytics: {
-             title: "2. Verwendung von Google Analytics",
-             description: "Google Analytics erfasst Nutzungsinformationen vollständig anonym, und Einzelpersonen können nicht identifiziert werden.",
-             cookie: "Für die Datenerfassung werden Cookies verwendet."
-           }
-         }
-       }
-     }
-   };
+<h2 data-i18n="privacy.analytics.title"></h2>
+<p data-i18n="privacy.analytics.description"></p>
+<p data-i18n="privacy.analytics.cookie"></p>
+</div>
+</div>
 
-   i18next.init({
-     resources,
-     lng: 'ja',
-     interpolation: { escapeValue: false }
-   }).then(function() {
-     updateContent();
-   });
+<script>
+const resources = {
+ja: { translation: {
+notice: "※ 各言語版に相違がある場合は、日本語版が優先されます。",
+privacy: {
+title: "プライバシーポリシー",
+collection: {
+title: "1. 情報の収集と利用目的",
+description: "当サイトでは、Google アナリティクスを使用してサイトの利用状況を確認しています。",
+items: "これにより以下の情報が収集されます：",
+list: { source: "アクセス元情報", pages: "閲覧したページの情報", device: "使用したデバイスの情報", duration: "滞在時間などの利用状況" }
+},
+analytics: {
+title: "2. Google アナリティクスの使用について",
+description: "Google アナリティクスは完全に匿名な形で利用情報を収集します、個人が特定されることはありません。",
+cookie: "データの収集のためにCookieを使用します。"
+}
+}
+}},
+en: { translation: {
+notice: "* In case of any discrepancy between language versions, the Japanese version shall prevail.",
+privacy: {
+title: "Privacy Policy",
+collection: {
+title: "1. Information Collection and Purpose",
+description: "This website uses Google Analytics to monitor site usage.",
+items: "The following information is collected:",
+list: { source: "Access source information", pages: "Viewed page information", device: "Device information", duration: "Usage data such as duration of visit" }
+},
+analytics: {
+title: "2. Use of Google Analytics",
+description: "Google Analytics collects usage information completely anonymously, and individuals cannot be identified.",
+cookie: "Cookies are used for data collection."
+}
+}
+}},
+zh: { translation: {
+notice: "* 如果语言版本之间存在差异，以日文版本为准。",
+privacy: {
+title: "隐私政策",
+collection: {
+title: "1. 信息收集和使用目的",
+description: "本网站使用Google Analytics来监控网站使用情况。",
+items: "收集以下信息：",
+list: { source: "访问来源信息", pages: "浏览页面信息", device: "设备信息", duration: "访问时长等使用数据" }
+},
+analytics: {
+title: "2. Google Analytics的使用",
+description: "Google Analytics完全匿名收集使用信息，不会识别个人身份。",
+cookie: "数据收集使用Cookie。"
+}
+}
+}},
+ko: { translation: {
+notice: "* 언어 버전 간 차이가 있는 경우 일본어 버전이 우선됩니다.",
+privacy: {
+title: "개인정보 처리방침",
+collection: {
+title: "1. 정보 수집 및 이용 목적",
+description: "본 웹사이트는 Google 애널리틱스를 사용하여 사이트 이용 현황을 모니터링합니다.",
+items: "다음과 같은 정보가 수집됩니다:",
+list: { source: "접속 출처 정보", pages: "조회한 페이지 정보", device: "사용 기기 정보", duration: "체류 시간 등 이용 데이터" }
+},
+analytics: {
+title: "2. Google 애널리틱스 사용에 대하여",
+description: "Google 애널리틱스는 완전히 익명으로 이용 정보를 수집하며, 개인을 식별할 수 없습니다.",
+cookie: "데이터 수집을 위해 쿠키를 사용합니다."
+}
+}
+}},
+fr: { translation: {
+notice: "* En cas de divergence entre les versions linguistiques, la version japonaise prévaut.",
+privacy: {
+title: "Politique de Confidentialité",
+collection: {
+title: "1. Collecte d'Informations et Objectif",
+description: "Ce site utilise Google Analytics pour surveiller l'utilisation du site.",
+items: "Les informations suivantes sont collectées :",
+list: { source: "Informations sur la source d'accès", pages: "Informations sur les pages consultées", device: "Informations sur l'appareil", duration: "Données d'utilisation telles que la durée de visite" }
+},
+analytics: {
+title: "2. Utilisation de Google Analytics",
+description: "Google Analytics collecte les informations d'utilisation de manière totalement anonyme, et les individus ne peuvent pas être identifiés.",
+cookie: "Des cookies sont utilisés pour la collecte de données."
+}
+}
+}},
+de: { translation: {
+notice: "* Bei Abweichungen zwischen den Sprachversionen ist die japanische Version maßgebend.",
+privacy: {
+title: "Datenschutzerklärung",
+collection: {
+title: "1. Informationserfassung und Zweck",
+description: "Diese Website verwendet Google Analytics zur Überwachung der Websitenutzung.",
+items: "Folgende Informationen werden erfasst:",
+list: { source: "Zugriffsquelleninformationen", pages: "Informationen zu aufgerufenen Seiten", device: "Geräteinformationen", duration: "Nutzungsdaten wie Besuchsdauer" }
+},
+analytics: {
+title: "2. Verwendung von Google Analytics",
+description: "Google Analytics erfasst Nutzungsinformationen vollständig anonym, und Einzelpersonen können nicht identifiziert werden.",
+cookie: "Für die Datenerfassung werden Cookies verwendet."
+}
+}
+}}
+};
 
-   function updateContent() {
-     document.querySelectorAll('[data-i18n]').forEach(element => {
-       const key = element.getAttribute('data-i18n');
-       element.innerHTML = i18next.t(key);
-     });
-   }
+i18next.init({ resources, lng: 'ja' }).then(updateContent);
 
-   document.querySelectorAll('.lang-button').forEach(button => {
-     button.addEventListener('click', function() {
-       const lang = this.getAttribute('data-lang');
-       document.querySelectorAll('.lang-button').forEach(btn => {
-         btn.classList.remove('active');
-       });
-       this.classList.add('active');
-       i18next.changeLanguage(lang).then(() => {
-         updateContent();
-       });
-     });
-   });
+function updateContent() {
+document.querySelectorAll('[data-i18n]').forEach(el => {
+el.innerHTML = i18next.t(el.getAttribute('data-i18n'));
+});
+}
 
-   // 初期状態で日本語ボタンをアクティブに
-   document.querySelector('[data-lang="ja"]').classList.add('active');
- </script>
+document.querySelectorAll('.lang-btn').forEach(btn => {
+btn.addEventListener('click', function() {
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+this.classList.add('active');
+i18next.changeLanguage(this.getAttribute('data-lang')).then(updateContent);
+});
+});
+</script>
 </body>
 </html>

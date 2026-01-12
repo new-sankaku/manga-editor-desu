@@ -2,104 +2,82 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title data-i18n="title">Comfyui API Setup Guide</title>
-<style>
-body{font-family:Arial,sans-serif;margin:0;padding:0;background-color:#f8f8f8;}
-.header{background-color:#d8d0c9;color:#5c534d;padding:5px 0;text-align:center;}
-.btn-group{margin:15px 0;display:flex;justify-content:center;flex-wrap:wrap;}
-.btn-group button{background-color:#e9e4e0;color:#5c534d;border:none;padding:8px 15px;margin:5px;border-radius:4px;cursor:pointer;transition:all 0.3s;}
-.btn-group button:hover{background-color:#d8d0c9;}
-.btn-group button.active{background-color:#c5bcb5;}
-.container{width:90%;max-width:1200px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 3px 10px rgba(0,0,0,0.05);}
-.tab-menu{display:flex;background-color:#f9f9f9;border-radius:8px 8px 0 0;overflow:hidden;margin-bottom:20px;}
-.tab-btn{flex:1;padding:12px 15px;text-align:center;background-color:#f9f9f9;border:none;cursor:pointer;transition:all 0.3s;font-weight:bold;}
-.tab-btn:hover{background-color:#e8e8e8;}
-.tab-btn.active{background-color:#e9e4e0;color:#5c534d;}
-.tab-content{display:none;animation:fadeIn 0.5s;}
-.tab-content.active{display:block;}
-img{max-width:100%;height:auto;margin:15px 0;border-radius:5px;box-shadow:0 2px 5px rgba(0,0,0,0.05);}
-h1,h2,h3{color:#5c534d;}
-p,li{font-size:16px;color:#666;line-height:1.6;}
-code{display:block;background-color:#f8f8f8;padding:15px;border-radius:5px;font-family:monospace;margin:15px 0;overflow-x:auto;border-left:4px solid #d8d0c9;}
-hr{border:0;height:1px;background:#eee;margin:25px 0;}
-.image-container{display:flex;flex-wrap:wrap;gap:20px;margin:20px 0;}
-.image-container img{flex:1;min-width:250px;max-width:45%;object-fit:cover;}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-@media (max-width:768px){
-.tab-menu{flex-direction:column;}
-.image-container img{max-width:100%;}
-}
-</style>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="title">ComfyUI API Setup</title>
+<link rel="stylesheet" href="../common.css">
 <script src="../../third/i18next/i18next.min.js"></script>
 </head>
 <body>
-<div class="header">
-<h2 data-i18n="title">Comfyui API Setup Guide</h2>
-</div>
-
-<div class="btn-group" role="group" aria-label="Language switcher">
-<button type="button" class="btn btn-primary" onclick="changeLanguage('en')">English</button>
-<button type="button" class="btn btn-secondary" onclick="changeLanguage('ja')">日本語</button>
-<button type="button" class="btn btn-secondary" onclick="changeLanguage('ko')">한국어</button>
-<button type="button" class="btn btn-secondary" onclick="changeLanguage('zh')">中文</button>
-<button type="button" class="btn btn-secondary" onclick="changeLanguage('fr')">Français</button>
-</div>
-
 <div class="container">
-<p data-i18n="intro">This guide explains how to set up the Comfyui API.</p>
+<div class="lang-buttons">
+<button class="lang-btn active" onclick="changeLanguage('en')">English</button>
+<button class="lang-btn" onclick="changeLanguage('ja')">日本語</button>
+<button class="lang-btn" onclick="changeLanguage('ko')">한국어</button>
+<button class="lang-btn" onclick="changeLanguage('zh')">中文</button>
+<button class="lang-btn" onclick="changeLanguage('fr')">Français</button>
+</div>
+
+<h1 data-i18n="title">ComfyUI API Setup Guide</h1>
+<p data-i18n="intro"></p>
 
 <div class="tab-menu">
-<button class="tab-btn active" onclick="openTab(event, 'api-config')">ComfyUI</button>
-<button class="tab-btn" onclick="openTab(event, 'stability-matrix')">ComfyUI Stability Matrix</button>
-<button class="tab-btn" onclick="openTab(event, 'pinokio')">ComfyUI Pinokio</button>
+<button class="tab-btn active" onclick="openTab(event,'comfyui')">ComfyUI</button>
+<button class="tab-btn" onclick="openTab(event,'stability')">Stability Matrix</button>
+<button class="tab-btn" onclick="openTab(event,'pinokio')">Pinokio</button>
 </div>
 
-<div id="api-config" class="tab-content active">
-<h2 data-i18n="config_steps">API Configuration Steps</h2>
-<p data-i18n="config_file_edit">Edit 'run_nvidia_gpu.bat' file in the Comfyui folder to set environment variables.</p>
-<p data-i18n="example_config">The configuration file is as follows</p>
-<img src="Comfyui_API_settings.jpg" alt="webui-user.bat settings example" style="border:2px solid #e8e8e8; max-width:80%;">
-
-<h3 data-i18n="env_variables">Environment Variables to Set</h3>
-<code data-i18n="simple_code">--enable-cors-header</code>
+<div id="comfyui" class="tab-content active">
+<div class="card">
+<h2 data-i18n="config_steps"></h2>
+<p data-i18n="config_file_edit"></p>
+<p data-i18n="example_config"></p>
+<div class="img-container">
+<img src="Comfyui_API_settings.jpg" alt="ComfyUI settings">
+</div>
+<h3 data-i18n="env_variables"></h3>
+<code>--enable-cors-header</code>
+</div>
 </div>
 
-<div id="stability-matrix" class="tab-content">
+<div id="stability" class="tab-content">
+<div class="card">
 <h2>Stability Matrix</h2>
-<p data-i18n="cors_note">Note: When launching from Stability Matrix, set this in Extra Launch Arguments.</p>
-<img src="StablityMatrixComfyUI.jpg" alt="Stability Matrix settings" style="border:2px solid #e8e8e8; max-width:45%;">
-<h3 data-i18n="env_variables">Environment Variables to Set</h3>
-<code data-i18n="simple_code">--enable-cors-header</code>
+<p class="notice" data-i18n="cors_note"></p>
+<div class="img-container">
+<img src="StablityMatrixComfyUI.jpg" alt="Stability Matrix">
+</div>
+<h3 data-i18n="env_variables"></h3>
+<code>--enable-cors-header</code>
+</div>
 </div>
 
 <div id="pinokio" class="tab-content">
+<div class="card">
 <h2>Pinokio</h2>
-<p data-i18n="pinokio_edit">Pinokioではstart.jsを編集して--enable-cors-headerを追加します。</p>
-<p data-i18n="pinokio_open">Files -> api -> comfy.git -> start.jsを開きます。</p>
-<img src="pinokio_file.png" alt="Stability Matrix settings" style="border:2px solid #e8e8e8; max-width:75%;">
-<br>
-<img src="pinokio_file_mod.png" alt="Stability Matrix settings" style="border:2px solid #e8e8e8; max-width:95%;">
-
-<h3 data-i18n="env_variables">Environment Variables to Set</h3>
-<code data-i18n="simple_code">--enable-cors-header</code>
-
+<p data-i18n="pinokio_edit"></p>
+<p data-i18n="pinokio_open"></p>
+<div class="img-container">
+<img src="pinokio_file.png" alt="Pinokio file">
 </div>
-
+<div class="img-container">
+<img src="pinokio_file_mod.png" alt="Pinokio modification">
+</div>
+<h3 data-i18n="env_variables"></h3>
+<code>--enable-cors-header</code>
+</div>
+</div>
 </div>
 
 <script>
 const resources = {
 en: {
 translation: {
-"title": "Comfyui API Setup Guide",
-"header": "How to Configure Comfyui API",
-"intro": "This guide explains how to set up the Comfyui API.",
+"title": "ComfyUI API Setup Guide",
+"intro": "This guide explains how to set up the ComfyUI API.",
 "config_steps": "API Configuration Steps",
-"config_file_edit": "Edit 'run_nvidia_gpu.bat' file in the Comfyui folder to set environment variables.",
+"config_file_edit": "Edit 'run_nvidia_gpu.bat' file in the ComfyUI folder to set environment variables.",
 "example_config": "The configuration file is as follows",
-"env_variables": "Environment Variables to Set",
-"simple_code": "--enable-cors-header",
+"env_variables": "Environment Variables",
 "cors_note": "Note: When launching from Stability Matrix, set this in Extra Launch Arguments.",
 "pinokio_edit": "In Pinokio, edit start.js to add --enable-cors-header",
 "pinokio_open": "Open Files -> api -> comfy.git -> start.js"
@@ -107,29 +85,25 @@ translation: {
 },
 ja: {
 translation: {
-"title": "Comfyui API セットアップガイド",
-"header": "Comfyui APIの設定方法",
-"intro": "このガイドではComfyui APIの設定方法を説明します。",
+"title": "ComfyUI API セットアップガイド",
+"intro": "このガイドではComfyUI APIの設定方法を説明します。",
 "config_steps": "API設定手順",
-"config_file_edit": "Comfyuiフォルダ内の'run_nvidia_gpu.bat'ファイルを編集して環境変数を設定します。",
+"config_file_edit": "ComfyUIフォルダ内の'run_nvidia_gpu.bat'ファイルを編集して環境変数を設定します。",
 "example_config": "設定ファイルは以下のとおりです",
-"env_variables": "設定する環境変数",
-"simple_code": "--enable-cors-header",
-"cors_note": "注意：Stablity Matrixからの起動ではExtra Launch Argumentsに設定してください。",
+"env_variables": "環境変数",
+"cors_note": "注意：Stability Matrixからの起動ではExtra Launch Argumentsに設定してください。",
 "pinokio_edit": "Pinokioではstart.jsを編集して--enable-cors-headerを追加します。",
 "pinokio_open": "Files -> api -> comfy.git -> start.jsを開きます。"
 }
 },
 ko: {
 translation: {
-"title": "Comfyui API 설정 가이드",
-"header": "Comfyui API 설정 방법",
-"intro": "이 가이드는 Comfyui API 설정 방법을 설명합니다.",
+"title": "ComfyUI API 설정 가이드",
+"intro": "이 가이드는 ComfyUI API 설정 방법을 설명합니다.",
 "config_steps": "API 설정 단계",
-"config_file_edit": "Comfyui 폴더의 'run_nvidia_gpu.bat' 파일에서 환경변수를 설정합니다.",
+"config_file_edit": "ComfyUI 폴더의 'run_nvidia_gpu.bat' 파일에서 환경변수를 설정합니다.",
 "example_config": "설정 파일은 다음과 같습니다",
-"env_variables": "설정할 환경변수",
-"simple_code": "--enable-cors-header",
+"env_variables": "환경변수",
 "cors_note": "주의: Stability Matrix에서 실행 시 Extra Launch Arguments에 설정하세요.",
 "pinokio_edit": "Pinokio에서 start.js를 편집하여 --enable-cors-header를 추가합니다.",
 "pinokio_open": "Files -> api -> comfy.git -> start.js를 엽니다."
@@ -137,14 +111,12 @@ translation: {
 },
 zh: {
 translation: {
-"title": "Comfyui API 设置指南",
-"header": "Comfyui API 设置方法",
-"intro": "本指南说明如何设置 Comfyui API。",
+"title": "ComfyUI API 设置指南",
+"intro": "本指南说明如何设置 ComfyUI API。",
 "config_steps": "API 设置步骤",
-"config_file_edit": "编辑 Comfyui 文件夹中的 'run_nvidia_gpu.bat' 文件以设置环境变量。",
+"config_file_edit": "编辑 ComfyUI 文件夹中的 'run_nvidia_gpu.bat' 文件以设置环境变量。",
 "example_config": "配置文件如下",
-"env_variables": "需要设置的环境变量",
-"simple_code": "--enable-cors-header",
+"env_variables": "环境变量",
 "cors_note": "注意：从 Stability Matrix 启动时，请在 Extra Launch Arguments 中设置。",
 "pinokio_edit": "在Pinokio中编辑start.js添加--enable-cors-header",
 "pinokio_open": "打开Files -> api -> comfy.git -> start.js"
@@ -152,15 +124,13 @@ translation: {
 },
 fr: {
 translation: {
-"title": "Guide de Configuration API Comfyui",
-"header": "Configuration de l'API Comfyui",
-"intro": "Ce guide explique comment configurer l'API Comfyui.",
+"title": "Guide de Configuration API ComfyUI",
+"intro": "Ce guide explique comment configurer l'API ComfyUI.",
 "config_steps": "Étapes de Configuration API",
-"config_file_edit": "Modifiez le fichier 'run_nvidia_gpu.bat' dans le dossier Comfyui pour définir les variables d'environnement.",
+"config_file_edit": "Modifiez le fichier 'run_nvidia_gpu.bat' dans le dossier ComfyUI pour définir les variables d'environnement.",
 "example_config": "Le fichier de configuration est comme suit",
-"env_variables": "Variables d'Environnement à Définir",
-"simple_code": "--enable-cors-header",
-"cors_note": "Note : Pour le lancement depuis Stability Matrix, définissez ceci dans Extra Launch Arguments.",
+"env_variables": "Variables d'Environnement",
+"cors_note": "Note: Pour le lancement depuis Stability Matrix, définissez ceci dans Extra Launch Arguments.",
 "pinokio_edit": "Dans Pinokio, modifiez start.js pour ajouter --enable-cors-header",
 "pinokio_open": "Ouvrez Files -> api -> comfy.git -> start.js"
 }
@@ -168,38 +138,31 @@ translation: {
 };
 
 function openTab(evt, tabName) {
-const tabContents = document.getElementsByClassName("tab-content");
-for (let i = 0; i < tabContents.length; i++) {
-tabContents[i].classList.remove("active");
-}
-const tabBtns = document.getElementsByClassName("tab-btn");
-for (let i = 0; i < tabBtns.length; i++) {
-tabBtns[i].classList.remove("active");
-}
-document.getElementById(tabName).classList.add("active");
-evt.currentTarget.classList.add("active");
+document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+document.getElementById(tabName).classList.add('active');
+evt.currentTarget.classList.add('active');
 }
 
-document.addEventListener("DOMContentLoaded", function() {
 i18next.init({
 lng: 'en',
-debug: true,
 resources: resources
 }, function(err, t) {
 updateContent();
 });
-});
-
-function changeLanguage(lng) {
-i18next.changeLanguage(lng, function(err, t) {
-updateContent();
-});
-}
 
 function updateContent() {
 document.title = i18next.t('title');
 document.querySelectorAll('[data-i18n]').forEach(function(elem) {
 elem.textContent = i18next.t(elem.getAttribute('data-i18n'));
+});
+}
+
+function changeLanguage(lng) {
+document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+i18next.changeLanguage(lng, function(err, t) {
+updateContent();
 });
 }
 </script>

@@ -1,252 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Terms of Service</title>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/23.8.2/i18next.min.js"></script>
- <style>
-   :root {
-     --bg-color: #1a1a1a;
-     --text-color: #e0e0e0;
-     --accent-color: #7c4dff;
-     --secondary-bg: #2d2d2d;
-     --hover-color: #9e7bff;
-     --notice-bg: #2d2d2d;
-     --notice-border: #3d3d3d;
-   }
-
-   body {
-     font-family: 'Segoe UI', Arial, sans-serif;
-     line-height: 1.8;
-     max-width: 800px;
-     margin: 0 auto;
-     padding: 20px;
-     background-color: var(--bg-color);
-     color: var(--text-color);
-   }
-
-   .lang-buttons {
-     margin-bottom: 40px;
-     text-align: center;
-     display: flex;
-     flex-wrap: wrap;
-     gap: 10px;
-     justify-content: center;
-   }
-
-   .lang-button {
-     padding: 10px 20px;
-     border: 1px solid var(--accent-color);
-     border-radius: 8px;
-     background: transparent;
-     color: var(--text-color);
-     cursor: pointer;
-     transition: all 0.3s ease;
-     font-size: 0.9rem;
-     letter-spacing: 0.5px;
-   }
-
-   .lang-button:hover {
-     background: var(--hover-color);
-     transform: translateY(-2px);
-   }
-
-   .lang-button.active {
-     background: var(--accent-color);
-     color: white;
-     box-shadow: 0 4px 12px rgba(124, 77, 255, 0.2);
-   }
-
-   .notice {
-     background-color: var(--notice-bg);
-     border: 1px solid var(--notice-border);
-     padding: 20px;
-     margin-bottom: 40px;
-     border-radius: 12px;
-     font-size: 0.95rem;
-     line-height: 1.6;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   }
-
-   .policy-content {
-     background: var(--secondary-bg);
-     padding: 30px;
-     border-radius: 12px;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-   }
-
-   h2 {
-     color: var(--accent-color);
-     font-size: 1.8rem;
-     margin-bottom: 30px;
-     border-bottom: 2px solid var(--accent-color);
-     padding-bottom: 10px;
-   }
-
-   h3 {
-     color: var(--hover-color);
-     font-size: 1.3rem;
-     margin-top: 30px;
-     margin-bottom: 20px;
-   }
-
-   p {
-     margin-bottom: 20px;
-     opacity: 0.9;
-   }
-
-   @media (max-width: 600px) {
-     body {
-       padding: 15px;
-     }
-
-     .policy-content {
-       padding: 20px;
-     }
-
-     h2 {
-       font-size: 1.5rem;
-     }
-
-     .lang-button {
-       padding: 8px 16px;
-     }
-   }
- </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terms of Service</title>
+<link rel="stylesheet" href="../common.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/23.8.2/i18next.min.js"></script>
 </head>
 <body>
- <div class="lang-buttons">
-   <button class="lang-button" data-lang="ja">日本語</button>
-   <button class="lang-button" data-lang="en">English</button>
-   <button class="lang-button" data-lang="zh">中文</button>
-   <button class="lang-button" data-lang="ko">한국어</button>
-   <button class="lang-button" data-lang="fr">Français</button>
-   <button class="lang-button" data-lang="de">Deutsch</button>
- </div>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn active" data-lang="ja">日本語</button>
+<button class="lang-btn" data-lang="en">English</button>
+<button class="lang-btn" data-lang="zh">中文</button>
+<button class="lang-btn" data-lang="ko">한국어</button>
+<button class="lang-btn" data-lang="fr">Français</button>
+<button class="lang-btn" data-lang="de">Deutsch</button>
+</div>
 
- <div class="notice" data-i18n="notice"></div>
+<p class="notice" data-i18n="notice"></p>
 
- <div class="policy-content">
-   <h2 data-i18n="terms.title"></h2>
-   <p data-i18n="terms.freedom"></p>
-   <p data-i18n="terms.speech"></p>
-   <p data-i18n="terms.morals"></p>
-   <p data-i18n="terms.disclaimer"></p>
-   <p data-i18n="terms.legal"></p>
- </div>
+<div class="card">
+<h1 data-i18n="terms.title"></h1>
+<p data-i18n="terms.freedom"></p>
+<p data-i18n="terms.speech"></p>
+<p data-i18n="terms.morals"></p>
+<p data-i18n="terms.disclaimer"></p>
+<p data-i18n="terms.legal"></p>
+</div>
+</div>
 
- <script>
-   const resources = {
-     ja: {
-       translation: {
-         notice: "※ 各言語版に相違がある場合は、日本語版が優先されます。",
-         terms: {
-           title: "利用規約",
-           freedom: "利用規約はありません。自由に利用することができます。",
-           speech: "アプリ開発者は言論の自由/表現の自由を重視しており、",
-           morals: "公序良俗に反する内容であったとしても利用を制限するつもりはありません。",
-           disclaimer: "ただし、これは法律に違反する利用方法を推奨するものではありません。",
-           legal: "単に法律に違反した場合は各国の司法が対応するという意味です。"
-         }
-       }
-     },
-     en: {
-       translation: {
-         notice: "* In case of any discrepancy between language versions, the Japanese version shall prevail.",
-         terms: {
-           title: "Terms of Service",
-           freedom: "There are no terms of service. You are free to use it as you wish.",
-           speech: "The app developer values freedom of speech/expression,",
-           morals: "and has no intention to restrict usage even if the content goes against public order and morals.",
-           disclaimer: "However, this does not endorse any usage methods that violate laws.",
-           legal: "It simply means that if laws are violated, the judiciary of each country will respond accordingly."
-         }
-       }
-     },
-     zh: {
-       translation: {
-         notice: "* 如果语言版本之间存在差异，以日文版本为准。",
-         terms: {
-           title: "使用条款",
-           freedom: "没有使用条款。您可以自由使用。",
-           speech: "应用程序开发者重视言论自由/表达自由，",
-           morals: "即使内容违反公序良俗，也无意限制使用。",
-           disclaimer: "但是，这并不表示支持任何违反法律的使用方式。",
-           legal: "这仅意味着如果违反法律，各国司法机构将相应处理。"
-         }
-       }
-     },
-     ko: {
-       translation: {
-         notice: "* 언어 버전 간 차이가 있는 경우 일본어 버전이 우선됩니다.",
-         terms: {
-           title: "이용약관",
-           freedom: "이용약관이 없습니다. 자유롭게 이용할 수 있습니다.",
-           speech: "앱 개발자는 언론의 자유/표현의 자유를 중시하며,",
-           morals: "공서양속에 반하는 내용이라도 이용을 제한할 의도가 없습니다.",
-           disclaimer: "단, 이는 법률을 위반하는 이용 방법을 권장하는 것이 아닙니다.",
-           legal: "단순히 법률을 위반한 경우 각국의 사법 체계가 대응한다는 의미입니다."
-         }
-       }
-     },
-     fr: {
-       translation: {
-         notice: "* En cas de divergence entre les versions linguistiques, la version japonaise prévaut.",
-         terms: {
-           title: "Conditions d'Utilisation",
-           freedom: "Il n'y a pas de conditions d'utilisation. Vous êtes libre de l'utiliser comme vous le souhaitez.",
-           speech: "Le développeur de l'application valorise la liberté d'expression/de parole,",
-           morals: "et n'a pas l'intention de restreindre l'utilisation même si le contenu va à l'encontre de l'ordre public et des bonnes mœurs.",
-           disclaimer: "Cependant, cela n'approuve pas les méthodes d'utilisation qui enfreignent les lois.",
-           legal: "Cela signifie simplement que si les lois sont violées, le système judiciaire de chaque pays réagira en conséquence."
-         }
-       }
-     },
-     de: {
-       translation: {
-         notice: "* Bei Abweichungen zwischen den Sprachversionen ist die japanische Version maßgebend.",
-         terms: {
-           title: "Nutzungsbedingungen",
-           freedom: "Es gibt keine Nutzungsbedingungen. Sie können es frei nutzen.",
-           speech: "Der App-Entwickler legt Wert auf Meinungsfreiheit/Ausdrucksfreiheit,",
-           morals: "und beabsichtigt nicht, die Nutzung einzuschränken, selbst wenn der Inhalt gegen die öffentliche Ordnung und guten Sitten verstößt.",
-           disclaimer: "Dies befürwortet jedoch keine Nutzungsmethoden, die gegen Gesetze verstoßen.",
-           legal: "Es bedeutet lediglich, dass bei Gesetzesverstößen die Justiz des jeweiligen Landes entsprechend reagieren wird."
-         }
-       }
-     }
-   };
+<script>
+const resources = {
+ja: { translation: {
+notice: "※ 各言語版に相違がある場合は、日本語版が優先されます。",
+terms: {
+title: "利用規約",
+freedom: "利用規約はありません。自由に利用することができます。",
+speech: "アプリ開発者は言論の自由/表現の自由を重視しており、",
+morals: "公序良俗に反する内容であったとしても利用を制限するつもりはありません。",
+disclaimer: "ただし、これは法律に違反する利用方法を推奨するものではありません。",
+legal: "単に法律に違反した場合は各国の司法が対応するという意味です。"
+}
+}},
+en: { translation: {
+notice: "* In case of any discrepancy between language versions, the Japanese version shall prevail.",
+terms: {
+title: "Terms of Service",
+freedom: "There are no terms of service. You are free to use it as you wish.",
+speech: "The app developer values freedom of speech/expression,",
+morals: "and has no intention to restrict usage even if the content goes against public order and morals.",
+disclaimer: "However, this does not endorse any usage methods that violate laws.",
+legal: "It simply means that if laws are violated, the judiciary of each country will respond accordingly."
+}
+}},
+zh: { translation: {
+notice: "* 如果语言版本之间存在差异，以日文版本为准。",
+terms: {
+title: "使用条款",
+freedom: "没有使用条款。您可以自由使用。",
+speech: "应用程序开发者重视言论自由/表达自由，",
+morals: "即使内容违反公序良俗，也无意限制使用。",
+disclaimer: "但是，这并不表示支持任何违反法律的使用方式。",
+legal: "这仅意味着如果违反法律，各国司法机构将相应处理。"
+}
+}},
+ko: { translation: {
+notice: "* 언어 버전 간 차이가 있는 경우 일본어 버전이 우선됩니다.",
+terms: {
+title: "이용약관",
+freedom: "이용약관이 없습니다. 자유롭게 이용할 수 있습니다.",
+speech: "앱 개발자는 언론의 자유/표현의 자유를 중시하며,",
+morals: "공서양속에 반하는 내용이라도 이용을 제한할 의도가 없습니다.",
+disclaimer: "단, 이는 법률을 위반하는 이용 방법을 권장하는 것이 아닙니다.",
+legal: "단순히 법률을 위반한 경우 각국의 사법 체계가 대응한다는 의미입니다."
+}
+}},
+fr: { translation: {
+notice: "* En cas de divergence entre les versions linguistiques, la version japonaise prévaut.",
+terms: {
+title: "Conditions d'Utilisation",
+freedom: "Il n'y a pas de conditions d'utilisation. Vous êtes libre de l'utiliser comme vous le souhaitez.",
+speech: "Le développeur de l'application valorise la liberté d'expression/de parole,",
+morals: "et n'a pas l'intention de restreindre l'utilisation même si le contenu va à l'encontre de l'ordre public et des bonnes mœurs.",
+disclaimer: "Cependant, cela n'approuve pas les méthodes d'utilisation qui enfreignent les lois.",
+legal: "Cela signifie simplement que si les lois sont violées, le système judiciaire de chaque pays réagira en conséquence."
+}
+}},
+de: { translation: {
+notice: "* Bei Abweichungen zwischen den Sprachversionen ist die japanische Version maßgebend.",
+terms: {
+title: "Nutzungsbedingungen",
+freedom: "Es gibt keine Nutzungsbedingungen. Sie können es frei nutzen.",
+speech: "Der App-Entwickler legt Wert auf Meinungsfreiheit/Ausdrucksfreiheit,",
+morals: "und beabsichtigt nicht, die Nutzung einzuschränken, selbst wenn der Inhalt gegen die öffentliche Ordnung und guten Sitten verstößt.",
+disclaimer: "Dies befürwortet jedoch keine Nutzungsmethoden, die gegen Gesetze verstoßen.",
+legal: "Es bedeutet lediglich, dass bei Gesetzesverstößen die Justiz des jeweiligen Landes entsprechend reagieren wird."
+}
+}}
+};
 
-   i18next.init({
-     resources,
-     lng: 'ja',
-     interpolation: { escapeValue: false }
-   }).then(function() {
-     updateContent();
-   });
+i18next.init({ resources, lng: 'ja' }).then(updateContent);
 
-   function updateContent() {
-     document.querySelectorAll('[data-i18n]').forEach(element => {
-       const key = element.getAttribute('data-i18n');
-       element.innerHTML = i18next.t(key);
-     });
-   }
+function updateContent() {
+document.querySelectorAll('[data-i18n]').forEach(el => {
+el.innerHTML = i18next.t(el.getAttribute('data-i18n'));
+});
+}
 
-   document.querySelectorAll('.lang-button').forEach(button => {
-     button.addEventListener('click', function() {
-       const lang = this.getAttribute('data-lang');
-       document.querySelectorAll('.lang-button').forEach(btn => {
-         btn.classList.remove('active');
-       });
-       this.classList.add('active');
-       i18next.changeLanguage(lang).then(() => {
-         updateContent();
-       });
-     });
-   });
-
-   document.querySelector('[data-lang="ja"]').classList.add('active');
- </script>
+document.querySelectorAll('.lang-btn').forEach(btn => {
+btn.addEventListener('click', function() {
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+this.classList.add('active');
+i18next.changeLanguage(this.getAttribute('data-lang')).then(updateContent);
+});
+});
+</script>
 </body>
 </html>

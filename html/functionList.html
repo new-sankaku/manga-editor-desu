@@ -1,1640 +1,321 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>スクロール改善版ブラウン管テレビ風機能一覧</title>
-  <style>
-    body {
-      font-family: monospace;
-      background-color: #1a1a1a;
-      color: #ffffff;
-      margin: 0;
-      padding: 20px;
-      line-height: 1.1;
-      /* 行間を狭める */
-      font-size: 16px;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-    }
-
-    .tv-container {
-      background: linear-gradient(145deg, #2a2a2a, #444444);
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow:
-        0 0 20px rgba(0, 0, 0, 0.5),
-        inset 0 0 10px rgba(255, 255, 255, 0.1);
-      position: relative;
-      width: 100%;
-      max-width: 1800px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      box-sizing: border-box;
-      /* 追加 */
-    }
-
-    .tv-frame {
-      background: linear-gradient(145deg, #333, #222);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow:
-        inset 0 0 10px rgba(0, 0, 0, 0.8),
-        0 5px 15px rgba(0, 0, 0, 0.3);
-      position: relative;
-      overflow: hidden;
-      flex: 1;
-      margin-right: 20px;
-      box-sizing: border-box;
-      /* 追加 */
-    }
-
-    .tv-frame::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 100%);
-      pointer-events: none;
-    }
-
-    .screen-border {
-      background: #000;
-      border-radius: 100% / 10%;
-      padding: 10px;
-      box-shadow:
-        inset 0 0 10px rgba(255, 255, 255, 0.1),
-        0 0 5px rgba(255, 255, 255, 0.1);
-      overflow: hidden;
-      height: calc(100vh - 180px);
-      /* 高さ調整 */
-      box-sizing: border-box;
-      /* 追加 */
-    }
-
-    .screen {
-      background: linear-gradient(135deg, #000033, #000066);
-      border-radius: 100% / 10%;
-      padding: 20px;
-      position: relative;
-      overflow: hidden;
-      box-shadow:
-        inset 0 0 20px rgba(255, 255, 255, 0.1),
-        0 0 10px rgba(255, 255, 255, 0.1);
-      height: 100%;
-      overflow-y: auto;
-      z-index: 1;
-      box-sizing: border-box;
-      /* 追加 */
-    }
-
-    .screen::-webkit-scrollbar {
-      width: 12px;
-    }
-
-    .screen::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 6px;
-    }
-
-    .screen::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 6px;
-      border: 3px solid rgba(0, 0, 0, 0.2);
-    }
-
-    .screen::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.4);
-    }
-
-    .screen.off {
-      background: #000;
-    }
-
-    /* 
-        .effects {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            pointer-events: none;
-            z-index: 2;
-        }
-        .scanlines, .scanlines2, .scanlines3 {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        .scanlines {
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(255, 255, 255, 0.1),
-                rgba(255, 255, 255, 0.1) 1px,
-                transparent 1px,
-                transparent 4px
-            );
-            animation: scanline-motion 10s linear infinite;
-        }
-        .scanlines2 {
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 255, 255, 0.05),
-                rgba(0, 255, 255, 0.05) 1px,
-                transparent 1px,
-                transparent 6px
-            );
-            animation: scanline-motion 15s linear infinite;
-        }
-        .scanlines3 {
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(255, 0, 255, 0.05),
-                rgba(255, 0, 255, 0.05) 1px,
-                transparent 1px,
-                transparent 8px
-            );
-            animation: scanline-motion 20s linear infinite;
-        }
-        @keyframes scanline-motion {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-        .noise {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.05;
-            pointer-events: none;
-            animation: noise 0.6s infinite;
-        }
-        @keyframes noise {
-            0%, 100% { background-color: transparent; }
-            10% { background-color: rgba(255, 255, 255, 0.1); }
-            20% { background-color: transparent; }
-            30% { background-color: rgba(255, 255, 255, 0.1); }
-            40% { background-color: transparent; }
-            50% { background-color: rgba(255, 255, 255, 0.1); }
-            60% { background-color: transparent; }
-            70% { background-color: rgba(255, 255, 255, 0.1); }
-            80% { background-color: transparent; }
-            90% { background-color: rgba(255, 255, 255, 0.1); }
-        }
-        .reflection {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.1) 0%,
-                rgba(255, 255, 255, 0.05) 40%,
-                rgba(255, 255, 255, 0) 60%
-            );
-            pointer-events: none;
-        } */
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 5px;
-    }
-
-    th,
-    td {
-      padding: 8px;
-      text-align: left;
-    }
-
-    th {
-      background-color: #4a90e2;
-      color: #ffffff;
-      font-weight: bold;
-      text-transform: uppercase;
-      border-radius: 4px;
-    }
-
-    .category {
-      background-color: #3a70b2;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 4px;
-    }
-
-    .category:hover {
-      background-color: #4a90e2;
-    }
-
-    .group {
-      background-color: rgba(74, 144, 226, 0.3);
-      font-style: italic;
-      border-radius: 4px;
-    }
-
-    .feature {
-      background-color: rgba(30, 58, 138, 0.3);
-      border-radius: 4px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .arrow {
-      display: inline-block;
-      margin-right: 10px;
-      transition: transform 0.3s;
-    }
-
-    .rotate {
-      transform: rotate(90deg);
-    }
-
-    .status-yes {
-      color: #4ade80;
-      text-shadow: 0 0 5px #4ade80;
-    }
-
-    .status-partial {
-      color: #fde047;
-      text-shadow: 0 0 5px #fde047;
-    }
-
-    .status-no {
-      color: #f87171;
-      text-shadow: 0 0 5px #f87171;
-    }
-
-    .ps-icon::before {
-      content: '▲';
-      color: #ff3366;
-      margin-right: 5px;
-    }
-
-    .tv-controls {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .tv-button {
-      width: 30px;
-      height: 30px;
-      background: linear-gradient(145deg, #666, #444);
-      border-radius: 50%;
-      margin: 10px 0;
-      cursor: pointer;
-      box-shadow:
-        0 2px 5px rgba(0, 0, 0, 0.5),
-        inset 0 1px 1px rgba(255, 255, 255, 0.2);
-    }
-
-    .power-button {
-      background: linear-gradient(145deg, #f00, #900);
-      margin-top: auto;
-    }
-
-    .language-buttons {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .language-button {
-      width: 80px;
-      height: 30px;
-      background: linear-gradient(145deg, #666, #444);
-      border-radius: 5px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      box-shadow:
-        0 2px 5px rgba(0, 0, 0, 0.5),
-        inset 0 1px 1px rgba(255, 255, 255, 0.2);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      font-weight: bold;
-    }
-
-    .brand-name {
-      font-family: 'Arial', sans-serif;
-      font-size: 24px;
-      font-weight: bold;
-      color: #ddd;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      text-align: center;
-      margin-top: 20px;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    }
-
-    .chromatic-aberration {
-      text-shadow:
-        -1px 0 #f00,
-        1px 0 #0ff;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Feature List</title>
+<link rel="stylesheet" href="common.css">
+<style>
+.category {
+background: var(--accent);
+color: #fff;
+cursor: pointer;
+font-weight: 600;
+}
+.category:hover { opacity: 0.9; }
+.group {
+background: rgba(124, 77, 255, 0.2);
+font-style: italic;
+}
+.feature td:first-child { padding-left: 24px; }
+.arrow {
+display: inline-block;
+margin-right: 8px;
+transition: transform 0.2s;
+}
+.rotate { transform: rotate(90deg); }
+.hidden { display: none; }
+</style>
 </head>
-
 <body>
-  <div class="tv-container">
-    <div class="tv-frame">
-      <div class="screen-border">
-        <div class="screen off">
-          <br>
-          <table id="featureTable">
-            <thead>
-              <tr id="table-header">
-                <th><span class="ps-icon"></span>機能</th>
-                <th>対応状況</th>
-                <th>詳細</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- JavaScriptで動的に生成されます -->
-            </tbody>
-          </table>
-          <br>
-        </div>
-        <div class="effects">
-          <div class="scanlines"></div>
-          <div class="scanlines2"></div>
-          <div class="scanlines3"></div>
-          <div class="noise"></div>
-          <div class="reflection"></div>
-        </div>
-      </div>
-      <div class="brand-name chromatic-aberration">SANKAKU</div>
-    </div>
-    <div class="tv-controls">
-      <div class="language-buttons">
-        <div class="language-button" id="btn-ja">日本語</div>
-        <div class="language-button" id="btn-en">English</div>
-      </div>
-      <div class="tv-button power-button"></div>
-    </div>
-  </div>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn active" id="btn-ja">日本語</button>
+<button class="lang-btn" id="btn-en">English</button>
+</div>
 
-  <script>
-    const features = {
+<h1 id="page-title">機能一覧</h1>
 
-      "漫画機能": {
-        "コマ": {
-          "初期配置されたコマセット": {
-            "対応": "〇",
-            "詳細": "縦型、横型のパネルセットあり。40種～"
-          },
-          "初期設定サイズ：A4, A5, 各SNS": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Webtoonサイズ": {
-            "対応": "△",
-            "詳細": "10,000px以上はパフォーマンスの問題あり"
-          },
-          "コマの配置": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマの縮尺・傾きの変更": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマの枠線の色・太さ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマの塗り・不透明度": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマの分割ツール": {
-            "対応": "〇",
-            "詳細": "ナイフツール有り、四角形のカッティング用"
-          },
-          "コマの頂点変更": {
-            "対応": "〇",
-            "詳細": "頂点を変更で四角形を台形などに変化可能"
-          },
-          "コマ枠内への画像配置": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマ枠内のみの画像描画": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマ変更時の枠内画像の追従": {
-            "対応": "〇",
-            "詳細": "コマ変更に合わせて画像の描画も枠内に自動で収まります。"
-          },
-          "コマ枠外への画像配置": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "透過画像サポート": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "フキダシ": {
-          "初期設定されたフキダシセット": {
-            "対応": "〇",
-            "詳細": "35種～"
-          },
-          "フキダシの縮尺・傾きの変更": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "フキダシの枠線の色・太さ": {
-            "対応": "△",
-            "詳細": "直観とやや異なる効果になることがあります。"
-          },
-          "フキダシの塗り・不透明度": {
-            "対応": "△",
-            "詳細": "直観とやや異なる効果になることがあります。"
-          },
-          "フキダシ内のテキスト描画": {
-            "対応": "△",
-            "詳細": "フキダシの上にテキストを描画できますが、吹き出しとGroup化はされません。機能追加予定。"
-          }
-        },
-        "テキスト": {
-          "フォント": {
-            "対応": "〇",
-            "詳細": "29種類"
-          },
-          "色、アウトライン色": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "サイズ、アウトラインサイズ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "横書き": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "縦書き": {
-            "対応": "△",
-            "詳細": "問題なく縦書きになりますが、ポップアップ上で操作するので少し手間があります。機能改善予定。"
-          },
-          "左揃え・中央揃え・右揃え": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "エフェクト色": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "エフェクト": {
-            "対応": "△",
-            "詳細": "シャドウ・ビビッドグラデーション・ネオンがあります。機能追加予定。"
-          }
-        },
-        "ペン": {
-          "ペンツール": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "鉛筆": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "円": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "クレヨン": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "インク": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "マーカー": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "消しゴム": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "モザイク": {
-            "対応": "〇",
-            "詳細": ""
-          },
+<div class="card">
+<table id="featureTable">
+<thead>
+<tr id="table-header">
+<th>機能</th>
+<th>対応</th>
+<th>詳細</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
 
-          "サイズ、色": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "スタイル": {
-            "対応": "〇",
-            "詳細": "通常線、ドット線、ダッシュ線"
-          },
-          "シャドウ・シャドウサイズ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "シャドウ距離・シャドウ色": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "ブラシ": {
-            "対応": "△",
-            "詳細": "ペン・丸・"
-          }
-        },
-        "アイコン": {
-          "フラットなアイコンセット": {
-            "対応": "〇",
-            "詳細": "Google Material Iconを使っています。2000種くらい？"
-          },
-          "スタイル指定": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "線幅、線色、塗り、不透明度": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "シャドウ、シャドウ色、シャドウ距離": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "シャドウぼかし": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      },
-      "基本機能": {
-        "テーマ": {
-          "ダークモード": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "ライトモード": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "ファイル": {
-          "プロジェクト保存": {
-            "対応": "〇",
-            "詳細": "Zip保存"
-          },
-          "プロジェクト読み込み": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "設定保存": {
-            "対応": "〇",
-            "詳細": "ブラウザストレージ保存"
-          },
-          "設定読み込み": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "設定自動読み込み": {
-            "対応": "〇",
-            "詳細": "起動時自動読み込み"
-          },
-          "画像ダウンロード": {
-            "対応": "〇",
-            "詳細": "PNG"
-          },
-          "画像コピー": {
-            "対応": "〇",
-            "詳細": "PNG"
-          },
-          "Svgダウンロード": {
-            "対応": "〇",
-            "詳細": "SVG"
-          }
-        },
-        "キャンバス": {
-          "背景色": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "グリッドライン": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "グリッドラインサイズ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "パネルとcanvasサイズとの余白": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "ヘルプ": {
-          "ショートカット一覧": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "言語": {
-          "English": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "日本語": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "韓国語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "中国語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "フランス語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "ロシア語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "スペイン語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "ポルトガル語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "タイ語": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          }
-        },
-        "シェア": {
-          "Twitter": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "レイヤー": {
-          "Objectごとの管理": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "コマとコマ内画像のGroup化": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Objectごとのボタン": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "レイヤーアップ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "レイヤーダウン": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "縮小画像": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Panel内画像のダウンロード": {
-            "対応": "〇",
-            "詳細": "Panel単位で画像をダウンロードできます。"
-          },
-          "画像のダウンロード": {
-            "対応": "〇",
-            "詳細": "canvas内の個別の画像をダウンロードできます。"
-          }
-        },
-        "操作履歴": {
-          "Undo/Redo": {
-            "対応": "〇",
-            "詳細": "無限履歴"
-          }
-        }
-      },
-      "生成AI": {
-        "対応API": {
-          "SD WebUI": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "SD Forge": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "基本機能": {
-          "IP設定/Port設定": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Base Prompt": {
-            "対応": "〇",
-            "詳細": "全体に影響がある設定。例えば品質Promptをここに書くと個別に書かなくて良くなります。"
-          },
-          "Text2Image生成": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Text2Image設定": {
-            "対応": "〇",
-            "詳細": "プロンプト・ネガティブプロンプト、Lora、Emb、Seed、 横幅、縦幅"
-          },
-          "Image2Image生成": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Image2Image設定": {
-            "対応": "〇",
-            "詳細": "プロンプト・ネガティブプロンプト、Lora、Emb、Seed、 横幅、縦幅"
-          },
-          "Model選択": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Sampler選択": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Controlnet": {
-            "対応": "×",
-            "詳細": "実装中"
-          },
-          "Adetailer": {
-            "対応": "×",
-            "詳細": "実装中"
-          },
-          "Upscaler": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Remove Background": {
-            "対応": "〇",
-            "詳細": "背景削除"
-          },
-          "コマのプロンプトプレビュー機能": {
-            "対応": "〇",
-            "詳細": "コマ上に現在設定されているプロンプトが表示されます。"
-          },
-          "画像のプロンプトプレビュー機能": {
-            "対応": "〇",
-            "詳細": "画像上に現在設定されているプロンプトが表示されます。"
-          },
-          "プロンプトの検索と置き換え": {
-            "対応": "〇",
-            "詳細": "プロンプトの一括置き換え機能"
-          },
-          "シード適用": {
-            "対応": "〇",
-            "詳細": "Panel単位で最後に生成した画像のSeedをPanelに固定します"
-          },
-          "プロンプト適用": {
-            "対応": "〇",
-            "詳細": "画像生成時に使用したPromptを画像に適用します。"
-          },
-          "ImageのClipプロンプト生成": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "ImageのDeepDooruプロンプト生成": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      },
-      "画像操作": {
-        "基本画像操作": {
-          "角度": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "縮尺": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "上からの位置、左からの位置": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "傾きX、傾きY": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "不透明度": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "高速画像処理": {
-          "上下反転": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "左右反転": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "輪郭へのシャドウぼかし": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "輪郭へのシャドウぼかし色": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "輪郭へのシャドウぼかしサイズ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "セピア": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "グレイスケール、 Ave or Luminosity": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "色調変更、赤青緑": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "明るさ": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "ぼかし": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "pixel化": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Glfx画像処理": {
-          "Brightness / Contrast": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Hue / Saturation": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Sepia": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Unsharp Mask": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Vibrance": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Vignette": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Lens Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Triangle Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Zoom Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Color Haiftone": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Dot Screen": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Edge Work": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Hexagonal Pixelate": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Ink": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Swirl": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      },
-      "その他": {
-        "Infomation": {
-          "FPS表示": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "座標表示X, Y": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "AI Ping check": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      }
-    };
+<script>
+const features = {
+"漫画機能": {
+"コマ": {
+"初期配置されたコマセット": { "対応": "〇", "詳細": "縦型、横型のパネルセットあり。40種～" },
+"初期設定サイズ：A4, A5, 各SNS": { "対応": "〇", "詳細": "" },
+"Webtoonサイズ": { "対応": "△", "詳細": "10,000px以上はパフォーマンスの問題あり" },
+"コマの配置": { "対応": "〇", "詳細": "" },
+"コマの縮尺・傾きの変更": { "対応": "〇", "詳細": "" },
+"コマの枠線の色・太さ": { "対応": "〇", "詳細": "" },
+"コマの塗り・不透明度": { "対応": "〇", "詳細": "" },
+"コマの分割ツール": { "対応": "〇", "詳細": "ナイフツール有り" },
+"コマの頂点変更": { "対応": "〇", "詳細": "頂点変更で台形などに変化可能" },
+"コマ枠内への画像配置": { "対応": "〇", "詳細": "" },
+"コマ枠内のみの画像描画": { "対応": "〇", "詳細": "" },
+"コマ変更時の枠内画像の追従": { "対応": "〇", "詳細": "" },
+"コマ枠外への画像配置": { "対応": "〇", "詳細": "" },
+"透過画像サポート": { "対応": "〇", "詳細": "" }
+},
+"フキダシ": {
+"初期設定されたフキダシセット": { "対応": "〇", "詳細": "35種～" },
+"フキダシの縮尺・傾きの変更": { "対応": "〇", "詳細": "" },
+"フキダシの枠線の色・太さ": { "対応": "△", "詳細": "直観とやや異なる効果になることがあります" },
+"フキダシの塗り・不透明度": { "対応": "△", "詳細": "" },
+"フキダシ内のテキスト描画": { "対応": "△", "詳細": "Group化は未対応" }
+},
+"テキスト": {
+"フォント": { "対応": "〇", "詳細": "29種類" },
+"色、アウトライン色": { "対応": "〇", "詳細": "" },
+"サイズ、アウトラインサイズ": { "対応": "〇", "詳細": "" },
+"横書き": { "対応": "〇", "詳細": "" },
+"縦書き": { "対応": "△", "詳細": "ポップアップ上で操作" },
+"左揃え・中央揃え・右揃え": { "対応": "〇", "詳細": "" },
+"エフェクト": { "対応": "△", "詳細": "シャドウ・グラデーション・ネオン" }
+},
+"ペン": {
+"ペンツール": { "対応": "〇", "詳細": "" },
+"鉛筆、円、クレヨン、インク、マーカー": { "対応": "〇", "詳細": "" },
+"消しゴム、モザイク": { "対応": "〇", "詳細": "" },
+"サイズ、色、スタイル": { "対応": "〇", "詳細": "通常線、ドット線、ダッシュ線" },
+"シャドウ": { "対応": "〇", "詳細": "" }
+},
+"アイコン": {
+"フラットなアイコンセット": { "対応": "〇", "詳細": "Google Material Icon 2000種" },
+"スタイル指定": { "対応": "〇", "詳細": "" },
+"線幅、線色、塗り、不透明度": { "対応": "〇", "詳細": "" },
+"シャドウ": { "対応": "〇", "詳細": "" }
+}
+},
+"基本機能": {
+"テーマ": {
+"ダークモード": { "対応": "〇", "詳細": "" },
+"ライトモード": { "対応": "〇", "詳細": "" }
+},
+"ファイル": {
+"プロジェクト保存/読み込み": { "対応": "〇", "詳細": "Zip形式" },
+"設定保存/読み込み": { "対応": "〇", "詳細": "ブラウザストレージ" },
+"画像ダウンロード/コピー": { "対応": "〇", "詳細": "PNG" },
+"SVGダウンロード": { "対応": "〇", "詳細": "" }
+},
+"キャンバス": {
+"背景色": { "対応": "〇", "詳細": "" },
+"グリッドライン": { "対応": "〇", "詳細": "" },
+"余白設定": { "対応": "〇", "詳細": "" }
+},
+"言語": {
+"対応言語": { "対応": "〇", "詳細": "日英韓中仏露西葡泰" }
+},
+"レイヤー": {
+"Objectごとの管理": { "対応": "〇", "詳細": "" },
+"Group化": { "対応": "〇", "詳細": "" },
+"レイヤー順序変更": { "対応": "〇", "詳細": "" },
+"個別画像ダウンロード": { "対応": "〇", "詳細": "" }
+},
+"操作履歴": {
+"Undo/Redo": { "対応": "〇", "詳細": "無限履歴" }
+}
+},
+"生成AI": {
+"対応API": {
+"SD WebUI / Forge": { "対応": "〇", "詳細": "" }
+},
+"基本機能": {
+"IP/Port設定": { "対応": "〇", "詳細": "" },
+"Base Prompt": { "対応": "〇", "詳細": "" },
+"Text2Image / Image2Image": { "対応": "〇", "詳細": "" },
+"Model / Sampler選択": { "対応": "〇", "詳細": "" },
+"Controlnet / Adetailer": { "対応": "×", "詳細": "実装中" },
+"Upscaler": { "対応": "〇", "詳細": "" },
+"Remove Background": { "対応": "〇", "詳細": "" },
+"プロンプトプレビュー": { "対応": "〇", "詳細": "" },
+"プロンプト検索・置換": { "対応": "〇", "詳細": "" },
+"CLIP / DeepDanbooru": { "対応": "〇", "詳細": "" }
+}
+},
+"画像操作": {
+"基本操作": {
+"角度、縮尺、位置、傾き": { "対応": "〇", "詳細": "" },
+"不透明度": { "対応": "〇", "詳細": "" }
+},
+"高速処理": {
+"上下/左右反転": { "対応": "〇", "詳細": "" },
+"輪郭シャドウ": { "対応": "〇", "詳細": "" },
+"セピア、グレイスケール": { "対応": "〇", "詳細": "" },
+"色調、明るさ、ぼかし、ピクセル化": { "対応": "〇", "詳細": "" }
+},
+"GLFX処理": {
+"Brightness/Contrast, Hue/Saturation": { "対応": "〇", "詳細": "" },
+"Sepia, Unsharp Mask, Vibrance, Vignette": { "対応": "〇", "詳細": "" },
+"Lens/Triangle/Zoom Blur": { "対応": "〇", "詳細": "" },
+"Color Halftone, Dot Screen, Edge Work": { "対応": "〇", "詳細": "" },
+"Hexagonal Pixelate, Ink, Swirl": { "対応": "〇", "詳細": "" }
+}
+}
+};
 
-    const features_en =
-    {
-      "Manga Features": {
-        "Panels": {
-          "Initial Panel Set": {
-            "対応": "〇",
-            "詳細": "Vertical and horizontal panel sets available. Over 40 types"
-          },
-          "Initial Settings Size: A4, A5, SNS": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Webtoon Size": {
-            "対応": "△",
-            "詳細": "Performance issues for sizes above 10,000px"
-          },
-          "Panel Placement": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Panel Scale and Tilt Change": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Panel Border Color and Thickness": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Panel Fill and Opacity": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Panel Split Tool": {
-            "対応": "〇",
-            "詳細": "Knife tool available for rectangular cutting"
-          },
-          "Panel Vertex Change": {
-            "対応": "〇",
-            "詳細": "Vertices can be modified to change rectangles to trapezoids, etc."
-          },
-          "Image Placement within Panel": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Image Drawing within Panel Only": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Image Follow within Panel when Panel Changes": {
-            "対応": "〇",
-            "詳細": "Images adjust automatically to fit within the panel when the panel changes."
-          },
-          "Image Placement Outside Panel": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Transparent Image Support": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Speech Bubbles": {
-          "Initial Speech Bubble Set": {
-            "対応": "〇",
-            "詳細": "Over 35 types"
-          },
-          "Speech Bubble Scale and Tilt Change": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Speech Bubble Border Color and Thickness": {
-            "対応": "△",
-            "詳細": "Effects may slightly differ from intuition."
-          },
-          "Speech Bubble Fill and Opacity": {
-            "対応": "△",
-            "詳細": "Effects may slightly differ from intuition."
-          },
-          "Text Drawing within Speech Bubble": {
-            "対応": "△",
-            "詳細": "Text can be drawn on top of the speech bubble but not grouped with it. Feature planned."
-          }
-        },
-        "Text": {
-          "Font": {
-            "対応": "〇",
-            "詳細": "29 types"
-          },
-          "Color and Outline Color": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Size and Outline Size": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Horizontal Writing": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Vertical Writing": {
-            "対応": "△",
-            "詳細": "Vertical writing works without issues, but requires operation on a pop-up. Planned improvement."
-          },
-          "Left Align, Center Align, Right Align": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Effect Color": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Effects": {
-            "対応": "△",
-            "詳細": "Shadow, vivid gradient, and neon available. Feature planned."
-          }
-        },
-        "Pen": {
-          "Pen Tool": {
-            "対応": "〇",
-            "詳細": ""
-          },
-  "Pencil": {
-    "対応": "〇",
-    "詳細": ""
-  },
-  "Circle": {
-    "対応": "〇",
-    "詳細": ""
-  },
-  "Crayon": {
-    "対応": "〇",
-    "詳細": ""
-  },
-  "Ink": {
-    "対応": "〇",
-    "詳細": ""
-  },
-  "Marker": {
-    "対応": "〇",
-    "詳細": ""
-  },
-  "Eraser": {
-    "対応": "〇",
-    "詳細": ""
-  },
-  "Mosaic": {
-    "対応": "〇",
-    "詳細": ""
-  },
-          "Size and Color": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Style": {
-            "対応": "〇",
-            "詳細": "Regular line, dotted line, dashed line"
-          },
-          "Shadow and Shadow Size": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Shadow Distance and Shadow Color": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Brush": {
-            "対応": "△",
-            "詳細": "Pen, round, etc."
-          }
-        },
-        "Icons": {
-          "Flat Icon Set": {
-            "対応": "〇",
-            "詳細": "Using Google Material Icons. Approximately 2000 types?"
-          },
-          "Style Specification": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Line Width, Line Color, Fill, Opacity": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Shadow, Shadow Color, Shadow Distance": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Shadow Blur": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      },
-      "Basic Functions": {
-        "Theme": {
-          "Dark Mode": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Light Mode": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "File": {
-          "Project Save": {
-            "対応": "〇",
-            "詳細": "Zip save"
-          },
-          "Project Load": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Settings Save": {
-            "対応": "〇",
-            "詳細": "Browser storage save"
-          },
-          "Settings Load": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Automatic Settings Load": {
-            "対応": "〇",
-            "詳細": "Automatic load on startup"
-          },
-          "Image Download": {
-            "対応": "〇",
-            "詳細": "PNG"
-          },
-          "Image Copy": {
-            "対応": "〇",
-            "詳細": "PNG"
-          },
-          "Svg Download": {
-            "対応": "〇",
-            "詳細": "SVG"
-          }
-        },
-        "Canvas": {
-          "Background Color": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Grid Lines": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Grid Line Size": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Margin between Panel and Canvas Size": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Help": {
-          "Shortcut List": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Language": {
-          "English": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "Japanese": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Korean": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "Chinese": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "French": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "Russian": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "Spanish": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "Portuguese": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          },
-          "Thai": {
-            "対応": "〇",
-            "詳細": "By ChatGPT4o"
-          }
-        },
-        "Share": {
-          "Twitter": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Layers": {
-          "Management by Object": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Grouping of Panel and Image within Panel": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Button for Each Object": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Layer Up": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Layer Down": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Thumbnail Image": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Download Image within Panel": {
-            "対応": "〇",
-            "詳細": "You can download images for each panel."
-          },
-          "Download Individual Images on Canvas": {
-            "対応": "〇",
-            "詳細": "You can download individual images within the canvas."
-          }
-        },
-        "Operation History": {
-          "Undo/Redo": {
-            "対応": "〇",
-            "詳細": "Unlimited history"
-          }
-        }
-      },
-      "Generation AI": {
-        "対応 API": {
-          "SD WebUI": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "SD Forge": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Basic Functions": {
-          "IP Setting/Port Setting": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Base Prompt": {
-            "対応": "〇",
-            "詳細": "Affects the whole. For example, writing quality prompts here eliminates the need to write them individually."
-          },
-          "Text2Image Generation": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Text2Image Settings": {
-            "対応": "〇",
-            "詳細": "Prompt, negative prompt, Lora, Emb, Seed, width, height"
-          },
-          "Image2Image Generation": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Image2Image Settings": {
-            "対応": "〇",
-            "詳細": "Prompt, negative prompt, Lora, Emb, Seed, width, height"
-          },
-          "Model Selection": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Sampler Selection": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Controlnet": {
-            "対応": "△",
-            "詳細": "In development"
-          },
-          "Adetailer": {
-            "対応": "△",
-            "詳細": "In development"
-          },
-          "Upscaler": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Remove Background": {
-            "対応": "〇",
-            "詳細": "背景削除"
-          },
-          "Panel Prompt Preview Function": {
-            "対応": "〇",
-            "詳細": "Displays the current prompt settings on the panel."
-          },
-          "Image Prompt Preview Function": {
-            "対応": "〇",
-            "詳細": "Displays the current prompt settings on the image."
-          },
-          "Search and Replace Prompts": {
-            "対応": "〇",
-            "詳細": "Batch replace prompt function"
-          },
-          "Apply Seed": {
-            "対応": "〇",
-            "詳細": "Fixes the seed of the last generated image to the panel."
-          },
-          "Apply Prompt": {
-            "対応": "〇",
-            "詳細": "Applies the prompt used during image generation to the image."
-          },
-          "Generate Clip Prompt for Image": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Generate DeepDooru Prompt for Image": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      },
-      "Image Manipulation": {
-        "Basic Image Manipulation": {
-          "Angle": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Scale": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Top Position, Left Position": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Tilt X, Tilt Y": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Opacity": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Fast Image Processing": {
-          "Flip Vertically": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Flip Horizontally": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Blur on Outline": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Blur Color on Outline": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Blur Size on Outline": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Sepia": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Grayscale, Ave or Luminosity": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Color Change, Red, Blue, Green": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Brightness": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Pixelation": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        },
-        "Glfx Image Processing": {
-          "Brightness / Contrast": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Hue / Saturation": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Sepia": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Unsharp Mask": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Vibrance": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Vignette": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Lens Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Triangle Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Zoom Blur": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Color Halftone": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Dot Screen": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Edge Work": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Hexagonal Pixelate": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Ink": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Swirl": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      },
-      "Other": {
-        "Information": {
-          "FPS Display": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "Coordinate Display X, Y": {
-            "対応": "〇",
-            "詳細": ""
-          },
-          "AI Ping Check": {
-            "対応": "〇",
-            "詳細": ""
-          }
-        }
-      }
-    }
+const features_en = {
+"Manga Features": {
+"Panels": {
+"Initial Panel Set": { "対応": "〇", "詳細": "40+ vertical/horizontal sets" },
+"Size: A4, A5, SNS": { "対応": "〇", "詳細": "" },
+"Webtoon Size": { "対応": "△", "詳細": "Performance issues above 10,000px" },
+"Panel Placement/Scale/Tilt": { "対応": "〇", "詳細": "" },
+"Border Color/Thickness": { "対応": "〇", "詳細": "" },
+"Fill/Opacity": { "対応": "〇", "詳細": "" },
+"Split Tool": { "対応": "〇", "詳細": "Knife tool" },
+"Vertex Edit": { "対応": "〇", "詳細": "" },
+"Image in Panel": { "対応": "〇", "詳細": "" },
+"Transparent Image": { "対応": "〇", "詳細": "" }
+},
+"Speech Bubbles": {
+"Initial Bubble Set": { "対応": "〇", "詳細": "35+ types" },
+"Scale/Tilt": { "対応": "〇", "詳細": "" },
+"Border/Fill": { "対応": "△", "詳細": "" },
+"Text in Bubble": { "対応": "△", "詳細": "No grouping yet" }
+},
+"Text": {
+"Font": { "対応": "〇", "詳細": "29 types" },
+"Color/Outline": { "対応": "〇", "詳細": "" },
+"Horizontal/Vertical": { "対応": "〇", "詳細": "" },
+"Alignment": { "対応": "〇", "詳細": "" },
+"Effects": { "対応": "△", "詳細": "Shadow, Gradient, Neon" }
+},
+"Pen": {
+"Pen Tools": { "対応": "〇", "詳細": "Pencil, Circle, Crayon, Ink, Marker" },
+"Eraser/Mosaic": { "対応": "〇", "詳細": "" },
+"Size/Color/Style": { "対応": "〇", "詳細": "" },
+"Shadow": { "対応": "〇", "詳細": "" }
+},
+"Icons": {
+"Icon Set": { "対応": "〇", "詳細": "Google Material Icon 2000+" },
+"Style/Shadow": { "対応": "〇", "詳細": "" }
+}
+},
+"Basic Functions": {
+"Theme": {
+"Dark/Light Mode": { "対応": "〇", "詳細": "" }
+},
+"File": {
+"Project Save/Load": { "対応": "〇", "詳細": "Zip format" },
+"Settings Save/Load": { "対応": "〇", "詳細": "Browser storage" },
+"Image Download/Copy": { "対応": "〇", "詳細": "PNG" },
+"SVG Download": { "対応": "〇", "詳細": "" }
+},
+"Canvas": {
+"Background Color": { "対応": "〇", "詳細": "" },
+"Grid Lines": { "対応": "〇", "詳細": "" }
+},
+"Language": {
+"Supported": { "対応": "〇", "詳細": "9 languages" }
+},
+"Layers": {
+"Object Management": { "対応": "〇", "詳細": "" },
+"Grouping": { "対応": "〇", "詳細": "" },
+"Layer Order": { "対応": "〇", "詳細": "" }
+},
+"History": {
+"Undo/Redo": { "対応": "〇", "詳細": "Unlimited" }
+}
+},
+"AI Generation": {
+"API": {
+"SD WebUI / Forge": { "対応": "〇", "詳細": "" }
+},
+"Features": {
+"IP/Port Settings": { "対応": "〇", "詳細": "" },
+"Text2Image / Image2Image": { "対応": "〇", "詳細": "" },
+"Model / Sampler": { "対応": "〇", "詳細": "" },
+"Controlnet / Adetailer": { "対応": "×", "詳細": "In development" },
+"Upscaler": { "対応": "〇", "詳細": "" },
+"Remove Background": { "対応": "〇", "詳細": "" },
+"Prompt Preview/Search": { "対応": "〇", "詳細": "" },
+"CLIP / DeepDanbooru": { "対応": "〇", "詳細": "" }
+}
+},
+"Image Processing": {
+"Basic": {
+"Angle/Scale/Position/Tilt": { "対応": "〇", "詳細": "" },
+"Opacity": { "対応": "〇", "詳細": "" }
+},
+"Fast Processing": {
+"Flip V/H": { "対応": "〇", "詳細": "" },
+"Shadow/Sepia/Grayscale": { "対応": "〇", "詳細": "" },
+"Color/Brightness/Blur/Pixelate": { "対応": "〇", "詳細": "" }
+},
+"GLFX": {
+"Adjustments": { "対応": "〇", "詳細": "Brightness, Contrast, Hue, etc." },
+"Blur Effects": { "対応": "〇", "詳細": "Lens, Triangle, Zoom" },
+"Stylize": { "対応": "〇", "詳細": "Halftone, Dot Screen, Ink, etc." }
+}
+}
+};
 
-      ;
+function renderFeatures(data) {
+const tbody = document.querySelector('#featureTable tbody');
+let html = '';
+for (const [cat, groups] of Object.entries(data)) {
+html += `<tr class="category"><td colspan="3"><span class="arrow">▶</span>${cat}</td></tr>`;
+for (const [group, items] of Object.entries(groups)) {
+html += `<tr class="group"><td colspan="3">${group}</td></tr>`;
+for (const [item, d] of Object.entries(items)) {
+const cls = d.対応 === '〇' ? 'status-yes' : d.対応 === '△' ? 'status-partial' : 'status-no';
+html += `<tr class="feature"><td>${item}</td><td class="${cls}">${d.対応}</td><td>${d.詳細 || '-'}</td></tr>`;
+}
+}
+}
+tbody.innerHTML = html;
+document.querySelectorAll('.category').forEach(row => {
+row.addEventListener('click', function() {
+this.querySelector('.arrow').classList.toggle('rotate');
+let next = this.nextElementSibling;
+while (next && !next.classList.contains('category')) {
+next.classList.toggle('hidden');
+next = next.nextElementSibling;
+}
+});
+});
+}
 
-    function renderFeatures(features) {
-      const tbody = document.querySelector('#featureTable tbody');
-      let html = '';
-      for (const [category, groups] of Object.entries(features)) {
-        html += `<tr class="category"><td colspan="3"><span class="arrow">▶</span><span class="ps-icon"></span>${category}</td></tr>`;
-        for (const [group, items] of Object.entries(groups)) {
-          html += `<tr class="group"><td colspan="3"><span class="ps-icon"></span>${group}</td></tr>`;
-          for (const [item, details] of Object.entries(items)) {
-            html +=
-              `<tr class="feature">
-                            <td>${item}</td>
-                            <td class="status-${details.対応 === '〇' ? 'yes' : details.対応 === '△' ? 'partial' : 'no'}">${details.対応}</td>
-                            <td>${details.詳細 || '-'}</td>
-                        </tr>`;
-          }
-        }
-      }
-      tbody.innerHTML = html;
+function setLang(lang) {
+const header = document.getElementById('table-header');
+const title = document.getElementById('page-title');
+if (lang === 'ja') {
+header.innerHTML = '<th>機能</th><th>対応</th><th>詳細</th>';
+title.textContent = '機能一覧';
+renderFeatures(features);
+} else {
+header.innerHTML = '<th>Feature</th><th>Status</th><th>Details</th>';
+title.textContent = 'Feature List';
+renderFeatures(features_en);
+}
+}
 
-      document.querySelectorAll('.category').forEach(row => {
-        row.addEventListener('click', function () {
-          this.querySelector('.arrow').classList.toggle('rotate');
-          let next = this.nextElementSibling;
-          while (next && !next.classList.contains('category')) {
-            next.classList.toggle('hidden');
-            next = next.nextElementSibling;
-          }
-        });
-      });
-    }
+document.getElementById('btn-ja').addEventListener('click', function() {
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+this.classList.add('active');
+setLang('ja');
+});
 
-    function setHeaderLanguage(language) {
-      const header = document.getElementById('table-header');
-      if (language === 'ja') {
-        header.innerHTML = `<th><span class="ps-icon"></span>機能</th>
-                                <th>対応状況</th>
-                                <th>詳細</th>`;
-      } else {
-        header.innerHTML = `<th><span class="ps-icon"></span>Feature</th>
-                                <th>Status</th>
-                                <th>Details</th>`;
-      }
-    }
+document.getElementById('btn-en').addEventListener('click', function() {
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+this.classList.add('active');
+setLang('en');
+});
 
-    renderFeatures(features);
-    setHeaderLanguage('ja');
-
-    // 電源ボタンの機能
-    const powerButton = document.querySelector('.power-button');
-    const screen = document.querySelector('.screen');
-    screen.classList.add('off'); // 初期状態で電源オフ
-    powerButton.addEventListener('click', () => {
-      screen.classList.toggle('off');
-    });
-
-    // 言語切り替えボタンの機能
-    const btnJa = document.getElementById('btn-ja');
-    const btnEn = document.getElementById('btn-en');
-
-    btnJa.addEventListener('click', () => {
-      renderFeatures(features);
-      setHeaderLanguage('ja');
-    });
-
-    btnEn.addEventListener('click', () => {
-      renderFeatures(features_en);
-      setHeaderLanguage('en');
-    });
-  </script>
+setLang('ja');
+</script>
 </body>
-
 </html>

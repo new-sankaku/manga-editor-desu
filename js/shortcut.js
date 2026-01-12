@@ -17,6 +17,13 @@ moveLeft: 'left',
 moveRight: 'right',
 moveUp: 'up',
 moveDown: 'down',
+deselect: 'escape',
+layerUp:!isMacOs ? 'ctrl+up' : 'command+up',
+layerDown:!isMacOs ? 'ctrl+down' : 'command+down',
+moveLeftFast: 'shift+left',
+moveRightFast: 'shift+right',
+moveUpFast: 'shift+up',
+moveDownFast: 'shift+down',
 }
 
 var isLongPressDirection=false;
@@ -130,6 +137,48 @@ hotkeys(hotkeysMap.moveDown,'all',function (e) {
 moveActiveObject('down' ,e);
 });
 
+// bind deselect shortcut
+hotkeys(hotkeysMap.deselect,'all',function (e) {
+if (isNotVisibleFloatingWindow()) {
+canvas.discardActiveObject();
+canvas.requestRenderAll();
+e.preventDefault();
+}
+});
+
+// bind layer up shortcut
+hotkeys(hotkeysMap.layerUp,'all',function (e) {
+if (canvas.getActiveObject()) {
+LayersUp();
+e.preventDefault();
+}
+});
+
+// bind layer down shortcut
+hotkeys(hotkeysMap.layerDown,'all',function (e) {
+if (canvas.getActiveObject()) {
+LayersDown();
+e.preventDefault();
+}
+});
+
+// bind fast move shortcuts (10px)
+hotkeys(hotkeysMap.moveLeftFast,'all',function (e) {
+moveActiveObjectFast('left',e);
+});
+
+hotkeys(hotkeysMap.moveRightFast,'all',function (e) {
+moveActiveObjectFast('right',e);
+});
+
+hotkeys(hotkeysMap.moveUpFast,'all',function (e) {
+moveActiveObjectFast('up',e);
+});
+
+hotkeys(hotkeysMap.moveDownFast,'all',function (e) {
+moveActiveObjectFast('down',e);
+});
+
 
 
 /**
@@ -162,6 +211,34 @@ activeObject.left+=activeObjectMoveStep;
 break;
 case 'down':
 activeObject.top+=activeObjectMoveStep;
+break;
+}
+activeObject.setCoords();
+canvas.renderAll();
+e.preventDefault();
+}
+}
+
+/**
+ * @description Move the active object fast (10px) in the canvas
+ * @param {*} direction
+ */
+function moveActiveObjectFast(direction,e) {
+var activeObject=canvas.getActiveObject();
+if (activeObject&&isNotVisibleFloatingWindow()) {
+var step=10;
+switch (direction) {
+case 'left':
+activeObject.left-=step;
+break;
+case 'up':
+activeObject.top-=step;
+break;
+case 'right':
+activeObject.left+=step;
+break;
+case 'down':
+activeObject.top+=step;
 break;
 }
 activeObject.setCoords();

@@ -1,429 +1,228 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Screen Tone Guide</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/22.4.9/i18next.min.js"></script>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 10px;
-        background-color: #f8f8f8;
-        color: #333;
-      }
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="title">Screen Tone Guide</title>
+<link rel="stylesheet" href="../common.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/22.4.9/i18next.min.js"></script>
+</head>
+<body>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn active" onclick="changeLanguage('en')">English</button>
+<button class="lang-btn" onclick="changeLanguage('ja')">日本語</button>
+<button class="lang-btn" onclick="changeLanguage('zh')">中文</button>
+</div>
 
-      h1,
-      h2 {
-        color: #4a4a4a;
-      }
+<h1 data-i18n="title"></h1>
+<p data-i18n="description"></p>
+<p><a href="#toneList" data-i18n="linkText"></a></p>
 
-      #ls {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-      }
+<div class="card">
+<h2 data-i18n="features"></h2>
+<ul>
+<li data-i18n="feature1"></li>
+<li data-i18n="feature2"></li>
+</ul>
+</div>
 
-      button {
-        margin-left: 5px;
-        padding: 5px 10px;
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
+<div class="card">
+<h2 data-i18n="howTo"></h2>
+<h3 data-i18n="panelTone"></h3>
+<ol>
+<li data-i18n="step1"></li>
+<li data-i18n="step2"></li>
+<li data-i18n="step3"></li>
+</ol>
+</div>
+<div class="img-container"><img src="SB/st/001.webp" alt="Step 1-3"></div>
 
-      button:hover {
-        background-color: #45a049;
-      }
+<div class="card">
+<ol start="4">
+<li data-i18n="step4"></li>
+<li data-i18n="step5"></li>
+<li data-i18n="step6"></li>
+</ol>
+</div>
+<div class="img-container"><img src="SB/st/002.webp" alt="Step 4-6"></div>
 
-      #c {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
+<div class="card">
+<h3 data-i18n="canvasTone"></h3>
+<ol>
+<li data-i18n="cStep1"></li>
+<li data-i18n="cStep2"></li>
+<li data-i18n="cStep3"></li>
+<li data-i18n="cStep4"></li>
+</ol>
+</div>
+<div class="img-container"><img src="SB/st/010.webp" alt="Canvas Tone"></div>
 
-      .s {
-        background-color: white;
-        padding: 15px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
+<h2 id="toneList" data-i18n="toneList"></h2>
 
-      img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin-bottom: 10px;
-      }
+<h3>Tone</h3>
+<div class="grid">
+<div class="grid-item"><img src="SB/st/t/001.webp"><p data-i18n="t001"></p></div>
+<div class="grid-item"><img src="SB/st/t/002.webp"><p data-i18n="t002"></p></div>
+<div class="grid-item"><img src="SB/st/t/003.webp"><p data-i18n="t003"></p></div>
+<div class="grid-item"><img src="SB/st/t/004.webp"><p data-i18n="t004"></p></div>
+<div class="grid-item"><img src="SB/st/t/005.webp"><p data-i18n="t005"></p></div>
+<div class="grid-item"><img src="SB/st/t/006.webp"><p data-i18n="t006"></p></div>
+<div class="grid-item"><img src="SB/st/t/007.webp"><p data-i18n="t007"></p></div>
+<div class="grid-item"><img src="SB/st/t/008.webp"><p data-i18n="t008"></p></div>
+</div>
 
-      a {
-        color: #1a73e8;
-        text-decoration: none;
-      }
+<h3>Tone Noise</h3>
+<div class="grid">
+<div class="grid-item"><img src="SB/st/tn/001.webp"><p data-i18n="tn001"></p></div>
+<div class="grid-item"><img src="SB/st/tn/002.webp"><p data-i18n="tn002"></p></div>
+<div class="grid-item"><img src="SB/st/tn/003.webp"><p data-i18n="tn003"></p></div>
+<div class="grid-item"><img src="SB/st/tn/004.webp"><p data-i18n="tn004"></p></div>
+</div>
 
-      a:hover {
-        text-decoration: underline;
-      }
+<h3>Tone Snow</h3>
+<div class="grid">
+<div class="grid-item"><img src="SB/st/ts/001.webp"><p data-i18n="ts001"></p></div>
+<div class="grid-item"><img src="SB/st/ts/002.webp"><p data-i18n="ts002"></p></div>
+<div class="grid-item"><img src="SB/st/ts/003.webp"><p data-i18n="ts003"></p></div>
+<div class="grid-item"><img src="SB/st/ts/004.webp"><p data-i18n="ts004"></p></div>
+</div>
 
-      .g {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-      }
+<h3>SpeedLine</h3>
+<div class="grid">
+<div class="grid-item"><img src="SB/st/sl/001.webp"><p data-i18n="sl001"></p></div>
+<div class="grid-item"><img src="SB/st/sl/002.webp"><p data-i18n="sl002"></p></div>
+<div class="grid-item"><img src="SB/st/sl/003.webp"><p data-i18n="sl003"></p></div>
+<div class="grid-item"><img src="SB/st/sl/004.webp"><p data-i18n="sl004"></p></div>
+</div>
 
-      @media (max-width: 768px) {
-        .g {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
+<h3>Focusing Line</h3>
+<div class="grid">
+<div class="grid-item"><img src="SB/st/fl/001.webp"><p data-i18n="fl001"></p></div>
+<div class="grid-item"><img src="SB/st/fl/002.webp"><p data-i18n="fl002"></p></div>
+<div class="grid-item"><img src="SB/st/fl/003.webp"><p data-i18n="fl003"></p></div>
+<div class="grid-item"><img src="SB/st/fl/004.webp"><p data-i18n="fl004"></p></div>
+<div class="grid-item"><img src="SB/st/fl/005.webp"><p data-i18n="fl005"></p></div>
+<div class="grid-item"><img src="SB/st/fl/006.webp"><p data-i18n="fl006"></p></div>
+<div class="grid-item"><img src="SB/st/fl/007.webp"><p data-i18n="fl007"></p></div>
+<div class="grid-item"><img src="SB/st/fl/008.webp"><p data-i18n="fl008"></p></div>
+</div>
+</div>
 
-  <body>
-    <div id="ls">
-      <button onclick="cL('en')">English</button
-      ><button onclick="cL('ja')">日本語</button
-      ><button onclick="cL('zh')">中文</button>
-    </div>
-    <div id="c">
-      <h1 data-i18n="title"></h1>
-      <p data-i18n="description"></p>
-      <a href="#toneList" data-i18n="linkText"></a>
-      <h2 data-i18n="features"></h2>
-      <ul>
-        <li data-i18n="feature1"></li>
-        <li data-i18n="feature2"></li>
-      </ul>
-      <h2 data-i18n="howTo"></h2>
-      <h3 data-i18n="panelTone"></h3>
-      <ol>
-        <li data-i18n="step1"></li>
-        <li data-i18n="step2"></li>
-        <li data-i18n="step3"></li>
-      <div class="s"><img src="SB/st/001.webp" style="height:800px"/></div>
-        <li data-i18n="step4"></li>
-        <li data-i18n="step5"></li>
-        <li data-i18n="step6"></li>
-      <div class="s"><img src="SB/st/002.webp"  style="height:800px"/></div>
-      </ol>
-      <h3 data-i18n="canvasTone"></h3>
-      <ol>
-        <li data-i18n="cStep1"></li>
-        <li data-i18n="cStep2"></li>
-        <li data-i18n="cStep3"></li>
-        <li data-i18n="cStep4"></li>
-      </ol>
-      <div class="s"><img src="SB/st/010.webp"  style="height:800px"/></div>
-      <h2 id="toneList" data-i18n="toneList"></h2>
-      <h3>Tone</h3>
-      <div class="g">
-        <div class="s">
-          <img src="SB/st/t/001.webp" />
-          <p data-i18n="t001"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/002.webp" />
-          <p data-i18n="t002"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/003.webp" />
-          <p data-i18n="t003"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/004.webp" />
-          <p data-i18n="t004"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/005.webp" />
-          <p data-i18n="t005"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/006.webp" />
-          <p data-i18n="t006"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/007.webp" />
-          <p data-i18n="t007"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/t/008.webp" />
-          <p data-i18n="t008"></p>
-        </div>
-      </div>
-      <h3>Tone Noise</h3>
-      <div class="g">
-        <div class="s">
-          <img src="SB/st/tn/001.webp" />
-          <p data-i18n="tn001"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/tn/002.webp" />
-          <p data-i18n="tn002"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/tn/003.webp" />
-          <p data-i18n="tn003"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/tn/004.webp" />
-          <p data-i18n="tn004"></p>
-        </div>
-      </div>
-      <h3>Tone Snow</h3>
-      <div class="g">
-        <div class="s">
-          <img src="SB/st/ts/001.webp" />
-          <p data-i18n="ts001"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/ts/002.webp" />
-          <p data-i18n="ts002"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/ts/003.webp" />
-          <p data-i18n="ts003"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/ts/004.webp" />
-          <p data-i18n="ts004"></p>
-        </div>
-      </div>
-      <h3>SpeedLine</h3>
-      <div class="g">
-        <div class="s">
-          <img src="SB/st/sl/001.webp" />
-          <p data-i18n="sl001"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/sl/002.webp" />
-          <p data-i18n="sl002"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/sl/003.webp" />
-          <p data-i18n="sl003"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/sl/004.webp" />
-          <p data-i18n="sl004"></p>
-        </div>
-      </div>
-      <h3>Focusing Line</h3>
-      <div class="g">
-        <div class="s">
-          <img src="SB/st/fl/001.webp" />
-          <p data-i18n="fl001"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/002.webp" />
-          <p data-i18n="fl002"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/003.webp" />
-          <p data-i18n="fl003"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/004.webp" />
-          <p data-i18n="fl004"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/005.webp" />
-          <p data-i18n="fl005"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/006.webp" />
-          <p data-i18n="fl006"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/007.webp" />
-          <p data-i18n="fl007"></p>
-        </div>
-        <div class="s">
-          <img src="SB/st/fl/008.webp" />
-          <p data-i18n="fl008"></p>
-        </div>
-      </div>
-    </div>
-    <script>
-      const r = {
-        en: {
-          translation: {
-            title: "Screen Tone Guide",
-            description:
-              "Screen Tone is used to create various patterns for manga backgrounds, allowing for simple yet not as plain panels as white backgrounds.",
-            linkText: "Tone Drawing List",
-            features: "Features",
-            feature1: "Draw Tone on individual panels",
-            feature2: "Apply Tone to the entire canvas",
-            howTo: "How to Use",
-            panelTone: "Apply Tone to a Panel",
-            step1: "Select a page from the panel template.",
-            step2: "Select the desired panel.",
-            step3:"Select Screen Tone from the sidebar.",
-            step4: "Select the desired Tone.",
-            step5: "The Tone is now added to the panel.",
-            step6: "Adjust parameters as needed.",
-            canvasTone: "Apply Tone to the Entire Canvas",
-            cStep1: "Choose the panel option from the sidebar.",
-            cStep2: "Select the desired Tone.",
-            cStep3: "The Tone is now added to the entire page.",
-            cStep4: "Adjust parameters as needed.",
-            toneList: "Tone Drawing List",
-            t001: "Tone 1",
-            t002: "Tone 2",
-            t003: "Tone 3",
-            t004: "Tone 4",
-            t005: "Tone 5",
-            t006: "Tone 6",
-            t007: "Tone 7",
-            t008: "Tone 8",
-            tn001: "Tone Noise 1",
-            tn002: "Tone Noise 2",
-            tn003: "Tone Noise 3",
-            tn004: "Tone Noise 4",
-            ts001: "Tone Snow 1",
-            ts002: "Tone Snow 2",
-            ts003: "Tone Snow 3",
-            ts004: "Tone Snow 4",
-            sl001: "SpeedLine 1",
-            sl002: "SpeedLine 2",
-            sl003: "SpeedLine 3",
-            sl004: "SpeedLine 4",
-            fl001: "Focusing Line 1",
-            fl002: "Focusing Line 2",
-            fl003: "Focusing Line 3",
-            fl004: "Focusing Line 4",
-            fl005: "Focusing Line 5",
-            fl006: "Focusing Line 6",
-            fl007: "Focusing Line 7",
-            fl008: "Focusing Line 8",
-          },
-        },
-        ja: {
-          translation: {
-            title: "スクリーントーンガイド",
-            description:
-              "スクリーントーンは漫画の背景用の様々な模様を描き、シンプルだが白背景ほど殺風景ではないコマを表現できます。",
-            linkText: "トーン描写の一覧",
-            features: "この機能でできること",
-            feature1: "コマ単位でのToneの描画",
-            feature2: "Canvas全体に対するToneの描画",
-            howTo: "操作方法",
-            panelTone: "コマ単位でのToneの描画",
-            step1: "コマテンプレートからページを選択しておきます。",
-            step2: "任意のコマを選択します。",
-            step3:"サイドバーからScreen Toneを選択します。",
-            step4: "任意のToneを選択",
-            step5: "これでコマにToneが追加されました。",
-            step6: "必要に応じてパラメータを調整します。",
-            canvasTone: "Canvas全体に対するToneの描画",
-            cStep1: "サイドバーからコマパネルを選択します。",
-            cStep2: "任意のToneを選択",
-            cStep3: "これでページ全体にToneが追加されました。",
-            cStep4: "必要に応じてパラメータを調整します。",
-            toneList: "トーン描写の一覧",
-            t001: "トーン1",
-            t002: "トーン2",
-            t003: "トーン3",
-            t004: "トーン4",
-            t005: "トーン5",
-            t006: "トーン6",
-            t007: "トーン7",
-            t008: "トーン8",
-            tn001: "トーンノイズ1",
-            tn002: "トーンノイズ2",
-            tn003: "トーンノイズ3",
-            tn004: "トーンノイズ4",
-            ts001: "トーンスノー1",
-            ts002: "トーンスノー2",
-            ts003: "トーンスノー3",
-            ts004: "トーンスノー4",
-            sl001: "スピードライン1",
-            sl002: "スピードライン2",
-            sl003: "スピードライン3",
-            sl004: "スピードライン4",
-            fl001: "フォーカスライン1",
-            fl002: "フォーカスライン2",
-            fl003: "フォーカスライン3",
-            fl004: "フォーカスライン4",
-            fl005: "フォーカスライン5",
-            fl006: "フォーカスライン6",
-            fl007: "フォーカスライン7",
-            fl008: "フォーカスライン8",
-          },
-        },
-        zh: {
-          translation: {
-            title: "网点指南",
-            description:
-              "网点用于创造漫画背景的各种图案，使面板简单但不像白色背景那样单调。",
-            linkText: "网点绘制列表",
-            features: "功能",
-            feature1: "在单个面板上绘制网点",
-            feature2: "在整个画布上应用网点",
-            howTo: "使用方法",
-            panelTone: "在面板上应用网点",
-            step1: "从面板模板中选择一个页面。",
-            step2: "选择所需的面板。",
-            step3:"从侧边栏选择Screen Tone。",
-            step4: "选择所需的网点。",
-            step5: "网点现在已添加到面板上。",
-            step6: "根据需要调整参数。",
-            canvasTone: "在整个画布上应用网点",
-            cStep1: "从侧边栏选择面板选项。",
-            cStep2: "选择所需的网点。",
-            cStep3: "网点现在已添加到整个页面。",
-            cStep4: "根据需要调整参数。",
-            toneList: "网点绘制列表",
-            t001: "网点1",
-            t002: "网点2",
-            t003: "网点3",
-            t004: "网点4",
-            t005: "网点5",
-            t006: "网点6",
-            t007: "网点7",
-            t008: "网点8",
-            tn001: "噪点1",
-            tn002: "噪点2",
-            tn003: "噪点3",
-            tn004: "噪点4",
-            ts001: "雪点1",
-            ts002: "雪点2",
-            ts003: "雪点3",
-            ts004: "雪点4",
-            sl001: "速度线1",
-            sl002: "速度线2",
-            sl003: "速度线3",
-            sl004: "速度线4",
-            fl001: "聚焦线1",
-            fl002: "聚焦线2",
-            fl003: "聚焦线3",
-            fl004: "聚焦线4",
-            fl005: "聚焦线5",
-            fl006: "聚焦线6",
-            fl007: "聚焦线7",
-            fl008: "聚焦线8",
-          },
-        },
-      };
-      function cL(e) {
-        i18next.changeLanguage(e, uC);
-      }
-      function uC() {
-        document.querySelectorAll("[data-i18n]").forEach((e) => {
-          const n = e.getAttribute("data-i18n");
-          e.textContent = i18next.t(n);
-        });
-      }
-      i18next.init(
-        { lng: "en", resources: r, fallbackLng: "en" },
-        function (e, t) {
-          if (e) return console.error("i18next init error", e);
-          uC();
-        }
-      );
-    </script>
-  </body>
+<script>
+const r = {
+en: {
+translation: {
+title: "Screen Tone Guide",
+description: "Screen Tone creates various patterns for manga backgrounds, making panels simple yet not as plain as white backgrounds.",
+linkText: "Tone Drawing List",
+features: "Features",
+feature1: "Draw Tone on individual panels",
+feature2: "Apply Tone to the entire canvas",
+howTo: "How to Use",
+panelTone: "Apply Tone to a Panel",
+step1: "Select a page from the panel template.",
+step2: "Select the desired panel.",
+step3: "Select Screen Tone from the sidebar.",
+step4: "Select the desired Tone.",
+step5: "The Tone is now added to the panel.",
+step6: "Adjust parameters as needed.",
+canvasTone: "Apply Tone to Entire Canvas",
+cStep1: "Choose the panel option from the sidebar.",
+cStep2: "Select the desired Tone.",
+cStep3: "The Tone is now added to the entire page.",
+cStep4: "Adjust parameters as needed.",
+toneList: "Tone List",
+t001: "Tone 1", t002: "Tone 2", t003: "Tone 3", t004: "Tone 4",
+t005: "Tone 5", t006: "Tone 6", t007: "Tone 7", t008: "Tone 8",
+tn001: "Noise 1", tn002: "Noise 2", tn003: "Noise 3", tn004: "Noise 4",
+ts001: "Snow 1", ts002: "Snow 2", ts003: "Snow 3", ts004: "Snow 4",
+sl001: "Speed 1", sl002: "Speed 2", sl003: "Speed 3", sl004: "Speed 4",
+fl001: "Focus 1", fl002: "Focus 2", fl003: "Focus 3", fl004: "Focus 4",
+fl005: "Focus 5", fl006: "Focus 6", fl007: "Focus 7", fl008: "Focus 8"
+}
+},
+ja: {
+translation: {
+title: "スクリーントーンガイド",
+description: "スクリーントーンは漫画の背景用の様々な模様を描き、白背景ほど殺風景ではないコマを表現できます。",
+linkText: "トーン一覧",
+features: "この機能でできること",
+feature1: "コマ単位でのToneの描画",
+feature2: "Canvas全体に対するToneの描画",
+howTo: "操作方法",
+panelTone: "コマ単位でのToneの描画",
+step1: "コマテンプレートからページを選択します。",
+step2: "任意のコマを選択します。",
+step3: "サイドバーからScreen Toneを選択。",
+step4: "任意のToneを選択。",
+step5: "コマにToneが追加されました。",
+step6: "必要に応じてパラメータを調整。",
+canvasTone: "Canvas全体に対するToneの描画",
+cStep1: "サイドバーからコマパネルを選択。",
+cStep2: "任意のToneを選択。",
+cStep3: "ページ全体にToneが追加されました。",
+cStep4: "必要に応じてパラメータを調整。",
+toneList: "トーン一覧",
+t001: "トーン1", t002: "トーン2", t003: "トーン3", t004: "トーン4",
+t005: "トーン5", t006: "トーン6", t007: "トーン7", t008: "トーン8",
+tn001: "ノイズ1", tn002: "ノイズ2", tn003: "ノイズ3", tn004: "ノイズ4",
+ts001: "スノー1", ts002: "スノー2", ts003: "スノー3", ts004: "スノー4",
+sl001: "スピード1", sl002: "スピード2", sl003: "スピード3", sl004: "スピード4",
+fl001: "フォーカス1", fl002: "フォーカス2", fl003: "フォーカス3", fl004: "フォーカス4",
+fl005: "フォーカス5", fl006: "フォーカス6", fl007: "フォーカス7", fl008: "フォーカス8"
+}
+},
+zh: {
+translation: {
+title: "网点指南",
+description: "网点用于创造漫画背景的各种图案，使面板简单但不像白色背景那样单调。",
+linkText: "网点列表",
+features: "功能",
+feature1: "在单个面板上绘制网点",
+feature2: "在整个画布上应用网点",
+howTo: "使用方法",
+panelTone: "在面板上应用网点",
+step1: "从面板模板中选择页面。",
+step2: "选择所需面板。",
+step3: "从侧边栏选择Screen Tone。",
+step4: "选择所需网点。",
+step5: "网点已添加到面板。",
+step6: "根据需要调整参数。",
+canvasTone: "在整个画布上应用网点",
+cStep1: "从侧边栏选择面板选项。",
+cStep2: "选择所需网点。",
+cStep3: "网点已添加到整个页面。",
+cStep4: "根据需要调整参数。",
+toneList: "网点列表",
+t001: "网点1", t002: "网点2", t003: "网点3", t004: "网点4",
+t005: "网点5", t006: "网点6", t007: "网点7", t008: "网点8",
+tn001: "噪点1", tn002: "噪点2", tn003: "噪点3", tn004: "噪点4",
+ts001: "雪点1", ts002: "雪点2", ts003: "雪点3", ts004: "雪点4",
+sl001: "速度1", sl002: "速度2", sl003: "速度3", sl004: "速度4",
+fl001: "聚焦1", fl002: "聚焦2", fl003: "聚焦3", fl004: "聚焦4",
+fl005: "聚焦5", fl006: "聚焦6", fl007: "聚焦7", fl008: "聚焦8"
+}
+}
+};
+
+function changeLanguage(e) {
+document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+i18next.changeLanguage(e, updateContent);
+}
+
+function updateContent() {
+document.querySelectorAll("[data-i18n]").forEach((e) => {
+e.textContent = i18next.t(e.getAttribute("data-i18n"));
+});
+document.title = i18next.t('title');
+}
+
+i18next.init({ lng: "en", resources: r, fallbackLng: "en" }, function(e, t) {
+if (e) return;
+updateContent();
+});
+</script>
+</body>
 </html>

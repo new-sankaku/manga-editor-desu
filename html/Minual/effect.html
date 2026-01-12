@@ -1,217 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Image Processing Menu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="title">Image Processing</title>
+<link rel="stylesheet" href="../common.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/i18next/22.4.9/i18next.min.js"></script>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 10px;
-    background-color: #f8f8f8;
-    color: #333;
-}
-h1, h2 {
-    color: #4a4a4a;
-}
-#ls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-button {
-    margin-left: 5px;
-    padding: 5px 10px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-button:hover {
-    background-color: #45a049;
-}
-#c {
-    max-width: 800px;
-    margin: 0 auto;
-}
-.s {
-    background-color: white;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin-bottom: 10px;
-}
-#menu {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-}
-.menu-item {
-    padding: 10px;
-    background-color: #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-}
-.menu-item:hover {
-    background-color: #ccc;
-}
-.section {
-    display: none;
-}
-.section.active {
-    display: block;
-}
-</style>
 </head>
 <body>
-<div id="ls">
-    <button onclick="cL('en')">English</button>
-    <button onclick="cL('ja')">日本語</button>
-    <button onclick="cL('zh')">中文</button>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn active" onclick="changeLanguage('en')">English</button>
+<button class="lang-btn" onclick="changeLanguage('ja')">日本語</button>
+<button class="lang-btn" onclick="changeLanguage('zh')">中文</button>
 </div>
-<div id="c">
-    <h1 data-i18n="title"></h1>
-    <div id="menu">
-        <div class="menu-item" onclick="showSection('c2bw')" data-i18n="menu.c2bw"></div>
-        <div class="menu-item" onclick="showSection('blend')" data-i18n="menu.blend"></div>
-    </div>
-    <div id="c2bw" class="section">
-        <h2 data-i18n="c2bw.title"></h2>
-        <p data-i18n="c2bw.description"></p>
-        <p data-i18n="c2bw.process"></p>
-        <ul>
-            <li data-i18n="c2bw.ink"></li>
-            <li data-i18n="c2bw.brightnessContrast"></li>
-            <li data-i18n="c2bw.dotScreen"></li>
-        </ul>
-        <p data-i18n="c2bw.sampleImages"></p>
-        <div class="s"><img src="SB\Effect\c2bw\01.webp" alt="Sample 1" width="800"/></div>
-        <div class="s"><img src="SB\Effect\c2bw\02.webp" alt="Sample 2" width="800"/></div>
-        <div class="s"><img src="SB\Effect\c2bw\03.webp" alt="Sample 3" width="800"/></div>
-        <div class="s"><img src="SB\Effect\c2bw\04.webp" alt="Sample 4" width="800"/></div>
-        <div class="s"><img src="SB\Effect\c2bw\05.webp" alt="Sample 5" width="800"/></div>
-        <div class="s"><img src="SB\Effect\c2bw\06.webp" alt="Sample 5" width="800"/></div>
-    </div>
-    <div id="blend" class="section">
-        <h2 data-i18n="blend.title"></h2>
-        <p data-i18n="blend.description"></p>
-        <p data-i18n="blend.requirements"></p>
-        <div class="s"><img src="SB\Effect\25b\layer.webp" alt="Sample 5" width="800"/></div>
-        <p data-i18n="blend.usage"></p>
-        <div class="s"><img src="SB\Effect\25b\cap.webp" alt="Sample 5" width="800"/></div>
-    </div>
+
+<h1 data-i18n="title"></h1>
+
+<div class="menu">
+<div class="menu-item" onclick="showSection('c2bw')" data-i18n="menu.c2bw"></div>
+<div class="menu-item" onclick="showSection('blend')" data-i18n="menu.blend"></div>
 </div>
+
+<div id="c2bw" class="section active">
+<div class="card">
+<h2 data-i18n="c2bw.title"></h2>
+<p data-i18n="c2bw.description"></p>
+<p data-i18n="c2bw.process"></p>
+<ul>
+<li data-i18n="c2bw.ink"></li>
+<li data-i18n="c2bw.brightnessContrast"></li>
+<li data-i18n="c2bw.dotScreen"></li>
+</ul>
+<p data-i18n="c2bw.sampleImages"></p>
+</div>
+<div class="img-container"><img src="SB\Effect\c2bw\01.webp" alt="Sample 1"></div>
+<div class="img-container"><img src="SB\Effect\c2bw\02.webp" alt="Sample 2"></div>
+<div class="img-container"><img src="SB\Effect\c2bw\03.webp" alt="Sample 3"></div>
+<div class="img-container"><img src="SB\Effect\c2bw\04.webp" alt="Sample 4"></div>
+<div class="img-container"><img src="SB\Effect\c2bw\05.webp" alt="Sample 5"></div>
+<div class="img-container"><img src="SB\Effect\c2bw\06.webp" alt="Sample 6"></div>
+</div>
+
+<div id="blend" class="section">
+<div class="card">
+<h2 data-i18n="blend.title"></h2>
+<p data-i18n="blend.description"></p>
+<p data-i18n="blend.requirements"></p>
+</div>
+<div class="img-container"><img src="SB\Effect\25b\layer.webp" alt="Layer"></div>
+<div class="card">
+<p data-i18n="blend.usage"></p>
+</div>
+<div class="img-container"><img src="SB\Effect\25b\cap.webp" alt="Capture"></div>
+</div>
+</div>
+
+<style>
+.section { display: none; }
+.section.active { display: block; }
+.menu-item.active { border-color: var(--accent); background: var(--bg-hover); }
+</style>
+
 <script>
 const r = {
-    en: {
-        translation: {
-            title: "Image Processing Menu",
-            menu: {
-                c2bw: "Color to Black & White",
-                blend: "25 Blend Modes"
-            },
-            c2bw: {
-                title: "Color to Black & White",
-                description: "Converts color images to black and white toned images.",
-                process: "The conversion process involves the following 3 GLFX processes:",
-                ink: "Ink: First, the lines are thickened.",
-                brightnessContrast: "Brightness Contrast: Brightness and contrast are increased to remove excessive expressions when toning.",
-                dotScreen: "Dot Screen: The image is toned.",
-                sampleImages: "These are samples of the original, black and white, and toned color."
-            },
-            blend: {
-                title: "25 Blend Modes",
-                description: "These are blend modes similar to those found in software like Photoshop. For more details, please refer to online resources.",
-                requirements: "Blending requires two or more images. Also, two or more circular icons in the layer panel image must be checked.",
-                usage: "In the blend screen, you can exclude images from the blend target. You can add images to the main canvas after blending. To re-add an image to a panel, right-click the image and select 'Place in panel'. The center point of the image needs to be within the panel."
-            }
-        },
-    },
-    ja: {
-        translation: {
-            title: "画像処理メニュー",
-            menu: {
-                c2bw: "カラーから白黒へ",
-                blend: "25種類のブレンド"
-            },
-            c2bw: {
-                title: "Color2BlackWhite",
-                description: "カラー画像を白黒トーン画像に変換します。",
-                process: "変換過程でGLFXの以下の3つの処理を行います。",
-                ink: "Ink：まず線を太くします。",
-                brightnessContrast: "Brightness Contrast：明るさとコントラストを上げ、トーン化したときの過剰な表現を取り除きます。",
-                dotScreen: "Dot Screen：トーン化します。",
-                sampleImages: "オリジナル、白黒、トーンカラーのそれぞれの見本です。"
-            },
-            blend: {
-                title: "25種類のブレンド",
-                description: "Photoshopなどで見られるブレンドモードです。詳しくはGoogle先生に聞いてください。",
-                requirements: "ブレンドには2枚以上の画像が必要です。また、レイヤーパネルのイメージにある丸いアイコンが2つ以上チェックされている必要があります。",
-                usage: "ブレンド画面では画像をブレンド対象から外すこともできます。ブレンド後にメインキャンバスに画像を追加できます。コマの中に画像を再追加する際は画像を右クリックして'パネル内に配置'を選択してください。画像の中心点がコマ内にある必要があります。"
-            }
-        },
-    },
-    zh: {
-        translation: {
-            title: "图像处理菜单",
-            menu: {
-                c2bw: "彩色转黑白",
-                blend: "25种混合模式"
-            },
-            c2bw: {
-                title: "彩色转黑白",
-                description: "将彩色图像转换为黑白调图像。",
-                process: "转换过程涉及以下3个GLFX处理：",
-                ink: "Ink：首先，加粗线条。",
-                brightnessContrast: "Brightness Contrast：增加亮度和对比度，以消除调子化时的过度表现。",
-                dotScreen: "Dot Screen：进行调子化。",
-                sampleImages: "原始、黑白和色调样本。"
-            },
-            blend: {
-                title: "25种混合模式",
-                description: "这些是类似于Photoshop等软件中的混合模式。详细信息请参考在线资源。",
-                requirements: "混合需要两张或更多图像。此外，图层面板图像中的两个或更多圆形图标必须被选中。",
-                usage: "在混合界面中，您可以从混合目标中排除图像。混合后可以将图像添加到主画布。要将图像重新添加到面板中，请右键单击图像并选择'放置在面板中'。图像的中心点需要在面板内。"
-            }
-        },
-    }
+en: {
+translation: {
+title: "Image Processing Menu",
+menu: { c2bw: "Color to B&W", blend: "25 Blend Modes" },
+c2bw: {
+title: "Color to Black & White",
+description: "Converts color images to black and white toned images.",
+process: "The conversion process involves 3 GLFX processes:",
+ink: "Ink: Thickens the lines.",
+brightnessContrast: "Brightness Contrast: Removes excessive expressions when toning.",
+dotScreen: "Dot Screen: Applies toning.",
+sampleImages: "Samples of original, B&W, and toned color:"
+},
+blend: {
+title: "25 Blend Modes",
+description: "Blend modes similar to Photoshop. For details, refer to online resources.",
+requirements: "Blending requires 2+ images with 2+ circular icons checked in the layer panel.",
+usage: "You can exclude images from blend, add blended images to canvas. Right-click to 'Place in panel'."
+}
+}
+},
+ja: {
+translation: {
+title: "画像処理メニュー",
+menu: { c2bw: "カラーから白黒へ", blend: "25種類のブレンド" },
+c2bw: {
+title: "Color2BlackWhite",
+description: "カラー画像を白黒トーン画像に変換します。",
+process: "変換過程でGLFXの3つの処理を行います：",
+ink: "Ink：線を太くします。",
+brightnessContrast: "Brightness Contrast：トーン化時の過剰な表現を除去。",
+dotScreen: "Dot Screen：トーン化します。",
+sampleImages: "オリジナル、白黒、トーンカラーの見本です："
+},
+blend: {
+title: "25種類のブレンド",
+description: "Photoshopなどで見られるブレンドモードです。詳しくはGoogle先生に。",
+requirements: "ブレンドには2枚以上の画像が必要です。レイヤーパネルの丸いアイコンを2つ以上チェック。",
+usage: "ブレンド対象から外すことも可能。右クリックで'パネル内に配置'を選択。"
+}
+}
+},
+zh: {
+translation: {
+title: "图像处理菜单",
+menu: { c2bw: "彩色转黑白", blend: "25种混合模式" },
+c2bw: {
+title: "彩色转黑白",
+description: "将彩色图像转换为黑白调图像。",
+process: "转换过程涉及3个GLFX处理：",
+ink: "Ink：加粗线条。",
+brightnessContrast: "Brightness Contrast：消除调子化时的过度表现。",
+dotScreen: "Dot Screen：进行调子化。",
+sampleImages: "原始、黑白和色调样本："
+},
+blend: {
+title: "25种混合模式",
+description: "类似于Photoshop的混合模式。详细信息请参考在线资源。",
+requirements: "混合需要2张以上图像，图层面板中需选中2个以上圆形图标。",
+usage: "可从混合目标中排除图像。右键单击选择'放置在面板中'。"
+}
+}
+}
 };
 
-function cL(e) {
-    i18next.changeLanguage(e, uC);
+function changeLanguage(e) {
+document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+i18next.changeLanguage(e, updateContent);
 }
 
-function uC() {
-    document.querySelectorAll("[data-i18n]").forEach((e) => {
-        const n = e.getAttribute("data-i18n");
-        e.textContent = i18next.t(n);
-    });
+function updateContent() {
+document.querySelectorAll("[data-i18n]").forEach((e) => {
+e.textContent = i18next.t(e.getAttribute("data-i18n"));
+});
+document.title = i18next.t('title');
 }
 
 function showSection(sectionId) {
-    document.querySelectorAll('.section').forEach(section => {
-        section.classList.remove('active');
-    });
-    document.getElementById(sectionId).classList.add('active');
+document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+document.getElementById(sectionId).classList.add('active');
+event.target.classList.add('active');
 }
 
-i18next.init(
-    { lng: "en", resources: r, fallbackLng: "en" },
-    function (e, t) {
-        if (e) return console.error("i18next init error", e);
-        uC();
-        showSection('c2bw'); // デフォルトでColor2BlackWhiteセクションを表示
-    }
-);
+i18next.init({ lng: "en", resources: r, fallbackLng: "en" }, function(e, t) {
+if (e) return;
+updateContent();
+document.querySelector('.menu-item').classList.add('active');
+});
 </script>
 </body>
 </html>
