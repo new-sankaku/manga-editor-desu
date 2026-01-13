@@ -441,8 +441,23 @@ return scale;
 
 function Edit() {
 var poly=canvas.getActiveObject();
-if (!poly) return;
-
+var editButton=$("edit");
+if (!poly) {
+createToast(getText("editModeNotPanel"),"");
+return;
+}
+if (!isPanel(poly)) {
+createToast(getText("editModeNotPanel"),"");
+return;
+}
+if (!(poly instanceof fabric.Polygon)) {
+createToast(getText("editModeNotPolygon"),"");
+return;
+}
+if (!poly.points||poly.points.length<3) {
+createToast(getText("editModeNoPoints"),"");
+return;
+}
 poly.edit=!poly.edit;
 if (poly.edit) {
 var lastControl=poly.points.length-1;
@@ -460,9 +475,15 @@ pointIndex: index,
 });
 return acc;
 },{});
+activeClearButton();
+editButton.classList.add("selected");
+editButton.querySelector("span").textContent=getText("editModeOff");
 } else {
 poly.cornerStyle="rect";
 poly.controls=fabric.Object.prototype.controls;
+nonActiveClearButton();
+editButton.classList.remove("selected");
+editButton.querySelector("span").textContent=getText("editModeOn");
 }
 poly.hasBorders=!poly.edit;
 canvas.requestRenderAll();

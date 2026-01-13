@@ -17,9 +17,7 @@ var apiMode=apis.A1111;
 
 document.addEventListener("DOMContentLoaded",function () {
 var settingsSave=$("settingsSave");
-var settingsLoad=$("settingsLoad");
 settingsSave.addEventListener("click",function () {saveSettingsLocalStrage();});
-settingsLoad.addEventListener("click",function () {loadSettingsLocalStrage();});
 
 var saveButton=$("projectSave");
 var loadButton=$("projectLoad");

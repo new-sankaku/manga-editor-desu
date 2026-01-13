@@ -36,9 +36,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 font-size:14px;
-text-transform:uppercase;
 letter-spacing:2px;
-/* transition:background-color 0.3s ease; */
 }
 
 .btm-drawer-handle:hover {

@@ -109,6 +109,7 @@ var clearLeftClipPath=createObjectMenuButton('clearLeftClipPath');
 
 var flipHorizontal=createObjectMenuButton('flipHorizontal');
 var flipVertical=createObjectMenuButton('flipVertical');
+var cropImage=createObjectMenuButton('cropImage');
 
 var font=createObjectMenuDiv('fontSelectorMenu');
 
@@ -169,7 +170,7 @@ menuItems.push(canvasFit);
 
 menuItems.push(flipHorizontal);
 menuItems.push(flipVertical);
-
+menuItems.push(cropImage);
 }
 }else if (isSpeechBubbleSVG(activeObject)||isSpeechBubbleText(activeObject)) {
 menuItems=[visible];
@@ -438,6 +439,11 @@ case 'clearBottomClipPath':
 case 'clearRightClipPath':
 case 'clearLeftClipPath':
 removeClipPath(activeObject,action);
+break;
+case 'cropImage':
+if(isImage(activeObject)){
+startCropMode(activeObject);
+}
 break;
 }
 canvas.requestRenderAll();

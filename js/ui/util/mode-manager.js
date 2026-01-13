@@ -233,14 +233,10 @@ ModeManager.change(ModeManager.MODE.CROP);
 },
 
 _enable:function(){
-$("crop").style.display="inline";
-$("cropMode").style.display="none";
 },
 
 disable:function(){
 if(!cropFrame)return;
-$("crop").style.display="none";
-$("cropMode").style.display="inline";
 canvas.remove(cropFrame);
 cropFrame=null;
 if(cropActiveObject){
@@ -316,8 +312,10 @@ currentMode===ModeManager.MODE.DELETE_POINT;
 
 edit:{
 clear:function(){
+var hasEditMode=false;
 canvas.getObjects().forEach(function(obj){
 if(obj.edit){
+hasEditMode=true;
 obj.edit=false;
 obj.cornerStyle="rect";
 obj.controls=fabric.Object.prototype.controls;
@@ -326,6 +324,14 @@ canvas.requestRenderAll();
 if(typeof updateLayerPanel==='function')updateLayerPanel();
 }
 });
+if(hasEditMode){
+var editButton=$("edit");
+if(editButton){
+editButton.classList.remove("selected");
+var span=editButton.querySelector("span");
+if(span)span.textContent=getText("editModeOn");
+}
+}
 }
 },
 

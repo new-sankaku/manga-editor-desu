@@ -22,7 +22,15 @@
       "Bash(taskkill:*)",
       "Bash(netstat:*)",
       "Bash(ls:*)",
-      "Bash(dir /s /b \"C:\\\\01_work\\\\00_Git\\\\manga-editor-desu\\\\js\\\\*generator*\")"
+      "Bash(dir /s /b \"C:\\\\01_work\\\\00_Git\\\\manga-editor-desu\\\\js\\\\*generator*\")",
+      "Bash(node format-translations.js:*)",
+      "Bash(move:*)",
+      "Bash(node format-translations.cjs:*)",
+      "Bash(ren:*)",
+      "Bash(node -c:*)",
+      "Bash(node -e:*)",
+      "Bash(dd:*)",
+      "Bash(node debug-json.cjs:*)"
     ]
   },
   "hooks": {

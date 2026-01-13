@@ -50,16 +50,12 @@ function setLanguage(language) {
     uiLogger.debug("setLanguage start");
     removeTooltips();
 
-    addTooltip('inputImageFile', 'inputImageFile');
     addTooltip('zoomIn', 'zoomIn');
     addTooltip('zoomOut', 'zoomOut');
     addTooltip('zoomFit', 'zoomFit');
     addTooltip('clearMode', 'clearMode');
     addTooltip('undo', 'undo');
     addTooltip('redo', 'redo');
-    addTooltip('cropMode', 'cropMode');
-    addTooltip('crop', 'crop');
-    addTooltip('rembg', 'rembg');
   });
 }
 

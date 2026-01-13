@@ -23,7 +23,7 @@ btmUpdateHandleText();
 }
 
 function btmUpdateHandleText() {
-btmDrawerHandle.textContent=btmDrawer.classList.contains("btm-closed") ? "OPEN" : "CLOSE";
+btmDrawerHandle.textContent=btmDrawer.classList.contains("btm-closed") ? "OPEN (Ctrl+B)" : "CLOSE (Ctrl+B)";
 }
 
 

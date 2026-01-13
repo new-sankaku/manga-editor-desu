@@ -275,9 +275,9 @@ function getElementClasses(element) {
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="#" id="settingsLoad">
-                                    <i class="material-icons">settings</i> <span data-i18n="settingsLoad">Settings
-                                        Load</span>
+                                <a class="dropdown-item" href="#" onclick="inputImageFile()">
+                                    <span class="material-symbols-outlined">image</span>
+                                    <span data-i18n="imageImport">画像インポート</span>
                                 </a>
                             </li>
                             <li>
@@ -339,7 +339,7 @@ function getElementClasses(element) {
                             <div class="A1111_api_content">
                                 <li>
                                     <label>
-                                        <h5 data-i18n="">WebUI(A1111/Forge)</h5>
+                                        <h5>WebUI(A1111/Forge)</h5>
                                     </label>
                                     <label for="sdWebUIPageUrl">
                                         <span data-i18n="apiUrl">URL</span>
@@ -844,7 +844,7 @@ function getElementClasses(element) {
                     <button id="add" onclick="panelAllChange()"><i class="material-icons">border_all</i> <span
                             data-i18n="all_change">All Change</span></button>
                     <button id="edit" onclick="Edit()"><i class="material-icons">edit_square</i> <span
-                            data-i18n="editingMode">Editing Mode</span></button>
+                            data-i18n="editModeOn">Panel Edit Mode ON</span></button>
 
                     <hr>
                     <div class="input-group">
@@ -1727,26 +1727,7 @@ function getElementClasses(element) {
                 <div class="area-header">
 
 
-                    <button id="inputImageFile" onclick="inputImageFile()">
-                        <span class="material-symbols-outlined">image</span>
-                        <input type="file" id="imageInput" multiple style="display: none;" accept="image/*">
-                        <label data-i18n="importButton" style="margin: 0px; ">
-                            Import
-                        </label>
-                    </button>
-
-                    <button id="cropMode">
-                        <i class="material-icons">crop_free</i>
-                        <label data-i18n="cropButton" style="margin: 0px; ">
-                            切り抜き
-                        </label>
-                    </button>
-                    <button id="crop" anim="glow" class="toggled">
-                        <i class="material-icons">crop</i>
-                        <label data-i18n="cropButton" style="margin: 0px; ">
-                            切り抜き
-                        </label>
-                    </button>
+                    <input type="file" id="imageInput" multiple style="display: none;" accept="image/*">
 
                     <button id="clearMode" onclick="operationModeClear()">
                         <span class="material-symbols-outlined">cancel_presentation</span>
@@ -1859,7 +1840,7 @@ function getElementClasses(element) {
 
                         <div id="comfyUIWorkflowId" class="controls-mini">
                             <div class="input-group" data-group="comfyUIWorkflowGroup">
-                                <button id="openWorkflowButton">ComfyUI Workflow's Settings</button>
+                                <button id="openWorkflowButton" data-i18n="comfyuiWorkflowSettings">ComfyUI Workflows設定</button>
                             </div>
                         </div>
 
@@ -2017,7 +1998,7 @@ function getElementClasses(element) {
 
     <div id="btm-drawer" class="btm-drawer btm-closed" style="display: none;">
         <div id="btm-drawer-handle" class="btm-drawer-handle neon-text">
-            OPEN
+            OPEN (Ctrl+B)
         </div>
         <div class="btm-drawer-content">
             <div id="btm-image-container" class="btm-image-container"></div>

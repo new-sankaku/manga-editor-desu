@@ -106,7 +106,6 @@ eventLogger.trace('11: selection:cleared');
 if (cropFrame) {
 canvas.remove(cropFrame);
 cropFrame=null;
-$('crop').style.display='none';
 }
 });
 canvas.on('selection:updated',function() {
@@ -114,7 +113,6 @@ eventLogger.trace('12: selection:updated');
 if (cropFrame&&canvas.getActiveObject()!==cropFrame) {
 canvas.remove(cropFrame);
 cropFrame=null;
-$('crop').style.display='none';
 }
 });
 //Crop Mode from finish

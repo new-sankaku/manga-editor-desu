@@ -27,6 +27,30 @@ const resources = {
 "th": {"unsupportedProjectFileFormat": "รูปแบบไฟล์ไม่รองรับ", "unsupportedProjectFileFormatMessage": "กรุณาเลือกไฟล์ .zip หรือ .lz4", "OutlinePen": "เส้นขอบคู่", "outline1-color": "สีขอบ1", "outline2-color": "สีขอบ2", "outline1-size": "ความกว้างขอบ1", "outline2-size": "ความกว้างขอบ2", "outline1-opacity": "ความทึบขอบ1", "outline2-opacity": "ความทึบขอบ2"},
 "de": {"unsupportedProjectFileFormat": "Nicht unterstütztes Dateiformat", "unsupportedProjectFileFormatMessage": "Bitte wählen Sie eine .zip- oder .lz4-Datei", "OutlinePen": "Doppelumriss", "outline1-color": "Umriss1 Farbe", "outline2-color": "Umriss2 Farbe", "outline1-size": "Umriss1 Breite", "outline2-size": "Umriss2 Breite", "outline1-opacity": "Umriss1 Deckkraft", "outline2-opacity": "Umriss2 Deckkraft"}
 },
+"20260114": {
+"ja": {"editModeNoObject": "オブジェクトを選択してください", "editModeNotPanel": "パネル（コマ）を選択してください", "editModeNotPolygon": "ポリゴン形式のパネルのみ編集可能です", "editModeNoPoints": "編集可能な頂点がありません", "editModeOn": "コマ編集モードON", "editModeOff": "コマ編集モードOFF"},
+"en": {"editModeNoObject": "Please select an object", "editModeNotPanel": "Please select a panel", "editModeNotPolygon": "Only polygon panels can be edited", "editModeNoPoints": "No editable points", "editModeOn": "Panel Edit Mode ON", "editModeOff": "Panel Edit Mode OFF"},
+"ko": {"editModeNoObject": "오브젝트를 선택하세요", "editModeNotPanel": "패널을 선택하세요", "editModeNotPolygon": "폴리곤 패널만 편집 가능합니다", "editModeNoPoints": "편집 가능한 점이 없습니다", "editModeOn": "패널 편집 모드 ON", "editModeOff": "패널 편집 모드 OFF"},
+"fr": {"editModeNoObject": "Veuillez sélectionner un objet", "editModeNotPanel": "Veuillez sélectionner un panneau", "editModeNotPolygon": "Seuls les panneaux polygones peuvent être modifiés", "editModeNoPoints": "Pas de points modifiables", "editModeOn": "Mode édit. panneau ON", "editModeOff": "Mode édit. panneau OFF"},
+"zh": {"editModeNoObject": "请选择对象", "editModeNotPanel": "请选择面板", "editModeNotPolygon": "只能编辑多边形面板", "editModeNoPoints": "没有可编辑的点", "editModeOn": "面板编辑模式 ON", "editModeOff": "面板编辑模式 OFF"},
+"ru": {"editModeNoObject": "Выберите объект", "editModeNotPanel": "Выберите панель", "editModeNotPolygon": "Можно редактировать только полигональные панели", "editModeNoPoints": "Нет редактируемых точек", "editModeOn": "Режим редакт. панели ВКЛ", "editModeOff": "Режим редакт. панели ВЫКЛ"},
+"es": {"editModeNoObject": "Seleccione un objeto", "editModeNotPanel": "Seleccione un panel", "editModeNotPolygon": "Solo se pueden editar paneles poligonales", "editModeNoPoints": "Sin puntos editables", "editModeOn": "Modo Edic. Panel ON", "editModeOff": "Modo Edic. Panel OFF"},
+"pt": {"editModeNoObject": "Selecione um objeto", "editModeNotPanel": "Selecione um painel", "editModeNotPolygon": "Apenas painéis poligonais podem ser editados", "editModeNoPoints": "Sem pontos editáveis", "editModeOn": "Modo Edição Painel ON", "editModeOff": "Modo Edição Painel OFF"},
+"th": {"editModeNoObject": "กรุณาเลือกวัตถุ", "editModeNotPanel": "กรุณาเลือกแผง", "editModeNotPolygon": "แก้ไขได้เฉพาะแผงรูปหลายเหลี่ยมเท่านั้น", "editModeNoPoints": "ไม่มีจุดที่แก้ไขได้", "editModeOn": "โหมดแก้ไขพาเนล ON", "editModeOff": "โหมดแก้ไขพาเนล OFF"},
+"de": {"editModeNoObject": "Bitte wählen Sie ein Objekt", "editModeNotPanel": "Bitte wählen Sie ein Panel", "editModeNotPolygon": "Nur Polygon-Panels können bearbeitet werden", "editModeNoPoints": "Keine bearbeitbaren Punkte", "editModeOn": "Panel-Bearbeit. ON", "editModeOff": "Panel-Bearbeit. OFF"}
+},
+"20260113": {
+"ja": {"cropEnterToast": "Crop: Enterで完了", "comfyuiWorkflowSettings": "ComfyUI Workflows設定", "sbSelectmode": "選択モード (ESC)"},
+"en": {"cropEnterToast": "Crop: Press Enter to complete", "comfyuiWorkflowSettings": "ComfyUI Workflows Settings", "sbSelectmode": "Select Mode (ESC)"},
+"ko": {"cropEnterToast": "Crop: Enter로 완료", "comfyuiWorkflowSettings": "ComfyUI Workflows 설정", "sbSelectmode": "선택 모드 (ESC)"},
+"fr": {"cropEnterToast": "Crop: Entrée pour terminer", "comfyuiWorkflowSettings": "Paramètres ComfyUI Workflows", "sbSelectmode": "Mode sélection (ESC)"},
+"zh": {"cropEnterToast": "裁剪: 按Enter完成", "comfyuiWorkflowSettings": "ComfyUI Workflows设置", "sbSelectmode": "选择模式 (ESC)"},
+"ru": {"cropEnterToast": "Обрезка: Enter для завершения", "comfyuiWorkflowSettings": "Настройки ComfyUI Workflows", "sbSelectmode": "Режим выбора (ESC)"},
+"es": {"cropEnterToast": "Recortar: Enter para completar", "comfyuiWorkflowSettings": "Configuración ComfyUI Workflows", "sbSelectmode": "Modo selección (ESC)"},
+"pt": {"cropEnterToast": "Cortar: Enter para concluir", "comfyuiWorkflowSettings": "Configurações ComfyUI Workflows", "sbSelectmode": "Modo seleção (ESC)"},
+"th": {"cropEnterToast": "ครอป: กด Enter เพื่อเสร็จสิ้น", "comfyuiWorkflowSettings": "การตั้งค่า ComfyUI Workflows", "sbSelectmode": "โหมดเลือก (ESC)"},
+"de": {"cropEnterToast": "Zuschneiden: Enter zum Abschließen", "comfyuiWorkflowSettings": "ComfyUI Workflows Einstellungen", "sbSelectmode": "Auswahlmodus (ESC)"}
+},
 "20260112": {
 "ja": {"op_cancel": "キャンセル", "op_cancelling": "キャンセル中...", "op_cancelled": "キャンセル済み", "op_waitingTask": "現在のタスクを待機中..."},
 "en": {"op_cancel": "Cancel", "op_cancelling": "Cancelling...", "op_cancelled": "Cancelled", "op_waitingTask": "Waiting for current task..."},
@@ -40,16 +64,16 @@ const resources = {
 "de": {"op_cancel": "Abbrechen", "op_cancelling": "Abbrechen...", "op_cancelled": "Abgebrochen", "op_waitingTask": "Warte auf aktuelle Aufgabe..."}
 },
 "20250413": {
-"ja": {"upscaleButton": "画像を高解像度化します", "cropButton": "Crop", "importButton": "インポート", "exitModeButton": "モード解除"},
-"en": {"upscaleButton": "Upscale image", "cropButton": "Crop", "importButton": "Import", "exitModeButton": "Exit Mode"},
-"ko": {"upscaleButton": "이미지 확대", "cropButton": "자르기", "importButton": "가져오기", "exitModeButton": "모드 해제"},
-"fr": {"upscaleButton": "Améliorer l'image", "cropButton": "Rogner", "importButton": "Importer", "exitModeButton": "Quitter le mode"},
-"zh": {"upscaleButton": "提升图像分辨率", "cropButton": "裁剪", "importButton": "导入", "exitModeButton": "退出模式"},
-"ru": {"upscaleButton": "Увеличить разрешение", "cropButton": "Обрезка", "importButton": "Импорт", "exitModeButton": "Выйти из режима"},
-"es": {"upscaleButton": "Mejorar resolución", "cropButton": "Recorte", "importButton": "Importar", "exitModeButton": "Salir del modo"},
-"pt": {"upscaleButton": "Aumentar resolução", "cropButton": "Cortar", "importButton": "Importar", "exitModeButton": "Sair do modo"},
-"th": {"upscaleButton": "เพิ่มความละเอียดภาพ", "cropButton": "ครอป", "importButton": "นำเข้า", "exitModeButton": "ออกจากโหมด"},
-"de": {"upscaleButton": "Bild verbessern", "cropButton": "Zuschneiden", "importButton": "Importieren", "exitModeButton": "Modus beenden"}
+"ja": {"upscaleButton": "画像を高解像度化します", "cropButton": "Crop", "importButton": "インポート", "exitModeButton": "モード解除 (ESC)"},
+"en": {"upscaleButton": "Upscale image", "cropButton": "Crop", "importButton": "Import", "exitModeButton": "Exit Mode (ESC)"},
+"ko": {"upscaleButton": "이미지 확대", "cropButton": "자르기", "importButton": "가져오기", "exitModeButton": "모드 해제 (ESC)"},
+"fr": {"upscaleButton": "Améliorer l'image", "cropButton": "Rogner", "importButton": "Importer", "exitModeButton": "Quitter (ESC)"},
+"zh": {"upscaleButton": "提升图像分辨率", "cropButton": "裁剪", "importButton": "导入", "exitModeButton": "退出模式 (ESC)"},
+"ru": {"upscaleButton": "Увеличить разрешение", "cropButton": "Обрезка", "importButton": "Импорт", "exitModeButton": "Выход (ESC)"},
+"es": {"upscaleButton": "Mejorar resolución", "cropButton": "Recorte", "importButton": "Importar", "exitModeButton": "Salir (ESC)"},
+"pt": {"upscaleButton": "Aumentar resolução", "cropButton": "Cortar", "importButton": "Importar", "exitModeButton": "Sair (ESC)"},
+"th": {"upscaleButton": "เพิ่มความละเอียดภาพ", "cropButton": "ครอป", "importButton": "นำเข้า", "exitModeButton": "ออก (ESC)"},
+"de": {"upscaleButton": "Bild verbessern", "cropButton": "Zuschneiden", "importButton": "Importieren", "exitModeButton": "Beenden (ESC)"}
 },
 
 "20250322": {

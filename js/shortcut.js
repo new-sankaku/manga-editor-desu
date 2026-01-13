@@ -27,6 +27,8 @@ moveDownFast: 'shift+down',
 projectSave:!isMacOs ? 'ctrl+s' : 'command+s',
 projectLoad:!isMacOs ? 'ctrl+o' : 'command+o',
 toggleBottomBar:!isMacOs ? 'ctrl+b' : 'command+b',
+imageDownload:!isMacOs ? 'ctrl+d' : 'command+d',
+settingsSave:!isMacOs ? 'ctrl+shift+s' : 'command+shift+s',
 }
 
 var isLongPressDirection=false;
@@ -186,6 +188,30 @@ e.preventDefault();
 hotkeys(hotkeysMap.toggleBottomBar,'all',function (e) {
 btmToggleDrawer();
 e.preventDefault();
+});
+
+// bind image download shortcut
+hotkeys(hotkeysMap.imageDownload,'all',function (e) {
+if (!isEditableTagsActive()) {
+cropAndDownload();
+e.preventDefault();
+}
+});
+
+// bind settings save shortcut
+hotkeys(hotkeysMap.settingsSave,'all',function (e) {
+if (!isEditableTagsActive()) {
+$('settingsSave').click();
+e.preventDefault();
+}
+});
+
+// bind enter key for crop completion
+hotkeys('enter','all',function (e) {
+if (!isEditableTagsActive()&&cropFrame) {
+completeCrop();
+e.preventDefault();
+}
 });
 
 // bind fast move shortcuts (10px)
