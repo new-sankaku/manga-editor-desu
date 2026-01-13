@@ -279,11 +279,33 @@ selectable: true,
 setText2ImageInitPrompt(polygon1);
 setText2ImageInitPrompt(polygon2);
 
+var childImages=[];
+if(polygon.guids&&polygon.guids.length>0){
+canvas.getObjects().forEach(function(obj){
+if(obj.guid&&polygon.guids.indexOf(obj.guid)!==-1){
+childImages.push(obj);
+}
+});
+}
+
 stopKnifeLineAnimation();
 canvas.remove(setNotSave(currentKnifeLine));
 canvas.remove(setNotSave(polygon));
 canvas.add(setNotSave(polygon1));
 canvas.add(setNotSave(polygon2));
+
+if(childImages.length>0){
+var area1=polygon1.width*polygon1.height;
+var area2=polygon2.width*polygon2.height;
+var largerPolygon=area1>=area2?polygon1:polygon2;
+childImages.forEach(function(img){
+img.clipPath=null;
+var imgCenterX=img.left+(img.width*img.scaleX)/2;
+var imgCenterY=img.top+(img.height*img.scaleY)/2;
+putImageInFrame(img,imgCenterX,imgCenterY,false,true,true,largerPolygon);
+});
+}
+
 saveStateByManual();
 
 currentKnifeObject=null;

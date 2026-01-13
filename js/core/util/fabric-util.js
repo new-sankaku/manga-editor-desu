@@ -607,8 +607,32 @@ logger.trace("ERROR",`Unknown action "${action}" for shape "${activeObject.name}
 canvasLogger.error(`[removeClipPath] Error: Unknown action "${action}"`);
 return;
 }
-if(activeObject.removeSettings){
+var shouldRemoveSettings=false;
+var shouldRemoveListenersOnly=false;
+if(action==='clearAllClipPaths'){
+shouldRemoveSettings=true;
+}else if(activeObject.clipPath){
+var cp=activeObject.clipPath;
+var cpMinX=Infinity,cpMaxX=-Infinity,cpMinY=Infinity,cpMaxY=-Infinity;
+for(var i=0;i<cp.points.length;i++){
+var px=cp.left+cp.points[i].x*cp.scaleX;
+var py=cp.top+cp.points[i].y*cp.scaleY;
+cpMinX=Math.min(cpMinX,px);
+cpMaxX=Math.max(cpMaxX,px);
+cpMinY=Math.min(cpMinY,py);
+cpMaxY=Math.max(cpMaxY,py);
+}
+if(cpMinX<=0&&cpMaxX>=canvasWidth&&cpMinY<=0&&cpMaxY>=canvasHeight){
+shouldRemoveSettings=true;
+activeObject.clipPath=undefined;
+}else{
+shouldRemoveListenersOnly=true;
+}
+}
+if(shouldRemoveSettings&&activeObject.removeSettings){
 activeObject.removeSettings();
+}else if(shouldRemoveListenersOnly&&activeObject.removeClipPathListeners){
+activeObject.removeClipPathListeners();
 }
 
 if (canvas) {

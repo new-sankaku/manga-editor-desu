@@ -327,3 +327,4 @@ const imageLogger=SimpleLogger('image',LogLevel.INFO);
 const panelLogger=SimpleLogger('panel',LogLevel.INFO);
 const compressionLogger=SimpleLogger('compression',LogLevel.INFO);
 const serviceLogger=SimpleLogger('service',LogLevel.INFO);
+const freehandBubbleLogger=SimpleLogger('freehandBubble',LogLevel.DEBUG);

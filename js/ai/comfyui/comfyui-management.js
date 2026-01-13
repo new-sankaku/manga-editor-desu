@@ -178,11 +178,14 @@ if(isPanel(layer)){
 var center=calculateCenter(layer);
 putImageInFrame(result,center.centerX,center.centerY,false,false,true,layer);
 }else if(layer.clipPath){
-layer.visible=false;
 var center=calculateCenter(layer);
-putImageInFrame(result,center.centerX,center.centerY,false,false,true,layer);
+var targetParent=layer.relatedPoly||layer;
+layer.saveHistory=false;
+canvas.remove(layer);
+putImageInFrame(result,center.centerX,center.centerY,false,false,true,targetParent);
 }else{
-layer.visible=false;
+layer.saveHistory=false;
+canvas.remove(layer);
 replaceImageObject(layer,result,Type);
 }
 } else {

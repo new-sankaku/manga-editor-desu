@@ -164,21 +164,45 @@ canvas.renderAll();
 }
 
 img.relatedPoly=poly;
+img._clipPathHandler=updateOnModification;
 
 ['moving','scaling','rotating','skewing','modified'].forEach(eventName=>{
 poly.on(eventName,updateOnModification);
 img.on(eventName,updateOnModification);
 });
 
-img.removeSettings=function() {
-removeGUID(this.relatedPoly,this);
+img.removeClipPathListeners=function() {
 const events=['moving','scaling','rotating','skewing','modified'];
+const handler=this._clipPathHandler;
+if(handler){
 events.forEach(eventName=>{
-this.off(eventName,updateOnModification);
-if (this.relatedPoly) {
-this.relatedPoly.off(eventName,updateOnModification);
+this.off(eventName,handler);
+if(this.relatedPoly){
+this.relatedPoly.off(eventName,handler);
 }
 });
+}
+delete this._clipPathHandler;
+delete this.removeClipPathListeners;
+};
+
+img.removeSettings=function() {
+removeGUID(this.relatedPoly,this);
+if(this.removeClipPathListeners){
+this.removeClipPathListeners();
+}else{
+const events=['moving','scaling','rotating','skewing','modified'];
+const handler=this._clipPathHandler;
+if(handler){
+events.forEach(eventName=>{
+this.off(eventName,handler);
+if(this.relatedPoly){
+this.relatedPoly.off(eventName,handler);
+}
+});
+}
+delete this._clipPathHandler;
+}
 delete this.relatedPoly;
 delete this.removeSettings;
 };

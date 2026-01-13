@@ -1,5 +1,3 @@
-var freehandBubbleLogger=new SimpleLogger('freehandBubble',LogLevel.DEBUG);
-
 function sbFreehandTextChange(alignment,button) {
 changeSelected(button);
 }

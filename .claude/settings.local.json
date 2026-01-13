@@ -21,7 +21,8 @@
       "Bash(curl:*)",
       "Bash(taskkill:*)",
       "Bash(netstat:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(dir /s /b \"C:\\\\01_work\\\\00_Git\\\\manga-editor-desu\\\\js\\\\*generator*\")"
     ]
   },
   "hooks": {

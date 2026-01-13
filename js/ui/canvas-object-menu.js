@@ -99,6 +99,7 @@ var panelInNotFit=createObjectMenuButton('panelInNotFit');
 var canvasFit=createObjectMenuButton('canvasFit');
 var selectClear=createObjectMenuButton('selectClear');
 var rembg=createObjectMenuButton('rembg');
+var upscale=createObjectMenuButton('upscale');
 var clearAllClipPaths=createObjectMenuButton('clearAllClipPaths');
 
 var clearTopClipPath=createObjectMenuButton('clearTopClipPath');
@@ -150,6 +151,7 @@ if (clickType!=='left') {
 menuItems=[visible,movement];
 if (hasRole(AI_ROLES.Image2Image)) menuItems.push(generate);
 if (hasRole(AI_ROLES.RemoveBG))    menuItems.push(rembg);
+if (hasRole(AI_ROLES.Upscaler))    menuItems.push(upscale);
 menuItems.push(deleteMenu);
 
 if (haveClipPath(activeObject)) {
@@ -360,6 +362,10 @@ break;
 case 'rembg':
 var spinner=createSpinner(canvasMenuIndex);
 aiRembg(activeObject,spinner);
+break;
+case 'upscale':
+var spinner=createSpinner(canvasMenuIndex);
+aiUpscale(activeObject,spinner);
 break;
 case 'generate':
 if (isPanel(activeObject)) {

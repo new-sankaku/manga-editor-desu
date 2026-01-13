@@ -40,6 +40,52 @@ python 99_server.py
 - ログレベル: TRACE, DEBUG, INFO, WARN, ERROR, SILENT
 - 使用例: `canvasLogger.debug("message");`, `canvasLogger.error("error message");`
 
+## レイヤー構造
+
+### オブジェクト間のリンク機構
+| リンク方式 | 方向 | 用途 |
+|-----------|------|------|
+| `parent.guids[]` | 親→子 | 親が子オブジェクトのGUID一覧を保持 |
+| `child.relatedPoly` | 子→親 | 子が親Polygonへの参照を保持 |
+| `child.clipPath` | 属性 | 親Polygon形状でマスク |
+
+### 構造図
+```
+キャンバス (canvasGuid)
+├─ Panel1 (guid:A, guids:[B,C])
+│  ├─ ImageB (relatedPoly:Panel1, clipPath:Polygon)
+│  └─ ImageC (relatedPoly:Panel1, clipPath:Polygon)
+└─ SpeechBubble (guid:D, guids:[E,F], customType:speechBubbleSVG)
+   ├─ Textbox (guid:E, customType:speechBubbleText)
+   └─ Rect (guid:F, customType:speechBubbleRect)
+```
+
+### リンク確立の流れ
+1. `putImageInFrame()` → `findTargetFrame()`でフレーム特定
+2. `moveSettings(img, poly)`:
+   - `updateClipPath()` → clipPath設定
+   - `img.relatedPoly = poly` → 双方向参照
+   - `img._clipPathHandler` → イベントハンドラを保存
+   - イベントリスナー登録（moving/scaling/rotating/skewing/modified）
+   - `img.removeClipPathListeners()` → イベントリスナーのみ解除（guids維持）
+   - `img.removeSettings()` → 完全解除（guidsも削除）
+3. `setGUID(parentFrame, img)` → `parent.guids[]`に追加
+
+### updateClipPath(img, poly)
+- 親Polygonの形状からclipPathを動的生成
+- オブジェクト移動/変形時にイベントリスナー経由で自動呼び出し
+- 部分削除後にイベントリスナーを解除しないとclipPathが復活する
+
+### リンク削除の流れ
+1. `img.removeSettings()` を呼び出し
+2. `removeGUID(relatedPoly, img)` → guids配列から削除
+3. イベントリスナー削除
+4. `relatedPoly`と`removeSettings`プロパティを削除
+
+### 画像置き換え時の注意
+- `layer.relatedPoly`で親Polygonを取得してから新画像を配置
+- 元画像は`saveHistory=false`を設定してから削除（履歴に残さない）
+
 ## 履歴管理（Undo/Redo）に関する注意事項
 - 画像の削除と追加を連続で行う場合、中間状態が履歴に残らないようにすること
 - `changeDoNotSaveHistory()`と`changeDoSaveHistory()`で履歴保存を一時的に無効化する
