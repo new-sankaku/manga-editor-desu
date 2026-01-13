@@ -140,6 +140,8 @@ function toggleMode() {
 const isDarkMode=document.body.classList.toggle('dark-mode');
 const logo=$('navbar-logo');
 
+document.documentElement.classList.remove('light-mode');
+document.documentElement.classList.add('dark-mode');
 document.body.classList.remove('light-mode');
 document.body.classList.add('dark-mode');
 document.documentElement.classList.remove('light-mode');
@@ -159,6 +161,7 @@ $('mode-toggle').addEventListener('change',toggleMode);
 function initializeMode() {
 // const mode = localStorage.getItem('mode') || 'dark-mode';
 const mode='dark-mode';
+document.documentElement.classList.add(mode);
 document.body.classList.add(mode);
 document.documentElement.classList.add(mode);
 const logo=$('navbar-logo');
