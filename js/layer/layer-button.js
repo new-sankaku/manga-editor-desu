@@ -141,7 +141,7 @@ button.innerHTML='<i class="material-icons">photo_size_select_large</i>';
 button.onclick=function (e) {
 e.stopPropagation();
 var spinner=createSpinner(index);
-ai_upscale(layer,spinner);
+aiUpscale(layer,spinner);
 };
 
 addTooltipByElement(button,"upscaleButton");
