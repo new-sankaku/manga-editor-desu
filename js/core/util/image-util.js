@@ -1,16 +1,6 @@
-/**
-* image-util.js
-* Fabric.js画像オブジェクトの処理ユーティリティ
-*/
+// image-util.js - Fabric.js画像オブジェクトの処理（変換、WebP、クロップ、反転、色変換など）
 
 var ImageUtil={
-// === Fabric画像変換 ===
-
-/**
-* Fabric画像からHTMLキャンバスを作成
-* @param {fabric.Image} fabricImage - Fabric画像オブジェクト
-* @returns {HTMLCanvasElement}
-*/
 createCanvasFromFabricImage:function(fabricImage){
 var tempCanvas=document.createElement('canvas');
 tempCanvas.width=canvas.width;
@@ -39,11 +29,6 @@ tempCtx.restore();
 return tempCanvas;
 },
 
-/**
-* Fabric画像をImageDataに変換
-* @param {fabric.Image} fabricImage - Fabric画像オブジェクト
-* @returns {Promise<ImageData>}
-*/
 fabricImage2ImageData:async function(fabricImage){
 var img=fabricImage.getElement();
 var tempCanvas=document.createElement('canvas');
@@ -54,12 +39,6 @@ tempCtx.drawImage(img,0,0,img.naturalWidth,img.naturalHeight);
 return tempCtx.getImageData(0,0,img.naturalWidth,img.naturalHeight);
 },
 
-/**
-* 画像オブジェクトをBase64に変換
-* @param {fabric.Image} object - 画像オブジェクト
-* @param {number} scale - スケール（デフォルト1.0）
-* @returns {string|null}
-*/
 imageObject2Base64Image:function(object,scale){
 scale=scale||1.0;
 try{
@@ -78,12 +57,6 @@ return null;
 }
 },
 
-/**
-* 画像オブジェクトをBase64に変換（エフェクト維持版）
-* @param {Object} layer - レイヤーオブジェクト
-* @param {number} scaleFactor - スケール係数
-* @returns {string}
-*/
 imageObject2Base64ImageEffectKeep:function(layer,scaleFactor){
 scaleFactor=scaleFactor||1;
 if(layer.type==='image'&&layer._element){
@@ -112,11 +85,6 @@ return offscreenCanvas.toDataURL('image/png');
 }
 },
 
-/**
-* 画像オブジェクトをDataURLに変換
-* @param {fabric.Image} activeObject - アクティブな画像オブジェクト
-* @returns {string|null}
-*/
 imageObject2DataURL:function(activeObject){
 if(activeObject&&activeObject.type==='image'){
 var originalWidth=activeObject.width;
@@ -131,11 +99,6 @@ return tempCanvas.toDataURL('image/png');
 return null;
 },
 
-/**
-* 画像オブジェクトをクロップしてDataURLに変換
-* @param {Object} activeObject - アクティブなオブジェクト
-* @returns {Promise<string|null>}
-*/
 imageObject2DataURLByCrop:function(activeObject){
 imageLogger.debug("Function start: imageObject2DataURLByCrop");
 imageLogger.debug("activeObject:",activeObject);
@@ -181,13 +144,6 @@ imageLogger.debug("Function end: imageObject2DataURLByCrop (no valid activeObjec
 return Promise.resolve(null);
 },
 
-// === WebP変換 ===
-
-/**
-* 画像をWebP形式に変換
-* @param {fabric.Image} i - Fabric画像オブジェクト
-* @returns {Promise<Object>}
-*/
 img2webp:async function(i){
 var blob=await fetch(i._element.src).then(function(response){return response.blob();});
 var fileType=blob.type;
@@ -216,11 +172,6 @@ reader.readAsDataURL(webpBlob);
 });
 },
 
-/**
-* ファイルをWebP形式に変換
-* @param {File} file - 画像ファイル
-* @returns {Promise<File>}
-*/
 imgFile2webpFile:async function(file){
 if(file.type==='image/webp'){
 return file;
@@ -238,16 +189,6 @@ throw error;
 }
 },
 
-// === 画像加工 ===
-
-/**
-* 画像をクロップ
-* @param {fabric.Image} png - 画像オブジェクト
-* @param {number} left - 左位置
-* @param {number} top - 上位置
-* @param {number} height - 高さ
-* @param {number} width - 幅
-*/
 cropImage:function(png,left,top,height,width){
 if(top<png.top){
 height=height-(png.top-top);
@@ -309,9 +250,6 @@ updateLayerPanel();
 );
 },
 
-/**
-* 水平反転
-*/
 flipHorizontally:function(){
 var activeObject=canvas.getActiveObject();
 if(isImage(activeObject)){
@@ -320,9 +258,6 @@ canvas.renderAll();
 }
 },
 
-/**
-* 垂直反転
-*/
 flipVertically:function(){
 var activeObject=canvas.getActiveObject();
 if(isImage(activeObject)){
@@ -331,9 +266,6 @@ canvas.renderAll();
 }
 },
 
-/**
-* 暗い画像を強調
-*/
 enhanceDarkImage:async function(){
 var loading=OP_showLoading({icon:'process',step:'Step1',substep:'Start up',progress:0});
 await new Promise(function(resolve){setTimeout(resolve,10);});
@@ -379,13 +311,6 @@ OP_hideLoading(loading);
 }
 },
 
-// === 入出力 ===
-
-/**
-* HTMLキャンバスをFabricキャンバスに送信
-* @param {HTMLCanvasElement} blendedCanvas - 合成されたキャンバス
-* @param {number} quality - 品質（デフォルト0.98）
-*/
 sendHtmlCanvas2FabricCanvas:function(blendedCanvas,quality){
 quality=quality||0.98;
 var ctx=blendedCanvas.getContext('2d');
@@ -405,11 +330,6 @@ canvas.renderAll();
 },{crossOrigin:'anonymous'});
 },
 
-/**
-* blob URLをdata URLに変換
-* @param {string} blobUrl - blob URL
-* @returns {Promise<string|null>}
-*/
 blobUrlToDataUrl:async function(blobUrl){
 try{
 var response=await fetch(blobUrl);
@@ -426,24 +346,10 @@ return null;
 }
 },
 
-// === ダウンロード・クリップボード ===
-
-/**
-* キャンバスをDataURLに変換
-* @param {number} multiplier - 倍率
-* @param {string} format - フォーマット
-* @returns {string}
-*/
 canvas2DataURL:function(multiplier,format){
 return canvas.toDataURL({format:format,multiplier:multiplier});
 },
 
-/**
-* クロップしてダウンロードリンクを取得（倍率指定版）
-* @param {number} multiplier - 倍率
-* @param {string} format - フォーマット
-* @returns {HTMLAnchorElement}
-*/
 getCropAndDownloadLinkByMultiplier:function(multiplier,format){
 var cropped=canvas.toDataURL({format:format,multiplier:multiplier});
 function getFormattedDateTime(){
@@ -463,10 +369,6 @@ link.href=cropped;
 return link;
 },
 
-/**
-* クロップしてダウンロードリンクを取得
-* @returns {HTMLAnchorElement}
-*/
 getCropAndDownloadLink:function(){
 var a5WidthInches=148/25.4;
 var a5HeightInches=210/25.4;
@@ -485,9 +387,6 @@ var multiplier=Math.max(multiplierWidth,multiplierHeight);
 return ImageUtil.getCropAndDownloadLinkByMultiplier(multiplier,'png');
 },
 
-/**
-* クリップボードにコピー
-*/
 clipCopy:function(){
 removeGrid();
 var link=ImageUtil.getCropAndDownloadLink();
@@ -507,9 +406,6 @@ isGridVisible=true;
 }
 },
 
-/**
-* クロップしてダウンロード
-*/
 cropAndDownload:function(){
 removeGrid();
 var link=ImageUtil.getCropAndDownloadLink();
@@ -520,11 +416,6 @@ isGridVisible=true;
 }
 },
 
-/**
-* DataURLからリンクを作成
-* @param {string} dataURL - DataURL
-* @returns {HTMLAnchorElement}
-*/
 getLink:function(dataURL){
 var link=document.createElement('a');
 link.href=dataURL;
@@ -532,31 +423,14 @@ link.download='selected-image.png';
 return link;
 },
 
-// === ユーティリティ ===
-
-/**
-* オブジェクトの中央左位置を計算
-* @param {number} objWidth - オブジェクト幅
-* @returns {number}
-*/
 getObjLeft:function(objWidth){
 return canvas.getWidth()/2-objWidth/2;
 },
 
-/**
-* オブジェクトの中央上位置を計算
-* @param {number} objHeight - オブジェクト高さ
-* @returns {number}
-*/
 getObjTop:function(objHeight){
 return canvas.getHeight()/2-objHeight/2;
 },
 
-/**
-* Fabric画像の幅を取得
-* @param {fabric.Image} fabricImage - Fabric画像
-* @returns {number}
-*/
 getWidth:function(fabricImage){
 var img=fabricImage.getElement();
 if(img.naturalWidth){
@@ -566,11 +440,6 @@ return fabricImage.width;
 }
 },
 
-/**
-* Fabric画像の高さを取得
-* @param {fabric.Image} fabricImage - Fabric画像
-* @returns {number}
-*/
 getHeight:function(fabricImage){
 var img=fabricImage.getElement();
 if(img.naturalHeight){
@@ -580,14 +449,6 @@ return fabricImage.height;
 }
 },
 
-// === 色変換 ===
-
-/**
-* HEXをRGBAに変換
-* @param {string} hex - HEX色
-* @param {number} opacity - 透明度
-* @returns {string}
-*/
 hexToRgba:function(hex,opacity){
 opacity=opacity===undefined?1:opacity;
 if(hex.startsWith('rgba')){
@@ -605,11 +466,6 @@ var b=parseInt(hex.substring(4,6),16);
 return 'rgba('+r+', '+g+', '+b+', '+opacity+')';
 },
 
-/**
-* RGBをHEXに変換
-* @param {string} color - RGB色
-* @returns {string}
-*/
 rgbToHex:function(color){
 if(!color){
 return '#000000';
@@ -628,11 +484,6 @@ return hex.length===1?'0'+hex:hex;
 return '#'+convert(match[1])+convert(match[2])+convert(match[3]);
 },
 
-/**
-* RGBAをHEXに変換
-* @param {string} color - RGBA色
-* @returns {string}
-*/
 rgbaToHex:function(color){
 if(!color)return '#000000';
 if(color.startsWith('#'))return color;
@@ -649,7 +500,6 @@ return '#'+toHex(r)+toHex(g)+toHex(b);
 }
 };
 
-// 既存コードとの互換性のためグローバル関数としてもエクスポート
 var createCanvasFromFabricImage=ImageUtil.createCanvasFromFabricImage;
 var fabricImage2ImageData=ImageUtil.fabricImage2ImageData;
 var imageObject2Base64Image=ImageUtil.imageObject2Base64Image;

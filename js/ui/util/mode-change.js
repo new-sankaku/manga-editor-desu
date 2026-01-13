@@ -231,7 +231,6 @@ object.moveCursor='default';
 });
 }
 
-// === クロップモードのイベントリスナー ===
 document.addEventListener("DOMContentLoaded",function(){
 $("crop").style.display="none";
 $("cropMode").style.display="inline";

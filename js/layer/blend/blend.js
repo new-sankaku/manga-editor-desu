@@ -187,8 +187,6 @@ await new Promise((resolve)=>setTimeout(resolve,0));
 }
 }
 
-// createScaledCanvasはHtmlCanvasUtil.createScaledCanvasを使用
-// 互換性のためラッパー関数として残す
 function createScaledCanvas(sourceCanvas,maxWidth,maxHeight){
 return HtmlCanvasUtil.createScaledCanvas(sourceCanvas,maxWidth,maxHeight);
 }
