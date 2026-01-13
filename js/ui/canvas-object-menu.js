@@ -359,7 +359,7 @@ break;
 
 case 'rembg':
 var spinner=createSpinner(canvasMenuIndex);
-ai_rembg(activeObject,spinner);
+aiRembg(activeObject,spinner);
 break;
 case 'generate':
 if (isPanel(activeObject)) {
