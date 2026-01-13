@@ -34,17 +34,13 @@ getPrevious:function(){
 return ModeManager._previous;
 },
 
-change:function(mode,options){
-options=options||{};
+change:function(mode){
 var prev=ModeManager._current;
-if(!options.skipClear){
-ModeManager._clearCurrentMode();
-}
+ModeManager.clearAll();
 ModeManager._previous=prev;
 ModeManager._current=mode;
 switch(mode){
 case ModeManager.MODE.SELECT:
-ModeManager._enableSelectMode();
 break;
 case ModeManager.MODE.FREEHAND:
 case ModeManager.MODE.POINT:
@@ -53,52 +49,18 @@ case ModeManager.MODE.DELETE_POINT:
 ModeManager._enableSpeechBubbleMode(mode);
 break;
 case ModeManager.MODE.KNIFE:
-ModeManager.knife.enable();
+ModeManager.knife._enable();
 break;
 case ModeManager.MODE.CROP:
-ModeManager.crop.enable();
+ModeManager.crop._enable();
 break;
 default:
 if(ModeManager._isPenMode(mode)){
-ModeManager.pencil.enable(mode);
+ModeManager.pencil._enable(mode);
 }
 }
 ModeManager.cursor.update(mode);
 uiLogger.debug("ModeManager.change:",prev,"->",mode);
-},
-
-clear:function(){
-ModeManager._clearCurrentMode();
-ModeManager._current=ModeManager.MODE.SELECT;
-ModeManager._enableSelectMode();
-ModeManager.cursor.update(ModeManager.MODE.SELECT);
-uiLogger.debug("ModeManager.clear: reset to select mode");
-},
-
-_clearCurrentMode:function(){
-var current=ModeManager._current;
-ModeManager.crop.disable();
-ModeManager.knife.disable();
-ModeManager.pencil.disable();
-if(current===ModeManager.MODE.FREEHAND||
-current===ModeManager.MODE.POINT||
-current===ModeManager.MODE.MOVE_POINT||
-current===ModeManager.MODE.DELETE_POINT){
-ModeManager.speechBubble.clear();
-}
-},
-
-_enableSelectMode:function(){
-canvas.selection=true;
-canvas.forEachObject(function(obj){
-if(obj.excludeFromLayerPanel)return;
-if(obj.customType==="freehandBubbleRect"){
-obj.set({selectable:false,evented:false});
-return;
-}
-obj.set({selectable:true,evented:true});
-});
-ModeManager.cursor.reset();
 },
 
 _enableSpeechBubbleMode:function(mode){
@@ -107,7 +69,15 @@ canvas.selection=false;
 canvas.forEachObject(function(obj){
 obj.set({selectable:false,evented:false});
 });
-ModeManager.cursor.update(mode);
+var buttons={
+freehand:typeof sbFreehandButton!=='undefined'?sbFreehandButton:null,
+point:typeof sbPointButton!=='undefined'?sbPointButton:null,
+movePoint:typeof sbMoveButton!=='undefined'?sbMoveButton:null,
+deletePoint:typeof sbDeleteButton!=='undefined'?sbDeleteButton:null
+};
+if(buttons[mode]&&typeof setSBActiveButton==='function'){
+setSBActiveButton(buttons[mode]);
+}
 },
 
 _isPenMode:function(mode){
@@ -211,11 +181,11 @@ object.moveCursor='default';
 
 knife:{
 enable:function(){
+ModeManager.change(ModeManager.MODE.KNIFE);
+},
+
+_enable:function(){
 isKnifeMode=true;
-if(currentMode===ModeManager.MODE.FREEHAND||currentMode===ModeManager.MODE.POINT){
-ModeManager.speechBubble.clear();
-}
-currentMode=ModeManager.MODE.SELECT;
 ModeManager.button.activeClear();
 ModeManager.cursor.update(ModeManager.MODE.KNIFE);
 ModeManager.knife._updateMovement();
@@ -237,7 +207,7 @@ ModeManager.knife._updateMovement();
 
 toggle:function(){
 if(isKnifeMode){
-ModeManager.knife.disable();
+ModeManager.clearAll();
 }else{
 ModeManager.knife.enable();
 }
@@ -259,6 +229,10 @@ canvas.renderAll();
 
 crop:{
 enable:function(){
+ModeManager.change(ModeManager.MODE.CROP);
+},
+
+_enable:function(){
 $("crop").style.display="inline";
 $("cropMode").style.display="none";
 },
@@ -281,6 +255,10 @@ return cropFrame!==null&&cropFrame!==undefined;
 
 pencil:{
 enable:function(type){
+ModeManager.change(type);
+},
+
+_enable:function(type){
 if(typeof switchPencilType==='function'){
 switchPencilType(type);
 }
@@ -319,23 +297,7 @@ return nowPencil!=="";
 
 speechBubble:{
 setMode:function(mode){
-currentMode=mode;
-ModeManager._current=mode;
-canvas.selection=false;
-canvas.forEachObject(function(obj){
-obj.set({selectable:false,evented:false});
-});
-ModeManager.cursor.update(mode);
-var buttons={
-freehand:typeof sbFreehandButton!=='undefined'?sbFreehandButton:null,
-point:typeof sbPointButton!=='undefined'?sbPointButton:null,
-movePoint:typeof sbMoveButton!=='undefined'?sbMoveButton:null,
-deletePoint:typeof sbDeleteButton!=='undefined'?sbDeleteButton:null,
-select:typeof sbSelectButton!=='undefined'?sbSelectButton:null
-};
-if(buttons[mode]&&typeof setSBActiveButton==='function'){
-setSBActiveButton(buttons[mode]);
-}
+ModeManager.change(mode);
 },
 
 clear:function(){
