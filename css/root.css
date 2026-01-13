@@ -130,7 +130,9 @@
 }
 
 :root {
-  
+  --color-base: #212121;
+  --background-color-A: #212121;
+
   --nav-height:                           calc(100vh - 96vh);
   --main-height:                          calc(100vh - 4vh);
   --left_area-height:                     calc(100vh - 5vh);
