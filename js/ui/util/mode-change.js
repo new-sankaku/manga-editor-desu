@@ -140,8 +140,12 @@ function toggleMode() {
 const isDarkMode=document.body.classList.toggle('dark-mode');
 const logo=$('navbar-logo');
 
+document.documentElement.classList.remove('light-mode');
+document.documentElement.classList.add('dark-mode');
 document.body.classList.remove('light-mode');
 document.body.classList.add('dark-mode');
+document.documentElement.classList.remove('light-mode');
+document.documentElement.classList.add('dark-mode');
 localStorage.setItem('mode','dark-mode');
 logo.src='02_images_svg/Logo/black_mode_logo.webp';
 
@@ -157,7 +161,9 @@ $('mode-toggle').addEventListener('change',toggleMode);
 function initializeMode() {
 // const mode = localStorage.getItem('mode') || 'dark-mode';
 const mode='dark-mode';
+document.documentElement.classList.add(mode);
 document.body.classList.add(mode);
+document.documentElement.classList.add(mode);
 const logo=$('navbar-logo');
 if (mode==='dark-mode') {
 $('mode-toggle').checked=true;
