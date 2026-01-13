@@ -187,20 +187,10 @@ await new Promise((resolve)=>setTimeout(resolve,0));
 }
 }
 
-function createScaledCanvas(sourceCanvas,maxWidth,maxHeight) {
-const scale=Math.min(
-1,
-maxWidth/sourceCanvas.width,
-maxHeight/sourceCanvas.height
-);
-const scaledCanvas=document.createElement("canvas");
-scaledCanvas.width=sourceCanvas.width*scale;
-scaledCanvas.height=sourceCanvas.height*scale;
-
-const ctx=scaledCanvas.getContext("2d");
-ctx.imageSmoothingEnabled=false;
-ctx.drawImage(sourceCanvas,0,0,scaledCanvas.width,scaledCanvas.height);
-return scaledCanvas;
+// createScaledCanvasはHtmlCanvasUtil.createScaledCanvasを使用
+// 互換性のためラッパー関数として残す
+function createScaledCanvas(sourceCanvas,maxWidth,maxHeight){
+return HtmlCanvasUtil.createScaledCanvas(sourceCanvas,maxWidth,maxHeight);
 }
 
 function updateLayerPreviewStyle(layer,previewCanvas) {
