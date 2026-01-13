@@ -1,5 +1,9 @@
 @import url('root.css');
 
+html,body {
+ background-color: var(--color-base);
+}
+
 body {
  display: flex;
  flex-direction: column;
