@@ -26,6 +26,7 @@ moveUpFast: 'shift+up',
 moveDownFast: 'shift+down',
 projectSave:!isMacOs ? 'ctrl+s' : 'command+s',
 projectLoad:!isMacOs ? 'ctrl+o' : 'command+o',
+toggleBottomBar:!isMacOs ? 'ctrl+b' : 'command+b',
 }
 
 var isLongPressDirection=false;
@@ -179,6 +180,12 @@ if (!isEditableTagsActive()) {
 $('projectLoad').click();
 e.preventDefault();
 }
+});
+
+// bind toggle bottom bar shortcut
+hotkeys(hotkeysMap.toggleBottomBar,'all',function (e) {
+btmToggleDrawer();
+e.preventDefault();
 });
 
 // bind fast move shortcuts (10px)
