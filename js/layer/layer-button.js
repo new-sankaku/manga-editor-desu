@@ -35,7 +35,7 @@ button.innerHTML='<i class="material-icons">wallpaper</i>';
 button.onclick=function (e) {
 e.stopPropagation();
 var spinner=createSpinner(index);
-ai_rembg(layer,spinner);
+aiRembg(layer,spinner);
 };
 
 addTooltipByElement(button,"rembg");
