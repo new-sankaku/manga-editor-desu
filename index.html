@@ -1787,6 +1787,17 @@ function getElementClasses(element) {
                 </div>
             </div>
 
+            <div id="status-bar">
+                <div id="status-tool">
+                    <span class="material-icons" style="font-size:16px;">build</span>
+                    <span id="status-tool-name" data-i18n="statusbar_select">Select</span>
+                </div>
+                <div id="status-coords">X:0 Y:0</div>
+                <div id="status-hint" data-i18n="statusbar_shift_hint">Shift: Select Mode</div>
+                <div id="status-shortcuts">
+                    <span>1:Pen 2:Eraser 3:Shape 4:Text 5:Bubble 6:Panel 0:Select Q:Prev</span>
+                </div>
+            </div>
 
             <div id="layer-panel">
                 <div class="area-header" >
@@ -2107,6 +2118,7 @@ function getElementClasses(element) {
     <script src="js/canvas-manager.js?v=7.2" defer></script>
     <script src="js/project-management.js?v=7.2" defer></script>
     <script src="js/shortcut.js?v=7.2" defer></script>
+    <script src="js/ui/status-bar.js?v=7.2" defer></script>
     <script src="js/panel/grid.js?v=7.2" defer></script>
     <script src="js/panel/randam-cut.js?v=7.2" defer></script>
     <script src="js/sidebar/panel/panel-manager.js?v=7.2" defer></script>

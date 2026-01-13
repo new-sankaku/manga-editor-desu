@@ -26,6 +26,14 @@ moveUpFast: 'shift+up',
 moveDownFast: 'shift+down',
 projectSave:!isMacOs ? 'ctrl+s' : 'command+s',
 projectLoad:!isMacOs ? 'ctrl+o' : 'command+o',
+toolPen: '1',
+toolEraser: '2',
+toolShape: '3',
+toolText: '4',
+toolBubble: '5',
+toolPanel: '6',
+toolSelect: '0',
+toolPrevious: 'q',
 }
 
 var isLongPressDirection=false;
@@ -195,6 +203,73 @@ moveActiveObjectFast('up',e);
 
 hotkeys(hotkeysMap.moveDownFast,'all',function (e) {
 moveActiveObjectFast('down',e);
+});
+
+// bind tool switch shortcuts
+hotkeys(hotkeysMap.toolPen,'all',function (e) {
+if (!isEditableTagsActive()) {
+toggleVisibility('tool-area');
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('Pencil');
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolEraser,'all',function (e) {
+if (!isEditableTagsActive()) {
+toggleVisibility('tool-area');
+setTimeout(function(){
+if(typeof switchPencilType==='function')switchPencilType(MODE_PEN_ERASER);
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('Eraser');
+},50);
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolShape,'all',function (e) {
+if (!isEditableTagsActive()) {
+toggleVisibility('shape-area');
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('shape');
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolText,'all',function (e) {
+if (!isEditableTagsActive()) {
+toggleVisibility('text-area');
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('text');
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolBubble,'all',function (e) {
+if (!isEditableTagsActive()) {
+toggleVisibility('speech-bubble-area1');
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('speech-bubble');
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolPanel,'all',function (e) {
+if (!isEditableTagsActive()) {
+toggleVisibility('custom-panel-manager-area');
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('panel');
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolSelect,'all',function (e) {
+if (!isEditableTagsActive()) {
+if(typeof operationModeClear==='function')operationModeClear();
+if(typeof updateStatusBarTool==='function')updateStatusBarTool('select');
+e.preventDefault();
+}
+});
+
+hotkeys(hotkeysMap.toolPrevious,'all',function (e) {
+if (!isEditableTagsActive()) {
+if(typeof switchToPreviousTool==='function')switchToPreviousTool();
+e.preventDefault();
+}
 });
 
 

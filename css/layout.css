@@ -286,3 +286,50 @@
  text-align: var(--text-align-center-bottom-bar-content);
 }
 
+#status-bar {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ padding: 4px 12px;
+ background-color: var(--background-color-C);
+ border-top: 1px solid var(--border-color-A);
+ font-size: 12px;
+ color: var(--text-color-B);
+ min-height: 24px;
+ flex-shrink: 0;
+}
+
+#status-bar > div {
+ display: flex;
+ align-items: center;
+ gap: 4px;
+}
+
+#status-tool {
+ font-weight: bold;
+ min-width: 120px;
+}
+
+#status-tool .material-icons {
+ color: var(--accent-color);
+}
+
+#status-coords {
+ font-family: monospace;
+ min-width: 100px;
+}
+
+#status-hint {
+ color: var(--text-color-C);
+ font-style: italic;
+}
+
+#status-shortcuts {
+ font-size: 11px;
+ color: var(--text-color-C);
+}
+
+#status-shortcuts span {
+ opacity: 0.8;
+}
+
