@@ -232,10 +232,13 @@ updateLayerPreviewStyle(layer,scaledPreviewCanvas);
 function toggleFloatingLayerCheck(layer,index,previewCanvas) {
 layer.layerCheck=!layer.layerCheck;
 updateLayerPreviewStyle(layer,previewCanvas);
+var layerPreviewsBlend=$("layerPreviewsBlend");
+if(layerPreviewsBlend&&layerPreviewsBlend.children[index]){
 updateLayerPreviewStyle(
 layer,
-$("layerPreviewsBlend").children[index].querySelector("canvas")
+layerPreviewsBlend.children[index].querySelector("canvas")
 );
+}
 layer.visible=layer.layerCheck;
 canvas.renderAll();
 }
@@ -298,6 +301,7 @@ brendContainer.addEventListener('click',hideEnlargedImage);
 }
 
 function showEnlargedImage(src) {
+if(!brendImg)initializeBrendImageViewer();
 brendImg.src=src;
 brendContainer.style.display="block";
 }
