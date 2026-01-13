@@ -142,6 +142,7 @@ moveActiveObject('down' ,e);
 // bind deselect shortcut
 hotkeys(hotkeysMap.deselect,'all',function (e) {
 if (isNotVisibleFloatingWindow()) {
+ModeManager.clearAll();
 canvas.discardActiveObject();
 canvas.requestRenderAll();
 e.preventDefault();
