@@ -253,24 +253,24 @@
  .comfui-node-title-normal {
   background: var(--background-color-B);
  }
-.unverified-banner {
+.comfui-unverified-banner {
 width: 100%;
 background-color: rgba(255, 255, 130, 0.3);
 border: 1px solid rgba(255, 200, 0, 0.5);
-border-radius: 4px;
-padding: 6px 8px;
+border-radius: 6px;
+padding: 10px 12px;
+margin-bottom: 12px;
+}
+.comfui-unverified-banner-title {
+font-weight: 600;
+font-size: 13px;
+color: #d4a000;
 margin-bottom: 6px;
 }
-.unverified-banner-title {
-font-weight: 600;
+.comfui-unverified-banner-desc {
 font-size: 11px;
-color: #d4a000;
-margin-bottom: 4px;
-}
-.unverified-banner-desc {
-font-size: 10px;
 color: #888;
-line-height: 1.4;
+line-height: 1.5;
 }
  .comfui-unverified-label {
   font-size: 11px;

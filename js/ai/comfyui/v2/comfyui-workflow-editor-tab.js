@@ -151,7 +151,7 @@ createContent() {
 const content=document.createElement("div");
 content.className="comfui-tab-content";
 content.dataset.tabId=this.id;
-content.innerHTML=`<div class="comfui-node-list" data-tab-id="${this.id}"></div>`;
+content.innerHTML=`<div class="comfui-unverified-banner-container"></div><div class="comfui-node-list" data-tab-id="${this.id}"></div>`;
 this.contentElement=content;
 return content;
 }
@@ -400,10 +400,10 @@ class_type
 .sort((a,b)=>b.inputCount-a.inputCount);
 
 const hasUnverifiedNodes=nodes.some(({class_type})=>notExistsWorkflowNodeVsComfyUI(class_type));
-const bannerContainer=document.getElementById("unverified-nodes-banner");
+const bannerContainer=this.contentElement.querySelector(".comfui-unverified-banner-container");
 if(bannerContainer){
 if(hasUnverifiedNodes){
-bannerContainer.innerHTML=`<div class="unverified-banner"><div class="unverified-banner-title">⚠ ${getText('missingNode')||'ノード情報が確認できないノードがあります'}</div><div class="unverified-banner-desc">${getText('missingDescription')||''}</div></div>`;
+bannerContainer.innerHTML=`<div class="comfui-unverified-banner"><div class="comfui-unverified-banner-title">⚠ ${getText('missingNode')||'ノード情報が確認できないノードがあります'}</div><div class="comfui-unverified-banner-desc">${getText('missingDescription')||''}</div></div>`;
 }else{
 bannerContainer.innerHTML="";
 }
