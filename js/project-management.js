@@ -13,7 +13,7 @@ return file ? file.data : null;
 
 
 // Variable to keep track of selected api model to use
-var apiMode=apis.A1111;
+var apiMode=apis.COMFYUI;
 
 document.addEventListener("DOMContentLoaded",function () {
 var settingsSave=$("settingsSave");
