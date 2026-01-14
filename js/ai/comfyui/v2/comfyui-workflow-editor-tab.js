@@ -400,11 +400,13 @@ class_type
 .sort((a,b)=>b.inputCount-a.inputCount);
 
 const hasUnverifiedNodes=nodes.some(({class_type})=>notExistsWorkflowNodeVsComfyUI(class_type));
+const bannerContainer=document.getElementById("unverified-nodes-banner");
+if(bannerContainer){
 if(hasUnverifiedNodes){
-const bannerElement=document.createElement("div");
-bannerElement.className="comfui-unverified-banner";
-bannerElement.innerHTML=`<div class="comfui-unverified-banner-title">⚠ ${getText('missingNode')||'ノード情報が確認できないノードがあります'}</div><div class="comfui-unverified-banner-desc">${getText('missingDescription')||''}</div>`;
-container.appendChild(bannerElement);
+bannerContainer.innerHTML=`<div class="unverified-banner"><div class="unverified-banner-title">⚠ ${getText('missingNode')||'ノード情報が確認できないノードがあります'}</div><div class="unverified-banner-desc">${getText('missingDescription')||''}</div></div>`;
+}else{
+bannerContainer.innerHTML="";
+}
 }
 
 nodes.forEach(({id,node,apiNode,class_type})=>{

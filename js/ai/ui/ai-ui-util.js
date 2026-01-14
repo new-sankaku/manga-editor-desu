@@ -4,10 +4,12 @@ changeSelected(button);
 const selectedValue=getSelectedValueByGroup("externalApiGroup");
 
 var help=getText("help_api_connect_settings");
+var bannerEl=$('unverified-nodes-banner');
 if (selectedValue==="sdWebUIButton") {
 apiMode=apis.A1111;
 createToast("API CHANGE!","WebUI(A1111/Forge)",2000);
 $('apiSettingsUrlHelpe').innerHTML=`<a href="html/API_Help/sd-api-guide.html" target="_blank">${help}</a>`;
+if(bannerEl)bannerEl.innerHTML="";
 } else if (selectedValue==="comfyUIButton") {
 apiMode=apis.COMFYUI;
 createToast("API CHANGE!","COMFYUI",2000);
