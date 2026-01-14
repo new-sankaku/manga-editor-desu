@@ -211,9 +211,8 @@ display:flex;
 align-items:center;
 gap:8px;
 }
-.lang-flag{
-font-size:18px;
-line-height:1;
+.tutorial-lang-btn .flag-icon{
+margin-right:4px;
 }
 .tutorial-lang-btn:hover{
 border-color:#505050;

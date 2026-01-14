@@ -5,16 +5,16 @@ LANG_STORAGE_KEY:'tutorial_lang_selected',
 state:null,
 activeHint:null,
 languages:[
-{code:'ja',name:'日本語',flag:'🇯🇵'},
-{code:'en',name:'English',flag:'🇺🇸'},
-{code:'ko',name:'한국어',flag:'🇰🇷'},
-{code:'zh',name:'中文',flag:'🇨🇳'},
-{code:'fr',name:'Français',flag:'🇫🇷'},
-{code:'de',name:'Deutsch',flag:'🇩🇪'},
-{code:'es',name:'Español',flag:'🇪🇸'},
-{code:'pt',name:'Português',flag:'🇧🇷'},
-{code:'ru',name:'Русский',flag:'🇷🇺'},
-{code:'th',name:'ไทย',flag:'🇹🇭'}
+{code:'ja',name:'日本語',flag:'jp'},
+{code:'en',name:'English',flag:'us'},
+{code:'ko',name:'한국어',flag:'kr'},
+{code:'zh',name:'中文',flag:'cn'},
+{code:'fr',name:'Français',flag:'fr'},
+{code:'de',name:'Deutsch',flag:'de'},
+{code:'es',name:'Español',flag:'es'},
+{code:'pt',name:'Português',flag:'pt'},
+{code:'ru',name:'Русский',flag:'ru'},
+{code:'th',name:'ไทย',flag:'th'}
 ],
 init:function(){
 this.loadState();
@@ -57,7 +57,7 @@ overlay.className='tutorial-overlay';
 var langButtons='';
 for(var i=0;i<this.languages.length;i++){
 var lang=this.languages[i];
-langButtons+='<button class="tutorial-lang-btn" data-lang="'+lang.code+'"><span class="lang-flag">'+lang.flag+'</span>'+lang.name+'</button>';
+langButtons+='<button class="tutorial-lang-btn" data-lang="'+lang.code+'"><span class="flag-icon flag-icon-'+lang.flag+'"></span>'+lang.name+'</button>';
 }
 overlay.innerHTML='<div class="tutorial-prompt">'+
 '<div class="tutorial-prompt-title">Select Language / 言語選択</div>'+
