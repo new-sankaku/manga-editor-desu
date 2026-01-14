@@ -84,14 +84,28 @@
 .custom-navbar .navbar-brand,
 .custom-navbar .nav-link,
 .custom-navbar .dropdown-item {
-  color: var(--text-color-B);
+color: var(--text-color-B);
+}
+.custom-navbar .nav-link {
+font-size: 11px;
+padding: 4px 8px;
+}
+.custom-navbar .dropdown-item {
+font-size: 11px;
+padding: 4px 10px;
+}
+.custom-navbar .dropdown-item .material-icons,
+.custom-navbar .dropdown-item .material-symbols-outlined {
+font-size: 14px;
+vertical-align: middle;
+margin-right: 4px;
 }
 
 .custom-navbar .dropdown-menu {
-  background-color: var(--background-color-A);
-  border-color: var(--nav-border);
-  border-width: 2px;
-  min-width: 350px;
+background-color: var(--background-color-A);
+border-color: var(--nav-border);
+border-width: 1px;
+min-width: 200px;
 }
 
 .custom-navbar .dropdown-item:hover {
