@@ -319,6 +319,12 @@ function getElementClasses(element) {
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <li>
+                                <a class="dropdown-item" onclick="View()">
+                                    <i class="material-icons">document_scanner</i>
+                                    <span data-i18n="promptView">Prompt View</span> (Ctrl+Shift+V)
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" onclick="openPromptChangeFloatingWindow()">
                                     <i class="material-icons">manage_search</i> <span data-i18n="searchReplace">Search &
                                         Replace</span>
@@ -1751,15 +1757,6 @@ function getElementClasses(element) {
                 </div>
                 <div id="layer-content"></div>
 
-                <div id="canvas-buttons">
-    
-                    <div id="layer-buttons">
-                        <button onclick="View()">
-                            <i class="material-icons">document_scanner</i>
-                            <span data-i18n="promptView">View</span>
-                        </button>
-                    </div>                    
-                </div>
             </div>
 
 
