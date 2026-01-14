@@ -206,7 +206,14 @@ color:#b0b0b0;
 cursor:pointer;
 font-size:13px;
 transition:all 0.15s;
-text-align:center;
+text-align:left;
+display:flex;
+align-items:center;
+gap:8px;
+}
+.lang-flag{
+font-size:18px;
+line-height:1;
 }
 .tutorial-lang-btn:hover{
 border-color:#505050;

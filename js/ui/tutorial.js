@@ -5,16 +5,16 @@ LANG_STORAGE_KEY:'tutorial_lang_selected',
 state:null,
 activeHint:null,
 languages:[
-{code:'ja',name:'日本語'},
-{code:'en',name:'English'},
-{code:'ko',name:'한국어'},
-{code:'zh',name:'中文'},
-{code:'fr',name:'Français'},
-{code:'de',name:'Deutsch'},
-{code:'es',name:'Español'},
-{code:'pt',name:'Português'},
-{code:'ru',name:'Русский'},
-{code:'th',name:'ไทย'}
+{code:'ja',name:'日本語',flag:'🇯🇵'},
+{code:'en',name:'English',flag:'🇺🇸'},
+{code:'ko',name:'한국어',flag:'🇰🇷'},
+{code:'zh',name:'中文',flag:'🇨🇳'},
+{code:'fr',name:'Français',flag:'🇫🇷'},
+{code:'de',name:'Deutsch',flag:'🇩🇪'},
+{code:'es',name:'Español',flag:'🇪🇸'},
+{code:'pt',name:'Português',flag:'🇧🇷'},
+{code:'ru',name:'Русский',flag:'🇷🇺'},
+{code:'th',name:'ไทย',flag:'🇹🇭'}
 ],
 init:function(){
 this.loadState();
@@ -57,7 +57,7 @@ overlay.className='tutorial-overlay';
 var langButtons='';
 for(var i=0;i<this.languages.length;i++){
 var lang=this.languages[i];
-langButtons+='<button class="tutorial-lang-btn" data-lang="'+lang.code+'">'+lang.name+'</button>';
+langButtons+='<button class="tutorial-lang-btn" data-lang="'+lang.code+'"><span class="lang-flag">'+lang.flag+'</span>'+lang.name+'</button>';
 }
 overlay.innerHTML='<div class="tutorial-prompt">'+
 '<div class="tutorial-prompt-title">Select Language / 言語選択</div>'+
