@@ -1,12 +1,28 @@
 var tutorialLogger=new SimpleLogger('tutorial',LogLevel.DEBUG);
 var TutorialManager={
 STORAGE_KEY:'manga_tutorial_state',
+LANG_STORAGE_KEY:'tutorial_lang_selected',
 state:null,
 activeHint:null,
+languages:[
+{code:'ja',name:'日本語'},
+{code:'en',name:'English'},
+{code:'ko',name:'한국어'},
+{code:'zh',name:'中文'},
+{code:'fr',name:'Français'},
+{code:'de',name:'Deutsch'},
+{code:'es',name:'Español'},
+{code:'pt',name:'Português'},
+{code:'ru',name:'Русский'},
+{code:'th',name:'ไทย'}
+],
 init:function(){
 this.loadState();
 this.setupEventListeners();
-if(!this.state.quickStartCompleted){
+var langSelected=localStorage.getItem(this.LANG_STORAGE_KEY);
+if(!langSelected){
+this.showLanguageSelection();
+}else if(!this.state.quickStartCompleted){
 this.showQuickStartPrompt();
 }
 },
@@ -31,7 +47,45 @@ tutorialLogger.error('Failed to save tutorial state');
 },
 resetState:function(){
 this.state={quickStartCompleted:false,hintsShown:{},comfyUIGuideShown:false};
+localStorage.removeItem(this.LANG_STORAGE_KEY);
 this.saveState();
+},
+showLanguageSelection:function(){
+var self=this;
+var overlay=document.createElement('div');
+overlay.className='tutorial-overlay';
+var langButtons='';
+for(var i=0;i<this.languages.length;i++){
+var lang=this.languages[i];
+langButtons+='<button class="tutorial-lang-btn" data-lang="'+lang.code+'">'+lang.name+'</button>';
+}
+overlay.innerHTML='<div class="tutorial-prompt">'+
+'<div class="tutorial-prompt-title">Select Language / 言語選択</div>'+
+'<div class="tutorial-prompt-body">Choose your preferred language</div>'+
+'<div class="tutorial-lang-grid">'+langButtons+'</div>'+
+'</div>';
+document.body.appendChild(overlay);
+overlay.querySelectorAll('.tutorial-lang-btn').forEach(function(btn){
+btn.addEventListener('click',function(){
+var langCode=this.getAttribute('data-lang');
+self.selectLanguage(langCode,overlay);
+});
+});
+},
+selectLanguage:function(langCode,overlay){
+var self=this;
+localStorage.setItem(this.LANG_STORAGE_KEY,'true');
+if(typeof changeLanguage==='function'){
+changeLanguage(langCode);
+}else if(typeof i18next!=='undefined'){
+i18next.changeLanguage(langCode);
+}
+overlay.remove();
+setTimeout(function(){
+if(!self.state.quickStartCompleted){
+self.showQuickStartPrompt();
+}
+},300);
 },
 showQuickStartPrompt:function(){
 var self=this;
@@ -59,36 +113,11 @@ self.saveState();
 startQuickStart:function(){
 var self=this;
 var steps=[
-{
-element:'#intro_svg-container-vertical',
-title:getText('tutorialStep1Title'),
-body:getText('tutorialStep1Body'),
-position:'right'
-},
-{
-element:'#intro_page-manager-area',
-title:getText('tutorialStep2Title'),
-body:getText('tutorialStep2Body'),
-position:'right'
-},
-{
-element:'#intro_speech-bubble-area1',
-title:getText('tutorialStep3Title'),
-body:getText('tutorialStep3Body'),
-position:'right'
-},
-{
-element:'#intro_text-area',
-title:getText('tutorialStep4Title'),
-body:getText('tutorialStep4Body'),
-position:'right'
-},
-{
-element:'#canvasArea',
-title:getText('tutorialStep5Title'),
-body:getText('tutorialStep5Body'),
-position:'left'
-}
+{element:'#intro_svg-container-vertical',title:getText('tutorialStep1Title'),body:getText('tutorialStep1Body'),position:'right'},
+{element:'#intro_page-manager-area',title:getText('tutorialStep2Title'),body:getText('tutorialStep2Body'),position:'right'},
+{element:'#intro_speech-bubble-area1',title:getText('tutorialStep3Title'),body:getText('tutorialStep3Body'),position:'right'},
+{element:'#intro_text-area',title:getText('tutorialStep4Title'),body:getText('tutorialStep4Body'),position:'right'},
+{element:'#canvasArea',title:getText('tutorialStep5Title'),body:getText('tutorialStep5Body'),position:'left'}
 ];
 this.runSteps(steps,0,function(){
 self.state.quickStartCompleted=true;
@@ -121,28 +150,28 @@ var overlay=document.createElement('div');
 overlay.className='tutorial-step-overlay';
 var highlight=document.createElement('div');
 highlight.className='tutorial-highlight';
-highlight.style.top=(rect.top-4)+'px';
-highlight.style.left=(rect.left-4)+'px';
-highlight.style.width=(rect.width+8)+'px';
-highlight.style.height=(rect.height+8)+'px';
+highlight.style.top=(rect.top-6)+'px';
+highlight.style.left=(rect.left-6)+'px';
+highlight.style.width=(rect.width+12)+'px';
+highlight.style.height=(rect.height+12)+'px';
 var tooltip=document.createElement('div');
 tooltip.className='tutorial-tooltip tutorial-tooltip-'+step.position;
 var tooltipLeft,tooltipTop;
 if(step.position==='right'){
-tooltipLeft=rect.right+16;
+tooltipLeft=rect.right+24;
 tooltipTop=rect.top;
 }else if(step.position==='left'){
-tooltipLeft=rect.left-320;
+tooltipLeft=rect.left-370;
 tooltipTop=rect.top;
 }else if(step.position==='bottom'){
 tooltipLeft=rect.left;
-tooltipTop=rect.bottom+16;
+tooltipTop=rect.bottom+24;
 }else{
 tooltipLeft=rect.left;
-tooltipTop=rect.top-150;
+tooltipTop=rect.top-180;
 }
-tooltip.style.left=tooltipLeft+'px';
-tooltip.style.top=tooltipTop+'px';
+tooltip.style.left=Math.max(10,tooltipLeft)+'px';
+tooltip.style.top=Math.max(10,tooltipTop)+'px';
 tooltip.innerHTML='<div class="tutorial-tooltip-header">'+
 '<span class="tutorial-step-indicator">'+current+'/'+total+'</span>'+
 '<span class="tutorial-tooltip-title">'+step.title+'</span>'+
@@ -189,11 +218,11 @@ if(position==='right'){
 tooltipLeft=rect.right+12;
 tooltipTop=rect.top;
 }else if(position==='left'){
-tooltipLeft=rect.left-280;
+tooltipLeft=rect.left-320;
 tooltipTop=rect.top;
 }else if(position==='top'){
 tooltipLeft=rect.left;
-tooltipTop=rect.top-120;
+tooltipTop=rect.top-150;
 }else{
 tooltipLeft=rect.left;
 tooltipTop=rect.bottom+12;
@@ -274,8 +303,8 @@ resetState:function(){
 this.state={setupGuideShown:false,testGenerateHintShown:false,nodeErrorHintShown:false,modelErrorHintShown:false};
 this.saveState();
 },
-showSetupGuide:function(isOnline){
-if(this.state.setupGuideShown)return;
+showSetupGuide:function(isOnline,forceShow){
+if(this.state.setupGuideShown&&!forceShow)return;
 var self=this;
 var container=document.querySelector('.comfui-right-sidebar');
 if(!container)return;
@@ -285,40 +314,50 @@ var guide=document.createElement('div');
 guide.className='comfyui-setup-guide';
 if(isOnline){
 guide.innerHTML='<div class="guide-header">'+
-'<span class="guide-icon">&#9989;</span>'+
+'<span class="guide-icon" style="font-size:20px;">&#9989;</span>'+
 '<span class="guide-title">'+getText('comfyGuideOnlineTitle')+'</span>'+
 '<button class="guide-close">&times;</button>'+
 '</div>'+
 '<div class="guide-content">'+
-'<div class="guide-step"><span class="step-num">1</span>'+getText('comfyGuideOnlineStep1')+'</div>'+
-'<div class="guide-step"><span class="step-num">2</span>'+getText('comfyGuideOnlineStep2')+'</div>'+
-'<div class="guide-step"><span class="step-num">3</span>'+getText('comfyGuideOnlineStep3')+'</div>'+
+'<div class="guide-step"><span class="step-num">1</span><span>'+getText('comfyGuideOnlineStep1')+'</span></div>'+
+'<div class="guide-step"><span class="step-num">2</span><span>'+getText('comfyGuideOnlineStep2')+'</span></div>'+
+'<div class="guide-step"><span class="step-num">3</span><span>'+getText('comfyGuideOnlineStep3')+'</span></div>'+
 '</div>'+
 '<div class="guide-footer">'+
+'<label class="tutorial-dont-show"><input type="checkbox" id="comfyGuideDontShow"> '+getText('tutorialDontShowAgain')+'</label>'+
 '<button class="tutorial-btn tutorial-btn-primary tutorial-btn-sm guide-got-it">'+getText('tutorialGotIt')+'</button>'+
 '</div>';
 }else{
 guide.innerHTML='<div class="guide-header">'+
-'<span class="guide-icon">&#9888;</span>'+
+'<span class="guide-icon" style="font-size:20px;">&#9888;</span>'+
 '<span class="guide-title">'+getText('comfyGuideOfflineTitle')+'</span>'+
 '<button class="guide-close">&times;</button>'+
 '</div>'+
 '<div class="guide-content">'+
-'<div class="guide-step"><span class="step-num">1</span>'+getText('comfyGuideOfflineStep1')+'</div>'+
-'<div class="guide-step"><span class="step-num">2</span>'+getText('comfyGuideOfflineStep2')+'</div>'+
+'<div class="guide-step"><span class="step-num">1</span><span>'+getText('comfyGuideOfflineStep1')+'</span></div>'+
+'<div class="guide-step"><span class="step-num">2</span><span>'+getText('comfyGuideOfflineStep2')+'</span></div>'+
 '<div class="guide-step highlight">'+getText('comfyGuideOfflineStep3')+'</div>'+
 '</div>'+
 '<div class="guide-footer">'+
+'<label class="tutorial-dont-show"><input type="checkbox" id="comfyGuideDontShow"> '+getText('tutorialDontShowAgain')+'</label>'+
 '<button class="tutorial-btn tutorial-btn-primary tutorial-btn-sm guide-got-it">'+getText('tutorialGotIt')+'</button>'+
 '</div>';
 }
 container.insertBefore(guide,container.firstChild);
 guide.querySelector('.guide-close').addEventListener('click',function(){
+var dontShow=document.getElementById('comfyGuideDontShow');
+if(dontShow&&dontShow.checked){
+self.state.setupGuideShown=true;
+self.saveState();
+}
 guide.remove();
 });
 guide.querySelector('.guide-got-it').addEventListener('click',function(){
+var dontShow=document.getElementById('comfyGuideDontShow');
+if(dontShow&&dontShow.checked){
 self.state.setupGuideShown=true;
 self.saveState();
+}
 guide.remove();
 });
 },
