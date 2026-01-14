@@ -6,10 +6,16 @@
   "scripts": {
     "lint": "eslint js/ --ext .js",
     "lint:fix": "eslint js/ --ext .js --fix",
-    "format": "node scripts/remove-spaces.cjs"
+    "format": "node scripts/remove-spaces.cjs",
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:update-snapshots": "npx playwright test --update-snapshots"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
-    "@eslint/js": "^8.57.0"
+    "@eslint/js": "^8.57.0",
+    "@playwright/test": "^1.57.0",
+    "eslint": "^8.57.0"
   }
 }
