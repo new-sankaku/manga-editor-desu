@@ -114,7 +114,7 @@ startQuickStart:function(){
 var self=this;
 var steps=[
 {element:'#intro_svg-container-vertical',title:getText('tutorialStep1Title'),body:getText('tutorialStep1Body'),position:'right'},
-{element:'#intro_page-manager-area',title:getText('tutorialStep2Title'),body:getText('tutorialStep2Body'),position:'right'},
+{element:'#canvasArea',title:getText('tutorialStep2Title'),body:getText('tutorialStep2Body'),position:'left'},
 {element:'#intro_speech-bubble-area1',title:getText('tutorialStep3Title'),body:getText('tutorialStep3Body'),position:'right'},
 {element:'#intro_text-area',title:getText('tutorialStep4Title'),body:getText('tutorialStep4Body'),position:'right'},
 {element:'#canvasArea',title:getText('tutorialStep5Title'),body:getText('tutorialStep5Body'),position:'left'}
