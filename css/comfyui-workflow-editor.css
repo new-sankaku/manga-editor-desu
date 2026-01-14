@@ -255,22 +255,24 @@
  }
 .comfui-unverified-banner {
 width: 100%;
-background-color: rgba(255, 255, 130, 0.3);
-border: 1px solid rgba(255, 200, 0, 0.5);
+background-color: #2a2a1a;
+border: 1px solid #5a5a2a;
 border-radius: 6px;
-padding: 10px 12px;
+padding: 12px 14px;
 margin-bottom: 12px;
 }
 .comfui-unverified-banner-title {
 font-weight: 600;
 font-size: 13px;
-color: #d4a000;
-margin-bottom: 6px;
+color: #fbbf24;
+margin-bottom: 8px;
 }
 .comfui-unverified-banner-desc {
-font-size: 11px;
-color: #888;
-line-height: 1.5;
+font-size: 12px;
+color: #d4d4d4;
+line-height: 1.6;
+word-wrap: break-word;
+white-space: normal;
 }
  .comfui-unverified-label {
   font-size: 11px;

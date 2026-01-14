@@ -243,6 +243,23 @@ border-bottom:1px solid #3a3a3a;
 background:#2a1f1f;
 border-bottom-color:#4a2a2a;
 }
+.comfyui-setup-guide.warning{
+border-color:#5a4a1a;
+}
+.guide-header.warning{
+background:#2a2510;
+border-bottom-color:#5a4a1a;
+}
+.guide-header.warning .guide-title{
+color:#fbbf24;
+}
+.step-num.warn{
+background:#d97706;
+}
+.guide-step.highlight.warn{
+border-left-color:#d97706;
+background:#2a2510;
+}
 .guide-icon{
 font-size:16px;
 }

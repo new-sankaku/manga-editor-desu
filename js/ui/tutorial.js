@@ -311,7 +311,7 @@ if(!container)return;
 var existingGuide=container.querySelector('.comfyui-setup-guide');
 if(existingGuide)existingGuide.remove();
 var guide=document.createElement('div');
-guide.className='comfyui-setup-guide';
+guide.className='comfyui-setup-guide'+(isOnline?'':' warning');
 if(isOnline){
 guide.innerHTML='<div class="guide-header">'+
 '<span class="guide-icon" style="font-size:20px;">&#9989;</span>'+
@@ -328,15 +328,15 @@ guide.innerHTML='<div class="guide-header">'+
 '<button class="tutorial-btn tutorial-btn-primary tutorial-btn-sm guide-got-it">'+getText('tutorialGotIt')+'</button>'+
 '</div>';
 }else{
-guide.innerHTML='<div class="guide-header">'+
+guide.innerHTML='<div class="guide-header warning">'+
 '<span class="guide-icon" style="font-size:20px;">&#9888;</span>'+
 '<span class="guide-title">'+getText('comfyGuideOfflineTitle')+'</span>'+
 '<button class="guide-close">&times;</button>'+
 '</div>'+
 '<div class="guide-content">'+
-'<div class="guide-step"><span class="step-num">1</span><span>'+getText('comfyGuideOfflineStep1')+'</span></div>'+
-'<div class="guide-step"><span class="step-num">2</span><span>'+getText('comfyGuideOfflineStep2')+'</span></div>'+
-'<div class="guide-step highlight">'+getText('comfyGuideOfflineStep3')+'</div>'+
+'<div class="guide-step"><span class="step-num warn">1</span><span>'+getText('comfyGuideOfflineStep1')+'</span></div>'+
+'<div class="guide-step"><span class="step-num warn">2</span><span>'+getText('comfyGuideOfflineStep2')+'</span></div>'+
+'<div class="guide-step highlight warn">'+getText('comfyGuideOfflineStep3')+'</div>'+
 '</div>'+
 '<div class="guide-footer">'+
 '<label class="tutorial-dont-show"><input type="checkbox" id="comfyGuideDontShow"> '+getText('tutorialDontShowAgain')+'</label>'+

@@ -105,7 +105,7 @@ margin-right: 4px;
 background-color: var(--background-color-A);
 border-color: var(--nav-border);
 border-width: 1px;
-min-width: 200px;
+min-width: 240px;
 }
 
 .custom-navbar .dropdown-item:hover {
