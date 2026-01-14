@@ -13,7 +13,7 @@ return file ? file.data : null;
 
 
 // Variable to keep track of selected api model to use
-var apiMode=apis.A1111;
+var apiMode=apis.COMFYUI;
 
 document.addEventListener("DOMContentLoaded",function () {
 var settingsSave=$("settingsSave");
@@ -267,6 +267,20 @@ var cfg=BASEPROMPT_SCHEMA[key];
 data[key]=basePrompt[cfg.key];
 });
 localStorage.setItem('localSettingsData',JSON.stringify(data));
+}
+
+function resetAllSettings(){
+var msg=getText('settingsResetConfirm')||'All settings and cache will be deleted. Continue?';
+if(!confirm(msg))return;
+localStorage.clear();
+sessionStorage.clear();
+if('caches' in window){
+caches.keys().then(function(names){
+names.forEach(function(name){caches.delete(name);});
+});
+}
+createToast('Settings Reset',['Clearing all data...','Reloading...'],1500);
+setTimeout(function(){location.reload();},1500);
 }
 
 document.addEventListener('DOMContentLoaded',function() {

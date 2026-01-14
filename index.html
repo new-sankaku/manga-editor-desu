@@ -275,6 +275,11 @@ function getElementClasses(element) {
                                 </a>
                             </li>
                             <li>
+                                <a class="dropdown-item" href="#" id="settingsReset" onclick="resetAllSettings()">
+                                    <i class="material-icons">restart_alt</i> <span data-i18n="settingsReset">Settings Reset</span>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" href="#" onclick="inputImageFile()">
                                     <span class="material-symbols-outlined">image</span>
                                     <span data-i18n="imageImport">画像インポート</span>
@@ -314,6 +319,12 @@ function getElementClasses(element) {
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <li>
+                                <a class="dropdown-item" onclick="View()">
+                                    <i class="material-icons">document_scanner</i>
+                                    <span data-i18n="promptView">Prompt View</span> (Ctrl+P)
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item" onclick="openPromptChangeFloatingWindow()">
                                     <i class="material-icons">manage_search</i> <span data-i18n="searchReplace">Search &
                                         Replace</span>
@@ -335,58 +346,23 @@ function getElementClasses(element) {
                             <span id="intro_sdWebUI" data-i18n="externalServices"></span>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <!--A1111-->
                             <div class="A1111_api_content">
-                                <li>
-                                    <label>
-                                        <h5>WebUI(A1111/Forge)</h5>
-                                    </label>
-                                    <label for="sdWebUIPageUrl">
-                                        <span data-i18n="apiUrl">URL</span>
-                                        <input type="text" id="sdWebUIPageUrl" value="http://127.0.0.1:7860">
-                                    </label>
-                                </li>
-                                <li>
-                                    <a href="html/API_Help/sd-api-guide.html" target="_blank">
-                                        <i class="material-icons">help_outline</i>
-                                        <span data-i18n="help_api_connect_settings">
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <button id="sdWebUIPageUrlDefaultUrl">
-                                        <span data-i18n="defaultUrl">デフォルトURL</span>
-                                    </button>
+                                <li class="es-section-title">WebUI (A1111/Forge)</li>
+                                <li class="es-url-row">
+                                    <input type="text" id="sdWebUIPageUrl" value="http://127.0.0.1:7860" placeholder="URL">
+                                    <button id="sdWebUIPageUrlDefaultUrl" class="es-btn-small" title="Reset">↺</button>
+                                    <a href="html/API_Help/sd-api-guide.html" target="_blank" class="es-btn-small" title="Help">?</a>
                                 </li>
                             </div>
                             <hr>
                             <div class="Comfyui_api_content">
-                                <li>
-                                    <label>
-                                        <h5 data-i18n="comfyUI">ComfyUI</h5>
-                                    </label>
+                                <li class="es-section-title" data-i18n="comfyUI">ComfyUI</li>
+                                <li class="es-url-row">
+                                    <input type="text" id="comfyUIPageUrl" value="http://127.0.0.1:8188" placeholder="URL">
+                                    <button id="comfyUIPageUrlDefaultUrl" class="es-btn-small" title="Reset">↺</button>
+                                    <a href="html/API_Help/comfyui_settings.html" target="_blank" class="es-btn-small" title="Help">?</a>
                                 </li>
-                                <li>
-                                    <label for="comfyUIPageUrl">
-                                        <span data-i18n="apiUrl">URL</span>
-                                        <input type="text" id="comfyUIPageUrl" value="http://127.0.0.1:8188">
-                                    </label>
-                                </li>
-
-                                <li>
-                                    <a href="html/API_Help/comfyui_settings.html" target="_blank">
-                                        <i class="material-icons">help_outline</i>
-                                        <span data-i18n="help_api_connect_settings">
-                                        </span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <button id="comfyUIPageUrlDefaultUrl">
-                                        <span data-i18n="defaultUrl">デフォルトURL</span>
-                                    </button>
-                                </li>
-
-                        </div>
+                            </div>
                         </ul>
                     </li>
                 </ul>
@@ -1781,19 +1757,6 @@ function getElementClasses(element) {
                 </div>
                 <div id="layer-content"></div>
 
-                <div id="canvas-buttons">
-    
-                    <div id="layer-buttons">
-                        <button onclick="AllRun()">
-                            <i class="material-icons">collections</i>
-                            <span data-i18n="T2I_AllRun">All Run</span>
-                        </button>
-                        <button onclick="View()">
-                            <i class="material-icons">document_scanner</i>
-                            <span data-i18n="promptView">View</span>
-                        </button>
-                    </div>                    
-                </div>
             </div>
 
 
@@ -1804,10 +1767,10 @@ function getElementClasses(element) {
                     </div>
                     <div id="esApi-controls-mini" class="controls-mini">
                         <div class="input-group" data-group="externalApiGroup">
-                            <button id="comfyUIButton" data-value="comfyUIButton" onclick="changeExternalAPI(this)">
+                            <button id="comfyUIButton" data-value="comfyUIButton" onclick="changeExternalAPI(this)" class="selected">
                                 ComfyUI
                             </button>
-                            <button id="sdWebUIButton" data-value="sdWebUIButton" onclick='changeExternalAPI(this)' class="selected" >
+                            <button id="sdWebUIButton" data-value="sdWebUIButton" onclick='changeExternalAPI(this)'>
                                 WebUI or Forge
                             </button>
 
@@ -2012,6 +1975,7 @@ function getElementClasses(element) {
 
     <link rel="stylesheet" href="third/intro/introjs.min.css">
     <link rel="stylesheet" href="css/ui/intro.css?">
+    <link rel="stylesheet" href="css/ui/tutorial.css?v=7.2">
     <link rel="stylesheet" href="css/styles-css.css?v=7.2">
 
     <script src="third/lz4/wasm.js"></script>
@@ -2052,6 +2016,7 @@ function getElementClasses(element) {
     <script src="js/ui/glfx-ui.js?v=7.2" defer></script>
     <script src="js/ui/canvas-object-menu.js?v=7.2" defer></script>
     <script src="js/ui/third/intro.js?v=7.2" defer></script>
+    <script src="js/ui/tutorial.js?v=7.2" defer></script>
     <script src="js/ui/toast.js?v=7.2" defer></script>
     <script src="js/ui/util/ui-util.js?v=7.2" defer></script>
     <script src="js/ui/third/tippy.js?v=7.2" defer></script>

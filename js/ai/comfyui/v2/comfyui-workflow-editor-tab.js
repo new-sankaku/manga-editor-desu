@@ -151,7 +151,7 @@ createContent() {
 const content=document.createElement("div");
 content.className="comfui-tab-content";
 content.dataset.tabId=this.id;
-content.innerHTML=`<div class="comfui-node-list" data-tab-id="${this.id}"></div>`;
+content.innerHTML=`<div class="comfui-unverified-banner-container"></div><div class="comfui-node-list" data-tab-id="${this.id}"></div>`;
 this.contentElement=content;
 return content;
 }
@@ -206,11 +206,7 @@ return!Array.isArray(inputValue);
 }
 
 createMissingInput() {
-
-let missingNode=getText('missingNode');
-let missingDescription=getText('missingDescription');
-
-return `<div class="comfui-input-container"> <label class="comfui-input-label" >${missingNode}</label> <textarea rows="4" oninput="this.style.height = ''; if(this.value.length > 100) { this.rows = 5; } else { this.rows = 4; } this.style.height = Math.min(this.scrollHeight, 120) + 'px'" style="resize: none; overflow-y: auto; font-size: 12px; padding: 2px;"> ${missingDescription} </textarea> </div>`;
+return `<div class="comfui-input-container"><span class="comfui-unverified-label">⚠ ${getText('unverifiedNode')||'未確認'}</span></div>`;
 }
 
 createInput(nodeId,inputName,inputDef,apiNode) {
@@ -403,6 +399,15 @@ class_type
 })
 .sort((a,b)=>b.inputCount-a.inputCount);
 
+const hasUnverifiedNodes=nodes.some(({class_type})=>notExistsWorkflowNodeVsComfyUI(class_type));
+const bannerContainer=this.contentElement.querySelector(".comfui-unverified-banner-container");
+if(bannerContainer){
+if(hasUnverifiedNodes){
+bannerContainer.innerHTML=`<div class="comfui-unverified-banner"><div class="comfui-unverified-banner-title">⚠ ${getText('missingNode')||'ノード情報が確認できないノードがあります'}</div><div class="comfui-unverified-banner-desc">${getText('missingDescription')||''}</div></div>`;
+}else{
+bannerContainer.innerHTML="";
+}
+}
 
 nodes.forEach(({id,node,apiNode,class_type})=>{
 const nodeElement=document.createElement("div");

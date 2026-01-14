@@ -29,6 +29,7 @@ projectLoad:!isMacOs ? 'ctrl+o' : 'command+o',
 toggleBottomBar:!isMacOs ? 'ctrl+b' : 'command+b',
 imageDownload:!isMacOs ? 'ctrl+d' : 'command+d',
 settingsSave:!isMacOs ? 'ctrl+shift+s' : 'command+shift+s',
+promptView:!isMacOs ? 'ctrl+p' : 'command+p',
 }
 
 var isLongPressDirection=false;
@@ -204,6 +205,12 @@ if (!isEditableTagsActive()) {
 $('settingsSave').click();
 e.preventDefault();
 }
+});
+
+// bind prompt view shortcut
+hotkeys(hotkeysMap.promptView,'all',function (e) {
+View();
+e.preventDefault();
 });
 
 // bind enter key for crop completion

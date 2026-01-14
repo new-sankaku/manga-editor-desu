@@ -39,18 +39,19 @@ this.element.innerHTML=`
 </div>
 <div class="comfui-tab-list" id="tabList"></div>
  </div>
- 
+
  <div class="comfui-main-content">
 <div class="comfui-tab-content-container" id="tabContentContainer"></div>
  </div>
- 
+
  <div class="comfui-right-sidebar">
 <div id="apiSettingsUrlHelpe">
  <label id="ExternalService_Heartbeat_Label_fw">Connection:</label>
 </div>
 <button id="comfyUIFwGenerateButton" class="comfui-sidebar-button">${testGenerate}</button>
 <div id="generatedImageContainer" class="comfui-generated-image-container">
- <img id="generatedImage" class="comfui-preview-image hidden" style="cursor:pointer;" title="Click to enlarge">
+ <div id="generatedImagePlaceholder" class="comfui-image-placeholder" style="display:flex;align-items:center;justify-content:center;height:150px;border:2px dashed rgba(255,215,0,0.3);border-radius:8px;color:#888;font-size:12px;text-align:center;padding:10px;">Test Generate to preview</div>
+ <img id="generatedImage" style="display:none;cursor:pointer;max-width:100%;border-radius:8px;" title="Click to enlarge">
 </div>
 
 <div>
@@ -131,24 +132,31 @@ height: `${event.rect.height}px`,
 });
 });
 
-const comfyUIFwGenerateButton=this.element.querySelector("#comfyUIFwGenerateButton");
-const testGenerateText=getText("comfyUI_testGenerate");
-comfyUIFwGenerateButton.addEventListener("click",async ()=>{
-const tabId=comfyUIWorkflowEditor.activeTabId;
-if (!tabId) return;
-
-const tab=comfyUIWorkflowEditor.tabs.get(tabId);
-if (!tab) return;
-
+var comfyUIFwGenerateButton=this.element.querySelector("#comfyUIFwGenerateButton");
+var testGenerateText=getText("comfyUI_testGenerate");
+comfyUIFwGenerateButton.addEventListener("click",async function(){
+var tabId=comfyUIWorkflowEditor.activeTabId;
+if(!tabId)return;
+var tab=comfyUIWorkflowEditor.tabs.get(tabId);
+if(!tab)return;
 comfyUIFwGenerateButton.disabled=true;
 comfyUIFwGenerateButton.innerHTML='<span class="spinner-border spinner-border-sm text-light"></span>';
-
 try{
-const img=await comfyui_put_queue_v2(tab.workflow);
-if(img){
-const generatedImage=this.element.querySelector("#generatedImage");
-generatedImage.src=img;
-generatedImage.classList.remove("hidden");
+var result=await comfyui_put_queue_v2(tab.workflow);
+if(result&&result.error){
+if(typeof ComfyUIGuide!=='undefined'){
+ComfyUIGuide.showGenerationErrorGuide(result.message);
+}
+}else if(result){
+var generatedImage=document.querySelector("#generatedImage");
+var placeholder=document.querySelector("#generatedImagePlaceholder");
+if(generatedImage){
+generatedImage.src=result;
+generatedImage.style.display="block";
+}
+if(placeholder){
+placeholder.style.display="none";
+}
 }
 }finally{
 comfyUIFwGenerateButton.disabled=false;
@@ -162,6 +170,14 @@ if (!this.element) {
 this.initializeWindow();
 }
 this.element.style.display="block";
+var self=this;
+setTimeout(function(){
+if(typeof ComfyUIGuide!=='undefined'){
+comfyui_apiHeartbeat_v2().then(function(isOnline){
+ComfyUIGuide.showSetupGuide(isOnline);
+});
+}
+},300);
 }
 
 hide() {

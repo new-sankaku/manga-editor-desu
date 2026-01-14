@@ -16,7 +16,7 @@ const base_ja = {
 "side-label-control":"操作",
 "side-label-shape":"図形",
 "comfyUI_workflowErrorHelp":"Workflow'sから設定しているWorkflowが動作することを確認してください。初期設定ではModel, VAEなどを環境に合わせて選択する必要があります。",
-"comfyUI_workflowHelp":"注意<br>・タイプごとに使うWorkflowを指定できます。自分で好きなWorkflowを使いたい場合はAPI用をComfyUIからExportして追加してください。</br>・ComfyUIがオンラインになると自動的にモデルリスト等が更新されます。一度でも更新するとComfyUIのモデルリストはブラウザに格納されます。</br>・seed, noise_seedに0を指定するとランダムになります。</br>・テキストに以下を指定すると置き換えます。</br>%prompt%</br>ポジティブプロンプト</br>%negative%</br>ネガティブプロンプト</br>",
+"comfyUI_workflowHelp":"注意<br>・タイプごとにWorkflowを指定できます。独自のWorkflowを使う場合はComfyUIからAPI用をExportして追加してください。</br>・ComfyUIがオンラインになると自動的にモデルリスト等が更新されます。一度でも更新するとComfyUIのモデルリストはブラウザに格納されます。</br>・seed, noise_seedに0を指定するとランダムになります。</br>・テキストに以下を指定すると置き換えます。</br>%prompt%</br>ポジティブプロンプト</br>%negative%</br>ネガティブプロンプト</br>",
 "comfyUI_addWorkflow":"API Workflowの追加",
 "comfyUI_testGenerate":"テスト生成",
 "flipHorizontal":"左右反転",

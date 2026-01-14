@@ -51,20 +51,23 @@ return false;
 
 
 let isOnline=false;
-async function comfyui_monitorConnection_v2() {
+let comfyGuideShownThisSession=false;
+async function comfyui_monitorConnection_v2(){
 comfyuiLogger.debug("comfyui_monitorConnection_v2");
-while (true) {
-const currentStatus=await comfyui_apiHeartbeat_v2();
-if (currentStatus!==isOnline) {
+while(true){
+var currentStatus=await comfyui_apiHeartbeat_v2();
+if(currentStatus!==isOnline){
 isOnline=currentStatus;
-if (isOnline) {
+if(isOnline){
 comfyUIWorkflowEditor.updateObjectInfoAndWorkflows();
-}else{
-
+}
+if(typeof ComfyUIGuide!=='undefined'&&!comfyGuideShownThisSession){
+comfyGuideShownThisSession=true;
+setTimeout(function(){ComfyUIGuide.showSetupGuide(isOnline);},500);
 }
 }
-const interval=isOnline ? 15000 : 5000;
-await new Promise((resolve)=>setTimeout(resolve,interval));
+var interval=isOnline?15000:5000;
+await new Promise(function(resolve){setTimeout(resolve,interval);});
 }
 }
 
