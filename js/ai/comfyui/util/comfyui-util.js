@@ -61,19 +61,22 @@ return classTypes;
 }
 
 
-function checkWorkflowNodeVsComfyUI(workflowClassTypes) {
-const setB=new Set(comfyObjectInfoList);
-const result=[];
-
-for (const item of workflowClassTypes) {
-if (!setB.has(item)) {
+function checkWorkflowNodeVsComfyUI(workflowClassTypes){
+var setB=new Set(comfyObjectInfoList);
+var result=[];
+for(var i=0;i<workflowClassTypes.length;i++){
+var item=workflowClassTypes[i];
+if(!setB.has(item)){
 result.push(item);
 }
 }
-if (result.length>0) {
+if(result.length>0){
 result.unshift("---");
 result.push("---");
 createToastError('Check ComfyUI Node! Not Exists!',result,1000*10);
+if(typeof ComfyUIGuide!=='undefined'){
+ComfyUIGuide.showNodeErrorGuide(result);
+}
 return false;
 }else{
 return true;

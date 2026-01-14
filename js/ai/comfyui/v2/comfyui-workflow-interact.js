@@ -131,24 +131,27 @@ height: `${event.rect.height}px`,
 });
 });
 
-const comfyUIFwGenerateButton=this.element.querySelector("#comfyUIFwGenerateButton");
-const testGenerateText=getText("comfyUI_testGenerate");
-comfyUIFwGenerateButton.addEventListener("click",async ()=>{
-const tabId=comfyUIWorkflowEditor.activeTabId;
-if (!tabId) return;
-
-const tab=comfyUIWorkflowEditor.tabs.get(tabId);
-if (!tab) return;
-
+var comfyUIFwGenerateButton=this.element.querySelector("#comfyUIFwGenerateButton");
+var testGenerateText=getText("comfyUI_testGenerate");
+comfyUIFwGenerateButton.addEventListener("click",async function(){
+var tabId=comfyUIWorkflowEditor.activeTabId;
+if(!tabId)return;
+var tab=comfyUIWorkflowEditor.tabs.get(tabId);
+if(!tab)return;
 comfyUIFwGenerateButton.disabled=true;
 comfyUIFwGenerateButton.innerHTML='<span class="spinner-border spinner-border-sm text-light"></span>';
-
 try{
-const img=await comfyui_put_queue_v2(tab.workflow);
-if(img){
-const generatedImage=this.element.querySelector("#generatedImage");
-generatedImage.src=img;
+var result=await comfyui_put_queue_v2(tab.workflow);
+if(result&&result.error){
+if(typeof ComfyUIGuide!=='undefined'){
+ComfyUIGuide.showGenerationErrorGuide(result.message);
+}
+}else if(result){
+var generatedImage=document.querySelector("#generatedImage");
+if(generatedImage){
+generatedImage.src=result;
 generatedImage.classList.remove("hidden");
+}
 }
 }finally{
 comfyUIFwGenerateButton.disabled=false;
