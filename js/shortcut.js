@@ -29,7 +29,7 @@ projectLoad:!isMacOs ? 'ctrl+o' : 'command+o',
 toggleBottomBar:!isMacOs ? 'ctrl+b' : 'command+b',
 imageDownload:!isMacOs ? 'ctrl+d' : 'command+d',
 settingsSave:!isMacOs ? 'ctrl+shift+s' : 'command+shift+s',
-promptView:!isMacOs ? 'ctrl+shift+v' : 'command+shift+v',
+promptView:!isMacOs ? 'ctrl+p' : 'command+p',
 }
 
 var isLongPressDirection=false;
