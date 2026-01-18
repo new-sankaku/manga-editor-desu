@@ -271,7 +271,7 @@ function getElementClasses(element) {
                             <li>
                                 <a class="dropdown-item" href="#" id="settingsSave">
                                     <i class="material-icons">settings</i> <span data-i18n="settingsSave">Settings
-                                        Save</span>
+                                        Save</span> (Ctrl+Shift+S)
                                 </a>
                             </li>
                             <li>
@@ -288,7 +288,7 @@ function getElementClasses(element) {
                             <li>
                                 <a class="dropdown-item" href="#" id="imageDownload" onclick="cropAndDownload()">
                                     <span class="material-symbols-outlined">imagesmode</span> <span
-                                        data-i18n="imageDownload">Image Download</span>
+                                        data-i18n="imageDownload">Image Download</span> (Ctrl+D)
                                 </a>
                             </li>
                             <li>
@@ -413,9 +413,9 @@ function getElementClasses(element) {
                             <span data-i18n="help">Help</span>
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" href="html/Shortcut/shortcut.html" target="_blank">
+                            <a class="dropdown-item" href="#" onclick="openShortcutModal()" id="shortcutPage">
                                 <i class="material-icons">switch_access_shortcut</i>
-                                <span data-i18n="shortcutPage">Shortcut Page</span>
+                                <span data-i18n="shortcutPage">Shortcut Page</span> (F1)
                             </a>
 
                             <a class="dropdown-item" href="html/functionList.html" target="_blank">
@@ -1973,6 +1973,20 @@ function getElementClasses(element) {
     <div id="sp-manga-toastContainer" class="position-fixed bottom-0 end-0 p-3" style="min-width: 250px;">
     </div>
 
+    <div id="shortcutModal" class="shortcut-modal" style="display:none;">
+        <div class="shortcut-modal-overlay" onclick="closeShortcutModal()"></div>
+        <div class="shortcut-modal-content">
+            <div class="shortcut-modal-header">
+                <h2 data-i18n="shortcutTitle">Keyboard Shortcuts</h2>
+                <button class="shortcut-modal-close" onclick="closeShortcutModal()">&times;</button>
+            </div>
+            <div class="shortcut-modal-body">
+                <div class="shortcut-grid" id="shortcutGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <link rel="stylesheet" href="css/ui/shortcut-modal.css?v=7.2">
     <link rel="stylesheet" href="third/intro/introjs.min.css">
     <link rel="stylesheet" href="css/ui/intro.css?">
     <link rel="stylesheet" href="css/ui/tutorial.css?v=7.2">

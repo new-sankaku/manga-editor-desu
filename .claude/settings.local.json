@@ -30,7 +30,8 @@
       "Bash(node -c:*)",
       "Bash(node -e:*)",
       "Bash(dd:*)",
-      "Bash(node debug-json.cjs:*)"
+      "Bash(node debug-json.cjs:*)",
+      "Bash(dir \"C:\\\\01_work\\\\00_Git\\\\manga-editor-desu\\\\tmpclaude*\")"
     ]
   },
   "hooks": {

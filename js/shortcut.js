@@ -30,6 +30,7 @@ toggleBottomBar:!isMacOs ? 'ctrl+b' : 'command+b',
 imageDownload:!isMacOs ? 'ctrl+d' : 'command+d',
 settingsSave:!isMacOs ? 'ctrl+shift+s' : 'command+shift+s',
 promptView:!isMacOs ? 'ctrl+p' : 'command+p',
+shortcutPage:'f1',
 }
 
 var isLongPressDirection=false;
@@ -212,6 +213,97 @@ hotkeys(hotkeysMap.promptView,'all',function (e) {
 View();
 e.preventDefault();
 });
+
+// bind shortcut page shortcut
+hotkeys(hotkeysMap.shortcutPage,'all',function (e) {
+openShortcutModal();
+e.preventDefault();
+});
+
+var shortcutCategories=[
+{category:'sc_cat_file',items:[
+{win:'Ctrl + S',mac:'⌘ + S',i18n:'sc_projectSave'},
+{win:'Ctrl + O',mac:'⌘ + O',i18n:'sc_projectLoad'},
+{win:'Ctrl + D',mac:'⌘ + D',i18n:'sc_imageDownload'},
+{win:'Ctrl + Shift + S',mac:'⌘ + Shift + S',i18n:'sc_settingsSave'},
+]},
+{category:'sc_cat_edit',items:[
+{win:'Ctrl + Z',mac:'⌘ + Z',i18n:'sc_undo'},
+{win:'Ctrl + Y',mac:'⌘ + Y',i18n:'sc_redo'},
+{win:'Ctrl + C',mac:'⌘ + C',i18n:'sc_copy'},
+{win:'Ctrl + V',mac:'⌘ + V',i18n:'sc_paste'},
+{win:'Delete / Backspace',mac:'Delete / Backspace',i18n:'sc_deleteLayer'},
+]},
+{category:'sc_cat_view',items:[
+{win:'Ctrl + G',mac:'Ctrl + G',i18n:'sc_toggleGrid'},
+{win:'Ctrl + L',mac:'Ctrl + L',i18n:'sc_toggleLayerPanel'},
+{win:'Ctrl + K',mac:'Ctrl + K',i18n:'sc_toggleControls'},
+{win:'Ctrl + B',mac:'Ctrl + B',i18n:'sc_toggleBottomBar'},
+{win:'Ctrl + P',mac:'⌘ + P',i18n:'sc_promptView'},
+{win:'Ctrl + 8',mac:'Ctrl + 8',i18n:'sc_zoomIn'},
+{win:'Ctrl + 9',mac:'Ctrl + 9',i18n:'sc_zoomOut'},
+{win:'Ctrl + 0',mac:'Ctrl + 0',i18n:'sc_zoomReset'},
+]},
+{category:'sc_cat_object',items:[
+{winI18n:'sc_arrowKeys',macI18n:'sc_arrowKeys',i18n:'sc_moveObject'},
+{winI18n:'sc_shiftArrow',macI18n:'sc_shiftArrow',i18n:'sc_moveObjectFast'},
+{win:'Ctrl + ↑',mac:'⌘ + ↑',i18n:'sc_layerUp'},
+{win:'Ctrl + ↓',mac:'⌘ + ↓',i18n:'sc_layerDown'},
+]},
+{category:'sc_cat_other',items:[
+{win:'Escape',mac:'Escape',i18n:'sc_deselect'},
+{win:'F1',mac:'F1',i18n:'sc_shortcutPage'},
+]},
+];
+
+function openShortcutModal(){
+var container=$('shortcutGrid');
+container.innerHTML='';
+var leftCol=document.createElement('div');
+leftCol.className='shortcut-column';
+var rightCol=document.createElement('div');
+rightCol.className='shortcut-column';
+shortcutCategories.forEach(function(cat,idx){
+var catDiv=document.createElement('div');
+catDiv.className='sc-category';
+var title=document.createElement('div');
+title.className='sc-category-title';
+title.textContent=i18next.t(cat.category);
+catDiv.appendChild(title);
+var items=document.createElement('div');
+items.className='sc-category-items';
+cat.items.forEach(function(item){
+var itemDiv=document.createElement('div');
+itemDiv.className='sc-item';
+var keySpan=document.createElement('span');
+keySpan.className='sc-key';
+if(item.winI18n){
+keySpan.textContent=i18next.t(isMacOs?item.macI18n:item.winI18n);
+}else{
+keySpan.textContent=isMacOs?item.mac:item.win;
+}
+var funcSpan=document.createElement('span');
+funcSpan.className='sc-func';
+funcSpan.textContent=i18next.t(item.i18n);
+itemDiv.appendChild(keySpan);
+itemDiv.appendChild(funcSpan);
+items.appendChild(itemDiv);
+});
+catDiv.appendChild(items);
+if(idx<3){
+leftCol.appendChild(catDiv);
+}else{
+rightCol.appendChild(catDiv);
+}
+});
+container.appendChild(leftCol);
+container.appendChild(rightCol);
+$('shortcutModal').style.display='flex';
+}
+
+function closeShortcutModal(){
+$('shortcutModal').style.display='none';
+}
 
 // bind enter key for crop completion
 hotkeys('enter','all',function (e) {
