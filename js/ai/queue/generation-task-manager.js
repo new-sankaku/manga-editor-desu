@@ -4,7 +4,18 @@ var generationTaskMap=new Map();
 async function registerGenerationTask(taskId,taskInfo){
 var canvasGuid=getCanvasGUID();
 if(!btmProjectsMap.has(canvasGuid)){
+try{
 await btmSaveProjectFile(canvasGuid,false);
+generationTaskLogger.debug("Saved current page to btmProjectsMap",canvasGuid);
+var savedData=btmProjectsMap.get(canvasGuid);
+generationTaskLogger.debug("Saved data check",{
+hasData:!!savedData,
+hasBlob:!!(savedData&&savedData.blob),
+blobType:savedData&&savedData.blob?savedData.blob.constructor.name:'none'
+});
+}catch(e){
+generationTaskLogger.error("Failed to save current page",e);
+}
 }
 var info={
 canvasGuid:canvasGuid,
