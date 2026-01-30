@@ -79,9 +79,21 @@ return false;
 try{
 var result=await processImageOnOffscreenCanvas(projectData.blob,task,fabricImage);
 if(result.success){
+generationTaskLogger.debug("processImageOnOffscreenCanvas result",{
+hasBlobResult:!!result.blob,
+blobType:result.blob?result.blob.constructor.name:'none',
+blobSize:result.blob?result.blob.size:0
+});
 btmProjectsMap.set(task.canvasGuid,{
 imageLink:result.previewLink,
 blob:result.blob
+});
+var updatedData=btmProjectsMap.get(task.canvasGuid);
+generationTaskLogger.debug("Updated btmProjectsMap",{
+hasData:!!updatedData,
+hasBlob:!!(updatedData&&updatedData.blob),
+blobType:updatedData&&updatedData.blob?updatedData.blob.constructor.name:'none',
+blobSize:updatedData&&updatedData.blob?updatedData.blob.size:0
 });
 btmUpdateThumbnail(task.canvasGuid,result.previewLink);
 showGenerationCompleteNotification(task.canvasGuid);
