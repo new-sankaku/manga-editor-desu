@@ -4,18 +4,7 @@ var generationTaskMap=new Map();
 async function registerGenerationTask(taskId,taskInfo){
 var canvasGuid=getCanvasGUID();
 if(!btmProjectsMap.has(canvasGuid)){
-try{
 await btmSaveProjectFile(canvasGuid,false);
-generationTaskLogger.debug("Saved current page to btmProjectsMap",canvasGuid);
-var savedData=btmProjectsMap.get(canvasGuid);
-generationTaskLogger.debug("Saved data check",{
-hasData:!!savedData,
-hasBlob:!!(savedData&&savedData.blob),
-blobType:savedData&&savedData.blob?savedData.blob.constructor.name:'none'
-});
-}catch(e){
-generationTaskLogger.error("Failed to save current page",e);
-}
 }
 var info={
 canvasGuid:canvasGuid,
@@ -79,21 +68,9 @@ return false;
 try{
 var result=await processImageOnOffscreenCanvas(projectData.blob,task,fabricImage);
 if(result.success){
-generationTaskLogger.debug("processImageOnOffscreenCanvas result",{
-hasBlobResult:!!result.blob,
-blobType:result.blob?result.blob.constructor.name:'none',
-blobSize:result.blob?result.blob.size:0
-});
 btmProjectsMap.set(task.canvasGuid,{
 imageLink:result.previewLink,
 blob:result.blob
-});
-var updatedData=btmProjectsMap.get(task.canvasGuid);
-generationTaskLogger.debug("Updated btmProjectsMap",{
-hasData:!!updatedData,
-hasBlob:!!(updatedData&&updatedData.blob),
-blobType:updatedData&&updatedData.blob?updatedData.blob.constructor.name:'none',
-blobSize:updatedData&&updatedData.blob?updatedData.blob.size:0
 });
 btmUpdateThumbnail(task.canvasGuid,result.previewLink);
 showGenerationCompleteNotification(task.canvasGuid);
@@ -124,6 +101,14 @@ var localStateStack=[];
 var canvasInfoBuffer=getDataByName(files,"canvas_info.json");
 var canvasInfoStr=ArrayBufferUtils.fromArrayBufferToString(canvasInfoBuffer);
 var canvasInfo=canvasInfoStr?JSON.parse(canvasInfoStr):{width:750,height:850};
+var basePromptBuffer=getDataByName(files,"text2img_basePrompt.json");
+var basePromptData={};
+if(basePromptBuffer){
+var basePromptStr=ArrayBufferUtils.fromArrayBufferToString(basePromptBuffer);
+if(basePromptStr){
+basePromptData=JSON.parse(basePromptStr);
+}
+}
 offscreenCanvas.setWidth(canvasInfo.width);
 offscreenCanvas.setHeight(canvasInfo.height);
 var sortedFiles=files.sort((a,b)=>{
@@ -168,7 +153,7 @@ placeImageOnOffscreenCanvas(offscreenCanvas,fabricImage,task,targetLayer,localIm
 offscreenCanvas.renderAll();
 var newState=customToJSONForOffscreen(offscreenCanvas,localImageMap);
 localStateStack.push(JSON.stringify(newState));
-var newBlob=await generateBlobForOffscreen(localStateStack,localImageMap,canvasInfo,offscreenCanvas);
+var newBlob=await generateBlobForOffscreen(localStateStack,localImageMap,canvasInfo,offscreenCanvas,basePromptData);
 var previewLink=generatePreviewFromOffscreen(offscreenCanvas);
 return{
 success:true,
@@ -309,8 +294,10 @@ objectCaching:false
 return clipPath;
 }
 
-async function generateBlobForOffscreen(localStateStack,localImageMap,canvasInfo,offscreenCanvas){
+async function generateBlobForOffscreen(localStateStack,localImageMap,canvasInfo,offscreenCanvas,basePromptData){
 var fileBufferList=[];
+var basePromptBuffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePromptData||{}));
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,'text2img_basePrompt.json',basePromptBuffer);
 for(var i=0;i<localStateStack.length;i++){
 var stateStr=typeof localStateStack[i]==='string'?localStateStack[i]:JSON.stringify(localStateStack[i]);
 var buffer=await ArrayBufferUtils.toArrayBuffer(stateStr);
