@@ -153,8 +153,10 @@ placeImageOnOffscreenCanvas(offscreenCanvas,fabricImage,task,targetLayer,localIm
 offscreenCanvas.renderAll();
 var newState=customToJSONForOffscreen(offscreenCanvas,localImageMap);
 localStateStack.push(JSON.stringify(newState));
-var newBlob=await generateBlobForOffscreen(localStateStack,localImageMap,canvasInfo,offscreenCanvas,basePromptData);
-var previewLink=generatePreviewFromOffscreen(offscreenCanvas);
+var previewDataUrl=offscreenCanvas.toDataURL({format:'jpeg',quality:0.8});
+var fileBufferList=await generateProjectFileBufferListCore(localStateStack,localImageMap,canvasInfo,basePromptData,previewDataUrl);
+var newBlob=await lz4Compressor.buffersToLz4Blob(fileBufferList);
+var previewLink={href:previewDataUrl};
 return{
 success:true,
 blob:newBlob,
@@ -294,33 +296,6 @@ objectCaching:false
 return clipPath;
 }
 
-async function generateBlobForOffscreen(localStateStack,localImageMap,canvasInfo,offscreenCanvas,basePromptData){
-var fileBufferList=[];
-var basePromptBuffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePromptData||{}));
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,'text2img_basePrompt.json',basePromptBuffer);
-for(var i=0;i<localStateStack.length;i++){
-var stateJson=typeof localStateStack[i]==='string'?localStateStack[i]:JSON.stringify(localStateStack[i]);
-var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(stateJson));
-var paddedIndex=String(i).padStart(6,'0');
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,'state_'+paddedIndex+'.json',buffer);
-}
-for(var [hash,value] of localImageMap){
-var buffer=await ArrayBufferUtils.toArrayBuffer(value);
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,hash+'.img',buffer);
-}
-var canvasInfoBuffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(canvasInfo));
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,'canvas_info.json',canvasInfoBuffer);
-var previewDataUrl=offscreenCanvas.toDataURL({format:'jpeg',quality:0.8});
-var previewBuffer=await ArrayBufferUtils.toArrayBuffer(previewDataUrl);
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,'preview-image.jpeg',previewBuffer);
-var lz4Blob=await lz4Compressor.buffersToLz4Blob(fileBufferList);
-return lz4Blob;
-}
-
-function generatePreviewFromOffscreen(offscreenCanvas){
-var dataUrl=offscreenCanvas.toDataURL({format:'jpeg',quality:0.8});
-return{href:dataUrl};
-}
 
 function btmUpdateThumbnail(canvasGuid,previewLink){
 var thumbnail=document.querySelector('.btm-image[data-index="'+canvasGuid+'"]');
