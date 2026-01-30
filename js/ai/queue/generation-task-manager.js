@@ -151,7 +151,14 @@ targetLayer=offscreenCanvas.getObjects().find(obj=>obj.guid===task.targetLayerGu
 }
 placeImageOnOffscreenCanvas(offscreenCanvas,fabricImage,task,targetLayer,localImageMap);
 offscreenCanvas.renderAll();
+if(targetLayer){
+generationTaskLogger.debug("targetLayer.guids after placeImage:",targetLayer.guids);
+}
 var newState=customToJSONForOffscreen(offscreenCanvas,localImageMap);
+if(targetLayer){
+var targetInJson=newState.objects.find(obj=>obj.guid===targetLayer.guid);
+generationTaskLogger.debug("targetLayer guids in JSON:",targetInJson?targetInJson.guids:null);
+}
 localStateStack.push(JSON.stringify(newState));
 var previewDataUrl=offscreenCanvas.toDataURL({format:'jpeg',quality:0.8});
 var fileBufferList=await generateProjectFileBufferListCore(localStateStack,localImageMap,canvasInfo,basePromptData,previewDataUrl);
