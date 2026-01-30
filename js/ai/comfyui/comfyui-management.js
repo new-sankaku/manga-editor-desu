@@ -158,7 +158,7 @@ requestData["uploadFileName"]=uploadFilename;
 
 var workflow=comfyuiReplacePlaceholders(selectedWorkflow,requestData,Type);
 
-var taskId=generateTaskId();
+var canvasGuid=getCanvasGUID();
 var layerType='unknown';
 var targetLayerGuid=null;
 if(isPanel(layer)){
@@ -171,7 +171,7 @@ targetLayerGuid=layer.relatedPoly?getGUID(layer.relatedPoly):getGUID(layer);
 layerType='standalone';
 }
 var center=calculateCenter(layer);
-await registerGenerationTask(taskId,{
+await registerGenerationTask(canvasGuid,{
 layerGuid:getGUID(layer),
 layerType:layerType,
 centerX:center.centerX,
@@ -194,13 +194,13 @@ if (result&&result.error) {
 createToastError("Generation Error",result.message);
 throw new Error(result.message);
 } else if (result) {
-if(isPageChanged(taskId)){
-var applied=await applyGeneratedImageToOriginalPage(taskId,result);
+if(isPageChanged(canvasGuid)){
+var applied=await applyGeneratedImageToOriginalPage(canvasGuid,result);
 if(applied){
 return;
 }
 }
-removeGenerationTask(taskId);
+removeGenerationTask(canvasGuid);
 if(isPanel(layer)){
 var center=calculateCenter(layer);
 putImageInFrame(result,center.centerX,center.centerY,false,false,true,layer);
@@ -220,7 +220,7 @@ throw new Error("Unexpected error: No result returned from comfyui_put_queue_v2"
 }
 })
 .catch((error)=>{
-removeGenerationTask(taskId);
+removeGenerationTask(canvasGuid);
 let help=getText("comfyUI_workflowErrorHelp");
 createToastError("Generation Error",[error.message,help],8000);
 comfyuiLogger.error("Error:",error);
