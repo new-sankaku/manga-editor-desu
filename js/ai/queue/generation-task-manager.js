@@ -57,7 +57,10 @@ generationTaskLogger.debug("Same page, no need for cross-page apply");
 return false;
 }
 generationTaskLogger.debug("Cross-page generation detected. TaskPage:",task.canvasGuid,"CurrentPage:",currentCanvasGuid);
-await btmSaveProjectFile(currentCanvasGuid,false);
+var currentPageBlob=null;
+if(stateStack.length>2){
+currentPageBlob=await generateBlobProjectFile();
+}
 var projectData=btmProjectsMap.get(task.canvasGuid);
 if(!projectData||!projectData.blob){
 generationTaskLogger.error("Original page data not found:",task.canvasGuid);
@@ -101,9 +104,13 @@ putImageInFrame(fabricImage,task.centerX,task.centerY,true,false,true,targetLaye
 canvas.renderAll();
 saveStateByManual();
 await btmSaveProjectFile(task.canvasGuid,false);
+if(currentPageBlob){
+await loadLz4BlobProjectFile(currentPageBlob,currentCanvasGuid);
+}else{
 var currentProjectData=btmProjectsMap.get(currentCanvasGuid);
 if(currentProjectData&&currentProjectData.blob){
 await loadLz4BlobProjectFile(currentProjectData.blob,currentCanvasGuid);
+}
 }
 showGenerationCompleteNotification(task.canvasGuid);
 return true;
