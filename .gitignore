@@ -167,3 +167,4 @@ package-lock.json
 
 # Claude Code temp files
 tmpclaude-*
+test_offscreen.html
