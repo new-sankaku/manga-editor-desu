@@ -1,8 +1,11 @@
 var generationTaskLogger=new SimpleLogger('generationTask',LogLevel.DEBUG);
 var generationTaskMap=new Map();
 
-function registerGenerationTask(taskId,taskInfo){
+async function registerGenerationTask(taskId,taskInfo){
 var canvasGuid=getCanvasGUID();
+if(!btmProjectsMap.has(canvasGuid)){
+await btmSaveProjectFile(canvasGuid,false);
+}
 var info={
 canvasGuid:canvasGuid,
 layerGuid:taskInfo.layerGuid||null,

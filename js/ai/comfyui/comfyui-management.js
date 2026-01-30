@@ -171,7 +171,7 @@ targetLayerGuid=layer.relatedPoly?getGUID(layer.relatedPoly):getGUID(layer);
 layerType='standalone';
 }
 var center=calculateCenter(layer);
-registerGenerationTask(taskId,{
+await registerGenerationTask(taskId,{
 layerGuid:getGUID(layer),
 layerType:layerType,
 centerX:center.centerX,
