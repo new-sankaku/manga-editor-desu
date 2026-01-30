@@ -299,8 +299,8 @@ var fileBufferList=[];
 var basePromptBuffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePromptData||{}));
 lz4Compressor.putDataListByArrayBuffer(fileBufferList,'text2img_basePrompt.json',basePromptBuffer);
 for(var i=0;i<localStateStack.length;i++){
-var stateStr=typeof localStateStack[i]==='string'?localStateStack[i]:JSON.stringify(localStateStack[i]);
-var buffer=await ArrayBufferUtils.toArrayBuffer(stateStr);
+var stateJson=typeof localStateStack[i]==='string'?localStateStack[i]:JSON.stringify(localStateStack[i]);
+var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(stateJson));
 var paddedIndex=String(i).padStart(6,'0');
 lz4Compressor.putDataListByArrayBuffer(fileBufferList,'state_'+paddedIndex+'.json',buffer);
 }
