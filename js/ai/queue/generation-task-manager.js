@@ -1,8 +1,7 @@
 var generationTaskLogger=new SimpleLogger('generationTask',LogLevel.DEBUG);
 var generationTaskMap=new Map();
 
-async function registerGenerationTask(taskId,taskInfo){
-var canvasGuid=getCanvasGUID();
+async function registerGenerationTask(canvasGuid,taskInfo){
 if(!btmProjectsMap.has(canvasGuid)){
 await btmSaveProjectFile(canvasGuid,false);
 }
@@ -12,170 +11,116 @@ layerGuid:taskInfo.layerGuid||null,
 layerType:taskInfo.layerType||'unknown',
 centerX:taskInfo.centerX||0,
 centerY:taskInfo.centerY||0,
-targetLayerGuid:taskInfo.targetLayerGuid||null,
-createdAt:Date.now()
+targetLayerGuid:taskInfo.targetLayerGuid||null
 };
-generationTaskMap.set(taskId,info);
-generationTaskLogger.debug("registerGenerationTask",taskId,info);
+generationTaskMap.set(canvasGuid,info);
+generationTaskLogger.debug("registerGenerationTask",canvasGuid,info);
 return info;
 }
 
-function getGenerationTask(taskId){
-return generationTaskMap.get(taskId);
+function getGenerationTask(canvasGuid){
+return generationTaskMap.get(canvasGuid);
 }
 
-function removeGenerationTask(taskId){
-generationTaskMap.delete(taskId);
+function removeGenerationTask(canvasGuid){
+generationTaskMap.delete(canvasGuid);
 }
 
-function isPageChanged(taskId){
-var task=generationTaskMap.get(taskId);
-if(!task)return false;
-var currentGuid=getCanvasGUID();
-return task.canvasGuid!==currentGuid;
+function isPageChanged(canvasGuid){
+return canvasGuid!==getCanvasGUID();
 }
 
-function getActiveGenerationTasks(){
-return Array.from(generationTaskMap.entries());
-}
-
-function hasActiveGenerationTasksForPage(canvasGuid){
-for(var [taskId,task] of generationTaskMap){
-if(task.canvasGuid===canvasGuid){
-return true;
-}
-}
-return false;
-}
-
-async function applyGeneratedImageToOriginalPage(taskId,fabricImage){
-var task=generationTaskMap.get(taskId);
+async function applyGeneratedImageToOriginalPage(canvasGuid,fabricImage){
+var task=generationTaskMap.get(canvasGuid);
 if(!task){
-generationTaskLogger.error("Task not found:",taskId);
+generationTaskLogger.error("Task not found:",canvasGuid);
 return false;
 }
-var currentCanvasGuid=getCanvasGUID();
-if(task.canvasGuid===currentCanvasGuid){
-generationTaskLogger.debug("Same page, no need for cross-page apply");
-return false;
-}
-generationTaskLogger.debug("Cross-page generation detected. TaskPage:",task.canvasGuid,"CurrentPage:",currentCanvasGuid);
-var projectData=btmProjectsMap.get(task.canvasGuid);
+var projectData=btmProjectsMap.get(canvasGuid);
 if(!projectData||!projectData.blob){
-generationTaskLogger.error("Original page data not found:",task.canvasGuid);
+generationTaskLogger.error("Original page data not found:",canvasGuid);
 return false;
 }
 try{
 var result=await processImageOnOffscreenCanvas(projectData.blob,task,fabricImage);
 if(result.success){
-btmProjectsMap.set(task.canvasGuid,{
+btmProjectsMap.set(canvasGuid,{
 imageLink:result.previewLink,
 blob:result.blob
 });
-btmUpdateThumbnail(task.canvasGuid,result.previewLink);
-showGenerationCompleteNotification(task.canvasGuid);
+var thumbnail=document.querySelector('.btm-image[data-index="'+canvasGuid+'"]');
+if(thumbnail&&result.previewLink){
+thumbnail.src=result.previewLink.href;
+}
 }
 return result.success;
 }catch(error){
-generationTaskLogger.error("Error applying image to original page:",error);
+generationTaskLogger.error("Error applying image:",error);
 return false;
 }finally{
-removeGenerationTask(taskId);
+removeGenerationTask(canvasGuid);
 }
 }
 
 async function processImageOnOffscreenCanvas(lz4Blob,task,fabricImage){
-var offscreenContainer=document.createElement('div');
-offscreenContainer.style.cssText='position:absolute;left:-9999px;top:-9999px;visibility:hidden;';
-var offscreenCanvasEl=document.createElement('canvas');
-offscreenCanvasEl.id='offscreen-canvas-'+Date.now();
-offscreenContainer.appendChild(offscreenCanvasEl);
-document.body.appendChild(offscreenContainer);
-var offscreenCanvas=new fabric.Canvas(offscreenCanvasEl,{
-renderOnAddRemove:false
-});
+var container=document.createElement('div');
+container.style.cssText='position:absolute;left:-9999px;top:-9999px;visibility:hidden;';
+var canvasEl=document.createElement('canvas');
+container.appendChild(canvasEl);
+document.body.appendChild(container);
+var offCanvas=new fabric.Canvas(canvasEl,{renderOnAddRemove:false});
 try{
 var files=await lz4Compressor.unLz4Files(lz4Blob);
 var localImageMap=new Map();
 var localStateStack=[];
 var canvasInfoBuffer=getDataByName(files,"canvas_info.json");
-var canvasInfoStr=ArrayBufferUtils.fromArrayBufferToString(canvasInfoBuffer);
-var canvasInfo=canvasInfoStr?JSON.parse(canvasInfoStr):{width:750,height:850};
+var canvasInfo=canvasInfoBuffer?JSON.parse(ArrayBufferUtils.fromArrayBufferToString(canvasInfoBuffer)):{width:750,height:850};
 var basePromptBuffer=getDataByName(files,"text2img_basePrompt.json");
-var basePromptData={};
-if(basePromptBuffer){
-var basePromptStr=ArrayBufferUtils.fromArrayBufferToString(basePromptBuffer);
-if(basePromptStr){
-basePromptData=JSON.parse(basePromptStr);
-}
-}
-offscreenCanvas.setWidth(canvasInfo.width);
-offscreenCanvas.setHeight(canvasInfo.height);
+var basePromptData=basePromptBuffer?JSON.parse(ArrayBufferUtils.fromArrayBufferToString(basePromptBuffer)):{};
+offCanvas.setWidth(canvasInfo.width);
+offCanvas.setHeight(canvasInfo.height);
 var sortedFiles=files.sort((a,b)=>{
 var numA=a.name.match(/(\d+)/)?parseInt(a.name.match(/(\d+)/)[0]):-1;
 var numB=b.name.match(/(\d+)/)?parseInt(b.name.match(/(\d+)/)[0]):-1;
-if(numA===numB){
-return a.name.localeCompare(b.name);
-}
-return numA-numB;
+return numA===numB?a.name.localeCompare(b.name):numA-numB;
 });
 for(var file of sortedFiles){
 if(file.name.endsWith(".img")){
-var imgDataUrlStr=ArrayBufferUtils.fromArrayBufferToString(file.data);
-var hash=file.name.split('.')[0];
-localImageMap.set(hash,imgDataUrlStr);
+localImageMap.set(file.name.split('.')[0],ArrayBufferUtils.fromArrayBufferToString(file.data));
 }
 }
 for(var file of sortedFiles){
-if(file.name.endsWith(".json")&&
-file.name!=="text2img_basePrompt.json"&&
-file.name!=="canvas_info.json"){
-var jsonStr=ArrayBufferUtils.fromArrayBufferToString(file.data);
-localStateStack.push(JSON.parse(jsonStr));
+if(file.name.endsWith(".json")&&file.name!=="text2img_basePrompt.json"&&file.name!=="canvas_info.json"){
+localStateStack.push(JSON.parse(ArrayBufferUtils.fromArrayBufferToString(file.data)));
 }
 }
 if(localStateStack.length===0){
-throw new Error("No state found in project data");
+throw new Error("No state found");
 }
-var lastStateJson=localStateStack[localStateStack.length-1];
-var restoredState=restoreImageForOffscreen(lastStateJson,localImageMap);
-await new Promise((resolve,reject)=>{
-offscreenCanvas.loadFromJSON(restoredState,function(){
-offscreenCanvas.renderAll();
+var lastState=localStateStack[localStateStack.length-1];
+var restored=restoreImageLocal(lastState,localImageMap);
+await new Promise(resolve=>{
+offCanvas.loadFromJSON(restored,function(){
+offCanvas.renderAll();
 resolve();
 });
 });
-var targetLayer=null;
-if(task.targetLayerGuid){
-targetLayer=offscreenCanvas.getObjects().find(obj=>obj.guid===task.targetLayerGuid);
-}
-placeImageOnOffscreenCanvas(offscreenCanvas,fabricImage,task,targetLayer,localImageMap);
-offscreenCanvas.renderAll();
-if(targetLayer){
-generationTaskLogger.debug("targetLayer.guids after placeImage:",targetLayer.guids);
-}
-var newState=customToJSONForOffscreen(offscreenCanvas,localImageMap);
-if(targetLayer){
-var targetInJson=newState.objects.find(obj=>obj.guid===targetLayer.guid);
-generationTaskLogger.debug("targetLayer guids in JSON:",targetInJson?targetInJson.guids:null);
-}
+var targetLayer=task.targetLayerGuid?offCanvas.getObjects().find(obj=>obj.guid===task.targetLayerGuid):null;
+placeImageLocal(offCanvas,fabricImage,task,targetLayer);
+offCanvas.renderAll();
+var newState=customToJSONLocal(offCanvas,localImageMap);
 localStateStack.push(JSON.stringify(newState));
-var previewDataUrl=offscreenCanvas.toDataURL({format:'jpeg',quality:0.8});
+var previewDataUrl=offCanvas.toDataURL({format:'jpeg',quality:0.8});
 var fileBufferList=await generateProjectFileBufferListCore(localStateStack,localImageMap,canvasInfo,basePromptData,previewDataUrl);
 var newBlob=await lz4Compressor.buffersToLz4Blob(fileBufferList);
-var previewLink={href:previewDataUrl};
-return{
-success:true,
-blob:newBlob,
-previewLink:previewLink
-};
+return{success:true,blob:newBlob,previewLink:{href:previewDataUrl}};
 }finally{
-offscreenCanvas.dispose();
-offscreenContainer.remove();
+offCanvas.dispose();
+container.remove();
 }
 }
 
-function restoreImageForOffscreen(jsonOrStr,localImageMap){
+function restoreImageLocal(jsonOrStr,localImageMap){
 var parsed=typeof jsonOrStr==='string'?JSON.parse(jsonOrStr):jsonOrStr;
 parsed.objects=parsed.objects.map(obj=>{
 if(obj.type==='image'&&localImageMap.has(obj.src)){
@@ -185,11 +130,7 @@ if(obj.speechBubbleGrid&&typeof obj.speechBubbleGrid==='string'){
 var hash=obj.speechBubbleGrid.replace('GUID:','');
 var gridData=localImageMap.get(hash);
 if(gridData){
-try{
-obj.speechBubbleGrid=JSON.parse(gridData);
-}catch(e){
-obj.speechBubbleGrid=gridData;
-}
+try{obj.speechBubbleGrid=JSON.parse(gridData);}catch(e){obj.speechBubbleGrid=gridData;}
 }
 }
 if(obj.textBaseline==='alphabetical'){
@@ -200,11 +141,10 @@ return obj;
 return parsed;
 }
 
-function customToJSONForOffscreen(offscreenCanvas,localImageMap){
-var json=offscreenCanvas.toJSON(commonProperties);
+function customToJSONLocal(offCanvas,localImageMap){
+var json=offCanvas.toJSON(commonProperties);
 json.objects=json.objects.map(obj=>{
-if(obj.type==='image'&&obj.src&&typeof obj.src==='string'&&
-(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))){
+if(obj.type==='image'&&obj.src&&typeof obj.src==='string'&&(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))){
 var hash=generateHash(obj.src);
 if(!localImageMap.has(hash)){
 localImageMap.set(hash,obj.src);
@@ -224,112 +164,37 @@ return obj;
 return json;
 }
 
-function placeImageOnOffscreenCanvas(offscreenCanvas,fabricImage,task,targetLayer,localImageMap){
-if(task.layerType==='panel'&&targetLayer){
-placeInFrameOffscreen(offscreenCanvas,fabricImage,task.centerX,task.centerY,targetLayer);
-}else if(task.layerType==='clipPath'&&targetLayer){
-var oldLayer=offscreenCanvas.getObjects().find(obj=>obj.guid===task.layerGuid);
-if(oldLayer){
-offscreenCanvas.remove(oldLayer);
-}
-placeInFrameOffscreen(offscreenCanvas,fabricImage,task.centerX,task.centerY,targetLayer);
-}else if(task.layerType==='standalone'){
-var oldLayer=offscreenCanvas.getObjects().find(obj=>obj.guid===task.layerGuid);
-if(oldLayer){
-fabricImage.set({
-left:oldLayer.left,
-top:oldLayer.top,
-scaleX:oldLayer.scaleX,
-scaleY:oldLayer.scaleY
-});
-offscreenCanvas.remove(oldLayer);
-}
-offscreenCanvas.add(fabricImage);
-}else{
-placeInFrameOffscreen(offscreenCanvas,fabricImage,task.centerX,task.centerY,targetLayer);
-}
-}
-
-function placeInFrameOffscreen(offscreenCanvas,img,x,y,targetFrame){
-offscreenCanvas.add(img);
+function placeImageLocal(offCanvas,img,task,targetFrame){
+offCanvas.add(img);
 if(targetFrame){
 var frameCenterX=targetFrame.left+(targetFrame.width*targetFrame.scaleX)/2;
 var frameCenterY=targetFrame.top+(targetFrame.height*targetFrame.scaleY)/2;
-var scaleToFitX=(targetFrame.width*targetFrame.scaleX)/img.width;
-var scaleToFitY=(targetFrame.height*targetFrame.scaleY)/img.height;
-var scaleToFit=Math.max(scaleToFitX,scaleToFitY);
+var scaleX=(targetFrame.width*targetFrame.scaleX)/img.width;
+var scaleY=(targetFrame.height*targetFrame.scaleY)/img.height;
+var scale=Math.max(scaleX,scaleY)*1.05;
 img.set({
-left:frameCenterX-(img.width*scaleToFit)/2,
-top:frameCenterY-(img.height*scaleToFit)/2,
-scaleX:scaleToFit*1.05,
-scaleY:scaleToFit*1.05
+left:frameCenterX-(img.width*scale)/2,
+top:frameCenterY-(img.height*scale)/2,
+scaleX:scale,
+scaleY:scale
 });
-var clipPath=createClipPathFromPoly(targetFrame);
-img.clipPath=clipPath;
-img.relatedPoly=targetFrame;
-if(!targetFrame.guids){
-targetFrame.guids=[];
+if(targetFrame.points){
+img.clipPath=new fabric.Polygon(targetFrame.points,{
+left:targetFrame.left,
+top:targetFrame.top,
+scaleX:targetFrame.scaleX,
+scaleY:targetFrame.scaleY,
+angle:targetFrame.angle||0,
+absolutePositioned:true
+});
 }
+if(!targetFrame.guids)targetFrame.guids=[];
 var imgGuid=img.guid||generateGUID();
 img.guid=imgGuid;
 targetFrame.guids.push(imgGuid);
-if(targetFrame.name){
-img.name=targetFrame.name+" In Image";
-}
+img.relatedPoly=targetFrame;
+if(targetFrame.name)img.name=targetFrame.name+" In Image";
 }else{
-var scaleToCanvasWidth=300/img.width;
-var scaleToCanvasHeight=300/img.height;
-var scaleToCanvas=Math.min(scaleToCanvasWidth,scaleToCanvasHeight);
-img.set({
-left:50,
-top:50,
-scaleX:scaleToCanvas,
-scaleY:scaleToCanvas
-});
+img.set({left:50,top:50,scaleX:0.5,scaleY:0.5});
 }
-}
-
-function createClipPathFromPoly(poly){
-if(!poly.points)return null;
-var clipPath=new fabric.Polygon(poly.points,{
-left:poly.left,
-top:poly.top,
-scaleX:poly.scaleX,
-scaleY:poly.scaleY,
-angle:poly.angle||0,
-absolutePositioned:true,
-objectCaching:false
-});
-return clipPath;
-}
-
-
-function btmUpdateThumbnail(canvasGuid,previewLink){
-var thumbnail=document.querySelector('.btm-image[data-index="'+canvasGuid+'"]');
-if(thumbnail&&previewLink&&previewLink.href){
-thumbnail.src=previewLink.href;
-}
-}
-
-function showGenerationCompleteNotification(originalCanvasGuid){
-var pageIndex=btmGetGuidIndex(originalCanvasGuid);
-var pageNum=pageIndex>=0?pageIndex+1:'?';
-var message=getText("generationCompletedOnOtherPage")||"Page "+pageNum+" generation completed";
-message=message.replace("{page}",pageNum);
-createToast(message,"",3000);
-highlightPageThumbnail(originalCanvasGuid);
-}
-
-function highlightPageThumbnail(canvasGuid){
-var thumbnail=document.querySelector('.btm-image[data-index="'+canvasGuid+'"]');
-if(thumbnail){
-thumbnail.classList.add('btm-generation-complete');
-setTimeout(function(){
-thumbnail.classList.remove('btm-generation-complete');
-},3000);
-}
-}
-
-function generateTaskId(){
-return 'task_'+Date.now()+'_'+Math.random().toString(36).substr(2,9);
 }
