@@ -1,46 +1,45 @@
 
+async function generateProjectFileBufferListCore(stateStackParam,imageMapParam,canvasInfoParam,basePromptParam,previewDataUrl){
+var fileBufferList=[];
+var promises=[
+(async ()=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePromptParam||{}));
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,"text2img_basePrompt.json",buffer);
+})(),
+...stateStackParam.map(async (json,index)=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(json));
+var paddedIndex=String(index).padStart(6,'0');
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,'state_'+paddedIndex+'.json',buffer);
+}),
+...Array.from(imageMapParam).map(async ([key,value])=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(value);
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,key+'.img',buffer);
+}),
+(async ()=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(canvasInfoParam));
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,"canvas_info.json",buffer);
+})(),
+(async ()=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(previewDataUrl);
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,"preview-image.jpeg",buffer);
+})()
+];
+await Promise.all(promises);
+return fileBufferList;
+}
+
 async function generateProjectFileBufferList() {
 saveState();
 await convertImageMapBlobUrls();
-const fileBufferList=[];
-
-const promises=[
-(async ()=>{
-const buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePrompt));
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,"text2img_basePrompt.json",buffer);
-})(),
-
-...stateStack.map(async (json,index)=>{
-const buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(json));
-const paddedIndex=String(index).padStart(6,'0');
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,`state_${paddedIndex}.json`,buffer);
-}),
-
-...Array.from(imageMap).map(async ([key,value])=>{
-const buffer=await ArrayBufferUtils.toArrayBuffer(value);
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,`${key}.img`,buffer);
-}),
-
-(async ()=>{
-const canvasInfo={width: canvas.width,height: canvas.height};
-const buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(canvasInfo));
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,"canvas_info.json",buffer);
-})(),
-
-(async ()=>{
 removeGrid();
-const previewLink=getCropAndDownloadLinkByMultiplier(1,'jpeg');
-const buffer=await ArrayBufferUtils.toArrayBuffer(previewLink.href);
-lz4Compressor.putDataListByArrayBuffer(fileBufferList,"preview-image.jpeg",buffer);
+var previewLink=getCropAndDownloadLinkByMultiplier(1,'jpeg');
+var previewDataUrl=previewLink.href;
 if (isGridVisible) {
 drawGrid();
 isGridVisible=true;
 }
-})()
-];
-
-await Promise.all(promises);
-return fileBufferList;
+var canvasInfo={width: canvas.width,height: canvas.height};
+return generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl);
 }
 
 

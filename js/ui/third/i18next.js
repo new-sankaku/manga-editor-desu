@@ -15,6 +15,38 @@
 
 //マージされるので日付単位で分けて入れたらOK
 const resources = {
+"20260130": {
+"ja":{
+"generationCompletedOnOtherPage":"ページ{page}の生成が完了しました"
+},
+"en":{
+"generationCompletedOnOtherPage":"Page {page} generation completed"
+},
+"ko":{
+"generationCompletedOnOtherPage":"페이지 {page} 생성 완료"
+},
+"fr":{
+"generationCompletedOnOtherPage":"Page {page} générée"
+},
+"zh":{
+"generationCompletedOnOtherPage":"第{page}页生成完成"
+},
+"ru":{
+"generationCompletedOnOtherPage":"Страница {page} создана"
+},
+"es":{
+"generationCompletedOnOtherPage":"Página {page} generada"
+},
+"pt":{
+"generationCompletedOnOtherPage":"Página {page} gerada"
+},
+"th":{
+"generationCompletedOnOtherPage":"สร้างหน้า {page} เสร็จ"
+},
+"de":{
+"generationCompletedOnOtherPage":"Seite {page} generiert"
+}
+},
 "20260118": {
 "ja":{"imageImport":"画像インポート",
 "shortcutTitle":"ショートカット一覧",
