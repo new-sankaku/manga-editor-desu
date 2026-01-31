@@ -15,6 +15,18 @@
 
 //マージされるので日付単位で分けて入れたらOK
 const resources = {
+"20260130": {
+"ja":{"sc_newPage":"新規ページ"},
+"en":{"sc_newPage":"New Page"},
+"ko":{"sc_newPage":"새 페이지"},
+"fr":{"sc_newPage":"Nouvelle page"},
+"zh":{"sc_newPage":"新建页面"},
+"ru":{"sc_newPage":"Новая страница"},
+"es":{"sc_newPage":"Nueva página"},
+"pt":{"sc_newPage":"Nova página"},
+"th":{"sc_newPage":"หน้าใหม่"},
+"de":{"sc_newPage":"Neue Seite"}
+},
 "20260118": {
 "ja":{"imageImport":"画像インポート",
 "shortcutTitle":"ショートカット一覧",

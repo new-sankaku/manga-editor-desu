@@ -31,6 +31,7 @@ imageDownload:!isMacOs ? 'ctrl+d' : 'command+d',
 settingsSave:!isMacOs ? 'ctrl+shift+s' : 'command+shift+s',
 promptView:!isMacOs ? 'ctrl+p' : 'command+p',
 shortcutPage:'f1',
+newPage:'alt+n',
 }
 
 var isLongPressDirection=false;
@@ -220,8 +221,17 @@ openShortcutModal();
 e.preventDefault();
 });
 
+// bind new page shortcut
+hotkeys(hotkeysMap.newPage,'all',function (e) {
+if (!isEditableTagsActive()) {
+loadBookSize(canvas.width,canvas.height,true,true);
+}
+return false;
+});
+
 var shortcutCategories=[
 {category:'sc_cat_file',items:[
+{win:'Alt + N',mac:'Alt + N',i18n:'sc_newPage'},
 {win:'Ctrl + S',mac:'⌘ + S',i18n:'sc_projectSave'},
 {win:'Ctrl + O',mac:'⌘ + O',i18n:'sc_projectLoad'},
 {win:'Ctrl + D',mac:'⌘ + D',i18n:'sc_imageDownload'},
