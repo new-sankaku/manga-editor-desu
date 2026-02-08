@@ -168,3 +168,4 @@ package-lock.json
 # Claude Code temp files
 tmpclaude-*
 test_offscreen.html
+.claude/tool-history.jsonl

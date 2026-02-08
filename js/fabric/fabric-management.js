@@ -22,7 +22,7 @@ const obj=e.target;
 if (!obj.initial) {
 saveInitialState(obj);
 }
-forcedAdjustCanvasSize();
+Promise.resolve().then(()=>forcedAdjustCanvasSize());
 
 if(currentMode==='freehand'){
 changeObjectCursor('freehand',obj)

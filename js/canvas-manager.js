@@ -39,6 +39,9 @@ canvas.renderAll();
 }
 
 function resizeCanvas(newWidth,newHeight) {
+if(!newWidth||!newHeight||isNaN(newWidth)||isNaN(newHeight)){
+return;
+}
 canvas.setDimensions({width: newWidth,height: newHeight});
 canvas.getObjects().forEach((obj)=>{
 
@@ -84,7 +87,9 @@ function adjustCanvasSize(forced) {
 var container=$("canvas-container");
 var windowWidth=container.clientWidth;
 var windowHeight=container.clientHeight;
-
+if(!windowWidth||!windowHeight||!aspectRatio||isNaN(aspectRatio)){
+return;
+}
 const windowAspectRatio=windowWidth/windowHeight;
 let newWidth,newHeight;
 if (windowAspectRatio>aspectRatio) {
@@ -133,7 +138,9 @@ function resizeCanvasToObject(objectWidth,objectHeight) {
 var container=$("canvas-container");
 var containerWidth=container.clientWidth;
 var containerHeight=container.clientHeight;
-
+if(!containerWidth||!containerHeight||!objectWidth||!objectHeight){
+return;
+}
 var objectAspectRatio=objectWidth/objectHeight;
 var containerAspectRatio=containerWidth/containerHeight;
 
