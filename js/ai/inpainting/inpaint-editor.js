@@ -1,11 +1,11 @@
-// Inpaintエディタ（別キャンバスオーバーレイ）
+// Inpaintエディタ（モーダルオーバーレイ）
 var inpaintLogger=new SimpleLogger('inpaint',LogLevel.DEBUG);
 
 var InpaintEditor=(function(){
 var isOpen=false;
 var targetLayer=null;
 var originalImageDataUrl=null;
-var editorContainer=null;
+var modal=null;
 var imageCanvas=null;
 var maskOverlay=null;
 var resultImageUrl=null;
@@ -25,13 +25,12 @@ inpaintLogger.debug("Inpaint editor opened");
 }
 
 function buildUI(){
-editorContainer=document.getElementById('inpaint-editor');
-if(!editorContainer){
-inpaintLogger.error("inpaint-editor element not found");
+modal=document.getElementById('inpaint-modal');
+if(!modal){
+inpaintLogger.error("inpaint-modal element not found");
 return;
 }
-document.getElementById('intro_content').style.display='none';
-editorContainer.style.display='flex';
+modal.style.display='flex';
 var applyBtn=document.getElementById('inpaint-apply-btn');
 var cancelBtn=document.getElementById('inpaint-cancel-btn');
 var brushBtn=document.getElementById('inpaint-brush-btn');
@@ -40,17 +39,17 @@ var clearBtn=document.getElementById('inpaint-clear-btn');
 var invertBtn=document.getElementById('inpaint-invert-btn');
 var generateBtn=document.getElementById('inpaint-generate-btn');
 var brushSlider=document.getElementById('inpaint-brush-size');
-applyBtn.addEventListener('click',applyResult);
-cancelBtn.addEventListener('click',close);
-brushBtn.addEventListener('click',function(){setTool('brush');});
-eraserBtn.addEventListener('click',function(){setTool('eraser');});
-clearBtn.addEventListener('click',clearMask);
-invertBtn.addEventListener('click',invertMask);
-generateBtn.addEventListener('click',onGenerate);
-brushSlider.addEventListener('input',function(e){
+applyBtn.onclick=applyResult;
+cancelBtn.onclick=close;
+brushBtn.onclick=function(){setTool('brush');};
+eraserBtn.onclick=function(){setTool('eraser');};
+clearBtn.onclick=clearMask;
+invertBtn.onclick=invertMask;
+generateBtn.onclick=onGenerate;
+brushSlider.oninput=function(e){
 InpaintMask.setBrushSize(parseInt(e.target.value));
 document.getElementById('inpaint-brush-size-label').textContent=e.target.value;
-});
+};
 setTool('brush');
 }
 
@@ -172,10 +171,9 @@ function close(){
 if(!isOpen) return;
 isOpen=false;
 InpaintMask.destroy();
-if(editorContainer){
-editorContainer.style.display='none';
+if(modal){
+modal.style.display='none';
 }
-document.getElementById('intro_content').style.display='';
 var previewArea=document.getElementById('inpaint-preview-area');
 if(previewArea) previewArea.style.display='none';
 document.getElementById('inpaint-apply-btn').disabled=true;

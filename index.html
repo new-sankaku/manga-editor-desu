@@ -1744,53 +1744,6 @@ function getElementClasses(element) {
                     </div>
                 </div>
 
-                <div id="inpaint-editor" style="display:none;">
-                    <div id="inpaint-toolbar">
-                        <button id="inpaint-brush-btn" class="inpaint-tool-btn" data-i18n="inpaintBrush">Brush</button>
-                        <button id="inpaint-eraser-btn" class="inpaint-tool-btn" data-i18n="inpaintEraser">Eraser</button>
-                        <button id="inpaint-invert-btn" class="inpaint-tool-btn" data-i18n="inpaintInvert">Invert</button>
-                        <button id="inpaint-clear-btn" class="inpaint-tool-btn" data-i18n="inpaintClear">Clear</button>
-                        <label data-i18n="inpaintBrushSize">Size</label>
-                        <input type="range" id="inpaint-brush-size" min="1" max="100" value="30">
-                        <span id="inpaint-brush-size-label">30</span>
-                        <span class="inpaint-separator"></span>
-                        <button id="inpaint-apply-btn" class="inpaint-action-btn" data-i18n="inpaintApply" disabled>Apply</button>
-                        <button id="inpaint-cancel-btn" class="inpaint-action-btn" data-i18n="inpaintCancel">Cancel</button>
-                    </div>
-                    <div id="inpaint-canvas-area">
-                        <div id="inpaint-canvas-wrapper">
-                            <canvas id="inpaint-image-canvas"></canvas>
-                            <canvas id="inpaint-mask-canvas"></canvas>
-                        </div>
-                    </div>
-                    <div id="inpaint-controls">
-                        <div class="inpaint-control-row">
-                            <label data-i18n="inpaintPrompt">Prompt</label>
-                            <textarea id="inpaint-prompt" rows="2" placeholder=""></textarea>
-                        </div>
-                        <div class="inpaint-control-row">
-                            <label data-i18n="inpaintNegative">Negative</label>
-                            <textarea id="inpaint-negative" rows="1" placeholder=""></textarea>
-                        </div>
-                        <div class="inpaint-control-row">
-                            <label data-i18n="inpaintDenoise">Denoise</label>
-                            <input type="range" id="inpaint-denoise" min="0" max="1" step="0.05" value="0.75"
-                                oninput="document.getElementById('inpaint-denoise-label').textContent=this.value">
-                            <span id="inpaint-denoise-label">0.75</span>
-                        </div>
-                        <button id="inpaint-generate-btn" class="inpaint-action-btn" data-i18n="inpaintGenerate">Generate</button>
-                    </div>
-                    <div id="inpaint-preview-area" style="display:none;">
-                        <div class="inpaint-preview-item">
-                            <label>Before</label>
-                            <img id="inpaint-before-img" alt="Before">
-                        </div>
-                        <div class="inpaint-preview-item">
-                            <label>After</label>
-                            <img id="inpaint-after-img" alt="After">
-                        </div>
-                    </div>
-                </div>
             </div>
 
 
@@ -2294,6 +2247,56 @@ setAutoSizeingControlMini();
 
 </script>
 
+
+<div id="inpaint-modal" class="inpaint-modal-overlay" style="display:none;">
+<div id="inpaint-editor" class="inpaint-modal-content">
+<div id="inpaint-toolbar">
+<button id="inpaint-brush-btn" class="inpaint-tool-btn" data-i18n="inpaintBrush">Brush</button>
+<button id="inpaint-eraser-btn" class="inpaint-tool-btn" data-i18n="inpaintEraser">Eraser</button>
+<button id="inpaint-invert-btn" class="inpaint-tool-btn" data-i18n="inpaintInvert">Invert</button>
+<button id="inpaint-clear-btn" class="inpaint-tool-btn" data-i18n="inpaintClear">Clear</button>
+<label data-i18n="inpaintBrushSize">Size</label>
+<input type="range" id="inpaint-brush-size" min="1" max="100" value="30">
+<span id="inpaint-brush-size-label">30</span>
+<span class="inpaint-separator"></span>
+<button id="inpaint-apply-btn" class="inpaint-action-btn" data-i18n="inpaintApply" disabled>Apply</button>
+<button id="inpaint-cancel-btn" class="inpaint-action-btn" data-i18n="inpaintCancel">Cancel</button>
+</div>
+<div id="inpaint-canvas-area">
+<div id="inpaint-canvas-wrapper">
+<canvas id="inpaint-image-canvas"></canvas>
+<canvas id="inpaint-mask-canvas"></canvas>
+</div>
+</div>
+<div id="inpaint-controls">
+<div class="inpaint-control-row">
+<label data-i18n="inpaintPrompt">Prompt</label>
+<textarea id="inpaint-prompt" rows="2" placeholder=""></textarea>
+</div>
+<div class="inpaint-control-row">
+<label data-i18n="inpaintNegative">Negative</label>
+<textarea id="inpaint-negative" rows="1" placeholder=""></textarea>
+</div>
+<div class="inpaint-control-row">
+<label data-i18n="inpaintDenoise">Denoise</label>
+<input type="range" id="inpaint-denoise" min="0" max="1" step="0.05" value="0.75"
+oninput="document.getElementById('inpaint-denoise-label').textContent=this.value">
+<span id="inpaint-denoise-label">0.75</span>
+</div>
+<button id="inpaint-generate-btn" class="inpaint-action-btn" data-i18n="inpaintGenerate">Generate</button>
+</div>
+<div id="inpaint-preview-area" style="display:none;">
+<div class="inpaint-preview-item">
+<label>Before</label>
+<img id="inpaint-before-img" alt="Before">
+</div>
+<div class="inpaint-preview-item">
+<label>After</label>
+<img id="inpaint-after-img" alt="After">
+</div>
+</div>
+</div>
+</div>
 
 </body>
 

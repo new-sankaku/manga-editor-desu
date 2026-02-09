@@ -1,9 +1,26 @@
-#inpaint-editor{
-display:flex;
-flex-direction:column;
+.inpaint-modal-overlay{
+position:fixed;
+top:0;
+left:0;
 width:100%;
 height:100%;
+background-color:rgba(0,0,0,0.7);
+z-index:10000;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+.inpaint-modal-content{
+display:flex;
+flex-direction:column;
+width:90vw;
+height:90vh;
+max-width:1200px;
+max-height:900px;
 background-color:var(--background-color-A);
+border:1px solid var(--fjm-border-color);
+border-radius:6px;
+overflow:hidden;
 }
 #inpaint-toolbar{
 display:flex;
@@ -57,10 +74,7 @@ margin:0 4px;
 #inpaint-toolbar input[type="range"]{
 width:80px;
 }
-#inpaint-toolbar label{
-font-size:12px;
-color:var(--fjm-font-color);
-}
+#inpaint-toolbar label,
 #inpaint-toolbar span{
 font-size:12px;
 color:var(--fjm-font-color);
@@ -73,6 +87,7 @@ justify-content:center;
 overflow:auto;
 position:relative;
 background-color:#1a1a1a;
+min-height:0;
 }
 #inpaint-canvas-wrapper{
 position:relative;
