@@ -16,6 +16,19 @@ builder.updateNodesByInputName({
 image: requestData["uploadFileName"]
 });
 }
+if(Type=='Inpaint'){
+builder.updateNodesByInputName({
+image: requestData["uploadFileName"]
+});
+if(requestData["maskFileName"]){
+builder.updateValueByTargetValue("inpaint_mask.png",requestData["maskFileName"]);
+}
+if(requestData["inpaintDenoise"]!==undefined){
+builder.updateNodesByInputName({
+denoise: parseFloat(requestData["inpaintDenoise"])
+});
+}
+}
 
 builder.updateValueByTargetValue("%prompt%",requestData["prompt"]);
 builder.updateValueByTargetValue("%negative%",requestData["negative_prompt"]);

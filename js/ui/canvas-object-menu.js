@@ -100,6 +100,7 @@ var canvasFit=createObjectMenuButton('canvasFit');
 var selectClear=createObjectMenuButton('selectClear');
 var rembg=createObjectMenuButton('rembg');
 var upscale=createObjectMenuButton('upscale');
+var inpaint=createObjectMenuButton('inpaint');
 var clearAllClipPaths=createObjectMenuButton('clearAllClipPaths');
 
 var clearTopClipPath=createObjectMenuButton('clearTopClipPath');
@@ -153,6 +154,7 @@ menuItems=[visible,movement];
 if (hasRole(AI_ROLES.Image2Image)) menuItems.push(generate);
 if (hasRole(AI_ROLES.RemoveBG))    menuItems.push(rembg);
 if (hasRole(AI_ROLES.Upscaler))    menuItems.push(upscale);
+if (hasRole(AI_ROLES.Inpaint))     menuItems.push(inpaint);
 menuItems.push(deleteMenu);
 
 if (haveClipPath(activeObject)) {
@@ -367,6 +369,9 @@ break;
 case 'upscale':
 var spinner=createSpinner(canvasMenuIndex);
 aiUpscale(activeObject,spinner);
+break;
+case 'inpaint':
+openInpaintEditor(activeObject);
 break;
 case 'generate':
 if (isPanel(activeObject)) {

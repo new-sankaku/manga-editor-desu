@@ -71,6 +71,10 @@ return comfyuiHandleProcessQueue(layer,spinner.id,'Upscaler');
 }
 }
 
+function canUseInpaint(){
+return apiMode==apis.COMFYUI&&hasRole(AI_ROLES.Inpaint);
+}
+
 
 function getDiffusionInfomation() {
 if (apiMode==apis.A1111) {

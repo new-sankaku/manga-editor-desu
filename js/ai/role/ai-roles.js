@@ -13,6 +13,7 @@ Image2Prompt_CLIP: "Image2Prompt_CLIP",
 RemoveBG: "RemoveBG",
 ADetailer: "ADetailer",
 Upscaler: "Upscaler",
+Inpaint: "Inpaint",
 PutPrompt: "PutPrompt",
 PutSeed: "PutSeed",
 Temp: "Temp",
@@ -33,7 +34,8 @@ COMFYUI: [
 AI_ROLES.Text2Image,
 AI_ROLES.RemoveBG,
 AI_ROLES.Upscaler,
-AI_ROLES.Image2Image
+AI_ROLES.Image2Image,
+AI_ROLES.Inpaint
 ]
 };
 

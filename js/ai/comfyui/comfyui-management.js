@@ -122,11 +122,14 @@ labelfw.style.color="red";
 return false;
 }
 
-async function comfyuiHandleProcessQueue(layer,spinnerId,Type='T2I') {
+async function comfyuiHandleProcessQueue(layer,spinnerId,Type='T2I',extraData) {
 if (!socket) comfyuiConnect();
 var requestData=baseRequestData(layer);
 if (basePrompt.text2img_model!=""){
 requestData["model"]=basePrompt.text2img_model;
+}
+if(extraData){
+Object.assign(requestData,extraData);
 }
 
 if (Type=='T2I') {
@@ -137,6 +140,8 @@ selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("I2I")
 selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("REMBG");
 } else if(Type=='Upscaler') {
 selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("Upscaler");
+} else if(Type=='Inpaint') {
+selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("Inpaint");
 } else{
 removeSpinner(spinnerId);
 return;
@@ -154,6 +159,16 @@ if (Type=='I2I'||Type=='Rembg'||Type=='Upscaler') {
 var uploadFilename=generateFilename();
 await comfyuiUploadImage(layer,uploadFilename);
 requestData["uploadFileName"]=uploadFilename;
+}
+if (Type=='Inpaint') {
+var inpaintImageFilename=generateFilename();
+await comfyuiUploadImage(layer,inpaintImageFilename);
+requestData["uploadFileName"]=inpaintImageFilename;
+if (requestData["inpaintMaskDataUrl"]) {
+var maskFilename="mask_"+generateFilename();
+await comfyuiUploadBase64Image(requestData["inpaintMaskDataUrl"],maskFilename);
+requestData["maskFileName"]=maskFilename;
+}
 }
 
 var workflow=comfyuiReplacePlaceholders(selectedWorkflow,requestData,Type);
@@ -267,6 +282,36 @@ throw error;
 }
 }
 
+
+async function comfyuiUploadBase64Image(base64DataUrl,fileName="mask_temp.png",overwrite=true) {
+if (!base64DataUrl||!base64DataUrl.startsWith("data:image/")) {
+throw new Error("Invalid base64 image data");
+}
+const byteCharacters=atob(base64DataUrl.split(",")[1]);
+const byteNumbers=new Array(byteCharacters.length);
+for (let i=0;i<byteCharacters.length;i++) {
+byteNumbers[i]=byteCharacters.charCodeAt(i);
+}
+const byteArray=new Uint8Array(byteNumbers);
+const blob=new Blob([byteArray],{type:"application/octet-stream"});
+const formData=new FormData();
+formData.append("image",blob,fileName);
+formData.append("overwrite",overwrite.toString());
+try {
+const response=await fetch(comfyUIUrls.uploadImage,{
+method:"POST",
+body:formData,
+});
+if (!response.ok) {
+throw new Error(`HTTP error! status: ${response.status}`);
+}
+const result=await response.json();
+return result;
+} catch (error) {
+comfyuiLogger.error("Error uploading mask image:",error);
+throw error;
+}
+}
 
 function extractComboOptions(inputDef) {
 if (Array.isArray(inputDef)) {

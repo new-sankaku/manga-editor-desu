@@ -103,4 +103,11 @@ workflow: ComfyUI_Upscaler,
 enabled: true
 },
 
+{
+name: "Inpaint_SDXL.json",
+type: "Inpaint",
+workflow: ComfyUI_Inpaint_BySDXL,
+enabled: true
+},
+
 ];
