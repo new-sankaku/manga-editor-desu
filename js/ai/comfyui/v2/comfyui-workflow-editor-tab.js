@@ -1,5 +1,5 @@
 // "Upscaler"
-const comfyuiTypes=["T2I","I2I","REMBG","Upscaler"];
+const comfyuiTypes=["T2I","I2I","REMBG","Upscaler","Inpaint"];
 
 class ComfyUIWorkflowTab {
 constructor(file,workflow,editor,id,type,enabled) {

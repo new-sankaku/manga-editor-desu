@@ -1,24 +1,25 @@
+// ログ出力ユーティリティ（SimpleLogger）
 const LogLevel={
-TRACE: 0,
-DEBUG: 1,
-INFO: 2,
-WARN: 3,
-ERROR: 4,
-SILENT: 5
+TRACE:0,
+DEBUG:1,
+INFO:2,
+WARN:3,
+ERROR:4,
+SILENT:5
 };
 
-function SimpleLogger(moduleName,defaultLevel=LogLevel.INFO) {
+function SimpleLogger(moduleName,defaultLevel=LogLevel.INFO){
 let currentLevel=defaultLevel;
 
-function getCallerMethodName() {
-try {
+function getCallerMethodName(){
+try{
 const stackFrames=StackTrace.getSync();
 
-for (let i=0;i<stackFrames.length;i++) {
+for(let i=0;i<stackFrames.length;i++){
 const frame=stackFrames[i];
 const fileName=frame.getFileName()||'';
 
-if (!fileName.includes('stacktrace')&&!fileName.includes('logger.js')) {
+if(!fileName.includes('stacktrace')&&!fileName.includes('logger.js')){
 const functionName=frame.getFunctionName()||frame.getMethodName()||'anonymous';
 
 let fileNameShort=fileName ? fileName.split('/').pop() : 'unknown';
@@ -30,17 +31,17 @@ return `${fileNameShort}:${lineNumber} ${functionName}`;
 }
 
 return 'unknown';
-} catch (e) {
+}catch(e){
 return 'unknown';
 }
 }
 
-function getFullStackTrace() {
-try {
+function getFullStackTrace(){
+try{
 const stackFrames=StackTrace.getSync();
 let fullTrace=[];
 
-for (let i=0;i<stackFrames.length;i++) {
+for(let i=0;i<stackFrames.length;i++){
 const frame=stackFrames[i];
 const fileName=frame.getFileName()||'unknown';
 const fileNameShort=fileName.split('/').pop().split('\\').pop();
@@ -52,19 +53,19 @@ fullTrace.push(`    at ${functionName} (${fileNameShort}:${lineNumber}:${columnN
 }
 
 return fullTrace.join('\n');
-} catch (e) {
+}catch(e){
 return 'Missing Stacktrace: '+e.message;
 }
 }
 
-function formatMessage(level,message,methodName) {
+function formatMessage(level,message,methodName){
 const caller=methodName||getCallerMethodName();
 const time=new Date().toTimeString().split(' ')[0];
 
 let emoji='⬛ ';
 let colorCode='';
 
-switch(level) {
+switch(level){
 case 'WARN':
 emoji='🟧 ';
 colorCode='\x1b[33m';
@@ -81,230 +82,79 @@ const resetCode='\x1b[0m';
 return `${colorCode}${emoji}${time} ${level} [${moduleName}] [${caller}] ${message}${resetCode}`;
 }
 
-function isValidMethodName(str) {
+function isValidMethodName(str){
 return typeof str==='string'&&
 str.includes(':')&&
 !str.startsWith('[{')&&
 !str.startsWith('{');
 }
 
-return {
-trace: function(...args) {
-if (currentLevel<=LogLevel.TRACE) {
+const consoleFn={
+TRACE:console.log,
+DEBUG:console.log,
+INFO:console.info,
+WARN:console.warn,
+ERROR:console.error
+};
+
+function _log(levelName,levelValue,withStack,args){
+if(currentLevel>levelValue) return;
 let methodName=null;
 let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
+if(args.length>1&&isValidMethodName(args[args.length-1])){
 methodName=args[args.length-1];
 messageArgs=args.slice(0,args.length-1);
 }
-
 const message=messageArgs.map(arg=>
 typeof arg==='object' ? JSON.stringify(arg) : String(arg)
 ).join(' ');
-
-console.log(formatMessage('TRACE',message,methodName));
-}
-},
-
-debug: function(...args) {
-if (currentLevel<=LogLevel.DEBUG) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-console.log(formatMessage('DEBUG',message,methodName));
-}
-},
-
-info: function(...args) {
-if (currentLevel<=LogLevel.INFO) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-console.info(formatMessage('INFO',message,methodName));
-}
-},
-
-warn: function(...args) {
-if (currentLevel<=LogLevel.WARN) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-console.warn(formatMessage('WARN',message,methodName));
-}
-},
-
-error: function(...args) {
-if (currentLevel<=LogLevel.ERROR) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-console.error(formatMessage('ERROR',message,methodName));
-}
-},
-
-traceWithStack: function(...args) {
-if (currentLevel<=LogLevel.TRACE) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-const formattedMessage=formatMessage('TRACE',message,methodName);
+const formatted=formatMessage(levelName,message,methodName);
+if(withStack){
 const stackTrace=getFullStackTrace();
-console.log(`${formattedMessage}\nStack Trace:\n${stackTrace}`);
+consoleFn[levelName].call(console,`${formatted}\nStack Trace:\n${stackTrace}`);
+}else{
+consoleFn[levelName].call(console,formatted);
 }
-},
-
-debugWithStack: function(...args) {
-if (currentLevel<=LogLevel.DEBUG) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
 }
 
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
+return{
+trace:function(...args){_log('TRACE',LogLevel.TRACE,false,args);},
+debug:function(...args){_log('DEBUG',LogLevel.DEBUG,false,args);},
+info:function(...args){_log('INFO',LogLevel.INFO,false,args);},
+warn:function(...args){_log('WARN',LogLevel.WARN,false,args);},
+error:function(...args){_log('ERROR',LogLevel.ERROR,false,args);},
+traceWithStack:function(...args){_log('TRACE',LogLevel.TRACE,true,args);},
+debugWithStack:function(...args){_log('DEBUG',LogLevel.DEBUG,true,args);},
+infoWithStack:function(...args){_log('INFO',LogLevel.INFO,true,args);},
+warnWithStack:function(...args){_log('WARN',LogLevel.WARN,true,args);},
+errorWithStack:function(...args){_log('ERROR',LogLevel.ERROR,true,args);},
 
-const formattedMessage=formatMessage('DEBUG',message,methodName);
-const stackTrace=getFullStackTrace();
-console.log(`${formattedMessage}\nStack Trace:\n${stackTrace}`);
+setLevel:function(level){
+if(typeof level==='string'){
+switch(level.toLowerCase()){
+case 'trace':currentLevel=LogLevel.TRACE;break;
+case 'debug':currentLevel=LogLevel.DEBUG;break;
+case 'info':currentLevel=LogLevel.INFO;break;
+case 'warn':currentLevel=LogLevel.WARN;break;
+case 'error':currentLevel=LogLevel.ERROR;break;
+case 'silent':currentLevel=LogLevel.SILENT;break;
+default:currentLevel=LogLevel.INFO;
 }
-},
-
-infoWithStack: function(...args) {
-if (currentLevel<=LogLevel.INFO) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-const formattedMessage=formatMessage('INFO',message,methodName);
-const stackTrace=getFullStackTrace();
-console.info(`${formattedMessage}\nStack Trace:\n${stackTrace}`);
-}
-},
-
-warnWithStack: function(...args) {
-if (currentLevel<=LogLevel.WARN) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-const formattedMessage=formatMessage('WARN',message,methodName);
-const stackTrace=getFullStackTrace();
-console.warn(`${formattedMessage}\nStack Trace:\n${stackTrace}`);
-}
-},
-
-errorWithStack: function(...args) {
-if (currentLevel<=LogLevel.ERROR) {
-let methodName=null;
-let messageArgs=args;
-
-if (args.length>1&&isValidMethodName(args[args.length-1])) {
-methodName=args[args.length-1];
-messageArgs=args.slice(0,args.length-1);
-}
-
-const message=messageArgs.map(arg=>
-typeof arg==='object' ? JSON.stringify(arg) : String(arg)
-).join(' ');
-
-const formattedMessage=formatMessage('ERROR',message,methodName);
-const stackTrace=getFullStackTrace();
-console.error(`${formattedMessage}\nStack Trace:\n${stackTrace}`);
-}
-},
-
-setLevel: function(level) {
-if (typeof level==='string') {
-switch (level.toLowerCase()) {
-case 'trace': currentLevel=LogLevel.TRACE;break;
-case 'debug': currentLevel=LogLevel.DEBUG;break;
-case 'info': currentLevel=LogLevel.INFO;break;
-case 'warn': currentLevel=LogLevel.WARN;break;
-case 'error': currentLevel=LogLevel.ERROR;break;
-case 'silent': currentLevel=LogLevel.SILENT;break;
-default: currentLevel=LogLevel.INFO;
-}
-} else {
+}else{
 currentLevel=level;
 }
 return currentLevel;
 },
 
-getLevel: function() {
-switch (currentLevel) {
-case LogLevel.TRACE: return 'trace';
-case LogLevel.DEBUG: return 'debug';
-case LogLevel.INFO: return 'info';
-case LogLevel.WARN: return 'warn';
-case LogLevel.ERROR: return 'error';
-case LogLevel.SILENT: return 'silent';
-default: return 'unknown';
+getLevel:function(){
+switch(currentLevel){
+case LogLevel.TRACE:return 'trace';
+case LogLevel.DEBUG:return 'debug';
+case LogLevel.INFO:return 'info';
+case LogLevel.WARN:return 'warn';
+case LogLevel.ERROR:return 'error';
+case LogLevel.SILENT:return 'silent';
+default:return 'unknown';
 }
 }
 };
@@ -328,3 +178,4 @@ const panelLogger=SimpleLogger('panel',LogLevel.INFO);
 const compressionLogger=SimpleLogger('compression',LogLevel.INFO);
 const serviceLogger=SimpleLogger('service',LogLevel.INFO);
 const freehandBubbleLogger=SimpleLogger('freehandBubble',LogLevel.DEBUG);
+const autoSaveLogger=SimpleLogger('autoSave',LogLevel.INFO);

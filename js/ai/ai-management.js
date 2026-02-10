@@ -71,6 +71,20 @@ return comfyuiHandleProcessQueue(layer,spinner.id,'Upscaler');
 }
 }
 
+function canUseInpaint(){
+return apiMode==apis.COMFYUI&&hasRole(AI_ROLES.Inpaint);
+}
+
+function canUseAngle(){
+return apiMode==apis.COMFYUI&&hasRole(AI_ROLES.I2I_Angle);
+}
+
+function AngleGenerate(layer,spinner,anglePrompt){
+if(apiMode==apis.COMFYUI){
+comfyuiHandleProcessQueue(layer,spinner.id,'I2I_Angle',{anglePrompt:anglePrompt});
+}
+}
+
 
 function getDiffusionInfomation() {
 if (apiMode==apis.A1111) {
@@ -80,6 +94,8 @@ fetchSdSampler();
 fetchSdUpscaler();
 fetchSdAdModels();
 fetchSdModules();
+}).catch((error)=>{
+logger.error('getDiffusionInfomation:',error);
 });
 
 }else if(apiMode==apis.COMFYUI){
@@ -165,8 +181,6 @@ modelDropdown.appendChild(option);
 }
 
 function updateVaeDropdown(models) {
-// console.log("updateVaeDropdown", JSON.stringify(models))
-
 const dropdown=$('vaeDropdownId');
 dropdown.innerHTML='';
 models.forEach(model=>{

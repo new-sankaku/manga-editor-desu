@@ -31,6 +31,7 @@ $("manga-effect-area").style.display="none";
 $("shape-area").style.display="none";
 $("controle-area").style.display="none";
 element.style.display="block";
+lazyLoadSvgData(id);
 } else {
 element.style.display="none";
 }

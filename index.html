@@ -208,6 +208,9 @@ function getElementClasses(element) {
 <link rel="stylesheet" href="css/ui/flowting-window.css?v=7.2">
 <link rel="stylesheet" href="css/ui/image-prompt-helper.css?v=7.2">
 <link rel="stylesheet" href="css/ui/overlay-progress.css?v=7.2">
+<link rel="stylesheet" href="css/ui/inpaint-editor.css?v=7.3">
+<link rel="stylesheet" href="css/ui/angle-editor.css?v=7.3">
+<link rel="stylesheet" href="css/ui/dashboard.css?v=7.3">
 
 <link rel="stylesheet" href="third/tippy/tippy.css">
 <link rel="stylesheet" href="third/Bootstrup/bootstrap.min.css">
@@ -224,6 +227,8 @@ function getElementClasses(element) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.31.3/tagify.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.31.3/tagify.min.css" rel="stylesheet" type="text/css" />
 <script src="https://unpkg.com/masonry-layout@4.2.2/dist/masonry.pkgd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/wordcloud"></script>
 
 <link rel="stylesheet" href="css/comfyui-workflow-editor.css?v=7.2">
 
@@ -307,6 +312,26 @@ function getElementClasses(element) {
                                 <a class="dropdown-item" href="#" onclick="allRemove()">
                                     <i class="material-icons">delete</i> <span data-i18n="allRemove">All Remove</span>
                                 </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span data-i18n="settingsMenu">Settings</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <div style="padding:4px 10px;white-space:nowrap;font-size:11px;">
+                                    <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
+                                        <input type="checkbox" id="autoSaveCheckbox" checked>
+                                        <span data-i18n="autoSave">Auto Save</span>
+                                    </label>
+                                    <input type="number" id="autoSaveInterval" value="60" min="10" max="600" style="width:50px;margin-left:8px;">
+                                    <span data-i18n="autoSaveSeconds">sec</span>
+                                </div>
                             </li>
                         </ul>
                     </li>
@@ -436,6 +461,13 @@ function getElementClasses(element) {
                                 <span>Effect</span>
                             </a>
                         </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="openDashboardModal();return false;">
+                            <span data-i18n="dashboard">Dashboard</span>
+                        </a>
                     </li>
                 </ul>
 
@@ -1742,6 +1774,7 @@ function getElementClasses(element) {
                         </div>
                     </div>
                 </div>
+
             </div>
 
 
@@ -1787,6 +1820,7 @@ function getElementClasses(element) {
                         <label id="ExternalService_Heartbeat_Label">SD WebUI Check…</label>
 
                     </div>
+
 
                 </div>
 
@@ -2026,7 +2060,8 @@ function getElementClasses(element) {
     <script src="js/core/settings.js?v=7.2" defer></script>
     <script src="js/core/debug.js?v=7.2" defer></script>
     <script src="js/core/logger.js?v=7.2" defer></script>
-    
+    <script src="js/core/global-error-handler.js?v=7.2" defer></script>
+
     <script src="js/ui/glfx-ui.js?v=7.2" defer></script>
     <script src="js/ui/canvas-object-menu.js?v=7.2" defer></script>
     <script src="js/ui/third/intro.js?v=7.2" defer></script>
@@ -2046,6 +2081,9 @@ function getElementClasses(element) {
     <script src="js/ui/third/base-translation/base-th.js?v=7.2" defer></script>
     <script src="js/ui/third/base-translation/base-zh.js?v=7.2" defer></script>
     <script src="js/ui/third/i18next.js?v=7.2" defer></script>
+    <script src="js/dashboard/performance-storage.js?v=7.3" defer></script>
+    <script src="js/dashboard/prompt-frequency-storage.js?v=7.3" defer></script>
+    <script src="js/dashboard/dashboard-ui.js?v=7.3" defer></script>
 
     <script src="js/ui/util/mode-change.js?v=7.2" defer></script>
     <script src="js/ui/util/mode-manager.js?v=7.2" defer></script>
@@ -2086,6 +2124,12 @@ function getElementClasses(element) {
     <script src="js/ai/comfyui/comfyui-management.js?v=7.2" defer></script>
     <script src="js/ai/ai-settings.js?v=7.2" defer></script>
     <script src="js/ai/ai-management.js?v=7.2" defer></script>
+    <script src="js/ai/inpainting/inpaint-mask.js?v=7.3" defer></script>
+    <script src="js/ai/inpainting/inpaint-workflow.js?v=7.3" defer></script>
+    <script src="js/ai/inpainting/inpaint-editor.js?v=7.3" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/ai/angle/camera-widget.js?v=7.3" defer></script>
+    <script src="js/ai/angle/angle-editor.js?v=7.3" defer></script>
     <script src="js/ai/ui/ai-ui-util.js?v=7.2" defer></script>
     <script src="js/ai/prompt/base-event-listener.js?v=7.2" defer></script>
     <script src="js/layer/floating-window-management.js?v=7.2" defer></script>
@@ -2140,9 +2184,6 @@ function getElementClasses(element) {
     <script src="js/fabric/fabric-management.js?v=7.2" defer></script>
     <script src="js/core/svg/google-icon-names.js?v=7.2"></script>
     <script src="js/core/svg/google-icon-helper.js?v=7.2"></script>
-    <script src="js/svg/manga-panels-image-landscape.js?v=7.2" defer></script>
-    <script src="js/svg/manga-panels-image-vertical.js?v=7.2" defer></script>
-    <script src="js/svg/speechbubble.js?v=7.2" defer></script>
     <script src="js/ui/bottom-bar.js?v=7.2" defer></script>
 
     <script src="js/ai/prompt/auto/prompt-map.js?v=7.2" defer></script>
@@ -2161,7 +2202,10 @@ function getElementClasses(element) {
     <script src="js/core/compression/lz4.js?v=7.2"></script>
     <script src="js/core/util/array-buffer-utils.js?v=7.2"></script>
     <script src="js/core/compression/project-compression.js?v=7.2"></script>
+    <script src="js/core/auto-save.js?v=7.2" defer></script>
 
+    <script src="js/ai/comfyui/v2/comfyui_workflow/comfyui-inpaint-default-workflows.js?v=7.3"></script>
+    <script src="js/ai/comfyui/v2/comfyui_workflow/comfyui-angle-default-workflows.js?v=7.3"></script>
     <script src="js/ai/comfyui/v2/comfyui_workflow/comfyui-upscale-default-workflows.js?v=7.3"></script>
     <script src="js/ai/comfyui/v2/comfyui_workflow/comfyui-rembg-default-workflows.js?v=7.3"></script>
     <script src="js/ai/comfyui/v2/comfyui_workflow/comfyui-t2i-default-workflows.js?v=7.3"></script>
@@ -2241,6 +2285,181 @@ setAutoSizeingControlMini();
 
 </script>
 
+
+<div id="inpaint-modal" class="inpaint-modal-overlay" style="display:none;">
+<div id="inpaint-editor" class="inpaint-modal-content">
+<button id="inpaint-cancel-btn" class="inpaint-close-btn">✕</button>
+<div id="inpaint-left-panel">
+<button id="inpaint-brush-btn" class="inpaint-tool-btn" data-i18n="inpaintBrush">Brush</button>
+<button id="inpaint-eraser-btn" class="inpaint-tool-btn" data-i18n="inpaintEraser">Eraser</button>
+<button id="inpaint-fillall-btn" class="inpaint-tool-btn" data-i18n="inpaintFillAll">Fill All</button>
+<button id="inpaint-clear-btn" class="inpaint-tool-btn" data-i18n="inpaintClear">Clear</button>
+<span class="inpaint-separator"></span>
+<label data-i18n="inpaintBrushSize">Size</label>
+<input type="range" id="inpaint-brush-size" min="1" max="500" value="30">
+<span id="inpaint-brush-size-label">30</span>
+</div>
+<div id="inpaint-canvas-area">
+<div id="inpaint-canvas-wrapper">
+<canvas id="inpaint-image-canvas"></canvas>
+<canvas id="inpaint-mask-canvas"></canvas>
+</div>
+</div>
+<div id="inpaint-right-panel">
+<div class="inpaint-control-row">
+<label data-i18n="inpaintPrompt">Prompt</label>
+<textarea id="inpaint-prompt" rows="3" placeholder=""></textarea>
+</div>
+<div class="inpaint-control-row">
+<label data-i18n="inpaintNegative">Negative</label>
+<textarea id="inpaint-negative" rows="2" placeholder=""></textarea>
+</div>
+<div class="inpaint-denoise-row">
+<label data-i18n="inpaintDenoise">Denoise</label>
+<input type="range" id="inpaint-denoise" min="0" max="1" step="0.05" value="0.75"
+oninput="document.getElementById('inpaint-denoise-label').textContent=this.value">
+<span id="inpaint-denoise-label">0.75</span>
+</div>
+<button id="inpaint-generate-btn" class="inpaint-action-btn" data-i18n="inpaintGenerate">Generate</button>
+</div>
+</div>
+</div>
+
+<div id="angle-modal" class="angle-modal-overlay" style="display:none;">
+<div class="angle-modal-content">
+<button id="angle-cancel-btn" class="angle-close-btn">✕</button>
+<div id="angle-left-panel">
+<label data-i18n="angleOriginal">Original</label>
+<img id="angle-original-img" alt="Original">
+</div>
+<div id="angle-center-panel">
+<div id="angle-camera-widget-container"></div>
+<button id="angle-camera-reset-btn" data-i18n="angleReset">Reset</button>
+<div id="angle-camera-prompt-display"></div>
+</div>
+<div id="angle-right-panel">
+<div class="angle-control-row">
+<label data-i18n="anglePrompt">Angle Prompt</label>
+<textarea id="angle-prompt" rows="3" placeholder=""></textarea>
+</div>
+<button id="angle-generate-btn" data-i18n="angleGenerate_btn">Generate</button>
+</div>
+</div>
+</div>
+
+<div id="dashboard-modal" class="dashboard-modal-overlay" style="display:none;">
+<div class="dashboard-modal-content">
+<button id="dashboard-close-btn" class="dashboard-modal-close-btn">&#10005;</button>
+<div class="dashboard-container">
+<div class="dashboard-header">
+<h3 data-i18n="dashboardTitle">Performance Dashboard</h3>
+<button class="dashboard-clear-btn" id="dashboardClearStats" data-i18n="dashboardClearAll">Clear All</button>
+</div>
+<div class="dashboard-summary">
+<div class="summary-card">
+<div class="summary-value" id="dashboardTotalGenerations">0</div>
+<div class="summary-label" data-i18n="dashboardTotal">Total</div>
+</div>
+<div class="summary-card">
+<div class="summary-value" id="dashboardGlobalAvg">-</div>
+<div class="summary-label" data-i18n="dashboardAvg">AVG</div>
+</div>
+<div class="summary-card">
+<div class="summary-value" id="dashboardGlobalMin">-</div>
+<div class="summary-label" data-i18n="dashboardMin">MIN</div>
+</div>
+<div class="summary-card">
+<div class="summary-value" id="dashboardGlobalMax">-</div>
+<div class="summary-label" data-i18n="dashboardMax">MAX</div>
+</div>
+<div class="summary-card">
+<div class="summary-value" id="dashboardUniqueTags">0</div>
+<div class="summary-label" data-i18n="dashboardTags">Tags</div>
+</div>
+<div class="summary-card">
+<div class="summary-value" id="dashboardLaunchCount">0</div>
+<div class="summary-label" data-i18n="dashboardLaunch">Launch</div>
+</div>
+<div class="summary-card">
+<div class="summary-value" id="dashboardFirstLaunch">-</div>
+<div class="summary-label" data-i18n="dashboardSince">Since</div>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardModeStats">Mode Statistics</h4>
+</div>
+<div class="stats-table-container">
+<table class="stats-table">
+<thead>
+<tr>
+<th data-i18n="dashboardMode">Mode</th>
+<th data-i18n="dashboardCount">Count</th>
+<th data-i18n="dashboardAvgMs">AVG (ms)</th>
+<th data-i18n="dashboardMinMs">MIN (ms)</th>
+<th data-i18n="dashboardMaxMs">MAX (ms)</th>
+</tr>
+</thead>
+<tbody id="dashboardStatsTable"></tbody>
+</table>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardTimeGraph">Generation Time Graph</h4>
+<select id="dashboardModeSelector" class="mode-selector">
+<option value="T2I">T2I</option>
+<option value="I2I">I2I</option>
+<option value="I2I_Angle">I2I Angle</option>
+<option value="Inpaint">Inpaint</option>
+<option value="Upscaler">Upscaler</option>
+<option value="Rembg">Rembg</option>
+</select>
+</div>
+<div class="chart-container">
+<canvas id="dashboardChart" width="600" height="200"></canvas>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardHourlyHeatmap">Hourly Activity Heatmap</h4>
+</div>
+<div class="heatmap-container" id="dashboardHeatmap"></div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardTrendGraph">Generation Trend</h4>
+<select id="dashboardTrendSelector" class="mode-selector">
+<option value="daily" data-i18n="dashboardDaily">Daily</option>
+<option value="weekly" data-i18n="dashboardWeekly">Weekly</option>
+<option value="monthly" data-i18n="dashboardMonthly">Monthly</option>
+</select>
+</div>
+<div class="chart-container">
+<canvas id="dashboardTrendChart" width="600" height="200"></canvas>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardTopTags">Most Used Tags</h4>
+<button class="dashboard-clear-btn-small" id="dashboardClearTags" data-i18n="dashboardClearTags">Clear Tags</button>
+</div>
+<div class="top-tags-container" id="dashboardTopTags">
+<div class="no-tags" data-i18n="dashboardNoTags">No tags recorded</div>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardWordcloud">Word Cloud</h4>
+<button class="dashboard-download-btn" id="dashboardDownloadWordcloud" data-i18n="dashboardDownload">Download</button>
+</div>
+<div class="wordcloud-container">
+<canvas id="dashboardWordcloud" width="600" height="300"></canvas>
+</div>
+</div>
+</div>
+</div>
+</div>
 
 </body>
 

@@ -175,37 +175,43 @@ updateLayerPanel();
 });
 }
 
-/** load svg. */
 const previewAreaVertical=$("svg-preview-area-vertical");
 const previewAreaLandscape=$("svg-preview-area-landscape");
 const speechBubbleArea=$("speech-bubble-preview");
+var svgDataLoaded={vertical:false,landscape:false,speechBubble:false};
 
-window.onload=function () {
+function loadSvgScript(src){
+return new Promise(function(resolve,reject){
+var script=document.createElement("script");
+script.src=src;
+script.onload=resolve;
+script.onerror=reject;
+document.head.appendChild(script);
+});
+}
+
+function populateVerticalPanels(){
 previewAreaVertical.innerHTML="";
-
-/** Load vertical manga panel image. */
 MangaPanelsImage_Vertical.forEach((item)=>{
 const img=document.createElement("img");
 img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
-img.addEventListener("click",async function () {
+img.addEventListener("click",async function(){
 panelLogger.debug("new panel");
-
 const loading=OP_showLoading({
-icon: 'process',step: 'Step1',substep: 'New Page',progress: 0
+icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if (stateStack.length>2) {
+if(stateStack.length>2){
 OP_updateLoadingState(loading,{
-icon: 'process',step: 'Step2',substep: 'Zip Start',progress: 20
+icon:'process',step:'Step2',substep:'Zip Start',progress:20
 });
-
 await btmSaveProjectFile().then(()=>{
 setCanvasGUID();
 loadSVGPlusReset(item.svg);
 });
-} else {
+}else{
 setCanvasGUID();
 loadSVGPlusReset(item.svg);
 }
@@ -215,49 +221,93 @@ OP_hideLoading(loading);
 });
 previewAreaVertical.appendChild(img);
 });
+}
 
-/** Load landscape manga panel image. */
+function populateLandscapePanels(){
 previewAreaLandscape.innerHTML="";
 MangaPanelsImage_Landscape.forEach((item)=>{
 const img=document.createElement("img");
 img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
-img.addEventListener("click",async function () {
+img.addEventListener("click",async function(){
 panelLogger.debug("new panel");
 const loading=OP_showLoading({
-icon: 'process',step: 'Step1',substep: 'New Page',progress: 0
+icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if (stateStack.length>2) {
+if(stateStack.length>2){
 OP_updateLoadingState(loading,{
-icon: 'process',step: 'Step2',substep: 'Zip Start',progress: 20
+icon:'process',step:'Step2',substep:'Zip Start',progress:20
 });
 await btmSaveProjectFile().then(()=>{
 setCanvasGUID();
 loadSVGPlusReset(item.svg,true);
 });
-} else {
+}else{
 setCanvasGUID();
 loadSVGPlusReset(item.svg,true);
 }
 }finally{
 OP_hideLoading(loading);
 }
-
 });
 previewAreaLandscape.appendChild(img);
 });
+}
 
-/** Load speech bubble manga panel image. */
+function populateSpeechBubbles(){
+speechBubbleArea.innerHTML="";
 SpeechBubble.forEach((item)=>{
 const img=document.createElement("img");
 img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
-img.addEventListener("click",function () {
+img.addEventListener("click",function(){
 loadSpeechBubbleSVGReadOnly(item.svg,item.name);
 });
 speechBubbleArea.appendChild(img);
 });
-};
+}
+
+function lazyLoadVerticalPanels(){
+if(svgDataLoaded.vertical) return;
+svgDataLoaded.vertical=true;
+previewAreaVertical.textContent="Loading...";
+loadSvgScript("js/svg/manga-panels-image-vertical.js?v=7.2").then(function(){
+populateVerticalPanels();
+}).catch(function(){
+svgDataLoaded.vertical=false;
+previewAreaVertical.textContent="";
+});
+}
+
+function lazyLoadLandscapePanels(){
+if(svgDataLoaded.landscape) return;
+svgDataLoaded.landscape=true;
+previewAreaLandscape.textContent="Loading...";
+loadSvgScript("js/svg/manga-panels-image-landscape.js?v=7.2").then(function(){
+populateLandscapePanels();
+}).catch(function(){
+svgDataLoaded.landscape=false;
+previewAreaLandscape.textContent="";
+});
+}
+
+function lazyLoadSpeechBubbles(){
+if(svgDataLoaded.speechBubble) return;
+svgDataLoaded.speechBubble=true;
+speechBubbleArea.textContent="Loading...";
+loadSvgScript("js/svg/speechbubble.js?v=7.2").then(function(){
+populateSpeechBubbles();
+}).catch(function(){
+svgDataLoaded.speechBubble=false;
+speechBubbleArea.textContent="";
+});
+}
+
+function lazyLoadSvgData(id){
+if(id==="svg-container-vertical") lazyLoadVerticalPanels();
+if(id==="svg-container-landscape") lazyLoadLandscapePanels();
+if(id==="speech-bubble-area1") lazyLoadSpeechBubbles();
+}

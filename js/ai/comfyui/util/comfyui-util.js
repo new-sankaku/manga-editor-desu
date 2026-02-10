@@ -11,10 +11,27 @@ width:      requestData["width"],
 height:     requestData["height"]
 });
 
-if(Type=='I2I'||Type=='Rembg'||Type=='Upscaler'){
+if(Type=='I2I'||Type=='Rembg'||Type=='Upscaler'||Type=='I2I_Angle'){
 builder.updateNodesByInputName({
 image: requestData["uploadFileName"]
 });
+}
+if(Type=='Inpaint'){
+builder.updateNodesByInputName({
+image: requestData["uploadFileName"]
+});
+if(requestData["maskFileName"]){
+builder.updateValueByTargetValue("inpaint_mask.png",requestData["maskFileName"]);
+}
+if(requestData["inpaintDenoise"]!==undefined){
+builder.updateNodesByInputName({
+denoise: parseFloat(requestData["inpaintDenoise"])
+});
+}
+}
+
+if(requestData["anglePrompt"]){
+builder.updateValueByTargetValue('%AnglePrompt%',requestData["anglePrompt"]);
 }
 
 builder.updateValueByTargetValue("%prompt%",requestData["prompt"]);
