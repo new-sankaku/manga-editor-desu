@@ -16,6 +16,7 @@ Upscaler: "Upscaler",
 Inpaint: "Inpaint",
 PutPrompt: "PutPrompt",
 PutSeed: "PutSeed",
+I2I_Angle: "I2I_Angle",
 Temp: "Temp",
 };
 
@@ -35,7 +36,8 @@ AI_ROLES.Text2Image,
 AI_ROLES.RemoveBG,
 AI_ROLES.Upscaler,
 AI_ROLES.Image2Image,
-AI_ROLES.Inpaint
+AI_ROLES.Inpaint,
+AI_ROLES.I2I_Angle
 ]
 };
 

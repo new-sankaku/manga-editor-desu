@@ -12,15 +12,13 @@ initTagify(data.ad_model);
 })
 .catch(error=>{
 sdwebuiLogger.error('Error:',error);
-alert('APIからデータを取得できませんでした。');
+createToastError("Fetch Error","APIからデータを取得できませんでした。");
 });
 }
 
 
 async function sendClipToServer() {
 const dualClip=getSelectedTagifyValues("clipDropdownId");
-
-// console.log("sendClipToServer", dualClip);
 
 const data=JSON.stringify({
 forge_additional_modules: dualClip
@@ -37,7 +35,8 @@ body: data
 .then(response=>response.json())
 .then(data=>{})
 .catch((error)=>{
-alert('Failed to apply the model.');
+sdwebuiLogger.error('Error:',error);
+createToastError("Fetch Error","Failed to apply the model.");
 });
 }
 
@@ -60,7 +59,8 @@ body: data
 .then(response=>response.json())
 .then(data=>{})
 .catch((error)=>{
-alert('Failed to apply the model.');
+sdwebuiLogger.error('Error:',error);
+createToastError("Fetch Error","Failed to apply the model.");
 });
 }
 
@@ -92,24 +92,40 @@ sdwebuiLogger.error('Failed to fetch data:',error);
 }
 
 async function fetchSdSampler() {
+try{
 const response=await fetch(sdWebUIUrls.sampler,{method: 'GET'});
 const models=await response.json();
 updateSamplerDropdown(models);
+}catch(error){
+sdwebuiLogger.error('fetchSdSampler:',error);
+createToastError("Fetch Error","Failed to fetch samplers.");
+}
 }
 
 async function fetchSdUpscaler() {
+try{
 const response=await fetch(sdWebUIUrls.upscaler,{method: 'GET'});
 const models=await response.json();
 updateUpscalerDropdown(models);
+}catch(error){
+sdwebuiLogger.error('fetchSdUpscaler:',error);
+createToastError("Fetch Error","Failed to fetch upscalers.");
+}
 }
 
 async function fetchSdModels() {
+try{
 const response=await fetch(sdWebUIUrls.sdModel,{method: 'GET'});
 const models=await response.json();
 updateModelDropdown(models);
+}catch(error){
+sdwebuiLogger.error('fetchSdModels:',error);
+createToastError("Fetch Error","Failed to fetch models.");
+}
 }
 
 async function fetchSdModules() {
+try{
 const response=await fetch(sdWebUIUrls.sdModules,{method: 'GET'});
 const rawModels=await response.json();
 const results=rawModels.map(model=>({
@@ -117,12 +133,11 @@ n: model.model_name,
 p: 0
 }));
 
-if(basePrompt.forge_additional_modules){
-// console.log("basePrompt.forge_additional_modules", basePrompt.forge_additional_modules);
-}
-
-
 updateTagifyDropdown("clipDropdownId",results,basePrompt.forge_additional_modules);
+}catch(error){
+sdwebuiLogger.error('fetchSdModules:',error);
+createToastError("Fetch Error","Failed to fetch modules.");
+}
 }
 
 function sdwebuiApiHeartbeat() {

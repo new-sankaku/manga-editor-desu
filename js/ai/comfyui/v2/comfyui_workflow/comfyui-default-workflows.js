@@ -110,4 +110,11 @@ workflow: ComfyUI_Inpaint_BySDXL,
 enabled: true
 },
 
+{
+name: "Angle_QwenEdit.json",
+type: "I2I_Angle",
+workflow: ComfyUI_I2I_Angle_Default,
+enabled: true
+},
+
 ];

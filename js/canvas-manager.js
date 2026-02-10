@@ -78,9 +78,6 @@ function forcedAdjustCanvasSize() {
 adjustCanvasSize(true);
 }
 
-// function adjustCanvasSize() {
-//   adjustCanvasSize(false);
-// }
 
 //forced = 強制
 function adjustCanvasSize(forced) {

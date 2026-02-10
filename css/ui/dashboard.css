@@ -1,0 +1,404 @@
+/* Dashboard Modal Overlay */
+.dashboard-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.dashboard-modal-content {
+    position: relative;
+    width: 90vw;
+    max-width: 1200px;
+    height: 85vh;
+    overflow-y: auto;
+    background: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+.dashboard-modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 1;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.dashboard-modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Dashboard Styles */
+.dashboard-container {
+    padding: 16px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #333;
+}
+
+.dashboard-header h3 {
+    margin: 0;
+    color: #00bcd4;
+    font-size: 18px;
+}
+
+.dashboard-clear-btn {
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.dashboard-clear-btn:hover {
+    background: #d32f2f;
+}
+
+/* Summary Cards */
+.dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.summary-card {
+    background: #252525;
+    border-radius: 6px;
+    padding: 8px 10px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.summary-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #00bcd4;
+    margin-bottom: 2px;
+}
+
+.summary-label {
+    font-size: 10px;
+    color: #888;
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+    background: #252525;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #333;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-header h4 {
+    margin: 0;
+    color: #fff;
+    font-size: 14px;
+}
+
+/* Mode Selector */
+.mode-selector {
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.mode-selector:focus {
+    outline: none;
+    border-color: #00bcd4;
+}
+
+/* Stats Table */
+.stats-table-container {
+    overflow-x: auto;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.stats-table th,
+.stats-table td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #333;
+}
+
+.stats-table th {
+    color: #888;
+    font-weight: normal;
+    font-size: 10px;
+}
+
+.stats-table td {
+    color: #fff;
+}
+
+.stats-table tbody tr:hover {
+    background: #2a2a2a;
+}
+
+/* Chart Container */
+.chart-container {
+    background: #1a1a1a;
+    border-radius: 4px;
+    padding: 8px;
+}
+
+#dashboardChart {
+    width: 100%;
+    height: 200px;
+}
+
+/* Top Tags */
+.top-tags-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.tag-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #333;
+}
+
+.tag-item:last-child {
+    border-bottom: none;
+}
+
+.tag-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.tag-name {
+    color: #fff;
+    font-size: 13px;
+    word-break: break-all;
+}
+
+.tag-count {
+    color: #00bcd4;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 30px;
+    text-align: right;
+}
+
+.tag-bar-container {
+    background: #333;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.tag-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00bcd4, #4caf50);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+.no-tags {
+    color: #666;
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+}
+
+/* Heatmap Styles */
+.heatmap-container {
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.heatmap-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: fit-content;
+}
+
+.heatmap-row {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+}
+
+.heatmap-header {
+    margin-bottom: 4px;
+}
+
+.heatmap-label {
+    width: 40px;
+    font-size: 10px;
+    color: #888;
+    text-align: right;
+    padding-right: 8px;
+    flex-shrink: 0;
+}
+
+.heatmap-hour {
+    width: 20px;
+    height: 16px;
+    font-size: 9px;
+    color: #666;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.heatmap-cell {
+    width: 20px;
+    height: 20px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.heatmap-cell:hover {
+    transform: scale(1.2);
+    z-index: 1;
+}
+
+/* Trend Chart */
+#dashboardTrendChart {
+    width: 100%;
+    height: 200px;
+}
+
+/* Small Clear Button */
+.dashboard-clear-btn-small {
+    background: #f44336;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 0.2s;
+}
+
+.dashboard-clear-btn-small:hover {
+    background: #d32f2f;
+}
+
+/* Download Button */
+.dashboard-download-btn {
+    background: #00bcd4;
+    color: #1a1a1a;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.dashboard-download-btn:hover {
+    background: #00acc1;
+}
+
+/* Wordcloud */
+.wordcloud-container {
+    background: #1a1a1a;
+    border-radius: 4px;
+    padding: 8px;
+    overflow: visible;
+}
+
+#dashboardWordcloud {
+    width: 100%;
+    height: 300px;
+    display: block;
+    max-width: 100%;
+}
+
+/* Scrollbar Styles */
+.dashboard-container::-webkit-scrollbar,
+.top-tags-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dashboard-container::-webkit-scrollbar-track,
+.top-tags-container::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.dashboard-container::-webkit-scrollbar-thumb,
+.top-tags-container::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+}
+
+.dashboard-container::-webkit-scrollbar-thumb:hover,
+.top-tags-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-summary {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+    }
+
+    .summary-card {
+        padding: 6px 8px;
+    }
+
+    .summary-value {
+        font-size: 14px;
+    }
+
+    .stats-table {
+        font-size: 11px;
+    }
+
+    .stats-table th,
+    .stats-table td {
+        padding: 6px 8px;
+    }
+}

@@ -11,7 +11,7 @@ width:      requestData["width"],
 height:     requestData["height"]
 });
 
-if(Type=='I2I'||Type=='Rembg'||Type=='Upscaler'){
+if(Type=='I2I'||Type=='Rembg'||Type=='Upscaler'||Type=='I2I_Angle'){
 builder.updateNodesByInputName({
 image: requestData["uploadFileName"]
 });
@@ -28,6 +28,10 @@ builder.updateNodesByInputName({
 denoise: parseFloat(requestData["inpaintDenoise"])
 });
 }
+}
+
+if(requestData["anglePrompt"]){
+builder.updateValueByTargetValue('%AnglePrompt%',requestData["anglePrompt"]);
 }
 
 builder.updateValueByTargetValue("%prompt%",requestData["prompt"]);

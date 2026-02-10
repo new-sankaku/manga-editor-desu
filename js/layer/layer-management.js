@@ -31,7 +31,6 @@ executeUpdate();
 
 function executeUpdate() {
 isExecuting=true;
-// console.time('updateLayerPanel');
 
 var layers=canvas.getObjects().slice().reverse();
 var layerContent=$("layer-content");
@@ -197,8 +196,6 @@ layerContent.appendChild(layerDiv);
 }
 });
 
-// console.timeEnd('updateLayerPanel');
-
 lastUpdateTime=Date.now();
 isExecuting=false;
 
@@ -217,7 +214,6 @@ nameTextArea.style.resize="none";
 nameTextArea.style.width="100%";
 nameTextArea.style.boxSizing="border-box";
 nameTextArea.style.border="none";
-// nameTextArea.style.borderBottom = '1px solid #cccccc';
 nameTextArea.style.outline="none";
 nameTextArea.style.color=getCssValue("--text-color-B");
 nameTextArea.style.borderColor=getCssValue("--boader-color-1px-solid-B");
@@ -231,7 +227,6 @@ nameTextArea.value=layer.text;
 nameTextArea.style.flex="1";
 nameTextArea.style.marginRight="5px";
 }
-// console.log("layer.text", layer.text);
 if (isImage(layer)&&layer.text) {
 nameTextArea.value=layer.text;
 }
@@ -280,7 +275,6 @@ obj.render(tempCtx);
 
 tempCtx.restore();
 } else if (layer.type==="path") {
-// console.log("Layer is a path");
 var pathBounds=layer.getBoundingRect();
 var pathWidth=pathBounds.width;
 var pathHeight=pathBounds.height;

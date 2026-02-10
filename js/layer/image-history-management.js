@@ -43,10 +43,8 @@ return true;
 if(activeObject.target.saveHistory===undefined){
 return true;
 }
-// console.log("isSaveObject false 5");
 return false;
 }else{
-// console.log("isSaveObject false 6");
 return false;
 }
 }
@@ -56,12 +54,10 @@ return!(isSaveObject(activeObject)) ;
 }
 
 function changeDoNotSaveHistory(){
-// console.log("changeDoNotSaveHistory start");
 isSaveHistory=false;
 }
 
 function changeDoSaveHistory(){
-// console.log("changeDoSaveHistory start");
 isSaveHistory=true;
 }
 
@@ -94,12 +90,10 @@ if(eventType==='object:removed'){
 if(isNotSaveObject(event)){
 return;
 }
-// console.log( "saveStateByListener event", event, eventType );
 saveState();
 }
 
 function saveStateByManual() {
-// console.log( "saveStateByManual" );
 saveState();
 }
 
@@ -199,8 +193,6 @@ function saveState() {
 if(notSave()){
 return ;
 }
-// console.log("saveState start");
-// console.trace();
 if (currentStateIndex<stateStack.length-1) {
 stateStack.splice(currentStateIndex+1);
 }
@@ -263,7 +255,6 @@ changeDoNotSaveHistory();
 currentStateIndex=stateStack.length-1;
 
 let state=restoreImage(stateStack[stateStack.length-1]);
-// console.log("state", JSON.stringify(state));
 canvas.loadFromJSON(state,function () {
 reSetSpeechBubbleText();
 if(guid){

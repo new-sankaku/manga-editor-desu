@@ -47,10 +47,12 @@ document.body.appendChild(a);
 a.click();
 document.body.removeChild(a);
 window.URL.revokeObjectURL(url);
+AutoSaveManager.clearAutoSave();
 })
 .catch((error)=>{
 projectLogger.error("error",error);
 projectLogger.error("error json,",JSON.stringify(error));
+createToastError("Save Error","Failed to save project.");
 })
 .finally(()=>{
 OP_hideLoading(loading);
@@ -117,6 +119,7 @@ createToastError(title,message,4000);
 }
 } catch (error) {
 projectLogger.error("error:",error);
+createToastError("Load Error","Failed to load project.");
 } finally {
 OP_hideLoading(loading);
 }
@@ -197,7 +200,9 @@ canvasGridLineSize:{id:'gridSizeInput',default:'10'},
 canvasMarginFromPanel:{id:'marginFromPanel',default:20},
 sdWebUIPageUrl:{id:'sdWebUIPageUrl',default:'http://127.0.0.1:7860'},
 comfyUIPageUrl:{id:'comfyUIPageUrl',default:'http://127.0.0.1:8188'},
-apiHeartbeatCheckbox:{id:'apiHeartbeatCheckbox',default:true,type:'checkbox'}
+apiHeartbeatCheckbox:{id:'apiHeartbeatCheckbox',default:true,type:'checkbox'},
+autoSaveEnabled:{id:'autoSaveCheckbox',default:true,type:'checkbox'},
+autoSaveInterval:{id:'autoSaveInterval',default:'60'}
 };
 
 var BASEPROMPT_SCHEMA={
@@ -288,6 +293,7 @@ loadSettingsLocalStrage();
 changeView("layer-panel",$('view_layers_checkbox').checked);
 changeView("controls",$('view_controles_checkbox').checked);
 if(DEBUG_FLAGS.settingsHighlight)toggleSettingsHighlight(true);
+AutoSaveManager.init();
 });
 
 document.addEventListener('DOMContentLoaded',function() {

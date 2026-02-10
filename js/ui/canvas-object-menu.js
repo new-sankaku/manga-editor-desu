@@ -101,6 +101,7 @@ var selectClear=createObjectMenuButton('selectClear');
 var rembg=createObjectMenuButton('rembg');
 var upscale=createObjectMenuButton('upscale');
 var inpaint=createObjectMenuButton('inpaint');
+var angleGenerate=createObjectMenuButton('angleGenerate');
 var clearAllClipPaths=createObjectMenuButton('clearAllClipPaths');
 
 var clearTopClipPath=createObjectMenuButton('clearTopClipPath');
@@ -155,6 +156,7 @@ if (hasRole(AI_ROLES.Image2Image)) menuItems.push(generate);
 if (hasRole(AI_ROLES.RemoveBG))    menuItems.push(rembg);
 if (hasRole(AI_ROLES.Upscaler))    menuItems.push(upscale);
 if (hasRole(AI_ROLES.Inpaint))     menuItems.push(inpaint);
+if (hasRole(AI_ROLES.I2I_Angle))   menuItems.push(angleGenerate);
 menuItems.push(deleteMenu);
 
 if (haveClipPath(activeObject)) {
@@ -372,6 +374,9 @@ aiUpscale(activeObject,spinner);
 break;
 case 'inpaint':
 openInpaintEditor(activeObject);
+break;
+case 'angleGenerate':
+openAngleEditor(activeObject);
 break;
 case 'generate':
 if (isPanel(activeObject)) {

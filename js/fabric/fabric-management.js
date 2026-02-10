@@ -630,7 +630,6 @@ closeMenu();
 
 canvas.on("mouse:move",function (options) {
 if (coordCheckbox.checked) {
-// eventLogger.trace('38: mouse:move');
 updateCoordinates(options);
 }
 });

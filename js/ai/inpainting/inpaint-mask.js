@@ -7,15 +7,21 @@ var maskCtx=null;
 var isDrawing=false;
 var brushSize=30;
 var maskMode='brush';
-var maskColor='rgba(255,0,0,0.5)';
+var maskColor='rgba(255,0,0,1)';
 var lastX=0;
 var lastY=0;
+var cursorOverlay=null;
+var cursorCtx=null;
 
 function init(canvasElement){
 maskCanvas=canvasElement;
 maskCtx=maskCanvas.getContext('2d');
 maskCtx.lineCap='round';
 maskCtx.lineJoin='round';
+cursorOverlay=document.createElement('canvas');
+cursorOverlay.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+maskCanvas.parentElement.appendChild(cursorOverlay);
+cursorCtx=cursorOverlay.getContext('2d');
 setupEvents();
 inpaintMaskLogger.debug("InpaintMask initialized");
 }
@@ -24,14 +30,16 @@ function setupEvents(){
 maskCanvas.addEventListener('mousedown',onMouseDown);
 maskCanvas.addEventListener('mousemove',onMouseMove);
 maskCanvas.addEventListener('mouseup',onMouseUp);
-maskCanvas.addEventListener('mouseleave',onMouseUp);
+maskCanvas.addEventListener('mouseleave',onMouseLeave);
+maskCanvas.style.cursor='none';
 }
 
 function removeEvents(){
 maskCanvas.removeEventListener('mousedown',onMouseDown);
 maskCanvas.removeEventListener('mousemove',onMouseMove);
 maskCanvas.removeEventListener('mouseup',onMouseUp);
-maskCanvas.removeEventListener('mouseleave',onMouseUp);
+maskCanvas.removeEventListener('mouseleave',onMouseLeave);
+maskCanvas.style.cursor='';
 }
 
 function onMouseDown(e){
@@ -45,12 +53,13 @@ draw(lastX,lastY);
 }
 
 function onMouseMove(e){
-if(!isDrawing) return;
 var rect=maskCanvas.getBoundingClientRect();
 var scaleX=maskCanvas.width/rect.width;
 var scaleY=maskCanvas.height/rect.height;
 var x=(e.clientX-rect.left)*scaleX;
 var y=(e.clientY-rect.top)*scaleY;
+drawCursor(e.clientX-rect.left,e.clientY-rect.top);
+if(!isDrawing) return;
 drawLine(lastX,lastY,x,y);
 lastX=x;
 lastY=y;
@@ -58,6 +67,35 @@ lastY=y;
 
 function onMouseUp(){
 isDrawing=false;
+}
+
+function onMouseLeave(){
+isDrawing=false;
+clearCursor();
+}
+
+function drawCursor(cx,cy){
+if(!cursorOverlay||!cursorCtx) return;
+cursorOverlay.width=maskCanvas.clientWidth;
+cursorOverlay.height=maskCanvas.clientHeight;
+var rect=maskCanvas.getBoundingClientRect();
+var displayRadius=brushSize/(maskCanvas.width/rect.width)/2;
+cursorCtx.clearRect(0,0,cursorOverlay.width,cursorOverlay.height);
+cursorCtx.beginPath();
+cursorCtx.arc(cx,cy,displayRadius,0,Math.PI*2);
+cursorCtx.strokeStyle='rgba(255,255,255,0.8)';
+cursorCtx.lineWidth=1.5;
+cursorCtx.stroke();
+cursorCtx.beginPath();
+cursorCtx.arc(cx,cy,displayRadius+1,0,Math.PI*2);
+cursorCtx.strokeStyle='rgba(0,0,0,0.5)';
+cursorCtx.lineWidth=1;
+cursorCtx.stroke();
+}
+
+function clearCursor(){
+if(!cursorCtx||!cursorOverlay) return;
+cursorCtx.clearRect(0,0,cursorOverlay.width,cursorOverlay.height);
 }
 
 function draw(x,y){
@@ -93,6 +131,10 @@ inpaintMaskLogger.debug("Mask mode:",mode);
 
 function setBrushSize(size){
 brushSize=size;
+if(!maskCanvas) return;
+var cx=maskCanvas.clientWidth/2;
+var cy=maskCanvas.clientHeight/2;
+drawCursor(cx,cy);
 }
 
 function clearMask(){
@@ -100,21 +142,11 @@ if(!maskCtx) return;
 maskCtx.clearRect(0,0,maskCanvas.width,maskCanvas.height);
 }
 
-function invertMask(){
+function fillAll(){
 if(!maskCtx) return;
-var imageData=maskCtx.getImageData(0,0,maskCanvas.width,maskCanvas.height);
-var data=imageData.data;
-for(var i=0;i<data.length;i+=4){
-if(data[i+3]>0){
-data[i+3]=0;
-}else{
-data[i]=255;
-data[i+1]=0;
-data[i+2]=0;
-data[i+3]=128;
-}
-}
-maskCtx.putImageData(imageData,0,0);
+maskCtx.globalCompositeOperation='source-over';
+maskCtx.fillStyle=maskColor;
+maskCtx.fillRect(0,0,maskCanvas.width,maskCanvas.height);
 }
 
 function getMaskAsBlackWhite(){
@@ -153,8 +185,13 @@ function destroy(){
 if(maskCanvas){
 removeEvents();
 }
+if(cursorOverlay&&cursorOverlay.parentElement){
+cursorOverlay.parentElement.removeChild(cursorOverlay);
+}
 maskCanvas=null;
 maskCtx=null;
+cursorOverlay=null;
+cursorCtx=null;
 }
 
 return{
@@ -162,7 +199,7 @@ init:init,
 setMode:setMode,
 setBrushSize:setBrushSize,
 clearMask:clearMask,
-invertMask:invertMask,
+fillAll:fillAll,
 getMaskAsBlackWhite:getMaskAsBlackWhite,
 hasMask:hasMask,
 destroy:destroy

@@ -123,6 +123,7 @@ return false;
 }
 
 async function comfyuiHandleProcessQueue(layer,spinnerId,Type='T2I',extraData) {
+var startTime=Date.now();
 if (!socket) comfyuiConnect();
 var requestData=baseRequestData(layer);
 if (basePrompt.text2img_model!=""){
@@ -142,6 +143,8 @@ selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("REMBG
 selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("Upscaler");
 } else if(Type=='Inpaint') {
 selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("Inpaint");
+} else if(Type=='I2I_Angle') {
+selectedWorkflow=await comfyUIWorkflowRepository.getEnabledWorkflowByType("I2I_Angle");
 } else{
 removeSpinner(spinnerId);
 return;
@@ -155,7 +158,7 @@ return;
 }
 
 
-if (Type=='I2I'||Type=='Rembg'||Type=='Upscaler') {
+if (Type=='I2I'||Type=='Rembg'||Type=='Upscaler'||Type=='I2I_Angle') {
 var uploadFilename=generateFilename();
 await comfyuiUploadImage(layer,uploadFilename);
 requestData["uploadFileName"]=uploadFilename;
@@ -209,6 +212,7 @@ if (result&&result.error) {
 createToastError("Generation Error",result.message);
 throw new Error(result.message);
 } else if (result) {
+DashboardUI.recordGeneration(Type,Date.now()-startTime,requestData.prompt||'');
 if(isPageChanged(canvasGuid)){
 var applied=await applyGeneratedImageToOriginalPage(canvasGuid,result);
 if(applied){

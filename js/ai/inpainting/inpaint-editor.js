@@ -8,7 +8,6 @@ var originalImageDataUrl=null;
 var modal=null;
 var imageCanvas=null;
 var maskOverlay=null;
-var resultImageUrl=null;
 
 function open(layer){
 if(isOpen) return;
@@ -31,20 +30,18 @@ inpaintLogger.error("inpaint-modal element not found");
 return;
 }
 modal.style.display='flex';
-var applyBtn=document.getElementById('inpaint-apply-btn');
 var cancelBtn=document.getElementById('inpaint-cancel-btn');
 var brushBtn=document.getElementById('inpaint-brush-btn');
 var eraserBtn=document.getElementById('inpaint-eraser-btn');
 var clearBtn=document.getElementById('inpaint-clear-btn');
-var invertBtn=document.getElementById('inpaint-invert-btn');
+var fillAllBtn=document.getElementById('inpaint-fillall-btn');
 var generateBtn=document.getElementById('inpaint-generate-btn');
 var brushSlider=document.getElementById('inpaint-brush-size');
-applyBtn.onclick=applyResult;
 cancelBtn.onclick=close;
 brushBtn.onclick=function(){setTool('brush');};
 eraserBtn.onclick=function(){setTool('eraser');};
 clearBtn.onclick=clearMask;
-invertBtn.onclick=invertMask;
+fillAllBtn.onclick=fillAllMask;
 generateBtn.onclick=onGenerate;
 brushSlider.oninput=function(e){
 InpaintMask.setBrushSize(parseInt(e.target.value));
@@ -91,11 +88,11 @@ function clearMask(){
 InpaintMask.clearMask();
 }
 
-function invertMask(){
-InpaintMask.invertMask();
+function fillAllMask(){
+InpaintMask.fillAll();
 }
 
-async function onGenerate(){
+function onGenerate(){
 if(!InpaintMask.hasMask()){
 createToastError("Inpaint",getText("inpaintNoMask")||"Please draw a mask area first");
 return;
@@ -104,66 +101,45 @@ var maskDataUrl=InpaintMask.getMaskAsBlackWhite();
 var prompt=document.getElementById('inpaint-prompt').value;
 var negative=document.getElementById('inpaint-negative').value;
 var denoise=parseFloat(document.getElementById('inpaint-denoise').value);
-var generateBtn=document.getElementById('inpaint-generate-btn');
-generateBtn.disabled=true;
-generateBtn.textContent=getText("generating")||"Generating...";
-try{
-var result=await InpaintWorkflow.generate(
-originalImageDataUrl,
-maskDataUrl,
-prompt,
-negative,
-denoise
-);
-if(result){
-resultImageUrl=result;
-showPreview(result);
-}
-}finally{
-generateBtn.disabled=false;
-generateBtn.textContent=getText("inpaintGenerate")||"Generate";
-}
-}
-
-function showPreview(imageUrl){
-var beforeImg=document.getElementById('inpaint-before-img');
-var afterImg=document.getElementById('inpaint-after-img');
-var previewArea=document.getElementById('inpaint-preview-area');
-beforeImg.src=originalImageDataUrl;
-afterImg.src=imageUrl;
-previewArea.style.display='flex';
-document.getElementById('inpaint-apply-btn').disabled=false;
-}
-
-function applyResult(){
-if(!resultImageUrl||!targetLayer) return;
-fabric.Image.fromURL(resultImageUrl,function(newImg){
-if(!newImg) return;
-changeDoNotSaveHistory();
-var layerRelatedPoly=targetLayer.relatedPoly;
-var layerLeft=targetLayer.left;
-var layerTop=targetLayer.top;
-var layerScaleX=targetLayer.scaleX;
-var layerScaleY=targetLayer.scaleY;
-targetLayer.saveHistory=false;
-canvas.remove(targetLayer);
-newImg.set({
-left:layerLeft,
-top:layerTop,
-scaleX:layerScaleX,
-scaleY:layerScaleY
-});
-canvas.add(newImg);
-if(layerRelatedPoly){
-var center=calculateCenter(newImg);
-putImageInFrame(newImg,center.centerX,center.centerY,false,false,true,layerRelatedPoly);
-}
-changeDoSaveHistory();
-saveStateByManual();
-canvas.renderAll();
-updateLayerPanel();
+var imageDataUrl=originalImageDataUrl;
+var layer=targetLayer;
 close();
+var spinner=createSpinner(canvasMenuIndex);
+var spinnerId=spinner.id;
+var startTime=Date.now();
+InpaintWorkflow.generate(imageDataUrl,maskDataUrl,prompt,negative,denoise)
+.then(function(result){
+if(!result) return;
+return new Promise(function(resolve,reject){
+fabric.Image.fromURL(result,function(img){
+if(img) resolve(img);
+else reject(new Error("Failed to create fabric.Image"));
+});
+});
+})
+.then(function(newImg){
+if(!newImg) return;
+DashboardUI.recordGeneration('Inpaint',Date.now()-startTime,prompt);
+if(layer.clipPath){
+var center=calculateCenter(layer);
+var targetParent=layer.relatedPoly||layer;
+layer.saveHistory=false;
+canvas.remove(layer);
+putImageInFrame(newImg,center.centerX,center.centerY,false,false,true,targetParent);
+}else{
+layer.saveHistory=false;
+canvas.remove(layer);
+replaceImageObject(layer,newImg,'I2I');
+}
 inpaintLogger.debug("Inpaint result applied");
+})
+.catch(function(error){
+var help=getText("comfyUI_workflowErrorHelp");
+createToastError("Inpaint Error",[error.message,help],8000);
+inpaintLogger.error("Inpaint error:",error);
+})
+.finally(function(){
+removeSpinner(spinnerId);
 });
 }
 
@@ -174,16 +150,12 @@ InpaintMask.destroy();
 if(modal){
 modal.style.display='none';
 }
-var previewArea=document.getElementById('inpaint-preview-area');
-if(previewArea) previewArea.style.display='none';
-document.getElementById('inpaint-apply-btn').disabled=true;
 document.getElementById('inpaint-prompt').value='';
 document.getElementById('inpaint-negative').value='';
 document.getElementById('inpaint-denoise').value='0.75';
 document.getElementById('inpaint-denoise-label').textContent='0.75';
 targetLayer=null;
 originalImageDataUrl=null;
-resultImageUrl=null;
 inpaintLogger.debug("Inpaint editor closed");
 }
 
