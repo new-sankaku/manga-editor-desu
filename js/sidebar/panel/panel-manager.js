@@ -265,6 +265,7 @@ saveState();
 changeDoNotSaveHistory();
 // console.log("svgPagging", svgPagging);
 
+skipForcedAdjust=true;
 fabric.loadSVGFromString(svgString,function (objects,options) {
 resizeCanvasToObject(options.width,options.height);
 
@@ -375,14 +376,13 @@ obj.selectable=false;
 });
 
 panelStrokeChange()
+skipForcedAdjust=false;
 canvas.renderAll();
-});
-
 resizeCanvas(canvas.width,canvas.height);
 changeDoSaveHistory();
 saveState();
-
 updateLayerPanel();
+});
 }
 
 
