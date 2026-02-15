@@ -50,9 +50,8 @@ isDrawingTone=false;
 }
 
 function createShape(x,y,size,shape,fillColor,opacity) {
-const color=`rgba(${parseInt(fillColor.substr(1, 2), 16)}, ${parseInt(
-    fillColor.substr(3, 2), 16
-  )}, ${parseInt(fillColor.substr(5, 2), 16)}, ${opacity})`;
+var pc=parseColor(fillColor);
+const color=`rgba(${pc.r}, ${pc.g}, ${pc.b}, ${opacity*pc.a})`;
 
 tmpCtxTone.fillStyle=color;
 tmpCtxTone.beginPath();

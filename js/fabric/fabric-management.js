@@ -1,3 +1,14 @@
+var perfCounters={forcedAdjust:0,highlight:0,coords:0,updateTemp:0,objectAdded:0,objectRemoved:0};
+var skipForcedAdjust=false;
+var perfLogger=new SimpleLogger('perf',LogLevel.DEBUG);
+setInterval(function(){
+var c=perfCounters;
+if(c.forcedAdjust||c.highlight||c.coords||c.updateTemp||c.objectAdded||c.objectRemoved){
+perfLogger.debug("[PERF/sec] forcedAdjust:"+c.forcedAdjust+" highlight:"+c.highlight+" coords:"+c.coords+" updateTemp:"+c.updateTemp+" obj+:"+c.objectAdded+" obj-:"+c.objectRemoved);
+c.forcedAdjust=0;c.highlight=0;c.coords=0;c.updateTemp=0;c.objectAdded=0;c.objectRemoved=0;
+}
+},1000);
+
 var lastActiveObjectState=null;
 
 canvas.on('selection:created',function(event) {
@@ -18,11 +29,14 @@ glfxReset();
 });
 canvas.on("object:added",(e)=>{
 eventLogger.trace('4: object:added');
+perfCounters.objectAdded++;
+perfCounters.forcedAdjust++;
 const obj=e.target;
+if(obj.fontFamily==="Font") obj.set("fontFamily","Arial");
 if (!obj.initial) {
 saveInitialState(obj);
 }
-Promise.resolve().then(()=>forcedAdjustCanvasSize());
+if(!skipForcedAdjust)Promise.resolve().then(()=>forcedAdjustCanvasSize());
 
 if(currentMode==='freehand'){
 changeObjectCursor('freehand',obj)
@@ -93,8 +107,8 @@ saveInitialState(obj);
 
 
 canvas.on('object:added',function(e) {eventLogger.trace('6: object:added');saveStateByListener(e,'object:added');});
-canvas.on('object:modified',function(e) {eventLogger.trace('7: object:modified');saveStateByListener(e,'object:modified');});
-canvas.on('object:removed',function(e) {eventLogger.trace('8: object:removed');saveStateByListener(e,'object:removed');});
+canvas.on('object:modified',function(e) {eventLogger.trace('7: object:modified');if(e.target&&e.target.isPanel)_dbgFabric.debug("[object:modified] strokeWidth="+e.target.strokeWidth+" stroke="+e.target.stroke+" notSave="+notSave());saveStateByListener(e,'object:modified');});
+canvas.on('object:removed',function(e) {eventLogger.trace('8: object:removed');perfCounters.objectRemoved++;saveStateByListener(e,'object:removed');});
 canvas.on('path:created',function(e) {eventLogger.trace('9: path:created');saveStateByListener(e,'path:created');});
 canvas.on('canvas:cleared',function(e) {eventLogger.trace('10: canvas:cleared');saveStateByListener(e,'canvas:cleared');});
 
@@ -122,7 +136,7 @@ cropFrame=null;
 //highligh from start
 canvas.on('selection:created',function(event)  {eventLogger.trace('50: selection:created');highlightActiveLayerByCanvas(event);});
 canvas.on('selection:updated',function(event)  {eventLogger.trace('51: selection:updated');highlightActiveLayerByCanvas(event);});
-canvas.on('object:added',function(event)  {eventLogger.trace('52: object:added');highlightActiveLayerByCanvas(event);});
+canvas.on('object:added',function(event)  {eventLogger.trace('52: object:added');perfCounters.highlight++;highlightActiveLayerByCanvas(event);});
 canvas.on('object:modified',function(event)  {eventLogger.trace('53: object:modified');highlightActiveLayerByCanvas(event);});
 canvas.on('selection:cleared',function() {eventLogger.trace('13: selection:cleared');highlightClear();});
 //highligh from finish
@@ -294,28 +308,37 @@ obj.set('fill','rgba(255,255,255,0.25)');
 });
 
 let lastCheckObject=null;
+var _dbgFabric=new SimpleLogger('DBG-fabric',LogLevel.DEBUG);
 canvas.on('mouse:down',function(e) {
 eventLogger.trace('18: mouse:down');
 if(canvas.isDrawingMode||isKnifeMode){
 return;
 }
 if (e.target) {
+if(e.target.isPanel)_dbgFabric.debug("[mouse:down] BEFORE strokeWidth="+e.target.strokeWidth+" stroke="+e.target.stroke);
 changeDoNotSaveHistory();
 e.target.originalOpacity=e.target.opacity;
 e.target.opacity=0.5;
 canvas.renderAll();
+if(e.target.isPanel)_dbgFabric.debug("[mouse:down] AFTER renderAll strokeWidth="+e.target.strokeWidth+" stroke="+e.target.stroke);
 lastCheckObject=e.target;
 }
 });
 
 canvas.on('mouse:up',function(e) {
 eventLogger.trace('19: mouse:up');
-if (e.target&&e.target.originalOpacity!==undefined) {
-e.target.opacity=e.target.originalOpacity;
-delete e.target.originalOpacity;
+var target=lastCheckObject||e.target;
+if(target&&target.originalOpacity!==undefined){
+if(target.isPanel)_dbgFabric.debug("[mouse:up] BEFORE strokeWidth="+target.strokeWidth+" stroke="+target.stroke);
+target.opacity=target.originalOpacity;
+delete target.originalOpacity;
 canvas.renderAll();
+if(target.isPanel)_dbgFabric.debug("[mouse:up] AFTER renderAll strokeWidth="+target.strokeWidth+" stroke="+target.stroke);
 changeDoSaveHistory();
-highlightActiveLayerByCanvas(e.target);
+highlightActiveLayerByCanvas(target);
+}
+if(!e.target||canvas.getActiveObject()===e.target){
+lastCheckObject=null;
 }
 });
 
@@ -468,12 +491,19 @@ activePoint=null;
 const pointer=canvas.getPointer(event.e);
 if (currentMode==="point"&&points.length>=4) {
 if (isNearStartPoint(pointer.x,pointer.y,points[0])) {
+var t0=performance.now();
 points.pop();
 points.push({x: points[0].x,y: points[0].y});
 points=processPoints(points);
+var t1=performance.now();
 const geometry=createJSTSPolygon(points);
+var t2=performance.now();
 if (geometry&&geometry.isValid()) {
-createSpeechBubble(mergeOverlappingShapes(geometry));
+var merged=mergeOverlappingShapes(geometry);
+var t3=performance.now();
+createSpeechBubble(merged);
+var t4=performance.now();
+perfLogger.warn("[PERF:point mouse:up] processPoints:"+Math.round(t1-t0)+"ms JSTS:"+Math.round(t2-t1)+"ms merge:"+Math.round(t3-t2)+"ms createBubble:"+Math.round(t4-t3)+"ms total:"+Math.round(t4-t0)+"ms pts:"+points.length);
 } else {
 canvasLogger.warn("jsts up error");
 sbClear();
@@ -488,11 +518,18 @@ updateObjectSelectability();
 updateTemporaryShapes();
 }
 } else if (currentMode==="freehand"&&points.length>=4) {
+var t0=performance.now();
 points.push({x: points[0].x,y: points[0].y});
 points=processPoints(points);
+var t1=performance.now();
 const geometry=createJSTSPolygon(points);
+var t2=performance.now();
 if (geometry&&geometry.isValid()) {
-createSpeechBubble(mergeOverlappingShapes(geometry));
+var merged=mergeOverlappingShapes(geometry);
+var t3=performance.now();
+createSpeechBubble(merged);
+var t4=performance.now();
+perfLogger.warn("[PERF:freehand mouse:up] processPoints:"+Math.round(t1-t0)+"ms JSTS:"+Math.round(t2-t1)+"ms merge:"+Math.round(t3-t2)+"ms createBubble:"+Math.round(t4-t3)+"ms total:"+Math.round(t4-t0)+"ms pts:"+points.length);
 points=[];
 } else {
 canvasLogger.warn("jsts up error");
@@ -558,26 +595,22 @@ const rect=getSpeechBubbleRectBySVG(event.target);
 const textbox=getSpeechBubbleTextBySVG(event.target);
 canvas.remove(rect);
 canvas.remove(textbox);
-canvas.requestRenderAll();
 }
 if (isSpeechBubbleText(event.target)) {
 const rect=getSpeechBubbleRectBySVG(event.target.targetObject);
 canvas.remove(rect);
 event.target.targetObject.customType="";
-canvas.requestRenderAll();
 }
 if (isFreehandBubblePath(event.target)) {
 const rect=getFreehandBubbleRectByPath(event.target);
 const textbox=getFreehandBubbleTextByPath(event.target);
 canvas.remove(rect);
 canvas.remove(textbox);
-canvas.requestRenderAll();
 }
 if (isFreehandBubbleText(event.target)) {
 const rect=getFreehandBubbleRectByPath(event.target.targetObject);
 canvas.remove(rect);
 event.target.targetObject.customType="";
-canvas.requestRenderAll();
 }
 });
 
@@ -628,8 +661,13 @@ eventLogger.trace('37: selection:updated');
 closeMenu();
 });
 
+var lastCoordsTime=0;
 canvas.on("mouse:move",function (options) {
 if (coordCheckbox.checked) {
+var now=Date.now();
+if(now-lastCoordsTime<50)return;
+lastCoordsTime=now;
+perfCounters.coords++;
 updateCoordinates(options);
 }
 });

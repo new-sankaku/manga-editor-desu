@@ -17,7 +17,20 @@ if(typeof fabricImage.fill==='string'){
 tempCtx.fillStyle=fabricImage.fill;
 tempCtx.fillRect(0,0,fabricImage.width,fabricImage.height);
 }else if(fabricImage.fill instanceof fabric.Gradient){
-var grad=tempCtx.createLinearGradient(0,0,fabricImage.width,0);
+var coords=fabricImage.fill.coords;
+var x1,y1,x2,y2;
+if(fabricImage.fill.gradientUnits==='percentage'){
+x1=coords.x1*fabricImage.width;
+y1=coords.y1*fabricImage.height;
+x2=coords.x2*fabricImage.width;
+y2=coords.y2*fabricImage.height;
+}else{
+x1=coords.x1;
+y1=coords.y1;
+x2=coords.x2;
+y2=coords.y2;
+}
+var grad=tempCtx.createLinearGradient(x1,y1,x2,y2);
 fabricImage.fill.colorStops.forEach(function(stop){
 grad.addColorStop(stop.offset,stop.color);
 });

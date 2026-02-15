@@ -1,7 +1,7 @@
 .flow-floating-window {
   position: absolute;
   background-color: var(--background-color-A);
-  border: var(--boader-color-1px-solid-B);
+  border: var(--border-color-1px-solid-B);
   border-radius: var(--fjm-border-radius);
   z-index: var(--fjm-z-index);
   min-width: 300px;
@@ -9,21 +9,35 @@
   color: var(--text-color-B);
   font-family: var(--fjm-font-family);
   resize: both;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .flow-window-header {
   cursor: move;
-  padding: 10px;
+  padding: 5px 10px;
   background-color: var(--background-color-B);
   color: var(--text-color-B);
-  display: var(--display-flex);
-  justify-content: var(--justify-content-space-between);
-  align-items: var(--align-items-center);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  height: 30px;
 }
 
 .flow-close-button {
   cursor: var(--fjm-button-cursor);
+  font-size: 20px;
+  line-height: 20px;
+}
+
+.flow-resize-handle {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 70%, var(--fjm-border-color) 70%);
 }
 
 .flow-window-content {

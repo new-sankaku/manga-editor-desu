@@ -1,6 +1,37 @@
 let finalLayerOrder=[];
 let lastHighlightGuid=null;
 
+function getLayerTypeIcon(layer){
+if(isSpeechBubbleSVG(layer)||isFreehandBubblePath(layer)){
+return '<i class="material-icons">chat_bubble_outline</i>';
+}
+if(isPanel(layer)){
+return '<i class="material-icons">crop_landscape</i>';
+}
+if(isImage(layer)){
+return '<i class="material-icons">image</i>';
+}
+if(isVerticalText(layer)){
+return '<i class="material-icons">text_rotation_none</i>';
+}
+if(isText(layer)){
+return '<i class="material-icons">text_fields</i>';
+}
+if(isPath(layer)){
+return '<i class="material-icons">gesture</i>';
+}
+if(isGroup(layer)){
+return '<i class="material-icons">folder</i>';
+}
+return '<i class="material-icons">layers</i>';
+}
+
+function putLayerBtnSeparator(buttonsDiv){
+var sep=document.createElement("span");
+sep.className="layer-btn-separator";
+buttonsDiv.appendChild(sep);
+}
+
 let lastUpdateTime=0;
 let updateLayerPanelTimer=null;
 let pendingUpdate=false;
@@ -125,8 +156,8 @@ nameTextArea.value=fullText.substring(0,15);
 
 setNameTextAreaProperties(layer,nameTextArea,index);
 
-if (isText(layer)) {
-detailsDiv.style.display="flex";
+if (isText(layer)||isSpeechBubbleSVG(layer)||isFreehandBubblePath(layer)) {
+detailsDiv.style.flexDirection="row";
 detailsDiv.style.alignItems="center";
 }
 
@@ -134,24 +165,6 @@ detailsDiv.appendChild(nameTextArea);
 
 putViewButton(buttonsDiv,layer,index);
 putMoveLockButton(buttonsDiv,layer,index);
-if (isImage(layer)) {
-putCheckButton(buttonsDiv,layer,index);
-}
-
-if (isPanel(layer)) {
-putRunT2IButton(buttonsDiv,layer,index);
-putSeedButton(buttonsDiv,layer,index);
-putCropImageDownloadButton(buttonsDiv,layer,index);
-}
-if (isImage(layer)) {
-putRunI2IButton(buttonsDiv,layer,index);
-putPromptButton(buttonsDiv,layer,index);
-putUpscalerButton(buttonsDiv,layer,index);
-putInterrogateDanbooruButtons(buttonsDiv,layer,index);
-putInterrogateClipButtons(buttonsDiv,layer,index);
-putImageDownloadButton(buttonsDiv,layer,index);
-putRembgButton(buttonsDiv,layer,index);
-}
 putDeleteButton(buttonsDiv,layer,index);
 
 layerDiv.setAttribute("data-guid",layer.guid);
@@ -163,6 +176,56 @@ layerDiv.appendChild(previewDiv);
 layerDiv.appendChild(detailsDiv);
 detailsDiv.appendChild(buttonsDiv);
 
+const activeObject=canvas.getActiveObject();
+var isActive=lastHighlightGuid&&lastHighlightGuid==layer.guid&&
+(!activeObject||layer.guid==activeObject.guid);
+
+if(isActive&&(isPanel(layer)||isImage(layer))){
+var actionBar=document.createElement("div");
+actionBar.className="layer-action-bar";
+if(isPanel(layer)){
+putActionButton(actionBar,"directions_run","actAiGenerate",function(){
+var spinner=createSpinner(index);T2I(layer,spinner);
+},AI_ROLES.Image2Image);
+putActionButton(actionBar,"recycling","actSeedApply",function(){
+if(layer.tempSeed){layer.text2img_seed=layer.tempSeed;createToast("Recycling Seed",layer.text2img_seed);}else{createToast("Nothing Seed","");}
+},AI_ROLES.PutSeed);
+putActionBarSeparator(actionBar);
+putActionButton(actionBar,"download","actDownload",function(){
+imageObject2DataURLByCrop(layer).then(function(croppedDataURL){if(croppedDataURL){var link=getLink(croppedDataURL);link.click();}});
+});
+}
+if(isImage(layer)){
+putActionButton(actionBar,"directions_run","actAiGenerate",function(){
+var spinner=createSpinner(index);I2I(layer,spinner);
+},AI_ROLES.Text2Image);
+putActionButton(actionBar,"photo_size_select_large","actUpscale",function(){
+var spinner=createSpinner(index);aiUpscale(layer,spinner);
+},AI_ROLES.Upscaler);
+putActionButton(actionBar,"wallpaper","actRemoveBg",function(){
+var spinner=createSpinner(index);aiRembg(layer,spinner);
+},AI_ROLES.RemoveBG);
+putActionButton(actionBar,"3d_rotation","actAngleGen",function(){
+openAngleEditor(layer);
+},AI_ROLES.I2I_Angle);
+putActionButton(actionBar,"inventory","actDeepDanbooru",function(){
+var spinner=createSpinnerSuccess(index);sdwebuiInterrogate(layer,"deepdanbooru",spinner.id);
+},AI_ROLES.Image2Prompt_DEEPDOORU);
+putActionButton(actionBar,"link","actClip",function(){
+var spinner=createSpinnerSuccess(index);sdwebuiInterrogate(layer,"clip",spinner.id);
+},AI_ROLES.Image2Prompt_CLIP);
+putActionBarSeparator(actionBar);
+putActionButton(actionBar,"text_snippet","actPromptApply",function(){
+if(layer.tempPrompt){layer.text2img_prompt=layer.tempPrompt;createToast("Apply Prompt",layer.text2img_prompt);}else{createToast("Nothing Prompt","");}
+if(layer.tempNegative){layer.text2img_negative=layer.tempNegative;createToast("Apply Negative Prompt",layer.text2img_negative);}else{createToast("Nothing Negative Prompt","");}
+},AI_ROLES.PutPrompt);
+putActionButton(actionBar,"download","actDownload",function(){
+var dataURL=imageObject2DataURL(layer);var link=getLink(dataURL);link.click();
+});
+}
+detailsDiv.appendChild(actionBar);
+}
+
 layerDiv.onclick=function () {
 canvas.setActiveObject(layer);
 canvas.renderAll();
@@ -171,21 +234,15 @@ updateControls(layer);
 };
 
 if (level>0) {
-layerDiv.style.border='none';
-layerDiv.style.marginLeft=`${level * 18}px`;
-layerDiv.style.paddingLeft="5px";
-layerDiv.style.borderLeft=getCssValue('--boader-color-2px-solid-C');
+layerDiv.classList.add("layer-item-nested");
+layerDiv.style.marginLeft=`${level * 16}px`;
+layerDiv.style.paddingLeft="8px";
 } else {
-layerDiv.style.border='none';
 isEven=!isEven;
 }
 
-const activeObject=canvas.getActiveObject();
-if(lastHighlightGuid&&activeObject&&
-layer.guid==activeObject.guid&&
-lastHighlightGuid==layer.guid){
-
-layerDiv.style.background="#9da600";
+if(isActive){
+layerDiv.classList.add("layer-active");
 }else if(isEven) {
 layerDiv.style.background=getCssValue('--odd-layer');
 } else {
@@ -213,11 +270,10 @@ nameTextArea.rows=1;
 nameTextArea.style.resize="none";
 nameTextArea.style.width="100%";
 nameTextArea.style.boxSizing="border-box";
-nameTextArea.style.border="none";
-nameTextArea.style.outline="none";
 nameTextArea.style.color=getCssValue("--text-color-B");
-nameTextArea.style.borderColor=getCssValue("--boader-color-1px-solid-B");
-nameTextArea.style.background=getCssValue("--background-color-B");
+nameTextArea.onclick=function(e){
+e.stopPropagation();
+};
 nameTextArea.oninput=function () {
 layer.name=nameTextArea.value;
 };
@@ -225,6 +281,12 @@ layer.name=nameTextArea.value;
 if (isText(layer)) {
 nameTextArea.value=layer.text;
 nameTextArea.style.flex="1";
+nameTextArea.style.width="auto";
+nameTextArea.style.marginRight="5px";
+}
+if (isSpeechBubbleSVG(layer)||isFreehandBubblePath(layer)) {
+nameTextArea.style.flex="1";
+nameTextArea.style.width="auto";
 nameTextArea.style.marginRight="5px";
 }
 if (isImage(layer)&&layer.text) {
@@ -340,21 +402,20 @@ layerDiv.appendChild(previewDiv);
 }
 
 function removeLayer(layer) {
+changeDoNotSaveHistory();
 canvas.remove(layer);
+changeDoSaveHistory();
+saveStateByManual();
 updateLayerPanel();
 
 if (canvas.getActiveObject()===layer) {
 canvas.discardActiveObject();
-canvas.requestRenderAll();
-} else {
-canvas.requestRenderAll();
 }
+canvas.requestRenderAll();
 }
 
 function highlightClear() {
-var layers=document.querySelectorAll(".layer-item");
-layers.forEach(layer=>layer.classList.remove("active"));
-
+lastHighlightGuid=null;
 updateLayerPanel();
 }
 
@@ -365,9 +426,6 @@ highlightActiveLayerByCanvas();
 
 function highlightActiveLayerByCanvas(object=null) {
 
-highlightClear();
-
-lastHighlightGuid=null;
 let activeObject;
 if(object){
 activeObject=object;
@@ -384,11 +442,8 @@ showI2IPrompts(activeObject);
 noShowPrompt();
 }
 
-const layerDiv=document.querySelector(`.layer-item[data-guid="${activeObject.guid}"]`);
-if(layerDiv) {
-layerDiv.style.background="#9da600";
-lastHighlightGuid=activeObject.guid;
-}
+lastHighlightGuid=activeObject?activeObject.guid:null;
+updateLayerPanel();
 }
 
 

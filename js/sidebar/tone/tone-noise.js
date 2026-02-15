@@ -42,16 +42,6 @@ var toneNoiseGradientStartY=null;
 var toneNoiseGradientEndX=null;
 var toneNoiseGradientEndY=null;
 
-function hexToRgb(hex) {
-const result=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-return result
-? {
-r: parseInt(result[1],16),
-g: parseInt(result[2],16),
-b: parseInt(result[3],16),
-}
-: null;
-}
 
 function generateNoiseWithGradient(color,noiseMin,noiseMax) {
 const imageData=tmpCtxToneNoise.createImageData(
@@ -59,7 +49,7 @@ tmpCanvasToneNoise.width,
 tmpCanvasToneNoise.height
 );
 const data=imageData.data;
-const rgb=hexToRgb(color);
+const rgb=parseColor(color);
 
 const startX=parseInt(toneNoiseGradientStartX.value);
 const startY=parseInt(toneNoiseGradientStartY.value);
@@ -82,7 +72,7 @@ if (noise<noiseThreshold) {
 data[index]=rgb.r;
 data[index+1]=rgb.g;
 data[index+2]=rgb.b;
-data[index+3]=255;
+data[index+3]=Math.round(255*rgb.a);
 } else {
 data[index]=255;
 data[index+1]=255;

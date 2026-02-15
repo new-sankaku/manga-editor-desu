@@ -25,16 +25,18 @@ if (file.type==='image/svg+xml') {
 var reader=new FileReader();
 reader.onload=function(event) {
 var svgText=event.target.result;
+panelLogger.info("[drop SVG] stateStack.length="+stateStack.length+" objectCount="+getObjectCount()+" canvasGUID="+getCanvasGUID());
 if (stateStack.length>=2&&getObjectCount()>0) {
+panelLogger.info("[drop SVG] putImageInFrame branch");
 var canvasX=x/canvasContinerScale;
 var canvasY=y/canvasContinerScale;
 putImageInFrame(svgText,canvasX,canvasY);
 } else {
-
-// SVGをFabric.jsのCanvasに読み込む
+panelLogger.info("[drop SVG] addInitialImageToCanvas branch");
 fabric.loadSVGFromString(svgText,function(objects,options) {
 var loadedObject=fabric.util.groupSVGElements(objects,options);
 addInitialImageToCanvas(loadedObject);
+panelLogger.info("[drop SVG] after addInitialImageToCanvas: stateStack.length="+stateStack.length);
 });
 }
 };
@@ -56,14 +58,17 @@ reader.onload=function (f) {
 var data=f.target.result;
 
 fabric.Image.fromURL(data,function (img) {
-panelLogger.debug("drop stateStack.length",stateStack.length);
+panelLogger.info("[drop] stateStack.length="+stateStack.length+" objectCount="+getObjectCount()+" canvasGUID="+getCanvasGUID()+" btmProjectsMap.size="+btmProjectsMap.size);
 if (stateStack.length>=2&&getObjectCount()>0) {
+panelLogger.info("[drop] putImageInFrame branch (existing content)");
 var canvasX=x/canvasContinerScale;
 var canvasY=y/canvasContinerScale;
 putImageInFrame(img,canvasX,canvasY);
 } else {
+panelLogger.info("[drop] addInitialImageToCanvas branch (first image on canvas)");
 addInitialImageToCanvas(img);
 }
+panelLogger.info("[drop] after image added: stateStack.length="+stateStack.length+" objectCount="+getObjectCount());
 
 setImage2ImageInitPrompt(img);
 });
@@ -387,20 +392,7 @@ updateLayerPanel();
 
 /** Disallow drag-on-drop. */
 document.addEventListener("DOMContentLoaded",function () {
-var svgPreviewArea=$("svg-container-vertical");
-svgPreviewArea.addEventListener(
-"mousedown",
-function (event) {
-event.preventDefault();
-event.stopPropagation();
-},
-false
-);
-});
-
-/** Disallow drag-on-drop. */
-document.addEventListener("DOMContentLoaded",function () {
-var svgPreviewArea=$("svg-container-landscape");
+var svgPreviewArea=$("svg-container-template");
 svgPreviewArea.addEventListener(
 "mousedown",
 function (event) {
@@ -547,9 +539,11 @@ var strokeColorValue=$("panelStrokeColor").value;
 var opacityValue=$("panelOpacity").value;
 const opacity=opacityValue/100;
 var fillValue=$("panelFillColor").value;
-
+var _dbgLogger=new SimpleLogger('DBG-panel',LogLevel.DEBUG);
+_dbgLogger.debug("[panelAllChange] inputs: sw="+strokeWidthValue+" stroke="+strokeColorValue+" fill="+fillValue+" opacity="+opacityValue);
 canvas.getObjects().forEach(function (obj) {
 if (isPanel(obj)) {
+_dbgLogger.debug("[panelAllChange] BEFORE obj.strokeWidth="+obj.strokeWidth+" obj.stroke="+obj.stroke);
 obj.set({
 strokeWidth: parseFloat(strokeWidthValue),
 strokeUniform: true,
@@ -557,6 +551,7 @@ strokeUniform: true,
 obj.set("stroke",strokeColorValue);
 obj.set("fill",fillValue);
 obj.set("opacity",opacity);
+_dbgLogger.debug("[panelAllChange] AFTER obj.strokeWidth="+obj.strokeWidth+" obj.stroke="+obj.stroke);
 }
 });
 canvas.requestRenderAll();
@@ -658,6 +653,11 @@ changeView("layer-panel",this.checked);
 });
 $("view_controles_checkbox").addEventListener("change",function () {
 changeView("controls",this.checked);
+});
+$("view_prompt_checkbox").addEventListener("change",function () {
+if(this.checked!==areNamesVisible){
+View();
+}
 });
 });
 

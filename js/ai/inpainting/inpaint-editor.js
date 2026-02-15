@@ -119,7 +119,7 @@ else reject(new Error("Failed to create fabric.Image"));
 })
 .then(function(newImg){
 if(!newImg) return;
-DashboardUI.recordGeneration('Inpaint',Date.now()-startTime,prompt);
+DashboardUI.recordGeneration('Inpaint',Date.now()-startTime,prompt,'');
 if(layer.clipPath){
 var center=calculateCenter(layer);
 var targetParent=layer.relatedPoly||layer;
@@ -134,6 +134,7 @@ replaceImageObject(layer,newImg,'I2I');
 inpaintLogger.debug("Inpaint result applied");
 })
 .catch(function(error){
+DashboardUI.recordFailure('Inpaint');
 var help=getText("comfyUI_workflowErrorHelp");
 createToastError("Inpaint Error",[error.message,help],8000);
 inpaintLogger.error("Inpaint error:",error);

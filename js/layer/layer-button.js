@@ -1,4 +1,22 @@
 
+function putActionButton(container,icon,labelKey,onclick,requiredRole){
+if(requiredRole&&hasNotRole(requiredRole)){return;}
+var button=document.createElement("button");
+button.className="layer-action-btn";
+var label=document.createElement("span");
+label.setAttribute("data-i18n",labelKey);
+label.textContent=i18next.t(labelKey);
+button.appendChild(label);
+button.onclick=function(e){e.stopPropagation();onclick();};
+container.appendChild(button);
+}
+
+function putActionBarSeparator(container){
+var sep=document.createElement("span");
+sep.className="layer-action-sep";
+container.appendChild(sep);
+}
+
 function putCropImageDownloadButton(buttonsDiv,layer,index) {
 var button=document.createElement("button");
 button.innerHTML='<i class="material-icons">download</i>';
@@ -148,34 +166,6 @@ addTooltipByElement(button,"upscaleButton");
 buttonsDiv.appendChild(button);
 }
 
-
-
-function putCheckButton(buttonsDiv,layer,index) {
-var btn=document.createElement("button");
-btn.id="checkButton-"+index;
-
-if(layer.layerCheck==undefined){
-layer.layerCheck=true;
-}
-
-if(layer.layerCheck){
-btn.innerHTML='<i class="material-icons">check_circle</i>';
-}else{
-btn.innerHTML='<i class="material-icons">radio_button_unchecked</i>';
-}
-
-btn.onclick=function (e) {
-layer.layerCheck=!layer.layerCheck;
-if(layer.layerCheck){
-btn.innerHTML='<i class="material-icons">check_circle</i>';
-}else{
-btn.innerHTML='<i class="material-icons">radio_button_unchecked</i>';
-}
-};
-
-addTooltipByElement(btn,"checkButton");
-buttonsDiv.appendChild(btn);
-}
 
 
 

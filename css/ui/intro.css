@@ -1,7 +1,7 @@
 .introjs-tooltip {
   background-color: rgba(44, 44, 44, 0.9);
   color: #d4af37;
-  border-radius: 8px;
+  border-radius: var(--fjm-border-radius);
   padding: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   font-family: 'Courier New', Courier, monospace;
@@ -20,7 +20,7 @@
 .introjs-button, .introjs-tooltip .introjs-button {
   background-color: #4b2e2e;
   border: 1px solid #d4af37;
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
   color: #fff;
   padding: 10px 15px;
   text-transform: uppercase;

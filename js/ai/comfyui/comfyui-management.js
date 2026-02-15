@@ -212,7 +212,7 @@ if (result&&result.error) {
 createToastError("Generation Error",result.message);
 throw new Error(result.message);
 } else if (result) {
-DashboardUI.recordGeneration(Type,Date.now()-startTime,requestData.prompt||'');
+DashboardUI.recordGeneration(Type,Date.now()-startTime,requestData.prompt||'',requestData.model||'');
 if(isPageChanged(canvasGuid)){
 var applied=await applyGeneratedImageToOriginalPage(canvasGuid,result);
 if(applied){
@@ -240,6 +240,7 @@ throw new Error("Unexpected error: No result returned from comfyui_put_queue_v2"
 })
 .catch((error)=>{
 removeGenerationTask(canvasGuid);
+DashboardUI.recordFailure(Type);
 let help=getText("comfyUI_workflowErrorHelp");
 createToastError("Generation Error",[error.message,help],8000);
 comfyuiLogger.error("Error:",error);

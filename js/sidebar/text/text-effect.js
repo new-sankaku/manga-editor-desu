@@ -3,8 +3,6 @@ var isNeonEnabled=false;
 
 function updateTextControls(object) {
 
-// console.log("isVerticalText ", typeof window.isVerticalText); 
-
 if (isVerticalText(object)) {
 if (object.fill) {
 return;
@@ -21,6 +19,11 @@ $('textColorPicker').value=hexColor;
 }
 $('fontSizeSlider').value=object.fontSize;
 }
+if (object.fontFamily) {
+var fmDisplay=$("fm-selected-font-fontSelector");
+if(fmDisplay) fmDisplay.textContent=object.fontFamily;
+}
+updateBoldToggleUI();
 }
 
 function applyCSSTextEffect() {
@@ -203,6 +206,7 @@ fontFamily: selectedFont,
 fill: $("textColorPicker").value,
 stroke: $("textOutlineColorPicker").value,
 strokeWidth: parseInt(fontStrokeWidth),
+backgroundColor: $("textBgColorPicker").value,
 textAlign: selectedValue,
 
 cornerSize: 8,
@@ -237,20 +241,29 @@ canvas.renderAll();
 
 function toggleBold() {
 var activeObject=canvas.getActiveObject();
-
-if (isVerticalText(activeObject)) {
-activeObject.getObjects().forEach(function (obj) {
-if (obj.type==='text') {
-var isBold=obj.fontWeight==="bold";
-obj.set("fontWeight",isBold ? "" : "bold");
-}
-});
-canvas.renderAll();
-} else if (isText(activeObject)) {
+if(isText(activeObject)){
 var isBold=activeObject.fontWeight==="bold";
 activeObject.set("fontWeight",isBold ? "" : "bold");
 canvas.renderAll();
 }
+updateBoldToggleUI();
+}
+
+function toggleBoldWithUI(btn) {
+toggleBold();
+}
+
+function updateBoldToggleUI() {
+var btn=$("bold-toggle-btn");
+if(!btn) return;
+var activeObject=canvas.getActiveObject();
+if(!activeObject||!isText(activeObject)) {
+btn.classList.remove("selected");
+return;
+}
+var isBold=activeObject.fontWeight==="bold";
+if(isBold) btn.classList.add("selected");
+else btn.classList.remove("selected");
 }
 
 function changeFontSize(size) {
@@ -298,6 +311,17 @@ activeObject.set("stroke",color);
 canvas.renderAll();
 } else if (isText(activeObject)) {
 activeObject.set("stroke",color);
+canvas.renderAll();
+}
+}
+function changeTextBgColor(color) {
+var activeObject=canvas.getActiveObject();
+var isTransparent=color==='rgba(0,0,0,0)';
+if(isVerticalText(activeObject)){
+activeObject.set("textBackgroundColor",isTransparent?'':color);
+canvas.renderAll();
+}else if(isText(activeObject)){
+activeObject.set("backgroundColor",isTransparent?'':color);
 canvas.renderAll();
 }
 }

@@ -55,22 +55,14 @@ start.y,
 end.x,
 end.y
 );
-gradient.addColorStop(
-0,
-`${lineColor}${Math.round(gradientStart * 255)
-        .toString(16)
-        .padStart(2, "0")}`
-);
-gradient.addColorStop(
-1,
-`${lineColor}${Math.round(gradientEnd * 255)
-        .toString(16)
-        .padStart(2, "0")}`
-);
+var pc=parseColor(lineColor);
+gradient.addColorStop(0,`rgba(${pc.r},${pc.g},${pc.b},${gradientStart*pc.a})`);
+gradient.addColorStop(1,`rgba(${pc.r},${pc.g},${pc.b},${gradientEnd*pc.a})`);
 tempCtxSpeedLine.strokeStyle=gradient;
 } else {
-tempCtxSpeedLine.strokeStyle=lineColor;
-tempCtxSpeedLine.globalAlpha=options.opacity||1;
+var pc=parseColor(lineColor);
+tempCtxSpeedLine.strokeStyle=`rgb(${pc.r},${pc.g},${pc.b})`;
+tempCtxSpeedLine.globalAlpha=pc.a;
 }
 
 tempCtxSpeedLine.lineWidth=options.strokeWidth||1;

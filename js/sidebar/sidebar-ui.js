@@ -6,15 +6,41 @@ const sidebarValueMap=new Map();
 const penValueMap=new Map();
 const effectValueMap=new Map();
 
-function savePenValueMap(element) {
-penValueMap.set(element.id,element.value);
-}
-function saveEffectValueMap(element) {
-effectValueMap.set(element.id,element.value);
+(function(){
+try{
+var s=localStorage.getItem('sidebarValues');
+if(s)Object.entries(JSON.parse(s)).forEach(function(e){sidebarValueMap.set(e[0],e[1]);});
+var p=localStorage.getItem('penValues');
+if(p)Object.entries(JSON.parse(p)).forEach(function(e){penValueMap.set(e[0],e[1]);});
+var ef=localStorage.getItem('effectValues');
+if(ef)Object.entries(JSON.parse(ef)).forEach(function(e){effectValueMap.set(e[0],e[1]);});
+}catch(e){}
+})();
+
+var _sidebarSaveTimer=null;
+function _debouncedSidebarSave(){
+if(_sidebarSaveTimer)clearTimeout(_sidebarSaveTimer);
+_sidebarSaveTimer=setTimeout(function(){
+var chk=document.getElementById('settingsAutoSaveCheckbox');
+if(!chk||!chk.checked)return;
+localStorage.setItem('sidebarValues',JSON.stringify(Object.fromEntries(sidebarValueMap)));
+localStorage.setItem('penValues',JSON.stringify(Object.fromEntries(penValueMap)));
+localStorage.setItem('effectValues',JSON.stringify(Object.fromEntries(effectValueMap)));
+},500);
 }
 
-function saveValueMap(element) {
+function savePenValueMap(element){
+penValueMap.set(element.id,element.value);
+_debouncedSidebarSave();
+}
+function saveEffectValueMap(element){
+effectValueMap.set(element.id,element.value);
+_debouncedSidebarSave();
+}
+
+function saveValueMap(element){
 sidebarValueMap.set(element.id,element.value);
+_debouncedSidebarSave();
 }
 
 function addNumber(id,label,min,max,value,step=1) {

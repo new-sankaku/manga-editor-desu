@@ -84,8 +84,6 @@ timestamp:Date.now(),
 currentPageGuid:getCanvasGUID(),
 pageOrder:btmGetGuids()
 });
-var msg=getText('autoSaveComplete')||'Auto-saved';
-createToast(msg,'',1000);
 autoSaveLogger.info("Auto-save complete, pages="+pages.length);
 }catch(e){
 autoSaveLogger.error("Auto-save failed:",e);
@@ -180,27 +178,22 @@ try{
 btmProjectsMap.clear();
 var btmImageContainer=$("btm-image-container");
 if(btmImageContainer)btmImageContainer.innerHTML='';
+var pageBlobs={};
 for(var i=0;i<pages.length;i++){
-var page=pages[i];
-var previewLink='';
-btmProjectsMap.set(page.guid,{imageLink:previewLink,blob:page.blob});
+pageBlobs[pages[i].guid]=pages[i].blob;
 }
+var bufferList=[];
+for(var j=0;j<metadata.pageOrder.length;j++){
+var g=metadata.pageOrder[j];
+if(pageBlobs[g]){
+var ab=await pageBlobs[g].arrayBuffer();
+bufferList.push({name:g,data:new Uint8Array(ab)});
+}
+}
+await multiLoadLz4(bufferList);
 var targetGuid=metadata.currentPageGuid||metadata.pageOrder[0];
 if(!btmProjectsMap.has(targetGuid))targetGuid=btmProjectsMap.keys().next().value;
 await loadLz4BlobProjectFile(btmProjectsMap.get(targetGuid).blob,targetGuid);
-for(var j=0;j<metadata.pageOrder.length;j++){
-var g=metadata.pageOrder[j];
-if(btmProjectsMap.has(g)){
-var pd=btmProjectsMap.get(g);
-var link=pd.imageLink;
-if(!link&&g===targetGuid){
-link=getCropAndDownloadLinkByMultiplier(1,"jpeg")||'';
-btmProjectsMap.set(g,{imageLink:link,blob:pd.blob});
-}
-btmAddImage(link,pd.blob,g,false);
-}
-}
-await clearAutoSave();
 autoSaveLogger.info("Recovery complete");
 createToast(getText('autoSaveRecoveryTitle')||'Recovery','OK',2000);
 }catch(e){

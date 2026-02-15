@@ -48,6 +48,7 @@ input[type="range"] {
   margin-left: 2px;
   margin-bottom: -7px;
   width: calc(100% - 5px);
+  accent-color: var(--slider-accent);
 }
 .slider-container {
   display: flex;
@@ -81,10 +82,15 @@ input[type="range"] {
 
 
 .jscolor-color-picker {
-margin-left: auto;
-border: 0;
-cursor: pointer;
-width: 40px;
-height: 20px;
-border-radius: 3px;
-} 
+margin-left:auto;
+margin-right:var(--input-margin);
+border:0 !important;
+cursor:pointer;
+width:40px !important;
+max-width:40px !important;
+min-width:0 !important;
+height:20px !important;
+padding:0 !important;
+border-radius:var(--fjm-button-border-radius);
+box-sizing:border-box !important;
+}

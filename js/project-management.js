@@ -202,7 +202,60 @@ sdWebUIPageUrl:{id:'sdWebUIPageUrl',default:'http://127.0.0.1:7860'},
 comfyUIPageUrl:{id:'comfyUIPageUrl',default:'http://127.0.0.1:8188'},
 apiHeartbeatCheckbox:{id:'apiHeartbeatCheckbox',default:true,type:'checkbox'},
 autoSaveEnabled:{id:'autoSaveCheckbox',default:true,type:'checkbox'},
-autoSaveInterval:{id:'autoSaveInterval',default:'60'}
+autoSaveInterval:{id:'autoSaveInterval',default:'60'},
+settingsAutoSaveEnabled:{id:'settingsAutoSaveCheckbox',default:true,type:'checkbox'},
+view_prompt_checkbox:{id:'view_prompt_checkbox',default:false,type:'checkbox'},
+customPanelSizeX:{id:'customPanelSizeX',default:'1380'},
+customPanelSizeY:{id:'customPanelSizeY',default:'4000'},
+panelStrokeColor:{id:'panelStrokeColor',default:'rgba(0,0,0,1)'},
+panelFillColor:{id:'panelFillColor',default:'rgba(255,255,255,1)'},
+panelStrokeWidth:{id:'panelStrokeWidth',default:'2'},
+panelOpacity:{id:'panelOpacity',default:'100'},
+bubbleStrokeColor:{id:'bubbleStrokeColor',default:'rgba(0,0,0,1)'},
+bubbleFillColor:{id:'bubbleFillColor',default:'rgba(255,255,255,1)'},
+speechBubbleOpacity:{id:'speechBubbleOpacity',default:'100'},
+bubbleStrokewidht:{id:'bubbleStrokewidht',default:'4.0'},
+speechBubbleLineSizeSlider:{id:'speechBubbleLineSizeSlider',default:'3'},
+sbStrokeColor:{id:'sbStrokeColor',default:'rgba(0,0,0,1)'},
+sbFillColor:{id:'sbFillColor',default:'rgba(255,255,255,1)'},
+sbSmoothing:{id:'sbSmoothing',default:true,type:'checkbox'},
+sbStrokeWidth:{id:'sbStrokeWidth',default:'1'},
+sbPointSpace:{id:'sbPointSpace',default:'4'},
+sbFillOpacity:{id:'sbFillOpacity',default:'100'},
+sbSornerRadius:{id:'sbSornerRadius',default:'2'},
+sbFillOpacity2:{id:'sbFillOpacity2',default:'100'},
+svg_icon_iconStyle:{id:'svg_icon_iconStyle',default:'filled'},
+svg_icon_lineColor:{id:'svg_icon_lineColor',default:'rgba(0,0,0,1)'},
+svg_icon_fillColor:{id:'svg_icon_fillColor',default:'rgba(255,255,255,1)'},
+svg_icon_lineWidth:{id:'svg_icon_lineWidth',default:'1'},
+svg_icon_fillOpacity:{id:'svg_icon_fillOpacity',default:'1'},
+svg_icon_shadowColor:{id:'svg_icon_shadowColor',default:'rgba(255,255,255,1)'},
+svg_icon_shadowBlur:{id:'svg_icon_shadowBlur',default:'3'},
+svg_icon_shadowOffsetX:{id:'svg_icon_shadowOffsetX',default:'0'},
+svg_icon_shadowOffsetY:{id:'svg_icon_shadowOffsetY',default:'0'},
+InfomationFPS:{id:'InfomationFPS',default:true,type:'checkbox'},
+InfomationCoordinate:{id:'InfomationCoordinate',default:true,type:'checkbox'},
+AdetailerCheck:{id:'AdetailerCheck',default:false,type:'checkbox'},
+AdetilerModelsPrompt:{id:'AdetilerModelsPrompt',default:''},
+AdetilerModelsNegative:{id:'AdetilerModelsNegative',default:''},
+pageCount:{id:'pageCount',default:'18'},
+verticalRandomPanelCount:{id:'verticalRandomPanelCount',default:'2'},
+horizontalRandamPanelCount:{id:'horizontalRandamPanelCount',default:'3'},
+tiltRandam:{id:'tiltRandam',default:'6'},
+cutChangeRate:{id:'cutChangeRate',default:'10'},
+onePanelGenerateNumber:{id:'onePanelGenerateNumber',default:'1'},
+inpaintBrushSize:{id:'inpaint-brush-size',default:'30'},
+inpaintDenoise:{id:'inpaint-denoise',default:'0.75'},
+dashboardDailyGoalInput:{id:'dashboardDailyGoalInput',default:''},
+dashboardWeeklyGoalInput:{id:'dashboardWeeklyGoalInput',default:''},
+textColorPicker:{id:'textColorPicker',default:'rgba(0,0,0,1)'},
+textOutlineColorPicker:{id:'textOutlineColorPicker',default:'rgba(0,0,0,1)'},
+textBgColorPicker:{id:'textBgColorPicker',default:'rgba(255,255,255,1)'},
+fontSizeSlider:{id:'fontSizeSlider',default:'14'},
+fontStrokeWidthSlider:{id:'fontStrokeWidthSlider',default:'0'},
+inpaintPrompt:{id:'inpaint-prompt',default:''},
+inpaintNegative:{id:'inpaint-negative',default:''},
+anglePrompt:{id:'angle-prompt',default:''}
 };
 
 var BASEPROMPT_SCHEMA={
@@ -258,8 +311,8 @@ if(mode===apis.A1111)changeExternalAPI($('sdWebUIButton'));
 else changeExternalAPI($('comfyUIButton'));
 }
 
-function saveSettingsLocalStrage(){
-createToast('Settings Save',['Saving settings...','Save Completed!!'],1500);
+function saveSettingsLocalStrage(silent){
+if(!silent)createToast('Settings Save',['Saving settings...','Save Completed!!'],1500);
 var data={externalAI:apiMode};
 Object.keys(SETTINGS_SCHEMA).forEach(function(key){
 var cfg=SETTINGS_SCHEMA[key];
@@ -294,7 +347,43 @@ changeView("layer-panel",$('view_layers_checkbox').checked);
 changeView("controls",$('view_controles_checkbox').checked);
 if(DEBUG_FLAGS.settingsHighlight)toggleSettingsHighlight(true);
 AutoSaveManager.init();
+initSettingsAutoSave();
 });
+
+var settingsAutoSaveTimer=null;
+function debouncedSettingsSave(){
+if(settingsAutoSaveTimer)clearTimeout(settingsAutoSaveTimer);
+settingsAutoSaveTimer=setTimeout(function(){
+saveSettingsLocalStrage(true);
+},500);
+}
+
+function initSettingsAutoSave(){
+var chk=$('settingsAutoSaveCheckbox');
+if(!chk)return;
+chk.addEventListener('change',function(){
+saveSettingsLocalStrage(true);
+});
+var idSet={};
+Object.keys(SETTINGS_SCHEMA).forEach(function(key){
+var cfg=SETTINGS_SCHEMA[key];
+if(cfg.id)idSet[cfg.id]=true;
+});
+Object.keys(BASEPROMPT_SCHEMA).forEach(function(key){
+var cfg=BASEPROMPT_SCHEMA[key];
+if(cfg.id)idSet[cfg.id]=true;
+});
+document.addEventListener('input',function(e){
+if(!chk.checked||!e.target||!e.target.id)return;
+if(e.target.id==='settingsAutoSaveCheckbox')return;
+if(idSet[e.target.id])debouncedSettingsSave();
+});
+document.addEventListener('change',function(e){
+if(!chk.checked||!e.target||!e.target.id)return;
+if(e.target.id==='settingsAutoSaveCheckbox')return;
+if(idSet[e.target.id])debouncedSettingsSave();
+});
+}
 
 document.addEventListener('DOMContentLoaded',function() {
 $('svgDownload').onclick=function () {

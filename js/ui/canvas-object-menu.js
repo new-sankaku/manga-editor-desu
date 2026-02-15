@@ -63,6 +63,9 @@ return {type:'div',value:itemValue};
 function createObjectMenuButton(itemValue){
 return {type:'button',value:itemValue};
 }
+function createObjectMenuGroupHeader(labelKey){
+return {type:'groupHeader',value:labelKey};
+}
 function createObjectMenuSlider(itemValue,min,max,step,value){
 return {type: 'slider',label: itemValue,
 options: {id:itemValue,min: min,max:max,step:step,value:value}};
@@ -132,7 +135,7 @@ strokeTemp=activeObject.stroke;
 let min=0,max=100,step=1,value=(activeObject.opacity*100),labelAndId='com-opacity';
 let opacity=createObjectMenuSlider(labelAndId,min,max,step,value);
 
-min=0,max=40,step=1,value=strokeWidthTemp,labelAndId='com-lineWidth';
+min=0,max=40,step=0.1,value=strokeWidthTemp,labelAndId='com-lineWidth';
 let strokeWidth=createObjectMenuSlider(labelAndId,min,max,step,value);
 
 min=7,max=150,step=1,value=activeObject.fontSize,labelAndId='com-fontSize';
@@ -145,108 +148,129 @@ let strokeColor=createObjectMenuColor("com-strokeColor",rgbaToHex(strokeTemp),st
 
 if (isPanel(activeObject)) {
 if (clickType!=='left') {
-menuItems=[visible,movement,edit,knife];
-if (hasRole(AI_ROLES.Text2Image)) menuItems.push(generate);
-menuItems.push(deleteMenu);
+menuItems.push(createObjectMenuGroupHeader('menuGroupOperation'));
+menuItems.push(visible,movement,edit,knife,deleteMenu,selectClear);
+var aiItems=[];
+if (hasRole(AI_ROLES.Text2Image)) aiItems.push(generate);
+if (aiItems.length>0) {
+menuItems.push(createObjectMenuGroupHeader('menuGroupAI'));
+menuItems=menuItems.concat(aiItems);
+}
+menuItems.push(createObjectMenuGroupHeader('menuGroupStyle'));
+menuItems.push(opacity,strokeWidth,fillColor,strokeColor);
 }
 } else if (isImage(activeObject)) {
 if (clickType!=='left') {
-menuItems=[visible,movement];
-if (hasRole(AI_ROLES.Image2Image)) menuItems.push(generate);
-if (hasRole(AI_ROLES.RemoveBG))    menuItems.push(rembg);
-if (hasRole(AI_ROLES.Upscaler))    menuItems.push(upscale);
-if (hasRole(AI_ROLES.Inpaint))     menuItems.push(inpaint);
-if (hasRole(AI_ROLES.I2I_Angle))   menuItems.push(angleGenerate);
-menuItems.push(deleteMenu);
-
-if (haveClipPath(activeObject)) {
-menuItems.push(clearAllClipPaths);
-
-menuItems.push(clearTopClipPath);
-menuItems.push(clearBottomClipPath);
-menuItems.push(clearRightClipPath);
-menuItems.push(clearLeftClipPath);
-
-} else {
-menuItems.push(panelIn);
-menuItems.push(canvasFit);
+menuItems.push(createObjectMenuGroupHeader('menuGroupOperation'));
+menuItems.push(visible,movement,deleteMenu,selectClear);
+var aiItems=[];
+if (hasRole(AI_ROLES.Image2Image)) aiItems.push(generate);
+if (hasRole(AI_ROLES.RemoveBG))    aiItems.push(rembg);
+if (hasRole(AI_ROLES.Upscaler))    aiItems.push(upscale);
+//if (hasRole(AI_ROLES.Inpaint))     aiItems.push(inpaint);
+if (hasRole(AI_ROLES.I2I_Angle))   aiItems.push(angleGenerate);
+if (aiItems.length>0) {
+menuItems.push(createObjectMenuGroupHeader('menuGroupAI'));
+menuItems=menuItems.concat(aiItems);
 }
-
-menuItems.push(flipHorizontal);
-menuItems.push(flipVertical);
-menuItems.push(cropImage);
+menuItems.push(createObjectMenuGroupHeader('menuGroupTransform'));
+menuItems.push(flipHorizontal,flipVertical,cropImage);
+if (haveClipPath(activeObject)) {
+menuItems.push(createObjectMenuGroupHeader('menuGroupViewLimit'));
+menuItems.push(clearAllClipPaths);
+menuItems.push(clearTopClipPath,clearBottomClipPath,clearRightClipPath,clearLeftClipPath);
+} else {
+menuItems.push(createObjectMenuGroupHeader('menuGroupPanel'));
+menuItems.push(panelIn,canvasFit);
+}
 }
 }else if (isSpeechBubbleSVG(activeObject)||isSpeechBubbleText(activeObject)) {
-menuItems=[visible];
-menuItems.push(panelInNotFit);
+menuItems.push(createObjectMenuGroupHeader('menuGroupOperation'));
+menuItems.push(visible,panelInNotFit,selectClear);
+menuItems.push(createObjectMenuGroupHeader('menuGroupStyle'));
+menuItems.push(opacity,strokeWidth,fillColor,strokeColor);
+if(isSpeechBubbleText(activeObject)){
+menuItems.push(fontSize,font);
 }
-
-if (isPanel(activeObject)||isSpeechBubbleSVG(activeObject)||isSpeechBubbleText(activeObject)||isText(activeObject)) {
-menuItems.push(opacity);
-menuItems.push(strokeWidth);
-menuItems.push(fillColor);
-menuItems.push(strokeColor);
+}else if (isText(activeObject)) {
+menuItems.push(createObjectMenuGroupHeader('menuGroupOperation'));
+menuItems.push(visible,selectClear);
+menuItems.push(createObjectMenuGroupHeader('menuGroupStyle'));
+let textColor=createObjectMenuColor("com-textColor",rgbaToHex(fillTemp),fillTemp);
+let outlineColor=createObjectMenuColor("com-outlineColor",rgbaToHex(strokeTemp),strokeTemp);
+let bgColorTemp=isVerticalText(activeObject)?(activeObject.textBackgroundColor||''):(activeObject.backgroundColor||'');
+let bgColor=createObjectMenuColor("com-bgColor",rgbaToHex(bgColorTemp)||'#ffffff',bgColorTemp||'#ffffff');
+menuItems.push(opacity,strokeWidth,textColor,outlineColor,bgColor);
+var isBoldNow=activeObject.fontWeight==="bold";
+var boldMenu=createObjectMenuButton(isBoldNow ? 'boldOff' : 'boldOn');
+menuItems.push(fontSize,boldMenu,font);
 }
-
-if(isSpeechBubbleText(activeObject)||isText(activeObject)){
-menuItems.push(fontSize);
-menuItems.push(font);
-}
-
-menuItems.push(selectClear);
 if (menuItems.length===0) {
 return;
 }
 
 let menuContent='';
+let groupOpen=false;
 menuItems.forEach(item=>{
 switch (item.type) {
+case 'groupHeader':
+if(groupOpen) menuContent+=`</div>`;
+menuContent+=`<div class="menu-group-header"><span>${getText(item.value)}</span></div>`;
+menuContent+=`<div class="menu-group">`;
+groupOpen=true;
+break;
 case 'div':
-menuContent+=`<div id="${item.value}"></div>`;
+menuContent+=`<div id="${item.value}" class="menu-group-wide"></div>`;
 break;
 case 'slider':
 let label=getText(item.options.id);
 menuContent+=`
-          <div class="input-container-leftSpace" data-label="${label}">
-            <input type="range" 
-              id=   "${item.options.id}"
-              name= "${item.options.id}"
-              min=  "${item.options.min}"
-              max=  "${item.options.max}"
-              step= "${item.options.step}"
-              value="${item.options.value}">
-          </div>`;
+<div class="input-container-leftSpace menu-group-wide" data-label="${label}">
+<input type="range"
+id="${item.options.id}"
+name="${item.options.id}"
+min="${item.options.min}"
+max="${item.options.max}"
+step="${item.options.step}"
+value="${item.options.value}">
+</div>`;
 break;
 case 'colorpicker':
 let labelColor=getText(item.options.id);
 menuContent+=`
-          <div class="input-group-multi" >
-            <label for="${item.options.id}">${labelColor}</label>
-            <input id=   "${item.options.id}"
-              name= "${item.options.id}"
-              value="${item.options.value}"
-              class="jscolor-color-picker" data-initial-color="${item.options.rgba}">
-          </div>`;
-// console.log("menuContent",menuContent);
+<div class="input-group-multi menu-group-wide">
+<label for="${item.options.id}">${labelColor}</label>
+<input id="${item.options.id}"
+name="${item.options.id}"
+value="${item.options.value}"
+class="jscolor-color-picker" data-initial-color="${item.options.rgba}">
+</div>`;
 break;
 case 'button':
 menuContent+=`<button id="fabricjs-${item.value}-btn">${getText(item.value)}</button>`;
 break;
 }
 });
+if(groupOpen) menuContent+=`</div>`;
 
 objectMenu.innerHTML=menuContent;
 jsColorSet();
-objectMenu.classList.add('active');
 objectMenu.style.display='flex';
 updateObjectMenuPosition();
+requestAnimationFrame(()=>{
+objectMenu.classList.add('active');
+});
 lastClickType=clickType;
 
 const sliders2=document.querySelectorAll('.input-container-leftSpace input[type="range"]');
 sliders2.forEach(slider=>{
 setupSlider(slider,'.input-container-leftSpace',false);
 });
-new FontSelector("fontSelectorMenu","Font");
+var fontSelectorMenuEl=$("fontSelectorMenu");
+if(fontSelectorMenuEl){
+var menuActiveObj=canvas.getActiveObject();
+new FontSelector("fontSelectorMenu",menuActiveObj&&menuActiveObj.fontFamily||"Font");
+}
 }
 
 function handleSliderInput(e) {
@@ -271,7 +295,7 @@ const opacityValue=parseInt(e.target.value);
 activeObject.opacity=opacityValue/100;
 break;
 case 'com-lineWidth':
-const strokeWidthValue=parseInt(e.target.value);
+const strokeWidthValue=parseFloat(e.target.value);
 activeObject.set("strokeWidth",strokeWidthValue);
 break;
 case 'com-fill':
@@ -281,6 +305,29 @@ break;
 case 'com-strokeColor':
 const strokeColor=e.target.value;
 activeObject.set("stroke",strokeColor);
+if(isText(activeObject)&&(!activeObject.strokeWidth||activeObject.strokeWidth===0)){
+activeObject.set("strokeWidth",1);
+var lineWidthSlider=$("com-lineWidth");
+if(lineWidthSlider)lineWidthSlider.value=1;
+}
+break;
+case 'com-textColor':
+activeObject.set("fill",e.target.value);
+break;
+case 'com-outlineColor':
+activeObject.set("stroke",e.target.value);
+if(isText(activeObject)&&(!activeObject.strokeWidth||activeObject.strokeWidth===0)){
+activeObject.set("strokeWidth",1);
+var lws=$("com-lineWidth");
+if(lws)lws.value=1;
+}
+break;
+case 'com-bgColor':
+if(isVerticalText(activeObject)){
+activeObject.set("textBackgroundColor",e.target.value);
+}else{
+activeObject.set("backgroundColor",e.target.value);
+}
 break;
 }
 
@@ -336,7 +383,7 @@ const opacityValue=parseInt(e.target.value);
 activeObject.opacity=opacityValue/100;
 break;
 case 'lineWidth':
-const strokeWidthValue=parseInt(e.target.value);
+const strokeWidthValue=parseFloat(e.target.value);
 activeObject.set("strokeWidth",strokeWidthValue);
 break;
 case 'canvasFit':
@@ -392,7 +439,10 @@ canvas.discardActiveObject();
 canvas.requestRenderAll();
 return;
 case 'delete':
+changeDoNotSaveHistory();
 canvas.remove(activeObject);
+changeDoSaveHistory();
+saveStateByManual();
 canvas.renderAll();
 updateLayerPanel();
 return;
@@ -455,6 +505,10 @@ if(isImage(activeObject)){
 startCropMode(activeObject);
 }
 break;
+case 'boldOn':
+case 'boldOff':
+toggleBold();
+break;
 }
 canvas.requestRenderAll();
 closeMenu();
@@ -463,7 +517,11 @@ closeMenu();
 function closeMenu() {
 if (objectMenu) {
 objectMenu.classList.remove('active');
+setTimeout(()=>{
+if (!objectMenu.classList.contains('active')) {
 objectMenu.style.display='none';
+}
+},150);
 }
 }
 
@@ -487,5 +545,24 @@ closeMenu();
 lastClickType='left';
 }
 });
+
+document.addEventListener('mousedown',function(e){
+if(!objectMenu||objectMenu.style.display==='none') return;
+if(objectMenu.contains(e.target)||canvas.wrapperEl.contains(e.target)) return;
+closeMenu();
+});
+
+var introContent=document.getElementById('intro_content');
+if(introContent){
+introContent.addEventListener('mousedown',function(e){
+if(e.button!==0) return;
+if(canvas.wrapperEl.contains(e.target)) return;
+if(canvas.getActiveObject()){
+canvas.discardActiveObject();
+canvas.requestRenderAll();
+closeMenu();
+}
+});
+}
 
 createObjectMenu();

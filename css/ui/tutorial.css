@@ -13,7 +13,7 @@ justify-content:center;
 .tutorial-prompt{
 background:#1e1e1e;
 border:1px solid #3a3a3a;
-border-radius:12px;
+border-radius:var(--fjm-border-radius);
 padding:28px 32px;
 max-width:420px;
 text-align:center;
@@ -38,7 +38,7 @@ justify-content:center;
 }
 .tutorial-btn{
 padding:10px 24px;
-border-radius:6px;
+border-radius:var(--fjm-button-border-radius);
 border:none;
 cursor:pointer;
 font-weight:500;
@@ -77,7 +77,7 @@ pointer-events:none;
 .tutorial-highlight{
 position:fixed;
 border:2px solid #3b82f6;
-border-radius:8px;
+border-radius:var(--fjm-border-radius);
 box-shadow:0 0 0 9999px rgba(0,0,0,0.7);
 pointer-events:none;
 z-index:10001;
@@ -86,7 +86,7 @@ z-index:10001;
 position:fixed;
 background:#1e1e1e;
 border:1px solid #3a3a3a;
-border-radius:10px;
+border-radius:var(--fjm-border-radius);
 padding:16px;
 width:320px;
 z-index:10002;
@@ -133,7 +133,7 @@ margin-bottom:12px;
 background:#3b82f6;
 color:#fff;
 padding:3px 10px;
-border-radius:4px;
+border-radius:var(--fjm-button-border-radius);
 font-size:11px;
 font-weight:500;
 }
@@ -200,7 +200,7 @@ margin:16px 0;
 .tutorial-lang-btn{
 padding:10px 14px;
 border:1px solid #3a3a3a;
-border-radius:6px;
+border-radius:var(--fjm-button-border-radius);
 background:#252525;
 color:#b0b0b0;
 cursor:pointer;
@@ -227,7 +227,7 @@ color:#fff;
 .comfyui-setup-guide,.comfyui-error-guide{
 background:#1e1e1e;
 border:1px solid #3a3a3a;
-border-radius:8px;
+border-radius:var(--fjm-border-radius);
 margin-bottom:12px;
 overflow:hidden;
 }
@@ -302,7 +302,7 @@ margin-bottom:0;
 .guide-step.highlight{
 background:#252525;
 padding:10px;
-border-radius:6px;
+border-radius:var(--fjm-border-radius);
 margin:10px 0;
 border-left:2px solid #3b82f6;
 }
@@ -322,7 +322,7 @@ flex-shrink:0;
 .guide-error-nodes{
 background:#2a1f1f;
 padding:10px;
-border-radius:6px;
+border-radius:var(--fjm-border-radius);
 margin-bottom:12px;
 font-size:12px;
 color:#f87171;
@@ -331,7 +331,7 @@ border-left:2px solid #ef4444;
 .guide-error-nodes code{
 background:#1a1a1a;
 padding:2px 6px;
-border-radius:3px;
+border-radius:var(--fjm-button-border-radius);
 font-family:monospace;
 color:#fca5a5;
 font-size:11px;
@@ -339,7 +339,7 @@ font-size:11px;
 .guide-tip,.guide-example{
 background:#252525;
 padding:10px;
-border-radius:6px;
+border-radius:var(--fjm-border-radius);
 margin-top:10px;
 font-size:11px;
 color:#a0a0a0;

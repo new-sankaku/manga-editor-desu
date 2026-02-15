@@ -1,18 +1,17 @@
-function changeExternalAPI(button) {
+function changeExternalAPI(button,showToast) {
 changeSelected(button);
 
 const selectedValue=getSelectedValueByGroup("externalApiGroup");
 
-var help=getText("help_api_connect_settings");
+var helpTitle=getText("help_api_connect_settings");
 if (selectedValue==="sdWebUIButton") {
 apiMode=apis.A1111;
-createToast("API CHANGE!","WebUI(A1111/Forge)",2000);
-$('apiSettingsUrlHelpe').innerHTML=`<a href="html/API_Help/sd-api-guide.html" target="_blank">${help}</a>`;
+if(showToast)createToast("API CHANGE!","WebUI(A1111/Forge)",2000);
+$('apiSettingsUrlHelpe').innerHTML=`<a href="html/API_Help/sd-api-guide.html" target="_blank" class="es-btn-small" title="${helpTitle}">?</a>`;
 } else if (selectedValue==="comfyUIButton") {
 apiMode=apis.COMFYUI;
-createToast("API CHANGE!","COMFYUI",2000);
-// updateAiModelType();
-$('apiSettingsUrlHelpe').innerHTML=`<a href="html/API_Help/comfyui_settings.html" target="_blank">${help}</a>`;
+if(showToast)createToast("API CHANGE!","COMFYUI",2000);
+$('apiSettingsUrlHelpe').innerHTML=`<a href="html/API_Help/comfyui_settings.html" target="_blank" class="es-btn-small" title="${helpTitle}">?</a>`;
 }
 
 updateWorkflowType();

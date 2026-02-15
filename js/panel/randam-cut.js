@@ -83,20 +83,12 @@ icon: 'process',step: 'Step2',substep: 'Page:'+page,progress: 50
 await new Promise(requestAnimationFrame);
 
 panelLogger.debug("----- "+page+" -----")
-if(selectedValue==='mA4H'){
+if(selectedValue==='mPortrait'){
 await loadBookSize(210,297,true,newPage);
 rundomPanelCut();
 }
-if(selectedValue==='mA4V'){
+if(selectedValue==='mLandscape'){
 await loadBookSize(297,210,true,newPage);
-rundomPanelCut();
-}
-if(selectedValue==='mB4H'){
-await loadBookSize(257,364,true,newPage);
-rundomPanelCut();
-}
-if(selectedValue==='mB4H'){
-await loadBookSize(364,257,true,newPage);
 rundomPanelCut();
 }
 newPage=true;

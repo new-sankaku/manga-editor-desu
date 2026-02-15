@@ -32,6 +32,8 @@ settingsSave:!isMacOs ? 'ctrl+shift+s' : 'command+shift+s',
 promptView:!isMacOs ? 'ctrl+p' : 'command+p',
 shortcutPage:'f1',
 newPage:'alt+n',
+prevPage:'alt+left',
+nextPage:'alt+right',
 }
 
 var isLongPressDirection=false;
@@ -212,6 +214,8 @@ e.preventDefault();
 // bind prompt view shortcut
 hotkeys(hotkeysMap.promptView,'all',function (e) {
 View();
+var cb=$("view_prompt_checkbox");
+if(cb)cb.checked=areNamesVisible;
 e.preventDefault();
 });
 
@@ -229,9 +233,21 @@ loadBookSize(canvas.width,canvas.height,true,true);
 return false;
 });
 
+hotkeys(hotkeysMap.prevPage,'all',function (e) {
+btmNavigatePage(-1);
+e.preventDefault();
+});
+
+hotkeys(hotkeysMap.nextPage,'all',function (e) {
+btmNavigatePage(1);
+e.preventDefault();
+});
+
 var shortcutCategories=[
 {category:'sc_cat_file',items:[
 {win:'Alt + N',mac:'Alt + N',i18n:'sc_newPage'},
+{win:'Alt + \u2190',mac:'Alt + \u2190',i18n:'sc_prevPage'},
+{win:'Alt + \u2192',mac:'Alt + \u2192',i18n:'sc_nextPage'},
 {win:'Ctrl + S',mac:'⌘ + S',i18n:'sc_projectSave'},
 {win:'Ctrl + O',mac:'⌘ + O',i18n:'sc_projectLoad'},
 {win:'Ctrl + D',mac:'⌘ + D',i18n:'sc_imageDownload'},

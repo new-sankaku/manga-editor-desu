@@ -843,11 +843,6 @@ return coords;
 
 
 
-function getImageObjectListByLayerChecked(){
-var resultList=getImageObjectList();
-return resultList.filter(layer=>layer.layerCheck);
-}
-
 
 function fitImageToCanvas(fabricImage) {
 const canvasWidth=canvas.width;

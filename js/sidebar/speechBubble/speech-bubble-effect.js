@@ -198,20 +198,23 @@ img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
 img.addEventListener("click",async function(){
-panelLogger.debug("new panel");
+panelLogger.info("[verticalTemplate] stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size+" canvasGUID="+getCanvasGUID()+" objectCount="+getObjectCount());
 const loading=OP_showLoading({
 icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if(stateStack.length>2){
+if(stateStack.length>=btmSaveStateThreshold){
+panelLogger.info("[verticalTemplate] saving current page to bottom bar");
 OP_updateLoadingState(loading,{
 icon:'process',step:'Step2',substep:'Zip Start',progress:20
 });
 await btmSaveProjectFile().then(()=>{
+panelLogger.info("[verticalTemplate] btmSaveProjectFile done. btmProjectsMap.size="+btmProjectsMap.size);
 setCanvasGUID();
 loadSVGPlusReset(item.svg);
 });
 }else{
+panelLogger.info("[verticalTemplate] skipping save (stateStack too short)");
 setCanvasGUID();
 loadSVGPlusReset(item.svg);
 }
@@ -231,20 +234,23 @@ img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
 img.addEventListener("click",async function(){
-panelLogger.debug("new panel");
+panelLogger.info("[landscapeTemplate] stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size+" canvasGUID="+getCanvasGUID()+" objectCount="+getObjectCount());
 const loading=OP_showLoading({
 icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if(stateStack.length>2){
+if(stateStack.length>=btmSaveStateThreshold){
+panelLogger.info("[landscapeTemplate] saving current page to bottom bar");
 OP_updateLoadingState(loading,{
 icon:'process',step:'Step2',substep:'Zip Start',progress:20
 });
 await btmSaveProjectFile().then(()=>{
+panelLogger.info("[landscapeTemplate] btmSaveProjectFile done. btmProjectsMap.size="+btmProjectsMap.size);
 setCanvasGUID();
 loadSVGPlusReset(item.svg,true);
 });
 }else{
+panelLogger.info("[landscapeTemplate] skipping save (stateStack too short)");
 setCanvasGUID();
 loadSVGPlusReset(item.svg,true);
 }
@@ -307,6 +313,14 @@ speechBubbleArea.textContent="";
 }
 
 function lazyLoadSvgData(id){
+if(id==="svg-container-template"){
+var toggle=document.getElementById("template-orientation-toggle");
+if(toggle&&toggle.checked){
+lazyLoadLandscapePanels();
+}else{
+lazyLoadVerticalPanels();
+}
+}
 if(id==="svg-container-vertical") lazyLoadVerticalPanels();
 if(id==="svg-container-landscape") lazyLoadLandscapePanels();
 if(id==="speech-bubble-area1") lazyLoadSpeechBubbles();

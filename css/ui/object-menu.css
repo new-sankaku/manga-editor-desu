@@ -1,41 +1,84 @@
 .fabricjs-object-menu {
-  position: fixed;
-  display: none;
-  background-color: var(--fjm-background-color);
-  padding: var(--fjm-padding);
-  z-index: var(--fjm-z-index);
-  border-radius: var(--fjm-border-radius);
-  font-family: var(--fjm-font-family);
-  font-size: var(--fjm-font-size);
-  user-select: none;
-  flex-direction: column;
-  border: 1px solid var(--fjm-border-color);
-  opacity: 1.0;
+position: fixed;
+display: none;
+background-color: var(--fjm-background-color);
+padding: var(--fjm-padding);
+z-index: var(--fjm-z-index);
+border-radius: var(--fjm-border-radius);
+font-family: var(--fjm-font-family);
+font-size: var(--fjm-font-size);
+user-select: none;
+flex-direction: column;
+border: 1px solid var(--fjm-border-color);
+box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+opacity: 0;
+transform: scale(0.95);
+transition: opacity 0.15s ease, transform 0.15s ease;
+pointer-events: none;
 }
 
 .fabricjs-object-menu.active {
-  display: flex;
+display: flex;
+opacity: 1;
+transform: scale(1);
+pointer-events: auto;
 }
 
 .fabricjs-object-menu button {
-  margin: var(--fjm-button-margin);
-  cursor: var(--fjm-button-cursor);
-  padding: var(--fjm-button-padding);
-  background-color: var(--fjm-button-bg-color);
-  border: 1px solid var(--fjm-button-border-color);
-  border-radius: var(--fjm-button-border-radius);
-  color: var(--fjm-button-color);
-  font-size: var(--fjm-font-size);
-  width: var(--fjm-button-width);
-  text-align: var(--fjm-button-text-align);
-  white-space: var(--fjm-button-white-space);
+margin: var(--fjm-button-margin);
+cursor: var(--fjm-button-cursor);
+padding: var(--fjm-button-padding);
+background-color: var(--fjm-button-bg-color);
+border: none;
+border-radius: var(--fjm-button-border-radius);
+color: var(--fjm-button-color);
+font-size: var(--fjm-font-size);
+width: var(--fjm-button-width);
+text-align: var(--fjm-button-text-align);
+white-space: var(--fjm-button-white-space);
+transition: background-color 0.12s ease, color 0.12s ease;
 }
 
 .fabricjs-object-menu button:hover {
-  background-color: var(--fjm-button-hover-bg-color);
-  color: var(--fjm-button-hover-color);
+background-color: var(--fjm-button-hover-bg-color);
+color: var(--fjm-button-hover-color);
 }
 
 .fabricjs-object-menu button:active {
-  background-color: var(--fjm-button-active-bg-color);
+background-color: var(--fjm-button-active-bg-color);
+color: var(--fjm-button-hover-color);
+}
+
+.menu-group {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 1px;
+}
+
+.menu-group-wide {
+grid-column: 1 / -1;
+}
+
+.menu-group .input-container-leftSpace,
+.menu-group .input-group-multi {
+padding: 3px 5px;
+}
+
+.menu-group-header {
+padding: 3px 10px 1px;
+border-top: 1px solid var(--fjm-separator-color);
+margin-top: 2px;
+}
+
+.menu-group-header:first-child {
+border-top: none;
+margin-top: 0;
+}
+
+.menu-group-header span {
+font-size: 10px;
+color: var(--fjm-button-color);
+opacity: 0.7;
+text-transform: uppercase;
+letter-spacing: 0.5px;
 }

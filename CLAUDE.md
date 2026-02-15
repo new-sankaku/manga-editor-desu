@@ -1,22 +1,8 @@
-
 ・Sonnet Haikuをサブエージェントとすることは禁止、サブエージェントは基本的にOpusを使用する。
 ・`file://` プロトコルで動作することが必須条件です。
-
-# プロジェクト注意事項
-
-## ブラウザ自動化ツールの制限
-- `mcp__claude-in-chrome__navigate` は `file://` プロトコルを正しく処理できない
-- ローカルHTMLを開く場合はサーバーを起動すること
-
-## ローカルサーバーの起動方法
-```bash
-python 99_server.py
-```
-- ポート: 8000
-- URL: http://localhost:8000
-
-## 読込禁止フォルダ
-以下のフォルダは検索から除外し読み込まないこと:
+・UIの変更は他の表示と調和させる。
+・文言の追加は他の文言と合わせる。（Plannning、プランニング、企画中のように同じ意味で別々の表記にしない。）
+・以下のフォルダは検索から除外し読み込まないこと:
 - json_js
 - test
 - third
@@ -25,6 +11,7 @@ python 99_server.py
 - 03_images
 - 99_doc
 - font
+・翻訳はi18next.jsに入れる。JsonのKeyはyyyyMMddHHmmss_SSSにする。
 
 ## コーディング規約の注意事項
 - APIレスポンスのプロパティ名（例: `response.prompt_id`）はAPI仕様に従う必要があり、camelCaseに変更してはいけない
@@ -127,6 +114,15 @@ saveStateByManual();
 // 悪い例
 "ja":{"key1":"値1","key2":"値2"}
 ```
+
+## Chrome連携（Claude in Chrome）
+- `navigate`ツールは`file://`プロトコルに対応していない（`https://`が自動付加されてしまう）
+- `javascript_tool`で`window.location.href`を設定しても`file://`には遷移できない
+- `chrome://newtab`等のChrome内部ページはスクリーンショット取得不可
+- 手順:
+  1. `tabs_context_mcp`で`createIfEmpty:true`を指定してタブグループを作成
+  2. ユーザーに手動で`file:///C:/01_work/00_Git/manga-editor-desu/index.html`を開いてもらう
+  3. `tabs_context_mcp`でタブIDを取得してから操作開始
 
 ## フォーマットスクリプト
 JSファイルからインデントと不要なスペースを削除するスクリプト:

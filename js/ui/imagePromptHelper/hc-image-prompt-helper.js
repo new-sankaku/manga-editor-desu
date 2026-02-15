@@ -1,40 +1,36 @@
 const iphHtmlContent=`
-  <div class="iph-container">
-    <div class="iph-top-bar">
-      <input type="text" id="iph-name-input" data-i18n="[placeholder]name">
-      <button id="iph-save-button" data-i18n="save"></button>
-      <select id="iph-language-dropdown" class="iph-dropdown" hidden>
-        <option value="en" data-i18n="english" data-flag="gb">English</option>
-        <option value="ja" data-i18n="japanese" data-flag="jp">日本語</option>
-      </select>
-      <select id="iph-model-dropdown" class="iph-dropdown" hidden>
-        <option value="SDXL">SDXL</option>
-        <option value="Pony">Pony</option>
-      </select>
-    </div>
-    <div class="iph-upper-section">
-      <div class="iph-column iph-column-2">
-        <h5 data-i18n="category"></h5>
-        <div id="iph-category-container" class="iph-scroll-area"></div>
-      </div>
-      <div class="iph-column iph-column-6">
-        <h5 data-i18n="subcategory"></h5>
-        <div id="iph-sub-category-container" class="iph-scroll-area"></div>
-      </div>
-      <div class="iph-column iph-column-2">
-        <h5>
-          <span data-i18n="selected"></span>
-          <button id="iph-download-button" class="iph-icon-button" disabled data-i18n="[title]download">
-            <i class="fas fa-download"></i>
-          </button>
-          <button id="iph-copy-button" class="iph-icon-button" disabled data-i18n="[title]copy">
-            <i class="fas fa-copy"></i>
-          </button>
-        </h5>
-        <div id="iph-selected-tags" class="iph-scroll-area"></div>
-        <textarea id="iph-free-input" data-i18n="[placeholder]freeInput"></textarea>
-      </div>
-    </div>
-    <div id="iph-image-container"></div>
-  </div>
+<div class="iph-container">
+<div class="iph-top-bar">
+<input type="text" id="iph-name-input" data-i18n="[placeholder]name">
+<button id="iph-save-button" data-i18n="save"></button>
+</div>
+<div class="iph-main">
+<div class="iph-major-tabs" id="iph-major-tabs"></div>
+<div class="iph-cat-panel" id="iph-cat-panel"></div>
+<div class="iph-center">
+<div class="iph-center-header">
+<span id="iph-breadcrumb" class="iph-breadcrumb"></span>
+<input type="text" id="iph-search-input" class="iph-search-input" data-i18n="[placeholder]iphSearch">
+</div>
+<div class="iph-img-grid" id="iph-img-grid"></div>
+</div>
+<div class="iph-right">
+<div class="iph-sel-header">
+<span data-i18n="selected"></span>
+<span class="iph-sel-actions">
+<button id="iph-copy-button" class="iph-icon-button" disabled data-i18n="[title]copy"><i class="fas fa-copy"></i></button>
+<button id="iph-download-button" class="iph-icon-button" disabled data-i18n="[title]download"><i class="fas fa-download"></i></button>
+<button id="iph-clear-button" class="iph-icon-button" disabled data-i18n="[title]iphClearAll"><i class="fas fa-trash-alt"></i></button>
+</span>
+</div>
+<div class="iph-sel-list" id="iph-sel-list"></div>
+<div class="iph-prompt-box" id="iph-prompt-box"></div>
+<div class="iph-prompt-acts">
+<button id="iph-prompt-copy" class="iph-icon-button" disabled data-i18n="[title]copy"><i class="fas fa-copy"></i></button>
+<button id="iph-prompt-download" class="iph-icon-button" disabled data-i18n="[title]download"><i class="fas fa-download"></i></button>
+</div>
+<textarea id="iph-free-input" data-i18n="[placeholder]freeInput"></textarea>
+</div>
+</div>
+</div>
 `;

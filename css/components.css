@@ -94,15 +94,31 @@
 
 
 #tool-buttons,
-#text-preview-area2 {
+.text-preview-area2 {
  max-height: 40%;
  overflow-y: auto;
  width: 100%;
 }
 
 #svg_icon_results {
- display: flex;
- flex-wrap: wrap;
+display:flex;
+flex-wrap:wrap;
+min-height:60px;
+max-height:300px;
+overflow-y:auto;
+background:var(--color-base);
+border:1px solid var(--color-tertiary);
+border-radius:var(--fjm-button-border-radius);
+padding:4px;
+}
+#svg_icon_results:empty::after {
+content:"---";
+display:flex;
+align-items:center;
+justify-content:center;
+width:100%;
+color:var(--color-tertiary);
+font-size:12px;
 }
 
 .icon-result {
@@ -141,11 +157,10 @@
 
 .input-group button,
 .input-group-multi button {
-  flex-direction: row; 
+  flex-direction: row;
  margin: 5px;
  padding: 5px;
  cursor: pointer;
- border: none;
 }
 
 
@@ -169,16 +184,19 @@
  padding-top: 2px;
  padding-bottom: 2px;
  cursor: pointer;
- border: none;
 }
 
 button.selected,
 button.selected {
- background-color: var(--select-button-color);
+ background: var(--btn-active-bg);
+ border-color: var(--btn-active-border-color);
+ box-shadow: var(--btn-active-shadow);
 }
 
 .active-button{
- background-color: var(--select-button-color);
+ background: var(--btn-active-bg);
+ border-color: var(--btn-active-border-color);
+ box-shadow: var(--btn-active-shadow);
 }
 
 
@@ -246,15 +264,15 @@ button.selected {
 #text-preview-area input[type="text"],
 #shape-preview-area input[type="text"],
 #panel-manager-items input[type="text"],
-#prompt-manager-items input[type="text"],
-#custom-panel-manager-items input[type="text"],
+.prompt-manager-items input[type="text"],
 #speech-bubble-svg-preview-area1 input[type="text"],
+#speech-bubble-svg-preview-area2 input[type="text"],
 #text-preview-area button,
 #shape-preview-area button,
 #panel-manager-items button,
-#prompt-manager-items button,
-#custom-panel-manager-items button,
-#speech-bubble-svg-preview-area1 button {
+.prompt-manager-items button,
+#speech-bubble-svg-preview-area1 button,
+#speech-bubble-svg-preview-area2 button {
  padding: var(--padding-button);
  font-size: var(--font-size-base);
  display: block;
@@ -263,8 +281,16 @@ button.selected {
  text-align: left;
 }
 
-#speech-bubble-svg-preview-area1{
+#speech-bubble-svg-preview-area1,
+#speech-bubble-svg-preview-area2 {
   max-height: 25%;
+}
+
+.param-group-header {
+font-weight: bold;
+margin-bottom: 5px;
+color: var(--text-color-C);
+font-size: 12px;
 }
 #speech-bubble-preview{
   max-height: 80%;

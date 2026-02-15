@@ -29,17 +29,24 @@ return fileBufferList;
 }
 
 async function generateProjectFileBufferList() {
-saveState();
+if(currentStateIndex<stateStack.length-1){
+stateStack.splice(currentStateIndex+1);
+}
+var state=customToJSON();
+var json=JSON.stringify(state);
+stateStack.push(json);
+currentStateIndex++;
 await convertImageMapBlobUrls();
 removeGrid();
 var previewLink=getCropAndDownloadLinkByMultiplier(1,'jpeg');
 var previewDataUrl=previewLink.href;
-if (isGridVisible) {
+if(isGridVisible){
 drawGrid();
 isGridVisible=true;
 }
-var canvasInfo={width: canvas.width,height: canvas.height};
-return generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl);
+var canvasInfo={width:canvas.width,height:canvas.height};
+var fileBufferList=await generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl);
+return {fileBufferList,previewDataUrl};
 }
 
 
@@ -112,11 +119,13 @@ setCanvasGUID(guid);
 async function btmSaveProjectFile(guid=null,openDrawer=true) {
 try {
 guid=guid||getCanvasGUID();
-const previewLink=getCropAndDownloadLinkByMultiplier(1,"jpeg");
-const lz4Blob=await generateBlobProjectFile();
-btmAddImage(previewLink,lz4Blob,guid,openDrawer);
-return;
+compressionLogger.info("[btmSaveProjectFile] START guid="+guid+" openDrawer="+openDrawer+" stateStack.length="+stateStack.length+" objectCount="+getObjectCount());
+var result=await generateBlobProjectFile();
+compressionLogger.info("[btmSaveProjectFile] generated blob, calling btmAddImage guid="+guid);
+btmAddImage({href:result.previewDataUrl},result.lz4Blob,guid,openDrawer);
+compressionLogger.info("[btmSaveProjectFile] DONE btmProjectsMap.size="+btmProjectsMap.size);
 } catch (error) {
+compressionLogger.error("[btmSaveProjectFile] ERROR",error);
 throw error;
 }
 }
@@ -124,9 +133,9 @@ throw error;
 async function generateBlobProjectFile(guid=null) {
 try {
 guid=guid||getCanvasGUID();
-const fileBufferList=await generateProjectFileBufferList();
-const lz4Blob=await lz4Compressor.buffersToLz4Blob(fileBufferList);
-return lz4Blob;
+var result=await generateProjectFileBufferList();
+var lz4Blob=await lz4Compressor.buffersToLz4Blob(result.fileBufferList);
+return {lz4Blob,previewDataUrl:result.previewDataUrl};
 } catch (error) {
 throw error;
 }

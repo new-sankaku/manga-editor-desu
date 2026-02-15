@@ -7,8 +7,8 @@
   margin-top: 12px;
   padding: 6px 12px;
   background: var(--background-color-B);
-  border: var(--boader-color-1px-solid-B);
-  border-radius: 4px;
+  border: var(--border-color-1px-solid-B);
+  border-radius: var(--fjm-button-border-radius);
   color: var(--component-text-color);
   font-size: var(--font-size-base);
   cursor: pointer;
@@ -22,7 +22,7 @@
  
  .comfui-sidebar-header {
   padding: 12px;
-  border-bottom: var(--boader-color-1px-solid-B);
+  border-bottom: var(--border-color-1px-solid-B);
  }
  
  .comfui-tab-type-separator {
@@ -30,7 +30,7 @@
   padding: 4px 8px;
   font-weight: bold;
   color: var(--component-text-color);
-  border-bottom: var(--boader-color-1px-solid-B);
+  border-bottom: var(--border-color-1px-solid-B);
  }
  
  .comfui-tab-enabled-radio {
@@ -75,8 +75,8 @@
   width: 100%;
   padding: 6px 12px;
   background: var(--background-color-B);
-  border: var(--boader-color-1px-solid-B);
-  border-radius: 4px;
+  border: var(--border-color-1px-solid-B);
+  border-radius: var(--fjm-button-border-radius);
   color: var(--component-text-color);
   font-size: var(--font-size-base);
   cursor: pointer;
@@ -102,14 +102,14 @@
   padding: 8px 12px;
   margin-bottom: 4px;
   background: var(--background-color-A);
-  border: var(--boader-color-1px-solid-B);
-  border-radius: 4px;
+  border: var(--border-color-1px-solid-B);
+  border-radius: var(--fjm-button-border-radius);
   font-size: var(--font-size-base);
   color: var(--component-text-color);
   cursor: pointer;
   transition: all 0.2s;
  }
- 
+
  .comfui-tab-button.active {
   background: var(--color-accent);
   color: var(--color-component-minitext);
@@ -124,8 +124,8 @@
  .comfui-tab-type-dropdown {
   width: 20%;
   padding: 4px 8px;
-  border: var(--boader-color-1px-solid-B);
-  border-radius: 4px;
+  border: var(--border-color-1px-solid-B);
+  border-radius: var(--textarea-border-radius);
   background-color: var(--background-color-B);
   color: var(--component-text-color);
   font-size: var(--font-size-base);
@@ -154,7 +154,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
   background: rgba(255, 255, 255, 0.1);
   font-size: 10px;
   cursor: pointer;
@@ -205,8 +205,8 @@
  .comfui-node-wrapper {
   width: 400px;
   margin-bottom: 8px;
-  border: var(--boader-color-1px-solid-B);
-  border-radius: 8px;
+  border: var(--border-color-1px-solid-B);
+  border-radius: var(--fjm-border-radius);
   padding: 8px;
   background-color: var(--background-color-A);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -257,7 +257,7 @@
 width: 100%;
 background-color: #2a2a1a;
 border: 1px solid #5a5a2a;
-border-radius: 6px;
+border-radius: var(--fjm-border-radius);
 padding: 12px 14px;
 margin-bottom: 12px;
 }
@@ -279,7 +279,7 @@ white-space: normal;
   color: #d4a000;
   padding: 2px 6px;
   background: rgba(255, 200, 0, 0.2);
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
  }
  
 
@@ -290,7 +290,7 @@ white-space: normal;
   color: var(--component-text-color);
   padding: 6px;
   border-bottom: 2px solid var(--color-accent);
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
   grid-column: 1 / -1;
  }
  
@@ -328,23 +328,23 @@ white-space: normal;
   width: 25%;
   flex: 0 0 25%;
   background: var(--background-color-A);
-  border-radius: 8px;
-  border: var(--boader-color-1px-solid-B);
+  border-radius: var(--fjm-border-radius);
+  border: var(--border-color-1px-solid-B);
   display: flex;
   flex-direction: column;
   min-width: 0;
  }
- 
+
  .comfui-main-content {
   width: 55%;
   flex: 0 0 55%;
   overflow-y: auto;
   background: var(--background-color-A);
-  border-radius: 8px;
-  border: var(--boader-color-1px-solid-B);
+  border-radius: var(--fjm-border-radius);
+  border: var(--border-color-1px-solid-B);
   min-width: 0;
  }
- 
+
  .comfui-right-sidebar {
   margin: 0;
   padding: 0;
@@ -352,8 +352,8 @@ white-space: normal;
   width: 18%;
   flex: 0 0 18%;
   background: var(--background-color-A);
-  border-radius: 8px;
-  border: var(--boader-color-1px-solid-B);
+  border-radius: var(--fjm-border-radius);
+  border: var(--border-color-1px-solid-B);
   padding: 8px;
   min-width: 0;
  }
@@ -362,8 +362,8 @@ white-space: normal;
   width: 100%;
   padding: 6px 12px;
   background: var(--background-color-B);
-  border: var(--boader-color-1px-solid-B);
-  border-radius: 4px;
+  border: var(--border-color-1px-solid-B);
+  border-radius: var(--fjm-button-border-radius);
   color: var(--component-text-color);
   font-size: var(--font-size-base);
   cursor: pointer;
@@ -378,9 +378,9 @@ white-space: normal;
  .comfui-image-preview {
   width: 100%;
   margin-top: 8px;
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
   overflow: hidden;
-  border: var(--boader-color-1px-solid-B);
+  border: var(--border-color-1px-solid-B);
  }
  
  .comfui-preview-image {
@@ -392,9 +392,9 @@ white-space: normal;
  
  .comfui-generated-image-container {
   margin-top: 16px;
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
   overflow: hidden;
-  border: var(--boader-color-1px-solid-B);
+  border: var(--border-color-1px-solid-B);
  }
  
 

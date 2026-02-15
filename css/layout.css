@@ -63,8 +63,111 @@
  font-weight: var(--font-weight-bold);
  padding: var(--padding-2);
  color: var(--text-color-B);
- background-color: var(--background-color-C);
+ background: rgba(0,0,0,0.35);
+ box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+ position: relative;
+ z-index: 1;
  text-align: var(--text-align-center);
+}
+.light-mode .area-header {
+ background: rgba(0,0,0,0.07);
+ box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.canvas-help-text {
+ display: none;
+ margin-left: 8px;
+ font-size: 12px;
+ font-weight: normal;
+ color: var(--text-color-B);
+ animation: helpTextFadeIn 0.3s ease;
+}
+.canvas-help-text.active {
+ display: inline;
+}
+.canvas-help-text .help-key {
+ color: var(--text-color-C);
+ font-weight: bold;
+}
+@keyframes helpTextFadeIn {
+ from {opacity:0;transform:translateY(-2px)}
+ to {opacity:1;transform:translateY(0)}
+}
+
+.template-header {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ padding: var(--padding-2) 8px;
+}
+
+#svg-container-template {
+ overflow-y: scroll;
+}
+
+.template-orientation-toggle {
+ display: inline-flex;
+ align-items: center;
+ cursor: pointer;
+ font-weight: normal;
+ user-select: none;
+}
+
+.template-orientation-toggle input[type="checkbox"] {
+ display: none;
+}
+
+.template-toggle-label {
+ display: inline-flex;
+ align-items: center;
+ gap: 4px;
+ padding: 2px 8px;
+ border-radius: var(--textarea-border-radius);
+ border: 1px solid var(--border-color-C);
+ background: var(--background-color-B);
+ font-size: 11px;
+}
+
+.template-toggle-v,
+.template-toggle-h {
+ display: inline-flex;
+ align-items: center;
+ gap: 2px;
+ transition: color 0.15s;
+}
+
+.template-toggle-v .material-icons,
+.template-toggle-h .material-icons {
+ font-size: 14px;
+}
+
+.template-toggle-v,
+.template-toggle-v span,
+.template-toggle-v i {
+ color: var(--text-color-C);
+}
+
+.template-toggle-h,
+.template-toggle-h span,
+.template-toggle-h i,
+.template-toggle-sep {
+ color: var(--a-link);
+}
+
+.template-toggle-sep {
+ margin: 0 2px;
+}
+
+.template-toggle-label.landscape .template-toggle-v,
+.template-toggle-label.landscape .template-toggle-v span,
+.template-toggle-label.landscape .template-toggle-v i {
+ color: var(--a-link);
+}
+
+.template-toggle-label.landscape .template-toggle-h,
+.template-toggle-label.landscape .template-toggle-h span,
+.template-toggle-label.landscape .template-toggle-h i {
+ color: var(--text-color-C);
 }
 
 
@@ -105,7 +208,7 @@
 }
 
 .info-section {
- border-top: var(--boader-color-1px-solid-A);
+ border-top: var(--border-color-1px-solid-A);
  padding: var(--padding-5);
 }
 
@@ -139,11 +242,27 @@
  display: none;
 }
 
-.navbar-logo {
- max-height: var(--navbar-logo-max-height);
- width: auto;
- margin-left: var(--margin-left-5);
- vertical-align: middle;
+.navbar-logo-text {
+width:70px;
+font-size:13px;
+font-weight:800;
+line-height:1.15;
+letter-spacing:0.12em;
+color:var(--text-color-C);
+text-align:center;
+display:inline-flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+flex-shrink:0;
+text-shadow:0 0 8px rgba(255,255,255,0.15);
+}
+.navbar-logo-ver {
+font-size:13px;
+font-weight:600;
+letter-spacing:0.08em;
+opacity:0.7;
+color:var(--text-color-C);
 }
 
 .dropdown-menu .dropdown-item div {
@@ -181,7 +300,7 @@
 }
 .A1111_api_content,
 .Comfyui_api_content {
-padding: 6px 10px;
+padding: 6px 10px 6px 18px;
 }
 .es-section-title {
 font-size: 11px;
@@ -202,7 +321,7 @@ flex: 1;
 font-size: 11px;
 padding: 3px 6px;
 border: 1px solid var(--border-color-C);
-border-radius: 3px;
+border-radius: var(--textarea-border-radius);
 background: var(--background-color-B);
 color: var(--text-color-B);
 min-width: 180px;
@@ -211,7 +330,7 @@ min-width: 180px;
 font-size: 11px;
 padding: 2px 6px;
 border: 1px solid var(--border-color-C);
-border-radius: 3px;
+border-radius: var(--fjm-button-border-radius);
 background: var(--background-color-D);
 color: var(--text-color-B);
 cursor: pointer;
@@ -278,7 +397,7 @@ color: var(--text-color-C);
  bottom: 0;
  height: var(--bottom-bar-height);
  width: var(--width-100);
- border-top: var(--boader-color-A);
+ border-top: var(--border-color-A);
 }
 
 .bottom-bar-content {

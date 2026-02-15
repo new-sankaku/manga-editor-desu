@@ -10,10 +10,41 @@
   --color-component-minitext:#ff7c7c;
   --color-hr:                #ff9532;
   --color-scllor:            #480000;
-  
+  --slider-accent:           #888888;
 
-  --odd-layer:            #0d0249;
-  --even-layer:          #450202;
+  --odd-layer:            #262626;
+  --even-layer:           #2c2c2c;
+  --layer-active-bg:      #3a1a1a;
+  --layer-active-border:  #a03030;
+  --layer-hover-bg:       rgba(255,255,255,0.10);
+  --layer-separator:      rgba(255,255,255,0.08);
+  --layer-nested-border:  rgba(255,255,255,0.2);
+  --layer-name-bg:        rgba(255,255,255,0.06);
+  --layer-name-border:    rgba(255,255,255,0.12);
+  --layer-name-focus-border:var(--color-accent-hover);
+  --layer-btn-bg:         rgba(255,255,255,0.08);
+  --layer-btn-border:     rgba(255,255,255,0.15);
+  --layer-btn-hover:      rgba(255,255,255,0.20);
+  --layer-btn-danger-hover:rgba(255,80,80,0.3);
+  --layer-preview-bg:     rgba(0,0,0,0.3);
+  --layer-preview-border: rgba(255,255,255,0.12);
+
+  --btn-bg:               rgba(255,255,255,0.07);
+  --btn-border:           1px solid rgba(255,255,255,0.10);
+  --btn-hover-bg:         rgba(255,255,255,0.15);
+  --btn-hover-border-color:rgba(255,255,255,0.20);
+  --btn-active-bg:        rgba(129,0,0,0.4);
+  --btn-active-border-color:rgba(160,48,48,0.6);
+  --btn-active-shadow:    0 0 8px rgba(129,0,0,0.2);
+  --btn-danger-bg:        rgba(255,80,80,0.10);
+  --btn-danger-border-color:rgba(255,80,80,0.20);
+  --btn-danger-hover-bg:  rgba(255,80,80,0.25);
+  --btn-danger-color:     #ff6b6b;
+  --btn-action-bg:        rgba(40,167,69,0.12);
+  --btn-action-border-color:rgba(40,167,69,0.25);
+  --btn-action-hover-bg:  rgba(40,167,69,0.25);
+  --btn-action-color:     #5cb85c;
+  --btn-transition:       background 0.15s,color 0.15s,border-color 0.15s,box-shadow 0.15s;
 
 
   --color-scrollbar-track:                var(--color-base);
@@ -23,22 +54,24 @@
   --select-button-color:                  var(--color-accent);
   --button-hover-background:              var(--color-secondary);
   --fjm-border-color:                     var(--color-secondary);
-  --boader-color-1px-solid-B:             1px solid  var(--color-tertiary);
-  --fjm-button-bg-color:                             var(--color-tertiary);
+  --border-color-1px-solid-B:             1px solid  var(--color-tertiary);
+  --fjm-button-bg-color:                  rgba(255,255,255,0.07);
   --dropdown-border:                      1px solid  var(--color-tertiary);
-  --boader-color-2px-solid-C:             2px dashed var(--color-accent-hover);
-  --boader-color-1px-solid-D:             1px dashed var(--color-tertiary);
-  --fjm-button-border-color:              var(--color-tertiary);
-  --fjm-button-hover-bg-color:            var(--color-tertiary);
+  --border-color-2px-solid-C:             2px dashed var(--color-accent-hover);
+  --border-color-1px-solid-D:             1px dashed var(--color-tertiary);
+  --fjm-button-border-color:              transparent;
+  --fjm-button-hover-bg-color:            rgba(255,255,255,0.15);
+  --fjm-button-hover-color:               var(--color-text-primary);
+  --fjm-button-active-bg-color:           var(--color-accent);
+  --fjm-separator-color:                  rgba(255,255,255,0.1);
   --background-color-D:                   var(--color-tertiary);
   --sidebar-icon-color:                   var(--color-tertiary);
   --button-background:                    var(--color-tertiary);
-  --fjm-button-active-bg-color:           var(--color-tertiary);
   --text-color-C:                         var(--color-component-minitext);
   --a-link-hover:                         var(--color-component-minitext);
   --text-border:                          var(--color-hr);
   --border-color-C:                       var(--color-tertiary);
-  --layer-panel-boader-color-1px-solid-B: 2px dashed var(--color-accent-hover:);
+  --layer-panel-border-color-1px-solid-B: 2px dashed var(--color-accent-hover);
   --color-dark-grey:                      var(--color-text-secondary);
   --fjm-button-color:                     var(--color-text-secondary);
   --text-color-B:                         var(--color-text-secondary);
@@ -51,17 +84,17 @@
   --button-hover-color:                   var(--color-text-primary);
   --color-input-focus-border:             var(--color-text-primary);
   --a-link:                               var(--color-text-primary);
-  --boader-color-1px-solid-A:             1px solid var(--color-text-primary);
+  --border-color-1px-solid-A:             1px solid var(--color-text-primary);
 
   --fjm-background-color:                 var(--color-secondary);
   --background-color-B:                   var(--color-secondary);
   --background-color-C:                   var(--color-secondary);
   --nav-background-hover-color:           var(--color-secondary);
-  
+
   --color-scrollbar-thumb:                var(--color-scllor);
-  --border-color-2px-dashed-B:            2px dashed var(--color-accent-hover:);
-  
-  --sidebar-gradient:                     linear-gradient(145deg,var(--color-base);, var(--color-secondary););
+  --border-color-2px-dashed-B:            2px dashed var(--color-accent-hover);
+
+  --sidebar-gradient:                     linear-gradient(145deg, var(--color-base), var(--color-secondary));
   --border-2px-solid:                     2px solid var(--border-color-C);
 
 }
@@ -77,8 +110,40 @@
   --color-component-minitext:             #ffffff;
   --color-hr:                             #ff9532;
   --color-scllor:                         rgb(107, 105, 90);
-  --odd-layer:           rgb(210, 218, 226);
-  --even-layer:          rgb(228, 214, 224);
+  --slider-accent:                        rgb(160, 155, 148);
+  --odd-layer:            rgb(218,210,178);
+  --even-layer:           rgb(210,202,170);
+  --layer-active-bg:      rgb(195,188,140);
+  --layer-active-border:  var(--color-accent);
+  --layer-hover-bg:       rgba(0,0,0,0.07);
+  --layer-separator:      rgba(0,0,0,0.08);
+  --layer-nested-border:  rgba(0,0,0,0.2);
+  --layer-name-bg:        rgba(0,0,0,0.04);
+  --layer-name-border:    rgba(0,0,0,0.12);
+  --layer-name-focus-border:var(--color-accent);
+  --layer-btn-bg:         rgba(0,0,0,0.05);
+  --layer-btn-border:     rgba(0,0,0,0.15);
+  --layer-btn-hover:      rgba(0,0,0,0.12);
+  --layer-btn-danger-hover:rgba(255,60,60,0.2);
+  --layer-preview-bg:     rgba(0,0,0,0.08);
+  --layer-preview-border: rgba(0,0,0,0.12);
+
+  --btn-bg:               rgba(0,0,0,0.05);
+  --btn-border:           1px solid rgba(0,0,0,0.10);
+  --btn-hover-bg:         rgba(0,0,0,0.12);
+  --btn-hover-border-color:rgba(0,0,0,0.18);
+  --btn-active-bg:        rgba(184,87,60,0.2);
+  --btn-active-border-color:rgba(184,87,60,0.45);
+  --btn-active-shadow:    0 0 8px rgba(184,87,60,0.15);
+  --btn-danger-bg:        rgba(200,50,50,0.08);
+  --btn-danger-border-color:rgba(200,50,50,0.18);
+  --btn-danger-hover-bg:  rgba(200,50,50,0.18);
+  --btn-danger-color:     #c03030;
+  --btn-action-bg:        rgba(40,140,60,0.08);
+  --btn-action-border-color:rgba(40,140,60,0.18);
+  --btn-action-hover-bg:  rgba(40,140,60,0.18);
+  --btn-action-color:     #28843c;
+  --btn-transition:       background 0.15s,color 0.15s,border-color 0.15s,box-shadow 0.15s;
 
   --color-scrollbar-track:                var(--color-base);
   --nav-border:                           var(--color-base);
@@ -87,27 +152,29 @@
   --select-button-color:                  var(--color-accent);
   --button-hover-background:              var(--color-secondary);
   --fjm-border-color:                     var(--color-secondary);
-  --boader-color-1px-solid-B:             1px solid  var(--color-tertiary);
-  --fjm-button-bg-color:                             var(--color-tertiary);
+  --border-color-1px-solid-B:             1px solid  var(--color-tertiary);
+  --fjm-button-bg-color:                  rgba(0,0,0,0.07);
   --dropdown-border:                      1px solid  var(--color-tertiary);
-  --boader-color-2px-solid-C:             2px dashed var(--color-tertiary);
-  --boader-color-1px-solid-D:             1px dashed var(--color-tertiary);
-  --fjm-button-border-color:              var(--color-tertiary);
-  --fjm-button-hover-bg-color:            var(--color-tertiary);
+  --border-color-2px-solid-C:             2px dashed var(--color-tertiary);
+  --border-color-1px-solid-D:             1px dashed var(--color-tertiary);
+  --fjm-button-border-color:              transparent;
+  --fjm-button-hover-bg-color:            rgba(0,0,0,0.13);
+  --fjm-button-hover-color:               var(--color-text-primary);
+  --fjm-button-active-bg-color:           var(--color-accent);
+  --fjm-separator-color:                  rgba(0,0,0,0.12);
   --background-color-D:                   var(--color-tertiary);
   --sidebar-icon-color:                   var(--color-tertiary);
   --button-background:                    var(--color-tertiary);
-  --fjm-button-active-bg-color:           var(--color-tertiary);
   --text-color-C:                         var(--color-component-minitext);
   --a-link-hover:                         var(--color-component-minitext);
   --text-border:                          var(--color-hr);
   --border-color-C:                       var(--color-tertiary);
-  --layer-panel-boader-color-1px-solid-B: 1px dashed var(--color-accent-hover:);
+  --layer-panel-border-color-1px-solid-B: 1px dashed var(--color-accent-hover);
   --color-dark-grey:                      var(--color-text-secondary);
   --fjm-button-color:                     var(--color-text-secondary);
   --text-color-B:                         var(--color-text-secondary);
   --dropdown-color:                       var(--color-text-secondary);
-  
+
   --svg-preview-background:               var(--color-base);
 
   --component-text-color:                 var(--color-text-primary);
@@ -115,17 +182,17 @@
   --button-hover-color:                   var(--color-text-primary);
   --color-input-focus-border:             var(--color-text-primary);
   --a-link:                               var(--color-text-primary);
-  --boader-color-1px-solid-A:             1px solid var(--color-text-primary);
+  --border-color-1px-solid-A:             1px solid var(--color-text-primary);
 
   --fjm-background-color:                 var(--color-secondary);
   --background-color-B:                   var(--color-secondary);
   --background-color-C:                   var(--color-secondary);
   --nav-background-hover-color:           var(--color-secondary);
-  
+
   --color-scrollbar-thumb:                var(--color-scllor);
-  --border-color-2px-dashed-B:            2px dashed var(--color-accent-hover:);
-  
-  --sidebar-gradient:                     linear-gradient(145deg,var(--color-base);, var(--color-secondary););
+  --border-color-2px-dashed-B:            2px dashed var(--color-accent-hover);
+
+  --sidebar-gradient:                     linear-gradient(145deg, var(--color-base), var(--color-secondary));
   --border-2px-solid:                     2px solid var(--border-color-C);
 }
 
@@ -137,15 +204,15 @@
   --main-height:                          calc(100vh - 4vh);
   --left_area-height:                     calc(100vh - 5vh);
 
-  --fjm-padding:                          2px;
+  --fjm-padding:                          4px;
   --fjm-z-index:                          1000;
-  --fjm-border-radius:                    0;
+  --fjm-border-radius:                    8px;
   --fjm-font-family:                      "Helvetica Neue", Arial, sans-serif;
-  --fjm-font-size:                        12px;
-  --fjm-button-margin:                    2px 0;
+  --fjm-font-size:                        11px;
+  --fjm-button-margin:                    1px 0;
   --fjm-button-cursor:                    pointer;
-  --fjm-button-padding:                   2px 3px;
-  --fjm-button-border-radius:             0;
+  --fjm-button-padding:                   4px 10px;
+  --fjm-button-border-radius:             4px;
   --fjm-button-width:                     100%;
   --fjm-button-text-align:                left;
   --fjm-button-white-space:               nowrap;
@@ -176,7 +243,7 @@
   --font-size-controls:                   12px;
   --font-size-small:                      12px;
   --font-size-base:                       12px;
-  --font-size-button:                     15px;
+  --font-size-button:                     12px;
   --font-size-material-icons:             16px;
   --font-size-icon-material:              16px;
   --font-size-icon-material-outlined:     18px;
@@ -184,7 +251,7 @@
 
   /* New Layer */
   --layer-buttons-margin: 0px;
-  --layer-item-padding:2px;
+  --layer-item-padding:6px 8px;
 
 /* 
 
@@ -255,8 +322,8 @@
   /* Widths & Heights - Fixed */
   --navbar-logo-max-height:               25px;
   --flex-span-width:                      30px;
-  --layer-preview-width:                  45px;
-  --layer-preview-height:                 45px;
+  --layer-preview-width:                  52px;
+  --layer-preview-height:                 52px;
   --max-width-50:                         50px;
   --min-width-50:                         50px;
   --width-50:                             50px;
@@ -319,4 +386,14 @@
 
   /* Navigation */
   --navbar-padding:                       0;
+
+  /* Z-Index Scale */
+  --z-dropdown:                           100;
+  --z-sidebar:                            200;
+  --z-floating-window:                    500;
+  --z-bottom-drawer:                      600;
+  --z-overlay:                            900;
+  --z-modal:                              1000;
+  --z-toast:                              2000;
+  --z-tutorial:                           3000;
 }

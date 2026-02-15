@@ -59,6 +59,9 @@ if(ModeManager._isPenMode(mode)){
 ModeManager.pencil._enable(mode);
 }
 }
+if(mode!==ModeManager.MODE.SELECT){
+ModeManager.button.activeClear();
+}
 ModeManager.cursor.update(mode);
 uiLogger.debug("ModeManager.change:",prev,"->",mode);
 },
@@ -189,6 +192,11 @@ isKnifeMode=true;
 ModeManager.button.activeClear();
 ModeManager.cursor.update(ModeManager.MODE.KNIFE);
 ModeManager.knife._updateMovement();
+var knifeModeButton=$("knifeModeButton");
+if(knifeModeButton){
+knifeModeButton.classList.add("selected");
+if(typeof getText==='function')knifeModeButton.textContent=getText("knifeOff");
+}
 },
 
 disable:function(){
@@ -203,6 +211,11 @@ canvas.remove(currentKnifeLine);
 currentKnifeLine=null;
 }
 ModeManager.knife._updateMovement();
+var knifeModeButton=$("knifeModeButton");
+if(knifeModeButton){
+knifeModeButton.classList.remove("selected");
+if(typeof getText==='function')knifeModeButton.textContent=getText("knifeOn");
+}
 },
 
 toggle:function(){
@@ -242,6 +255,7 @@ cropFrame=null;
 if(cropActiveObject){
 cropActiveObject.set({selectable:true});
 }
+hideCanvasHelpText();
 },
 
 isActive:function(){

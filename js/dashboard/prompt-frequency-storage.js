@@ -6,6 +6,7 @@ name:'MangaEditor_PromptFrequency',
 storeName:'tagFrequency',
 });
 var MAX_TAGS=500;
+var MAX_COOCCURRENCE=500;
 function parsePrompt(prompt){
 if(!prompt||typeof prompt!=='string') return[];
 var tags=prompt
@@ -57,10 +58,53 @@ delete frequencies[tagList[i][0]];
 }
 }
 await store.setItem('frequencies',frequencies);
+if(tags.length>=2){
+await recordCoOccurrence(tags);
+}
 return frequencies;
 }catch(error){
 dashboardTagLogger.error('Error recording prompt:',error);
 return null;
+}
+}
+async function recordCoOccurrence(tags){
+try{
+var coData=(await store.getItem('cooccurrence'))||{};
+for(var i=0;i<tags.length;i++){
+for(var j=i+1;j<tags.length;j++){
+var pair=[tags[i],tags[j]].sort().join('|||');
+if(!coData[pair]){
+coData[pair]=0;
+}
+coData[pair]+=1;
+}
+}
+var entries=Object.entries(coData);
+if(entries.length>MAX_COOCCURRENCE){
+entries.sort(function(a,b){return a[1]-b[1];});
+var toRemove=entries.length-MAX_COOCCURRENCE;
+for(var i=0;i<toRemove;i++){
+delete coData[entries[i][0]];
+}
+}
+await store.setItem('cooccurrence',coData);
+}catch(error){
+dashboardTagLogger.error('Error recording co-occurrence:',error);
+}
+}
+async function getCoOccurrence(limit){
+limit=limit||20;
+try{
+var coData=(await store.getItem('cooccurrence'))||{};
+var entries=Object.entries(coData);
+entries.sort(function(a,b){return b[1]-a[1];});
+return entries.slice(0,limit).map(function(entry){
+var tags=entry[0].split('|||');
+return{tag1:tags[0],tag2:tags[1],count:entry[1]};
+});
+}catch(error){
+dashboardTagLogger.error('Error getting co-occurrence:',error);
+return[];
 }
 }
 async function getTopTags(limit){
@@ -110,6 +154,7 @@ avgUsagePerTag:0,
 async function clearAll(){
 try{
 await store.removeItem('frequencies');
+await store.removeItem('cooccurrence');
 return true;
 }catch(error){
 dashboardTagLogger.error('Error clearing frequencies:',error);
@@ -145,5 +190,6 @@ getStats:getStats,
 clearAll:clearAll,
 searchTags:searchTags,
 parsePrompt:parsePrompt,
+getCoOccurrence:getCoOccurrence,
 };
 })();

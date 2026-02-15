@@ -31,7 +31,6 @@ class FontSelector {
     return `<div class="fm-font-dropdown">
             <button class="fm-dropdown-trigger">
             <span id="fm-selected-font-${this.targetId}">${this.title}</span>
-            <span>▼</span>
             </button>
             <div class="fm-dropdown-content" id="fm-fontDropdown-${this.targetId}"></div>
             </div>`;
@@ -86,49 +85,105 @@ class FontSelector {
   }
  
   closeDropdown() {
-    const dropdown = $(`fm-fontDropdown-${this.targetId}`);
-    if (dropdown) {
-      dropdown.classList.remove("fm-show");
-      dropdown.style.removeProperty('top');
-      dropdown.style.removeProperty('left');
-      dropdown.style.removeProperty('maxHeight');
-      dropdown.style.removeProperty('maxWidth');
-    }
-  }
+const dropdown = $(`fm-fontDropdown-${this.targetId}`);
+if (dropdown) {
+dropdown.classList.remove("fm-show");
+dropdown.style.removeProperty('top');
+dropdown.style.removeProperty('left');
+dropdown.style.removeProperty('maxHeight');
+dropdown.style.removeProperty('maxWidth');
+this.resetGridColumns(dropdown);
+}
+}
 
-  updateDropdownPosition(trigger, dropdown) {
-    const triggerRect = trigger.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    
-    dropdown.style.removeProperty('maxHeight');
-    dropdown.style.removeProperty('maxWidth');
+resetGridColumns(dropdown) {
+const grids = dropdown.querySelectorAll('.fm-font-grid');
+grids.forEach(g => g.style.removeProperty('grid-template-columns'));
+}
 
-    const dropdownHeight = dropdown.offsetHeight;
-    const dropdownWidth = dropdown.offsetWidth;
+setGridColumns(dropdown, cols) {
+const grids = dropdown.querySelectorAll('.fm-font-grid');
+grids.forEach(g => {
+g.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+});
+}
 
-    let top = triggerRect.bottom + window.scrollY;
-    let left = triggerRect.left + window.scrollX;
+findHorizontalPosition(w, menuRect, triggerRect, vW, margin) {
+const candidates = [];
+if (menuRect) {
+candidates.push(menuRect.right);
+candidates.push(menuRect.left - w);
+}
+candidates.push(triggerRect.left);
+candidates.push(Math.round((vW - w) / 2));
+candidates.push(vW - w - margin);
+candidates.push(margin);
+for (const l of candidates) {
+if (l >= margin && l + w <= vW - margin) return l;
+}
+if (w <= vW - margin * 2) return Math.max(margin, vW - w - margin);
+return margin;
+}
 
-    if (triggerRect.bottom + dropdownHeight > viewportHeight) {
-      top = (triggerRect.top + window.scrollY) - dropdownHeight;
-      if (top < 0) {
-        top = 20;
-        dropdown.style.maxHeight = `${viewportHeight - 40}px`;
-      }
-    }
+getFixedOffset(dropdown) {
+dropdown.style.top = '0px';
+dropdown.style.left = '0px';
+const rect = dropdown.getBoundingClientRect();
+return {x:rect.left,y:rect.top};
+}
 
-    if (left + dropdownWidth > viewportWidth) {
-      left = (viewportWidth - dropdownWidth - 20);
-      if (left < 0) {
-        left = 20;
-        dropdown.style.maxWidth = `${viewportWidth - 40}px`;
-      }
-    }
-
-    dropdown.style.top = `${top}px`;
-    dropdown.style.left = `${left}px`;
-  }
+updateDropdownPosition(trigger, dropdown) {
+const margin = 8;
+const vH = window.innerHeight;
+const vW = window.innerWidth;
+const triggerRect = trigger.getBoundingClientRect();
+dropdown.style.visibility = 'hidden';
+dropdown.style.top = '0px';
+dropdown.style.left = '0px';
+dropdown.style.removeProperty('maxHeight');
+dropdown.style.removeProperty('maxWidth');
+this.resetGridColumns(dropdown);
+const offset = this.getFixedOffset(dropdown);
+const menuEl = trigger.closest('.fabricjs-object-menu');
+const menuRect = menuEl ? menuEl.getBoundingClientRect() : null;
+const maxAvailW = vW - margin * 2;
+const maxAvailH = vH - margin * 2;
+const columnOptions = [4,3,2,1];
+let bestLeft = margin;
+let bestTop = margin;
+let bestCols = 1;
+let bestMaxH = maxAvailH;
+let needsMaxH = true;
+for (const cols of columnOptions) {
+this.setGridColumns(dropdown, cols);
+const w = dropdown.scrollWidth;
+const h = dropdown.scrollHeight;
+if (w > maxAvailW) continue;
+const left = this.findHorizontalPosition(w, menuRect, triggerRect, vW, margin);
+let top = triggerRect.top;
+if (h <= maxAvailH) {
+if (top + h > vH - margin) top = vH - margin - h;
+if (top < margin) top = margin;
+bestLeft = left;
+bestTop = top;
+bestCols = cols;
+needsMaxH = false;
+break;
+}
+bestLeft = left;
+bestTop = margin;
+bestCols = cols;
+bestMaxH = maxAvailH;
+needsMaxH = true;
+break;
+}
+this.setGridColumns(dropdown, bestCols);
+if (needsMaxH) dropdown.style.maxHeight = `${bestMaxH}px`;
+if (dropdown.scrollWidth > maxAvailW) dropdown.style.maxWidth = `${maxAvailW}px`;
+dropdown.style.top = `${bestTop - offset.y}px`;
+dropdown.style.left = `${bestLeft - offset.x}px`;
+dropdown.style.visibility = '';
+}
  
   initializeDropdown() {
     const container = $(this.targetId);
@@ -210,8 +265,8 @@ class FontSelector {
  
 document.addEventListener("DOMContentLoaded", async () => {
   await fontManager.init();
-  new FontSelector("fontSelector", "Font");
-  
+  new FontSelector("fontSelector", "Arial");
+
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".fm-font-dropdown")) {
       FontSelectorManager.closeAllDropdowns();

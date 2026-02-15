@@ -46,10 +46,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Bangers&family=Bungee+Shade&family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Creepster&family=Permanent+Marker&family=Rubik+Mono+One&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 
-    <div id="a" style="display:none">
-    </div>
+    <div id="a" style="display:none"></div>
     <script>
-        
+
 
 const $ = (id) => document.getElementById(id);
 const $on = (element, event, callback) => element.addEventListener(event, callback);
@@ -193,7 +192,6 @@ function getElementClasses(element) {
 <link rel="stylesheet" href="css/core/main-component.css?v=7.2">
 <link rel="stylesheet" href="css/css2.css?v=7.2">
 <link rel="stylesheet" href="css/icon.css?v=7.2">
-<link rel="stylesheet" href="css/form.css?v=7.2">
 <link rel="stylesheet" href="css/controls-mini.css?v=7.2">
 <link rel="stylesheet" href="css/common.css?v=7.2">
 <link rel="stylesheet" href="css/components.css?v=7.2">
@@ -214,6 +212,7 @@ function getElementClasses(element) {
 
 <link rel="stylesheet" href="third/tippy/tippy.css">
 <link rel="stylesheet" href="third/Bootstrup/bootstrap.min.css">
+<link rel="stylesheet" href="css/form.css?v=7.2">
 <link rel="stylesheet" href="css/all.min.css?v=7.2">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/4.1.3/css/flag-icons.min.css">
 <link rel="stylesheet" href="css/ui/blend.css?v=7.2">
@@ -245,10 +244,7 @@ function getElementClasses(element) {
 
 <!-- Category:Menu -->
         <nav id="desu-nav" class="navbar navbar-expand custom-navbar" style="display: none;">
-            <a class="navbar-brand" href="#">
-                <img src="02_images_svg/Logo/icon_full_192_192.png" alt="Manga Editor Desu! Pro Edition Official Logo"
-                    class="navbar-logo" id="navbar-logo">
-            </a>
+<span class="navbar-logo-text" id="navbar-logo">DESU<br><span class="navbar-logo-ver">v1</span></span>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown"
                 aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -256,11 +252,12 @@ function getElementClasses(element) {
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownFile" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <span data-i18n="file">File</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownFile">
+                            <label data-i18n="fileProject"></label>
                             <li>
                                 <a class="dropdown-item" href="#" id="projectSave">
                                     <i class="material-icons">folder_zip</i>
@@ -284,6 +281,7 @@ function getElementClasses(element) {
                                     <i class="material-icons">restart_alt</i> <span data-i18n="settingsReset">Settings Reset</span>
                                 </a>
                             </li>
+                            <label data-i18n="fileImage"></label>
                             <li>
                                 <a class="dropdown-item" href="#" onclick="inputImageFile()">
                                     <span class="material-symbols-outlined">image</span>
@@ -319,10 +317,11 @@ function getElementClasses(element) {
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                             <span data-i18n="settingsMenu">Settings</span>
                         </a>
                         <ul class="dropdown-menu">
+                            <label data-i18n="20260214155000_001"></label>
                             <li>
                                 <div style="padding:4px 10px;white-space:nowrap;font-size:11px;">
                                     <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
@@ -333,22 +332,79 @@ function getElementClasses(element) {
                                     <span data-i18n="autoSaveSeconds">sec</span>
                                 </div>
                             </li>
+                            <li>
+                                <div style="padding:4px 10px;white-space:nowrap;font-size:11px;">
+                                    <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
+                                        <input type="checkbox" id="settingsAutoSaveCheckbox" checked>
+                                        <span data-i18n="settingsAutoSave">設定値自動保存</span>
+                                    </label>
+                                </div>
+                            </li>
+                            <label id="intro_sdWebUI" data-i18n="20260214155000_002"></label>
+                            <div class="A1111_api_content">
+                                <li class="es-section-title">WebUI (A1111/Forge)</li>
+                                <li class="es-url-row">
+                                    <input type="text" id="sdWebUIPageUrl" value="http://127.0.0.1:7860" placeholder="URL">
+                                    <button id="sdWebUIPageUrlDefaultUrl" class="es-btn-small" title="Reset">↺</button>
+                                    <a href="html/API_Help/sd-api-guide.html" target="_blank" class="es-btn-small" title="Help">?</a>
+                                </li>
+                            </div>
+                            <div class="Comfyui_api_content">
+                                <li class="es-section-title" data-i18n="comfyUI">ComfyUI</li>
+                                <li class="es-url-row">
+                                    <input type="text" id="comfyUIPageUrl" value="http://127.0.0.1:8188" placeholder="URL">
+                                    <button id="comfyUIPageUrlDefaultUrl" class="es-btn-small" title="Reset">↺</button>
+                                    <a href="html/API_Help/comfyui_settings.html" target="_blank" class="es-btn-small" title="Help">?</a>
+                                </li>
+                            </div>
                         </ul>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownView" role="button"
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            <span data-i18n="viewMenu">表示</span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownView">
+                            <label data-i18n="viewPanel"></label>
+                            <li>
+                                <div style="padding:2px 10px 2px 18px;white-space:nowrap;font-size:11px;">
+                                    <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
+                                        <input type="checkbox" id="view_layers_checkbox" checked>
+                                        <i class="material-icons" style="font-size:16px;">layers</i>
+                                        <span data-i18n="view_Layer">レイヤー</span> (Ctrl+L)
+                                    </label>
+                                </div>
+                            </li>
+                            <li>
+                                <div style="padding:2px 10px 4px 18px;white-space:nowrap;font-size:11px;">
+                                    <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
+                                        <input type="checkbox" id="view_controles_checkbox" checked>
+                                        <i class="material-icons" style="font-size:16px;">smart_toy</i>
+                                        <span data-i18n="view_AI">AI</span> (Ctrl+K)
+                                    </label>
+                                </div>
+                            </li>
+                            <li>
+                                <div style="padding:2px 10px 2px 18px;white-space:nowrap;font-size:11px;">
+                                    <label style="display:inline-flex;align-items:center;gap:4px;cursor:pointer;">
+                                        <input type="checkbox" id="view_prompt_checkbox">
+                                        <i class="material-icons" style="font-size:16px;">document_scanner</i>
+                                        <span data-i18n="promptView">Prompt View</span> (Ctrl+P)
+                                    </label>
+                                </div>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPrompt" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <span data-i18n="prompt">Prompt</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li>
-                                <a class="dropdown-item" onclick="View()">
-                                    <i class="material-icons">document_scanner</i>
-                                    <span data-i18n="promptView">Prompt View</span> (Ctrl+P)
-                                </a>
-                            </li>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownPrompt">
                             <li>
                                 <a class="dropdown-item" onclick="openPromptChangeFloatingWindow()">
                                     <i class="material-icons">manage_search</i> <span data-i18n="searchReplace">Search &
@@ -366,38 +422,12 @@ function getElementClasses(element) {
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="intro_sdWebUI" data-i18n="externalServices"></span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <div class="A1111_api_content">
-                                <li class="es-section-title">WebUI (A1111/Forge)</li>
-                                <li class="es-url-row">
-                                    <input type="text" id="sdWebUIPageUrl" value="http://127.0.0.1:7860" placeholder="URL">
-                                    <button id="sdWebUIPageUrlDefaultUrl" class="es-btn-small" title="Reset">↺</button>
-                                    <a href="html/API_Help/sd-api-guide.html" target="_blank" class="es-btn-small" title="Help">?</a>
-                                </li>
-                            </div>
-                            <hr>
-                            <div class="Comfyui_api_content">
-                                <li class="es-section-title" data-i18n="comfyUI">ComfyUI</li>
-                                <li class="es-url-row">
-                                    <input type="text" id="comfyUIPageUrl" value="http://127.0.0.1:8188" placeholder="URL">
-                                    <button id="comfyUIPageUrlDefaultUrl" class="es-btn-small" title="Reset">↺</button>
-                                    <a href="html/API_Help/comfyui_settings.html" target="_blank" class="es-btn-small" title="Help">?</a>
-                                </li>
-                            </div>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCanvas" role="button"
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                             <span data-i18n="canvas">Canvas</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownCanvas">
+                            <label data-i18n="canvasDisplay"></label>
                             <a class="dropdown-item">
                                 <i class="material-icons">format_color_fill</i>
                                 <span data-i18n="canvasBG">Canvas BG</span>
@@ -410,7 +440,7 @@ function getElementClasses(element) {
                                 <input type="number" id="outputDpi" class="dropdown-item-mini-text" value="300" min="96"
                                     step="1">
                             </a>
-                            <hr>
+                            <label data-i18n="canvasGrid"></label>
                             <a class="dropdown-item" href="#" id="toggleGridButton">
                                 <i class="material-icons">grid_4x4</i>
                                 <span data-i18n="gridLine">Grid Line (Ctrl+G)</span>
@@ -421,7 +451,7 @@ function getElementClasses(element) {
                                 <input type="number" id="gridSizeInput" class="dropdown-item-mini-text" value="10"
                                     min="1">
                             </a>
-                            <hr>
+                            <label data-i18n="canvasLayout"></label>
                             <a class="dropdown-item">
                                 <i class="material-icons">fit_screen</i> <span data-i18n="marginFromPanel">Margin From
                                     Panel</span>
@@ -432,22 +462,71 @@ function getElementClasses(element) {
                     </li>
                 </ul>
                 <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="openDashboardModal();return false;">
+                            <span data-i18n="dashboard">Dashboard</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLanguage" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="language" data-i18n="language" data-step="1" data-intro="">Language</span> <span id="languageFlag" class="flag-icon"></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownLanguage">
+                            <label data-i18n="languageSelect"></label>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('en', event)">
+                                <span class="flag-icon flag-icon-us"></span> <span data-i18n="english">English</span>
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('ja', event)">
+                                <span class="flag-icon flag-icon-jp"></span>
+                                <span data-i18n="japanese">日本語</span>
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('ko', event)">
+                                <span class="flag-icon flag-icon-kr"></span> <span data-i18n="korean">한국어</span>
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('zh', event)">
+                                <span class="flag-icon flag-icon-cn"></span> <span data-i18n="chinese">中文</span>
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('fr', event)">
+                                <span class="flag-icon flag-icon-fr"></span> <span data-i18n="french">Français</span>
+                            </a>
+
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('ru', event)">
+                                <span class="flag-icon flag-icon-ru"></span> <span data-i18n="russian">Русский</span>
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('es', event)">
+                                <span class="flag-icon flag-icon-es"></span> <span data-i18n="spanish">Español</span>
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="changeLanguage('de', event)">
+                                <span class="flag-icon flag-icon-de"></span> <span data-i18n="Germany">Germany</span>
+                            </a>
+
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownHelp" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <span data-i18n="help">Help</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownHelp">
+                            <label data-i18n="helpGuide"></label>
+                            <a id="Intro_Tutorial" class="dropdown-item" href="#" target="_blank">
+                                <i class="material-icons">volunteer_activism</i>
+                                <span data-i18n="Tutorial">Tutorial</span>
+                            </a>
                             <a class="dropdown-item" href="#" onclick="openShortcutModal()" id="shortcutPage">
                                 <i class="material-icons">switch_access_shortcut</i>
                                 <span data-i18n="shortcutPage">Shortcut Page</span> (F1)
                             </a>
-
                             <a class="dropdown-item" href="html/functionList.html" target="_blank">
                                 <i class="material-icons">functions</i>
                                 <span data-i18n="functionList">Function List</span>
                             </a>
-
+                            <label data-i18n="helpManual"></label>
                             <a class="dropdown-item" href="html/Minual/custom-speechBubble.html" target="_blank">
                                 <i class="material-icons">reviews</i>
                                 <span>Custom Bubble</span>
@@ -464,70 +543,13 @@ function getElementClasses(element) {
                     </li>
                 </ul>
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="openDashboardModal();return false;">
-                            <span data-i18n="dashboard">Dashboard</span>
-                        </a>
-                    </li>
-                </ul>
-
-
-                <ul class="navbar-nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="language" data-i18n="language" data-step="1" data-intro="">Language</span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a id="Intro_Tutorial" class="dropdown-item" href="#" target="_blank">
-                                <i class="material-icons">volunteer_activism</i>
-                                <span data-i18n="Tutorial">Tutorial</span>
-                            </a>
-
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('en', event)">
-                                <span class="flag-icon flag-icon-us"></span> <span data-i18n="english">English</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('ja', event)">
-                                <span class="flag-icon flag-icon-jp"></span>
-                                <span data-i18n="japanese">日本語</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('ko', event)">
-                                <span class="flag-icon flag-icon-kr"></span> <span data-i18n="korean">한국어</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('zh', event)">
-                                <span class="flag-icon flag-icon-cn"></span> <span data-i18n="chinese">中文</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('fr', event)">
-                                <span class="flag-icon flag-icon-fr"></span> <span data-i18n="french">Français</span>
-                            </a>
-
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('ru', event)">
-                                <span class="flag-icon flag-icon-ru"></span> <span data-i18n="russian">Русский</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('es', event)">
-                                <span class="flag-icon flag-icon-es"></span> <span data-i18n="spanish">Español</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('pt', event)">
-                                <span class="flag-icon flag-icon-pt"></span> <span
-                                    data-i18n="portuguese">Português</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('th', event)">
-                                <span class="flag-icon flag-icon-th"></span> <span data-i18n="thailand">Thailand</span>
-                            </a>
-                            <a class="dropdown-item" href="#" target="_blank" onclick="changeLanguage('de', event)">
-                                <span class="flag-icon flag-icon-de"></span> <span data-i18n="Germany">Germany</span>
-                            </a>
-
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLinks" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             <span id="intro_links" data-i18n="links">Links</span>
                         </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownLinks">
+                            <label data-i18n="linksTools"></label>
                             <a class="dropdown-item" href="https://new-sankaku.github.io/SP-MangaEditer/"
                                 target="_blank">
                                 <i class="material-icons">emoji_people</i>
@@ -547,6 +569,7 @@ function getElementClasses(element) {
 
                             
 
+                            <label data-i18n="linksCommunity"></label>
                             <a class="dropdown-item" href="https://discord.gg/zuU96TqNUb" target="_blank">
                                 <i class="fab fa-discord"></i>
                                 <span data-i18n="discord">Discord</span>
@@ -558,18 +581,30 @@ function getElementClasses(element) {
                                 <span data-i18n="github">GitHub</span>
                             </a>
 
+                            <label data-i18n="20260214150000_000"></label>
                             <a class="dropdown-item" href="html/PrivacyPolicy/i18n-privacy-dark-complete.html" target="_blank">
                                 <i class="material-icons">verified_user</i>
                                 <span>Privacy Policy</span>
                             </a>
-
-                            
                             <a class="dropdown-item" href="html/TermsOfService/terms-of-service.html" target="_blank">
                                 <i class="material-icons">verified_user</i>
                                 <span data-i18n="terms_of_service">Terms of Service</span>
                             </a>
-
-                            <label data-i18n="DevelopmentDonations"></label>
+                            <label data-i18n="Share"></label>
+                            <a class="dropdown-item" target="_blank" onclick="snsTweet()">
+                                <i class="fab fa-twitter"></i>
+                                <span>Twitter</span>
+                            </a>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownDonate" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span data-i18n="DevelopmentDonations"></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownDonate">
                             <a class="dropdown-item"
                                 href="https://github.com/sponsors/new-sankaku"
                                 target="_blank">
@@ -585,20 +620,6 @@ function getElementClasses(element) {
                                 href="https://note.com/vivid_walrus6061/n/n40e38122c45b?from=notice"
                                 target="_blank">
                                 <span>[Japan] Note</span>
-                            </a>
-                        </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span id="intro_links" data-i18n="Share">Share</span>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <a class="dropdown-item" target="_blank" onclick="snsTweet()">
-                                <i class="fab fa-twitter"></i>
-                                <span>Twitter</span>
                             </a>
                         </ul>
                     </li>
@@ -629,23 +650,13 @@ function getElementClasses(element) {
         <div id="head-id" style="display: none; flex-grow: 1;">
             <div id="sidebar">
                 <div class="icon-wrapper">
-                 <i class="material-icons" id="intro_svg-container-vertical" onclick="toggleVisibility('svg-container-vertical')">crop_portrait</i>
-                 <span class="icon-label" data-i18n="side-label-template-vertical" onclick="toggleVisibility('svg-container-vertical')">ひな形 縦</span>
+                 <i class="material-icons" id="intro_svg-container-template" onclick="toggleVisibility('svg-container-template')">auto_awesome_mosaic</i>
+                 <span class="icon-label" data-i18n="side-label-template" onclick="toggleVisibility('svg-container-template')">ひな形</span>
                 </div>
                 <hr>
                 <div class="icon-wrapper">
-                 <i class="material-icons" id="intro_svg-container-landscape" onclick="toggleVisibility('svg-container-landscape')">crop_16_9</i>
-                 <span class="icon-label" data-i18n="side-label-template-landscape" onclick="toggleVisibility('svg-container-landscape')">ひな形 横</span>
-                </div>
-                <hr>
-                <div class="icon-wrapper">
-                 <i class="material-icons" id="intro_page-manager-area" onclick="toggleVisibility('panel-manager-area')">dashboard</i>
+                 <i class="material-icons" id="intro_page-manager-area" onclick="toggleVisibility('panel-manager-area')">dashboard_customize</i>
                  <span class="icon-label" data-i18n="side-label-page-manager" onclick="toggleVisibility('panel-manager-area')">ページ管理</span>
-                </div>
-                <hr>
-                <div class="icon-wrapper">
-                 <i class="material-icons" id="intro_custom-panel-manager-area" onclick="toggleVisibility('custom-panel-manager-area')">dashboard_customize</i>
-                 <span class="icon-label" data-i18n="side-label-panel-manager" onclick="toggleVisibility('custom-panel-manager-area')">コマ管理</span>
                 </div>
                 <hr>
                 <div class="icon-wrapper">
@@ -695,11 +706,6 @@ function getElementClasses(element) {
                  <span class="icon-label" data-i18n="side-label-effect" onclick="toggleVisibility('manga-effect-area')">効果</span>
                 </div>
                 <hr>
-                <div class="icon-wrapper">
-                 <i class="material-icons" id="intro_rough-manager-area" onclick="toggleVisibility('rough-manager-area')">stairs</i>
-                 <span class="icon-label" data-i18n="side_label_rough" onclick="toggleVisibility('rough-manager-area')">ラフ</span>
-                </div>
-                <hr>
 
 
                 
@@ -714,230 +720,125 @@ function getElementClasses(element) {
                 </div>
                </div>
 
-<!-- Category:Vertical -->
-            <div class="left_area" id="svg-container-vertical" style="display: none;">
-                <div class="area-header" data-i18n="panelsVertical">Panels</div>
+<!-- Category:Template -->
+            <div class="left_area" id="svg-container-template" style="display: none;">
+                <div class="area-header template-header">
+                    <span data-i18n="panelsTemplate">パネル</span>
+                    <label class="template-orientation-toggle">
+                        <input type="checkbox" id="template-orientation-toggle" onchange="switchTemplateOrientation()">
+                        <span class="template-toggle-label">
+                            <span class="template-toggle-v"><i class="material-icons">crop_portrait</i><span data-i18n="templateVertical">縦</span></span>
+                            <span class="template-toggle-sep">/</span>
+                            <span class="template-toggle-h"><i class="material-icons">crop_16_9</i><span data-i18n="templateHorizontal">横</span></span>
+                        </span>
+                    </label>
+                </div>
                 <div id="svg-preview-area-vertical"></div>
-            </div>
-
-<!-- Category:Landscape -->
-            <div class="left_area" id="svg-container-landscape" style="display: none;">
-                <div class="area-header" data-i18n="panelsLandscape">Panels</div>
-                <div id="svg-preview-area-landscape"></div>
+                <div id="svg-preview-area-landscape" style="display:none;"></div>
             </div>
 
 <!-- Category:PageManager -->
             <div class="left_area" id="panel-manager-area" style="display: none;">
                 <div class="area-header" data-i18n="pageManager">Page Manager</div>
                 <div id="panel-manager-items">
-                    <div class="input-group">
-                        <button id="knifeModeButton">
-                            <span data-i18n="knifeMode">Knife Mode: OFF</span>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="sectionPageAdd"></div>
+                        <button id="page-portrait">
+                            <i class="material-icons">crop_portrait</i>
+                            <span data-i18n="pagePortrait">縦ページ</span>
+                        </button>
+                        <button id="page-landscape">
+                            <i class="material-icons">crop_landscape</i>
+                            <span data-i18n="pageLandscape">横ページ</span>
+                        </button>
+                        <button id="CustomPanelButton">
+                            <i class="material-icons">crop_landscape</i>
+                            <span data-i18n="customPanel">Custom Page</span>
+                        </button>
+                        <div class="input-group">
+                            <label for="customPanelSizeX" data-i18n="customPanelSizeX">Width</label>
+                            <input type="number" id="customPanelSizeX" name="customPanelSizeX" min="1" max="4096" step="1"
+                                value="1380">
+                        </div>
+                        <div class="input-group">
+                            <label for="customPanelSizeY" data-i18n="customPanelSizeY">Height</label>
+                            <input type="number" id="customPanelSizeY" name="customPanelSizeY" min="1" max="4096" step="1"
+                                value="4000">
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="sectionPanelSplit"></div>
+                        <div class="input-group">
+                            <button id="knifeModeButton">
+                                <i class="material-icons">content_cut</i>
+                                <span data-i18n="knifeMode">Knife Mode: OFF</span>
+                            </button>
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="spaceSizeLabel">
+                            <input type="range" id="knifePanelSpaceSize" name="knifePanelSpaceSize" min="0" max="75" step="1" value="20">
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="sectionPanelSettings"></div>
+                        <div class="input-group">
+                            <label for="panelStrokeColor" data-i18n="line">Line:</label>
+                            <input id="panelStrokeColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changePanelStrokeColor(this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label for="panelFillColor" data-i18n="fill">Fill:</label>
+                            <input id="panelFillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changePanelFillColor(this.value)">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="lineWidth">
+                            <input type="range" id="panelStrokeWidth" name="panelStrokeWidth" min="0.1" max="10" step="0.1" value="2" oninput="changePanelStrokeWidth(this.value)">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
+                            <input type="range" id="panelOpacity" name="panelOpacity" min="0" max="100" step="1" value="100" oninput="changePanelOpacity(this.value)">
+                        </div>
+                        <button id="add" onclick="panelAllChange()"><i class="material-icons">border_all</i> <span
+                                data-i18n="all_change">All Change</span></button>
+                        <button id="edit" onclick="Edit()"><i class="material-icons">edit_square</i> <span
+                                data-i18n="editModeOn">Panel Edit Mode ON</span></button>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="sectionShapeAdd"></div>
+                        <button id="addSquare" onclick="addSquare()">
+                            <i class="material-icons">add_box</i>
+                            <span data-i18n="square">Square</span>
+                        </button>
+                        <button id="addTallRect" onclick="addTallRect()">
+                            <i class="material-icons">vertical_split</i>
+                            <span data-i18n="tallRect">Tall Rectangle</span>
+                        </button>
+                        <button id="addWideRect" onclick="addWideRect()">
+                            <i class="material-icons">horizontal_split</i>
+                            <span data-i18n="wideRect">Wide Rectangle</span>
+                        </button>
+                        <button id="addTriangle" onclick="addTriangle()">
+                            <i class="material-icons">change_history</i>
+                            <span data-i18n="triangle">Triangle</span>
+                        </button>
+                        <button id="addPentagon" onclick="addPentagon()">
+                            <i class="material-icons">pentagon</i>
+                            <span data-i18n="pentagon">Pentagon</span>
+                        </button>
+                        <button id="addHexagon" onclick="addHexagon()">
+                            <i class="material-icons">hexagon</i>
+                            <span data-i18n="hexagon">Hexagon</span>
+                        </button>
+                        <button id="addStar" onclick="addStar()">
+                            <i class="material-icons">star</i>
+                            <span data-i18n="star">Star</span>
+                        </button>
+                        <button id="addHeart" onclick="addHeart()">
+                            <i class="material-icons">favorite</i>
+                            <span data-i18n="heartShape">Heart</span>
                         </button>
                     </div>
-                    <div class="input-container-leftSpace" data-i18n-label="spaceSizeLabel">
-                        <input type="range" id="knifePanelSpaceSize" name="knifePanelSpaceSize" min="0" max="75" step="1" value="20">
-                    </div>
 
-                    <hr>
-
-                    <button id="A4-H">
-                        <i class="material-icons">crop_portrait</i>
-                        <span data-i18n="A4-H-Scale">A4 Scale Panel</span>
-                    </button>
-                    <button id="A4-V">
-                        <i class="material-icons">crop_landscape</i>
-                        <span data-i18n="A4-V-Scale">A4 Scale Panel</span>
-                    </button>
-                    <button id="B4-H">
-                        <i class="material-icons">crop_portrait</i>
-                        <span data-i18n="B4-H-Scale">B4 Scale Panel</span>
-                    </button>
-                    <button id="B4-V">
-                        <i class="material-icons">crop_landscape</i>
-                        <span data-i18n="B4-V-Scale">B4 Scale Panel</span>
-                    </button>
-                    <hr>
-                    <button id="insta">
-                        <i class="fab fa-instagram"></i>
-                        <span data-i18n="instagram">IG</span>
-                    </button>
-                    <button id="insta-story">
-                        <i class="fab fa-instagram"></i>
-                        <span data-i18n="instagram_story">IG Story</span>
-                    </button>
-                    <button id="insta-portrait">
-                        <i class="fab fa-instagram"></i>
-                        <span data-i18n="instagram_portrait">IG Port</span>
-                    </button>
-                    <hr>
-
-                    <button id="fb-page-cover">
-                        <i class="fab fa-facebook"></i>
-                        <span data-i18n="fb_page_cover">FB Page</span>
-                    </button>
-                    <button id="fb-event">
-                        <i class="fab fa-facebook"></i>
-                        <span data-i18n="fb_event">FB Event</span>
-                    </button>
-                    <button id="fb-group-header">
-                        <i class="fab fa-facebook"></i>
-                        <span data-i18n="fb_group_header">FB Group</span>
-                    </button>
-                    <hr>
-
-                    <button id="youtube-thumbnail">
-                        <i class="fab fa-youtube"></i>
-                        <span data-i18n="youtube_thumbnail">YT Thumb</span>
-                    </button>
-                    <button id="youtube-profile">
-                        <i class="fab fa-youtube"></i>
-                        <span data-i18n="youtube_profile">YT Prof</span>
-                    </button>
-                    <button id="youtube-cover">
-                        <i class="fab fa-youtube"></i>
-                        <span data-i18n="youtube_cover">YT Cover</span>
-                    </button>
-                    <hr>
-
-                    <button id="twitter-profile">
-                        <i class="fab fa-twitter"></i>
-                        <span data-i18n="twitter_profile">TW Prof</span>
-                    </button>
-                    <button id="twitter-header">
-                        <i class="fab fa-twitter"></i>
-                        <span data-i18n="twitter_header">TW Head</span>
-                    </button>
-                    <hr>
-                    <div class="input-group">
-                        <label for="customPanelSizeX" data-i18n="customPanelSizeX">Width</label>
-                        <input type="number" id="customPanelSizeX" name="customPanelSizeX" min="1" max="4096" step="1"
-                            value="1380">
-                    </div>
-                    <div class="input-group">
-                        <label for="customPanelSizeY" data-i18n="customPanelSizeY">Height</label>
-                        <input type="number" id="customPanelSizeY" name="customPanelSizeY" min="1" max="4096" step="1"
-                            value="4000">
-                    </div>
-                    <button id="CustomPanelButton">
-                        <i class="material-icons">crop_landscape</i>
-                        <span data-i18n="customPanel">Custom Size</span>
-                    </button>
-
-                </div>
-            </div>
-
-<!-- Category:PanelManager -->
-            <div class="left_area" id="custom-panel-manager-area" style="display: none;">
-                <div class="area-header" data-i18n="panelManager">Panel Manager</div>
-                <div id="custom-panel-manager-items">
-
-                    <div class="input-group">
-                        <label for="panelStrokeColor" data-i18n="line">Line:</label>
-                        <input id="panelStrokeColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changePanelStrokeColor(this.value)">
-                    </div>
-                    <div class="input-group">
-                        <label for="panelFillColor" data-i18n="fill">Fill:</label>
-                        <input id="panelFillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changePanelStrokeColor(this.value)">
-                    </div>
-
-                    <div class="input-container-leftSpace" data-i18n-label="lineWidth">
-                        <input type="range" id="panelStrokeWidth" name="panelStrokeWidth" min="0.1" max="10" step="0.1" value="2" oninput="changePanelStrokeWidth(this.value)">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
-                        <input type="range" id="panelOpacity" name="panelOpacity" min="0" max="100" step="1" value="100" oninput="changePanelOpacity(this.value)">
-                    </div>
-
-
-                    <button id="add" onclick="panelAllChange()"><i class="material-icons">border_all</i> <span
-                            data-i18n="all_change">All Change</span></button>
-                    <button id="edit" onclick="Edit()"><i class="material-icons">edit_square</i> <span
-                            data-i18n="editModeOn">Panel Edit Mode ON</span></button>
-
-                    <hr>
-                    <div class="input-group">
-                        <label data-i18n="accept_ratio">Accept Ratio</label>
-                    </div>
-
-                    <div class="input-container-leftSpace" data-i18n-label="width">
-                        <input type="range" id="ar_width" name="ar_width" min="1" max="1000" step="1" value="3">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="height">
-                        <input type="range" id="ar_height" name="ar_height" min="1" max="1000" step="1" value="4">
-                    </div>
-
-                    <button id="addRect" onclick="addArRect()">
-                        <i class="material-icons">aspect_ratio</i>
-                        <span data-i18n="ar_Rect">AR Rect</span>
-                    </button>
-                    <hr>
-                    <button id="addSquare" onclick="addSquare()">
-                        <i class="material-icons">add_box</i>
-                        <span data-i18n="square">Square</span>
-                    </button>
-                    <button id="addTallRect" onclick="addTallRect()">
-                        <i class="material-icons">vertical_split</i>
-                        <span data-i18n="tallRect">Tall Rectangle</span>
-                    </button>
-                    <button id="addWideRect" onclick="addWideRect()">
-                        <i class="material-icons">horizontal_split</i>
-                        <span data-i18n="wideRect">Wide Rectangle</span>
-                    </button>
-
-                    <button id="addTrapezoid" onclick="addTrapezoid()">
-                        <i class="material-icons">filter_none</i>
-                        <span data-i18n="trapezoid">Trapezoid</span>
-                    </button>
-                    <button id="addTallRightLeaningTrapezoid" onclick="addTallRightLeaningTrapezoid()">
-                        <i class="material-icons">filter_none</i>
-                        <span data-i18n="tallTrapezoid">Tall Trapezoid</span>
-                    </button>
-                    <button id="addRightSlantingTrapezoid" onclick="addRightSlantingTrapezoid()">
-                        <i class="material-icons">filter_none</i>
-                        <span data-i18n="wideTrapezoid">Wide Trapezoid</span>
-                    </button>
-                    <button id="addTallTrap" onclick="addTallTrap()">
-                        <i class="material-icons">filter_none</i>
-                        <span data-i18n="tallTrap">Tall Trapezoid</span>
-                    </button>
-                    <button id="addWideTrap" onclick="addWideTrap()">
-                        <i class="material-icons">filter_none</i>
-                        <span data-i18n="wideTrap">Wide Trapezoid</span>
-                    </button>
-
-                    <button id="addTriangle" onclick="addTriangle()">
-                        <i class="material-icons">change_history</i>
-                        <span data-i18n="triangle">Triangle</span>
-                    </button>
-                    <button id="addRhombus" onclick="addRhombus()">
-                        <i class="material-icons">diamond</i>
-                        <span data-i18n="rhombus">Rhombus</span>
-                    </button>
-                    <button id="addPentagon" onclick="addPentagon()">
-                        <i class="material-icons">pentagon</i>
-                        <span data-i18n="pentagon">Pentagon</span>
-                    </button>
-                    <button id="addHexagon" onclick="addHexagon()">
-                        <i class="material-icons">hexagon</i>
-                        <span data-i18n="hexagon">Hexagon</span>
-                    </button>
-
-                    <button id="addCircle" onclick="addCircle()">
-                        <i class="material-icons">radio_button_unchecked</i>
-                        <span data-i18n="circle">Circle</span>
-                    </button>
-                    <button id="addEllipse" onclick="addEllipse()">
-                        <i class="material-icons">panorama_fish_eye</i>
-                        <span data-i18n="ellipse">Ellipse</span>
-                    </button>
-                    <button id="addOctagon" onclick="addOctagon()">
-                        <i class="material-icons">report</i>
-                        <span data-i18n="octagon">Octagon</span>
-                    </button>
-                    <button id="addStar" onclick="addStar()">
-                        <i class="material-icons">star</i>
-                        <span data-i18n="star">Star</span>
-                    </button>
                 </div>
             </div>
 
@@ -955,75 +856,72 @@ function getElementClasses(element) {
 <!-- Category:PromptManager -->
             <div class="left_area" id="auto-generate-area" style="display: none;">
                 <div class="area-header" data-i18n="auto_generate">Auto Generate</div>
-                <div id="prompt-manager-items">
-                    <div class="input-group">
-                        <button id="panelRandamCutButton">
-                            <span data-i18n="panelRandamCut">Randam Cut</span>
-                        </button>
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="verticalRandomPanelCount">
-                        <input type="range" id="verticalRandomPanelCount" name="verticalRandomPanelCount" min="0" max="5" step="1" value="2">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="horizontalRandamPanelCount">
-                        <input type="range" id="horizontalRandamPanelCount" name="horizontalRandamPanelCount" min="0" max="5" step="1" value="3">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="tiltRandam">
-                        <input type="range" id="tiltRandam" name="tiltRandam" min="0" max="50" step="1" value="6">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="cutChangeRate">
-                        <input type="range" id="cutChangeRate" name="cutChangeRate" min="0" max="45" step="1" value="10">
-                    </div>
-
-                    <hr>
-                    <div class="input-group">
-                        <button id="multiPageGenerate">
-                            <span data-i18n="multiPageGenerate">Multi Page Generate</span>
-                        </button>
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="pageCount">
-                        <input type="range" id="pageCount" name="pageCount" min="2" max="50" step="1" value="18">
-                    </div>
-                    <div class="input-group-multi" data-group="multiPageType">
-                        <label>A4</label>
-                        <button id="mA4HButton" data-value="mA4H" onclick="changeSelected(this)" class="selected" >
-                            <i class="material-icons">crop_portrait</i>
-                        </button>
-                        <button id="mA4VButton" data-value="mA4V" onclick="changeSelected(this)">
-                            <i class="material-icons">crop_landscape</i>
-                        </button>
-                        <label>B4</label>
-                        <button id="mB4HButton" data-value="mB4H" onclick="changeSelected(this)">
-                            <i class="material-icons">crop_portrait</i>
-                        </button>
-                        <button id="mB4VButton" data-value="mB4V" onclick="changeSelected(this)">
-                            <i class="material-icons">crop_landscape</i>
-                        </button>
+                <div class="prompt-manager-items">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secMultiPage"></div>
+                        <div class="input-group">
+                            <button id="multiPageGenerate">
+                                <span data-i18n="multiPageGenerate">Multi Page Generate</span>
+                            </button>
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="pageCount">
+                            <input type="range" id="pageCount" name="pageCount" min="2" max="50" step="1" value="18">
+                        </div>
+                        <div class="input-group-multi" data-group="multiPageType">
+                            <button id="mPortraitButton" data-value="mPortrait" onclick="changeSelected(this)" class="selected" >
+                                <i class="material-icons">crop_portrait</i><span data-i18n="pagePortrait">縦ページ</span>
+                            </button>
+                            <button id="mLandscapeButton" data-value="mLandscape" onclick="changeSelected(this)">
+                                <i class="material-icons">crop_landscape</i><span data-i18n="pageLandscape">横ページ</span>
+                            </button>
+                        </div>
                     </div>
 
-
-                    <hr>
-                    <div class="input-group">
-                        <label data-i18n="scenario"></label>
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secRandomCut"></div>
+                        <div class="input-group">
+                            <button id="panelRandamCutButton">
+                                <span data-i18n="panelRandamCut">Randam Cut</span>
+                            </button>
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="verticalRandomPanelCount">
+                            <input type="range" id="verticalRandomPanelCount" name="verticalRandomPanelCount" min="0" max="5" step="1" value="2">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="horizontalRandamPanelCount">
+                            <input type="range" id="horizontalRandamPanelCount" name="horizontalRandamPanelCount" min="0" max="5" step="1" value="3">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="tiltRandam">
+                            <input type="range" id="tiltRandam" name="tiltRandam" min="0" max="50" step="1" value="6">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="cutChangeRate">
+                            <input type="range" id="cutChangeRate" name="cutChangeRate" min="0" max="45" step="1" value="10">
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <select id="ScenarioPromptSelecter"></select>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secAutoPrompt"></div>
+                        <div class="input-group">
+                            <label data-i18n="scenario"></label>
+                        </div>
+                        <div class="input-group">
+                            <select id="ScenarioPromptSelecter"></select>
+                        </div>
+                        <button id="" onclick="autoMultiPromptSet()">
+                            <i class="material-icons">generating_tokens</i>
+                            <span data-i18n="promptMultiAutoGenerate">Multi Prompt Generate</span>
+                        </button>
                     </div>
 
-                    <button id="" onclick="autoMultiPromptSet()">
-                        <i class="material-icons">generating_tokens</i>
-                        <span data-i18n="promptMultiAutoGenerate">Multi Prompt Generate</span>
-                    </button>
-                    <hr>
-
-                    <div class="input-container-leftSpace" data-i18n-label="onePanelGenerateNumber">
-                        <input type="range" id="onePanelGenerateNumber" name="onePanelGenerateNumber" min="1" max="10" step="1" value="1">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secBatchGenerate"></div>
+                        <div class="input-container-leftSpace" data-i18n-label="onePanelGenerateNumber">
+                            <input type="range" id="onePanelGenerateNumber" name="onePanelGenerateNumber" min="1" max="10" step="1" value="1">
+                        </div>
+                        <button id="" onclick="autoMultiGenerate()">
+                            <i class="material-icons">all_inbox</i>
+                            <span data-i18n="pageMultiAutoGenerate">Multi Page Generate</span>
+                        </button>
                     </div>
-
-                    <button id="" onclick="autoMultiGenerate()">
-                        <i class="material-icons">all_inbox</i>
-                        <span data-i18n="pageMultiAutoGenerate">Multi Page Generate</span>
-                    </button>
-                    <hr>
                 </div>
             </div>
 
@@ -1032,7 +930,7 @@ function getElementClasses(element) {
 <!-- Category:PromptManager -->
 <div class="left_area" id="prompt-manager-area" style="display: none;">
     <div class="area-header" data-i18n="prompt"></div>
-    <div id="prompt-manager-items">
+    <div class="prompt-manager-items">
      <div class="input-group">
       <button onclick="createImagePromptHelperFlotingWindow()">
        <span data-i18n="prompt_gallery">Prompt Gallery</span>
@@ -1111,85 +1009,87 @@ function getElementClasses(element) {
                         Custom Bubble (Help)
                     </a>
                 </div>
-                <div id="speech-bubble-svg-preview-area1">
-                    <div class="input-group">
-                        <button id="sbSelectButton" data-i18n="sbSelectmode">Select Mode</button>
-                        <button id="sbPointButton" data-i18n="sbPointMode">Point Mode</button>
-                        <button id="sbFreehandButton" data-i18n="sbFreehandMode">Free Hand</button>
-                        <button id="sbMoveButton" data-i18n="sbMoveMode">Move Point</button>
-                        <button id="sbDeleteButton" data-i18n="sbDeleteMode">Delete Point</button>
+                <div id="speech-bubble-svg-preview-area2">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secDrawMode"></div>
+                        <div class="input-group">
+                            <button id="sbSelectButton" data-i18n="sbSelectmode">Select Mode</button>
+                            <button id="sbPointButton" data-i18n="sbPointMode">Point Mode</button>
+                            <button id="sbFreehandButton" data-i18n="sbFreehandMode">Free Hand</button>
+                            <button id="sbMoveButton" data-i18n="sbMoveMode">Move Point</button>
+                            <button id="sbDeleteButton" data-i18n="sbDeleteMode">Delete Point</button>
+                        </div>
+                        <div class="input-group-multi" data-group="sbFreehandTextGroup">
+                            <button id="sbFreehandNothingText" onclick="sbFreehandTextChange('Nothing', this)" data-value="Nothing">
+                                <i class="material-icons">do_not_disturb</i>
+                                <i class="material-icons">text_fields</i>
+                            </button>
+                            <button id="sbFreehandHorizontalText" onclick="sbFreehandTextChange('Horizontal', this)" class="selected" data-value="Horizontal">
+                                <i class="material-icons">east</i>
+                                <i class="material-icons">text_fields</i>
+                            </button>
+                            <button id="sbFreehandVerticalText" onclick="sbFreehandTextChange('Vertical', this)" data-value="Vertical">
+                                <i class="material-icons">south</i>
+                                <i class="material-icons">text_fields</i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="input-group-multi" data-group="sbFreehandTextGroup">
-                        <button id="sbFreehandNothingText" onclick="sbFreehandTextChange('Nothing', this)" data-value="Nothing">
-                            <i class="material-icons">do_not_disturb</i>
-                            <i class="material-icons">text_fields</i>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secBubbleStyle"></div>
+                        <div class="input-group">
+                            <label for="sbStrokeColor" data-i18n="line">Line</label>
+                            <input id="sbStrokeColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changePanelStrokeColor(this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label for="sbFillColor" data-i18n="fill">Fill</label>
+                            <input id="sbFillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changePanelStrokeColor(this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label for="sbSmoothing" data-i18n="smooth">Smooth</label>
+                            <input type="checkbox" id="sbSmoothing" checked>
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="lineWidth">
+                            <input type="range" id="sbStrokeWidth" min="1" max="20" value="1" step="0.1">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="pointSpace">
+                            <input type="range" id="sbPointSpace" min="0" max="100" value="4">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
+                            <input type="range" id="sbFillOpacity" min="0" max="100" value="100">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="cornerRadius">
+                            <input type="range" id="sbSornerRadius" min="0" max="15" value="2">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
+                            <input type="range" id="sbFillOpacity2" min="0" max="100" value="100">
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secLinePreset"></div>
+                        <button id="sb_aButton" onclick="switchSBLine('sb_a')">
+                            <img src="03_images/preset/line/a.png">
                         </button>
-                        <button id="sbFreehandHorizontalText" onclick="sbFreehandTextChange('Horizontal', this)" class="selected" data-value="Horizontal">
-                            <i class="material-icons">east</i>
-                            <i class="material-icons">text_fields</i>
+                        <button id="sb_bButton" onclick="switchSBLine('sb_b')">
+                            <img src="03_images/preset/line/b.png">
                         </button>
-                        <button id="sbFreehandVerticalText" onclick="sbFreehandTextChange('Vertical', this)" data-value="Vertical">
-                            <i class="material-icons">south</i>
-                            <i class="material-icons">text_fields</i>
+                        <button id="sb_cButton" onclick="switchSBLine('sb_c')">
+                            <img src="03_images/preset/line/c.png">
+                        </button>
+                        <button id="sb_dButton" onclick="switchSBLine('sb_d')">
+                            <img src="03_images/preset/line/d.png">
+                        </button>
+                        <button id="sb_eButton" onclick="switchSBLine('sb_e')">
+                            <img src="03_images/preset/line/e.png">
+                        </button>
+                        <button id="sb_fButton" onclick="switchSBLine('sb_f')">
+                            <img src="03_images/preset/line/f.png">
+                        </button>
+                        <button id="sb_gButton" onclick="switchSBLine('sb_g')">
+                            <img src="03_images/preset/line/g.png">
                         </button>
                     </div>
-                    <hr>
-                    <div class="input-group">
-                        <label for="sbStrokeColor" data-i18n="line">Line</label>
-                        <input id="sbStrokeColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changePanelStrokeColor(this.value)">
-                    </div>
-                    <div class="input-group">
-                        <label for="sbFillColor" data-i18n="fill">Fill</label>
-                        <input id="sbFillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changePanelStrokeColor(this.value)">
-
-                    </div>                    
-                    <div class="input-group">
-                        <label for="sbSmoothing" data-i18n="smooth">Smooth</label>
-                        <input type="checkbox" id="sbSmoothing" checked>
-                    </div>
-
-                    <div class="input-container-leftSpace" data-i18n-label="lineWidth">
-                        <input type="range" id="sbStrokeWidth" min="1" max="20" value="1" step="0.1">
-                    </div>
-                    
-                    <div class="input-container-leftSpace" data-i18n-label="pointSpace">
-                        <input type="range" id="sbPointSpace" min="0" max="100" value="4">
-                    </div>
-                    
-                    <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
-                        <input type="range" id="sbFillOpacity" min="0" max="100" value="100">
-                    </div>
-
-
-                    <div class="input-container-leftSpace" data-i18n-label="cornerRadius">
-                        <input type="range" id="sbSornerRadius" min="0" max="15" value="2">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
-                        <input type="range" id="sbFillOpacity" min="0" max="100" value="100">
-                    </div>
-
-                    <hr>
-                    <button id="sb_aButton" onclick="switchSBLine('sb_a')">
-                        <img src="03_images/preset/line/a.png">
-                    </button>
-                    <button id="sb_bButton" onclick="switchSBLine('sb_b')">
-                        <img src="03_images/preset/line/b.png">
-                    </button>
-                    <button id="sb_cButton" onclick="switchSBLine('sb_c')">
-                        <img src="03_images/preset/line/c.png">
-                    </button>
-                    <button id="sb_dButton" onclick="switchSBLine('sb_d')">
-                        <img src="03_images/preset/line/d.png">
-                    </button>
-                    <button id="sb_eButton" onclick="switchSBLine('sb_e')">
-                        <img src="03_images/preset/line/e.png">
-                    </button>
-                    <button id="sb_fButton" onclick="switchSBLine('sb_f')">
-                        <img src="03_images/preset/line/f.png">
-                    </button>
-                    <button id="sb_gButton" onclick="switchSBLine('sb_g')">
-                        <img src="03_images/preset/line/g.png">
-                    </button>
                 </div>
             </div>
 
@@ -1197,81 +1097,68 @@ function getElementClasses(element) {
                 <div class="area-header" data-i18n="text">Text</div>
                 <div id="text-preview-area">
 
-
-                    <div class="input-group">
-                        <button onclick="fontManager.openUserFontManager()" data-i18n="add_font">add font</button>
-                    </div>
-                    <hr>
-
-                    <div class="input-group">
-                        <div id="fontSelector"></div>
-                    </div>
-                    <div class="input-group">
-                        <label data-i18n="textColor">Text</label>
-                        <input id="textColorPicker" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changeTextColor(this.value)">
-                    </div>
-                    <div class="input-group">
-                        <label data-i18n="outlineColor">Outline</label>
-                        <input id="textOutlineColorPicker" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changeOutlineTextColor(this.value)">
-                    </div>
-
-                    <div class="input-container-leftSpace" data-i18n-label="fontSize">
-                        <input type="range" id="fontSizeSlider" min="7" max="150" value="14" oninput="changeFontSize(this.value)">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="outlineSize">
-                        <input type="range" id="fontStrokeWidthSlider" min="0" max="5" step="1" value="0" oninput="changeStrokeWidthSize(this.value)">
-                    </div>
-
-                    <div class="input-group-multi" data-group="align_group">
-                        <button id="align-left" data-value="left" class="selected" onclick="alignText('left', this)">
-                            <i class="material-icons">format_align_left</i>
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secTextAdd"></div>
+                        <button onclick="createTextbox()">
+                            <i class="material-icons">text_fields</i>
+                            <i class="material-icons">east</i>
+                            <span data-i18n="HorizontalText"></span>
                         </button>
-                        <button id="align-center" data-value="center" onclick="alignText('center', this)">
-                            <i class="material-icons">format_align_center</i>
-                        </button>
-                        <button id="align-right" data-value="right" onclick="alignText('right', this)">
-                            <i class="material-icons">format_align_right</i>
+                        <button id="verticalText">
+                            <i class="material-icons">text_fields</i>
+                            <i class="material-icons">south</i>
+                            <span data-i18n="VerticalText"></span>
                         </button>
                     </div>
-                    <hr>
-                    <button onclick="createTextbox()">
-                        <i class="material-icons">text_fields</i>
-                        <i class="material-icons">east</i>
-                        <span data-i18n="HorizontalText"></span>
-                    </button>
-                    <button id="verticalText">
-                        <i class="material-icons">text_fields</i>
-                        <i class="material-icons">south</i>
-                        <span data-i18n="VerticalText"></span>
-                    </button>
-                    <button onclick="toggleBold()">
-                        <i class="material-icons">format_bold</i>
-                        <span data-i18n="bold">Bold</span>
-                    </button>
-                    <hr>
-                    <label data-i18n="effects">Effects</label>
-                    <div class="input-group">
-                        <label data-i18n="firstColor">First Color:</label>
-                        <input id="firstTextEffectColorPicker" class="jscolor-color-picker" data-initial-color="rgba(0,255,0,1)"  oninput="changeNeonColor(this.value)">
 
-                    </div>
-                    <div class="input-group">
-                        <label data-i18n="secondColor">Second Color:</label>
-                        <input id="secondTextEffectColorPicker" class="jscolor-color-picker" data-initial-color="rgba(0,0,255,1)"  oninput="changeNeonColor(this.value)">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secFontSettings"></div>
+                        <div class="input-group">
+                            <div id="fontSelector"></div>
                         </div>
-                    <hr>
-                    <button onclick="applyCSSTextEffect()">
-                        <i class="material-icons">deblur</i>
-                        <span data-i18n="shadow">Shadow</span>
-                    </button>
-                    <button onclick="applyVividGradientEffect()">
-                        <i class="material-icons">filter</i>
-                        <span data-i18n="vividGradient">Vivid Gradient</span>
-                    </button>
-                    <button onclick="applyNeonEffect()">
-                        <i class="material-icons">flare</i>
-                        <span data-i18n="neon">Neon</span>
-                    </button>
+                        <div class="input-group-multi" data-group="bold_group">
+                            <button id="bold-toggle-btn" onclick="toggleBoldWithUI(this)">
+                                <i class="material-icons">format_bold</i>
+                                <span data-i18n="bold">Bold</span>
+                            </button>
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="textColor">Text</label>
+                            <input id="textColorPicker" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changeTextColor(this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="outlineColor">Outline</label>
+                            <input id="textOutlineColorPicker" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changeOutlineTextColor(this.value)">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="com-bgColor">Background</label>
+                            <input id="textBgColorPicker" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changeTextBgColor(this.value)">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="fontSize">
+                            <input type="range" id="fontSizeSlider" min="7" max="150" value="14" oninput="changeFontSize(this.value)">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="outlineSize">
+                            <input type="range" id="fontStrokeWidthSlider" min="0" max="5" step="1" value="0" oninput="changeStrokeWidthSize(this.value)">
+                        </div>
+                        <div class="input-group-multi" data-group="align_group">
+                            <button id="align-left" data-value="left" class="selected" onclick="alignText('left', this)">
+                                <i class="material-icons">format_align_left</i>
+                            </button>
+                            <button id="align-center" data-value="center" onclick="alignText('center', this)">
+                                <i class="material-icons">format_align_center</i>
+                            </button>
+                            <button id="align-right" data-value="right" onclick="alignText('right', this)">
+                                <i class="material-icons">format_align_right</i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secFontAdd"></div>
+                        <div class="input-group">
+                            <button onclick="fontManager.openUserFontManager()" data-i18n="add_font">add font</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1284,56 +1171,56 @@ function getElementClasses(element) {
                 </div>
 
                 <div id="tool-buttons">
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="shadowButton" onclick="switchText2('shadow')">
                             <span data-i18n="shadow">Shadow</span>
                             <img src="03_images/preset/text/t2_shadow.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="wildButton" onclick="switchText2('wild')">
                             <span data-i18n="wild">wild</span>
                             <img src="03_images/preset/text/t2_wild.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="scratchButton" onclick="switchText2('scratch')">
                             <span data-i18n="scratch">scratch</span>
                             <img src="03_images/preset/text/t2_scratch.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="brokenButton" onclick="switchText2('broken')">
                             <span data-i18n="broken">broken</span>
                             <img src="03_images/preset/text/t2_broken.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="cloudButton" onclick="switchText2('cloud')">
                             <span data-i18n="cloud">cloud</span>
                             <img src="03_images/preset/text/t2_cloud.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="layeredButton" onclick="switchText2('layered')">
                             <span data-i18n="layered">layered</span>
                             <img src="03_images/preset/text/t2_layered.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="meshButton" onclick="switchText2('mesh')">
                             <span data-i18n="mesh">mesh</span>
                             <img src="03_images/preset/text/t2_mesh.webp" style="width: 100%;">
                         </button>
                     </div>
 
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="thrillButton" onclick="switchText2('thrill')">
                             <span data-i18n="thrill">thrill</span>
                             <img src="03_images/preset/text/t2_thrill.webp" style="width: 100%;">
                         </button>
                     </div>
-                    <div id="text-preview-area2">
+                    <div class="text-preview-area2">
                         <button id="zebraButton" onclick="switchText2('zebra')">
                             <span data-i18n="zebra">zebra</span>
                             <img src="03_images/preset/text/t2_zebra.webp" style="width: 100%;">
@@ -1368,7 +1255,7 @@ function getElementClasses(element) {
                         <span data-i18n="Color2BlackWhiteRough">Color2BlackWhiteRough</span>
                         <img src="03_images/preset/effect/color2monoRough.webp" style="width: 100%;">
                     </button>
-                    <button id="Color2BlackWhiteNoDotButton" onclick="switchMangaEffect('Color2BlackWhiteSimple')">
+                    <button id="Color2BlackWhiteSimpleButton" onclick="switchMangaEffect('Color2BlackWhiteSimple')">
                         <span data-i18n="Color2BlackWhiteSimple">Color2BlackWhiteSimple</span>
                         <img src="03_images/preset/effect/color2monoSimple.webp" style="width: 100%;">
                     </button>
@@ -1405,110 +1292,6 @@ function getElementClasses(element) {
 
 
 
-<!-- Category:PromptManager -->
-<div class="left_area" id="rough-manager-area" style="display: none;">
-    <div class="area-header" data-i18n="Rough"></div>
-    <div id="prompt-manager-items">
-
-        <button id="toggle-rough" data-i18n="rough_on">ラフ化ON/OFF</button>
-
-        <div class="param-group" style="border-left:3px solid #FF9800;">
-            <div style="font-weight:bold;margin-bottom:5px;color:#FF9800;font-size:12px;" data-i18n="fill_style"></div>
-            <div class="input-group">
-                <label data-i18n="fillStyle"></label>
-            </div>
-            <div class="input-group">
-                <select id="fillStyle">
-                    <option value="cross-hatch">cross-hatch</option>
-                    <option value="hachure">hachure</option>
-                    <option value="solid">solid</option>
-                    <option value="zigzag">zigzag</option>
-                    <option value="dots">dots</option>
-                    <option value="dashed">dashed</option>
-                    <option value="zigzag-line">zigzag-line</option>
-                </select>
-            </div>
-
-
-            <div style="margin-bottom:5px;">
-             <label for="fillColor" data-i18n="fill" 
-                    style="display:block;margin-bottom:2px;font-size:12px;">
-                    fillColor:
-             </label>
-             <input id="fillColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)"/>
-            </div>
-
-            <div class="input-container-leftSpace" data-i18n-label="fillWeight">
-                <input type="range" id="fillWeight"  min="0" max="5" step="0.1" value="1">
-            </div>
-        </div>
-           
-        <div class="param-group" style="border-left:3px solid #2196F3;">
-            <div style="font-weight:bold;margin-bottom:5px;color:#2196F3;font-size:12px;" data-i18n="rough_style"></div>
- 
-            <div class="input-container-leftSpace" data-i18n-label="roughness">
-                <input type="range" id="roughness" min="0" max="10" step="0.1" value="0.4" >
-            </div>
-            <div class="input-container-leftSpace" data-i18n-label="bowing">
-                <input type="range" id="bowing" min="0" max="10" step="0.1" value="1" >
-            </div>
-            <div class="input-container-leftSpace" data-i18n-label="strokeWidth">
-                <input type="range" id="strokeWidth" min="0.1" max="10" step="0.1" value="0.5">
-            </div>
-
-            <div style="margin-bottom:5px;">
-             <label for="strokeColor" data-i18n="strokeColor" style="display:block;margin-bottom:2px;font-size:12px;">strokeColor:</label>
-             <input id="strokeColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" >
-
-            </div>
-            <div style="display:none">
-             <input type="number" id="seed" min="1" max="10000" value="1">
-            </div>
-
-            <div class="input-group" style="display: none;">
-                <label>
-                    <input type="checkbox" id="disableMultiStroke" checked>
-                    Multi
-                </label>
-            </div>
-
-        </div>
-           
-        <div id="hachureParams" class="param-group" style="border-left:3px solid #9C27B0;">
-            <div style="font-weight:bold;margin-bottom:5px;color:#9C27B0;font-size:12px;" data-i18n="rough_hachure"></div>
-
-            <div class="input-container-leftSpace" data-i18n-label="hachureAngle">
-                <input type="range" id="hachureAngle" min="-180" max="180" step="1" value="-41">
-            </div>
-            <div class="input-container-leftSpace" data-i18n-label="hachureGap">
-                <input type="range" id="hachureGap" min="0" max="20" step="0.1" value="0.8" >
-            </div>
-            
-            <div class="input-group" style="display: none;">
-                <label>
-                    <input type="checkbox" id="disableMultiStrokeFill" checked>
-                    MultiFill
-                </label>
-            </div>
-
-        </div>
-           
-        <div class="param-group" style="border-left:3px solid #795548;">
-            <div style="font-weight:bold;margin-bottom:5px;color:#795548;font-size:12px;" data-i18n="rough_curve"></div>
-
-            <div class="input-container-leftSpace" data-i18n-label="curveStepCount">
-                <input type="range" id="curveStepCount" min="1" max="20" value="9" >
-            </div>
-            <div class="input-container-leftSpace" data-i18n-label="curveFitting">
-                <input type="range" id="curveFitting" min="0" max="1" step="0.01" value="0.95" >
-            </div>
-            <div class="input-container-leftSpace" data-i18n-label="simplification">
-                <input type="range" id="simplification" min="0" max="1" step="0.01" value="0">
-            </div>
-        </div>
-
-    </div>
-</div>
 
 
 
@@ -1599,54 +1382,59 @@ function getElementClasses(element) {
             <div class="left_area" id="controle-area" style="display: none;">
                 <div class="area-header" data-i18n="Controle">Controle</div>
                 <div id="controle-preview-area">
-                    <div class="input-group">
-                        <label>
-                            <input type="checkbox" id="InfomationFPS" checked>
-                            FPS :0
-                        </label>
-                    </div>
-                    <div class="input-group">
-                        <label>
-                            <input type="checkbox" id="InfomationCoordinate" checked>
-                            X:0.0 Y:0.0
-                        </label>
-                    </div>
-
-                    <hr>
-
-                    <div class="input-container-leftSpace" data-i18n-label="angle">
-                        <input type="range" id="angle-control" min="0" max="360" value="0">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secInfoDisplay"></div>
+                        <div class="input-group">
+                            <label>
+                                <input type="checkbox" id="InfomationFPS" checked>
+                                FPS :0
+                            </label>
+                        </div>
+                        <div class="input-group">
+                            <label>
+                                <input type="checkbox" id="InfomationCoordinate" checked>
+                                X:0.0 Y:0.0
+                            </label>
+                        </div>
                     </div>
 
-                    <div class="input-container-leftSpace" data-i18n-label="scale">
-                        <input type="range" id="scale-control" min="0.01" max="10.0" step="0.01" value="1.00">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secTransform"></div>
+                        <div class="input-container-leftSpace" data-i18n-label="angle">
+                            <input type="range" id="angle-control" min="0" max="360" value="0">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="scale">
+                            <input type="range" id="scale-control" min="0.01" max="10.0" step="0.01" value="1.00">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="top">
+                            <input type="range" id="top-control" min="-300" max="600" value="100">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="left">
+                            <input type="range" id="left-control" min="-300" max="600" value="100">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="skewX">
+                            <input type="range" id="skewX-control" min="-60" max="60" value="0">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="skewY">
+                            <input type="range" id="skewY-control" min="-60" max="60" value="0">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="opacity">
+                            <input type="range" id="opacity-control" min="0" max="100" step="0.1" value="100">
+                        </div>
                     </div>
-                    <div class="input-container-leftSpace" data-i18n-label="top">
-                        <input type="range" id="top-control" min="-300" max="600" value="100">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="left">
-                        <input type="range" id="left-control" min="-300" max="600" value="100">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="skewX">
-                        <input type="range" id="skewX-control" min="-60" max="60" value="0">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="skewY">
-                        <input type="range" id="skewY-control" min="-60" max="60" value="0">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="opacity">
-                        <input type="range" id="opacity-control" min="0" max="100" step="0.1" value="100">
-                    </div>
-                    <hr>
 
-                    <div class="input-group-multi">
-                        <button onclick="flipHorizontally()">
-                            <i class="material-icons">swap_horiz</i> 
-                        </button>
-                        <button onclick="flipVertically()">
-                            <i class="material-icons">swap_vert</i> 
-                        </button>
-                        <button style="visibility: hidden;">
-                        </button>
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secFlip"></div>
+                        <div class="input-group-multi">
+                            <button onclick="flipHorizontally()">
+                                <i class="material-icons">swap_horiz</i>
+                            </button>
+                            <button onclick="flipVertically()">
+                                <i class="material-icons">swap_vert</i>
+                            </button>
+                            <button style="visibility: hidden;">
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -1659,72 +1447,64 @@ function getElementClasses(element) {
             <div class="left_area" id="shape-area" style="display: none;">
                 <div class="area-header" data-i18n="shape">Shape</div>
                 <div id="shape-preview-area">
-                    <div class="input-group">
-                        <input type="text" id="svg_icon_searchInput" placeholder="Enter icon name"
-                            data-i18n="svg_icon_search_placeholder"
-                            onkeydown="if (event.key === 'Enter') searchIcon();">
-                        <button onclick="searchIcon()" data-i18n="svg_icon_search_button">Search</button>
-                    </div>
-                    <hr>
-                    <div class="input-group">
-                        <label for="svg_icon_iconStyle" data-i18n="svg_icon_icon_style">Style</label>
-                        <select id="svg_icon_iconStyle" onchange="searchInitialIcons()">
-                            <option value="filled" data-i18n="svg_icon_filled">Filled</option>
-                            <option value="outlined" data-i18n="svg_icon_outlined">Outlined</option>
-                            <option value="rounded" data-i18n="svg_icon_rounded">Rounded</option>
-                            <option value="twotone" data-i18n="svg_icon_twotone">Two-tone</option>
-                        </select>
-                    </div>
-
-
-                    <div class="input-group">
-                        <label for="svg_icon_lineColor" data-i18n="svg_icon_line_color">Line</label>
-                        <input id="svg_icon_lineColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)"  oninput="updateSVGStyles()">
-                    </div>
-                    <div class="input-group">
-                        <label for="svg_icon_fillColor" data-i18n="svg_icon_fill_color">Fill</label>
-                        <input id="svg_icon_fillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="updateSVGStyles()">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secIconSearch"></div>
+                        <div class="input-group">
+                            <input type="text" id="svg_icon_searchInput" placeholder="Enter icon name"
+                                data-i18n="svg_icon_search_placeholder"
+                                onkeydown="if (event.key === 'Enter') searchIcon();">
+                            <button onclick="searchIcon()" data-i18n="svg_icon_search_button">Search</button>
+                        </div>
+                        <div class="input-group">
+                            <label for="svg_icon_iconStyle" data-i18n="svg_icon_icon_style">Style</label>
+                            <select id="svg_icon_iconStyle" onchange="searchInitialIcons()">
+                                <option value="filled" data-i18n="svg_icon_filled">Filled</option>
+                                <option value="outlined" data-i18n="svg_icon_outlined">Outlined</option>
+                                <option value="rounded" data-i18n="svg_icon_rounded">Rounded</option>
+                                <option value="twotone" data-i18n="svg_icon_twotone">Two-tone</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="input-container-leftSpace" data-i18n-label="svg_icon_line_width">
-                        <input type="range" id="svg_icon_lineWidth" min="0" max="5" step="1" value="1" oninput="updateSVGStyles()">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="svg_icon_fill_opacity">
-                        <input type="range" id="svg_icon_fillOpacity" min="0" max="1" step="0.1" value="1" oninput="updateSVGStyles()">
-                    </div>
-
-                    <hr>
-                    <label>Shadow</label>
-                    <div class="input-group">
-                        <label for="svg_icon_shadowColor" data-i18n="svg_icon_shadow_color">Color</label>
-                        <input id="svg_icon_shadowColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="updateSVGStyles(this.value)">
-                    </div>
-
-                    <div class="input-container-leftSpace" data-i18n-label="svg_icon_shadow_blur">
-                        <input type="range" id="svg_icon_shadowBlur" min="0" max="100" step="0.1" value="3" oninput="updateSVGStyles()">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="svg_icon_shadow_offset_x">
-                        <input type="range" id="svg_icon_shadowOffsetX" min="-20" max="20" step="1" value="0" oninput="updateSVGStyles()">
-                    </div>
-                    <div class="input-container-leftSpace" data-i18n-label="svg_icon_shadow_offset_y">
-                        <input type="range" id="svg_icon_shadowOffsetY" min="-20" max="20" step="1" value="0" oninput="updateSVGStyles()">
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secIconStyle"></div>
+                        <div class="input-group">
+                            <label for="svg_icon_lineColor" data-i18n="svg_icon_line_color">Line</label>
+                            <input id="svg_icon_lineColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)"  oninput="updateSVGStyles()">
+                        </div>
+                        <div class="input-group">
+                            <label for="svg_icon_fillColor" data-i18n="svg_icon_fill_color">Fill</label>
+                            <input id="svg_icon_fillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="updateSVGStyles()">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="svg_icon_line_width">
+                            <input type="range" id="svg_icon_lineWidth" min="0" max="5" step="1" value="1" oninput="updateSVGStyles()">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="svg_icon_fill_opacity">
+                            <input type="range" id="svg_icon_fillOpacity" min="0" max="1" step="0.1" value="1" oninput="updateSVGStyles()">
+                        </div>
                     </div>
 
-                    <hr>
-                    <div id="svg_icon_results"></div>
-                    <hr>
-                    <a
-                        href="https://fonts.google.com/icons?icon.size=24&icon.color=%235f6368&icon.query=Loading&icon.set=Material+Icons&icon.style=Filled">Google
-                        Icon</a>
-                    <hr>
-                    <button id="addTv" onclick="addTv()">
-                        <i class="material-icons">tv</i>
-                        <span data-i18n="tv">tv</span>
-                    </button>
-                    <button id="addRefinedRazerKishiController" onclick="addRefinedRazerKishiController()">
-                        <i class="material-icons">videogame_asset</i>
-                        <span data-i18n="videogame_asset">videogame_asset</span>
-                    </button>
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secIconShadow"></div>
+                        <div class="input-group">
+                            <label for="svg_icon_shadowColor" data-i18n="svg_icon_shadow_color">Color</label>
+                            <input id="svg_icon_shadowColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="updateSVGStyles(this.value)">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="svg_icon_shadow_blur">
+                            <input type="range" id="svg_icon_shadowBlur" min="0" max="100" step="0.1" value="3" oninput="updateSVGStyles()">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="svg_icon_shadow_offset_x">
+                            <input type="range" id="svg_icon_shadowOffsetX" min="-20" max="20" step="1" value="0" oninput="updateSVGStyles()">
+                        </div>
+                        <div class="input-container-leftSpace" data-i18n-label="svg_icon_shadow_offset_y">
+                            <input type="range" id="svg_icon_shadowOffsetY" min="-20" max="20" step="1" value="0" oninput="updateSVGStyles()">
+                        </div>
+                    </div>
+
+                    <div class="param-group">
+                        <div class="param-group-header" data-i18n="secIconPreset"></div>
+                        <div id="svg_icon_results"></div>
+                    </div>
 
                 </div>
             </div>
@@ -1739,23 +1519,10 @@ function getElementClasses(element) {
 
                     <button id="clearMode" onclick="operationModeClear()">
                         <span class="material-symbols-outlined">cancel_presentation</span>
-                        <label data-i18n="exitModeButton" style="margin: 0px; ">
+                        <label data-i18n="exitModeButton" style="margin:0px;">
                             モード解除
                         </label>
                     </button>
-
-                    <label data-i18n="view_Layer" style="margin-top: 0px; margin-bottom: 0px;">
-                        Layer
-                    </label>
-                    <input type="checkbox" id="view_layers_checkbox" checked
-                        style="margin-top: 0px; margin-bottom: 0px;">
-
-                    <label data-i18n="view_AI" style="margin-top: 0px; margin-bottom: 0px;">
-                        AI
-                    </label>
-                    <input type="checkbox" id="view_controles_checkbox" checked
-                        style="margin-top: 0px; margin-bottom: 0px;">
-
                     <button id="zoomIn" onclick="zoomIn()">
                         <span class="material-symbols-outlined">zoom_in</span>
                     </button>
@@ -1765,6 +1532,7 @@ function getElementClasses(element) {
                     <button id="zoomFit" onclick="zoomFit()">
                         <span class="material-symbols-outlined">1x_mobiledata_badge</span>
                     </button>
+                    <span id="canvas-help-text" class="canvas-help-text"></span>
                 </div>
 
                 <div id="intro_content" class="content">
@@ -1780,13 +1548,11 @@ function getElementClasses(element) {
 
             <div id="layer-panel">
                 <div class="area-header" >
+                        <label data-i18n="layers">Layers</label>
                         <button onclick="LayersUp()"><i class="material-icons">arrow_upward</i></button>
                         <button onclick="LayersDown()"><i class="material-icons">arrow_downward</i></button>
                         <button id="undo" onclick="undo()"><i class="material-icons">undo</i></button>
                         <button id="redo" onclick="redo()"><i class="material-icons">redo</i></button>
-                        <label data-i18n="layers">
-                            Layers
-                        </label>
                 </div>
                 <div id="layer-content"></div>
 
@@ -1800,10 +1566,10 @@ function getElementClasses(element) {
                     </div>
                     <div id="esApi-controls-mini" class="controls-mini">
                         <div class="input-group" data-group="externalApiGroup">
-                            <button id="comfyUIButton" data-value="comfyUIButton" onclick="changeExternalAPI(this)" class="selected">
+                            <button id="comfyUIButton" data-value="comfyUIButton" onclick="changeExternalAPI(this,true)" class="selected">
                                 ComfyUI
                             </button>
-                            <button id="sdWebUIButton" data-value="sdWebUIButton" onclick='changeExternalAPI(this)'>
+                            <button id="sdWebUIButton" data-value="sdWebUIButton" onclick='changeExternalAPI(this,true)'>
                                 WebUI or Forge
                             </button>
 
@@ -2076,9 +1842,7 @@ function getElementClasses(element) {
     <script src="js/ui/third/base-translation/base-fr.js?v=7.2" defer></script>
     <script src="js/ui/third/base-translation/base-ja.js?v=7.2" defer></script>
     <script src="js/ui/third/base-translation/base-ko.js?v=7.2" defer></script>
-    <script src="js/ui/third/base-translation/base-pt.js?v=7.2" defer></script>
     <script src="js/ui/third/base-translation/base-ru.js?v=7.2" defer></script>
-    <script src="js/ui/third/base-translation/base-th.js?v=7.2" defer></script>
     <script src="js/ui/third/base-translation/base-zh.js?v=7.2" defer></script>
     <script src="js/ui/third/i18next.js?v=7.2" defer></script>
     <script src="js/dashboard/performance-storage.js?v=7.3" defer></script>
@@ -2219,9 +1983,6 @@ function getElementClasses(element) {
     <script src="js/ai/comfyui/v2/comfyui-workflow-editor.js"></script>
     <script src="js/ai/comfyui/v2/comfyui-workflow-interact.js"></script>
 
-    <!-- <script src="https://cdn.jsdelivr.net/npm/roughjs@4.5.2/bundled/rough.js"></script> -->
-    <script src="js/sidebar/rough/rough_manager.js?v=7.2"></script>
-    <script src="js/sidebar/rough/rough.js?v=7.2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
     
 <script>
@@ -2455,6 +2216,135 @@ oninput="document.getElementById('inpaint-denoise-label').textContent=this.value
 </div>
 <div class="wordcloud-container">
 <canvas id="dashboardWordcloud" width="600" height="300"></canvas>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardStreak">Streak</h4>
+</div>
+<div class="streak-session-row">
+<div class="streak-card">
+<div class="streak-icon">&#x1F525;</div>
+<div class="streak-value" id="dashboardCurrentStreak">0</div>
+<div class="streak-label" data-i18n="dashboardCurrentStreak">Current</div>
+</div>
+<div class="streak-card">
+<div class="streak-icon">&#x1F3C6;</div>
+<div class="streak-value" id="dashboardLongestStreak">0</div>
+<div class="streak-label" data-i18n="dashboardLongestStreak">Longest</div>
+</div>
+<div class="streak-card">
+<div class="streak-icon">&#x1F4C5;</div>
+<div class="streak-value" id="dashboardTodayCount">0</div>
+<div class="streak-label" data-i18n="dashboardToday">Today</div>
+</div>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardSessionStats">Session</h4>
+</div>
+<div class="streak-session-row">
+<div class="streak-card">
+<div class="streak-value" id="dashboardCurrentSession">0m</div>
+<div class="streak-label" data-i18n="dashboardCurrentSession">This Session</div>
+</div>
+<div class="streak-card">
+<div class="streak-value" id="dashboardSessionGenCount">0</div>
+<div class="streak-label" data-i18n="dashboardGenPerSession">Gens</div>
+</div>
+<div class="streak-card">
+<div class="streak-value" id="dashboardAvgSession">0m</div>
+<div class="streak-label" data-i18n="dashboardAvgSession">Avg Session</div>
+</div>
+<div class="streak-card">
+<div class="streak-value" id="dashboardTotalSessions">0</div>
+<div class="streak-label" data-i18n="dashboardTotalSessions">Sessions</div>
+</div>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardCalendar">Activity Calendar</h4>
+</div>
+<div class="calendar-container" id="dashboardCalendar"></div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardSuccessRate">Success Rate</h4>
+</div>
+<div class="success-rate-container">
+<canvas id="dashboardSuccessRateChart" width="300" height="150"></canvas>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardPromptLength">Prompt Length</h4>
+</div>
+<div class="chart-container">
+<canvas id="dashboardPromptLengthChart" width="600" height="200"></canvas>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardCoOccurrence">Tag Co-occurrence</h4>
+</div>
+<div class="stats-table-container">
+<table class="stats-table cooccurrence-table">
+<thead>
+<tr>
+<th data-i18n="dashboardTagPair">Tag Pair</th>
+<th data-i18n="dashboardPairCount">Count</th>
+</tr>
+</thead>
+<tbody id="dashboardCoOccurrenceTable"></tbody>
+</table>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardModelUsage">Model Usage</h4>
+</div>
+<div class="chart-container model-chart-container">
+<canvas id="dashboardModelChart" width="600" height="200"></canvas>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardGoals">Goals</h4>
+</div>
+<div class="goal-container">
+<div class="goal-row">
+<span class="goal-label" data-i18n="dashboardDailyGoal">Daily Goal</span>
+<input type="number" id="dashboardDailyGoalInput" class="goal-input" min="1" max="9999" placeholder="0">
+<button class="dashboard-download-btn goal-save-btn" id="dashboardSaveDailyGoal" data-i18n="dashboardGoalSave">Save</button>
+</div>
+<div class="goal-progress-wrap">
+<div class="goal-progress-bar" id="dashboardDailyProgressBar"><span id="dashboardDailyProgressText"></span></div>
+</div>
+<div class="goal-row">
+<span class="goal-label" data-i18n="dashboardWeeklyGoal">Weekly Goal</span>
+<input type="number" id="dashboardWeeklyGoalInput" class="goal-input" min="1" max="9999" placeholder="0">
+<button class="dashboard-download-btn goal-save-btn" id="dashboardSaveWeeklyGoal" data-i18n="dashboardGoalSave">Save</button>
+</div>
+<div class="goal-progress-wrap">
+<div class="goal-progress-bar" id="dashboardWeeklyProgressBar"><span id="dashboardWeeklyProgressText"></span></div>
+</div>
+</div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardBadges">Badges</h4>
+</div>
+<div class="badge-grid" id="dashboardBadgeGrid"></div>
+</div>
+<div class="dashboard-section">
+<div class="section-header">
+<h4 data-i18n="dashboardExport">Export</h4>
+</div>
+<div class="export-section">
+<button class="dashboard-download-btn" id="dashboardExportJSON" data-i18n="dashboardExportJSON">JSON</button>
+<button class="dashboard-download-btn" id="dashboardExportCSV" data-i18n="dashboardExportCSV">CSV</button>
 </div>
 </div>
 </div>

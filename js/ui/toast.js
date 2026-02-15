@@ -128,10 +128,3 @@ let text=getText("nothingPanel");
 createToast(text,"",2000);
 return false;
 }
-
-function checkRoughTarget() {
-let text=getText("rough_target");
-let roughTargetMessage=getText("roughTargetMessage");
-createToast(text,roughTargetMessage,2000);
-return false;
-}

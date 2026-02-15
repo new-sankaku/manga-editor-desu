@@ -429,7 +429,7 @@ ctx.fillStyle=this.cursorColor||this.getValueOfPropertyAt(lineIndex,charIndex,'f
 ctx.globalAlpha=this.__isMousedown?1:this._currentCursorOpacity;
 ctx.fillRect(drawStart,topOffset+boundaries.top,charHeight,cursorWidth,)};
 _renderTextLinesBackground(ctx){if(!this.textBackgroundColor&&!this.styleHas('textBackgroundColor')){return};
-var heightOfLine,originalFill=ctx.fillStyle,line,lastColor,leftOffset=this.width-this._getLeftOffset(),lineTopOffset=this._getTopOffset(),charBox,currentColor,path=this.path,boxHeight=0,left=1,top=null,char;
+var heightOfLine,originalFill=ctx.fillStyle,line,lastColor,leftOffset=this.width-this._getLeftOffset(),lineTopOffset=this._getTopOffset(),charBox,currentColor,path=this.path,boxHeight=0,left=-1,top=null,char;
 for(var i=0,len=this._textLines.length;i<len;i++){heightOfLine=this.getHeightOfLine(i);
 left+=heightOfLine;
 if(!this.textBackgroundColor&&!this.styleHas('textBackgroundColor',i)){continue};

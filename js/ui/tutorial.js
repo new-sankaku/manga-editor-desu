@@ -113,7 +113,7 @@ self.saveState();
 startQuickStart:function(){
 var self=this;
 var steps=[
-{element:'#intro_svg-container-vertical',title:getText('tutorialStep1Title'),body:getText('tutorialStep1Body'),position:'right'},
+{element:'#intro_svg-container-template',title:getText('tutorialStep1Title'),body:getText('tutorialStep1Body'),position:'right'},
 {element:'#canvas-area',title:getText('tutorialStep2Title'),body:getText('tutorialStep2Body'),position:'left'},
 {element:'#intro_speech-bubble-area1',title:getText('tutorialStep3Title'),body:getText('tutorialStep3Body'),position:'right'},
 {element:'#intro_text-area',title:getText('tutorialStep4Title'),body:getText('tutorialStep4Body'),position:'right'},
@@ -266,7 +266,8 @@ this.saveState();
 setupEventListeners:function(){
 var self=this;
 document.addEventListener('click',function(e){
-if(e.target.id==='Intro_Tutorial'){
+var el=e.target.closest('#Intro_Tutorial');
+if(el){
 e.preventDefault();
 self.startQuickStart();
 }

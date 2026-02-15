@@ -94,13 +94,17 @@ const commonProperties=[
 ];
 
 let jscolorOptions={
-value: 'rgba(0,0,0,1)',
-position: 'bottom',
-height: 80,
-backgroundColor: '#333',
-palette: 'rgba(0,0,0,0) #fff #808080 #000 #996e36 #f55525 #ffe438 #88dd20 #22e0cd #269aff #bb1cd4',
-paletteCols: 11,
-hideOnPaletteClick: true
+value:'rgba(0,0,0,1)',
+position:'bottom',
+height:80,
+backgroundColor:'#333',
+palette:'rgba(0,0,0,0) #fff #808080 #000 #996e36 #f55525 #ffe438 #88dd20 #22e0cd #269aff #bb1cd4',
+paletteCols:11,
+hideOnPaletteClick:true,
+previewSize:0,
+previewPadding:0,
+alphaChannel:true,
+format:'rgba'
 };
 
 document.addEventListener('DOMContentLoaded',function() {

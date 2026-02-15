@@ -12,7 +12,7 @@
   max-width: 85%;
   height: 85vh;
   max-height: 85vh;
-  border-radius: 12px;
+  border-radius: var(--fjm-border-radius);
   overflow: hidden;
   color: #e0e0e0;
 }
@@ -83,7 +83,7 @@
   color: #fff;
   border: none;
   padding: 6px 12px;
-  border-radius: 6px;
+  border-radius: var(--fjm-button-border-radius);
   cursor: pointer;
   font-size: 13px;
   transition: background 0.2s;
@@ -98,7 +98,7 @@
   height: 120px;
   padding: 6px;
   border: 1px solid #404040;
-  border-radius: 6px;
+  border-radius: var(--textarea-border-radius);
   margin-bottom: 6px;
   resize: vertical;
   font-family: monospace;
@@ -139,7 +139,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--fjm-border-radius);
   transition: background 0.2s;
 }
 
@@ -222,9 +222,12 @@
 
 
 .fm-font-dropdown {
-  background: var(--color-tertiary);
-  position: relative;
-  width: 180px;
+background: var(--color-tertiary);
+position: relative;
+width: 180px;
+}
+.fabricjs-object-menu .fm-font-dropdown {
+width: 100%;
 }
 
 .fm-dropdown-trigger {
@@ -232,7 +235,7 @@
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #444;
-  border-radius: 4px;
+  border-radius: var(--fjm-button-border-radius);
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -248,19 +251,16 @@
 }
 
 .fm-dropdown-content {
-  display: none;
-  position: fixed;
-  max-width: 100%;
-  max-height: 800px;
-  margin-top: 4px;
-  background: #2a2a2a;
-  border: 1px solid #ffffff;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(255, 10, 10, 0.25);
-  overflow-y: auto;
-  z-index: 1000;
-  color: #fff;
-  font-size: 16px;
+display: none;
+position: fixed;
+background: #2a2a2a;
+border: 1px solid var(--fjm-border-color);
+border-radius: var(--fjm-button-border-radius);
+box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+overflow-y: auto;
+z-index: 1001;
+color: #fff;
+font-size: 16px;
 }
 
 .fm-dropdown-content.fm-show {

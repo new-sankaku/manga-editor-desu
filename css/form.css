@@ -17,17 +17,20 @@ hr {
 
 .file-input-label {
  display: inline-block;
- padding: 3px;
- background-color: #6e7e8f;
- color: rgb(255, 255, 255);
- border-radius: 4px;
+ padding: 3px 8px;
+ background: var(--btn-bg);
+ color: var(--text-color-B);
+ border: var(--btn-border);
+ border-radius: var(--fjm-button-border-radius);
  cursor: pointer;
- transition: background-color 0.3s;
+ transition: var(--btn-transition);
  font-size: 14px;
 }
 
 .file-input-label:hover {
- background-color: #679ed9;
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
+ color: var(--button-text-color);
 }
 
 input[type="file"] {
@@ -123,7 +126,7 @@ input[type="url"],
 textarea {
  background: var(--background-color-B);
  color: var(--text-color-B);
- border: var(--boader-color-1px-solid-B);
+ border: var(--border-color-1px-solid-B);
  box-sizing: border-box;
 }
 
@@ -171,25 +174,53 @@ i {
 }
 
 button {
- background-color: var(--button-background);
- background: var(--button-background);
+ background: var(--btn-bg);
  color: var(--button-text-color);
- border: var(--button-border);
+ border: var(--btn-border);
+ border-radius: var(--fjm-button-border-radius);
  cursor: pointer;
  padding: var(--padding-button);
  font-size: var(--font-size-button);
  margin: var(--margin-button);
  text-align: left;
+ transition: var(--btn-transition);
 }
 
 button:hover {
- background: var(--button-hover-background);
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
  color: var(--button-hover-color);
 }
 
+button:active {
+ background: rgba(255,255,255,0.05);
+ transition: none;
+}
+
+button.btn-danger {
+ background: var(--btn-danger-bg);
+ border-color: var(--btn-danger-border-color);
+ color: var(--btn-danger-color);
+}
+
+button.btn-danger:hover {
+ background: var(--btn-danger-hover-bg);
+}
+
+button.btn-action {
+ background: var(--btn-action-bg);
+ border-color: var(--btn-action-border-color);
+ color: var(--btn-action-color);
+}
+
+button.btn-action:hover {
+ background: var(--btn-action-hover-bg);
+}
+
 button.active-button:hover {
-  background-color: var(--select-button-color);
- }
+ background-color: var(--btn-active-bg);
+ border-color: var(--btn-active-border-color);
+}
  
 
 button .material-icons {
@@ -229,7 +260,7 @@ a {
 }
 
 fieldset {
- border: var(--boader-color-1px-solid-B);
+ border: var(--border-color-1px-solid-B);
 }
 
 legend {
@@ -260,7 +291,7 @@ table {
 
 th,
 td {
- border: var(--boader-color-1px-solid-B);
+ border: var(--border-color-1px-solid-B);
 }
 
 th {
@@ -294,11 +325,11 @@ tr:nth-child(even) {
 progress {
  background: var(--background-color-B);
  color: var(--text-color-B);
- border: var(--boader-color-1px-solid-B);
+ border: var(--border-color-1px-solid-B);
 }
 
 meter {
  background: var(--background-color-B);
  color: var(--text-color-B);
- border: var(--boader-color-1px-solid-B);
+ border: var(--border-color-1px-solid-B);
 }

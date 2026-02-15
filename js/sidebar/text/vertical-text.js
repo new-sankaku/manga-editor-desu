@@ -16,6 +16,7 @@ fontFamily: selectedFont,
 fill: $("textColorPicker").value,
 stroke: $("textOutlineColorPicker").value,
 strokeWidth: parseInt(fontStrokeWidth),
+textBackgroundColor: $("textBgColorPicker").value,
 textAlign: selectedValue,
 
 cornerSize: 8,

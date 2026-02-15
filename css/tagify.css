@@ -12,7 +12,7 @@
   --tag-bg: var(--button-backgroun);
   --tag-hover: var(--border-color-C);
   --tag-text-color: #e0e0e0;
-  --tag-border-radius: 4px;
+  --tag-border-radius: var(--fjm-button-border-radius);
   --tag-pad: 0.3em 0.5em;
 }
 .tagify__tag > div {

@@ -57,7 +57,10 @@ updateLabel();
 });
 
 function updateLabel() {
-container.setAttribute('data-label',`${label}：${slider.value}`);
+const step=parseFloat(slider.step)||1;
+const decimals=step<1?Math.max(1,String(step).split('.')[1]?.length||1):0;
+const displayValue=decimals>0?parseFloat(slider.value).toFixed(decimals):slider.value;
+container.setAttribute('data-label',`${label}：${displayValue}`);
 }
 
 function updateSlider(newValue) {

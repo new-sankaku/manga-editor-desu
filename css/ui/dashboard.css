@@ -17,9 +17,10 @@
     width: 90vw;
     max-width: 1200px;
     height: 85vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     background: #1a1a1a;
-    border-radius: 8px;
+    border-radius: var(--fjm-border-radius);
     border: 1px solid #333;
 }
 
@@ -32,13 +33,13 @@
     color: #fff;
     font-size: 20px;
     cursor: pointer;
-    z-index: 1;
+    z-index: 3;
     width: 30px;
     height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: var(--fjm-button-border-radius);
 }
 
 .dashboard-modal-close-btn:hover {
@@ -48,6 +49,8 @@
 /* Dashboard Styles */
 .dashboard-container {
     padding: 16px;
+    overflow-y: auto;
+    flex: 1;
 }
 
 .dashboard-header {
@@ -56,7 +59,14 @@
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 12px;
+    padding-right: 36px;
     border-bottom: 1px solid #333;
+    position: sticky;
+    top: -16px;
+    z-index: 2;
+    background: #1a1a1a;
+    margin: -16px -16px 20px -16px;
+    padding: 16px 52px 12px 16px;
 }
 
 .dashboard-header h3 {
@@ -70,7 +80,7 @@
     color: #fff;
     border: none;
     padding: 6px 12px;
-    border-radius: 4px;
+    border-radius: var(--fjm-button-border-radius);
     cursor: pointer;
     font-size: 12px;
     transition: background 0.2s;
@@ -90,7 +100,7 @@
 
 .summary-card {
     background: #252525;
-    border-radius: 6px;
+    border-radius: var(--fjm-border-radius);
     padding: 8px 10px;
     text-align: center;
     border: 1px solid #333;
@@ -111,7 +121,7 @@
 /* Dashboard Sections */
 .dashboard-section {
     background: #252525;
-    border-radius: 8px;
+    border-radius: var(--fjm-border-radius);
     padding: 16px;
     margin-bottom: 16px;
     border: 1px solid #333;
@@ -136,7 +146,7 @@
     color: #fff;
     border: 1px solid #444;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--textarea-border-radius);
     font-size: 12px;
     cursor: pointer;
 }
@@ -181,7 +191,7 @@
 /* Chart Container */
 .chart-container {
     background: #1a1a1a;
-    border-radius: 4px;
+    border-radius: var(--fjm-button-border-radius);
     padding: 8px;
 }
 
@@ -314,7 +324,7 @@
     color: #fff;
     border: none;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--fjm-button-border-radius);
     cursor: pointer;
     font-size: 11px;
     transition: background 0.2s;
@@ -330,7 +340,7 @@
     color: #1a1a1a;
     border: none;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--fjm-button-border-radius);
     cursor: pointer;
     font-size: 11px;
     font-weight: bold;
@@ -344,7 +354,7 @@
 /* Wordcloud */
 .wordcloud-container {
     background: #1a1a1a;
-    border-radius: 4px;
+    border-radius: var(--fjm-button-border-radius);
     padding: 8px;
     overflow: visible;
 }
@@ -354,6 +364,276 @@
     height: 300px;
     display: block;
     max-width: 100%;
+}
+
+/* Streak & Session Row */
+.streak-session-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.streak-card {
+    flex: 1;
+    min-width: 80px;
+    background: #1a1a1a;
+    border-radius: var(--fjm-border-radius);
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #333;
+}
+
+.streak-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.streak-value {
+    font-size: 22px;
+    font-weight: bold;
+    color: #00bcd4;
+}
+
+.streak-label {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* GitHub Calendar */
+.calendar-container {
+    overflow-x: auto;
+    padding: 8px 0;
+}
+
+.calendar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: fit-content;
+}
+
+.calendar-months {
+    display: flex;
+    gap: 0;
+    padding-left: 28px;
+    margin-bottom: 4px;
+}
+
+.calendar-month-label {
+    font-size: 9px;
+    color: #888;
+    text-align: left;
+}
+
+.calendar-body {
+    display: flex;
+    gap: 0;
+}
+
+.calendar-day-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-right: 4px;
+}
+
+.calendar-day-label {
+    width: 24px;
+    height: 11px;
+    font-size: 9px;
+    color: #888;
+    text-align: right;
+    line-height: 11px;
+}
+
+.calendar-grid {
+    display: flex;
+    gap: 2px;
+}
+
+.calendar-week {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.calendar-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.calendar-cell:hover {
+    outline: 1px solid #fff;
+    outline-offset: -1px;
+}
+
+.calendar-cell-empty {
+    width: 11px;
+    height: 11px;
+}
+
+.calendar-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    justify-content: flex-end;
+    font-size: 9px;
+    color: #888;
+}
+
+.calendar-legend-cell {
+    width: 11px;
+    height: 11px;
+    border-radius: 2px;
+}
+
+/* Success Rate */
+.success-rate-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+}
+
+#dashboardSuccessRateChart {
+    max-width: 250px;
+    max-height: 150px;
+}
+
+/* Prompt Length Chart */
+#dashboardPromptLengthChart {
+    width: 100%;
+    height: 200px;
+}
+
+/* Co-occurrence Table */
+.cooccurrence-table td:first-child {
+    max-width: 300px;
+    word-break: break-all;
+}
+
+/* Model Chart */
+.model-chart-container {
+    min-height: 120px;
+}
+
+#dashboardModelChart {
+    width: 100%;
+    height: 200px;
+}
+
+/* Goals */
+.goal-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.goal-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.goal-label {
+    color: #fff;
+    font-size: 12px;
+    min-width: 80px;
+}
+
+.goal-input {
+    width: 70px;
+    background: #1a1a1a;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 4px 8px;
+    border-radius: var(--textarea-border-radius);
+    font-size: 12px;
+}
+
+.goal-input:focus {
+    outline: none;
+    border-color: #00bcd4;
+}
+
+.goal-save-btn {
+    padding: 4px 10px;
+}
+
+.goal-progress-wrap {
+    background: #333;
+    border-radius: 4px;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.goal-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00bcd4, #4caf50);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.goal-progress-bar span {
+    font-size: 10px;
+    color: #fff;
+    white-space: nowrap;
+    text-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+/* Badges */
+.badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+}
+
+.badge-item {
+    background: #1a1a1a;
+    border-radius: var(--fjm-border-radius);
+    padding: 10px 6px;
+    text-align: center;
+    border: 1px solid #333;
+    transition: transform 0.2s;
+}
+
+.badge-item:hover {
+    transform: scale(1.05);
+}
+
+.badge-item.badge-locked {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+.badge-icon {
+    font-size: 28px;
+    margin-bottom: 4px;
+}
+
+.badge-name {
+    font-size: 10px;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.badge-item.badge-locked .badge-name {
+    color: #666;
+}
+
+/* Export */
+.export-section {
+    display: flex;
+    gap: 8px;
 }
 
 /* Scrollbar Styles */
@@ -378,6 +658,162 @@
     background: #555;
 }
 
+/* Light theme */
+body:not(.dark-mode) .dashboard-modal-content {
+    background: #fff;
+    border-color: #ddd;
+}
+
+body:not(.dark-mode) .dashboard-header {
+    border-color: #ddd;
+    background: #fff;
+}
+
+body:not(.dark-mode) .dashboard-header h3 {
+    color: #0097a7;
+}
+
+body:not(.dark-mode) .dashboard-section {
+    background: #f5f5f5;
+    border-color: #ddd;
+}
+
+body:not(.dark-mode) .section-header h4 {
+    color: #333;
+}
+
+body:not(.dark-mode) .summary-card {
+    background: #f5f5f5;
+    border-color: #ddd;
+}
+
+body:not(.dark-mode) .summary-value {
+    color: #0097a7;
+}
+
+body:not(.dark-mode) .summary-label {
+    color: #999;
+}
+
+body:not(.dark-mode) .streak-card {
+    background: #fff;
+    border-color: #ddd;
+}
+
+body:not(.dark-mode) .streak-value {
+    color: #0097a7;
+}
+
+body:not(.dark-mode) .streak-label {
+    color: #999;
+}
+
+body:not(.dark-mode) .chart-container {
+    background: #fff;
+}
+
+body:not(.dark-mode) .mode-selector {
+    background: #fff;
+    color: #333;
+    border-color: #ccc;
+}
+
+body:not(.dark-mode) .stats-table th {
+    color: #999;
+}
+
+body:not(.dark-mode) .stats-table td {
+    color: #333;
+}
+
+body:not(.dark-mode) .stats-table th,
+body:not(.dark-mode) .stats-table td {
+    border-color: #ddd;
+}
+
+body:not(.dark-mode) .stats-table tbody tr:hover {
+    background: #eee;
+}
+
+body:not(.dark-mode) .tag-name {
+    color: #333;
+}
+
+body:not(.dark-mode) .tag-count {
+    color: #0097a7;
+}
+
+body:not(.dark-mode) .tag-bar-container {
+    background: #ddd;
+}
+
+body:not(.dark-mode) .no-tags {
+    color: #999;
+}
+
+body:not(.dark-mode) .goal-input {
+    background: #fff;
+    color: #333;
+    border-color: #ccc;
+}
+
+body:not(.dark-mode) .goal-label {
+    color: #333;
+}
+
+body:not(.dark-mode) .goal-progress-wrap {
+    background: #ddd;
+}
+
+body:not(.dark-mode) .badge-item {
+    background: #fff;
+    border-color: #ddd;
+}
+
+body:not(.dark-mode) .badge-name {
+    color: #333;
+}
+
+body:not(.dark-mode) .badge-item.badge-locked .badge-name {
+    color: #999;
+}
+
+body:not(.dark-mode) .wordcloud-container {
+    background: #fff;
+}
+
+body:not(.dark-mode) .dashboard-modal-close-btn {
+    color: #333;
+}
+
+body:not(.dark-mode) .dashboard-modal-close-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body:not(.dark-mode) .calendar-month-label,
+body:not(.dark-mode) .calendar-day-label,
+body:not(.dark-mode) .calendar-legend {
+    color: #999;
+}
+
+body:not(.dark-mode) .heatmap-label {
+    color: #999;
+}
+
+body:not(.dark-mode) .heatmap-hour {
+    color: #999;
+}
+
+body:not(.dark-mode) .dashboard-container::-webkit-scrollbar-track,
+body:not(.dark-mode) .top-tags-container::-webkit-scrollbar-track {
+    background: #f5f5f5;
+}
+
+body:not(.dark-mode) .dashboard-container::-webkit-scrollbar-thumb,
+body:not(.dark-mode) .top-tags-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .dashboard-summary {
@@ -400,5 +836,18 @@
     .stats-table th,
     .stats-table td {
         padding: 6px 8px;
+    }
+
+    .streak-session-row {
+        gap: 6px;
+    }
+
+    .streak-card {
+        padding: 8px;
+    }
+
+    .badge-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 6px;
     }
 }

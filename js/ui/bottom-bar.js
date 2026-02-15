@@ -7,9 +7,13 @@ const btmImageContainer=$("btm-image-container");
 const btmScrollLeftBtn=$("btm-scroll-left");
 const btmScrollRightBtn=$("btm-scroll-right");
 
+var btmSaveStateThreshold=2;
 let btmScrollPosition=0;
 let btmIsDragging=false;
 let btmIgnoreClose=false;
+var btmNavLeft=null;
+var btmNavCenter=null;
+var btmNavRight=null;
 
 function btmToggleDrawer() {
 btmDrawer.classList.toggle("btm-closed");
@@ -23,17 +27,53 @@ btmUpdateHandleText();
 }
 
 function btmUpdateHandleText() {
-btmDrawerHandle.textContent=btmDrawer.classList.contains("btm-closed") ? "OPEN (Ctrl+B)" : "CLOSE (Ctrl+B)";
+if(!btmNavCenter)return;
+var isClosed=btmDrawer.classList.contains("btm-closed");
+var stateText=isClosed?"OPEN":"CLOSE";
+var totalPages=btmGetGuidsSize();
+var currentGuid=getCanvasGUID();
+var currentIndex=btmGetGuidIndex(currentGuid);
+var pageText=totalPages>0?" "+(currentIndex+1)+"/"+totalPages:"";
+var ctrlKey=isMacOs?"⌘+B":"Ctrl+B";
+btmNavCenter.textContent=stateText+pageText+" ("+ctrlKey+")";
+if(currentIndex>0){
+btmNavLeft.textContent="\u2190 "+currentIndex+"(Alt+\u2190)";
+btmNavLeft.style.visibility="visible";
+}else{
+btmNavLeft.textContent="";
+btmNavLeft.style.visibility="hidden";
+}
+if(currentIndex>=0&&currentIndex<totalPages-1){
+btmNavRight.textContent=(currentIndex+2)+"\u2192(Alt+\u2192)";
+btmNavRight.style.visibility="visible";
+}else{
+btmNavRight.textContent="";
+btmNavRight.style.visibility="hidden";
+}
 }
 
+async function btmNavigatePage(direction) {
+var currentGuid=getCanvasGUID();
+var currentIndex=btmGetGuidIndex(currentGuid);
+var targetIndex=currentIndex+direction;
+if(targetIndex<0||targetIndex>=btmGetGuidsSize())return;
+var targetGuid=btmGetGuidByIndex(targetIndex);
+if(stateStack.length>=btmSaveStateThreshold){
+await btmSaveProjectFile();
+}
+await chengeCanvasByGuid(targetGuid);
+btmUpdateHandleText();
+}
 
 function btmAddImage(imageLink,blob,guid,openDrawer=true) {
+uiLogger.info("[btmAddImage] guid="+guid+" openDrawer="+openDrawer+" hasImageLink="+(!!imageLink)+" hasBlob="+(!!blob)+" btmProjectsMap.size="+btmProjectsMap.size);
 const projectData=btmProjectsMap.get(guid);
+uiLogger.info("[btmAddImage] existingProject="+(!!projectData)+" (update="+(!!projectData)+", create="+(!projectData)+")");
 
 if (projectData) {
 btmProjectsMap.set(guid,{imageLink,blob});
 const image=document.querySelector(`.btm-image[data-index="${guid}"]`);
-if (image) {
+if (image&&imageLink&&imageLink.href) {
 image.src=imageLink.href;
 const pageNumber=image.parentElement.querySelector(".btm-page-number");
 if (pageNumber) {
@@ -68,14 +108,15 @@ updateAllPageNumbers();
 });
 
 const image=document.createElement("img");
-image.src=imageLink.href;
+if(imageLink&&imageLink.href)image.src=imageLink.href;
 image.className="btm-image";
 image.dataset.index=guid;
 image.addEventListener("click",async ()=>{
-if (stateStack.length>2) {
+if(stateStack.length>=btmSaveStateThreshold){
 await btmSaveProjectFile();
 }
 await chengeCanvasByGuid(guid);
+btmUpdateHandleText();
 });
 
 const moveRightBtn=document.createElement("button");
@@ -94,14 +135,39 @@ updateAllPageNumbers();
 const deleteBtn=document.createElement("button");
 deleteBtn.textContent="🗑";
 deleteBtn.className="btm-delete-btn";
-deleteBtn.addEventListener("click",(e)=>{
+deleteBtn.addEventListener("click",async (e)=>{
 e.stopPropagation();
-if (btmGetGuidsSize()>1) {
+if(btmGetGuidsSize()>1){
+var isCurrentPage=(getCanvasGUID()===guid);
+var deletedIndex=btmGetGuidIndex(guid);
 btmProjectsMap.delete(guid);
 imageWrapper.remove();
+if(isCurrentPage){
+var targetIndex=Math.min(deletedIndex,btmGetGuidsSize()-1);
+var targetGuid=btmGetGuidByIndex(targetIndex);
+await chengeCanvasByGuid(targetGuid);
+}
+}else{
+var isCurrentPage=(getCanvasGUID()===guid);
+btmProjectsMap.delete(guid);
+imageWrapper.remove();
+if(isCurrentPage&&getObjectCount()===0){
+initImageHistory();
+setCanvasGUID();
+await btmSaveProjectFile();
+}
+}
 btmUpdateScrollButtons();
 updateAllPageNumbers();
-}
+btmUpdateHandleText();
+});
+
+var addBtn=document.createElement("button");
+addBtn.textContent="+";
+addBtn.className="btm-add-btn";
+addBtn.addEventListener("click",function(e){
+e.stopPropagation();
+btmShowAddPageDialog(guid);
 });
 
 imageWrapper.appendChild(pageNumber);
@@ -109,6 +175,7 @@ imageWrapper.appendChild(moveLeftBtn);
 imageWrapper.appendChild(image);
 imageWrapper.appendChild(moveRightBtn);
 imageWrapper.appendChild(deleteBtn);
+imageWrapper.appendChild(addBtn);
 btmImageContainer.appendChild(imageWrapper);
 btmProjectsMap.set(guid,{imageLink,blob});
 }
@@ -121,7 +188,10 @@ btmToggleDrawer();
 setTimeout(()=>{btmIgnoreClose=false;},200);
 } else {
 btmUpdateScrollButtons();
+btmUpdateHandleText();
 }
+} else {
+btmUpdateHandleText();
 }
 }
 
@@ -130,6 +200,7 @@ const pageNumbers=document.querySelectorAll(".btm-page-number");
 pageNumbers.forEach((numberElement,index)=>{
 numberElement.textContent=index+1;
 });
+btmUpdateHandleText();
 }
 
 function swapImages(guid1,guid2) {
@@ -224,6 +295,25 @@ btmUpdateScrollButtons();
 }
 
 document.addEventListener("DOMContentLoaded",function () {
+btmDrawerHandle.textContent="";
+btmNavLeft=document.createElement("span");
+btmNavLeft.className="btm-nav-left";
+btmNavLeft.addEventListener("click",function(e){
+e.stopPropagation();
+btmNavigatePage(-1);
+});
+btmNavCenter=document.createElement("span");
+btmNavCenter.className="btm-nav-center";
+btmNavRight=document.createElement("span");
+btmNavRight.className="btm-nav-right";
+btmNavRight.addEventListener("click",function(e){
+e.stopPropagation();
+btmNavigatePage(1);
+});
+btmDrawerHandle.appendChild(btmNavLeft);
+btmDrawerHandle.appendChild(btmNavCenter);
+btmDrawerHandle.appendChild(btmNavRight);
+btmUpdateHandleText();
 btmDrawerHandle.addEventListener("click",btmToggleDrawer);
 btmScrollLeftBtn.addEventListener("click",()=>btmScroll(-1));
 btmScrollRightBtn.addEventListener("click",()=>btmScroll(1));
@@ -323,139 +413,49 @@ return Array.from(btmProjectsMap.keys())[0];
 }
 
 function btmShowAddPageDialog(guid) {
-const dialog=document.createElement("div");
+var dialog=document.createElement("div");
 dialog.className="btm-dialog-overlay";
-dialog.innerHTML=`
-        <div class="btm-dialog">
-            <div class="btm-dialog-content">
-                <h3>ページサイズを選択</h3>
-                <div class="btm-radio-group">
-                    <label>
-                        <input type="radio" name="page-size" value="a4-portrait" checked>
-                        A4縦
-                    </label>
-                    <label>
-                        <input type="radio" name="page-size" value="a4-landscape">
-                        A4横
-                    </label>
-                    <label>
-                        <input type="radio" name="page-size" value="b5-portrait">
-                        B5縦
-                    </label>
-                    <label>
-                        <input type="radio" name="page-size" value="b5-landscape">
-                        B5横
-                    </label>
-                </div>
-                <div class="btm-dialog-buttons">
-                    <button class="btm-dialog-button" id="btm-dialog-cancel">キャンセル</button>
-                    <button class="btm-dialog-button btm-dialog-submit" id="btm-dialog-submit">作成</button>
-                </div>
-            </div>
-        </div>
-    `;
-
+dialog.innerHTML='<div class="btm-dialog"><div class="btm-dialog-content">'+
+'<h3>ページサイズを選択</h3>'+
+'<div class="btm-radio-group">'+
+'<label><input type="radio" name="page-size" value="portrait" checked>縦</label>'+
+'<label><input type="radio" name="page-size" value="landscape">横</label>'+
+'</div>'+
+'<div class="btm-dialog-buttons">'+
+'<button class="btm-dialog-button" id="btm-dialog-cancel">キャンセル</button>'+
+'<button class="btm-dialog-button btm-dialog-submit" id="btm-dialog-submit">作成</button>'+
+'</div></div></div>';
 document.body.appendChild(dialog);
-
-// スタイルを追加
-const style=document.createElement("style");
-style.textContent=`
-        .btm-dialog-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .btm-dialog {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            min-width: 300px;
-        }
-        
-        .btm-dialog h3 {
-            margin: 0 0 20px 0;
-            font-size: 18px;
-        }
-        
-        .btm-radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .btm-radio-group label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        
-        .btm-dialog-buttons {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        .btm-dialog-button {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .btm-dialog-submit {
-            background: #007bff;
-            color: white;
-        }
-        
-        .btm-dialog-submit:hover {
-            background: #0056b3;
-        }
-    `;
-document.head.appendChild(style);
-
-// イベントリスナーを設定
-const cancelButton=document.getElementById("btm-dialog-cancel");
-const submitButton=document.getElementById("btm-dialog-submit");
-
-cancelButton.addEventListener("click",()=>{
+var cancelButton=document.getElementById("btm-dialog-cancel");
+var submitButton=document.getElementById("btm-dialog-submit");
+cancelButton.addEventListener("click",function(){
 document.body.removeChild(dialog);
 });
-
-submitButton.addEventListener("click",()=>{
-const selectedSize=document.querySelector(
-'input[name="page-size"]:checked'
-).value;
+submitButton.addEventListener("click",async function(){
+var selectedSize=document.querySelector('input[name="page-size"]:checked').value;
 document.body.removeChild(dialog);
-btmSaveProjectFile().then(()=>{
-const currentIndex=btmGetGuidIndex(guid);
-const newGuid=getCanvasGUID();
-
-uiLogger.debug("newGuid",newGuid);
-if (selectedSize==="a4-portrait") {
-loadBookSize(210,297,true);
-} else if (selectedSize==="a4-landscape") {
-loadBookSize(297,210,true);
-} else if (selectedSize==="b5-portrait") {
-loadBookSize(257,364,true);
-} else if (selectedSize==="b5-landscape") {
-loadBookSize(364,257,true);
-}
-
-btmSaveProjectFile(newGuid).then(()=>{
-uiLogger.debug("reorderImages前");
+var currentIndex=btmGetGuidIndex(guid);
+var newGuid=generateGUID();
+var w,h;
+if(selectedSize==="portrait"){w=210;h=297;}
+else{w=297;h=210;}
+var pc=document.createElement('canvas');
+pc.width=100;
+pc.height=Math.round(100*h/w);
+var pctx=pc.getContext('2d');
+pctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--color-tertiary').trim()||'#505050';
+pctx.fillRect(0,0,pc.width,pc.height);
+var placeholderUrl=pc.toDataURL('image/jpeg',0.5);
+await btmSaveProjectFile(null,false);
+btmAddImage({href:placeholderUrl},null,newGuid,true);
 reorderImages(currentIndex+1,newGuid);
+changeDoNotSaveHistory();
+resizeCanvasToObject(w,h);
+changeDoSaveHistory();
+initImageHistory();
+setCanvasGUID(newGuid);
+await btmSaveProjectFile(newGuid,false);
 updateAllPageNumbers();
-});
-});
+btmUpdateHandleText();
 });
 }

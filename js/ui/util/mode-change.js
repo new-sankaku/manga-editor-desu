@@ -23,6 +23,20 @@ var cropFrame;
 var cropActiveObject;
 let nowPencil="";
 
+function showCanvasHelpText(text,highlightKey){
+var el=$("canvas-help-text");
+if(!el)return;
+var escaped=text.replace(highlightKey,'<span class="help-key">'+highlightKey+'</span>');
+el.innerHTML=escaped;
+el.classList.add("active");
+}
+function hideCanvasHelpText(){
+var el=$("canvas-help-text");
+if(!el)return;
+el.classList.remove("active");
+el.innerHTML="";
+}
+
 function toggleMode() {
 const isDarkMode=document.body.classList.toggle('dark-mode');
 const logo=$('navbar-logo');
@@ -118,5 +132,5 @@ cropFrame.height=cropActiveObject.height*cropActiveObject.scaleY;
 canvas.add(cropFrame);
 canvas.setActiveObject(cropFrame);
 canvas.renderAll();
-createToast(getText("cropEnterToast"),"");
+showCanvasHelpText(getText("cropHelpText"),"Enter");
 }

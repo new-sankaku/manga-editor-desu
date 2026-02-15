@@ -273,7 +273,7 @@ clearJSTSGeometry();
 
 function reSetSpeechBubbleText(){
 canvas.getObjects().forEach(obj=>{
-if(isSpeechBubbleSVG(obj)){
+if(isSpeechBubbleSVG(obj)||isFreehandBubblePath(obj)){
 const childObjects=canvas.getObjects().filter((childObj)=>obj.guids.includes(childObj.guid));
 childObjects.forEach(childObject=>{
 childObject.targetObject=obj;
@@ -318,7 +318,7 @@ objectMap[obj.guid]=obj;
 }
 });
 canvas.getObjects().forEach(obj=>{
-if(isSpeechBubbleSVG(obj)){
+if(isSpeechBubbleSVG(obj)||isFreehandBubblePath(obj)){
 return;
 }
 if (obj.guids) {

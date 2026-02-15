@@ -29,6 +29,17 @@ let controlPoints=[];
 let activePoint;
 let lastRenderTime=0;
 
+function addTemporary(obj){
+if(!obj)return;
+obj.canvas=canvas;
+canvas._objects.push(obj);
+}
+function removeTemporary(obj){
+if(!obj)return;
+var idx=canvas._objects.indexOf(obj);
+if(idx!==-1)canvas._objects.splice(idx,1);
+}
+
 var nowLine="sb_a";
 switchSBLine("sb_a");
 
@@ -123,55 +134,61 @@ perPixelTargetFind: true
 });
 
 sbClear();
+changeDoNotSaveHistory();
+skipForcedAdjust=true;
+var tb0=performance.now();
 canvas.add(bubble);
+var tb1=performance.now();
 createFreehandBubbleMetrics(bubble);
+var tb2=performance.now();
+skipForcedAdjust=false;
+changeDoSaveHistory();
+saveStateByManual();
+forcedAdjustCanvasSize();
+perfLogger.warn("[PERF:createSpeechBubble] canvas.add:"+Math.round(tb1-tb0)+"ms metrics:"+Math.round(tb2-tb1)+"ms");
 return bubble;
 }
 
-function updateTemporaryShapes() {
-if (typeof changeDoNotSaveHistory==="function") changeDoNotSaveHistory();
-
-removeByNotSave(temporaryLine);
-removeByNotSave(temporaryShape);
-
-if (currentMode==="point"&&points.length>0) {
+function updateTemporaryShapes(){
+perfCounters.updateTemp++;
+removeTemporary(temporaryLine);
+removeTemporary(temporaryShape);
+temporaryLine=null;
+temporaryShape=null;
+if(currentMode==="point"&&points.length>0){
 temporaryShape=new fabric.Polyline(points,{
-fill: "rgba(0,0,255,0.2)",
-stroke: "blue",
-strokeWidth: parseInt(sbStrokeWidth.value),
-selectable: false,
-evented: false,
+fill:"rgba(0,0,255,0.2)",
+stroke:"blue",
+strokeWidth:parseInt(sbStrokeWidth.value),
+selectable:false,
+evented:false,
 excludeFromLayerPanel:true
 });
 temporaryShape.saveHistory=false;
-addByNotSave(temporaryShape);
-
-if (mousePosition) {
+addTemporary(temporaryShape);
+if(mousePosition){
 temporaryLine=new fabric.Line([points[points.length-1].x,points[points.length-1].y,mousePosition.x,mousePosition.y],{
-stroke: "blue",
-strokeWidth: parseInt(sbStrokeWidth.value),
-selectable: false,
-evented: false,
+stroke:"blue",
+strokeWidth:parseInt(sbStrokeWidth.value),
+selectable:false,
+evented:false,
 excludeFromLayerPanel:true
 });
 temporaryLine.saveHistory=false;
-addByNotSave(temporaryLine);
+addTemporary(temporaryLine);
 }
-} else if (currentMode==="freehand"&&points.length>0) {
-temporaryShape=new fabric.Path(points.map((point,index)=>(index===0 ? "M" : "L")+point.x+" "+point.y).join(""),{
-fill: "rgba(0,0,255,0.2)",
-stroke: "blue",
-strokeWidth: parseInt(sbStrokeWidth.value),
-selectable: false,
-evented: false,
+}else if(currentMode==="freehand"&&points.length>0){
+temporaryShape=new fabric.Path(points.map((point,index)=>(index===0?"M":"L")+point.x+" "+point.y).join(""),{
+fill:"rgba(0,0,255,0.2)",
+stroke:"blue",
+strokeWidth:parseInt(sbStrokeWidth.value),
+selectable:false,
+evented:false,
 excludeFromLayerPanel:true
 });
 temporaryShape.saveHistory=false;
-addByNotSave(temporaryShape);
+addTemporary(temporaryShape);
 }
-
-if (typeof changeDoSaveHistory==="function") changeDoSaveHistory();
-
 requestAnimationFrame(()=>canvas.renderAll());
 }
 
@@ -336,37 +353,30 @@ return;
 obj.set({selectable:currentMode==="select",evented:true});
 });
 }
-function createControlPoints(obj) {
+function createControlPoints(obj){
 sbClearControlePoints();
-
-if (!obj) return;
-
-if (typeof changeDoNotSaveHistory==="function") changeDoNotSaveHistory();
-
+if(!obj)return;
 const path=obj.path;
-for (let i=1;i<path.length-1;i++) {
-if (path[i][0]!=='L') continue;
+for(let i=1;i<path.length-1;i++){
+if(path[i][0]!=='L')continue;
 const point=new fabric.Circle({
-left: path[i][1]+obj.left,
-top: path[i][2]+obj.top,
-radius: 5,
-fill: currentMode==="deletePoint" ? 'red' : 'blue',
-originX: 'center',
-originY: 'center',
-hasBorders: false,
-hasControls: false,
-selectable: false,
-evented: true,
-data: {index: i},
+left:path[i][1]+obj.left,
+top:path[i][2]+obj.top,
+radius:5,
+fill:currentMode==="deletePoint"?'red':'blue',
+originX:'center',
+originY:'center',
+hasBorders:false,
+hasControls:false,
+selectable:false,
+evented:true,
+data:{index:i},
 excludeFromLayerPanel:true
 });
 point.saveHistory=false;
 controlPoints.push(point);
-addByNotSave(point);
+addTemporary(point);
 }
-
-if (typeof changeDoSaveHistory==="function") changeDoSaveHistory();
-
 requestAnimationFrame(()=>canvas.renderAll());
 }
 
@@ -436,23 +446,14 @@ changeCursor("deletePoint");
 });
 
 function sbClear(){
-if (typeof changeDoNotSaveHistory==="function") changeDoNotSaveHistory();
-
-removeByNotSave(temporaryLine);
-removeByNotSave(temporaryShape);
+removeTemporary(temporaryLine);
+removeTemporary(temporaryShape);
 temporaryLine=null;
 temporaryShape=null;
-
-if (typeof changeDoSaveHistory==="function") changeDoSaveHistory();
 }
 function sbClearControlePoints(){
-if (typeof changeDoNotSaveHistory==="function") changeDoNotSaveHistory();
-
-controlPoints.forEach(p=>removeByNotSave(p));
+controlPoints.forEach(p=>removeTemporary(p));
 controlPoints=[];
-
-if (typeof changeDoSaveHistory==="function") changeDoSaveHistory();
-
 requestAnimationFrame(()=>canvas.renderAll());
 }
 
@@ -702,9 +703,7 @@ bubble.lastLeft=bubble.left;
 bubble.lastTop=bubble.top;
 bubble.baseScaleX=bubble.scaleX||1;
 bubble.baseScaleY=bubble.scaleY||1;
-changeDoNotSaveHistory();
 canvas.add(newRect);
-changeDoSaveHistory();
 canvas.add(newTextbox);
 newTextbox.bringToFront();
 canvas.renderAll();

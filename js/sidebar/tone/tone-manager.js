@@ -1,3 +1,13 @@
+function parseColor(color) {
+var m=color.match(/rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)/);
+if(m)return{r:parseInt(m[1]),g:parseInt(m[2]),b:parseInt(m[3]),a:parseFloat(m[4])};
+m=color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+if(m)return{r:parseInt(m[1]),g:parseInt(m[2]),b:parseInt(m[3]),a:1};
+var result=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+if(result)return{r:parseInt(result[1],16),g:parseInt(result[2],16),b:parseInt(result[3],16),a:1};
+return{r:0,g:0,b:0,a:1};
+}
+
 const MODE_TONE="Tone";
 const MODE_TONE_NOISE="ToneNoise";
 const MODE_TONE_SNOW="ToneSnow";
@@ -101,6 +111,7 @@ settingsHTML+=addSlider(MODE_TONE+'-dot-spacing','dot-spacing',1,100,sidebarValu
 settingsHTML+=addSlider(MODE_TONE+'-grad-start','grad-start',0,100,sidebarValueMap.getOrDefault(MODE_TONE+'-grad-start',0));//grad-start-y
 settingsHTML+=addSlider(MODE_TONE+'-grad-end','grad-end',0,100,sidebarValueMap.getOrDefault(MODE_TONE+'-grad-end',100));//grad-end-y
 $('manga-tone-settings').innerHTML=settingsHTML;
+jsColorSet();
 
 mangaToneColor=$(MODE_TONE+'-color');
 mangaToneDotStyle=$(MODE_TONE+'-dot-style');
@@ -119,6 +130,7 @@ settingsHTML+=addSlider(MODE_TONE_NOISE+'-grad-start-y','grad-start-y',0,100,sid
 settingsHTML+=addSlider(MODE_TONE_NOISE+'-grad-end-x','grad-end-x',0,100,sidebarValueMap.getOrDefault(MODE_TONE_NOISE+'-grad-end-x',100));//grad-end-y
 settingsHTML+=addSlider(MODE_TONE_NOISE+'-grad-end-y','grad-end-y',0,100,sidebarValueMap.getOrDefault(MODE_TONE_NOISE+'-grad-end-y',100));//grad-end-y
 $('manga-tone-settings').innerHTML=settingsHTML;
+jsColorSet();
 
 mangaToneColor=$(MODE_TONE_NOISE+'-color');
 mangaToneMaxNoise=$(MODE_TONE_NOISE+'-max-noise');
@@ -138,6 +150,7 @@ settingsHTML+=addSlider(MODE_TONE_SNOW+'-frontBlurSize','frontBlurSize',1,50,sid
 settingsHTML+=addSlider(MODE_TONE_SNOW+'-backBlurSize','backBlurSize',1,50,sidebarValueMap.getOrDefault(MODE_TONE_SNOW+'-backBlurSize',3));//density
 settingsHTML+=addSlider(MODE_TONE_SNOW+'-angle','angle',0,180,sidebarValueMap.getOrDefault(MODE_TONE_SNOW+'-angle',140));//density
 $('manga-tone-settings').innerHTML=settingsHTML;
+jsColorSet();
 
 mangaToneColor=$(MODE_TONE_NOISE+'-frontColor');
 mangaToneBackColor=$(MODE_TONE_NOISE+'-backColor');
@@ -159,6 +172,7 @@ settingsHTML+=addSlider(MODE_FOCUSING_LINE+'-center-x','centerX',0,100,sidebarVa
 settingsHTML+=addSlider(MODE_FOCUSING_LINE+'-center-y','centerY',0,100,sidebarValueMap.getOrDefault(MODE_FOCUSING_LINE+'-center-y',0));
 settingsHTML+=addSlider(MODE_FOCUSING_LINE+'-line-width-expand','line-width-expand',1,300,sidebarValueMap.getOrDefault(MODE_FOCUSING_LINE+'-line-width-expand',100));// line-width-expand
 $('manga-tone-settings').innerHTML=settingsHTML;
+jsColorSet();
 
 mangaToneColor=$(MODE_FOCUSING_LINE+'-color');
 mangaToneLineSize=$(MODE_FOCUSING_LINE+'-line-size');

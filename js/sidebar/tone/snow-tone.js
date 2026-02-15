@@ -79,12 +79,14 @@ size/2+blurLength
 
 const offset=size/(4*blurLength);
 const clamp=(value)=>Math.max(0,Math.min(1,value));
+var pc=parseColor(color);
+var transparent=`rgba(${pc.r},${pc.g},${pc.b},0)`;
 
-gradient.addColorStop(0,"rgba(255,255,255,0)");
-gradient.addColorStop(clamp(0.5-offset),"rgba(255,255,255,0)");
+gradient.addColorStop(0,transparent);
+gradient.addColorStop(clamp(0.5-offset),transparent);
 gradient.addColorStop(0.5,color);
-gradient.addColorStop(clamp(0.5+offset),"rgba(255,255,255,0)");
-gradient.addColorStop(1,"rgba(255,255,255,0)");
+gradient.addColorStop(clamp(0.5+offset),transparent);
+gradient.addColorStop(1,transparent);
 
 tmpCtxSnowTone.beginPath();
 tmpCtxSnowTone.ellipse(
@@ -102,16 +104,13 @@ tmpCtxSnowTone.restore();
 }
 
 function interpolateColor(color1,color2,factor) {
-const r1=parseInt(color1.substr(1,2),16);
-const g1=parseInt(color1.substr(3,2),16);
-const b1=parseInt(color1.substr(5,2),16);
-const r2=parseInt(color2.substr(1,2),16);
-const g2=parseInt(color2.substr(3,2),16);
-const b2=parseInt(color2.substr(5,2),16);
-const r=Math.round(r1+factor*(r2-r1));
-const g=Math.round(g1+factor*(g2-g1));
-const b=Math.round(b1+factor*(b2-b1));
-return `rgb(${r}, ${g}, ${b})`;
+var c1=parseColor(color1);
+var c2=parseColor(color2);
+const r=Math.round(c1.r+factor*(c2.r-c1.r));
+const g=Math.round(c1.g+factor*(c2.g-c1.g));
+const b=Math.round(c1.b+factor*(c2.b-c1.b));
+const a=c1.a+factor*(c2.a-c1.a);
+return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 function generateSnowTone() {
