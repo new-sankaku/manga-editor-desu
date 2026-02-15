@@ -131,7 +131,9 @@ const b = `<svg viewBox="0 0 100 100" width="100%" height="100%" style="position
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-YWPRKY7WKV');
+        gtag('config', 'G-YWPRKY7WKV', {
+'cookie_domain': 'new-sankaku.github.io'
+});
 
         function trackCustomEvent(eventCategory, eventAction, eventLabel, eventValue, additionalParams) {
             gtag('event', eventAction, {

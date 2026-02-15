@@ -36,7 +36,13 @@ if(obj.fontFamily==="Font") obj.set("fontFamily","Arial");
 if (!obj.initial) {
 saveInitialState(obj);
 }
-if(!skipForcedAdjust)Promise.resolve().then(()=>forcedAdjustCanvasSize());
+if(!skipForcedAdjust){
+if(obj._element&&!obj._element.complete){
+obj._element.addEventListener('load',()=>forcedAdjustCanvasSize(),{once:true});
+}else{
+Promise.resolve().then(()=>forcedAdjustCanvasSize());
+}
+}
 
 if(currentMode==='freehand'){
 changeObjectCursor('freehand',obj)
