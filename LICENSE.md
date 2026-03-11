@@ -43,6 +43,21 @@
 | WordCloud2 | - | MIT | <https://github.com/timdream/wordcloud2.js> |
 | JSColor | 2.4.5 | GPLv3 | <https://jscolor.com/> |
 | Flag Icons CSS | 4.1.3 | MIT | <https://github.com/lipis/flag-icons> |
+| Material Icons | - | Apache License 2.0 | <https://github.com/google/material-design-icons> |
+
+## アイコン・画像素材
+
+| 素材 | ライセンス | 備考 |
+|---|---|---|
+| favicon.svg | Apache License 2.0 | Google Material Symbols「edit」アイコン |
+
+## Python 依存ライブラリ（`scripts/`）
+
+配布物には含まれないが、関連スクリプトで使用。
+
+| ライブラリ | ライセンス | URL |
+|---|---|---|
+| Gradio | Apache License 2.0 | <https://github.com/gradio-app/gradio> |
 
 ## 同梱フォント（`font/` ディレクトリ）
 
