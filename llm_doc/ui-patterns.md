@@ -97,4 +97,15 @@ await FolderPicker.getCurrent()      // 保存済み {path, displayPath, timesta
 - 永続化: `localforage.createInstance({name:'folderPicker'})`、キー `currentProjectPath`
 - 閲覧スコープ: バックエンドで $HOME 配下に限定
 - メニュー: File > 「プロジェクトを開く」(`#projectFolderOpen`)
-- 選択時は `createToast` で通知するのみ（後続のロード処理は未実装）
+- 選択時 `window.ProjectLoader.loadFromFolder(path, displayPath)` を呼ぶ
+
+## プロジェクトローダ（project-loader.js）
+選択フォルダ配下の `pages/pXXX_page.json` (XXX は数字) を XXX 数値順にページとして取り込む。仕様は `format.md`。
+```javascript
+await window.ProjectLoader.loadFromFolder(homeRelativePath, displayPath)
+```
+- `<選択フォルダ>/pages/` を `/api/files?pattern=^p\d+_page\.json$` で列挙、ファイル名から `parseInt` で数値ソート
+- `/api/file` で各 JSON を取得 → `enlivenLayer()` で fabric オブジェクト群に展開 → `canvas.add` → `btmSaveProjectFile(guid,false)`
+- アセット (画像など) は `assets/...` 相対参照、`/api/file?path=<pagesPath>/<assets相対>` で取得
+- 既存 `btmProjectsMap` は全クリアして新規プロジェクトとして再構築
+- `pages/` サブフォルダが無い場合は専用エラー (`projectLoaderNoPagesDir`)

@@ -44,6 +44,8 @@ manga-editor-desu/
 - ルート以下を StaticFiles でホスト、`/api/*` で REST API を提供
 - 主な API:
   - `GET /api/folders?path=<HOME相対>` — HOME 配下のフォルダ列挙（symlink解決後 HOME 外は 403）
+  - `GET /api/files?path=<HOME相対>&pattern=<regex>` — フォルダ内ファイル列挙、正規表現フィルタ可
+  - `GET /api/file?path=<HOME相対>` — ファイル本文（FileResponse）
 - launchd 経由の常駐起動は `dev/devserver.sh install`
 
 ## 主要グローバル変数

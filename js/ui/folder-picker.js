@@ -91,9 +91,13 @@ await folderPickerStore.setItem(FOLDER_PICKER_KEY,payload);
 folderPickerLogger.error('failed to persist selection',err);
 }
 }
+close();
+if(window.ProjectLoader&&typeof window.ProjectLoader.loadFromFolder==='function'){
+await window.ProjectLoader.loadFromFolder(currentPath,currentDisplayPath);
+}else{
 const label=currentDisplayPath||currentPath||fpText('folderPickerHome');
 createToast(fpText('folderPickerSelected'),[label]);
-close();
+}
 });
 
 overlay.querySelector('#folderPickerParent').addEventListener('click',async ()=>{

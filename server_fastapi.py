@@ -6,11 +6,13 @@
 # ]
 # ///
 import mimetypes
+import re
 from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -92,6 +94,59 @@ def list_folders(path: str = Query(default="")):
         "parent": parent,
         "entries": entries,
     }
+
+
+@app.get("/api/files")
+def list_files(path: str = Query(default=""), pattern: str = Query(default="")):
+    target = resolve_within_home(path)
+    if not target.is_dir():
+        raise HTTPException(status_code=404, detail="Not a directory")
+
+    compiled = None
+    if pattern:
+        try:
+            compiled = re.compile(pattern)
+        except re.error:
+            raise HTTPException(status_code=400, detail="Invalid pattern")
+
+    try:
+        children = sorted(target.iterdir(), key=lambda p: p.name.lower())
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    entries = []
+    for child in children:
+        if child.name.startswith('.'):
+            continue
+        if not child.is_file():
+            continue
+        if compiled and not compiled.search(child.name):
+            continue
+        try:
+            resolved = child.resolve()
+            resolved.relative_to(HOME)
+            size = resolved.stat().st_size
+        except (ValueError, OSError):
+            continue
+        entries.append({
+            "name": child.name,
+            "path": to_relative(resolved),
+            "size": size,
+        })
+
+    return {
+        "path": to_relative(target),
+        "displayPath": str(target),
+        "entries": entries,
+    }
+
+
+@app.get("/api/file")
+def get_file(path: str = Query(...)):
+    target = resolve_within_home(path)
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail="Not a file")
+    return FileResponse(str(target))
 
 
 app.mount("/", StaticFiles(directory=str(ROOT), html=True), name="static")

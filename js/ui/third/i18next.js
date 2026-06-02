@@ -10,6 +10,56 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20260602180000_001":{
+"ja":{
+"projectLoaderLoaded":"プロジェクトを読み込みました",
+"projectLoaderNoPages":"pages/pXXX_page.json が見つかりません",
+"projectLoaderNoPagesDir":"pages フォルダが見つかりません",
+"projectLoaderError":"プロジェクトの読み込みに失敗しました"
+},
+"en":{
+"projectLoaderLoaded":"Project loaded",
+"projectLoaderNoPages":"No pages/pXXX_page.json files found",
+"projectLoaderNoPagesDir":"pages folder not found",
+"projectLoaderError":"Failed to load project"
+},
+"ko":{
+"projectLoaderLoaded":"프로젝트를 불러왔습니다",
+"projectLoaderNoPages":"pages/pXXX_page.json 파일을 찾을 수 없습니다",
+"projectLoaderNoPagesDir":"pages 폴더를 찾을 수 없습니다",
+"projectLoaderError":"프로젝트를 불러오지 못했습니다"
+},
+"fr":{
+"projectLoaderLoaded":"Projet chargé",
+"projectLoaderNoPages":"Aucun fichier pages/pXXX_page.json trouvé",
+"projectLoaderNoPagesDir":"Dossier pages introuvable",
+"projectLoaderError":"Échec du chargement du projet"
+},
+"zh":{
+"projectLoaderLoaded":"项目已加载",
+"projectLoaderNoPages":"未找到 pages/pXXX_page.json 文件",
+"projectLoaderNoPagesDir":"未找到 pages 文件夹",
+"projectLoaderError":"加载项目失败"
+},
+"ru":{
+"projectLoaderLoaded":"Проект загружен",
+"projectLoaderNoPages":"Файлы pages/pXXX_page.json не найдены",
+"projectLoaderNoPagesDir":"Папка pages не найдена",
+"projectLoaderError":"Не удалось загрузить проект"
+},
+"es":{
+"projectLoaderLoaded":"Proyecto cargado",
+"projectLoaderNoPages":"No se encontraron archivos pages/pXXX_page.json",
+"projectLoaderNoPagesDir":"Carpeta pages no encontrada",
+"projectLoaderError":"Error al cargar el proyecto"
+},
+"de":{
+"projectLoaderLoaded":"Projekt geladen",
+"projectLoaderNoPages":"Keine pages/pXXX_page.json-Dateien gefunden",
+"projectLoaderNoPagesDir":"pages-Ordner nicht gefunden",
+"projectLoaderError":"Projekt konnte nicht geladen werden"
+}
+},
 "20260602100000_001":{
 "ja":{
 "folderPickerOpen":"プロジェクトを開く",
