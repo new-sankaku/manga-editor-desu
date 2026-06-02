@@ -87,3 +87,14 @@ getText("keyName")  // i18next.t()のラッパー
 ModeManager.getCurrent()
 ModeManager.MODE.SELECT
 ```
+
+## フォルダ選択ダイアログ（folder-picker.js）
+プロジェクトフォルダを選ぶモーダル。`server_fastapi.py` の `/api/folders` 必須。
+```javascript
+FolderPicker.open()                  // ダイアログを開く
+await FolderPicker.getCurrent()      // 保存済み {path, displayPath, timestamp}
+```
+- 永続化: `localforage.createInstance({name:'folderPicker'})`、キー `currentProjectPath`
+- 閲覧スコープ: バックエンドで $HOME 配下に限定
+- メニュー: File > 「プロジェクトを開く」(`#projectFolderOpen`)
+- 選択時は `createToast` で通知するのみ（後続のロード処理は未実装）

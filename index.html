@@ -213,6 +213,7 @@ function getElementClasses(element) {
 <link rel="stylesheet" href="css/ui/inpaint-editor.css?v=7.3" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/angle-editor.css?v=7.3" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/dashboard.css?v=7.3" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/ui/folder-picker.css?v=7.3">
 
 <link rel="stylesheet" href="third/tippy/tippy.css">
 <link rel="stylesheet" href="third/Bootstrup/bootstrap.min.css">
@@ -273,6 +274,12 @@ function getElementClasses(element) {
                                 <a class="dropdown-item" href="#" id="projectLoad">
                                     <i class="material-icons">folder_zip</i> <span data-i18n="projectLoad">Project
                                         Load</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" id="projectFolderOpen">
+                                    <i class="material-icons">folder_open</i>
+                                    <span data-i18n="folderPickerOpen">Open Project</span>
                                 </a>
                             </li>
                             <li>
@@ -2092,6 +2099,7 @@ function getElementClasses(element) {
     <script src="js/core/svg/google-icon-names.js?v=7.2"></script>
     <script src="js/core/svg/google-icon-helper.js?v=7.2"></script>
     <script src="js/ui/bottom-bar.js?v=7.2" defer></script>
+    <script src="js/ui/folder-picker.js?v=7.3" defer></script>
 
     <script src="js/ai/prompt/auto/prompt-map.js?v=7.2" defer></script>
     <script src="js/ai/prompt/auto/story-prompt-map.js?v=7.2" defer></script>

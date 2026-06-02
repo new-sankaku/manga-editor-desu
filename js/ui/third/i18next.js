@@ -10,6 +10,104 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20260602100000_001":{
+"ja":{
+"folderPickerOpen":"プロジェクトを開く",
+"folderPickerTitle":"プロジェクトフォルダを選択",
+"folderPickerParent":"親フォルダへ",
+"folderPickerSelect":"このフォルダを選択",
+"folderPickerCancel":"キャンセル",
+"folderPickerEmpty":"サブフォルダはありません",
+"folderPickerLoading":"読み込み中...",
+"folderPickerError":"フォルダの取得に失敗しました",
+"folderPickerSelected":"プロジェクトを設定しました",
+"folderPickerHome":"ホーム"
+},
+"en":{
+"folderPickerOpen":"Open Project",
+"folderPickerTitle":"Select Project Folder",
+"folderPickerParent":"Parent Folder",
+"folderPickerSelect":"Select This Folder",
+"folderPickerCancel":"Cancel",
+"folderPickerEmpty":"No subfolders",
+"folderPickerLoading":"Loading...",
+"folderPickerError":"Failed to load folders",
+"folderPickerSelected":"Project Selected",
+"folderPickerHome":"Home"
+},
+"ko":{
+"folderPickerOpen":"프로젝트 열기",
+"folderPickerTitle":"프로젝트 폴더 선택",
+"folderPickerParent":"상위 폴더",
+"folderPickerSelect":"이 폴더 선택",
+"folderPickerCancel":"취소",
+"folderPickerEmpty":"하위 폴더 없음",
+"folderPickerLoading":"불러오는 중...",
+"folderPickerError":"폴더를 불러오지 못했습니다",
+"folderPickerSelected":"프로젝트가 설정되었습니다",
+"folderPickerHome":"홈"
+},
+"fr":{
+"folderPickerOpen":"Ouvrir un projet",
+"folderPickerTitle":"Sélectionner un dossier de projet",
+"folderPickerParent":"Dossier parent",
+"folderPickerSelect":"Sélectionner ce dossier",
+"folderPickerCancel":"Annuler",
+"folderPickerEmpty":"Aucun sous-dossier",
+"folderPickerLoading":"Chargement...",
+"folderPickerError":"Échec du chargement des dossiers",
+"folderPickerSelected":"Projet sélectionné",
+"folderPickerHome":"Accueil"
+},
+"zh":{
+"folderPickerOpen":"打开项目",
+"folderPickerTitle":"选择项目文件夹",
+"folderPickerParent":"上级文件夹",
+"folderPickerSelect":"选择此文件夹",
+"folderPickerCancel":"取消",
+"folderPickerEmpty":"无子文件夹",
+"folderPickerLoading":"加载中...",
+"folderPickerError":"加载文件夹失败",
+"folderPickerSelected":"已选择项目",
+"folderPickerHome":"主目录"
+},
+"ru":{
+"folderPickerOpen":"Открыть проект",
+"folderPickerTitle":"Выбор папки проекта",
+"folderPickerParent":"Родительская папка",
+"folderPickerSelect":"Выбрать эту папку",
+"folderPickerCancel":"Отмена",
+"folderPickerEmpty":"Нет вложенных папок",
+"folderPickerLoading":"Загрузка...",
+"folderPickerError":"Не удалось загрузить папки",
+"folderPickerSelected":"Проект выбран",
+"folderPickerHome":"Домой"
+},
+"es":{
+"folderPickerOpen":"Abrir proyecto",
+"folderPickerTitle":"Seleccionar carpeta de proyecto",
+"folderPickerParent":"Carpeta superior",
+"folderPickerSelect":"Seleccionar esta carpeta",
+"folderPickerCancel":"Cancelar",
+"folderPickerEmpty":"Sin subcarpetas",
+"folderPickerLoading":"Cargando...",
+"folderPickerError":"Error al cargar las carpetas",
+"folderPickerSelected":"Proyecto seleccionado",
+"folderPickerHome":"Inicio"
+},
+"de":{
+"folderPickerOpen":"Projekt öffnen",
+"folderPickerTitle":"Projektordner auswählen",
+"folderPickerParent":"Übergeordneter Ordner",
+"folderPickerSelect":"Diesen Ordner auswählen",
+"folderPickerCancel":"Abbrechen",
+"folderPickerEmpty":"Keine Unterordner",
+"folderPickerLoading":"Laden...",
+"folderPickerError":"Ordner konnten nicht geladen werden",
+"folderPickerSelected":"Projekt ausgewählt",
+"folderPickerHome":"Home"
+}
+},
 "20260218220000_001":{
 "ja":{
 "modelSettingsButton":"&#128295; 使用モデル・ワークフロー",

@@ -34,13 +34,13 @@ class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     timeout = 60
 
 if __name__ == '__main__':
-    PORT = 8000
-    ADDRESS = ""
+    PORT = 8125
+    ADDRESS = "0.0.0.0"
     socketserver.TCPServer.allow_reuse_address = True
     
     with ThreadedTCPServer((ADDRESS, PORT), CORSRequestHandler) as httpd:
         with ThreadPoolExecutor(max_workers=500) as executor:
-            print(f"Server running at http://localhost:{PORT}")
+            print(f"Server running at http://0.0.0.0:{PORT}")
             try:
                 httpd.serve_forever()
             except KeyboardInterrupt:

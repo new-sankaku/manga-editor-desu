@@ -8,7 +8,7 @@ manga-editor-desu/
 │   ├── core/           基盤（logger, settings, auto-save, compression, font, util）
 │   ├── fabric/         fabric.js Canvas管理（fabric-management.js）
 │   ├── layer/          レイヤー管理（layer-management.js, blend, floating-window）
-│   ├── ui/             UI部品（toast, overlay, control, event-delegator, prompt-manager）
+│   ├── ui/             UI部品（toast, overlay, control, event-delegator, prompt-manager, folder-picker）
 │   ├── sidebar/        サイドバーツール
 │   │   ├── pen/        ブラシ（crayon, ink, marker, spray, drip, stroke）
 │   │   ├── text/       テキスト（vertical-text, custom effects 10種）
@@ -33,8 +33,18 @@ manga-editor-desu/
 │   └── ui/             機能別CSS
 ├── html/               HTMLテンプレート
 ├── llm_doc/            LLM向けドキュメント
-└── scripts/            ユーティリティスクリプト（format, translation check）
+├── scripts/            ユーティリティスクリプト（format, translation check）
+├── server_fastapi.py   開発用 FastAPI サーバ（uv run, port 8125, uvicorn --reload）
+├── 99_server.py        旧 標準ライブラリ製サーバ
+└── dev/                launchd エージェント関連（devserver.sh, plist テンプレート）
 ```
+
+## 開発サーバ (server_fastapi.py)
+- PEP 723 inline script metadata で依存解決 → `uv run server_fastapi.py`
+- ルート以下を StaticFiles でホスト、`/api/*` で REST API を提供
+- 主な API:
+  - `GET /api/folders?path=<HOME相対>` — HOME 配下のフォルダ列挙（symlink解決後 HOME 外は 403）
+- launchd 経由の常駐起動は `dev/devserver.sh install`
 
 ## 主要グローバル変数
 | 変数 | 説明 |

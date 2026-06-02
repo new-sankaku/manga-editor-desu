@@ -203,3 +203,4 @@ const inpaintLogger=SimpleLogger('inpaint',LogLevel.WARN);
 const inpaintMaskLogger=SimpleLogger('inpaintMask',LogLevel.WARN);
 const inpaintWorkflowLogger=SimpleLogger('inpaintWorkflow',LogLevel.WARN);
 const _dbgLogger=SimpleLogger('DBG-panel',LogLevel.WARN);
+const folderPickerLogger=SimpleLogger('folderPicker',LogLevel.WARN);
