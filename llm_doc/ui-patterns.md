@@ -105,7 +105,9 @@ await FolderPicker.getCurrent()      // 保存済み {path, displayPath, timesta
 await window.ProjectLoader.loadFromFolder(homeRelativePath, displayPath)
 ```
 - `<選択フォルダ>/pages/` を `/api/files?pattern=^p\d+_page\.json$` で列挙、ファイル名から `parseInt` で数値ソート
-- `/api/file` で各 JSON を取得 → `enlivenLayer()` で fabric オブジェクト群に展開 → `canvas.add` → `btmSaveProjectFile(guid,false)`
+- `/api/file` で各 JSON を取得 → `addLayerWithChildren()` で各レイヤーを再帰展開 → `canvas.add` → `btmSaveProjectFile(guid,false)`
+- 親 (例: コマ `isPanel=true`) の `children` 配列に子レイヤーを入れる方式。子は canvas に並列 add され、階層は `guids` / `relatedPoly` で保持
+- `group` (`type: "group"`) の `children` のみ fabric.Group 内部に統合される
 - アセット (画像など) は `assets/...` 相対参照、`/api/file?path=<pagesPath>/<assets相対>` で取得
 - 既存 `btmProjectsMap` は全クリアして新規プロジェクトとして再構築
 - `pages/` サブフォルダが無い場合は専用エラー (`projectLoaderNoPagesDir`)

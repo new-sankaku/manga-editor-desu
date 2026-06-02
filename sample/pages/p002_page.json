@@ -17,46 +17,50 @@
       ],
       "fill": "rgb(255,255,255)",
       "stroke": "rgb(0,0,0)",
-      "strokeWidth": 4
-    },
-    {
-      "guid": "img-1-002",
-      "type": "image",
-      "name": "Hallway Scene",
-      "src": "assets/scene-hallway.png",
-      "left": 50,
-      "top": 50,
-      "width": 700,
-      "height": 500,
-      "relatedPoly": "panel-1-002"
-    },
-    {
-      "guid": "bubble-1-002",
-      "type": "group",
-      "customType": "speechBubbleSVG",
-      "name": "Bubble 1",
-      "left": 80,
-      "top": 100,
+      "strokeWidth": 4,
+      "guids": ["img-1-002", "bubble-1-002"],
       "children": [
         {
-          "guid": "bubble-1-002-shape",
-          "type": "path",
-          "d": "M 0 0 L 300 0 L 300 100 L 180 100 L 150 140 L 130 100 L 0 100 Z",
-          "fill": "white",
-          "stroke": "black",
-          "strokeWidth": 3
+          "guid": "img-1-002",
+          "type": "image",
+          "name": "Hallway Scene",
+          "src": "assets/scene-hallway.png",
+          "left": 50,
+          "top": 50,
+          "width": 700,
+          "height": 500,
+          "relatedPoly": "panel-1-002"
         },
         {
-          "guid": "bubble-1-002-text",
-          "type": "textbox",
-          "text": "テスト自信ある？",
-          "left": 20,
-          "top": 25,
-          "width": 260,
-          "fontSize": 30,
-          "fontFamily": "Noto Sans JP",
-          "fill": "rgb(0,0,0)",
-          "textAlign": "center"
+          "guid": "bubble-1-002",
+          "type": "group",
+          "customType": "speechBubbleSVG",
+          "name": "Bubble 1",
+          "left": 80,
+          "top": 100,
+          "relatedPoly": "panel-1-002",
+          "children": [
+            {
+              "guid": "bubble-1-002-shape",
+              "type": "path",
+              "d": "M 0 0 L 300 0 L 300 100 L 180 100 L 150 140 L 130 100 L 0 100 Z",
+              "fill": "white",
+              "stroke": "black",
+              "strokeWidth": 3
+            },
+            {
+              "guid": "bubble-1-002-text",
+              "type": "textbox",
+              "text": "テスト自信ある?",
+              "left": 20,
+              "top": 25,
+              "width": 260,
+              "fontSize": 30,
+              "fontFamily": "Noto Sans JP",
+              "fill": "rgb(0,0,0)",
+              "textAlign": "center"
+            }
+          ]
         }
       ]
     },
@@ -71,46 +75,50 @@
       "height": 520,
       "fill": "rgb(255,255,255)",
       "stroke": "rgb(0,0,0)",
-      "strokeWidth": 4
-    },
-    {
-      "guid": "img-2-002",
-      "type": "image",
-      "name": "Rooftop Scene",
-      "src": "assets/scene-rooftop.png",
-      "left": 50,
-      "top": 630,
-      "width": 700,
-      "height": 500,
-      "relatedPoly": "panel-2-002"
-    },
-    {
-      "guid": "bubble-2-002",
-      "type": "group",
-      "customType": "speechBubbleSVG",
-      "name": "Bubble 2",
-      "left": 100,
-      "top": 700,
+      "strokeWidth": 4,
+      "guids": ["img-2-002", "bubble-2-002"],
       "children": [
         {
-          "guid": "bubble-2-002-shape",
-          "type": "path",
-          "d": "M 0 0 L 320 0 L 320 110 L 230 110 L 200 150 L 180 110 L 0 110 Z",
-          "fill": "white",
-          "stroke": "black",
-          "strokeWidth": 3
+          "guid": "img-2-002",
+          "type": "image",
+          "name": "Rooftop Scene",
+          "src": "assets/scene-rooftop.png",
+          "left": 50,
+          "top": 630,
+          "width": 700,
+          "height": 500,
+          "relatedPoly": "panel-2-002"
         },
         {
-          "guid": "bubble-2-002-text",
-          "type": "textbox",
-          "text": "夕焼け、きれいだね…",
-          "left": 20,
-          "top": 30,
-          "width": 280,
-          "fontSize": 28,
-          "fontFamily": "Noto Sans JP",
-          "fill": "rgb(150,0,40)",
-          "textAlign": "center"
+          "guid": "bubble-2-002",
+          "type": "group",
+          "customType": "speechBubbleSVG",
+          "name": "Bubble 2",
+          "left": 100,
+          "top": 700,
+          "relatedPoly": "panel-2-002",
+          "children": [
+            {
+              "guid": "bubble-2-002-shape",
+              "type": "path",
+              "d": "M 0 0 L 320 0 L 320 110 L 230 110 L 200 150 L 180 110 L 0 110 Z",
+              "fill": "white",
+              "stroke": "black",
+              "strokeWidth": 3
+            },
+            {
+              "guid": "bubble-2-002-text",
+              "type": "textbox",
+              "text": "夕焼け、きれいだね…",
+              "left": 20,
+              "top": 30,
+              "width": 280,
+              "fontSize": 28,
+              "fontFamily": "Noto Sans JP",
+              "fill": "rgb(150,0,40)",
+              "textAlign": "center"
+            }
+          ]
         }
       ]
     }

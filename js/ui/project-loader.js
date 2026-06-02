@@ -83,12 +83,21 @@ canvas.setHeight(pageJson.pageSize.height);
 
 const layers=Array.isArray(pageJson.layers)?pageJson.layers:[];
 for(const layerSpec of layers){
-const obj=await enlivenLayer(layerSpec,pagesBasePath);
-if(obj) canvas.add(obj);
+await addLayerWithChildren(layerSpec,pagesBasePath);
 }
 
 canvas.renderAll();
 await btmSaveProjectFile(newGuid,false);
+}
+
+async function addLayerWithChildren(spec,pagesBasePath){
+const obj=await enlivenLayer(spec,pagesBasePath);
+if(obj) canvas.add(obj);
+if(spec.type!=='group'&&Array.isArray(spec.children)){
+for(const childSpec of spec.children){
+await addLayerWithChildren(childSpec,pagesBasePath);
+}
+}
 }
 
 async function enlivenLayer(spec,pagesBasePath){

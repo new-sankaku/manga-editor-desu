@@ -211,13 +211,16 @@
 
 ## 親子関係の記述
 
-**冗長だが両方を必須**にする:
+このツールでは **コマ (パネル) の配下に画像やセリフを置く**のが基本構造。
+親子関係は以下を**すべて**満たすこと:
 
-1. 親レイヤーの `guids` に子の guid を列挙
-2. 子レイヤーの `relatedPoly` に親の guid を設定
-3. 子レイヤーは `layers` トップレベル配列に置く**か** 親の `children` 配列に置く (どちらでも可、ローダ側で正規化)
+1. 子レイヤーを**親の `children` 配列**に入れる (`layers` トップレベルに flat に並べる方式は非対応)
+2. 親レイヤーの `guids` 配列に子の guid を列挙
+3. 子レイヤーの `relatedPoly` に親の guid を設定
 
-例:
+ローダは canvas には親と子を並列に add しますが、`guids` / `relatedPoly` を保持するためレイヤーパネルでは親→子の階層で表示されます。
+
+例 (コマの中に画像 1 枚):
 
 ```json
 {
@@ -226,17 +229,28 @@
       "guid": "panel-A",
       "type": "rect",
       "isPanel": true,
-      "guids": ["img-A"]
-    },
-    {
-      "guid": "img-A",
-      "type": "image",
-      "src": "assets/img-a.png",
-      "relatedPoly": "panel-A"
+      "left": 40, "top": 40,
+      "width": 720, "height": 500,
+      "fill": "rgb(255,255,255)",
+      "stroke": "rgb(0,0,0)",
+      "strokeWidth": 3,
+      "guids": ["img-A"],
+      "children": [
+        {
+          "guid": "img-A",
+          "type": "image",
+          "src": "assets/img-a.png",
+          "left": 50, "top": 50,
+          "width": 700, "height": 480,
+          "relatedPoly": "panel-A"
+        }
+      ]
     }
   ]
 }
 ```
+
+`group` (`type: "group"`) の `children` は fabric の Group オブジェクト内部に統合されますが、それ以外の type (`rect` / `polygon` 等) の `children` は **canvas 上では並列**に置かれ、階層はメタ情報 (`guids` / `relatedPoly`) でのみ表現されます。
 
 ## アセット参照
 
@@ -246,7 +260,7 @@
 
 ## 完全な例
 
-`pages/p001_page.json`:
+`pages/p001_page.json` (コマの中に画像 + セリフ吹き出し):
 
 ```json
 {
@@ -255,56 +269,52 @@
   "layers": [
     {
       "guid": "panel-1",
-      "type": "polygon",
+      "type": "rect",
       "isPanel": true,
       "name": "Top Panel",
       "left": 32, "top": 32,
       "width": 960, "height": 400,
-      "points": [
-        {"x": 0, "y": 0},
-        {"x": 960, "y": 0},
-        {"x": 960, "y": 400},
-        {"x": 0, "y": 400}
-      ],
       "fill": "rgb(255,255,255)",
       "stroke": "rgb(0,0,0)",
       "strokeWidth": 3,
-      "guids": ["bg-1"]
-    },
-    {
-      "guid": "bg-1",
-      "type": "image",
-      "name": "Background",
-      "src": "assets/bg-cafe.png",
-      "left": 32, "top": 32,
-      "width": 960, "height": 400,
-      "relatedPoly": "panel-1"
-    },
-    {
-      "guid": "bubble-1",
-      "type": "group",
-      "customType": "speechBubbleSVG",
-      "name": "Hero Bubble",
-      "left": 500, "top": 80,
-      "guids": ["bubble-1-shape", "bubble-1-text"],
+      "guids": ["bg-1", "bubble-1"],
       "children": [
         {
-          "guid": "bubble-1-shape",
-          "type": "path",
-          "d": "M 0 0 L 200 0 L 200 80 L 130 90 L 100 110 L 80 90 L 0 80 Z",
-          "fill": "white",
-          "stroke": "black",
-          "strokeWidth": 2
+          "guid": "bg-1",
+          "type": "image",
+          "name": "Background",
+          "src": "assets/bg-cafe.png",
+          "left": 40, "top": 40,
+          "width": 944, "height": 384,
+          "relatedPoly": "panel-1"
         },
         {
-          "guid": "bubble-1-text",
-          "type": "textbox",
-          "text": "やあ、久しぶり！",
-          "left": 20, "top": 20,
-          "width": 160,
-          "fontSize": 18,
-          "fontFamily": "Noto Sans JP",
-          "textAlign": "center"
+          "guid": "bubble-1",
+          "type": "group",
+          "customType": "speechBubbleSVG",
+          "name": "Hero Bubble",
+          "left": 500, "top": 80,
+          "relatedPoly": "panel-1",
+          "children": [
+            {
+              "guid": "bubble-1-shape",
+              "type": "path",
+              "d": "M 0 0 L 200 0 L 200 80 L 130 90 L 100 110 L 80 90 L 0 80 Z",
+              "fill": "white",
+              "stroke": "black",
+              "strokeWidth": 2
+            },
+            {
+              "guid": "bubble-1-text",
+              "type": "textbox",
+              "text": "やあ、久しぶり！",
+              "left": 20, "top": 20,
+              "width": 160,
+              "fontSize": 18,
+              "fontFamily": "Noto Sans JP",
+              "textAlign": "center"
+            }
+          ]
         }
       ]
     }
@@ -338,12 +348,13 @@ my-project/
 |---|---|
 | `loadProjectPagesFromFolder(folderPath, displayPath)` | `pages/pXXX_page.json` を列挙して取り込み |
 | `addJsonAsPage(pageJson, pagesBasePath)` | 新規 GUID + canvas.clear → 各レイヤー enliven → btmSaveProjectFile |
-| `enlivenLayer(spec, pagesBasePath)` | `type` で分岐して fabric オブジェクトを生成 (group は再帰) |
+| `addLayerWithChildren(spec, pagesBasePath)` | レイヤーを add し、`group` 以外の `children` を再帰的に並列 add |
+| `enlivenLayer(spec, pagesBasePath)` | `type` で分岐して fabric オブジェクトを生成 (`group` の `children` は内部統合) |
 | `resolveSrc(src, pagesBasePath)` | 相対パスは `/api/file?path=<HOME相対>` に解決 (data:/http(s) はそのまま) |
 
 未対応 (将来):
-- 親子関係 (`guids` / `relatedPoly`) を読み取って fabric object のフラグとして保持はするが、clipPath の動的再生成はしていない
-- `children` 配列方式のみサポート。`layers` トップレベルに flat に置いて `relatedPoly` で繋ぐ方式は今後対応
+- 親子関係 (`guids` / `relatedPoly`) はメタプロパティとして保持するが、`clipPath` の動的再生成は未対応
+- `layers` トップレベルに flat に並べて `relatedPoly` のみで階層を表現する方式は非対応 (親の `children` に入れること)
 
 ## 仕様変更ポリシー
 
