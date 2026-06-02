@@ -153,7 +153,7 @@ app.mount("/", StaticFiles(directory=str(ROOT), html=True), name="static")
 
 
 if __name__ == '__main__':
-    PORT = 8125
+    PORT = 8128
     ADDRESS = "0.0.0.0"
     print(f"Server running at http://0.0.0.0:{PORT}")
     uvicorn.run(

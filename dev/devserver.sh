@@ -39,7 +39,7 @@ case "$cmd" in
         fi
         launchctl bootstrap "$DOMAIN" "$PLIST_INSTALLED"
         launchctl kickstart -k "$SERVICE" || true
-        echo "Installed: $LABEL -> http://localhost:8125"
+        echo "Installed: $LABEL -> http://0.0.0.0:8128"
         echo "Logs: $LOG_DIR/devserver.{out,err}.log"
         ;;
     uninstall)
@@ -80,7 +80,7 @@ Usage: $0 {install|uninstall|start|stop|restart|status|logs}
   status     状態表示
   logs       ログを tail -F
 
-ポート: 8125  (http://localhost:8125)
+ポート: 8128  (http://0.0.0.0:8128)
 コード変更時の自動再起動は uvicorn --reload が担当
 EOF
         ;;
