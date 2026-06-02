@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff3b0"/>
+      <stop offset="1" stop-color="#90caf9"/>
+    </linearGradient>
+  </defs>
+  <rect width="700" height="500" fill="url(#sky)"/>
+  <circle cx="580" cy="120" r="60" fill="#ffd54f"/>
+  <rect x="0" y="380" width="700" height="120" fill="#a5d6a7"/>
+  <rect x="200" y="220" width="300" height="180" fill="#90a4ae"/>
+  <rect x="220" y="240" width="40" height="60" fill="#37474f"/>
+  <rect x="280" y="240" width="40" height="60" fill="#37474f"/>
+  <rect x="340" y="240" width="40" height="60" fill="#37474f"/>
+  <rect x="400" y="240" width="40" height="60" fill="#37474f"/>
+  <rect x="460" y="240" width="40" height="60" fill="#37474f"/>
+  <rect x="220" y="320" width="40" height="60" fill="#37474f"/>
+  <rect x="280" y="320" width="40" height="60" fill="#37474f"/>
+  <rect x="340" y="320" width="40" height="60" fill="#37474f"/>
+  <rect x="400" y="320" width="40" height="60" fill="#37474f"/>
+  <rect x="460" y="320" width="40" height="60" fill="#37474f"/>
+  <polygon points="200,220 350,160 500,220" fill="#6d4c41"/>
+  <rect x="80" y="350" width="40" height="30" fill="#5d4037"/>
+  <circle cx="100" cy="320" r="20" fill="#ffe0b2"/>
+</svg>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="500" viewBox="0 0 700 500">
+  <rect width="700" height="500" fill="#fff8e1"/>
+  <rect x="0" y="0" width="700" height="200" fill="#e8d4a8"/>
+  <rect x="60" y="40" width="280" height="140" fill="#2e7d32" stroke="#1b5e20" stroke-width="4"/>
+  <line x1="80" y1="80" x2="240" y2="80" stroke="#fff" stroke-width="2"/>
+  <line x1="80" y1="110" x2="280" y2="110" stroke="#fff" stroke-width="2"/>
+  <line x1="80" y1="140" x2="220" y2="140" stroke="#fff" stroke-width="2"/>
+  <rect x="0" y="200" width="700" height="300" fill="#bcaaa4"/>
+  <rect x="100" y="280" width="120" height="80" fill="#a1887f"/>
+  <rect x="300" y="280" width="120" height="80" fill="#a1887f"/>
+  <rect x="500" y="280" width="120" height="80" fill="#a1887f"/>
+  <rect x="100" y="380" width="120" height="80" fill="#a1887f"/>
+  <rect x="300" y="380" width="120" height="80" fill="#a1887f"/>
+  <rect x="500" y="380" width="120" height="80" fill="#a1887f"/>
+  <circle cx="160" cy="260" r="22" fill="#ffe0b2"/>
+  <circle cx="360" cy="260" r="22" fill="#ffe0b2"/>
+  <circle cx="560" cy="260" r="22" fill="#ffe0b2"/>
+</svg>
