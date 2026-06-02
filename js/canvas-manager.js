@@ -42,6 +42,12 @@ function resizeCanvas(newWidth,newHeight) {
 if(!newWidth||!newHeight||isNaN(newWidth)||isNaN(newHeight)){
 return;
 }
+// プロジェクト取り込み中はオブジェクトごとのスケール再計算を抑止する。
+// ビルド中の画像ロードawaitの隙にリサイズが割り込むと、追加済みオブジェクトが
+// 繰り返しスケールされ歪んだ状態が保存に焼き付くため(コマ位置・サイズのズレ)。
+if(window._projectLoaderBuilding){
+return;
+}
 canvas.setDimensions({width: newWidth,height: newHeight});
 canvas.getObjects().forEach((obj)=>{
 

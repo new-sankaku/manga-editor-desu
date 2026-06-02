@@ -76,14 +76,24 @@ const newGuid=pageJson.canvasGuid||generateGUID();
 setCanvasGUID(newGuid);
 canvas.clear();
 
+// ページサイズはresizeCanvasByNumで設定する。raw setWidth/setHeightだと
+// aspectRatioが更新されず、後続のadjustCanvasSizeが旧アスペクト(A4等)で
+// 合わせてコマを非一様に歪ませるため。
 if(pageJson.pageSize&&pageJson.pageSize.width&&pageJson.pageSize.height){
-canvas.setWidth(pageJson.pageSize.width);
-canvas.setHeight(pageJson.pageSize.height);
+resizeCanvasByNum(pageJson.pageSize.width,pageJson.pageSize.height);
 }
 
+// ビルド中の画像ロードawait中にリサイズが割り込んでスケールが累積するのを防ぐ。
+window._projectLoaderBuilding=true;
+try{
 const layers=Array.isArray(pageJson.layers)?pageJson.layers:[];
 for(const layerSpec of layers){
 await addLayerWithChildren(layerSpec,pagesBasePath);
+}
+// 全オブジェクトの基準状態をページサイズ(scale=1)で揃えてから保存する。
+canvas.getObjects().forEach(obj=>saveInitialState(obj));
+}finally{
+window._projectLoaderBuilding=false;
 }
 
 canvas.renderAll();
@@ -179,9 +189,10 @@ resolve(img);
 }
 
 function createRectLayer(spec){
+const shift=strokeShift(spec);
 return new fabric.Rect({
-left:numOr(spec.left,0),
-top:numOr(spec.top,0),
+left:numOr(spec.left,0)-shift,
+top:numOr(spec.top,0)-shift,
 width:numOr(spec.width,100),
 height:numOr(spec.height,100),
 fill:spec.fill||'transparent',
@@ -192,9 +203,10 @@ strokeWidth:numOr(spec.strokeWidth,0)
 
 function createPolygonLayer(spec){
 const points=Array.isArray(spec.points)?spec.points:[];
+const shift=strokeShift(spec);
 return new fabric.Polygon(points,{
-left:numOr(spec.left,0),
-top:numOr(spec.top,0),
+left:numOr(spec.left,0)-shift,
+top:numOr(spec.top,0)-shift,
 fill:spec.fill||'transparent',
 stroke:spec.stroke,
 strokeWidth:numOr(spec.strokeWidth,0)
@@ -202,9 +214,10 @@ strokeWidth:numOr(spec.strokeWidth,0)
 }
 
 function createPathLayer(spec){
+const shift=strokeShift(spec);
 return new fabric.Path(spec.d||'M 0 0',{
-left:numOr(spec.left,0),
-top:numOr(spec.top,0),
+left:numOr(spec.left,0)-shift,
+top:numOr(spec.top,0)-shift,
 fill:spec.fill||'transparent',
 stroke:spec.stroke,
 strokeWidth:numOr(spec.strokeWidth,0)
@@ -248,10 +261,18 @@ for(const childSpec of childSpecs){
 const childObj=await enlivenLayer(childSpec,pagesBasePath);
 if(childObj) children.push(childObj);
 }
-return new fabric.Group(children,{
-left:numOr(spec.left,0),
-top:numOr(spec.top,0)
+const shift=groupStrokeShift(spec);
+const group=new fabric.Group(children,{
+left:numOr(spec.left,0)-shift,
+top:numOr(spec.top,0)-shift
 });
+// speechBubbleSVG等はreSetSpeechBubbleTextがobj.guidsを参照するため、
+// specにguidsが無くても子のguidから補完する(未設定だと読込時に例外)。
+if(!Array.isArray(spec.guids)){
+const childGuids=childSpecs.map(child=>child.guid).filter(Boolean);
+if(childGuids.length) group.guids=childGuids;
+}
+return group;
 }
 
 function resolveSrc(src,pagesBasePath){
@@ -266,6 +287,24 @@ return `${PROJECT_LOADER_FILE_API}?path=${encodeURIComponent(fullPath)}`;
 
 function numOr(v,fallback){
 return (v===undefined||v===null||isNaN(v))?fallback:v;
+}
+
+// fabricのleft/topはstroke外側を指すため、SVG/外部座標(幾何形状の角)に合わせて
+// strokeWidth/2だけ左上に補正する。これをしないと枠線分(strokeWidth/2)右下にズレる。
+function strokeShift(spec){
+return numOr(spec.strokeWidth,0)/2;
+}
+
+// グループ(吹き出し等)はfabricが子のbboxで再配置するため、bbox端を成す子のstroke分だけ
+// グループ自体を補正する。子要素中の最大strokeWidthを端の枠線とみなす。
+function groupStrokeShift(spec){
+const children=Array.isArray(spec.children)?spec.children:[];
+let max=0;
+for(const child of children){
+const sw=numOr(child.strokeWidth,0);
+if(sw>max) max=sw;
+}
+return max/2;
 }
 
 function plText(key){

@@ -332,6 +332,13 @@ my-project/
         └── bg-cafe.png
 ```
 
+## 座標系 (left/top と strokeWidth)
+
+- `left`/`top` は **幾何形状の角** (SVG の `x`/`y` と同じ意味) で指定する。stroke はその輪郭線上に均等に乗る (外側に `strokeWidth/2` はみ出す) 前提
+- 一方 fabric.js の `left`/`top` は **stroke の外側** を指すため、JSON の値をそのまま渡すと枠線が `strokeWidth/2` だけ右下にズレる。ローダは `strokeShift()` / `groupStrokeShift()` で `left`/`top` から `strokeWidth/2` を引いて補正する (`js/ui/project-loader.js`)
+- グループ (吹き出し等) は fabric が子の bbox で再配置するため、グループ自体を **子要素中の最大 strokeWidth の半分** だけ補正する
+- 外部生成側は `strokeWidth` を SVG 出力と一致させること。SVG と JSON でデフォルト値が食い違うと枠線の太さがズレる
+
 ## 制約と既知の落とし穴
 
 - **GUID 重複**: 別ページで同じ guid を使うと既存ページの参照が崩れる可能性。ページごとにユニーク推奨
