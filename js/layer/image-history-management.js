@@ -12,10 +12,21 @@ var historyDebounceTimerId=0;
 var historyRestoreQueueIndex=null;
 var historyRestoreWatchdogId=0;
 var historyChangeCounter=0;
+var canvasDirtyUnlocked=false;
 
 const HISTORY_COMMIT_DELAY=0;
 const HISTORY_DEFAULT_DEBOUNCE=500;
+const HISTORY_AUTO_COMMIT_DELAY=400;
 const HISTORY_RESTORE_TIMEOUT=30000;
+// 自動コミット判定から除外するキー（描画内容ではなく操作モード・制御用の属性）
+const HISTORY_IGNORE_KEYS={
+dirty:true,canvas:true,group:true,
+selectable:true,evented:true,hasControls:true,hasBorders:true,
+lockMovementX:true,lockMovementY:true,lockRotation:true,lockScalingX:true,lockScalingY:true,
+hoverCursor:true,moveCursor:true,perPixelTargetFind:true,objectCaching:true,
+borderColor:true,cornerColor:true,cornerStyle:true,cornerSize:true,transparentCorners:true,
+borderScaleFactor:true,edit:true,targetObject:true
+};
 
 
 fabric.Object.prototype.toObject=(function (toObject) {
@@ -24,6 +35,21 @@ propertiesToInclude=(propertiesToInclude||[]).concat(["clipTo"]);
 return toObject.apply(this,[propertiesToInclude]);
 };
 })(fabric.Object.prototype.toObject);
+
+fabric.Object.prototype._set=(function (_set) {
+return function (key,value) {
+if(!HISTORY_IGNORE_KEYS[key]&&this[key]!==value&&historyLockDepth===0&&!isHistoryRestoring){
+canvasDirtyUnlocked=true;
+}
+return _set.call(this,key,value);
+};
+})(fabric.Object.prototype._set);
+
+function markCanvasDirty(){
+if(historyLockDepth===0&&!isHistoryRestoring){
+canvasDirtyUnlocked=true;
+}
+}
 
 function isSave(){
 return historyLockDepth===0&&!isHistoryRestoring;
@@ -187,6 +213,7 @@ return false;
 }
 canvas.renderAll();
 const json=JSON.stringify(customToJSON());
+canvasDirtyUnlocked=false;
 if(currentStateIndex>=0&&stateStack[currentStateIndex]===json){
 return false;
 }
@@ -207,6 +234,7 @@ if(isNotSaveObject(event)){
 return;
 }
 historyChangeCounter++;
+markCanvasDirty();
 if (notSave()) {
 return;
 }
@@ -349,6 +377,7 @@ historyRestoreWatchdogId=0;
 function finishRestore(){
 stopRestoreWatchdog();
 isHistoryRestoring=false;
+canvasDirtyUnlocked=false;
 cancelPendingHistory();
 if(historyRestoreQueueIndex!==null){
 const nextIndex=historyRestoreQueueIndex;
@@ -477,6 +506,18 @@ allRemove();
 document.addEventListener('DOMContentLoaded',function() {
 captureState();
 });
+
+// 個別ハンドラでのコミット漏れに対する保険。
+// fabricのset()経由でオブジェクトが変化した場合のみ、操作の区切りで1回コミットする。
+function autoCommitOnInteractionEnd(){
+if(!canvasDirtyUnlocked){
+return;
+}
+commitHistoryDebounced(HISTORY_AUTO_COMMIT_DELAY);
+}
+document.addEventListener('pointerup',autoCommitOnInteractionEnd,true);
+document.addEventListener('keyup',autoCommitOnInteractionEnd,true);
+document.addEventListener('change',autoCommitOnInteractionEnd,true);
 
 
 

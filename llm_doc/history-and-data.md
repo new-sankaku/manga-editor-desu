@@ -20,6 +20,34 @@
 | `changeDoNotSaveHistory()` / `changeDoSaveHistory()` | 低レベルAPI。深さカウンタ方式でネスト可 |
 | `getHistoryChangeCounter()` | 抑止中も増える変更検知カウンタ（ドラッグ判定に使用） |
 
+### 保存の粒度
+連続操作でスナップショットが量産されないよう、記録の単位を操作単位に固定している。
+
+| 操作 | 発火するイベント | 履歴の単位 |
+|------|-----------------|-----------|
+| ドラッグ移動・拡縮・回転 | `object:moving`等は履歴対象外。`object:modified`が終了時に1回 | ドラッグ1回＝1件 |
+| スライダー（不透明度・線幅・フォントサイズ・角度等） | `input`が連続発火 | `commitHistoryDebounced()`で入力停止から500ms後に1件 |
+| 矢印キー移動（長押し含む） | `keydown`が連続発火 | 同上。押しっぱなしでも1件 |
+| 文字入力 | `text:changed`が1文字ごと | 同上。加えて編集終了時に1件 |
+| ボタン1回の操作（重ね順、反転、表示切替等） | なし | `commitHistory()`で即1件 |
+
+履歴対象のイベントは`object:added` / `object:modified` / `object:removed` /
+`path:created` / `canvas:cleared`のみ。`object:moving`・`object:scaling`・
+`object:rotating`は対象外なので、ドラッグ中に保存が走ることはない。
+
+### コミット漏れの保険（自動コミット網）
+`fabric.Object.prototype._set`をフックし、`set()`でオブジェクトが変化したら
+`canvasDirtyUnlocked`を立てる。`pointerup` / `keyup` / `change`（capture）で
+このフラグが立っていれば`commitHistoryDebounced()`を1回だけ予約する。
+個別ハンドラで`commitHistory()`を呼び忘れても、操作の区切りで履歴に残る。
+
+- 抑止中（`withoutHistory`内）の変更はフラグを立てない。glfxのライブプレビュー等が
+  勝手に履歴化されるのを防ぐため
+- `selectable`・`evented`・`lockMovement*`等の操作モード用の属性は`HISTORY_IGNORE_KEYS`で
+  除外。ナイフモード切替等で無意味な履歴が積まれるのを防ぐため
+- **`obj.left=100`のような直接代入は`set()`を通らないため検知できない。**
+  直接代入するハンドラは明示的に`commitHistory()`を呼ぶこと
+
 ### 抑止スコープの注意
 - 抑止は**深さカウンタ**。内側の`changeDoSaveHistory()`で外側の抑止が解除されることはない
 - 非同期コールバックをまたぐ抑止は、コールバック側を`try{}finally{changeDoSaveHistory();}`で囲む

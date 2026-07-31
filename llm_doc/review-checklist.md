@@ -30,6 +30,6 @@
 | 19 | ログ | 各ファイルで`new SimpleLogger()`していないか。ロガーは`js/core/logger.js`に集約定義し、各ファイルではグローバル変数として参照する | 1 |
 | 20 | 非同期 | `_comfyUIExecProvider`等のグローバル変数に依存するURL/認証情報を、長時間のawait（WebSocket待機等）をまたいで使っていないか。非同期処理中に別タスクがグローバル変数を上書きし、別プロバイダのURLに接続してしまう。関数冒頭でサーバーアドレス・認証情報をローカル変数にキャプチャして使う | 2 |
 | 21 | fallback | グローバル変数が未設定のときデフォルト値（`'local'`等）にフォールバックしていないか。`_comfyUIExecProvider`がnullのときキーを`'local'`にする、`comfyObjectInfoListMap.get(key)\|\|comfyObjectInfoListMap.get('local')`のように別キーにフォールバックする等はすべて暗黙のfallback。awaitなしで呼ばれたasync関数ではグローバル変数が既にクリアされているため、呼び出し元で値を事前キャプチャして引数で渡す | 1 |
-| 22 | 履歴 | オブジェクト属性を直接変更するUIハンドラ（スライダー、メニュー、レイヤーボタン、ショートカット等）で`commitHistory()`/`commitHistoryDebounced()`を呼んでいるか。fabric.jsのcanvasイベントが発火しない変更は履歴に残らず、次のUndoが1つ前の操作まで巻き戻る | 1 |
+| 22 | 履歴 | オブジェクト属性を`obj.left=100`のように直接代入するUIハンドラで`commitHistory()`/`commitHistoryDebounced()`を呼んでいるか。canvasイベントが発火せず、自動コミット網（`_set`フック）も直接代入は検知できないため履歴に残らず、次のUndoが1つ前の操作まで巻き戻る。連続入力（スライダー・キーリピート）は必ずdebounce版を使う | 1 |
 | 23 | 履歴 | `changeDoNotSaveHistory()`の解除漏れがないか。非同期コールバックをまたぐ場合はtry/finallyで囲む。解除漏れは以降の全操作が履歴に残らなくなり、Undoが大きく巻き戻る。同期処理は`withoutHistory(fn)`を使う | 1 |
 | 24 | 履歴 | 一時的なUI用オブジェクト（クロップ枠等）に`setNotSave`/`excludeFromLayerPanel`/`excludeFromExport`を設定し、`addByNotSave`/`removeByNotSave`で追加削除しているか。通常のadd/removeでは無意味な履歴が積まれる | 1 |
