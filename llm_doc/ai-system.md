@@ -52,6 +52,26 @@ Promise-based並行実行。プロバイダ別にキューが分かれる。
 タスク種別ごとにどのプロバイダを使うか設定。
 - T2I, I2I, UP, BG, IP, ANG, TAG
 
+## ObjectInfo（ComfyUIノード定義）
+ワークフローのノードが接続先ComfyUIに存在するかを`checkWorkflowNodeVsComfyUI()`で照合する。
+照合元は`comfyObjectInfoRepo_local` / `comfyObjectInfoRepo_runpod`（IndexedDB）。
+
+- **未取得だと全ノードが「存在しない」と判定され、生成・背景削除・アップスケールが
+  一律に中断される。** 取得は`comfyui_monitorConnection_v2()`の接続確立時のみで、
+  この監視はモデル・ワークフロー設定ウィンドウを開くまで開始されない
+- そのため`checkWorkflowNodeVsComfyUI()`は未取得なら`fetchAndSaveComfyObjectInfo()`で
+  その場で`/object_info`を取得する。起動直後でも動くようにするため
+- 取得できなかった場合は「全ノード欠落」ではなく接続エラーとして通知する。
+  ノード名を並べると原因を誤認させるため
+- 監視ループは`comfyMonitorStarted`で1本に制限。複数動くと接続状態の変化を
+  取り合ってObjectInfoの更新が走らないことがある。ループ内は例外を握りつぶす
+  （例外でループが終了するとObjectInfoが二度と更新されない）
+
+## デフォルトワークフロー
+`comfyuiDefaultWorkflows`（comfyui-default-workflows.js）をDOMContentLoaded時に
+IndexedDBへ登録する。`getEnabledWorkflowByType(type)`は該当typeで`enabled`のものを返す。
+有効なワークフローが無い場合はnullを返すので、呼び出し側で明示的に弾くこと。
+
 ## タスクライフサイクル（generation-task-manager.js）
 → `layer-structure.md`のAIタスク進捗管理セクション参照
 

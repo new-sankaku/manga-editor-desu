@@ -261,12 +261,12 @@ scaleY: scale,
 /** Load SVG(Verfical, Landscope) */
 function loadSVGPlusReset(svgString,isLand=false) {
 initImageHistory();
-saveState();
 changeDoNotSaveHistory();
 // console.log("svgPagging", svgPagging);
 
 skipForcedAdjust=true;
 fabric.loadSVGFromString(svgString,function (objects,options) {
+try{
 resizeCanvasToObject(options.width,options.height);
 
 var strokeWidthScale=canvas.width/700;
@@ -379,7 +379,10 @@ panelStrokeChange()
 skipForcedAdjust=false;
 canvas.renderAll();
 resizeCanvas(canvas.width,canvas.height);
+}finally{
+skipForcedAdjust=false;
 changeDoSaveHistory();
+}
 saveState();
 updateLayerPanel();
 });
@@ -490,6 +493,7 @@ strokeWidth: parseFloat(value),
 strokeUniform: true,
 });
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
 }
 function changePanelStrokeColor(value) {
@@ -497,6 +501,7 @@ var activeObject=canvas.getActiveObject();
 if (isPanel(activeObject)) {
 activeObject.set("stroke",value);
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
 }
 function changePanelOpacity(value) {
@@ -505,6 +510,7 @@ if (isPanel(activeObject)) {
 const opacity=value/100;
 activeObject.set("opacity",opacity);
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
 }
 function changePanelFillColor(value) {
@@ -512,7 +518,14 @@ var activeObject=canvas.getActiveObject();
 if (isPanel(activeObject)) {
 activeObject.set("fill",value);
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
+}
+
+// 変更した値を他のパネル（共通コントロール等）にも反映し、履歴に残す
+function afterPanelValueChange(activeObject){
+updateControls(activeObject);
+commitHistoryDebounced();
 }
 
 

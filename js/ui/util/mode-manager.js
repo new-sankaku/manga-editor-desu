@@ -250,7 +250,7 @@ _enable:function(){
 
 disable:function(){
 if(!cropFrame)return;
-canvas.remove(cropFrame);
+removeByNotSave(cropFrame);
 cropFrame=null;
 if(cropActiveObject){
 cropActiveObject.set({selectable:true});

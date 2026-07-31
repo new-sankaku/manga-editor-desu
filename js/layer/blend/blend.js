@@ -242,15 +242,28 @@ if(applyBtn)applyBtn.classList.remove("active");
 var info=$("blendSelectedInfo");
 if(info)info.textContent=getText("blendSelectMode");
 const checkedLayers=getCheckedLayers();
-if(checkedLayers.length<2)return;
+if(checkedLayers.length<2){
+// 空欄のままだと操作を間違えたのか処理中なのか分からない
+var notice=document.createElement("div");
+notice.className="blend-empty-notice";
+notice.textContent=getText("blendLowImages");
+blendModesContainer.appendChild(notice);
+return;
+}
 const canvases=checkedLayers.map((layer)=>
 createCanvasFromFabricImage(layer)
 );
 var modePlaceholders={};
+// 25モード分を一度に合成すると重いため、開いているカテゴリのぶんだけ生成する
+var categoryLoaders={};
 for(var c=0;c<blendCategories.length;c++){
 var cat=blendCategories[c];
 var categoryDiv=document.createElement("div");
 categoryDiv.className="blend-category";
+// 既定では先頭カテゴリだけ開く
+if(c>0){
+categoryDiv.classList.add("collapsed");
+}
 var headerDiv=document.createElement("div");
 headerDiv.className="blend-category-header";
 var toggle=document.createElement("span");
@@ -260,11 +273,14 @@ var catLabel=document.createElement("span");
 catLabel.textContent=getText(cat.key);
 headerDiv.appendChild(toggle);
 headerDiv.appendChild(catLabel);
-headerDiv.onclick=function(el){
+headerDiv.onclick=function(el,key){
 return function(){
 el.classList.toggle("collapsed");
+if(!el.classList.contains("collapsed")){
+loadBlendCategory(key);
+}
 };
-}(categoryDiv);
+}(categoryDiv,cat.key);
 categoryDiv.appendChild(headerDiv);
 var gridDiv=document.createElement("div");
 gridDiv.className="blend-category-grid";
@@ -282,11 +298,12 @@ modePlaceholders[mode]=container;
 }
 categoryDiv.appendChild(gridDiv);
 blendModesContainer.appendChild(categoryDiv);
+categoryLoaders[cat.key]={modes:cat.modes.slice(),loaded:false};
 }
-var totalModes=allBlendModes.length;
-for(let i=0;i<totalModes;i++){
+
+async function renderBlendMode(currentMode){
 if(currentSession!==blendSessionId)return;
-const currentMode=allBlendModes[i];
+if(blendResultMap[currentMode])return;
 const blendedCanvas=await blendCanvasesWithPixi(canvases,currentMode);
 if(currentSession!==blendSessionId)return;
 blendResultMap[currentMode]=blendedCanvas;
@@ -306,6 +323,18 @@ showEnlargedImage(bc.toDataURL());
 }
 await new Promise((resolve)=>setTimeout(resolve,0));
 }
+
+loadBlendCategory=async function(key){
+var loader=categoryLoaders[key];
+if(!loader||loader.loaded)return;
+loader.loaded=true;
+for(var i=0;i<loader.modes.length;i++){
+if(currentSession!==blendSessionId)return;
+await renderBlendMode(loader.modes[i]);
+}
+};
+
+await loadBlendCategory(blendCategories[0].key);
 }
 
 function createScaledCanvas(sourceCanvas,maxWidth,maxHeight){
@@ -326,6 +355,8 @@ previewContainer.classList.add("unchecked");
 previewContainer.classList.remove("checked");
 }
 }
+
+var loadBlendCategory=function(){};
 
 var blendDragState=null;
 
@@ -490,7 +521,7 @@ var imageLayerListTemp=null;
 
 async function handleBlend() {
 var imageLayerList=getImageObjectList();
-if(imageLayerList.length<1){
+if(imageLayerList.length<2){
 var blendLowImages=getText("blendLowImages");
 createToastError("Blend error",blendLowImages);
 return;

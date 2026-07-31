@@ -173,6 +173,7 @@ function visibleChange(obj){
 obj.visible=!obj.visible;
 updateLayerPanel();
 canvas.requestRenderAll();
+commitHistory();
 }
 
 function putViewButton(buttonsDiv,layer,index) {
@@ -194,7 +195,7 @@ buttonsDiv.appendChild(viewButton);
 
 
 function putRunI2IButton(buttonsDiv,layer,index) {
-if(hasNotRole(AI_ROLES.Text2Image)){return;}
+if(hasNotRole(AI_ROLES.Image2Image)){return;}
 
 var runButton=document.createElement("button");
 runButton.id="runButton-"+index;
@@ -244,7 +245,7 @@ buttonsDiv.appendChild(seedButton);
 }
 
 function putRunT2IButton(buttonsDiv,layer,index) {
-if(hasNotRole(AI_ROLES.Image2Image)){return;}
+if(hasNotRole(AI_ROLES.Text2Image)){return;}
 
 var runButton=document.createElement("button");
 runButton.id="runButton-"+index;
@@ -276,6 +277,7 @@ obj.selectable=!obj.selectable;
 canvas.discardActiveObject();
 canvas.renderAll();
 updateLayerPanel();
+commitHistory();
 }
 
 function putMoveLockButton(buttonsDiv,layer,index) {

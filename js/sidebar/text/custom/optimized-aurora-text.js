@@ -107,21 +107,15 @@ const svgString=new XMLSerializer().serializeToString(t2_aurora_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2AuroraStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2AuroraStr=t2PlaceImageTextObject(img,'aurora',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_aurora_updateAll(){
-const position=nowT2AuroraStr?
-{left:nowT2AuroraStr.left,top:nowT2AuroraStr.top}:{left:50,top:100};
-if(nowT2AuroraStr){
-canvas.remove(nowT2AuroraStr).renderAll();
+const position=t2BeginReplace(nowT2AuroraStr);
 nowT2AuroraStr=null;
-}
 t2_aurora_deleteSvg();
 t2_aurora_createSvg(position.left,position.top);
 }
+function t2_aurora_setCurrent(obj){nowT2AuroraStr=obj;}

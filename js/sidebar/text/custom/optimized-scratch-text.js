@@ -124,21 +124,15 @@ const svgString=new XMLSerializer().serializeToString(t2_scratch_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2ScratchStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2ScratchStr=t2PlaceImageTextObject(img,'scratch',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_scratch_updateAll(){
-const position=nowT2ScratchStr?
-{left:nowT2ScratchStr.left,top:nowT2ScratchStr.top}:{left:50,top:100};
-if(nowT2ScratchStr){
-canvas.remove(nowT2ScratchStr).renderAll();
+const position=t2BeginReplace(nowT2ScratchStr);
 nowT2ScratchStr=null;
-}
 t2_scratch_deleteSvg();
 t2_scratch_createSvg(position.left,position.top);
 }
+function t2_scratch_setCurrent(obj){nowT2ScratchStr=obj;}

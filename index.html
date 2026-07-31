@@ -226,12 +226,12 @@ function getElementClasses(element) {
 
 <link rel="stylesheet" href="css/ui/font-manager.css?v=7.2" media="print" onload="this.media='all'">
 
-<script src="https://cdn.jsdelivr.net/npm/stacktrace-js/dist/stacktrace.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.31.3/tagify.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/tagify/4.31.3/tagify.min.css" rel="stylesheet" type="text/css" />
+<script src="third/stacktrace/stacktrace.min.js?v=7.2"></script>
+<script src="third/tagify/tagify.min.js?v=7.2"></script>
+<link href="third/tagify/tagify.min.css?v=7.2" rel="stylesheet" type="text/css" />
 <script src="https://unpkg.com/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/wordcloud" defer></script>
+<script src="third/chartjs/chart.min.js?v=7.2" defer></script>
+<script src="third/wordcloud/wordcloud.min.js?v=7.2" defer></script>
 
 <link rel="stylesheet" href="css/comfyui-workflow-editor.css?v=7.2" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/responsive.css?v=7.3">
@@ -435,6 +435,15 @@ function getElementClasses(element) {
                                     data-i18n="downloadDpi">Download Dpi</span>
                                 <input type="number" id="outputDpi" class="dropdown-item-mini-text" value="300" min="96"
                                     step="1">
+                            </a>
+
+                            <a class="dropdown-item">
+                                <i class="material-icons">crop_free</i> <span
+                                    data-i18n="pageSizeMm">Page Size (mm)</span>
+                                <input type="number" id="pageWidthMm" class="dropdown-item-mini-text" value="148" min="1"
+                                    step="1">
+                                <input type="number" id="pageHeightMm" class="dropdown-item-mini-text" value="210"
+                                    min="1" step="1">
                             </a>
                             <label data-i18n="canvasGrid"></label>
                             <a class="dropdown-item" href="#" id="toggleGridButton">
@@ -1035,24 +1044,24 @@ function getElementClasses(element) {
                         <div class="param-group-header" data-i18n="secBubbleStyle"></div>
                         <div class="input-group">
                             <label for="sbStrokeColor" data-i18n="line">Line</label>
-                            <input id="sbStrokeColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="changePanelStrokeColor(this.value)">
+                            <input id="sbStrokeColor" class="jscolor-color-picker" data-initial-color="rgba(0,0,0,1)" oninput="applySpeechBubbleStyleFromSidebar()">
                         </div>
                         <div class="input-group">
                             <label for="sbFillColor" data-i18n="fill">Fill</label>
-                            <input id="sbFillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="changePanelStrokeColor(this.value)">
+                            <input id="sbFillColor" class="jscolor-color-picker" data-initial-color="rgba(255,255,255,1)" oninput="applySpeechBubbleStyleFromSidebar()">
                         </div>
                         <div class="input-group">
                             <label for="sbSmoothing" data-i18n="smooth">Smooth</label>
                             <input type="checkbox" id="sbSmoothing" checked>
                         </div>
                         <div class="input-container-leftSpace" data-i18n-label="lineWidth">
-                            <input type="range" id="sbStrokeWidth" min="1" max="20" value="1" step="0.1">
+                            <input type="range" id="sbStrokeWidth" min="1" max="20" value="1" step="0.1" oninput="applySpeechBubbleStyleFromSidebar()">
                         </div>
                         <div class="input-container-leftSpace" data-i18n-label="pointSpace">
                             <input type="range" id="sbPointSpace" min="0" max="100" value="4">
                         </div>
                         <div class="input-container-leftSpace" data-i18n-label="panelOpacity">
-                            <input type="range" id="sbFillOpacity" min="0" max="100" value="100">
+                            <input type="range" id="sbFillOpacity" min="0" max="100" value="100" oninput="applySpeechBubbleStyleFromSidebar()">
                         </div>
                         <div class="input-container-leftSpace" data-i18n-label="cornerRadius">
                             <input type="range" id="sbSornerRadius" min="0" max="15" value="2">
@@ -2034,7 +2043,7 @@ function getElementClasses(element) {
     <script src="js/ai/inpainting/inpaint-mask.js?v=7.3" defer></script>
     <script src="js/ai/inpainting/inpaint-workflow.js?v=7.3" defer></script>
     <script src="js/ai/inpainting/inpaint-editor.js?v=7.3" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
+    <script src="third/three/three.min.js?v=7.2" defer></script>
     <script src="js/ai/angle/camera-widget.js?v=7.3" defer></script>
     <script src="js/ai/angle/angle-editor.js?v=7.3" defer></script>
     <script src="js/ai/ui/ai-ui-util.js?v=7.2" defer></script>
@@ -2085,6 +2094,7 @@ function getElementClasses(element) {
     <script src="js/sidebar/panel/knife/knife-index.js?v=7.2" defer></script>
 
     <script src="js/ui/control/common-control-management.js?v=7.2" defer></script>
+    <script src="js/ui/control/object-control-sync.js?v=7.2" defer></script>
     <script src="js/ui/control/image-control-manager.js?v=7.2" defer></script>
     <script src="js/ui/control/information-control.js?v=7.2" defer></script>
     <script src="js/ui/control/glfx-control.js?v=7.2" defer></script>
@@ -2102,6 +2112,7 @@ function getElementClasses(element) {
     <script src="js/ui/font/user-font-manager.js?v=7.2" defer></script>
     <script src="js/core/font/font-manager-core.js?v=7.2" defer></script>
     <script src="js/core/font/font-dropdown.js?v=7.2" defer></script>
+    <script src="js/core/font/project-font.js?v=7.2" defer></script>
 
     <script src="service-worker.js?v=7.2" defer></script>
     <script src="js/core/service/worker-register.js?v=7.2" defer></script>
@@ -2126,7 +2137,7 @@ function getElementClasses(element) {
     <script src="js/ai/comfyui/v2/comfyui-workflow-editor.js"></script>
     <script src="js/ai/comfyui/v2/comfyui-workflow-interact.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jscolor/2.4.5/jscolor.min.js"></script>
+    <script src="third/jscolor/jscolor.min.js?v=7.2"></script>
 <!-- ========== Inline Scripts ========== -->
     
 <script>

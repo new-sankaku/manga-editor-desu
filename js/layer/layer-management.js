@@ -406,9 +406,9 @@ layerDiv.appendChild(previewDiv);
 }
 
 function removeLayer(layer) {
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.remove(layer);
-changeDoSaveHistory();
+});
 saveStateByManual();
 updateLayerPanel();
 

@@ -206,7 +206,7 @@ localImageMap.set(file.name.split('.')[0],ArrayBufferUtils.fromArrayBufferToStri
 }
 }
 for(var file of sortedFiles){
-if(file.name.endsWith(".json")&&file.name!=="text2img_basePrompt.json"&&file.name!=="canvas_info.json"){
+if(file.name.startsWith("state_")&&file.name.endsWith(".json")){
 localStateStack.push(JSON.parse(ArrayBufferUtils.fromArrayBufferToString(file.data)));
 }
 }

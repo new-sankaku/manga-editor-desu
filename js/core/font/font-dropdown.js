@@ -215,8 +215,9 @@ dropdown.style.visibility = '';
 
           const activeObject = canvas.getActiveObject();
           if(activeObject){
-            activeObject.fontFamily=font.name;
+            activeObject.set("fontFamily", font.name);
             canvas.requestRenderAll();
+            commitHistory();
           }
           fmSelectedFont.textContent = font.name;
           fmSelectedFont.className = `fm-font-${font.name.replace(/[\s-]/g,"_")}`;

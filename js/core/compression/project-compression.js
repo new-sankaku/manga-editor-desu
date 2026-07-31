@@ -1,10 +1,14 @@
 
-async function generateProjectFileBufferListCore(stateStackParam,imageMapParam,canvasInfoParam,basePromptParam,previewDataUrl){
+async function generateProjectFileBufferListCore(stateStackParam,imageMapParam,canvasInfoParam,basePromptParam,previewDataUrl,fontDataParam){
 var fileBufferList=[];
 var promises=[
 (async ()=>{
 var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePromptParam||{}));
 lz4Compressor.putDataListByArrayBuffer(fileBufferList,"text2img_basePrompt.json",buffer);
+})(),
+(async ()=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(fontDataParam||[]));
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,"fonts.json",buffer);
 })(),
 ...stateStackParam.map(async (json,index)=>{
 var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(json));
@@ -29,13 +33,11 @@ return fileBufferList;
 }
 
 async function generateProjectFileBufferList() {
+flushHistory();
 if(currentStateIndex<stateStack.length-1){
 stateStack.splice(currentStateIndex+1);
 }
-var state=customToJSON();
-var json=JSON.stringify(state);
-stateStack.push(json);
-currentStateIndex++;
+captureState();
 await convertImageMapBlobUrls();
 removeGrid();
 var previewLink=getCropAndDownloadLinkByMultiplier(1,'jpeg');
@@ -44,14 +46,32 @@ if(isGridVisible){
 drawGrid();
 isGridVisible=true;
 }
-var canvasInfo={width:canvas.width,height:canvas.height};
-var fileBufferList=await generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl);
+var pageSize=getPageSizeMm();
+var canvasInfo={width:canvas.width,height:canvas.height,pageWidthMm:pageSize.width,pageHeightMm:pageSize.height};
+var fileBufferList=await generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl,buildProjectFontData());
 return {fileBufferList,previewDataUrl};
 }
 
 
 
+var isProjectLoading=false;
+
+// ページ切り替え・プロジェクト読み込みの最中は保存してはいけない。
+// 読み込み途中のキャンバスを現在ページのblobに上書きしてしまう
+function isProjectBusy(){
+return isProjectLoading||isHistoryRestoreInProgress();
+}
+
 async function loadLz4BlobProjectFile(lz4Blob,guid=null){
+if(!lz4Blob){
+compressionLogger.error("[loadLz4BlobProjectFile] blob is empty. guid="+guid);
+throw new Error("Project data is empty");
+}
+isProjectLoading=true;
+try{
+// 前ページの未確定コミットが走ると、クリア済みのimageMapに前ページの画像が
+// 混ざって次ページのプロジェクトファイルに紛れ込む
+cancelPendingHistory();
 stateStack=[];
 imageMap.clear();
 
@@ -91,11 +111,11 @@ compressionLogger.error("Failed to load file:",file.name,error);
 }
 }));
 
+// 履歴状態は state_XXXXXX.json のみ。除外リスト方式だと新しいメタファイルを
+// 追加するたびに状態として読み込まれてしまうため、名前で限定する
 const jsonLoadPromises=sortedFiles.map(async (file)=>{
 try {
-if (file.name.endsWith(".json")&&
-file.name!=="text2img_basePrompt.json"&&
-file.name!=="canvas_info.json") {
+if (file.name.startsWith("state_")&&file.name.endsWith(".json")) {
 let jsonStr=ArrayBufferUtils.fromArrayBufferToString(file.data);
 return JSON.parse(jsonStr);
 }
@@ -108,11 +128,26 @@ const jsonResults=await Promise.all(jsonLoadPromises);
 stateStack=jsonResults.filter(data=>data!==undefined);
 
 currentStateIndex=stateStack.length-1;
+applyPageSizeMm(canvasInfo);
+
+// テキストの文字幅計算より前にフォントを登録しないと、フォールバックされた
+// 幅でレイアウトされてしまうため、キャンバス復元より先に処理する
+let fontsBuffer=getDataByName(files,"fonts.json");
+if(fontsBuffer){
+let fontsStr=ArrayBufferUtils.fromArrayBufferToString(fontsBuffer);
+await restoreProjectFonts(JSON.parse(fontsStr));
+}else{
+setProjectFontData([]);
+}
+
 resizeCanvasByNum(canvasInfo.width,canvasInfo.height);
 lastRedo(guid);
 
 if(guid){
 setCanvasGUID(guid);
+}
+}finally{
+isProjectLoading=false;
 }
 }
 
@@ -348,8 +383,10 @@ const jsonResults=await Promise.all(jsonLoadPromises);
 stateStack=jsonResults.filter(data=>data!==undefined);
 
 currentStateIndex=stateStack.length-1;
+applyPageSizeMm(canvasInfo);
 resizeCanvasByNum(canvasInfo.width,canvasInfo.height);
 lastRedo(guid);
+setProjectFontData([]);
 
 if(guid){
 setCanvasGUID(guid);

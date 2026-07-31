@@ -22,10 +22,8 @@
  justify-content: var(--justify-content-center);
 }
 
-.canvas-container {
- transform-origin: top center;
-}
-
+/* 拡大時にスクロールで端まで到達できるよう、拡大は右下方向にだけ広げる。
+   中央基準だと左と上にはみ出した分がスクロール範囲に入らず端まで表示できない */
 #canvas-container {
  width: var(--width-100);
  min-width: var(--min-width-600);
@@ -38,6 +36,7 @@
  align-items: var(--align-items-center);
  overflow: hidden;
  box-sizing: border-box;
+ transform-origin: top left;
 }
 
 #mangaImageCanvas {

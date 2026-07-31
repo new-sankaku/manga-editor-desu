@@ -91,6 +91,7 @@ const commonProperties=[
 "guids","guid","tempPrompt","tempNegative","tempSeed","img2imgScale","img2img_denoise","canvasGuid","isSpeechBubble","jstsGeom","text","selectable","customType"
 ,"speechBubbleGrid","speechBubbleScale","speechBubbleViewBoxWidth","speechBubbleViewBoxHeight","speechBubbleRectX","speechBubbleRectY","speechBubbleRectWidth","speechBubbleRectHeight"
 ,"baseScaleX","baseScaleY","lastLeft","lastTop","targetObject","originalSvg"
+,"imageTextType","imageTextParams"
 ];
 
 let jscolorOptions={

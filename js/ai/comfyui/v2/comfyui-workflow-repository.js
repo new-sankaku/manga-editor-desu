@@ -141,6 +141,10 @@ enabledWorkflow=value;
 return false;
 }
 });
+if(!enabledWorkflow){
+comfyuiLogger.error("No enabled workflow for type: "+type);
+return null;
+}
 return enabledWorkflow.workflowJson;
 } catch (error) {
 comfyuiLogger.error("Failed to retrieve enabled workflow by type:",error);

@@ -283,6 +283,7 @@ let fmFontData = {
                 document.fonts.add(fontFace);
                 await fmFontRepository.saveLocalFont(fontName);
                 this.addFontOption({ name: fontName, type: "local" });
+                applyRecoveredFont(fontName);
                 loaded = true;
             } catch (error) {
                 fontLogger.error(`${variant}`, error);
@@ -322,6 +323,7 @@ let fmFontData = {
         await this.loadWebFontStylesheet(fontUrl);
         await fmFontRepository.saveWebFont(fontName, fontUrl);
         this.addFontOption({ name: fontName, type: "web", url: fontUrl });
+        applyRecoveredFont(fontName);
       } catch (error) {
         fontLogger.error(fontUrl, error);
       }
@@ -355,6 +357,7 @@ let fmFontData = {
       document.fonts.add(loadedFont);
       await fmFontRepository.saveUploadedFont(fontName, buffer);
       this.addFontOption({ name: fontName, type: "upload" });
+      applyRecoveredFont(fontName);
       await this.setUserFontData();
       FontSelectorManager.reloadAll();
       fmUserFontManager.updateFontList();

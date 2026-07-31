@@ -9,6 +9,7 @@ manga-editor-desu/
 │   ├── fabric/         fabric.js Canvas管理（fabric-management.js）
 │   ├── layer/          レイヤー管理（layer-management.js, blend, floating-window）
 │   ├── ui/             UI部品（toast, overlay, control, event-delegator, prompt-manager）
+│   │   └── control/object-control-sync.js  選択オブジェクト値の各パネルへの反映
 │   ├── sidebar/        サイドバーツール
 │   │   ├── pen/        ブラシ（crayon, ink, marker, spray, drip, stroke）
 │   │   ├── text/       テキスト（vertical-text, custom effects 10種）
@@ -20,7 +21,8 @@ manga-editor-desu/
 │   ├── db/             永続化（user-font-repository）
 │   ├── dashboard/      ダッシュボード（統計、プロンプト頻度）
 │   ├── svg/            SVGテンプレート（コマ割り、吹き出し）
-│   ├── canvas-manager.js    キャンバスリサイズ・ズーム
+│   ├── core/font/project-font.js  プロジェクトのフォント情報保存・復元
+│   ├── canvas-manager.js    キャンバスリサイズ・ズーム、原稿サイズ(mm)
 │   ├── project-management.js プロジェクト保存/読み込み
 │   └── shortcut.js     キーボードショートカット
 ├── css/

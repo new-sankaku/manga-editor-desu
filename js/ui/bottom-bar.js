@@ -52,15 +52,23 @@ btmNavRight.style.visibility="hidden";
 }
 }
 
+// 保留中のコミットを確定してから保存判定する。
+// 先に判定すると、直前の変更が履歴に入る前にページを離れて変更が失われる
+async function btmSaveCurrentPage() {
+flushHistory();
+if(stateStack.length>=btmSaveStateThreshold){
+await btmSaveProjectFile();
+}
+}
+
 async function btmNavigatePage(direction) {
+if(isProjectBusy())return;
 var currentGuid=getCanvasGUID();
 var currentIndex=btmGetGuidIndex(currentGuid);
 var targetIndex=currentIndex+direction;
 if(targetIndex<0||targetIndex>=btmGetGuidsSize())return;
 var targetGuid=btmGetGuidByIndex(targetIndex);
-if(stateStack.length>=btmSaveStateThreshold){
-await btmSaveProjectFile();
-}
+await btmSaveCurrentPage();
 await chengeCanvasByGuid(targetGuid);
 btmUpdateHandleText();
 }
@@ -112,9 +120,8 @@ if(imageLink&&imageLink.href)image.src=imageLink.href;
 image.className="btm-image";
 image.dataset.index=guid;
 image.addEventListener("click",async ()=>{
-if(stateStack.length>=btmSaveStateThreshold){
-await btmSaveProjectFile();
-}
+if(isProjectBusy())return;
+await btmSaveCurrentPage();
 await chengeCanvasByGuid(guid);
 btmUpdateHandleText();
 });
@@ -137,25 +144,24 @@ deleteBtn.textContent="🗑";
 deleteBtn.className="btm-delete-btn";
 deleteBtn.addEventListener("click",async (e)=>{
 e.stopPropagation();
-if(btmGetGuidsSize()>1){
+if(isProjectBusy())return;
 var isCurrentPage=(getCanvasGUID()===guid);
 var deletedIndex=btmGetGuidIndex(guid);
 btmProjectsMap.delete(guid);
 imageWrapper.remove();
+if(btmGetGuidsSize()>0){
+// 削除したページを表示していた場合は隣のページへ移動する。
+// 後ろのページを優先し、最後尾を削除したときは前のページになる
 if(isCurrentPage){
 var targetIndex=Math.min(deletedIndex,btmGetGuidsSize()-1);
-var targetGuid=btmGetGuidByIndex(targetIndex);
-await chengeCanvasByGuid(targetGuid);
+await chengeCanvasByGuid(btmGetGuidByIndex(targetIndex));
 }
 }else{
-var isCurrentPage=(getCanvasGUID()===guid);
-btmProjectsMap.delete(guid);
-imageWrapper.remove();
-if(isCurrentPage&&getObjectCount()===0){
+// ページが無くなったら空ページを表示する。
+// キャンバスに内容を残すと、一覧に無いページを編集し続けることになる
 initImageHistory();
 setCanvasGUID();
 await btmSaveProjectFile();
-}
 }
 btmUpdateScrollButtons();
 updateAllPageNumbers();
@@ -378,10 +384,16 @@ window.addEventListener("resize",btmUpdateScrollButtons);
 
 async function chengeCanvasByGuid(guid) {
 const projectData=btmProjectsMap.get(guid);
+if(!projectData||!projectData.blob){
+uiLogger.error("[chengeCanvasByGuid] project data not found. guid="+guid);
+createToastError(getText("pageLoadErrorTitle"),getText("pageLoadErrorMessage"));
+return;
+}
 try {
 await loadLz4BlobProjectFile(projectData.blob,guid);
 } catch (error) {
 uiLogger.error("Error loading ZIP:",error);
+createToastError(getText("pageLoadErrorTitle"),getText("pageLoadErrorMessage"));
 throw error;
 }
 }
@@ -413,17 +425,19 @@ return Array.from(btmProjectsMap.keys())[0];
 }
 
 function btmShowAddPageDialog(guid) {
+// 二重に開くとIDが重複して2枚目のボタンが効かなくなる
+if(document.querySelector(".btm-dialog-overlay"))return;
 var dialog=document.createElement("div");
 dialog.className="btm-dialog-overlay";
 dialog.innerHTML='<div class="btm-dialog"><div class="btm-dialog-content">'+
-'<h3>ページサイズを選択</h3>'+
+'<h3>'+getText("pageAddDialogTitle")+'</h3>'+
 '<div class="btm-radio-group">'+
-'<label><input type="radio" name="page-size" value="portrait" checked>縦</label>'+
-'<label><input type="radio" name="page-size" value="landscape">横</label>'+
+'<label><input type="radio" name="page-size" value="portrait" checked>'+getText("pagePortrait")+'</label>'+
+'<label><input type="radio" name="page-size" value="landscape">'+getText("pageLandscape")+'</label>'+
 '</div>'+
 '<div class="btm-dialog-buttons">'+
-'<button class="btm-dialog-button" id="btm-dialog-cancel">キャンセル</button>'+
-'<button class="btm-dialog-button btm-dialog-submit" id="btm-dialog-submit">作成</button>'+
+'<button class="btm-dialog-button" id="btm-dialog-cancel">'+getText("cancel")+'</button>'+
+'<button class="btm-dialog-button btm-dialog-submit" id="btm-dialog-submit">'+getText("pageAddDialogSubmit")+'</button>'+
 '</div></div></div>';
 document.body.appendChild(dialog);
 var cancelButton=document.getElementById("btm-dialog-cancel");
@@ -432,6 +446,7 @@ cancelButton.addEventListener("click",function(){
 document.body.removeChild(dialog);
 });
 submitButton.addEventListener("click",async function(){
+if(isProjectBusy())return;
 var selectedSize=document.querySelector('input[name="page-size"]:checked').value;
 document.body.removeChild(dialog);
 var currentIndex=btmGetGuidIndex(guid);
@@ -439,6 +454,7 @@ var newGuid=generateGUID();
 var w,h;
 if(selectedSize==="portrait"){w=210;h=297;}
 else{w=297;h=210;}
+setPageSizeMm(w,h);
 var pc=document.createElement('canvas');
 pc.width=100;
 pc.height=Math.round(100*h/w);
@@ -449,9 +465,9 @@ var placeholderUrl=pc.toDataURL('image/jpeg',0.5);
 await btmSaveProjectFile(null,false);
 btmAddImage({href:placeholderUrl},null,newGuid,true);
 reorderImages(currentIndex+1,newGuid);
-changeDoNotSaveHistory();
+withoutHistory(function(){
 resizeCanvasToObject(w,h);
-changeDoSaveHistory();
+});
 initImageHistory();
 setCanvasGUID(newGuid);
 await btmSaveProjectFile(newGuid,false);

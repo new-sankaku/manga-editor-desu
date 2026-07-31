@@ -87,8 +87,8 @@ var scaleX=layer.scaleX;
 var scaleY=layer.scaleY;
 var left=layer.left;
 var top=layer.top;
-var pixelRatio=window.devicePixelRatio||1;
-var enhancedScaleFactor=scaleFactor*2*pixelRatio;
+// devicePixelRatioを掛けると同じプロジェクトでも実行環境で送信画像の解像度が変わるため使わない
+var enhancedScaleFactor=scaleFactor*2;
 var offscreenCanvas=HtmlCanvasUtil.createOffscreenCanvas(
 Math.ceil(width*scaleX*enhancedScaleFactor),
 Math.ceil(height*scaleY*enhancedScaleFactor)
@@ -268,6 +268,7 @@ var activeObject=canvas.getActiveObject();
 if(isImage(activeObject)){
 activeObject.set("flipX",!activeObject.flipX);
 canvas.renderAll();
+commitHistory();
 }
 },
 
@@ -276,6 +277,7 @@ var activeObject=canvas.getActiveObject();
 if(isImage(activeObject)){
 activeObject.set("flipY",!activeObject.flipY);
 canvas.renderAll();
+commitHistory();
 }
 },
 
@@ -306,10 +308,10 @@ await new Promise(function(resolve){
 fabric.Image.fromURL(webpDataUrl,function(img){
 img.set({left:activeObject.left,top:activeObject.top,scaleX:originalScaleX,scaleY:originalScaleY});
 copy(activeObject,img);
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.remove(activeObject);
 canvas.add(img);
-changeDoSaveHistory();
+});
 canvas.setActiveObject(img);
 canvas.renderAll();
 updateLayerPanel();
@@ -383,16 +385,22 @@ return link;
 },
 
 getCropAndDownloadLink:function(){
-var a5WidthInches=148/25.4;
-var a5HeightInches=210/25.4;
+if(!hasProjectPageSize){
+createToast(getText("pageSizeUnknownTitle"),getText("pageSizeUnknownMessage"));
+}
+var pageSize=getPageSizeMm();
+var pageWidthInches=pageSize.width/25.4;
+var pageHeightInches=pageSize.height/25.4;
 var dpi=parseFloat($('outputDpi').value);
 var canvasWidthPixels=canvas.width;
 var canvasHeightPixels=canvas.height;
-var targetWidthPixels=a5WidthInches*dpi;
-var targetHeightPixels=a5HeightInches*dpi;
-if(canvasWidthPixels>canvasHeightPixels){
-targetWidthPixels=a5HeightInches*dpi;
-targetHeightPixels=a5WidthInches*dpi;
+var targetWidthPixels=pageWidthInches*dpi;
+var targetHeightPixels=pageHeightInches*dpi;
+// 原稿の向きとキャンバスの向きが食い違う場合は用紙の縦横を入れ替える
+if((canvasWidthPixels>canvasHeightPixels)!==(targetWidthPixels>targetHeightPixels)){
+var swap=targetWidthPixels;
+targetWidthPixels=targetHeightPixels;
+targetHeightPixels=swap;
 }
 var multiplierWidth=targetWidthPixels/canvasWidthPixels;
 var multiplierHeight=targetHeightPixels/canvasHeightPixels;

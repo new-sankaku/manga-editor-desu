@@ -1,5 +1,7 @@
 var glfxOriginalImage=null;
 var glfxCopiedImage=null;
+// フィルタ結果は画像1枚分の容量を持つため、履歴化はスライダー停止後に1回だけ行う
+const GLFX_HISTORY_DEBOUNCE=700;
 
 function glfxResetFilterValues() {
 $("glfxBrightness").value=0;
@@ -48,19 +50,18 @@ function glfxApplyFilter(filter=null) {
 // console.log("glfxApplyFilter: Start");
 if (!canvas) {
 // console.log("glfxApplyFilter: Canvas is null");
-return;
+return Promise.resolve();
 }
 
 var activeObject=canvas.getActiveObject();
 
 if (activeObject&&activeObject.type==="image") {
 // console.log("glfxApplyFilter: Applying filter to object", activeObject);
-glfxApplyFilterToObject(activeObject,filter).then(()=>{
-// console.log("glfxApplyFilter: Filter applied to object successfully");
-});
+return glfxApplyFilterToObject(activeObject,filter);
 } else {
 // console.log("glfxApplyFilter: No active image object, applying filter to canvas");
 glfxApplyFilterToCanvas(filter);
+return Promise.resolve();
 }
 }
 
@@ -393,15 +394,20 @@ createToastError("Select Image!");
 return;
 }
 
-changeDoNotSaveHistory();
 if (glfxOriginalImage) {
 glfxCopiedImage=glfxOriginalImage.cloneNode();
-glfxApplyFilter();
+glfxApplyFilter().then(function(){
+commitHistoryDebounced(GLFX_HISTORY_DEBOUNCE);
+});
 }
-changeDoSaveHistory();
 },100)
 );
 });
+
+// フィルタはスライダー操作で即時反映される。Applyは「現在の結果を確定して
+// スライダーを0に戻す（重ねがけに進む）」、Resetは「元画像に戻す」
+addTooltipByElement($("glfxApplyButton"),"glfxApplyHelp");
+addTooltipByElement($("glfxResetButton"),"glfxResetHelp");
 
 $("glfxApplyButton").addEventListener("click",function () {
 glfxApply();

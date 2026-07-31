@@ -114,21 +114,15 @@ const svgString=new XMLSerializer().serializeToString(t2_thrill_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2ThrillStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2ThrillStr=t2PlaceImageTextObject(img,'thrill',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_thrill_updateAll(){
-const position=nowT2ThrillStr?
-{left:nowT2ThrillStr.left,top:nowT2ThrillStr.top}:{left:50,top:100};
-if(nowT2ThrillStr){
-canvas.remove(nowT2ThrillStr).renderAll();
+const position=t2BeginReplace(nowT2ThrillStr);
 nowT2ThrillStr=null;
-}
 t2_thrill_deleteSvg();
 t2_thrill_createSvg(position.left,position.top);
 }
+function t2_thrill_setCurrent(obj){nowT2ThrillStr=obj;}

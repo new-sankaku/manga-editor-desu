@@ -57,8 +57,10 @@ e.preventDefault();
 
 // bind redo shortcut
 hotkeys(hotkeysMap.redo,'all' ,function (e) {
+if (!isEditableTagsActive()) {
 redo();
 e.preventDefault();
+}
 });
 
 // bind toggle layer panel shortcut
@@ -83,7 +85,7 @@ e.preventDefault();
 
 // bind zoom out shortcut
 hotkeys(hotkeysMap.zoomOut,'all',function (e) {
-zoomIn();
+zoomOut();
 e.preventDefault();
 });
 
@@ -398,6 +400,7 @@ break;
 }
 activeObject.setCoords();
 canvas.renderAll();
+commitHistoryDebounced();
 e.preventDefault();
 }
 }
@@ -426,6 +429,7 @@ break;
 }
 activeObject.setCoords();
 canvas.renderAll();
+commitHistoryDebounced();
 e.preventDefault();
 }
 }

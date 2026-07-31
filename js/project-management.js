@@ -36,6 +36,9 @@ btmSaveProjectFile(null,false).then(async ()=>{
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step2',substep: 'Process 1',progress: 20});
 
 const lz4BlobList=Array.from(btmProjectsMap.values()).map(data=>data.blob);
+if(lz4BlobList.some(blob=>!blob)){
+throw new Error("Some pages have no saved data");
+}
 let mergeLz4Blob=await lz4Compressor.mergeLz4Blobs(lz4BlobList);
 
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step3',substep: 'Process 2',progress: 20});

@@ -230,6 +230,13 @@ removeSpinner(spinnerId);
 return;
 }
 
+// 有効なワークフローが無いまま進むと getClassTypeOnlyByJson で例外になる
+if(!selectedWorkflow){
+createToastError(getText("comfyWorkflowMissingTitle"),getText("comfyWorkflowMissingMessage")+" "+Type,1000*10);
+removeSpinner(spinnerId);
+return;
+}
+
 var classTypeLists=getClassTypeOnlyByJson(selectedWorkflow);
 var objInfoRepo=(_comfyUIExecProvider&&_comfyUIExecProvider.id==='runpodComfyUI')?comfyObjectInfoRepo_runpod:comfyObjectInfoRepo_local;
 if(!await checkWorkflowNodeVsComfyUI(classTypeLists,objInfoRepo)){

@@ -7,6 +7,23 @@ var opacity=$("speechBubbleOpacity").value;
 changeSpeechBubbleSVG(bubbleStrokewidht,fillColor,strokeColor,opacity);
 
 }
+// 吹き出しスタイルのサイドバーから選択中の吹き出しへ適用する。
+// 以前は changePanelStrokeColor が指定されており、吹き出しには何も起きず
+// コマが選択されているとコマの線色が変わっていた
+function applySpeechBubbleStyleFromSidebar(){
+var activeObject=canvas.getActiveObject();
+if(!isSpeechBubbleSVG(activeObject)&&!isFreehandBubblePath(activeObject)){
+return;
+}
+changeSpeechBubbleSVG(
+parseFloat($("sbStrokeWidth").value),
+$("sbFillColor").value,
+$("sbStrokeColor").value,
+parseFloat($("sbFillOpacity").value)
+);
+commitHistoryDebounced();
+}
+
 function changeSpeechBubbleSVG(bubbleStrokewidht,fillColor,strokeColor,opacity){
 opacity=opacity/100;
 var fillColorRgba=hexToRgba(fillColor,opacity);
@@ -162,9 +179,9 @@ const selectedValue=getSelectedValueByGroup("sbTextGroup");
 if (name.startsWith("90_focus_")||selectedValue==="Nothing") {
 canvas.add(svgObject);
 }else{
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.add(svgObject);
-changeDoSaveHistory();
+});
 createSpeechBubbleMetrics(svgObject,svgData);
 }
 canvas.setActiveObject(svgObject);
