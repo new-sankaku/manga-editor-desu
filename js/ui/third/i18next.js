@@ -12,6 +12,8 @@
 const resources = {
 "20260731100000_001":{
 "ja":{
+"glfxApplyHelp":"効果はスライダー操作で即時反映されます。Applyは現在の結果を確定してスライダーを0に戻します（続けて重ねがけできます）",
+"glfxResetHelp":"かけた効果を取り消して元の画像に戻します",
 "comfyObjectInfoErrorTitle":"ComfyUIのノード構成を取得できません",
 "comfyObjectInfoErrorMessage":"ComfyUIに接続できないため、ワークフローのノード確認ができませんでした。接続先URLとComfyUIの起動状態を確認してください。",
 "comfyWorkflowMissingTitle":"有効なワークフローがありません",
@@ -28,6 +30,8 @@ const resources = {
 "fontRestoredTitle":"フォントを反映しました"
 },
 "en":{
+"glfxApplyHelp":"Effects apply immediately as you move the sliders. Apply commits the current result and resets the sliders so you can stack another pass.",
+"glfxResetHelp":"Discards the applied effects and restores the original image.",
 "comfyObjectInfoErrorTitle":"Cannot get ComfyUI node list",
 "comfyObjectInfoErrorMessage":"Could not verify workflow nodes because ComfyUI is unreachable. Check the endpoint URL and that ComfyUI is running.",
 "comfyWorkflowMissingTitle":"No enabled workflow",
@@ -44,6 +48,8 @@ const resources = {
 "fontRestoredTitle":"Font applied"
 },
 "ko":{
+"glfxApplyHelp":"효과는 슬라이더 조작 시 즉시 반영됩니다. Apply는 현재 결과를 확정하고 슬라이더를 0으로 되돌립니다(계속 겹쳐 적용 가능).",
+"glfxResetHelp":"적용한 효과를 취소하고 원본 이미지로 되돌립니다.",
 "comfyObjectInfoErrorTitle":"ComfyUI 노드 목록을 가져올 수 없습니다",
 "comfyObjectInfoErrorMessage":"ComfyUI에 연결할 수 없어 워크플로 노드를 확인하지 못했습니다. 접속 URL과 ComfyUI 실행 상태를 확인하세요.",
 "comfyWorkflowMissingTitle":"활성화된 워크플로가 없습니다",
@@ -60,6 +66,8 @@ const resources = {
 "fontRestoredTitle":"폰트를 적용했습니다"
 },
 "fr":{
+"glfxApplyHelp":"Les effets s'appliquent immédiatement au déplacement des curseurs. Apply valide le résultat et remet les curseurs à zéro pour un nouveau passage.",
+"glfxResetHelp":"Annule les effets appliqués et restaure l'image d'origine.",
 "comfyObjectInfoErrorTitle":"Impossible d'obtenir la liste des nœuds ComfyUI",
 "comfyObjectInfoErrorMessage":"Impossible de vérifier les nœuds du workflow car ComfyUI est injoignable. Vérifiez l'URL et que ComfyUI est démarré.",
 "comfyWorkflowMissingTitle":"Aucun workflow activé",
@@ -76,6 +84,8 @@ const resources = {
 "fontRestoredTitle":"Police appliquée"
 },
 "zh":{
+"glfxApplyHelp":"拖动滑块即时生效。Apply 会确定当前结果并将滑块归零，可继续叠加。",
+"glfxResetHelp":"取消已应用的效果，恢复原始图像。",
 "comfyObjectInfoErrorTitle":"无法获取 ComfyUI 节点列表",
 "comfyObjectInfoErrorMessage":"无法连接 ComfyUI，因此无法校验工作流节点。请检查连接地址和 ComfyUI 是否已启动。",
 "comfyWorkflowMissingTitle":"没有启用的工作流",
@@ -92,6 +102,8 @@ const resources = {
 "fontRestoredTitle":"已应用字体"
 },
 "ru":{
+"glfxApplyHelp":"Эффекты применяются сразу при движении ползунков. Apply фиксирует результат и обнуляет ползунки для следующего прохода.",
+"glfxResetHelp":"Отменяет применённые эффекты и восстанавливает исходное изображение.",
 "comfyObjectInfoErrorTitle":"Не удалось получить список узлов ComfyUI",
 "comfyObjectInfoErrorMessage":"Не удалось проверить узлы рабочего процесса: ComfyUI недоступен. Проверьте URL и запущен ли ComfyUI.",
 "comfyWorkflowMissingTitle":"Нет включённого рабочего процесса",
@@ -108,6 +120,8 @@ const resources = {
 "fontRestoredTitle":"Шрифт применён"
 },
 "es":{
+"glfxApplyHelp":"Los efectos se aplican al instante al mover los deslizadores. Apply confirma el resultado y pone los deslizadores a cero para otra pasada.",
+"glfxResetHelp":"Descarta los efectos aplicados y restaura la imagen original.",
 "comfyObjectInfoErrorTitle":"No se puede obtener la lista de nodos de ComfyUI",
 "comfyObjectInfoErrorMessage":"No se pudieron verificar los nodos del flujo porque ComfyUI no responde. Revise la URL y que ComfyUI esté en ejecución.",
 "comfyWorkflowMissingTitle":"No hay flujo de trabajo activo",
@@ -124,6 +138,8 @@ const resources = {
 "fontRestoredTitle":"Fuente aplicada"
 },
 "de":{
+"glfxApplyHelp":"Effekte werden beim Bewegen der Regler sofort übernommen. Apply bestätigt das Ergebnis und setzt die Regler auf 0 für einen weiteren Durchgang.",
+"glfxResetHelp":"Verwirft die angewendeten Effekte und stellt das Originalbild wieder her.",
 "comfyObjectInfoErrorTitle":"ComfyUI-Knotenliste nicht abrufbar",
 "comfyObjectInfoErrorMessage":"Workflow-Knoten konnten nicht geprüft werden, da ComfyUI nicht erreichbar ist. Prüfen Sie die URL und ob ComfyUI läuft.",
 "comfyWorkflowMissingTitle":"Kein aktivierter Workflow",

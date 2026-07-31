@@ -81,21 +81,15 @@ const svgString=new XMLSerializer().serializeToString(t2_layered_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2LayeredStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2LayeredStr=t2PlaceImageTextObject(img,'layered',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_layered_updateAll(){
-const position=nowT2LayeredStr?
-{left:nowT2LayeredStr.left,top:nowT2LayeredStr.top}:{left:50,top:100};
-if(nowT2LayeredStr){
-canvas.remove(nowT2LayeredStr).renderAll();
+const position=t2BeginReplace(nowT2LayeredStr);
 nowT2LayeredStr=null;
-}
 t2_layered_deleteSvg();
 t2_layered_createSvg(position.left,position.top);
 }
+function t2_layered_setCurrent(obj){nowT2LayeredStr=obj;}

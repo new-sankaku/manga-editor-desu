@@ -162,13 +162,13 @@ debounceSnapToGrid(e.target);
 canvas.on('selection:created',function(event) {
 eventLogger.trace('15: selection:created');
 if (event.selected&&event.selected[0]) {
-updateTextControls(event.selected[0]);
+syncObjectControls(event.selected[0]);
 }
 });
 canvas.on('selection:updated',function(event) {
 eventLogger.trace('16: selection:updated');
 if (event.selected&&event.selected[0]) {
-updateTextControls(event.selected[0]);
+syncObjectControls(event.selected[0]);
 }
 });
 

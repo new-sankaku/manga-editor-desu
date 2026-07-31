@@ -121,21 +121,15 @@ const svgString=new XMLSerializer().serializeToString(t2_cloud_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2CloudStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2CloudStr=t2PlaceImageTextObject(img,'cloud',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_cloud_updateAll(){
-const position=nowT2CloudStr?
-{left:nowT2CloudStr.left,top:nowT2CloudStr.top}:{left:50,top:100};
-if(nowT2CloudStr){
-canvas.remove(nowT2CloudStr).renderAll();
+const position=t2BeginReplace(nowT2CloudStr);
 nowT2CloudStr=null;
-}
 t2_cloud_deleteSvg();
 t2_cloud_createSvg(position.left,position.top);
 }
+function t2_cloud_setCurrent(obj){nowT2CloudStr=obj;}

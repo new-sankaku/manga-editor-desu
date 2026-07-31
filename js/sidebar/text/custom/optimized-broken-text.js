@@ -117,21 +117,15 @@ const svgString=new XMLSerializer().serializeToString(t2_broken_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2BrokenStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2BrokenStr=t2PlaceImageTextObject(img,'broken',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_broken_updateAll(){
-const position=nowT2BrokenStr?
-{left:nowT2BrokenStr.left,top:nowT2BrokenStr.top}:{left:50,top:100};
-if(nowT2BrokenStr){
-canvas.remove(nowT2BrokenStr).renderAll();
+const position=t2BeginReplace(nowT2BrokenStr);
 nowT2BrokenStr=null;
-}
 t2_broken_deleteSvg();
 t2_broken_createSvg(position.left,position.top);
 }
+function t2_broken_setCurrent(obj){nowT2BrokenStr=obj;}

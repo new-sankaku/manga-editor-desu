@@ -87,3 +87,35 @@ getText("keyName")  // i18next.t()のラッパー
 ModeManager.getCurrent()
 ModeManager.MODE.SELECT
 ```
+
+## 選択オブジェクトと各パネルの同期（object-control-sync.js）
+同じ設定（不透明度・線幅・色・フォントサイズ）が複数のパネルに存在するため、
+1箇所で変更した値を他へ反映しないと、次にそのパネルを触ったときに
+**表示されている古い値へ飛ぶ**。
+
+```javascript
+syncObjectControls(activeObject)  // 共通コントロール・テキスト・コマ・吹き出し・画像テキストへ反映
+```
+- `selection:created` / `selection:updated` で呼ぶ
+- いずれかのパネルで値を変更した直後にも呼ぶ
+- jscolorのピッカーは`value`代入では見た目が変わらない。`picker.jscolor.fromString(色)`を使う
+
+## 画像テキスト（text-2-manager.js / custom/）
+パラメータ変更のたびにSVGをラスタライズして**オブジェクトを作り直す**。
+そのままだと変形・重ね順・GUIDが失われるため、共通ヘルパーで引き継ぐ。
+
+```javascript
+const position=t2BeginReplace(nowT2XxxStr);   // 変形とindexを退避し履歴を抑止して削除
+nowT2XxxStr=t2PlaceImageTextObject(img,'xxx',left,top);  // 退避した内容を適用し元のindexへ戻す
+```
+- `imageTextType` / `imageTextParams` をオブジェクトに保存し`commonProperties`に含める
+- 選択時は`syncImageTextControls()`がサイドバーを該当種類・値に戻し、
+  以降の編集がそのオブジェクトに向くよう`t2_xxx_setCurrent()`を呼ぶ
+- これがないと**直前に作った1つしか編集できない**
+
+## 外部ライブラリ
+`file://`で動作させるため、実行に必要なライブラリは`third/`に同梱する。
+CDN参照だとオフラインで読み込みに失敗し、jscolorなら色ピッカーが
+ただのテキスト入力に化ける。
+同梱済み: jscolor / tagify / stacktrace / chart.js / wordcloud / three.js
+（Google Fontsとflag-iconsは未同梱。読み込めなくても代替表示で機能は動く）

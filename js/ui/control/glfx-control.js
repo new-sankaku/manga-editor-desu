@@ -404,6 +404,11 @@ commitHistoryDebounced(GLFX_HISTORY_DEBOUNCE);
 );
 });
 
+// フィルタはスライダー操作で即時反映される。Applyは「現在の結果を確定して
+// スライダーを0に戻す（重ねがけに進む）」、Resetは「元画像に戻す」
+addTooltipByElement($("glfxApplyButton"),"glfxApplyHelp");
+addTooltipByElement($("glfxResetButton"),"glfxResetHelp");
+
 $("glfxApplyButton").addEventListener("click",function () {
 glfxApply();
 });

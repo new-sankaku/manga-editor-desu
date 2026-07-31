@@ -123,20 +123,15 @@ const svgString=new XMLSerializer().serializeToString(t2_mesh_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2MeshStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2MeshStr=t2PlaceImageTextObject(img,'mesh',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_mesh_updateAll(){
-const position=nowT2MeshStr?{left:nowT2MeshStr.left,top:nowT2MeshStr.top}:{left:50,top:100};
-if(nowT2MeshStr){
-canvas.remove(nowT2MeshStr).renderAll();
+const position=t2BeginReplace(nowT2MeshStr);
 nowT2MeshStr=null;
-}
 t2_mesh_deleteSvg();
 t2_mesh_createSvg(position.left,position.top);
 }
+function t2_mesh_setCurrent(obj){nowT2MeshStr=obj;}

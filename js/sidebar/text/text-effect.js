@@ -323,6 +323,7 @@ updateShapeMetrics(svgObj);
 activeObject.set("fontSize",parseInt(size));
 }
 canvas.renderAll();
+syncObjectControls();
 commitHistoryDebounced();
 }
 

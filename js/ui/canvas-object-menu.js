@@ -459,6 +459,8 @@ changeSpeechBubbleSVG(bubbleStrokewidht,fillColorsvg,strokeColorsvg,opacity);
 }
 
 canvas.requestRenderAll();
+// 同じ設定が他のパネルにもあるため、変更した値をそちらにも反映する
+syncObjectControls(activeObject);
 commitHistoryDebounced();
 }
 

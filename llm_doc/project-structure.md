@@ -9,6 +9,7 @@ manga-editor-desu/
 │   ├── fabric/         fabric.js Canvas管理（fabric-management.js）
 │   ├── layer/          レイヤー管理（layer-management.js, blend, floating-window）
 │   ├── ui/             UI部品（toast, overlay, control, event-delegator, prompt-manager）
+│   │   └── control/object-control-sync.js  選択オブジェクト値の各パネルへの反映
 │   ├── sidebar/        サイドバーツール
 │   │   ├── pen/        ブラシ（crayon, ink, marker, spray, drip, stroke）
 │   │   ├── text/       テキスト（vertical-text, custom effects 10種）

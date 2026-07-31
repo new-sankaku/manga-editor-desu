@@ -402,3 +402,62 @@ break;
 function clearActiveT2Button() {
 // $(MODE_T2_SHADOW + 'Button').classList.remove('active-button');
 }
+
+const t2SetCurrentMap={
+aurora:function(obj){t2_aurora_setCurrent(obj);},
+broken:function(obj){t2_broken_setCurrent(obj);},
+cloud:function(obj){t2_cloud_setCurrent(obj);},
+layered:function(obj){t2_layered_setCurrent(obj);},
+mesh:function(obj){t2_mesh_setCurrent(obj);},
+scratch:function(obj){t2_scratch_setCurrent(obj);},
+shadow:function(obj){t2_shadow_setCurrent(obj);},
+thrill:function(obj){t2_thrill_setCurrent(obj);},
+water:function(obj){t2_water_setCurrent(obj);},
+wild:function(obj){t2_wild_setCurrent(obj);},
+zebra:function(obj){t2_zebra_setCurrent(obj);}
+};
+
+// キャンバス上の画像テキストを選び直したとき、サイドバーをその種類・値に戻し、
+// 以降の編集がそのオブジェクトに向くようにする。
+// これをしないと直前に作った1つしか編集できない
+function syncImageTextControls(activeObject){
+if(!activeObject||!activeObject.imageTextType){
+return;
+}
+var type=activeObject.imageTextType;
+if(!t2SetCurrentMap[type]){
+textLogger.error("unknown imageTextType: "+type);
+return;
+}
+if(activeObject.imageTextParams){
+Object.keys(activeObject.imageTextParams).forEach(function(key){
+sidebarValueMap.set(key,activeObject.imageTextParams[key]);
+});
+}
+if(nowText2!==type){
+switchText2Ui(type);
+addT2EventListener();
+nowText2=type;
+}else{
+restoreT2SettingValues(activeObject.imageTextParams);
+}
+t2SetCurrentMap[type](activeObject);
+}
+
+function restoreT2SettingValues(params){
+if(!params){
+return;
+}
+Object.keys(params).forEach(function(key){
+var element=$(key);
+if(!element){
+return;
+}
+// jscolorのピッカーはvalue代入では見た目が変わらない
+if(element.jscolor){
+element.jscolor.fromString(params[key]);
+}else{
+element.value=params[key];
+}
+});
+}

@@ -148,21 +148,15 @@ const svgString=new XMLSerializer().serializeToString(t2_shadow_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2ShadowStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2ShadowStr=t2PlaceImageTextObject(img,'shadow',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_shadow_updateAll(){
-const position=nowT2ShadowStr?
-{left:nowT2ShadowStr.left,top:nowT2ShadowStr.top}:{left:50,top:100};
-if(nowT2ShadowStr){
-canvas.remove(nowT2ShadowStr).renderAll();
+const position=t2BeginReplace(nowT2ShadowStr);
 nowT2ShadowStr=null;
-}
 t2_shadow_deleteSvg();
 t2_shadow_createSvg(position.left,position.top);
 }
+function t2_shadow_setCurrent(obj){nowT2ShadowStr=obj;}

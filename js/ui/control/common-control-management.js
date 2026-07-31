@@ -33,6 +33,7 @@ break;
 }
 activeObject.setCoords();
 canvas.requestRenderAll();
+syncObjectControls(activeObject);
 commitHistoryDebounced();
 };
 });

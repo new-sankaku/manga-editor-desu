@@ -493,6 +493,7 @@ strokeWidth: parseFloat(value),
 strokeUniform: true,
 });
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
 }
 function changePanelStrokeColor(value) {
@@ -500,6 +501,7 @@ var activeObject=canvas.getActiveObject();
 if (isPanel(activeObject)) {
 activeObject.set("stroke",value);
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
 }
 function changePanelOpacity(value) {
@@ -508,6 +510,7 @@ if (isPanel(activeObject)) {
 const opacity=value/100;
 activeObject.set("opacity",opacity);
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
 }
 function changePanelFillColor(value) {
@@ -515,7 +518,14 @@ var activeObject=canvas.getActiveObject();
 if (isPanel(activeObject)) {
 activeObject.set("fill",value);
 canvas.requestRenderAll();
+afterPanelValueChange(activeObject);
 }
+}
+
+// 変更した値を他のパネル（共通コントロール等）にも反映し、履歴に残す
+function afterPanelValueChange(activeObject){
+updateControls(activeObject);
+commitHistoryDebounced();
 }
 
 

@@ -169,21 +169,15 @@ const svgString=new XMLSerializer().serializeToString(t2_water_textSvg);
 const reader=new FileReader();
 reader.onload=({target})=>{
 fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2WaterStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
+nowT2WaterStr=t2PlaceImageTextObject(img,'water',left,top);
 },{crossOrigin:'anonymous'});
 };
 reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
 }
 function t2_water_updateAll(){
-const position=nowT2WaterStr?
-{left:nowT2WaterStr.left,top:nowT2WaterStr.top}:{left:50,top:100};
-if(nowT2WaterStr){
-canvas.remove(nowT2WaterStr).renderAll();
+const position=t2BeginReplace(nowT2WaterStr);
 nowT2WaterStr=null;
-}
 t2_water_deleteSvg();
 t2_water_createSvg(position.left,position.top);
 }
+function t2_water_setCurrent(obj){nowT2WaterStr=obj;}
