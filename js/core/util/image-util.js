@@ -87,8 +87,8 @@ var scaleX=layer.scaleX;
 var scaleY=layer.scaleY;
 var left=layer.left;
 var top=layer.top;
-var pixelRatio=window.devicePixelRatio||1;
-var enhancedScaleFactor=scaleFactor*2*pixelRatio;
+// devicePixelRatioを掛けると同じプロジェクトでも実行環境で送信画像の解像度が変わるため使わない
+var enhancedScaleFactor=scaleFactor*2;
 var offscreenCanvas=HtmlCanvasUtil.createOffscreenCanvas(
 Math.ceil(width*scaleX*enhancedScaleFactor),
 Math.ceil(height*scaleY*enhancedScaleFactor)

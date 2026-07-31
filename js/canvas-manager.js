@@ -70,7 +70,7 @@ top: obj.clipPath.initial.top*scaleY,
 });
 clipPath.setCoords();
 }
-saveInitialState(obj);
+// initialは再フィットの基準点。ここで更新すると基準が毎回ずれて誤差が蓄積するため更新しない
 obj.setCoords();
 });
 });
