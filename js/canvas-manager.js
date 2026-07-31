@@ -43,6 +43,8 @@ if(!newWidth||!newHeight||isNaN(newWidth)||isNaN(newHeight)){
 return;
 }
 canvas.setDimensions({width: newWidth,height: newHeight});
+// キャンバスの再フィットは表示上の追従であり編集操作ではないため履歴に残さない
+withoutHistory(function(){
 canvas.getObjects().forEach((obj)=>{
 
 var scaleX=newWidth/obj.initial.canvasWidth;
@@ -70,6 +72,7 @@ clipPath.setCoords();
 }
 saveInitialState(obj);
 obj.setCoords();
+});
 });
 canvas.renderAll();
 }
