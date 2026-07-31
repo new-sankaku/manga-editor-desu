@@ -83,6 +83,7 @@ const fileBuffer=await file.arrayBuffer();
 const fileName=file.name.toLowerCase();
 const isZip=fileName.endsWith('.zip');
 const isLz4=fileName.endsWith('.lz4');
+var firstLoadedGuid=null;
 
 if (isZip) {
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step2',substep: 'UnZip',progress: 20});
@@ -101,11 +102,11 @@ hasNestedZip=true;
 
 if (hasNestedZip) {
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step4',substep: 'UnZip:',progress: 40});
-await processZip(zip);
+firstLoadedGuid=await processZip(zip);
 document.body.removeChild(fileInput);
 } else {
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step4',substep: 'UnZip:',progress: 40});
-await multiLoadZip(zip);
+firstLoadedGuid=await multiLoadZip(zip);
 }
 } else if (isLz4) {
 //fileList is {name, data}
@@ -113,13 +114,22 @@ OP_updateLoadingState(loading,{icon: 'process',step: 'Step2',substep: 'UnLz4',pr
 let bufferFileLz4List=await lz4Compressor.unLz4FilesByBuffer(fileBuffer);
 
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step3',substep: 'UnLz4',progress: 25});
-await multiLoadLz4(bufferFileLz4List);
+firstLoadedGuid=await multiLoadLz4(bufferFileLz4List);
 
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step4',substep: 'UnLz4',progress: 85});
 } else {
 let title=getText("unsupportedProjectFileFormat");
 let message=getText("unsupportedProjectFileFormatMessage");
 createToastError(title,message,4000);
+}
+
+if (firstLoadedGuid) {
+OP_updateLoadingState(loading,{icon: 'process',step: 'Step5',substep: 'Open Page 1',progress: 90});
+if(stateStack.length>=btmSaveStateThreshold){
+await btmSaveProjectFile(null,false);
+}
+await chengeCanvasByGuid(firstLoadedGuid);
+btmUpdateHandleText();
 }
 }
 } catch (error) {

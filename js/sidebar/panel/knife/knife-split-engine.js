@@ -56,6 +56,7 @@ area1AspectRatio>=KNIFE_CONSTANTS.ASPECT_RATIO.MAX) {
 canvas.add(setNotSave(panel));
 canvas.remove(setNotSave(polygon1));
 canvas.remove(setNotSave(polygon2));
+setSave(panel);
 return false;
 }
 if (area2AspectRatio<=KNIFE_CONSTANTS.ASPECT_RATIO.MIN||
@@ -63,6 +64,7 @@ area2AspectRatio>=KNIFE_CONSTANTS.ASPECT_RATIO.MAX) {
 canvas.add(setNotSave(panel));
 canvas.remove(setNotSave(polygon1));
 canvas.remove(setNotSave(polygon2));
+setSave(panel);
 return false;
 }
 return true;
@@ -306,6 +308,8 @@ putImageInFrame(img,imgCenterX,imgCenterY,false,true,true,largerPolygon);
 });
 }
 
+setSave(polygon1);
+setSave(polygon2);
 saveStateByManual();
 
 currentKnifeObject=null;

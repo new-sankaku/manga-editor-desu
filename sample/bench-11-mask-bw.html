@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 11 — マスク白黒変換</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.note{font-size:12px;color:#888;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>Bench 11 — マスク白黒変換</h1>
+<p class="subtitle">アルファチャンネルを元に白黒2値化する3つの実装の速度比較</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">キャンバスサイズ: 2048×2048 &nbsp;|&nbsp; 繰り返し: 10回</p>
+  <p class="note">※ 中央1024×1024に円形の描画を施したマスクデータを使用</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>現行比 改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const W = 2048, H = 2048;
+const REPEAT = 10;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テスト用マスクデータ生成（中央に円を描く）
+function createMaskData() {
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'rgba(0,0,0,0)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,0,0,255)';
+  // 中央に大きな円
+  ctx.beginPath();
+  ctx.arc(W/2, H/2, W/3, 0, Math.PI*2);
+  ctx.fill();
+  // いくつか小さな円も追加
+  for (let i = 0; i < 20; i++) {
+    ctx.beginPath();
+    ctx.arc(Math.random()*W, Math.random()*H, 50+Math.random()*100, 0, Math.PI*2);
+    ctx.fill();
+  }
+  return ctx.getImageData(0, 0, W, H);
+}
+
+// 現行実装
+function implLegacy(maskData) {
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = W; outCanvas.height = H;
+  const outCtx = outCanvas.getContext('2d');
+  const outData = outCtx.createImageData(W, H);
+  for (var i = 0; i < maskData.data.length; i += 4) {
+    if (maskData.data[i+3] > 0) {
+      outData.data[i]=255; outData.data[i+1]=255; outData.data[i+2]=255; outData.data[i+3]=255;
+    } else {
+      outData.data[i]=0; outData.data[i+1]=0; outData.data[i+2]=0; outData.data[i+3]=255;
+    }
+  }
+  outCtx.putImageData(outData, 0, 0);
+}
+
+// 改善案A: Uint32Arrayビューで一括書き込み
+function implUint32(maskData) {
+  const outCanvas = document.createElement('canvas');
+  outCanvas.width = W; outCanvas.height = H;
+  const outCtx = outCanvas.getContext('2d');
+  const outData = outCtx.createImageData(W, H);
+
+  const src32 = new Uint32Array(maskData.data.buffer);
+  const dst32 = new Uint32Array(outData.data.buffer);
+
+  // リトルエンディアン: ABGR順 → 0xFF000000=黒不透明, 0xFFFFFFFF=白不透明
+  const WHITE = 0xFFFFFFFF;
+  const BLACK = 0xFF000000;
+
+  for (let i = 0; i < src32.length; i++) {
+    // アルファは最上位バイト（リトルエンディアンでは src32[i] >>> 24）
+    dst32[i] = (src32[i] >>> 24) > 0 ? WHITE : BLACK;
+  }
+  outCtx.putImageData(outData, 0, 0);
+}
+
+// 改善案B: OffscreenCanvas + globalCompositeOperation
+function implOffscreen(maskData) {
+  if (typeof OffscreenCanvas === 'undefined') {
+    throw new Error('OffscreenCanvas未対応');
+  }
+  // 白背景キャンバスを作成
+  const bgCanvas = new OffscreenCanvas(W, H);
+  const bgCtx = bgCanvas.getContext('2d');
+  bgCtx.fillStyle = '#000000';
+  bgCtx.fillRect(0, 0, W, H);
+
+  // マスクをアルファ付きで描画
+  const maskCanvas = new OffscreenCanvas(W, H);
+  const maskCtx = maskCanvas.getContext('2d');
+  maskCtx.putImageData(maskData, 0, 0);
+
+  // destination-inで白領域抽出
+  const whiteCanvas = new OffscreenCanvas(W, H);
+  const whiteCtx = whiteCanvas.getContext('2d');
+  whiteCtx.fillStyle = '#ffffff';
+  whiteCtx.fillRect(0, 0, W, H);
+  whiteCtx.globalCompositeOperation = 'destination-in';
+  whiteCtx.drawImage(maskCanvas, 0, 0);
+
+  // 黒背景の上に白マスクを合成
+  bgCtx.drawImage(whiteCanvas, 0, 0);
+}
+
+async function runBench(name, fn, maskData) {
+  const times = [];
+  for (let r = 0; r < REPEAT; r++) {
+    const t0 = performance.now();
+    await fn(maskData);
+    times.push(performance.now() - t0);
+    setProgress(`${name}: ${r+1}/${REPEAT}回完了`, 0);
+    await new Promise(res => setTimeout(res, 0));
+  }
+  return times;
+}
+
+function stats(times) {
+  const mn = Math.min(...times);
+  const mx = Math.max(...times);
+  const avg = times.reduce((a,b)=>a+b,0)/times.length;
+  return { min: mn, max: mx, avg };
+}
+
+function renderRow(name, s, baseAvg, isBest) {
+  const tr = document.createElement('tr');
+  const improvement = baseAvg != null
+    ? ((baseAvg - s.avg) / baseAvg * 100).toFixed(1)
+    : null;
+  const improvStr = improvement != null
+    ? `<span class="speedup">${improvement > 0 ? '+' : ''}${improvement}%</span>`
+    : '<span style="color:#888">—（基準）</span>';
+  const badge = isBest ? '<span class="tag-best">BEST</span>' : (improvement < 0 ? '<span class="tag-worst">SLOW</span>' : '');
+  tr.innerHTML = `
+    <td>${name}${badge}</td>
+    <td>${s.min.toFixed(2)}</td>
+    <td>${s.max.toFixed(2)}</td>
+    <td>${s.avg.toFixed(2)}</td>
+    <td>${improvStr}</td>
+    <td style="color:#4af">完了</td>`;
+  document.getElementById('resultBody').appendChild(tr);
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  this.disabled = true;
+  document.getElementById('resultBody').innerHTML = '';
+
+  setProgress('マスクデータ生成中...', 5);
+  await new Promise(res => setTimeout(res, 0));
+  const maskData = createMaskData();
+
+  setProgress('現行実装 実行中...', 10);
+  const timesLegacy = await runBench('現行実装', implLegacy, maskData);
+  setProgress('改善案A (Uint32Array) 実行中...', 40);
+  const timesUint32 = await runBench('改善案A', implUint32, maskData);
+
+  let timesOff = null;
+  let offErr = null;
+  try {
+    setProgress('改善案B (OffscreenCanvas) 実行中...', 70);
+    timesOff = await runBench('改善案B', implOffscreen, maskData);
+  } catch(e) {
+    offErr = e.message;
+  }
+
+  setProgress('完了', 100);
+
+  const sLeg = stats(timesLegacy);
+  const sU32 = stats(timesUint32);
+  const sOff = timesOff ? stats(timesOff) : null;
+
+  const avgs = [sLeg.avg, sU32.avg];
+  if (sOff) avgs.push(sOff.avg);
+  const bestAvg = Math.min(...avgs);
+
+  renderRow('現行実装（ループ）', sLeg, null, sLeg.avg === bestAvg);
+  renderRow('改善案A: Uint32Array一括書き込み', sU32, sLeg.avg, sU32.avg === bestAvg);
+  if (sOff) {
+    renderRow('改善案B: OffscreenCanvas合成', sOff, sLeg.avg, sOff.avg === bestAvg);
+  } else {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>改善案B: OffscreenCanvas合成</td><td colspan="4" style="color:#f84">エラー: ${offErr}</td>`;
+    document.getElementById('resultBody').appendChild(tr);
+  }
+
+  this.disabled = false;
+});
+</script>
+</body>
+</html>

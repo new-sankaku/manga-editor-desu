@@ -201,6 +201,40 @@ btmUpdateHandleText();
 }
 }
 
+let btmThumbnailRefreshTimer=null;
+
+function btmScheduleThumbnailRefresh() {
+if(btmThumbnailRefreshTimer)clearTimeout(btmThumbnailRefreshTimer);
+btmThumbnailRefreshTimer=setTimeout(btmRefreshThumbnail,500);
+}
+
+function btmCancelThumbnailRefresh() {
+if(btmThumbnailRefreshTimer){
+clearTimeout(btmThumbnailRefreshTimer);
+btmThumbnailRefreshTimer=null;
+}
+}
+
+function btmRefreshThumbnail() {
+btmThumbnailRefreshTimer=null;
+const guid=getCanvasGUID();
+if(!guid)return;
+const image=document.querySelector(`.btm-image[data-index="${guid}"]`);
+if(!image)return;
+removeGrid();
+const multiplier=Math.min(1,400/canvas.height);
+const dataUrl=canvas.toDataURL({format:"jpeg",multiplier:multiplier});
+if(isGridVisible){
+drawGrid();
+isGridVisible=true;
+}
+image.src=dataUrl;
+const projectData=btmProjectsMap.get(guid);
+if(projectData){
+projectData.imageLink={href:dataUrl};
+}
+}
+
 function updateAllPageNumbers() {
 const pageNumbers=document.querySelectorAll(".btm-page-number");
 pageNumbers.forEach((numberElement,index)=>{
@@ -383,6 +417,7 @@ window.addEventListener("resize",btmUpdateScrollButtons);
 });
 
 async function chengeCanvasByGuid(guid) {
+btmCancelThumbnailRefresh();
 const projectData=btmProjectsMap.get(guid);
 if(!projectData||!projectData.blob){
 uiLogger.error("[chengeCanvasByGuid] project data not found. guid="+guid);

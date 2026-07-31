@@ -94,6 +94,7 @@ saveInitialState(img);
 canvas.renderAll();
 
 updateLayerPanel();
+setSave(img);
 saveStateByManual();
 return img;
 }
@@ -200,6 +201,7 @@ saveInitialState(obj);
 
 canvas.renderAll();
 updateLayerPanel();
+setSave(obj);
 saveStateByManual();
 return obj;
 }

@@ -35,6 +35,8 @@
 | [012](012_image_export_options.md) | 画像エクスポート拡充 | JPEG/WebP対応、サイズ指定、一括エクスポート |
 | [018](018_accessibility.md) | アクセシビリティ対応 | aria属性、フォーカス管理、キーボード操作 |
 | [019](019_comfyui_workflow_v3.md) | ComfyUIワークフロー改善 | バリデーション強化、テンプレート |
+| [032](032_jsts_polygon_optimization.md) | JSTSポリゴン計算の高速化 | JSTS→BBox+Sutherland-Hodgman置換 (27.8x改善) |
+| [033](033_mosaic_brush_optimization.md) | モザイクブラシの高速化 | OffscreenCanvas縮小拡大方式 (5.3x改善) |
 
 ## 新機能 - 機能的売りポイント
 
@@ -94,6 +96,8 @@
 8. **008** - SVG遅延読み込み
 9. **010** - エラーハンドリング統一
 10. **012** - 画像エクスポート拡充
+11. **032** - JSTSポリゴン計算の高速化（6秒→0.2秒）
+12. **033** - モザイクブラシの高速化（2秒→0.4秒）
 
 ### 中期（リファクタリング）
 11. **011** - Fabric.jsイベント整理

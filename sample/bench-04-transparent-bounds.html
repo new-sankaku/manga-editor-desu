@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 04 — 非透明領域境界検出</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.result-info{font-size:12px;color:#888;margin-top:10px}
+.detail{font-size:12px;color:#888;margin-top:8px;line-height:1.6}
+code{background:#0d1526;padding:1px 5px;border-radius:3px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>Bench 04 — 非透明領域境界検出</h1>
+<p class="subtitle">全走査 vs 外周スキャン vs Uint32Array α一括チェック — 2250×2550（中央500×500描画）</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">キャンバスサイズ: 2250×2550 px &nbsp;|&nbsp; 描画領域: 中央 500×500 px &nbsp;|&nbsp; 繰り返し: 5回</p>
+  <div class="detail">
+    <b>現行:</b> 全ピクセルをY→X順に走査し、α>0 ならmin/maxを更新<br>
+    <b>改善案A:</b> 4辺から内側にスキャン（上辺→下辺→左辺→右辺）して早期終了<br>
+    <b>改善案B:</b> Uint32Array でα値を一括チェック（メモリアクセスパターン改善）
+  </div>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+  <div class="result-info" id="resultInfo"></div>
+</div>
+
+<script>
+'use strict';
+
+const W = 2250, H = 2550;
+const REPEAT = 5;
+// 中央500x500の描画領域
+const DRAW_X = (W - 500) >> 1;
+const DRAW_Y = (H - 500) >> 1;
+const DRAW_W = 500, DRAW_H = 500;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テストデータ生成: 中央500x500だけα>0
+function createTestData() {
+  const buf = new ArrayBuffer(W * H * 4);
+  const data = new Uint8ClampedArray(buf);
+  for (let y = DRAW_Y; y < DRAW_Y + DRAW_H; y++) {
+    for (let x = DRAW_X; x < DRAW_X + DRAW_W; x++) {
+      const idx = (y * W + x) * 4;
+      data[idx] = 128;
+      data[idx + 1] = 64;
+      data[idx + 2] = 32;
+      data[idx + 3] = 255;
+    }
+  }
+  return data;
+}
+
+// 現行実装
+function runOriginal(data) {
+  const width = W, height = H;
+  let minX = width, maxX = -1, minY = height, maxY = -1;
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  return { minX, maxX, minY, maxY };
+}
+
+// 改善案A: 外周からスキャン（4辺から内側へ）
+function runOptimizedA(data) {
+  const width = W, height = H;
+  let minY = -1, maxY = -1, minX = -1, maxX = -1;
+
+  // 上辺から下へ
+  outer: for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { minY = y; break outer; }
+    }
+  }
+  if (minY < 0) return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+
+  // 下辺から上へ
+  outer2: for (let y = height - 1; y >= minY; y--) {
+    for (let x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { maxY = y; break outer2; }
+    }
+  }
+
+  // 左辺から右へ（minY..maxY の範囲のみ）
+  outer3: for (let x = 0; x < width; x++) {
+    for (let y = minY; y <= maxY; y++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { minX = x; break outer3; }
+    }
+  }
+
+  // 右辺から左へ
+  outer4: for (let x = width - 1; x >= minX; x--) {
+    for (let y = minY; y <= maxY; y++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { maxX = x; break outer4; }
+    }
+  }
+
+  return { minX, maxX, minY, maxY };
+}
+
+// 改善案B: Uint32Array でα一括チェック
+function runOptimizedB(data) {
+  const width = W, height = H;
+  const u32 = new Uint32Array(data.buffer, data.byteOffset, data.length >> 2);
+  // little endian: pixel = 0xAABBGGRR → α は上位バイト
+  // α > 0 は pixel >= 0x01000000
+  const ALPHA_MASK = 0xFF000000;
+
+  let minX = width, maxX = -1, minY = height, maxY = -1;
+  for (let y = 0; y < height; y++) {
+    const rowOff = y * width;
+    for (let x = 0; x < width; x++) {
+      if (u32[rowOff + x] & ALPHA_MASK) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  return { minX, maxX, minY, maxY };
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows, results) {
+  const minAvg = Math.min(...rows.map(r => r.avg));
+  const maxAvg = Math.max(...rows.map(r => r.avg));
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach((r, i) => {
+    const ratio = (r.avg / minAvg).toFixed(2);
+    const isBest = Math.abs(r.avg - minAvg) < 0.01;
+    const isWorst = Math.abs(r.avg - maxAvg) < 0.01 && rows.length > 1;
+    const res = results[i];
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.min.toFixed(1)}</td>
+      <td>${r.max.toFixed(1)}</td>
+      <td>${r.avg.toFixed(1)}</td>
+      <td class="speedup">${ratio}x</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // 結果の正確性確認
+  if (results.length > 0) {
+    const r0 = results[0];
+    const allMatch = results.every(r =>
+      r.minX === r0.minX && r.maxX === r0.maxX &&
+      r.minY === r0.minY && r.maxY === r0.maxY
+    );
+    document.getElementById('resultInfo').textContent =
+      `検出結果: minX=${r0.minX} maxX=${r0.maxX} minY=${r0.minY} maxY=${r0.maxY} — ` +
+      `期待値: minX=${DRAW_X} maxX=${DRAW_X + DRAW_W - 1} minY=${DRAW_Y} maxY=${DRAW_Y + DRAW_H - 1} — ` +
+      `全手法一致: ${allMatch ? 'OK' : 'NG'}`;
+  }
+}
+
+async function run() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    const baseData = createTestData();
+    const rows = [];
+    const lastResults = [];
+
+    // 現行実装
+    {
+      const times = [];
+      let lastResult;
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`現行実装 計測中 (${i + 1}/${REPEAT})...`, 5 + i * 15);
+        await new Promise(r => setTimeout(r, 10));
+        const data = new Uint8ClampedArray(baseData);
+        const t0 = performance.now();
+        lastResult = runOriginal(data);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '現行: 全走査 (Y→X ネストループ)', ...stats(times) });
+      lastResults.push(lastResult);
+    }
+
+    // 改善案A
+    {
+      const times = [];
+      let lastResult;
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案A (外周スキャン) 計測中 (${i + 1}/${REPEAT})...`, 30 + i * 12);
+        await new Promise(r => setTimeout(r, 10));
+        const data = new Uint8ClampedArray(baseData);
+        const t0 = performance.now();
+        lastResult = runOptimizedA(data);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '改善案A: 外周4辺から内側スキャン', ...stats(times) });
+      lastResults.push(lastResult);
+    }
+
+    // 改善案B
+    {
+      const times = [];
+      let lastResult;
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案B (Uint32Array α一括) 計測中 (${i + 1}/${REPEAT})...`, 60 + i * 10);
+        await new Promise(r => setTimeout(r, 10));
+        const data = new Uint8ClampedArray(baseData);
+        const t0 = performance.now();
+        lastResult = runOptimizedB(data);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '改善案B: Uint32Array α一括チェック', ...stats(times) });
+      lastResults.push(lastResult);
+    }
+
+    renderTable(rows, lastResults);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnRun').addEventListener('click', run);
+window.addEventListener('load', () => setTimeout(run, 300));
+</script>
+</body>
+</html>

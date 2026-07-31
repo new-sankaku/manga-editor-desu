@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Halftone Line Protection Prototype</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:16px}
+h1{font-size:18px;margin-bottom:12px}
+
+#drop-zone{
+  border:2px dashed #555;border-radius:8px;padding:48px;text-align:center;
+  cursor:pointer;margin-bottom:16px;transition:all .2s;
+}
+#drop-zone.dragover{border-color:#4af;background:rgba(68,170,255,.08)}
+#drop-zone p{color:#888;font-size:14px}
+#drop-zone.hidden{display:none}
+
+.pipeline{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.stage{
+  background:#16213e;padding:10px 14px;border-radius:6px;min-width:200px;
+  border:1px solid #1a2a50;transition:border-color .15s;
+}
+.stage.disabled{opacity:0.45}
+.stage.disabled .ctrl-row{pointer-events:none}
+.stage-header input[type=checkbox]{pointer-events:auto}
+.stage-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.stage-header h3{font-size:13px;color:#4af;flex:1}
+.stage-header input[type=checkbox]{width:15px;height:15px;cursor:pointer}
+.ctrl-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.ctrl-row label{font-size:12px;min-width:100px}
+.ctrl-row input[type=range]{flex:1}
+.ctrl-row .val{font-size:11px;min-width:40px;text-align:right;color:#aaa}
+
+.tabs{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap}
+.tab{
+  padding:6px 12px;border-radius:6px 6px 0 0;cursor:pointer;
+  background:#16213e;color:#888;font-size:12px;font-weight:bold;
+  border:1px solid transparent;border-bottom:none;transition:all .15s;
+}
+.tab:hover{color:#ccc}
+.tab.active{background:#0f3460;color:#4af;border-color:#4af}
+.tab.stage-off{color:#555;text-decoration:line-through}
+
+.view-area{
+  background:#0f3460;border-radius:0 6px 6px 6px;padding:12px;
+  position:relative;overflow:hidden;
+}
+.canvas-container{
+  overflow:auto;max-height:80vh;border:1px solid #333;
+  background:repeating-conic-gradient(#404040 0% 25%, #333 0% 50%) 50%/16px 16px;
+  cursor:crosshair;position:relative;
+}
+.canvas-container canvas{display:block;image-rendering:pixelated}
+
+.zoom-controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.zoom-controls button{
+  background:#16213e;color:#e0e0e0;border:1px solid #444;
+  padding:4px 12px;border-radius:4px;cursor:pointer;font-size:13px;
+}
+.zoom-controls button:hover{background:#1a2a50}
+.zoom-controls button.active{background:#4af;color:#000}
+.zoom-controls span{font-size:12px;color:#888}
+
+.loupe{
+  position:fixed;width:200px;height:200px;border:2px solid #4af;
+  border-radius:4px;pointer-events:none;display:none;z-index:100;
+  overflow:hidden;background:#000;
+  box-shadow:0 4px 20px rgba(0,0,0,.6);
+}
+.loupe canvas{position:absolute;image-rendering:pixelated}
+.loupe-label{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(0,0,0,.7);color:#4af;font-size:10px;
+  text-align:center;padding:2px;
+}
+
+#status{margin:8px 0;font-size:12px;color:#888}
+</style>
+</head>
+<body>
+<h1>Halftone Line Protection Prototype</h1>
+
+<div id="drop-zone">
+  <p>画像をドロップ または クリックして選択</p>
+  <input type="file" id="file-input" accept="image/*" style="display:none">
+</div>
+
+<!-- ── Pipeline Controls ── -->
+<div class="pipeline">
+
+  <div class="stage" id="stage-ink">
+    <div class="stage-header">
+      <h3>① Ink</h3>
+      <input type="checkbox" id="en-ink" checked title="ON/OFF">
+    </div>
+    <div class="ctrl-row">
+      <label>Strength</label>
+      <input type="range" id="inkStrength" min="0" max="1" step="0.01" value="1">
+      <span class="val" id="inkStrength-val">1</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-thresh">
+    <div class="stage-header">
+      <h3>② Threshold</h3>
+    </div>
+    <div class="ctrl-row">
+      <label>Threshold</label>
+      <input type="range" id="threshold" min="0" max="1" step="0.01" value="0.10">
+      <span class="val" id="threshold-val">0.10</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-vector">
+    <div class="stage-header">
+      <h3>③ Vectorize</h3>
+      <input type="checkbox" id="en-vector" checked title="ON/OFF">
+    </div>
+    <div class="ctrl-row">
+      <label>Turdsize</label>
+      <input type="range" id="turdsize" min="0" max="20" step="1" value="0">
+      <span class="val" id="turdsize-val">0</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Alphamax</label>
+      <input type="range" id="alphamax" min="0" max="4" step="0.1" value="0">
+      <span class="val" id="alphamax-val">0</span>
+    </div>
+    <div class="ctrl-row">
+      <label>Opt tolerance</label>
+      <input type="range" id="opttolerance" min="0" max="1" step="0.01" value="0">
+      <span class="val" id="opttolerance-val">0</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-sdf">
+    <div class="stage-header">
+      <h3>④ SDF Smooth</h3>
+      <input type="checkbox" id="en-sdf" checked title="ON/OFF">
+    </div>
+    <div class="ctrl-row">
+      <label>Sigma (σ)</label>
+      <input type="range" id="sdfSigma" min="0.1" max="5" step="0.1" value="1.0">
+      <span class="val" id="sdfSigma-val">1.0</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-dilate">
+    <div class="stage-header">
+      <h3>⑤ Dilate</h3>
+      <input type="checkbox" id="en-dilate" title="ON/OFF">
+    </div>
+    <div class="ctrl-row">
+      <label>Radius (px)</label>
+      <input type="range" id="dilation" min="1" max="15" step="1" value="1">
+      <span class="val" id="dilation-val">1</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-blur">
+    <div class="stage-header">
+      <h3>⑥ Blur</h3>
+      <input type="checkbox" id="en-blur" checked title="ON/OFF">
+    </div>
+    <div class="ctrl-row">
+      <label>Sigma (σ)</label>
+      <input type="range" id="blurSigma" min="0.1" max="10" step="0.1" value="0.3">
+      <span class="val" id="blurSigma-val">0.3</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage-halftone">
+    <div class="stage-header">
+      <h3>⑦ Halftone (4 Presets)</h3>
+    </div>
+    <div style="font-size:11px;color:#888;line-height:1.6">
+      <div><b style="color:#4af">Light</b>: B0.35 C0.35 Ink0.25 Dot1.5 Ang0</div>
+      <div><b style="color:#4af">Dark</b>: B0.22 C0.22 Ink0.25 Dot1.5 Ang0</div>
+      <div><b style="color:#4af">Rough</b>: B0.41 C0.41 Ink0.42 Dot1.5 Ang0.1</div>
+      <div><b style="color:#4af">Simple</b>: B0.15 C0.15 NoInk Dot1.5 Ang0</div>
+    </div>
+  </div>
+
+</div>
+
+<div id="status"></div>
+
+<!-- ── Tabs: one per pipeline stage ── -->
+<div class="tabs">
+  <div class="tab active" data-view="original">Original</div>
+  <div class="tab" data-view="ink">① Ink</div>
+  <div class="tab" data-view="thresh">② Thresh</div>
+  <div class="tab" data-view="vector">③ Vector</div>
+  <div class="tab" data-view="sdf">④ SDF</div>
+  <div class="tab" data-view="dilate">⑤ Dilate</div>
+  <div class="tab" data-view="blur">⑥ Blur</div>
+  <div class="tab" data-view="ht-light">⑦ Light</div>
+  <div class="tab" data-view="ht-dark">⑦ Dark</div>
+  <div class="tab" data-view="ht-rough">⑦ Rough</div>
+  <div class="tab" data-view="ht-simple">⑦ Simple</div>
+  <div class="tab" data-view="final-light">⑧ Light</div>
+  <div class="tab" data-view="final-dark">⑧ Dark</div>
+  <div class="tab" data-view="final-rough">⑧ Rough</div>
+  <div class="tab" data-view="final-simple">⑧ Simple</div>
+</div>
+<div class="view-area">
+  <div class="zoom-controls">
+    <button data-zoom="fit" class="active">Fit</button>
+    <button data-zoom="1">100%</button>
+    <button data-zoom="2">200%</button>
+    <button data-zoom="4">400%</button>
+    <span id="zoom-info"></span>
+  </div>
+  <div class="canvas-container" id="canvas-container">
+    <canvas id="c-original"></canvas>
+    <canvas id="c-ink" style="display:none"></canvas>
+    <canvas id="c-thresh" style="display:none"></canvas>
+    <canvas id="c-vector" style="display:none"></canvas>
+    <canvas id="c-sdf" style="display:none"></canvas>
+    <canvas id="c-dilate" style="display:none"></canvas>
+    <canvas id="c-blur" style="display:none"></canvas>
+    <canvas id="c-ht-light" style="display:none"></canvas>
+    <canvas id="c-ht-dark" style="display:none"></canvas>
+    <canvas id="c-ht-rough" style="display:none"></canvas>
+    <canvas id="c-ht-simple" style="display:none"></canvas>
+    <canvas id="c-final-light" style="display:none"></canvas>
+    <canvas id="c-final-dark" style="display:none"></canvas>
+    <canvas id="c-final-rough" style="display:none"></canvas>
+    <canvas id="c-final-simple" style="display:none"></canvas>
+  </div>
+</div>
+
+<div class="loupe" id="loupe">
+  <canvas id="loupe-canvas" width="200" height="200"></canvas>
+  <div class="loupe-label">4x Loupe</div>
+</div>
+
+<script src="lib/potrace.js"></script>
+<script>
+'use strict';
+
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+const statusEl = document.getElementById('status');
+
+const VIEWS = ['original','ink','thresh','vector','sdf','dilate','blur',
+  'ht-light','ht-dark','ht-rough','ht-simple',
+  'final-light','final-dark','final-rough','final-simple'];
+
+const PRESETS = {
+  light:  { brightness: 0.35, contrast: 0.35, dotSize: 1.5, dotAngle: 0,   inkStrength: 0.25 },
+  dark:   { brightness: 0.22, contrast: 0.22, dotSize: 1.5, dotAngle: 0,   inkStrength: 0.25 },
+  rough:  { brightness: 0.41, contrast: 0.41, dotSize: 1.5, dotAngle: 0.1, inkStrength: 0.42 },
+  simple: { brightness: 0.15, contrast: 0.15, dotSize: 1.5, dotAngle: 0,   inkStrength: 0 },
+};
+const canvases = {};
+VIEWS.forEach(v => { canvases[v] = document.getElementById('c-' + v); });
+
+let sourceImage = null;
+let W = 0, H = 0;
+const MAX_DIM = 1024;
+
+// ── Drop / File handling ──
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) loadImage(f);
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.width, h = img.height;
+      if (w > MAX_DIM || h > MAX_DIM) {
+        const s = MAX_DIM / Math.max(w, h);
+        w = Math.round(w * s);
+        h = Math.round(h * s);
+      }
+      W = w; H = h;
+      for (const c of Object.values(canvases)) { c.width = w; c.height = h; }
+      const ctx = canvases.original.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      sourceImage = ctx.getImageData(0, 0, w, h);
+      dropZone.classList.add('hidden');
+      applyZoom();
+      process();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Parameters ──
+
+function getParams() {
+  return {
+    enInk:        document.getElementById('en-ink').checked,
+    inkStrength:  +document.getElementById('inkStrength').value,
+    threshold:    +document.getElementById('threshold').value,
+    enVector:     document.getElementById('en-vector').checked,
+    turdsize:     +document.getElementById('turdsize').value,
+    alphamax:     +document.getElementById('alphamax').value,
+    opttolerance: +document.getElementById('opttolerance').value,
+    enSdf:        document.getElementById('en-sdf').checked,
+    sdfSigma:     +document.getElementById('sdfSigma').value,
+    enDilate:     document.getElementById('en-dilate').checked,
+    dilation:     +document.getElementById('dilation').value,
+    enBlur:       document.getElementById('en-blur').checked,
+    blurSigma:    +document.getElementById('blurSigma').value,
+  };
+}
+
+// Slider value display + debounce
+document.querySelectorAll('input[type=range]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    document.getElementById(inp.id + '-val').textContent = inp.value;
+    if (sourceImage) debounceProcess();
+  });
+});
+
+// Checkbox enable/disable → toggle stage UI + reprocess
+document.querySelectorAll('.stage-header input[type=checkbox]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    const stage = cb.closest('.stage');
+    stage.classList.toggle('disabled', !cb.checked);
+    updateTabStates();
+    if (sourceImage) debounceProcess();
+  });
+  // Init disabled state
+  const stage = cb.closest('.stage');
+  stage.classList.toggle('disabled', !cb.checked);
+});
+
+function updateTabStates() {
+  const map = {
+    ink:    document.getElementById('en-ink').checked,
+    vector: document.getElementById('en-vector').checked,
+    sdf:    document.getElementById('en-sdf').checked,
+    dilate: document.getElementById('en-dilate').checked,
+    blur:   document.getElementById('en-blur').checked,
+  };
+  document.querySelectorAll('.tab[data-view]').forEach(tab => {
+    const v = tab.dataset.view;
+    if (v in map) {
+      tab.classList.toggle('stage-off', !map[v]);
+    }
+  });
+}
+updateTabStates();
+
+let timer = null;
+function debounceProcess() {
+  clearTimeout(timer);
+  timer = setTimeout(process, 200);
+}
+
+// ── Utility ──
+
+function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+function lum(r, g, b) { return 0.299 * r + 0.587 * g + 0.114 * b; }
+
+// ── Step ①: Ink Filter ──
+
+function applyInk(src, strength) {
+  if (strength <= 0) return new ImageData(new Uint8ClampedArray(src.data), W, H);
+  const d = src.data;
+  const out = new Uint8ClampedArray(d.length);
+  const s = Math.pow(strength, 5) * 100000;
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const idx = (y * W + x) * 4;
+      let bR = 0, bG = 0, bB = 0, bN = 0;
+      let sR = 0, sG = 0, sB = 0, sN = 0;
+
+      for (let dy = -2; dy <= 2; dy++) {
+        const ny = y + dy;
+        if (ny < 0 || ny >= H) continue;
+        for (let dx = -2; dx <= 2; dx++) {
+          const nx = x + dx;
+          if (nx < 0 || nx >= W) continue;
+          const ni = (ny * W + nx) * 4;
+          const r = d[ni], g = d[ni + 1], b = d[ni + 2];
+          bR += r; bG += g; bB += b; bN++;
+          if (Math.abs(dx) + Math.abs(dy) < 2) {
+            sR += r; sG += g; sB += b; sN++;
+          }
+        }
+      }
+
+      const eR = Math.max(0, bR / bN - sR / sN) / 255;
+      const eG = Math.max(0, bG / bN - sG / sN) / 255;
+      const eB = Math.max(0, bB / bN - sB / sN) / 255;
+      const darkening = (eR * eR + eG * eG + eB * eB) * s;
+
+      out[idx]     = Math.max(0, d[idx]     - darkening);
+      out[idx + 1] = Math.max(0, d[idx + 1] - darkening);
+      out[idx + 2] = Math.max(0, d[idx + 2] - darkening);
+      out[idx + 3] = d[idx + 3];
+    }
+  }
+  return new ImageData(out, W, H);
+}
+
+// ── Step ②: Luminance + binary threshold ──
+
+function getLuminanceArray(imageData) {
+  const d = imageData.data;
+  const arr = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    const idx = i * 4;
+    arr[i] = lum(d[idx], d[idx + 1], d[idx + 2]) / 255;
+  }
+  return arr;
+}
+
+function generateMask(lumArray, threshold) {
+  const mask = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    mask[i] = lumArray[i] < threshold ? 1.0 : 0.0;
+  }
+  return mask;
+}
+
+// ── Step ③: Vectorize via Potrace ──
+
+function vectorizeMask(lumArray, threshold, turdsize, alphamax, opttolerance) {
+  const binary = new Uint8Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    binary[i] = lumArray[i] < threshold ? 1 : 0;
+  }
+  Potrace.setParameter({ turdsize, alphamax, opttolerance, optcurve: true });
+  Potrace.loadBitmapData(binary, W, H);
+  Potrace.processSync();
+
+  const pathD = Potrace.getPathD(1);
+  const path2d = new Path2D(pathD);
+  const cvs = document.createElement('canvas');
+  cvs.width = W; cvs.height = H;
+  const ctx = cvs.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#fff';
+  ctx.fill(path2d, 'evenodd');
+
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const mask = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) {
+    mask[i] = imgData.data[i * 4] / 255;
+  }
+  return mask;
+}
+
+// ── Step ④: SDF Smooth (Felzenszwalb EDT) ──
+
+function edt1d(f, n) {
+  const d = new Float32Array(n);
+  const v = new Int32Array(n);
+  const z = new Float32Array(n + 1);
+  let k = 0;
+  v[0] = 0;
+  z[0] = -Infinity;
+  z[1] = Infinity;
+
+  for (let q = 1; q < n; q++) {
+    let s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    while (s <= z[k]) {
+      k--;
+      s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+    }
+    k++;
+    v[k] = q;
+    z[k] = s;
+    z[k + 1] = Infinity;
+  }
+
+  k = 0;
+  for (let q = 0; q < n; q++) {
+    while (z[k + 1] < q) k++;
+    d[q] = (q - v[k]) * (q - v[k]) + f[v[k]];
+  }
+  return d;
+}
+
+function distanceTransform(binary, w, h, inside) {
+  const INF = 1e20;
+  const grid = new Float32Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    grid[i] = (binary[i] > 0.5) === inside ? 0 : INF;
+  }
+  const rowBuf = new Float32Array(Math.max(w, h));
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) rowBuf[x] = grid[y * w + x];
+    const d = edt1d(rowBuf, w);
+    for (let x = 0; x < w; x++) grid[y * w + x] = d[x];
+  }
+  const colBuf = new Float32Array(h);
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < h; y++) colBuf[y] = grid[y * w + x];
+    const d = edt1d(colBuf, h);
+    for (let y = 0; y < h; y++) grid[y * w + x] = d[y];
+  }
+  for (let i = 0; i < w * h; i++) grid[i] = Math.sqrt(grid[i]);
+  return grid;
+}
+
+function sdfSmooth(mask, sigma) {
+  const distOut = distanceTransform(mask, W, H, false);
+  const distIn  = distanceTransform(mask, W, H, true);
+  const sdf = new Float32Array(W * H);
+  // SDF: negative=inside(line), positive=outside
+  for (let i = 0; i < W * H; i++) sdf[i] = distIn[i] - distOut[i];
+
+  const blurred = gaussianBlur(sdf, sigma);
+
+  const out = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) out[i] = blurred[i] <= 0 ? 1.0 : 0.0;
+  return out;
+}
+
+// ── Step ⑤: Dilate (separable max filter) ──
+
+function dilateMask(mask, radius) {
+  const tmp = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) {
+    const row = y * W;
+    for (let x = 0; x < W; x++) {
+      let mx = 0;
+      const x0 = Math.max(0, x - radius);
+      const x1 = Math.min(W - 1, x + radius);
+      for (let i = x0; i <= x1; i++) mx = Math.max(mx, mask[row + i]);
+      tmp[row + x] = mx;
+    }
+  }
+  const out = new Float32Array(W * H);
+  for (let x = 0; x < W; x++) {
+    for (let y = 0; y < H; y++) {
+      let mx = 0;
+      const y0 = Math.max(0, y - radius);
+      const y1 = Math.min(H - 1, y + radius);
+      for (let i = y0; i <= y1; i++) mx = Math.max(mx, tmp[i * W + x]);
+      out[y * W + x] = mx;
+    }
+  }
+  return out;
+}
+
+// ── Step ⑥: Gaussian Blur ──
+
+function gaussianBlur(data, sigma) {
+  if (sigma <= 0) return new Float32Array(data);
+  const r = Math.ceil(sigma * 3);
+  const kernel = [];
+  let sum = 0;
+  for (let i = -r; i <= r; i++) {
+    const v = Math.exp(-(i * i) / (2 * sigma * sigma));
+    kernel.push(v);
+    sum += v;
+  }
+  for (let i = 0; i < kernel.length; i++) kernel[i] /= sum;
+
+  const tmp = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) {
+    const row = y * W;
+    for (let x = 0; x < W; x++) {
+      let v = 0;
+      for (let k = 0; k < kernel.length; k++) {
+        const nx = Math.min(Math.max(x + k - r, 0), W - 1);
+        v += data[row + nx] * kernel[k];
+      }
+      tmp[row + x] = v;
+    }
+  }
+  const out = new Float32Array(W * H);
+  for (let x = 0; x < W; x++) {
+    for (let y = 0; y < H; y++) {
+      let v = 0;
+      for (let k = 0; k < kernel.length; k++) {
+        const ny = Math.min(Math.max(y + k - r, 0), H - 1);
+        v += tmp[ny * W + x] * kernel[k];
+      }
+      out[y * W + x] = v;
+    }
+  }
+  return out;
+}
+
+// ── Step ⑦: Brightness / Contrast + Dot Screen ──
+
+function applyBC(src, brightness, contrast) {
+  const d = src.data;
+  const out = new Uint8ClampedArray(d.length);
+  for (let i = 0; i < W * H; i++) {
+    const idx = i * 4;
+    for (let c = 0; c < 3; c++) {
+      let v = d[idx + c] / 255 + brightness;
+      if (contrast > 0) {
+        v = (v - 0.5) / (1.0 - contrast) + 0.5;
+      } else {
+        v = (v - 0.5) * (1.0 + contrast) + 0.5;
+      }
+      out[idx + c] = clamp01(v) * 255;
+    }
+    out[idx + 3] = d[idx + 3];
+  }
+  return new ImageData(out, W, H);
+}
+
+function applyDotScreen(src, angle, size) {
+  const d = src.data;
+  const out = new Uint8ClampedArray(d.length);
+  const scale = Math.PI / size;
+  const sinA = Math.sin(angle);
+  const cosA = Math.cos(angle);
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const idx = (y * W + x) * 4;
+      const tx = x - 1, ty = y - 1;
+      const px = (cosA * tx - sinA * ty) * scale;
+      const py = (sinA * tx + cosA * ty) * scale;
+      const pattern = (Math.sin(px) * Math.sin(py)) * 4.0;
+      const avg = (d[idx] + d[idx + 1] + d[idx + 2]) / 3 / 255;
+      const v = clamp01(avg * 10.0 - 5.0 + pattern);
+      out[idx] = v * 255; out[idx + 1] = v * 255; out[idx + 2] = v * 255;
+      out[idx + 3] = d[idx + 3];
+    }
+  }
+  return new ImageData(out, W, H);
+}
+
+// ── Step ⑧: Composite ──
+
+function composite(halftoned, inkResult, softMask) {
+  const hd = halftoned.data;
+  const id = inkResult.data;
+  const out = new Uint8ClampedArray(hd.length);
+  for (let i = 0; i < W * H; i++) {
+    const idx = i * 4;
+    const m = softMask[i];
+    const inkGray = lum(id[idx], id[idx + 1], id[idx + 2]);
+    const htVal = hd[idx];
+    const v = htVal * (1 - m) + inkGray * m;
+    out[idx] = v; out[idx + 1] = v; out[idx + 2] = v; out[idx + 3] = 255;
+  }
+  return new ImageData(out, W, H);
+}
+
+// ── Main Pipeline ──
+
+function process() {
+  if (!sourceImage) return;
+  const t0 = performance.now();
+  const p = getParams();
+
+  // ① Ink
+  const inkResult = p.enInk ? applyInk(sourceImage, p.inkStrength) : sourceImage;
+  putImage('ink', inkResult);
+
+  // ② Threshold → binary mask
+  const lumArr = getLuminanceArray(inkResult);
+  const threshMask = generateMask(lumArr, p.threshold);
+  putMask('thresh', threshMask);
+
+  // ③ Vectorize (Potrace)
+  let mask = threshMask;
+  if (p.enVector) {
+    mask = vectorizeMask(lumArr, p.threshold, p.turdsize, p.alphamax, p.opttolerance);
+  }
+  putMask('vector', mask);
+
+  // ④ SDF Smooth
+  if (p.enSdf) {
+    mask = sdfSmooth(mask, p.sdfSigma);
+  }
+  putMask('sdf', mask);
+
+  // ⑤ Dilate
+  if (p.enDilate) {
+    mask = dilateMask(mask, p.dilation);
+  }
+  putMask('dilate', mask);
+
+  // ⑥ Blur
+  if (p.enBlur) {
+    mask = gaussianBlur(mask, p.blurSigma);
+  }
+  putMask('blur', mask);
+
+  // ⑦⑧ Halftone + Final composite (4 presets)
+  for (const [name, preset] of Object.entries(PRESETS)) {
+    // Each preset has its own ink strength
+    const presetInk = preset.inkStrength > 0
+      ? applyInk(sourceImage, preset.inkStrength)
+      : new ImageData(new Uint8ClampedArray(sourceImage.data), W, H);
+    const bcResult = applyBC(presetInk, preset.brightness, preset.contrast);
+    const halftoned = applyDotScreen(bcResult, preset.dotAngle, preset.dotSize);
+    putImage('ht-' + name, halftoned);
+
+    const finalResult = composite(halftoned, inkResult, mask);
+    putImage('final-' + name, finalResult);
+  }
+
+  statusEl.textContent = `Processing: ${(performance.now() - t0).toFixed(0)}ms (${W}×${H})`;
+}
+
+function putImage(name, imageData) {
+  canvases[name].getContext('2d').putImageData(imageData, 0, 0);
+}
+
+function putMask(name, mask) {
+  const imgData = new ImageData(W, H);
+  const d = imgData.data;
+  for (let i = 0; i < W * H; i++) {
+    const v = mask[i] * 255;
+    d[i * 4] = v; d[i * 4 + 1] = v; d[i * 4 + 2] = v; d[i * 4 + 3] = 255;
+  }
+  canvases[name].getContext('2d').putImageData(imgData, 0, 0);
+}
+
+// ── Tab Switching ──
+
+let activeView = 'original';
+const container = document.getElementById('canvas-container');
+
+document.querySelectorAll('.tab[data-view]').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeView = tab.dataset.view;
+    for (const [key, cvs] of Object.entries(canvases)) {
+      cvs.style.display = (key === activeView) ? 'block' : 'none';
+    }
+  });
+});
+
+// ── Zoom ──
+
+let currentZoom = 'fit';
+
+document.querySelectorAll('[data-zoom]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-zoom]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentZoom = btn.dataset.zoom;
+    applyZoom();
+  });
+});
+
+function applyZoom() {
+  if (!W) return;
+  const containerWidth = container.parentElement.clientWidth - 24;
+  for (const cvs of Object.values(canvases)) {
+    if (currentZoom === 'fit') {
+      const scale = Math.min(1, containerWidth / W);
+      cvs.style.width = (W * scale) + 'px';
+      cvs.style.height = (H * scale) + 'px';
+    } else {
+      const z = parseFloat(currentZoom);
+      cvs.style.width = (W * z) + 'px';
+      cvs.style.height = (H * z) + 'px';
+    }
+  }
+  const info = document.getElementById('zoom-info');
+  if (currentZoom === 'fit') {
+    const scale = Math.min(1, containerWidth / W);
+    info.textContent = `${Math.round(scale * 100)}% (${W}×${H})`;
+  } else {
+    info.textContent = `${parseFloat(currentZoom) * 100}% (${W}×${H})`;
+  }
+}
+
+window.addEventListener('resize', () => { if (currentZoom === 'fit') applyZoom(); });
+
+// ── Loupe ──
+
+const loupe = document.getElementById('loupe');
+const loupeCanvas = document.getElementById('loupe-canvas');
+const loupeCtx = loupeCanvas.getContext('2d');
+const LOUPE_SIZE = 200;
+const LOUPE_ZOOM = 4;
+const LOUPE_SRC = LOUPE_SIZE / LOUPE_ZOOM;
+
+container.addEventListener('mousemove', e => {
+  if (!W) return;
+  const cvs = canvases[activeView];
+  const rect = cvs.getBoundingClientRect();
+  const scaleX = W / rect.width;
+  const scaleY = H / rect.height;
+  const srcX = (e.clientX - rect.left) * scaleX;
+  const srcY = (e.clientY - rect.top) * scaleY;
+
+  if (srcX < 0 || srcX >= W || srcY < 0 || srcY >= H) {
+    loupe.style.display = 'none';
+    return;
+  }
+
+  loupe.style.display = 'block';
+  loupe.style.left = (e.clientX + 20) + 'px';
+  loupe.style.top = (e.clientY - LOUPE_SIZE - 10) + 'px';
+
+  const lr = loupe.getBoundingClientRect();
+  if (lr.right > window.innerWidth) loupe.style.left = (e.clientX - LOUPE_SIZE - 20) + 'px';
+  if (lr.top < 0) loupe.style.top = (e.clientY + 20) + 'px';
+
+  loupeCtx.imageSmoothingEnabled = false;
+  loupeCtx.clearRect(0, 0, LOUPE_SIZE, LOUPE_SIZE);
+  loupeCtx.drawImage(
+    cvs,
+    srcX - LOUPE_SRC / 2, srcY - LOUPE_SRC / 2, LOUPE_SRC, LOUPE_SRC,
+    0, 0, LOUPE_SIZE, LOUPE_SIZE
+  );
+});
+
+container.addEventListener('mouseleave', () => { loupe.style.display = 'none'; });
+</script>
+</body>
+</html>

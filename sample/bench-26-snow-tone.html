@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 26 — スノートーン生成速度比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improve{color:#4f4;font-weight:bold}
+.desc{font-size:12px;color:#888;margin-top:4px;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>Bench 26 — スノートーン生成</h1>
+<p class="subtitle">3000粒子×Math.random×parseColor正規表現 vs キャッシュ最適化 vs バッチ描画</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">粒子数: 3,000 &nbsp;|&nbsp; 繰り返し: 50回</p>
+  <p class="desc">
+    現行: parseColor()を毎フレーム呼び出し（正規表現 + parseInt × 6回）<br>
+    改善A: parseColorをループ外でキャッシュ（色計算のみ最適化）<br>
+    改善B: fillStyleを事前計算済み文字列配列化 + バッチ描画（パス統合）
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>合計 (ms)</th>
+        <th>改善率</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<canvas id="offscreen" width="800" height="600" style="display:none"></canvas>
+
+<script>
+'use strict';
+
+const PARTICLE_COUNT = 3000;
+const REPEAT = 50;
+
+// --- 現行実装 ---
+function parseColor(colorStr) {
+  var match = colorStr.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  return { r: parseInt(match[1], 16), g: parseInt(match[2], 16), b: parseInt(match[3], 16) };
+}
+function interpolateColor(color1, color2, t) {
+  var c1 = parseColor(color1), c2 = parseColor(color2);
+  return { r: c1.r + (c2.r - c1.r) * t | 0, g: c1.g + (c2.g - c1.g) * t | 0, b: c1.b + (c2.b - c1.b) * t | 0 };
+}
+function generateSnowOriginal(ctx, count, w, h) {
+  for (var i = 0; i < count; i++) {
+    var x = Math.random() * w, y = Math.random() * h;
+    var depth = Math.random();
+    var color = interpolateColor('#ffffff', '#aaccff', depth);
+    var size = 2 + depth * 5;
+    ctx.fillStyle = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+    ctx.beginPath();
+    ctx.ellipse(x, y, size, size * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// --- 改善案A: parseColorをループ外でキャッシュ ---
+function generateSnowOptA(ctx, count, w, h) {
+  // 色を事前解析（ループ外）
+  var c1 = { r: 0xff, g: 0xff, b: 0xff };
+  var c2 = { r: 0xaa, g: 0xcc, b: 0xff };
+  var dr = c2.r - c1.r, dg = c2.g - c1.g, db = c2.b - c1.b;
+  for (var i = 0; i < count; i++) {
+    var x = Math.random() * w, y = Math.random() * h;
+    var depth = Math.random();
+    var r = c1.r + dr * depth | 0;
+    var g = c1.g + dg * depth | 0;
+    var b = c1.b + db * depth | 0;
+    var size = 2 + depth * 5;
+    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+    ctx.beginPath();
+    ctx.ellipse(x, y, size, size * 0.7, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// --- 改善案B: fillStyleを事前計算済み文字列配列化 + バッチ描画（色ごとにパスをまとめる）---
+function generateSnowOptB(ctx, count, w, h) {
+  // 色テーブルを事前生成（256段階）
+  var c1 = { r: 0xff, g: 0xff, b: 0xff };
+  var c2 = { r: 0xaa, g: 0xcc, b: 0xff };
+  var dr = c2.r - c1.r, dg = c2.g - c1.g, db = c2.b - c1.b;
+  var colorTable = new Array(256);
+  for (var ci = 0; ci < 256; ci++) {
+    var t = ci / 255;
+    colorTable[ci] = 'rgb(' + (c1.r + dr * t | 0) + ',' + (c1.g + dg * t | 0) + ',' + (c1.b + db * t | 0) + ')';
+  }
+
+  // 粒子ごとのデータを生成
+  var particles = new Array(count);
+  for (var i = 0; i < count; i++) {
+    var depth = Math.random();
+    particles[i] = {
+      x: Math.random() * w,
+      y: Math.random() * h,
+      depth: depth,
+      size: 2 + depth * 5,
+      colorIdx: depth * 255 | 0
+    };
+  }
+
+  // 色でグループ化してバッチ描画（色変更回数を最小化）
+  // 色インデックス順にソート
+  particles.sort(function(a, b) { return a.colorIdx - b.colorIdx; });
+
+  var currentColor = null;
+  for (var j = 0; j < particles.length; j++) {
+    var p = particles[j];
+    var col = colorTable[p.colorIdx];
+    if (col !== currentColor) {
+      if (currentColor !== null) ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = col;
+      currentColor = col;
+    }
+    ctx.moveTo(p.x + p.size, p.y);
+    ctx.ellipse(p.x, p.y, p.size, p.size * 0.7, 0, 0, Math.PI * 2);
+  }
+  if (currentColor !== null) ctx.fill();
+}
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function runBench(label, fn, ctx, w, h, totalSteps, stepOffset) {
+  const times = [];
+  for (let i = 0; i < REPEAT; i++) {
+    ctx.clearRect(0, 0, w, h);
+    const t0 = performance.now();
+    fn(ctx, PARTICLE_COUNT, w, h);
+    times.push(performance.now() - t0);
+    const pct = ((stepOffset + i + 1) / totalSteps) * 100;
+    setProgress(label + ' — ' + (i + 1) + '/' + REPEAT, pct);
+    if (i % 5 === 4) await sleep(0);
+  }
+  return times;
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const sum = times.reduce((a, b) => a + b, 0);
+  const avg = sum / times.length;
+  return { min, max, avg, sum };
+}
+
+function renderResult(results) {
+  const body = document.getElementById('resultBody');
+  body.innerHTML = '';
+  const baseAvg = results[0].s.avg;
+  results.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const improvePct = idx === 0 ? '—' : ((baseAvg - r.s.avg) / baseAvg * 100).toFixed(1) + '%';
+    const isImprove = idx > 0 && r.s.avg < baseAvg;
+    const bestTag = results.reduce((b, x) => x.s.avg < b.s.avg ? x : b, results[0]) === r
+      ? '<span class="tag-best">BEST</span>' : '';
+    const worstTag = results.reduce((b, x) => x.s.avg > b.s.avg ? x : b, results[0]) === r
+      ? '<span class="tag-worst">SLOW</span>' : '';
+    tr.innerHTML =
+      '<td>' + r.label + bestTag + worstTag + '</td>' +
+      '<td>' + r.s.min.toFixed(2) + '</td>' +
+      '<td>' + r.s.max.toFixed(2) + '</td>' +
+      '<td>' + r.s.avg.toFixed(2) + '</td>' +
+      '<td>' + r.s.sum.toFixed(1) + '</td>' +
+      '<td class="' + (isImprove ? 'improve' : 'speedup') + '">' + (idx === 0 ? '基準' : (isImprove ? '+' : '') + improvePct) + '</td>' +
+      '<td>' + (idx === 0 ? '現行' : (isImprove ? '改善' : '悪化')) + '</td>';
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  const btn = this;
+  btn.disabled = true;
+  const canvas = document.getElementById('offscreen');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const totalSteps = REPEAT * 3;
+
+  setProgress('現行実装 計測中...', 0);
+  const timesOrig = await runBench('現行実装', generateSnowOriginal, ctx, W, H, totalSteps, 0);
+  await sleep(50);
+
+  setProgress('改善案A 計測中...', 33);
+  const timesA = await runBench('改善案A', generateSnowOptA, ctx, W, H, totalSteps, REPEAT);
+  await sleep(50);
+
+  setProgress('改善案B 計測中...', 66);
+  const timesB = await runBench('改善案B', generateSnowOptB, ctx, W, H, totalSteps, REPEAT * 2);
+  await sleep(50);
+
+  const results = [
+    { label: '現行: parseColor正規表現×毎回', s: stats(timesOrig) },
+    { label: '改善A: parseColorキャッシュ', s: stats(timesA) },
+    { label: '改善B: 色テーブル＋バッチ描画', s: stats(timesB) },
+  ];
+  renderResult(results);
+  setProgress('完了', 100);
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>

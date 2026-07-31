@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 02 — ノイズトーン全ピクセル生成</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.note{font-size:12px;color:#888;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>Bench 02 — ノイズトーン全ピクセル生成</h1>
+<p class="subtitle">現行実装 vs TypedArray最適化 vs Web Worker — 2250×2550 キャンバス</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">キャンバスサイズ: 2250×2550 px &nbsp;|&nbsp; 繰り返し: 3回（重いため）</p>
+  <p class="note">※ Web Worker版はインラインWorkerで実装しています（file://プロトコル対応）</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const W = 2250, H = 2550;
+const REPEAT = 3;
+const DENSITY = 0.3;
+const GRADIENT_INTENSITY = 0.4;
+const DIR_X = 0.7071, DIR_Y = 0.7071;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// 現行実装
+function runOriginal(data) {
+  const width = W, height = H;
+  const density = DENSITY;
+  const gradientIntensity = GRADIENT_INTENSITY;
+  const dirX = DIR_X, dirY = DIR_Y;
+  const maxDist = Math.sqrt(width * width + height * height);
+
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      var idx = (y * width + x) * 4;
+      var gradientValue = (x * dirX + y * dirY) / maxDist;
+      var threshold = density + (gradientValue * gradientIntensity);
+      if (Math.random() < threshold) {
+        data[idx] = 0; data[idx + 1] = 0; data[idx + 2] = 0; data[idx + 3] = 255;
+      }
+    }
+  }
+}
+
+// 改善案A: Uint32Array ビュー
+function runOptimizedA(data) {
+  const width = W, height = H;
+  const density = DENSITY;
+  const gradientIntensity = GRADIENT_INTENSITY;
+  const dirX = DIR_X, dirY = DIR_Y;
+  const maxDist = Math.sqrt(width * width + height * height);
+  const u32 = new Uint32Array(data.buffer);
+  const BLACK = 0xFF000000; // ABGR: A=255, R=0, G=0, B=0
+
+  for (let y = 0; y < height; y++) {
+    const yDirY = y * dirY;
+    for (let x = 0; x < width; x++) {
+      const gradientValue = (x * dirX + yDirY) / maxDist;
+      const threshold = density + gradientValue * gradientIntensity;
+      if (Math.random() < threshold) {
+        u32[y * width + x] = BLACK;
+      }
+    }
+  }
+}
+
+// Web Worker コード文字列
+const workerCode = `
+self.onmessage = function(e) {
+  const { W, H, density, gradientIntensity, dirX, dirY } = e.data;
+  const maxDist = Math.sqrt(W * W + H * H);
+  const buf = new ArrayBuffer(W * H * 4);
+  const u32 = new Uint32Array(buf);
+  const BLACK = 0xFF000000;
+
+  for (let y = 0; y < H; y++) {
+    const yDirY = y * dirY;
+    for (let x = 0; x < W; x++) {
+      const gradientValue = (x * dirX + yDirY) / maxDist;
+      const threshold = density + gradientValue * gradientIntensity;
+      if (Math.random() < threshold) {
+        u32[y * W + x] = BLACK;
+      }
+    }
+  }
+  self.postMessage({ buf }, [buf]);
+};
+`;
+
+function runWorker() {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    const worker = new Worker(url);
+    const t0 = performance.now();
+    worker.onmessage = (e) => {
+      const elapsed = performance.now() - t0;
+      worker.terminate();
+      URL.revokeObjectURL(url);
+      resolve(elapsed);
+    };
+    worker.onerror = reject;
+    worker.postMessage({
+      W, H,
+      density: DENSITY,
+      gradientIntensity: GRADIENT_INTENSITY,
+      dirX: DIR_X,
+      dirY: DIR_Y
+    });
+  });
+}
+
+function createData() {
+  const buf = new ArrayBuffer(W * H * 4);
+  return new Uint8ClampedArray(buf);
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const valid = rows.filter(r => !isNaN(r.avg));
+  const minAvg = Math.min(...valid.map(r => r.avg));
+  const maxAvg = Math.max(...valid.map(r => r.avg));
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    if (isNaN(r.avg)) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r.label}</td><td colspan="4" style="color:#888">スキップ</td><td></td>`;
+      tbody.appendChild(tr);
+      return;
+    }
+    const ratio = (r.avg / minAvg).toFixed(2);
+    const isBest = Math.abs(r.avg - minAvg) < 0.01;
+    const isWorst = Math.abs(r.avg - maxAvg) < 0.01 && valid.length > 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.min.toFixed(1)}</td>
+      <td>${r.max.toFixed(1)}</td>
+      <td>${r.avg.toFixed(1)}</td>
+      <td class="speedup">${ratio}x</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function run() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    const rows = [];
+
+    // 現行実装
+    {
+      const times = [];
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`現行実装 計測中 (${i + 1}/${REPEAT})...`, 5 + i * 20);
+        await new Promise(r => setTimeout(r, 20));
+        const data = createData();
+        const t0 = performance.now();
+        runOriginal(data);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '現行: ネストループ + RGBA個別代入', ...stats(times) });
+    }
+
+    // 改善案A
+    {
+      const times = [];
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案A (Uint32Array) 計測中 (${i + 1}/${REPEAT})...`, 35 + i * 15);
+        await new Promise(r => setTimeout(r, 20));
+        const data = createData();
+        const t0 = performance.now();
+        runOptimizedA(data);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '改善案A: Uint32Array ビュー (1ワード書き込み)', ...stats(times) });
+    }
+
+    // 改善案B: Web Worker
+    {
+      const times = [];
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案B (Web Worker) 計測中 (${i + 1}/${REPEAT})...`, 65 + i * 10);
+        await new Promise(r => setTimeout(r, 20));
+        const elapsed = await runWorker();
+        times.push(elapsed);
+      }
+      rows.push({ label: '改善案B: Web Worker + Uint32Array (転送時間含む)', ...stats(times) });
+    }
+
+    renderTable(rows);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnRun').addEventListener('click', run);
+window.addEventListener('load', () => setTimeout(run, 300));
+</script>
+</body>
+</html>

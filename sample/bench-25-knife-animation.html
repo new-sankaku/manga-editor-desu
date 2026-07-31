@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 25 — ナイフアニメーション描画コスト比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improve{color:#4f4;font-weight:bold}
+.desc{font-size:12px;color:#888;margin-top:6px;line-height:1.6}
+.canvases{display:none}
+</style>
+</head>
+<body>
+<h1>Bench 25 — ナイフ分割線アニメーション描画コスト比較</h1>
+<p class="subtitle">毎フレーム全描画 vs dirty flag vs レイヤー分離 — 50オブジェクト×300フレーム</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">オブジェクト数: 50個 &nbsp;|&nbsp; フレーム数: 300フレーム &nbsp;|&nbsp; Canvas: 800×600 px</p>
+  <p class="desc">
+    現行: requestAnimationFrame で毎フレーム clearRect + 全オブジェクト drawImage<br>
+    改善案A: dirty flag — 変更のあったオブジェクトのみ再描画（静的オブジェクトをスキップ）<br>
+    改善案B: レイヤー分離 — 静的オブジェクト用 Canvas + アニメーション用 Canvas に分割
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>合計 (ms)</th>
+        <th>平均フレーム (ms)</th>
+        <th>推定 FPS</th>
+        <th>速度比</th>
+        <th>改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody">
+      <tr><td colspan="7" style="color:#666;text-align:center;padding:20px">ベンチマーク開始ボタンを押してください</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- 描画に使う非表示 Canvas -->
+<div class="canvases">
+  <canvas id="benchCanvas" width="800" height="600"></canvas>
+  <canvas id="benchCanvasStatic" width="800" height="600"></canvas>
+  <canvas id="benchCanvasAnim" width="800" height="600"></canvas>
+</div>
+
+<script>
+'use strict';
+
+const FRAME_COUNT = 300;
+const OBJ_COUNT = 50;
+const CANVAS_W = 800;
+const CANVAS_H = 600;
+// 全体の何割をアニメーション（動く）オブジェクトにするか
+const ANIM_RATIO = 0.2; // 20% = 10個が動く
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テスト用オブジェクトの生成
+// img の代わりに offscreen canvas に描画したものを使用
+function createObjects(count) {
+  const objects = [];
+  for (let i = 0; i < count; i++) {
+    // 各オブジェクトを小さな offscreen canvas として作成
+    const offscreen = document.createElement('canvas');
+    offscreen.width = 40;
+    offscreen.height = 40;
+    const ctx = offscreen.getContext('2d');
+    const hue = (i * 360 / count) | 0;
+    ctx.fillStyle = `hsl(${hue}, 70%, 55%)`;
+    ctx.beginPath();
+    ctx.arc(20, 20, 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = `hsl(${hue}, 70%, 80%)`;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    objects.push({
+      img: offscreen,
+      left: Math.random() * (CANVAS_W - 50),
+      top: Math.random() * (CANVAS_H - 50),
+      angle: Math.random() * Math.PI * 2,
+      // アニメーション対象かどうか
+      isAnimated: i < Math.round(count * ANIM_RATIO),
+      dirty: true,
+    });
+  }
+  return objects;
+}
+
+// フレームごとにアニメーションオブジェクトの位置・角度を更新
+function updateObjects(objects, frame) {
+  for (let i = 0; i < objects.length; i++) {
+    if (objects[i].isAnimated) {
+      objects[i].angle += 0.02;
+      objects[i].left = (objects[i].left + 1.5) % (CANVAS_W - 50);
+      objects[i].dirty = true;
+    }
+  }
+}
+
+// 現行: 毎フレーム全オブジェクトを描画
+function renderAll(ctx, objects) {
+  ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  for (var i = 0; i < objects.length; i++) {
+    ctx.save();
+    ctx.translate(objects[i].left + 20, objects[i].top + 20);
+    ctx.rotate(objects[i].angle);
+    ctx.drawImage(objects[i].img, -20, -20);
+    ctx.restore();
+  }
+}
+
+// 改善案A: dirty flag — 変更オブジェクトのみ再描画
+// ただし clearRect は変更範囲のみ実施（完全なdirty-rectシステム）
+function renderDirtyFlag(ctx, objects, prevStates) {
+  for (var i = 0; i < objects.length; i++) {
+    if (objects[i].dirty) {
+      // 旧位置をクリア
+      const prev = prevStates[i];
+      if (prev) {
+        ctx.clearRect(prev.left - 2, prev.top - 2, 44, 44);
+      }
+      // 新位置を描画
+      ctx.save();
+      ctx.translate(objects[i].left + 20, objects[i].top + 20);
+      ctx.rotate(objects[i].angle);
+      ctx.drawImage(objects[i].img, -20, -20);
+      ctx.restore();
+      // 状態を記録
+      prevStates[i] = { left: objects[i].left, top: objects[i].top };
+      objects[i].dirty = false;
+    }
+  }
+}
+
+// 改善案B: レイヤー分離
+// 静的オブジェクトは初回のみ staticCtx に描画、以降は animCtx のみ更新
+function renderLayered(staticCtx, animCtx, objects, staticInitDone) {
+  if (!staticInitDone) {
+    staticCtx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    for (var i = 0; i < objects.length; i++) {
+      if (!objects[i].isAnimated) {
+        staticCtx.save();
+        staticCtx.translate(objects[i].left + 20, objects[i].top + 20);
+        staticCtx.rotate(objects[i].angle);
+        staticCtx.drawImage(objects[i].img, -20, -20);
+        staticCtx.restore();
+      }
+    }
+  }
+  // アニメーション用 Canvas のみクリアして動くオブジェクトだけ描画
+  animCtx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+  for (var i = 0; i < objects.length; i++) {
+    if (objects[i].isAnimated) {
+      animCtx.save();
+      animCtx.translate(objects[i].left + 20, objects[i].top + 20);
+      animCtx.rotate(objects[i].angle);
+      animCtx.drawImage(objects[i].img, -20, -20);
+      animCtx.restore();
+    }
+  }
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const baselineTotal = rows[0].total;
+  const minTotal = Math.min(...rows.map(r => r.total));
+  const maxTotal = Math.max(...rows.map(r => r.total));
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach((r, idx) => {
+    const ratio = (r.total / minTotal).toFixed(2);
+    const improveRate = ((1 - r.total / baselineTotal) * 100).toFixed(1);
+    const isBest = Math.abs(r.total - minTotal) < 0.01;
+    const isWorst = Math.abs(r.total - maxTotal) < 0.01 && rows.length > 1;
+    const isBaseline = idx === 0;
+    const avgFrame = (r.total / FRAME_COUNT).toFixed(2);
+    const fps = (1000 / (r.total / FRAME_COUNT)).toFixed(1);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.total.toFixed(1)}</td>
+      <td>${avgFrame}</td>
+      <td>${fps}</td>
+      <td class="speedup">${ratio}x</td>
+      <td class="${isBaseline ? '' : (parseFloat(improveRate) > 0 ? 'improve' : 'speedup')}">${isBaseline ? '(基準)' : (parseFloat(improveRate) > 0 ? '+' + improveRate + '%' : improveRate + '%')}</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// rAF ループで指定フレーム数を計測する Promise ラッパー
+function measureFrames(frameCount, renderFn, progressFn) {
+  return new Promise(function(resolve) {
+    const frameTimes = [];
+    let frameIdx = 0;
+    let lastTime = performance.now();
+
+    function loop() {
+      const now = performance.now();
+      renderFn(frameIdx);
+      frameTimes.push(performance.now() - now);
+      frameIdx++;
+      if (frameIdx % 30 === 0) {
+        progressFn(frameIdx);
+      }
+      if (frameIdx < frameCount) {
+        requestAnimationFrame(loop);
+      } else {
+        resolve(frameTimes);
+      }
+    }
+    requestAnimationFrame(loop);
+  });
+}
+
+async function runBench() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  const mainCanvas = document.getElementById('benchCanvas');
+  const staticCanvas = document.getElementById('benchCanvasStatic');
+  const animCanvas = document.getElementById('benchCanvasAnim');
+  const mainCtx = mainCanvas.getContext('2d');
+  const staticCtx = staticCanvas.getContext('2d');
+  const animCtx = animCanvas.getContext('2d');
+
+  try {
+    setProgress('テストオブジェクト生成中... (50個)', 5);
+    await new Promise(r => setTimeout(r, 20));
+
+    // ---- 現行: 毎フレーム全描画 ----
+    setProgress('現行実装 (毎フレーム全描画) 計測中... (1/3)', 10);
+    await new Promise(r => setTimeout(r, 20));
+
+    const objectsCurrent = createObjects(OBJ_COUNT);
+    const timesCurrent = await measureFrames(
+      FRAME_COUNT,
+      function(frame) {
+        updateObjects(objectsCurrent, frame);
+        renderAll(mainCtx, objectsCurrent);
+      },
+      function(frame) {
+        setProgress(`現行実装 計測中... ${frame}/${FRAME_COUNT}`, 10 + frame / FRAME_COUNT * 25);
+      }
+    );
+
+    // ---- 改善案A: dirty flag ----
+    setProgress('改善案A (dirty flag) 計測中... (2/3)', 35);
+    await new Promise(r => setTimeout(r, 20));
+
+    const objectsDirty = createObjects(OBJ_COUNT);
+    mainCtx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    // 初回は全部描画
+    renderAll(mainCtx, objectsDirty);
+    const prevStates = objectsDirty.map(o => ({ left: o.left, top: o.top }));
+    objectsDirty.forEach(o => { o.dirty = false; });
+
+    const timesA = await measureFrames(
+      FRAME_COUNT,
+      function(frame) {
+        updateObjects(objectsDirty, frame);
+        renderDirtyFlag(mainCtx, objectsDirty, prevStates);
+      },
+      function(frame) {
+        setProgress(`改善案A 計測中... ${frame}/${FRAME_COUNT}`, 35 + frame / FRAME_COUNT * 25);
+      }
+    );
+
+    // ---- 改善案B: レイヤー分離 ----
+    setProgress('改善案B (レイヤー分離) 計測中... (3/3)', 60);
+    await new Promise(r => setTimeout(r, 20));
+
+    const objectsLayered = createObjects(OBJ_COUNT);
+    let staticInitDone = false;
+
+    const timesB = await measureFrames(
+      FRAME_COUNT,
+      function(frame) {
+        updateObjects(objectsLayered, frame);
+        renderLayered(staticCtx, animCtx, objectsLayered, staticInitDone);
+        staticInitDone = true;
+      },
+      function(frame) {
+        setProgress(`改善案B 計測中... ${frame}/${FRAME_COUNT}`, 60 + frame / FRAME_COUNT * 25);
+      }
+    );
+
+    setProgress('結果集計中...', 92);
+    await new Promise(r => setTimeout(r, 20));
+
+    const totalCurrent = timesCurrent.reduce((a, b) => a + b, 0);
+    const totalA = timesA.reduce((a, b) => a + b, 0);
+    const totalB = timesB.reduce((a, b) => a + b, 0);
+
+    const rows = [
+      { label: `現行: 毎フレーム全描画 (${OBJ_COUNT}オブジェクト)`, total: totalCurrent },
+      { label: `改善案A: dirty flag (動くオブジェクトのみ再描画)`, total: totalA },
+      { label: `改善案B: レイヤー分離 (静的${OBJ_COUNT - Math.round(OBJ_COUNT * ANIM_RATIO)}個 + アニメ${Math.round(OBJ_COUNT * ANIM_RATIO)}個)`, total: totalB },
+    ];
+    renderTable(rows);
+    setProgress(`完了 — ${FRAME_COUNT}フレーム計測`, 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnRun').addEventListener('click', runBench);
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('btnRun').click(), 200);
+});
+</script>
+</body>
+</html>

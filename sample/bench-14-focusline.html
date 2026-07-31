@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 14 — フォーカスライン座標計算</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.note{font-size:12px;color:#888;margin-top:8px}
+.verify{font-size:12px;color:#8f8;margin-top:4px}
+</style>
+</head>
+<body>
+<h1>Bench 14 — フォーカスライン座標計算</h1>
+<p class="subtitle">集中線の各ラインの座標を計算する3つの実装の速度比較</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">ライン本数: 500本 &nbsp;|&nbsp; 繰り返し: 100回 &nbsp;|&nbsp; 合計計算数: 50,000回</p>
+  <p class="note">※ 改善案A: Float64Arrayフラット配列管理、改善案B: sin/cosルックアップテーブル + Xorshift乱数</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <div class="verify" id="verifyMsg"></div>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>現行比 改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const LINE_NUM = 500;
+const REPEAT = 100;
+const CX = 1000, CY = 1000;
+const INNER_RADIUS = 50, OUTER_RADIUS = 800;
+const VARIATION = 30;
+const MIN_WIDTH = 1, MAX_WIDTH = 5;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// 現行実装: オブジェクト配列 + Math.random/cos/sin
+function implLegacy() {
+  const lineNum = LINE_NUM;
+  const cx = CX, cy = CY;
+  const innerRadius = INNER_RADIUS, outerRadius = OUTER_RADIUS;
+  const variation = VARIATION;
+  const minWidth = MIN_WIDTH, maxWidth = MAX_WIDTH;
+
+  var lines = [];
+  for (var i = 0; i < lineNum; i++) {
+    var angle = Math.random() * Math.PI * 2;
+    var innerR = innerRadius + Math.random() * variation;
+    var outerR = outerRadius + Math.random() * variation;
+    lines.push({
+      x1: cx + Math.cos(angle) * innerR,
+      y1: cy + Math.sin(angle) * innerR,
+      x2: cx + Math.cos(angle) * outerR,
+      y2: cy + Math.sin(angle) * outerR,
+      width: minWidth + Math.random() * (maxWidth - minWidth)
+    });
+  }
+  return lines;
+}
+
+// 改善案A: Float64Arrayフラット配列で状態管理
+// 1ラインあたり5要素: x1, y1, x2, y2, width
+function implFloat64() {
+  const lineNum = LINE_NUM;
+  const cx = CX, cy = CY;
+  const innerRadius = INNER_RADIUS, outerRadius = OUTER_RADIUS;
+  const variation = VARIATION;
+  const minWidth = MIN_WIDTH, maxWidth = MAX_WIDTH;
+  const widthRange = maxWidth - minWidth;
+
+  const buf = new Float64Array(lineNum * 5);
+  for (var i = 0; i < lineNum; i++) {
+    var angle = Math.random() * Math.PI * 2;
+    var innerR = innerRadius + Math.random() * variation;
+    var outerR = outerRadius + Math.random() * variation;
+    var cosA = Math.cos(angle);
+    var sinA = Math.sin(angle);
+    var base = i * 5;
+    buf[base]   = cx + cosA * innerR;
+    buf[base+1] = cy + sinA * innerR;
+    buf[base+2] = cx + cosA * outerR;
+    buf[base+3] = cy + sinA * outerR;
+    buf[base+4] = minWidth + Math.random() * widthRange;
+  }
+  return buf;
+}
+
+// 改善案B: sin/cosルックアップテーブル + Xorshift乱数
+// テーブルサイズ: 4096分割
+const LUT_SIZE = 4096;
+const LUT_MASK = LUT_SIZE - 1;
+const COS_TABLE = new Float64Array(LUT_SIZE);
+const SIN_TABLE = new Float64Array(LUT_SIZE);
+for (let i = 0; i < LUT_SIZE; i++) {
+  const a = (i / LUT_SIZE) * Math.PI * 2;
+  COS_TABLE[i] = Math.cos(a);
+  SIN_TABLE[i] = Math.sin(a);
+}
+
+// Xorshift32
+let xorState = 0xDEADBEEF;
+function xorshift() {
+  let x = xorState;
+  x ^= x << 13;
+  x ^= x >>> 17;
+  x ^= x << 5;
+  xorState = x;
+  // [0, 1) に変換
+  return (x >>> 0) / 4294967296;
+}
+
+function implLUT() {
+  xorState = 0xDEADBEEF; // 毎回同じシードでリセット
+  const lineNum = LINE_NUM;
+  const cx = CX, cy = CY;
+  const innerRadius = INNER_RADIUS, outerRadius = OUTER_RADIUS;
+  const variation = VARIATION;
+  const minWidth = MIN_WIDTH, maxWidth = MAX_WIDTH;
+  const widthRange = maxWidth - minWidth;
+
+  const buf = new Float64Array(lineNum * 5);
+  for (var i = 0; i < lineNum; i++) {
+    // LUTからランダムにsin/cosを取得
+    var lutIdx = (xorshift() * LUT_SIZE) & LUT_MASK;
+    var cosA = COS_TABLE[lutIdx];
+    var sinA = SIN_TABLE[lutIdx];
+    var innerR = innerRadius + xorshift() * variation;
+    var outerR = outerRadius + xorshift() * variation;
+    var base = i * 5;
+    buf[base]   = cx + cosA * innerR;
+    buf[base+1] = cy + sinA * innerR;
+    buf[base+2] = cx + cosA * outerR;
+    buf[base+3] = cy + sinA * outerR;
+    buf[base+4] = minWidth + xorshift() * widthRange;
+  }
+  return buf;
+}
+
+async function runBench(name, fn) {
+  const times = [];
+  let lastResult;
+  for (let r = 0; r < REPEAT; r++) {
+    if (r % 10 === 0) {
+      setProgress(`${name}: ${r}/${REPEAT}回完了`, 0);
+      await new Promise(res => setTimeout(res, 0));
+    }
+    const t0 = performance.now();
+    lastResult = fn();
+    times.push(performance.now() - t0);
+  }
+  return { times, lastResult };
+}
+
+function stats(times) {
+  const mn = Math.min(...times);
+  const mx = Math.max(...times);
+  const avg = times.reduce((a,b)=>a+b,0)/times.length;
+  return { min: mn, max: mx, avg };
+}
+
+function renderRow(name, s, baseAvg, isBest) {
+  const tr = document.createElement('tr');
+  const improvement = baseAvg != null
+    ? ((baseAvg - s.avg) / baseAvg * 100).toFixed(1)
+    : null;
+  const improvStr = improvement != null
+    ? `<span class="speedup">${improvement > 0 ? '+' : ''}${improvement}%</span>`
+    : '<span style="color:#888">—（基準）</span>';
+  const badge = isBest ? '<span class="tag-best">BEST</span>' : (improvement !== null && parseFloat(improvement) < 0 ? '<span class="tag-worst">SLOW</span>' : '');
+  tr.innerHTML = `
+    <td>${name}${badge}</td>
+    <td>${s.min.toFixed(3)}</td>
+    <td>${s.max.toFixed(3)}</td>
+    <td>${s.avg.toFixed(3)}</td>
+    <td>${improvStr}</td>
+    <td style="color:#4af">完了</td>`;
+  document.getElementById('resultBody').appendChild(tr);
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  this.disabled = true;
+  document.getElementById('resultBody').innerHTML = '';
+  document.getElementById('verifyMsg').textContent = '';
+
+  setProgress('現行実装 実行中...', 5);
+  const { times: timesLeg, lastResult: rLeg } = await runBench('現行実装', implLegacy);
+  setProgress('改善案A (Float64Array) 実行中...', 38);
+  const { times: timesF64, lastResult: rF64 } = await runBench('改善案A', implFloat64);
+  setProgress('改善案B (LUT+Xorshift) 実行中...', 70);
+  const { times: timesLUT, lastResult: rLUT } = await runBench('改善案B', implLUT);
+
+  setProgress('完了', 100);
+
+  // 参考: 最後の計算でのLine[0]のx1を表示
+  const legX1 = rLeg[0] ? rLeg[0].x1.toFixed(2) : '?';
+  const f64X1 = rF64 ? rF64[0].toFixed(2) : '?';
+  const lutX1 = rLUT ? rLUT[0].toFixed(2) : '?';
+  document.getElementById('verifyMsg').textContent =
+    `各実装の最終回ライン[0].x1: 現行=${legX1} / A=${f64X1} / B=${lutX1} ※乱数が異なるため値は一致しません`;
+
+  const sLeg = stats(timesLeg);
+  const sF64 = stats(timesF64);
+  const sLUT = stats(timesLUT);
+  const bestAvg = Math.min(sLeg.avg, sF64.avg, sLUT.avg);
+
+  renderRow('現行実装（オブジェクト配列 + Math.random）', sLeg, null, sLeg.avg === bestAvg);
+  renderRow('改善案A: Float64Arrayフラット配列', sF64, sLeg.avg, sF64.avg === bestAvg);
+  renderRow('改善案B: sin/cosLUT + Xorshift乱数', sLUT, sLeg.avg, sLUT.avg === bestAvg);
+
+  this.disabled = false;
+});
+</script>
+</body>
+</html>

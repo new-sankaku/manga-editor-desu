@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 08 — 二重アウトラインブラシ全ストローク再描画</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:20px;font-size:14px}
+h1{font-size:18px;margin-bottom:6px;color:#4af}
+.subtitle{color:#888;font-size:12px;margin-bottom:20px}
+.bench-section{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.bench-section h2{font-size:14px;color:#adf;margin-bottom:8px}
+.bench-section p{font-size:12px;color:#888;margin-bottom:12px;line-height:1.6}
+.progress-bar-wrap{background:#0a0a1a;border-radius:4px;height:8px;margin-bottom:12px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4af,#8af);width:0%;transition:width .1s}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#0f3460}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1a2a50}
+th{color:#4af;font-weight:600;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.winner{color:#4f8;font-weight:700}
+.slower{color:#f84}
+.baseline{color:#aaa}
+.tag-current{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#3a1a0a;color:#f84;margin-left:6px}
+.tag-opt{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#0a3a1a;color:#4f8;margin-left:6px}
+.status{font-size:12px;color:#888;margin-bottom:8px;min-height:18px}
+button{background:#0f3460;color:#4af;border:1px solid #4af;border-radius:5px;padding:8px 20px;cursor:pointer;font-size:13px;margin-bottom:12px}
+button:hover{background:#1a4a80}
+button:disabled{opacity:0.4;cursor:not-allowed}
+canvas{display:none}
+</style>
+</head>
+<body>
+<h1>Bench 08 — 二重アウトラインブラシ全ストローク再描画</h1>
+<p class="subtitle">500ポイントのストロークを3パス（外枠→内枠→本線）で再描画する速度比較</p>
+
+<div class="bench-section">
+  <h2>概要</h2>
+  <p>
+    <strong>現行:</strong> pathDataArrayの全ポイントを毎回3パスで再描画（新規ポイント追加のたびに全体を再描画）。<br>
+    <strong>改善A:</strong> 増分描画（前回からの差分ポイントのみ描画し、既描画部分は再利用）。<br>
+    <strong>改善B:</strong> Path2Dオブジェクトにパスをキャッシュし、stroke()のみ呼び出し。
+  </p>
+</div>
+
+<button id="btnRun">ベンチマーク実行</button>
+<div class="status" id="status">ボタンを押すと自動実行します</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>実装</th>
+      <th class="num">合計時間 (ms)</th>
+      <th class="num">イテレーション</th>
+      <th class="num">1回あたり (μs)</th>
+      <th class="num">速度比</th>
+    </tr>
+  </thead>
+  <tbody id="results">
+    <tr><td colspan="5" style="color:#555;text-align:center">実行待ち</td></tr>
+  </tbody>
+</table>
+
+<canvas id="cv"></canvas>
+
+<script>
+var W = 600, H = 400;
+var LINE_WIDTH = 4;
+var ITERATIONS = 200;
+var POINT_COUNT = 500;
+
+function initCanvas() {
+  var cv = document.getElementById('cv');
+  cv.width = W;
+  cv.height = H;
+  return cv.getContext('2d');
+}
+
+// テストデータ: サイン波状の500ポイント
+function generatePathData() {
+  var pts = [];
+  for (var i = 0; i < POINT_COUNT; i++) {
+    pts.push({
+      x: (i / POINT_COUNT) * W,
+      y: H / 2 + Math.sin(i * 0.05) * 80 + Math.sin(i * 0.13) * 30
+    });
+  }
+  return pts;
+}
+
+// ---- 現行実装: 全ポイントを3パスで毎回再描画 ----
+function renderAllStrokes(ctx, pathDataArray, lineWidth) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Pass 1: outer outline
+  ctx.beginPath();
+  ctx.lineWidth = lineWidth + 4;
+  ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  for (var i = 0; i < pathDataArray.length; i++) {
+    var p = pathDataArray[i];
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+
+  // Pass 2: inner outline
+  ctx.beginPath();
+  ctx.lineWidth = lineWidth + 2;
+  ctx.strokeStyle = 'rgba(200,200,200,0.6)';
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  for (var i = 0; i < pathDataArray.length; i++) {
+    var p = pathDataArray[i];
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+
+  // Pass 3: main line
+  ctx.beginPath();
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = 'rgba(50,50,80,1)';
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  for (var i = 0; i < pathDataArray.length; i++) {
+    var p = pathDataArray[i];
+    if (i === 0) ctx.moveTo(p.x, p.y);
+    else ctx.lineTo(p.x, p.y);
+  }
+  ctx.stroke();
+}
+
+function currentImpl(ctx, pts) {
+  renderAllStrokes(ctx, pts, LINE_WIDTH);
+}
+
+// ---- 改善A: 増分描画（差分ポイントのみ追加描画）----
+// 状態管理用（ベンチでは毎回リセット）
+function makeIncrementalRenderer() {
+  var lastIndex = -1;
+  return {
+    reset: function() { lastIndex = -1; },
+    render: function(ctx, pts, lineWidth) {
+      var startIdx = lastIndex < 1 ? 0 : lastIndex - 1; // 継続のため1点戻る
+      if (startIdx === 0) ctx.clearRect(0, 0, W, H);
+
+      var drawPass = function(lw, style, fromIdx) {
+        ctx.beginPath();
+        ctx.lineWidth = lw;
+        ctx.strokeStyle = style;
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        for (var i = fromIdx; i < pts.length; i++) {
+          var p = pts[i];
+          if (i === 0 || i === fromIdx) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        }
+        ctx.stroke();
+      };
+
+      drawPass(lineWidth + 4, 'rgba(255,255,255,0.8)', startIdx);
+      drawPass(lineWidth + 2, 'rgba(200,200,200,0.6)', startIdx);
+      drawPass(lineWidth, 'rgba(50,50,80,1)', startIdx);
+
+      lastIndex = pts.length - 1;
+    }
+  };
+}
+
+// ---- 改善B: Path2Dキャッシュ ----
+function makePath2DRenderer() {
+  var cachedPath = null;
+  var cachedLength = 0;
+  return {
+    reset: function() { cachedPath = null; cachedLength = 0; },
+    render: function(ctx, pts, lineWidth) {
+      // 変化があればPath2D再構築
+      if (!cachedPath || pts.length !== cachedLength) {
+        cachedPath = new Path2D();
+        for (var i = 0; i < pts.length; i++) {
+          if (i === 0) cachedPath.moveTo(pts[i].x, pts[i].y);
+          else cachedPath.lineTo(pts[i].x, pts[i].y);
+        }
+        cachedLength = pts.length;
+      }
+
+      ctx.clearRect(0, 0, W, H);
+
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+
+      ctx.lineWidth = lineWidth + 4;
+      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+      ctx.stroke(cachedPath);
+
+      ctx.lineWidth = lineWidth + 2;
+      ctx.strokeStyle = 'rgba(200,200,200,0.6)';
+      ctx.stroke(cachedPath);
+
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = 'rgba(50,50,80,1)';
+      ctx.stroke(cachedPath);
+    }
+  };
+}
+
+function bench(fn, ctx, pts, iters) {
+  var start = performance.now();
+  for (var i = 0; i < iters; i++) {
+    fn(ctx, pts);
+  }
+  return performance.now() - start;
+}
+
+function setProgress(pct) {
+  document.getElementById('progress').style.width = pct + '%';
+}
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function renderResults(rows) {
+  var baseline = rows[0].ms;
+  var html = '';
+  rows.forEach(function(r) {
+    var ratio = baseline / r.ms;
+    var ratioStr = ratio.toFixed(2) + 'x';
+    var cls = ratio > 1.1 ? 'winner' : ratio < 0.9 ? 'slower' : 'baseline';
+    var usEach = (r.ms / ITERATIONS * 1000).toFixed(1);
+    html += '<tr>';
+    html += '<td>' + r.label + (r.tag === 'current' ? '<span class="tag-current">現行</span>' : '<span class="tag-opt">最適化</span>') + '</td>';
+    html += '<td class="num">' + r.ms.toFixed(2) + '</td>';
+    html += '<td class="num">' + ITERATIONS + '</td>';
+    html += '<td class="num">' + usEach + '</td>';
+    html += '<td class="num ' + cls + '">' + ratioStr + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('results').innerHTML = html;
+}
+
+document.getElementById('btnRun').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  setProgress(0);
+  setStatus('テストデータ生成中...');
+  document.getElementById('results').innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center">実行中...</td></tr>';
+
+  setTimeout(function() {
+    var ctx = initCanvas();
+    var pts = generatePathData();
+
+    // 増分レンダラー（ベンチではキャッシュなし状態から毎回再構築するよう全量渡し）
+    var incRenderer = makeIncrementalRenderer();
+    var path2dRenderer = makePath2DRenderer();
+
+    setStatus('現行実装 計測中...');
+    setProgress(10);
+
+    setTimeout(function() {
+      var msA = bench(function(ctx, pts) {
+        currentImpl(ctx, pts);
+      }, ctx, pts, ITERATIONS);
+      setProgress(40);
+      setStatus('改善案A 計測中...');
+
+      setTimeout(function() {
+        var msB = bench(function(ctx, pts) {
+          incRenderer.reset();
+          incRenderer.render(ctx, pts, LINE_WIDTH);
+        }, ctx, pts, ITERATIONS);
+        setProgress(70);
+        setStatus('改善案B 計測中...');
+
+        setTimeout(function() {
+          var msC = bench(function(ctx, pts) {
+            path2dRenderer.reset();
+            path2dRenderer.render(ctx, pts, LINE_WIDTH);
+          }, ctx, pts, ITERATIONS);
+          setProgress(100);
+          setStatus('完了');
+          renderResults([
+            { label: '現行（全3パス毎回再描画）', ms: msA, tag: 'current' },
+            { label: '改善A（増分描画）', ms: msB, tag: 'opt' },
+            { label: '改善B（Path2Dキャッシュ）', ms: msC, tag: 'opt' }
+          ]);
+          btn.disabled = false;
+        }, 50);
+      }, 50);
+    }, 50);
+  }, 50);
+});
+
+window.addEventListener('load', function() {
+  document.getElementById('btnRun').click();
+});
+</script>
+</body>
+</html>

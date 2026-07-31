@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 03 — 暗部強調CPUフィルタ</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.detail{font-size:12px;color:#888;margin-top:8px;line-height:1.6}
+code{background:#0d1526;padding:1px 5px;border-radius:3px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>Bench 03 — 暗部強調 CPU フィルタ</h1>
+<p class="subtitle">現行実装 vs LUT最適化 vs Uint32Array一括処理 — 2250×2550 キャンバス</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">キャンバスサイズ: 2250×2550 px &nbsp;|&nbsp; intensity: 2.0 &nbsp;|&nbsp; 繰り返し: 5回</p>
+  <div class="detail">
+    <b>現行:</b> <code>Math.pow(intensity*0.2, 1.5)</code> をピクセルごとに計算<br>
+    <b>改善案A:</b> brightnessByValue[0..254] の LUT で <code>Math.pow</code> を排除<br>
+    <b>改善案B:</b> Uint32Array でピクセルを一括取得し分岐を減らす
+  </div>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const W = 2250, H = 2550;
+const REPEAT = 5;
+const INTENSITY = 2.0;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テストデータ生成（グレースケールに近いランダム画像）
+function createTestData() {
+  const buf = new ArrayBuffer(W * H * 4);
+  const data = new Uint8ClampedArray(buf);
+  const u32 = new Uint32Array(buf);
+  // 暗い領域が多い画像（brightness < 200 が多い）
+  for (let i = 0; i < u32.length; i++) {
+    const v = (Math.random() * 220) | 0; // 0-220
+    data[i * 4] = v;
+    data[i * 4 + 1] = v;
+    data[i * 4 + 2] = v;
+    data[i * 4 + 3] = 255;
+  }
+  return data;
+}
+
+// 現行実装
+function runOriginal(data, intensity) {
+  for (var i = 0; i < data.length; i += 4) {
+    var r = data[i], g = data[i + 1], b = data[i + 2];
+    var brightness = (r + g + b) / 3;
+    if (brightness < 200) {
+      var darkFactor = Math.max(0, 1 - Math.pow(intensity * 0.2, 1.5));
+      data[i] *= darkFactor;
+      data[i + 1] *= darkFactor;
+      data[i + 2] *= darkFactor;
+    }
+  }
+}
+
+// 改善案A: LUT でMath.powを排除
+function buildDarkFactorLUT(intensity) {
+  // darkFactor は intensity が同じなら定数なので1回だけ計算
+  const darkFactor = Math.max(0, 1 - Math.pow(intensity * 0.2, 1.5));
+  // brightnessByThreshold: brightness < 200 のとき darkFactor、そうでなければ 1.0
+  // brightness は 0-767 (r+g+b) の合計で判定するより、平均で 0-255
+  // LUT: index = brightness (0-255), value = darkFactor or 1.0
+  const lut = new Float32Array(256);
+  for (let b = 0; b < 256; b++) {
+    lut[b] = b < 200 ? darkFactor : 1.0;
+  }
+  return lut;
+}
+
+function runOptimizedA(data, lut) {
+  for (let i = 0; i < data.length; i += 4) {
+    const brightness = ((data[i] + data[i + 1] + data[i + 2]) / 3) | 0;
+    const f = lut[brightness];
+    if (f < 1.0) {
+      data[i] = data[i] * f;
+      data[i + 1] = data[i + 1] * f;
+      data[i + 2] = data[i + 2] * f;
+    }
+  }
+}
+
+// 改善案B: Uint32Array + LUT
+function runOptimizedB(data, lut) {
+  // Uint32Array ビューでピクセルを読む（RGBA = little endian: 0xAABBGGRR）
+  const u32 = new Uint32Array(data.buffer, data.byteOffset, data.length >> 2);
+  for (let i = 0; i < u32.length; i++) {
+    const pixel = u32[i];
+    const r = pixel & 0xFF;
+    const g = (pixel >> 8) & 0xFF;
+    const b = (pixel >> 16) & 0xFF;
+    const brightness = ((r + g + b) / 3) | 0;
+    const f = lut[brightness];
+    if (f < 1.0) {
+      const nr = (r * f) | 0;
+      const ng = (g * f) | 0;
+      const nb = (b * f) | 0;
+      u32[i] = (pixel & 0xFF000000) | (nb << 16) | (ng << 8) | nr;
+    }
+  }
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const minAvg = Math.min(...rows.map(r => r.avg));
+  const maxAvg = Math.max(...rows.map(r => r.avg));
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const ratio = (r.avg / minAvg).toFixed(2);
+    const isBest = Math.abs(r.avg - minAvg) < 0.01;
+    const isWorst = Math.abs(r.avg - maxAvg) < 0.01 && rows.length > 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.min.toFixed(1)}</td>
+      <td>${r.max.toFixed(1)}</td>
+      <td>${r.avg.toFixed(1)}</td>
+      <td class="speedup">${ratio}x</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function run() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    const lut = buildDarkFactorLUT(INTENSITY);
+    const baseData = createTestData();
+    const rows = [];
+
+    // 現行実装
+    {
+      const times = [];
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`現行実装 計測中 (${i + 1}/${REPEAT})...`, 5 + i * 15);
+        await new Promise(r => setTimeout(r, 10));
+        // データはコピーして毎回新鮮な状態で
+        const data = new Uint8ClampedArray(baseData);
+        const t0 = performance.now();
+        runOriginal(data, INTENSITY);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '現行: Math.pow ピクセルごと計算', ...stats(times) });
+    }
+
+    // 改善案A: LUT
+    {
+      const times = [];
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案A (LUT) 計測中 (${i + 1}/${REPEAT})...`, 30 + i * 15);
+        await new Promise(r => setTimeout(r, 10));
+        const data = new Uint8ClampedArray(baseData);
+        const t0 = performance.now();
+        runOptimizedA(data, lut);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '改善案A: LUT で Math.pow を排除', ...stats(times) });
+    }
+
+    // 改善案B: Uint32Array + LUT
+    {
+      const times = [];
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案B (Uint32Array+LUT) 計測中 (${i + 1}/${REPEAT})...`, 60 + i * 10);
+        await new Promise(r => setTimeout(r, 10));
+        const data = new Uint8ClampedArray(baseData);
+        const t0 = performance.now();
+        runOptimizedB(data, lut);
+        times.push(performance.now() - t0);
+      }
+      rows.push({ label: '改善案B: Uint32Array ビュー + LUT', ...stats(times) });
+    }
+
+    renderTable(rows);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnRun').addEventListener('click', run);
+window.addEventListener('load', () => setTimeout(run, 300));
+</script>
+</body>
+</html>

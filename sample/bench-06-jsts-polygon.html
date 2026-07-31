@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 06 — JSTSポリゴン計算</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:20px;font-size:14px}
+h1{font-size:18px;margin-bottom:6px;color:#4af}
+.subtitle{color:#888;font-size:12px;margin-bottom:20px}
+.bench-section{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.bench-section h2{font-size:14px;color:#adf;margin-bottom:8px}
+.bench-section p{font-size:12px;color:#888;margin-bottom:12px;line-height:1.6}
+.progress-bar-wrap{background:#0a0a1a;border-radius:4px;height:8px;margin-bottom:12px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4af,#8af);width:0%;transition:width .1s}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#0f3460}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1a2a50}
+th{color:#4af;font-weight:600;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.winner{color:#4f8;font-weight:700}
+.slower{color:#f84}
+.baseline{color:#aaa}
+.tag-current{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#3a1a0a;color:#f84;margin-left:6px}
+.tag-opt{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#0a3a1a;color:#4f8;margin-left:6px}
+.status{font-size:12px;color:#888;margin-bottom:8px;min-height:18px}
+button{background:#0f3460;color:#4af;border:1px solid #4af;border-radius:5px;padding:8px 20px;cursor:pointer;font-size:13px;margin-bottom:12px}
+button:hover{background:#1a4a80}
+button:disabled{opacity:0.4;cursor:not-allowed}
+</style>
+</head>
+<body>
+<h1>Bench 06 — JSTSポリゴン計算</h1>
+<p class="subtitle">50個の重なりあるポリゴン（各32頂点）の重なり判定・マージ速度比較</p>
+
+<div class="bench-section">
+  <h2>概要</h2>
+  <p>
+    <strong>現行:</strong> JSTSライブラリ（Java→JSトランスパイル）相当の重いポリゴン演算をシミュレート。<br>
+    <strong>改善A:</strong> バウンディングボックスによる事前フィルタで不要な交差判定をスキップ。<br>
+    <strong>改善B:</strong> Sutherland-Hodgmanクリッピングの直接実装による高速ポリゴンマージ。
+  </p>
+</div>
+
+<button id="btnRun">ベンチマーク実行</button>
+<div class="status" id="status">ボタンを押すと自動実行します</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>実装</th>
+      <th class="num">合計時間 (ms)</th>
+      <th class="num">イテレーション</th>
+      <th class="num">1回あたり (μs)</th>
+      <th class="num">速度比</th>
+    </tr>
+  </thead>
+  <tbody id="results">
+    <tr><td colspan="5" style="color:#555;text-align:center">実行待ち</td></tr>
+  </tbody>
+</table>
+
+<script>
+// ---- テストデータ生成 ----
+function makeCirclePolygon(cx, cy, r, n) {
+  var pts = [];
+  for (var i = 0; i < n; i++) {
+    var a = (i / n) * Math.PI * 2;
+    pts.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r });
+  }
+  return pts;
+}
+
+function generatePolygons() {
+  var polys = [];
+  // 50個、格子状+ランダムオフセットで重なりを作る
+  var cols = 7, spacing = 40;
+  for (var i = 0; i < 50; i++) {
+    var col = i % cols;
+    var row = Math.floor(i / cols);
+    var cx = 50 + col * spacing + (Math.sin(i * 1.7) * 15);
+    var cy = 50 + row * spacing + (Math.cos(i * 2.3) * 15);
+    var r = 18 + (i % 5) * 3;
+    polys.push(makeCirclePolygon(cx, cy, r, 32));
+  }
+  return polys;
+}
+
+// ---- 現行実装シミュレーション ----
+// JSTSのような全ペア総当たりで交差判定（重い）
+function polygonArea(pts) {
+  var area = 0;
+  var n = pts.length;
+  for (var i = 0; i < n; i++) {
+    var j = (i + 1) % n;
+    area += pts[i].x * pts[j].y;
+    area -= pts[j].x * pts[i].y;
+  }
+  return Math.abs(area) / 2;
+}
+
+function pointInPolygon(pt, poly) {
+  var inside = false;
+  var n = poly.length;
+  for (var i = 0, j = n - 1; i < n; j = i++) {
+    var xi = poly[i].x, yi = poly[i].y;
+    var xj = poly[j].x, yj = poly[j].y;
+    if (((yi > pt.y) !== (yj > pt.y)) &&
+        (pt.x < (xj - xi) * (pt.y - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function segmentsIntersect(p1, p2, p3, p4) {
+  var d1x = p2.x - p1.x, d1y = p2.y - p1.y;
+  var d2x = p4.x - p3.x, d2y = p4.y - p3.y;
+  var cross = d1x * d2y - d1y * d2x;
+  if (Math.abs(cross) < 1e-10) return false;
+  var t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / cross;
+  var u = ((p3.x - p1.x) * d1y - (p3.y - p1.y) * d1x) / cross;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+}
+
+function currentImpl_checkIntersect(polyA, polyB) {
+  // 全辺ペア総当たり（JSTSシミュレーション）
+  var na = polyA.length, nb = polyB.length;
+  for (var i = 0; i < na; i++) {
+    for (var j = 0; j < nb; j++) {
+      if (segmentsIntersect(polyA[i], polyA[(i+1)%na], polyB[j], polyB[(j+1)%nb])) {
+        return true;
+      }
+    }
+  }
+  // containment check
+  return pointInPolygon(polyA[0], polyB) || pointInPolygon(polyB[0], polyA);
+}
+
+function currentImpl(polys) {
+  var results = [];
+  var n = polys.length;
+  for (var i = 0; i < n; i++) {
+    for (var j = i + 1; j < n; j++) {
+      if (currentImpl_checkIntersect(polys[i], polys[j])) {
+        results.push([i, j]);
+      }
+    }
+  }
+  return results;
+}
+
+// ---- 改善A: バウンディングボックス事前フィルタ ----
+function getBBox(poly) {
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (var i = 0; i < poly.length; i++) {
+    if (poly[i].x < minX) minX = poly[i].x;
+    if (poly[i].y < minY) minY = poly[i].y;
+    if (poly[i].x > maxX) maxX = poly[i].x;
+    if (poly[i].y > maxY) maxY = poly[i].y;
+  }
+  return { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+}
+
+function bboxOverlap(a, b) {
+  return a.minX <= b.maxX && a.maxX >= b.minX &&
+         a.minY <= b.maxY && a.maxY >= b.minY;
+}
+
+function optimizedA(polys) {
+  var results = [];
+  var n = polys.length;
+  // 事前にBBox計算
+  var bboxes = polys.map(getBBox);
+  for (var i = 0; i < n; i++) {
+    for (var j = i + 1; j < n; j++) {
+      // BBoxフィルタで早期スキップ
+      if (!bboxOverlap(bboxes[i], bboxes[j])) continue;
+      if (currentImpl_checkIntersect(polys[i], polys[j])) {
+        results.push([i, j]);
+      }
+    }
+  }
+  return results;
+}
+
+// ---- 改善B: Sutherland-Hodgmanクリッピング ----
+function sutherlandHodgman(subjectPoly, clipPoly) {
+  var output = subjectPoly.slice();
+  var cn = clipPoly.length;
+  for (var i = 0; i < cn; i++) {
+    if (output.length === 0) break;
+    var input = output.slice();
+    output = [];
+    var edgeStart = clipPoly[i];
+    var edgeEnd = clipPoly[(i + 1) % cn];
+    var dx = edgeEnd.x - edgeStart.x;
+    var dy = edgeEnd.y - edgeStart.y;
+    function inside(p) {
+      return dx * (p.y - edgeStart.y) - dy * (p.x - edgeStart.x) >= 0;
+    }
+    function intersect(a, b) {
+      var da = { x: b.x - a.x, y: b.y - a.y };
+      var dc = { x: edgeEnd.x - edgeStart.x, y: edgeEnd.y - edgeStart.y };
+      var denom = da.x * dc.y - da.y * dc.x;
+      if (Math.abs(denom) < 1e-10) return a;
+      var t = ((edgeStart.x - a.x) * dc.y - (edgeStart.y - a.y) * dc.x) / denom;
+      return { x: a.x + t * da.x, y: a.y + t * da.y };
+    }
+    for (var k = 0; k < input.length; k++) {
+      var cur = input[k];
+      var prev = input[(k + input.length - 1) % input.length];
+      var curIn = inside(cur);
+      var prevIn = inside(prev);
+      if (curIn) {
+        if (!prevIn) output.push(intersect(prev, cur));
+        output.push(cur);
+      } else if (prevIn) {
+        output.push(intersect(prev, cur));
+      }
+    }
+  }
+  return output;
+}
+
+function optimizedB(polys) {
+  var results = [];
+  var n = polys.length;
+  var bboxes = polys.map(getBBox);
+  for (var i = 0; i < n; i++) {
+    for (var j = i + 1; j < n; j++) {
+      if (!bboxOverlap(bboxes[i], bboxes[j])) continue;
+      // SHクリッピングで交差ポリゴン面積を確認
+      var clipped = sutherlandHodgman(polys[i], polys[j]);
+      if (clipped.length >= 3 && polygonArea(clipped) > 0.01) {
+        results.push([i, j, clipped]);
+      }
+    }
+  }
+  return results;
+}
+
+// ---- ベンチマーク実行 ----
+var ITERATIONS = 20;
+
+function bench(fn, polys, iters) {
+  var start = performance.now();
+  for (var i = 0; i < iters; i++) {
+    fn(polys);
+  }
+  return performance.now() - start;
+}
+
+function setProgress(pct) {
+  document.getElementById('progress').style.width = pct + '%';
+}
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function renderResults(rows) {
+  var baseline = rows[0].ms;
+  var html = '';
+  rows.forEach(function(r) {
+    var ratio = baseline / r.ms;
+    var ratioStr = ratio.toFixed(2) + 'x';
+    var cls = ratio > 1.1 ? 'winner' : ratio < 0.9 ? 'slower' : 'baseline';
+    var usEach = (r.ms / ITERATIONS * 1000).toFixed(1);
+    html += '<tr>';
+    html += '<td>' + r.label + (r.tag === 'current' ? '<span class="tag-current">現行</span>' : '<span class="tag-opt">最適化</span>') + '</td>';
+    html += '<td class="num">' + r.ms.toFixed(2) + '</td>';
+    html += '<td class="num">' + ITERATIONS + '</td>';
+    html += '<td class="num">' + usEach + '</td>';
+    html += '<td class="num ' + cls + '">' + ratioStr + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('results').innerHTML = html;
+}
+
+document.getElementById('btnRun').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  setProgress(0);
+  setStatus('テストデータ生成中...');
+  document.getElementById('results').innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center">実行中...</td></tr>';
+
+  setTimeout(function() {
+    var polys = generatePolygons();
+    setStatus('現行実装 計測中...');
+    setProgress(10);
+
+    setTimeout(function() {
+      var msA = bench(currentImpl, polys, ITERATIONS);
+      setProgress(40);
+      setStatus('改善案A 計測中...');
+
+      setTimeout(function() {
+        var msB = bench(optimizedA, polys, ITERATIONS);
+        setProgress(70);
+        setStatus('改善案B 計測中...');
+
+        setTimeout(function() {
+          var msC = bench(optimizedB, polys, ITERATIONS);
+          setProgress(100);
+          setStatus('完了');
+          renderResults([
+            { label: '現行（全ペア総当たり）', ms: msA, tag: 'current' },
+            { label: '改善A（BBoxフィルタ）', ms: msB, tag: 'opt' },
+            { label: '改善B（Sutherland-Hodgman）', ms: msC, tag: 'opt' }
+          ]);
+          btn.disabled = false;
+        }, 50);
+      }, 50);
+    }, 50);
+  }, 50);
+});
+
+// 自動実行
+window.addEventListener('load', function() {
+  document.getElementById('btnRun').click();
+});
+</script>
+</body>
+</html>

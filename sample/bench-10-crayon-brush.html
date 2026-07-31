@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 10 — クレヨンブラシ大量矩形生成</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:20px;font-size:14px}
+h1{font-size:18px;margin-bottom:6px;color:#4af}
+.subtitle{color:#888;font-size:12px;margin-bottom:20px}
+.bench-section{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.bench-section h2{font-size:14px;color:#adf;margin-bottom:8px}
+.bench-section p{font-size:12px;color:#888;margin-bottom:12px;line-height:1.6}
+.progress-bar-wrap{background:#0a0a1a;border-radius:4px;height:8px;margin-bottom:12px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4af,#8af);width:0%;transition:width .1s}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#0f3460}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1a2a50}
+th{color:#4af;font-weight:600;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.winner{color:#4f8;font-weight:700}
+.slower{color:#f84}
+.baseline{color:#aaa}
+.tag-current{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#3a1a0a;color:#f84;margin-left:6px}
+.tag-opt{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#0a3a1a;color:#4f8;margin-left:6px}
+.status{font-size:12px;color:#888;margin-bottom:8px;min-height:18px}
+button{background:#0f3460;color:#4af;border:1px solid #4af;border-radius:5px;padding:8px 20px;cursor:pointer;font-size:13px;margin-bottom:12px}
+button:hover{background:#1a4a80}
+button:disabled{opacity:0.4;cursor:not-allowed}
+canvas{display:none}
+</style>
+</head>
+<body>
+<h1>Bench 10 — クレヨンブラシ大量矩形生成</h1>
+<p class="subtitle">size=50で1000回呼び出し（dotNum×stepNum個の矩形生成）速度比較</p>
+
+<div class="bench-section">
+  <h2>概要</h2>
+  <p>
+    <strong>現行:</strong> dotNum×stepNum個の矩形をfillRectで1つずつ描画（大量のAPI呼び出し）。<br>
+    <strong>改善A:</strong> Path2Dに全矩形をまとめて1回のfill()で描画（コンテキスト切り替えを最小化）。<br>
+    <strong>改善B:</strong> 事前計算済みランダムテーブル + ImageDataへの直接書き込み（Canvas API不使用）。
+  </p>
+</div>
+
+<button id="btnRun">ベンチマーク実行</button>
+<div class="status" id="status">ボタンを押すと自動実行します</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>実装</th>
+      <th class="num">合計時間 (ms)</th>
+      <th class="num">呼び出し回数</th>
+      <th class="num">1回あたり (μs)</th>
+      <th class="num">速度比</th>
+    </tr>
+  </thead>
+  <tbody id="results">
+    <tr><td colspan="5" style="color:#555;text-align:center">実行待ち</td></tr>
+  </tbody>
+</table>
+
+<canvas id="cv"></canvas>
+
+<script>
+var BRUSH_SIZE = 50;
+var CALL_COUNT = 1000;
+var ITERATIONS = 5;
+var W = 600, H = 400;
+
+function initCanvas() {
+  var cv = document.getElementById('cv');
+  cv.width = W;
+  cv.height = H;
+  return cv.getContext('2d');
+}
+
+// ---- 現行実装: fillRect連打 ----
+function drawCrayon_current(ctx, x, y, size) {
+  var dotNum = size * 0.5;
+  var stepNum = 3;
+  ctx.fillStyle = 'rgba(50,30,10,0.3)';
+  for (var i = 0; i < dotNum; i++) {
+    for (var j = 0; j < stepNum; j++) {
+      var rx = x + (Math.random() - 0.5) * size;
+      var ry = y + (Math.random() - 0.5) * size;
+      var rs = Math.random() * 2 + 1;
+      ctx.fillRect(rx, ry, rs, rs);
+    }
+  }
+}
+
+function currentImpl(ctx) {
+  ctx.clearRect(0, 0, W, H);
+  for (var n = 0; n < CALL_COUNT; n++) {
+    var x = (n % 30) * 20 + 10;
+    var y = Math.floor(n / 30) * 20 + 10;
+    drawCrayon_current(ctx, x, y, BRUSH_SIZE);
+  }
+}
+
+// ---- 改善A: Path2Dバッチ描画 ----
+function drawCrayon_path2d(ctx, x, y, size) {
+  var dotNum = size * 0.5 | 0;
+  var stepNum = 3;
+  var path = new Path2D();
+  for (var i = 0; i < dotNum; i++) {
+    for (var j = 0; j < stepNum; j++) {
+      var rx = x + (Math.random() - 0.5) * size;
+      var ry = y + (Math.random() - 0.5) * size;
+      var rs = Math.random() * 2 + 1;
+      path.rect(rx, ry, rs, rs);
+    }
+  }
+  ctx.fillStyle = 'rgba(50,30,10,0.3)';
+  ctx.fill(path);
+}
+
+function optimizedA(ctx) {
+  ctx.clearRect(0, 0, W, H);
+  for (var n = 0; n < CALL_COUNT; n++) {
+    var x = (n % 30) * 20 + 10;
+    var y = Math.floor(n / 30) * 20 + 10;
+    drawCrayon_path2d(ctx, x, y, BRUSH_SIZE);
+  }
+}
+
+// ---- 改善B: 事前計算ランダムテーブル + ImageData直接書き込み ----
+var TABLE_SIZE = 2048;
+var randTable = new Float32Array(TABLE_SIZE);
+(function() {
+  for (var i = 0; i < TABLE_SIZE; i++) {
+    randTable[i] = Math.random();
+  }
+})();
+var randIdx = 0;
+
+function fastRand() {
+  var v = randTable[randIdx & (TABLE_SIZE - 1)];
+  randIdx = (randIdx + 1) & (TABLE_SIZE - 1);
+  return v;
+}
+
+function drawCrayon_imagedata(imageData, x, y, size, w) {
+  var dotNum = size * 0.5 | 0;
+  var stepNum = 3;
+  var d = imageData.data;
+  var alpha = 77; // 0.3 * 255
+  var r = 50, g = 30, b = 10;
+  for (var i = 0; i < dotNum; i++) {
+    for (var j = 0; j < stepNum; j++) {
+      var rx = x + (fastRand() - 0.5) * size | 0;
+      var ry = y + (fastRand() - 0.5) * size | 0;
+      var rs = (fastRand() * 2 + 1) | 0;
+      // 小矩形を直接書き込み（アルファブレンド簡略版）
+      for (var py = ry; py < ry + rs; py++) {
+        if (py < 0 || py >= imageData.height) continue;
+        for (var px = rx; px < rx + rs; px++) {
+          if (px < 0 || px >= w) continue;
+          var idx = (py * w + px) * 4;
+          // Aの加算合成（簡易）
+          var existing_a = d[idx + 3];
+          var new_a = Math.min(255, existing_a + alpha);
+          d[idx]     = r;
+          d[idx + 1] = g;
+          d[idx + 2] = b;
+          d[idx + 3] = new_a;
+        }
+      }
+    }
+  }
+}
+
+function optimizedB(ctx) {
+  var imageData = ctx.createImageData(W, H);
+  randIdx = 0;
+  for (var n = 0; n < CALL_COUNT; n++) {
+    var x = (n % 30) * 20 + 10;
+    var y = Math.floor(n / 30) * 20 + 10;
+    drawCrayon_imagedata(imageData, x, y, BRUSH_SIZE, W);
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function bench(fn, ctx, iters) {
+  var start = performance.now();
+  for (var i = 0; i < iters; i++) {
+    fn(ctx);
+  }
+  return performance.now() - start;
+}
+
+function setProgress(pct) {
+  document.getElementById('progress').style.width = pct + '%';
+}
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function renderResults(rows) {
+  var baseline = rows[0].ms;
+  var html = '';
+  rows.forEach(function(r) {
+    var ratio = baseline / r.ms;
+    var ratioStr = ratio.toFixed(2) + 'x';
+    var cls = ratio > 1.1 ? 'winner' : ratio < 0.9 ? 'slower' : 'baseline';
+    var totalCalls = CALL_COUNT * ITERATIONS;
+    var usEach = (r.ms / totalCalls * 1000).toFixed(1);
+    html += '<tr>';
+    html += '<td>' + r.label + (r.tag === 'current' ? '<span class="tag-current">現行</span>' : '<span class="tag-opt">最適化</span>') + '</td>';
+    html += '<td class="num">' + r.ms.toFixed(2) + '</td>';
+    html += '<td class="num">' + totalCalls.toLocaleString() + '</td>';
+    html += '<td class="num">' + usEach + '</td>';
+    html += '<td class="num ' + cls + '">' + ratioStr + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('results').innerHTML = html;
+}
+
+document.getElementById('btnRun').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  setProgress(0);
+  setStatus('Canvas初期化中...');
+  document.getElementById('results').innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center">実行中...</td></tr>';
+
+  setTimeout(function() {
+    var ctx = initCanvas();
+    setStatus('現行実装 計測中...');
+    setProgress(10);
+
+    setTimeout(function() {
+      var msA = bench(currentImpl, ctx, ITERATIONS);
+      setProgress(40);
+      setStatus('改善案A 計測中...');
+
+      setTimeout(function() {
+        var msB = bench(optimizedA, ctx, ITERATIONS);
+        setProgress(70);
+        setStatus('改善案B 計測中...');
+
+        setTimeout(function() {
+          var msC = bench(optimizedB, ctx, ITERATIONS);
+          setProgress(100);
+          setStatus('完了');
+          renderResults([
+            { label: '現行（fillRect連打）', ms: msA, tag: 'current' },
+            { label: '改善A（Path2Dバッチ）', ms: msB, tag: 'opt' },
+            { label: '改善B（事前ランダムテーブル+ImageData）', ms: msC, tag: 'opt' }
+          ]);
+          btn.disabled = false;
+        }, 50);
+      }, 50);
+    }, 50);
+  }, 50);
+});
+
+window.addEventListener('load', function() {
+  document.getElementById('btnRun').click();
+});
+</script>
+</body>
+</html>
