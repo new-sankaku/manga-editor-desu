@@ -227,6 +227,7 @@ stateStack.splice(currentStateIndex+1);
 stateStack.push(json);
 currentStateIndex=stateStack.length-1;
 updateLayerPanel();
+btmScheduleThumbnailRefresh();
 return true;
 }
 
@@ -421,6 +422,7 @@ reSetSpeechBubbleText();
 setCanvasGUID(guid||state.canvasGuid);
 canvas.renderAll();
 updateLayerPanel();
+btmScheduleThumbnailRefresh();
 resetEventHandlers();
 customSpeechBubbleAllRelocation();
 }catch(e){

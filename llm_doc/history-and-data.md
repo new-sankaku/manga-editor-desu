@@ -7,6 +7,7 @@
 - **1ユーザー操作＝1履歴エントリ**。同一タスク内で発生した複数のcanvasイベントは自動で1件に集約される
 - 履歴は非同期コミット（0msタイマー）。同期的に`stateStack`を読む処理の前には`flushHistory()`を呼ぶ
 - 直前の状態とJSONが同一なら積まない（重複除去）。そのため`commitHistory()`は空振りしても無害
+- 履歴の保存（`captureState`）と復元（`applyHistoryState`）の完了時に`btmScheduleThumbnailRefresh()`でページサムネイルを自動更新する
 
 ### API
 | 関数 | 用途 |
