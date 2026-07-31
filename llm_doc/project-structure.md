@@ -20,7 +20,8 @@ manga-editor-desu/
 │   ├── db/             永続化（user-font-repository）
 │   ├── dashboard/      ダッシュボード（統計、プロンプト頻度）
 │   ├── svg/            SVGテンプレート（コマ割り、吹き出し）
-│   ├── canvas-manager.js    キャンバスリサイズ・ズーム
+│   ├── core/font/project-font.js  プロジェクトのフォント情報保存・復元
+│   ├── canvas-manager.js    キャンバスリサイズ・ズーム、原稿サイズ(mm)
 │   ├── project-management.js プロジェクト保存/読み込み
 │   └── shortcut.js     キーボードショートカット
 ├── css/

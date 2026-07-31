@@ -29,6 +29,45 @@ initMessage();
 },15);
 }
 
+// 原稿の物理サイズ(mm)。キャンバスのピクセルサイズはウィンドウ依存のため、
+// 出力解像度はこの値とDPIから決める
+const DEFAULT_PAGE_WIDTH_MM=148;
+const DEFAULT_PAGE_HEIGHT_MM=210;
+var hasProjectPageSize=true;
+
+function getPageSizeMm(){
+var widthInput=$("pageWidthMm");
+var heightInput=$("pageHeightMm");
+var width=widthInput ? parseFloat(widthInput.value) : NaN;
+var height=heightInput ? parseFloat(heightInput.value) : NaN;
+if(!(width>0)||!(height>0)){
+return {width:DEFAULT_PAGE_WIDTH_MM,height:DEFAULT_PAGE_HEIGHT_MM};
+}
+return {width:width,height:height};
+}
+
+function setPageSizeMm(width,height){
+if(!(width>0)||!(height>0)){
+return;
+}
+var widthInput=$("pageWidthMm");
+var heightInput=$("pageHeightMm");
+if(widthInput){widthInput.value=width;}
+if(heightInput){heightInput.value=height;}
+}
+
+// プロジェクト読み込み時に原稿サイズを復元する。未記録の旧プロジェクトは
+// 従来どおりA5換算で出力するが、その旨を出力時に明示する
+function applyPageSizeMm(canvasInfo){
+if(canvasInfo&&canvasInfo.pageWidthMm>0&&canvasInfo.pageHeightMm>0){
+setPageSizeMm(canvasInfo.pageWidthMm,canvasInfo.pageHeightMm);
+hasProjectPageSize=true;
+return;
+}
+setPageSizeMm(DEFAULT_PAGE_WIDTH_MM,DEFAULT_PAGE_HEIGHT_MM);
+hasProjectPageSize=false;
+}
+
 function resizeCanvasByNum(newWidth,newHeight) {
 canvas.setWidth(newWidth);
 canvas.setHeight(newHeight);
@@ -172,6 +211,12 @@ commitHistoryDebounced();
 });
 $('bg-color').addEventListener('input',function (event) {
 resizableContainer=$('canvas-container');
+});
+['pageWidthMm','pageHeightMm'].forEach(function(id){
+var input=$(id);
+if(input){
+input.addEventListener('input',function(){hasProjectPageSize=true;});
+}
 });
 });
 

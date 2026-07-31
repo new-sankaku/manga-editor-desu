@@ -10,6 +10,72 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20260731100000_001":{
+"ja":{
+"pageSizeMm":"原稿サイズ (mm)",
+"pageSizeUnknownTitle":"原稿サイズが未設定です",
+"pageSizeUnknownMessage":"このプロジェクトには原稿サイズが記録されていないため、A5として出力します。",
+"fontMissingTitle":"フォントが見つかりません",
+"fontMissingMessage":"このプロジェクトで使用しているフォントが未登録です:",
+"fontRestoredTitle":"フォントを反映しました"
+},
+"en":{
+"pageSizeMm":"Page Size (mm)",
+"pageSizeUnknownTitle":"Page size not set",
+"pageSizeUnknownMessage":"This project has no recorded page size, so it will be exported as A5.",
+"fontMissingTitle":"Font not found",
+"fontMissingMessage":"Fonts used in this project are not registered:",
+"fontRestoredTitle":"Font applied"
+},
+"ko":{
+"pageSizeMm":"원고 크기 (mm)",
+"pageSizeUnknownTitle":"원고 크기가 설정되지 않음",
+"pageSizeUnknownMessage":"이 프로젝트에는 원고 크기가 기록되어 있지 않아 A5로 출력합니다.",
+"fontMissingTitle":"폰트를 찾을 수 없음",
+"fontMissingMessage":"이 프로젝트에서 사용하는 폰트가 등록되어 있지 않습니다:",
+"fontRestoredTitle":"폰트를 적용했습니다"
+},
+"fr":{
+"pageSizeMm":"Taille de page (mm)",
+"pageSizeUnknownTitle":"Taille de page non définie",
+"pageSizeUnknownMessage":"Ce projet n'a pas de taille de page enregistrée, il sera exporté en A5.",
+"fontMissingTitle":"Police introuvable",
+"fontMissingMessage":"Les polices utilisées dans ce projet ne sont pas enregistrées :",
+"fontRestoredTitle":"Police appliquée"
+},
+"zh":{
+"pageSizeMm":"原稿尺寸 (mm)",
+"pageSizeUnknownTitle":"未设置原稿尺寸",
+"pageSizeUnknownMessage":"此项目未记录原稿尺寸，将按 A5 输出。",
+"fontMissingTitle":"找不到字体",
+"fontMissingMessage":"此项目使用的字体尚未注册：",
+"fontRestoredTitle":"已应用字体"
+},
+"ru":{
+"pageSizeMm":"Размер страницы (мм)",
+"pageSizeUnknownTitle":"Размер страницы не задан",
+"pageSizeUnknownMessage":"В этом проекте не записан размер страницы, экспорт будет выполнен как A5.",
+"fontMissingTitle":"Шрифт не найден",
+"fontMissingMessage":"Шрифты, используемые в этом проекте, не зарегистрированы:",
+"fontRestoredTitle":"Шрифт применён"
+},
+"es":{
+"pageSizeMm":"Tamaño de página (mm)",
+"pageSizeUnknownTitle":"Tamaño de página no definido",
+"pageSizeUnknownMessage":"Este proyecto no tiene un tamaño de página registrado, se exportará como A5.",
+"fontMissingTitle":"Fuente no encontrada",
+"fontMissingMessage":"Las fuentes usadas en este proyecto no están registradas:",
+"fontRestoredTitle":"Fuente aplicada"
+},
+"de":{
+"pageSizeMm":"Seitengröße (mm)",
+"pageSizeUnknownTitle":"Seitengröße nicht festgelegt",
+"pageSizeUnknownMessage":"Für dieses Projekt ist keine Seitengröße gespeichert, es wird als A5 exportiert.",
+"fontMissingTitle":"Schriftart nicht gefunden",
+"fontMissingMessage":"Die in diesem Projekt verwendeten Schriftarten sind nicht registriert:",
+"fontRestoredTitle":"Schriftart angewendet"
+}
+},
 "20260218220000_001":{
 "ja":{
 "modelSettingsButton":"&#128295; 使用モデル・ワークフロー",

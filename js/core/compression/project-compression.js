@@ -1,10 +1,14 @@
 
-async function generateProjectFileBufferListCore(stateStackParam,imageMapParam,canvasInfoParam,basePromptParam,previewDataUrl){
+async function generateProjectFileBufferListCore(stateStackParam,imageMapParam,canvasInfoParam,basePromptParam,previewDataUrl,fontDataParam){
 var fileBufferList=[];
 var promises=[
 (async ()=>{
 var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(basePromptParam||{}));
 lz4Compressor.putDataListByArrayBuffer(fileBufferList,"text2img_basePrompt.json",buffer);
+})(),
+(async ()=>{
+var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(fontDataParam||[]));
+lz4Compressor.putDataListByArrayBuffer(fileBufferList,"fonts.json",buffer);
 })(),
 ...stateStackParam.map(async (json,index)=>{
 var buffer=await ArrayBufferUtils.toArrayBuffer(JSON.stringify(json));
@@ -42,8 +46,9 @@ if(isGridVisible){
 drawGrid();
 isGridVisible=true;
 }
-var canvasInfo={width:canvas.width,height:canvas.height};
-var fileBufferList=await generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl);
+var pageSize=getPageSizeMm();
+var canvasInfo={width:canvas.width,height:canvas.height,pageWidthMm:pageSize.width,pageHeightMm:pageSize.height};
+var fileBufferList=await generateProjectFileBufferListCore(stateStack,imageMap,canvasInfo,basePrompt,previewDataUrl,buildProjectFontData());
 return {fileBufferList,previewDataUrl};
 }
 
@@ -89,11 +94,11 @@ compressionLogger.error("Failed to load file:",file.name,error);
 }
 }));
 
+// 履歴状態は state_XXXXXX.json のみ。除外リスト方式だと新しいメタファイルを
+// 追加するたびに状態として読み込まれてしまうため、名前で限定する
 const jsonLoadPromises=sortedFiles.map(async (file)=>{
 try {
-if (file.name.endsWith(".json")&&
-file.name!=="text2img_basePrompt.json"&&
-file.name!=="canvas_info.json") {
+if (file.name.startsWith("state_")&&file.name.endsWith(".json")) {
 let jsonStr=ArrayBufferUtils.fromArrayBufferToString(file.data);
 return JSON.parse(jsonStr);
 }
@@ -106,6 +111,18 @@ const jsonResults=await Promise.all(jsonLoadPromises);
 stateStack=jsonResults.filter(data=>data!==undefined);
 
 currentStateIndex=stateStack.length-1;
+applyPageSizeMm(canvasInfo);
+
+// テキストの文字幅計算より前にフォントを登録しないと、フォールバックされた
+// 幅でレイアウトされてしまうため、キャンバス復元より先に処理する
+let fontsBuffer=getDataByName(files,"fonts.json");
+if(fontsBuffer){
+let fontsStr=ArrayBufferUtils.fromArrayBufferToString(fontsBuffer);
+await restoreProjectFonts(JSON.parse(fontsStr));
+}else{
+setProjectFontData([]);
+}
+
 resizeCanvasByNum(canvasInfo.width,canvasInfo.height);
 lastRedo(guid);
 
@@ -346,8 +363,10 @@ const jsonResults=await Promise.all(jsonLoadPromises);
 stateStack=jsonResults.filter(data=>data!==undefined);
 
 currentStateIndex=stateStack.length-1;
+applyPageSizeMm(canvasInfo);
 resizeCanvasByNum(canvasInfo.width,canvasInfo.height);
 lastRedo(guid);
+setProjectFontData([]);
 
 if(guid){
 setCanvasGUID(guid);

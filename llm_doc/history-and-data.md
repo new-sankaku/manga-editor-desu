@@ -176,9 +176,38 @@ localStorageキー別にMap保存。500msデバウンス。
 LZ4圧縮で以下を保存:
 - `text2img_basePrompt.json` … basePromptのスナップショット
 - `state_XXXXXX.json` … キャンバス状態（`customToJSON()`出力）
-- `canvas_info.json` … キャンバスサイズ
+- `canvas_info.json` … キャンバスサイズ＋原稿サイズ（`pageWidthMm` / `pageHeightMm`）
+- `fonts.json` … 使用中フォントのメタ情報（`name` / `type` / `url`）
 - `HASH.img` … 画像データ（ハッシュで重複排除）
 - `preview-image.jpeg` … プレビュー
+
+**履歴状態の判定は `state_` プレフィックスで行う。** 除外リスト方式にすると
+メタファイルを追加するたびに状態として読み込まれてしまう。
+読み込み側は `loadLz4BlobProjectFile()` と `generation-task-manager.js` の2箇所。
+
+### 実行環境をまたぐときの注意
+- キャンバスの`width`/`height`は**コンテナにフィットさせた後のピクセルサイズ**であり
+  ウィンドウ依存。オブジェクト座標もこの空間に入る
+- 読み込み時に`resizeCanvas()`が`obj.initial.canvasWidth/Height`を基準に比例スケール
+  するため、別環境でもレイアウトは相似形で再現される
+- `obj.initial`は再フィットの基準点。`resizeCanvas()`内で更新してはいけない
+- 出力ピクセルサイズは**原稿サイズ(mm)×DPI**で決まる（`getCropAndDownloadLink()`）。
+  ウィンドウサイズには依存しない
+- `devicePixelRatio`は描画バッファにのみ影響し、座標にも出力サイズにも影響しない。
+  **画像生成用のデータURL生成でDPIを掛けてはいけない**（環境で送信解像度が変わる）
+
+### フォント（project-font.js）
+フォント本体はIndexedDB(`fm-fontStorage`)にありプロジェクトには含まれない。
+`fonts.json`に`name`/`type`/`url`を保存し、読み込み時に:
+- 登録済み … 何もしない
+- 未登録かつ`type==='web'` … `fontManager.registerWebFont(url)`で自動復元
+- それ以外（`upload` / `local`）… `missingProjectFonts`に積みToastで明示（黙ってフォールバックしない）
+
+後からフォントを登録すると`applyRecoveredFont()`が該当テキストを再計算して再描画する。
+再読み込みは不要。この再描画は履歴に残さない。
+
+保存時は「ローカル登録済みの情報」→「読み込み時に受け取った情報」の順で引き継ぐ。
+引き継がないとフォント未登録の環境で保存し直したときに情報が失われる。
 
 ### auto-save（auto-save.js）
 `AutoSaveManager`がlocalforage(`autoSaveStorage`)に定期保存。

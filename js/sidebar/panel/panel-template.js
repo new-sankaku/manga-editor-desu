@@ -117,8 +117,8 @@ loadBookSize(x,y,false);
 canvas.renderAll();
 adjustCanvasSize();
 });
-$on($("page-portrait"),"click",()=>loadBookSize(210,297,true));
-$on($("page-landscape"),"click",()=>loadBookSize(297,210,true));
+$on($("page-portrait"),"click",()=>{setPageSizeMm(210,297);loadBookSize(210,297,true);});
+$on($("page-landscape"),"click",()=>{setPageSizeMm(297,210);loadBookSize(297,210,true);});
 });
 
 

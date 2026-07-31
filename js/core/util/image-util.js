@@ -385,16 +385,22 @@ return link;
 },
 
 getCropAndDownloadLink:function(){
-var a5WidthInches=148/25.4;
-var a5HeightInches=210/25.4;
+if(!hasProjectPageSize){
+createToast(getText("pageSizeUnknownTitle"),getText("pageSizeUnknownMessage"));
+}
+var pageSize=getPageSizeMm();
+var pageWidthInches=pageSize.width/25.4;
+var pageHeightInches=pageSize.height/25.4;
 var dpi=parseFloat($('outputDpi').value);
 var canvasWidthPixels=canvas.width;
 var canvasHeightPixels=canvas.height;
-var targetWidthPixels=a5WidthInches*dpi;
-var targetHeightPixels=a5HeightInches*dpi;
-if(canvasWidthPixels>canvasHeightPixels){
-targetWidthPixels=a5HeightInches*dpi;
-targetHeightPixels=a5WidthInches*dpi;
+var targetWidthPixels=pageWidthInches*dpi;
+var targetHeightPixels=pageHeightInches*dpi;
+// 原稿の向きとキャンバスの向きが食い違う場合は用紙の縦横を入れ替える
+if((canvasWidthPixels>canvasHeightPixels)!==(targetWidthPixels>targetHeightPixels)){
+var swap=targetWidthPixels;
+targetWidthPixels=targetHeightPixels;
+targetHeightPixels=swap;
 }
 var multiplierWidth=targetWidthPixels/canvasWidthPixels;
 var multiplierHeight=targetHeightPixels/canvasHeightPixels;

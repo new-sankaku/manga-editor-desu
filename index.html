@@ -436,6 +436,15 @@ function getElementClasses(element) {
                                 <input type="number" id="outputDpi" class="dropdown-item-mini-text" value="300" min="96"
                                     step="1">
                             </a>
+
+                            <a class="dropdown-item">
+                                <i class="material-icons">crop_free</i> <span
+                                    data-i18n="pageSizeMm">Page Size (mm)</span>
+                                <input type="number" id="pageWidthMm" class="dropdown-item-mini-text" value="148" min="1"
+                                    step="1">
+                                <input type="number" id="pageHeightMm" class="dropdown-item-mini-text" value="210"
+                                    min="1" step="1">
+                            </a>
                             <label data-i18n="canvasGrid"></label>
                             <a class="dropdown-item" href="#" id="toggleGridButton">
                                 <i class="material-icons">grid_4x4</i>
@@ -2102,6 +2111,7 @@ function getElementClasses(element) {
     <script src="js/ui/font/user-font-manager.js?v=7.2" defer></script>
     <script src="js/core/font/font-manager-core.js?v=7.2" defer></script>
     <script src="js/core/font/font-dropdown.js?v=7.2" defer></script>
+    <script src="js/core/font/project-font.js?v=7.2" defer></script>
 
     <script src="service-worker.js?v=7.2" defer></script>
     <script src="js/core/service/worker-register.js?v=7.2" defer></script>
