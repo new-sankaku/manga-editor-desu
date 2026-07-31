@@ -50,8 +50,18 @@ objectMenu.addEventListener('input',handleSliderInput);
 }
 
 
+// 表示倍率はDOMから実測する。CSSのscaleと状態変数がずれても位置が狂わない
+function getCanvasDisplayScale(){
+const rect=canvas.getElement().getBoundingClientRect();
+const logicalWidth=canvas.getWidth();
+if(!logicalWidth||!rect.width){
+return 1;
+}
+return rect.width/logicalWidth;
+}
+
 function updateObjectMenuPosition(){
-if(!objectMenu){
+if(!objectMenu||objectMenu.style.display==='none'){
 return;
 }
 const activeObject=canvas.getActiveObject();
@@ -61,31 +71,24 @@ return;
 
 const boundingRect=activeObject.getBoundingRect(true,true);
 const menuPadding=20;
+const viewportMargin=5;
 const canvasRect=canvas.getElement().getBoundingClientRect();
-const canvasOffsetLeft=canvasRect.left;
-const canvasOffsetTop=canvasRect.top;
-const canvasWidth=canvasRect.width;
-const canvasHeight=canvasRect.height;
+const scale=getCanvasDisplayScale();
 
-let left=canvasOffsetLeft+boundingRect.left*canvasContinerScale+boundingRect.width*canvasContinerScale+menuPadding;
-let top=canvasOffsetTop+boundingRect.top*canvasContinerScale;
+let left=canvasRect.left+(boundingRect.left+boundingRect.width)*scale+menuPadding;
+let top=canvasRect.top+boundingRect.top*scale;
 
-if(left+objectMenu.offsetWidth>canvasOffsetLeft+canvasWidth){
-left=Math.min(
-canvasOffsetLeft+canvasWidth+5,
-window.innerWidth-objectMenu.offsetWidth
-);
-}else if(left<canvasOffsetLeft){
-left=Math.max(canvasOffsetLeft-5,0);
+// はみ出し判定はビューポート基準で行う。キャンバス基準だと拡大時に
+// キャンバス右端が画面外にあってもクランプされず、メニューが画面外に出る
+const maxLeft=Math.max(window.innerWidth-objectMenu.offsetWidth-viewportMargin,viewportMargin);
+if(left>maxLeft){
+// 右に置けないときはオブジェクトの左側へ回す
+left=canvasRect.left+boundingRect.left*scale-objectMenu.offsetWidth-menuPadding;
 }
+left=Math.min(Math.max(left,viewportMargin),maxLeft);
 
-top=Math.max(top,canvasOffsetTop-5);
-if(top+objectMenu.offsetHeight>canvasOffsetTop+canvasHeight){
-top=Math.min(
-canvasOffsetTop+canvasHeight+5,
-window.innerHeight-objectMenu.offsetHeight
-);
-}
+const maxTop=Math.max(window.innerHeight-objectMenu.offsetHeight-viewportMargin,viewportMargin);
+top=Math.min(Math.max(top,viewportMargin),maxTop);
 
 objectMenu.style.left=`${left}px`;
 objectMenu.style.top=`${top}px`;
@@ -693,3 +696,12 @@ closeMenu();
 }
 
 createObjectMenu();
+
+// キャンバスをスクロール・拡大縮小・リサイズしてもメニューが対象からずれないようにする
+document.addEventListener('DOMContentLoaded',function(){
+var scrollContainer=$('resizable-container');
+if(scrollContainer){
+scrollContainer.addEventListener('scroll',updateObjectMenuPosition,{passive:true});
+}
+window.addEventListener('resize',updateObjectMenuPosition);
+});

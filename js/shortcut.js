@@ -85,7 +85,7 @@ e.preventDefault();
 
 // bind zoom out shortcut
 hotkeys(hotkeysMap.zoomOut,'all',function (e) {
-zoomIn();
+zoomOut();
 e.preventDefault();
 });
 

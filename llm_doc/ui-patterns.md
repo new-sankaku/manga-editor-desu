@@ -119,3 +119,32 @@ CDN参照だとオフラインで読み込みに失敗し、jscolorなら色ピ�
 ただのテキスト入力に化ける。
 同梱済み: jscolor / tagify / stacktrace / chart.js / wordcloud / three.js
 （Google Fontsとflag-iconsは未同梱。読み込めなくても代替表示で機能は動く）
+
+## キャンバスの拡大縮小（canvas-manager.js）
+`#canvas-container` に CSS の `transform: scale()` をかける方式。
+fabric の `viewportTransform` は使っていない。
+
+```
+#resizable-container   overflow:auto   ← スクロールするのはこちら
+└ #canvas-container    overflow:hidden ← transform:scale() をかける対象
+  └ .canvas-container（fabric生成）
+    └ #mangaImageCanvas
+```
+
+- **スクロール対象を間違えない。** `#canvas-container` は `overflow:hidden` なので
+  `scrollLeft`/`scrollTop` を代入しても何も起きない。`getScrollContainer()` を使う
+- **`transform-origin` は `top left`。** 中央基準にすると左と上にはみ出した分が
+  スクロール範囲に入らず、端まで表示できなくなる
+- 拡大縮小は `applyCanvasZoom(倍率)` に集約。表示中心を保つスクロール補正を行う
+- `clientWidth`/`clientHeight` は transform の影響を受けない（レイアウト値）。
+  `getBoundingClientRect()` は影響を受ける（表示値）
+
+### 画面座標への変換
+表示倍率は状態変数ではなく **DOMから実測** する。
+
+```javascript
+const scale=getCanvasDisplayScale();  // canvasRect.width / canvas.getWidth()
+const screenX=canvasRect.left+logicalX*scale;
+```
+はみ出し判定は**ビューポート基準**で行う。キャンバス基準にすると、拡大時に
+キャンバス右端が画面外にあってもクランプされず、メニューが画面外に出る。

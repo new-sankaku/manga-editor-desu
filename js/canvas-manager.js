@@ -201,16 +201,24 @@ canvas.renderAll();
 
 }
 
-var resizableContainer=0;
+// スクロールするのは #resizable-container（overflow:auto）。
+// 拡大対象の #canvas-container は overflow:hidden なので
+// scrollLeft/scrollTop を代入しても何も起きない
+var resizableContainer=null;
+
+function getScrollContainer(){
+if(!resizableContainer){
+resizableContainer=$('resizable-container');
+}
+return resizableContainer;
+}
 
 document.addEventListener('DOMContentLoaded',function() {
+resizableContainer=$('resizable-container');
 $('bg-color').addEventListener('input',function (event) {
 var color=event.target.value;
 canvas.setBackgroundColor(color,canvas.renderAll.bind(canvas));
 commitHistoryDebounced();
-});
-$('bg-color').addEventListener('input',function (event) {
-resizableContainer=$('canvas-container');
 });
 ['pageWidthMm','pageHeightMm'].forEach(function(id){
 var input=$(id);
@@ -222,59 +230,53 @@ input.addEventListener('input',function(){hasProjectPageSize=true;});
 
 
 let canvasContinerScale=1;
+const CANVAS_ZOOM_STEP=0.1;
+const CANVAS_ZOOM_MIN=0.1;
+const CANVAS_ZOOM_MAX=8;
 
-function zoomIn() {
-const containerRect=resizableContainer.getBoundingClientRect();
+// transform-origin を top left にしてあるため、拡大分は右下方向にだけ広がる。
+// 中央基準だと左と上にはみ出した分がスクロールで到達できず、端まで表示できない
+function applyCanvasZoom(nextScale){
+const container=getScrollContainer();
+if(!container){
+return;
+}
+nextScale=Math.min(Math.max(nextScale,CANVAS_ZOOM_MIN),CANVAS_ZOOM_MAX);
+const previousScale=canvasContinerScale;
+if(nextScale===previousScale){
+return;
+}
 
-canvasContinerScale+=0.1;
+// 拡大前に画面中央にあった位置を、拡大後も画面中央に保つ
+const viewCenterX=container.scrollLeft+container.clientWidth/2;
+const viewCenterY=container.scrollTop+container.clientHeight/2;
+const ratio=nextScale/previousScale;
+
+canvasContinerScale=nextScale;
 $('canvas-container').style.transform=`scale(${canvasContinerScale})`;
 
-const newContentRect=$('canvas-container').getBoundingClientRect();
-const centerX=containerRect.left+containerRect.width/2;
-const centerY=containerRect.top+containerRect.height/2;
-const newScrollLeft=(centerX-newContentRect.width/2-containerRect.left)+resizableContainer.scrollLeft;
-const newScrollTop=(centerY-newContentRect.height/2-containerRect.top)+resizableContainer.scrollTop;
+container.scrollLeft=Math.max(0,viewCenterX*ratio-container.clientWidth/2);
+container.scrollTop=Math.max(0,viewCenterY*ratio-container.clientHeight/2);
 
-resizableContainer.scrollLeft=newScrollLeft;
-resizableContainer.scrollTop=newScrollTop;
 forcedAdjustCanvasSize();
+updateObjectMenuPosition();
+}
+
+function zoomIn() {
+applyCanvasZoom(canvasContinerScale+CANVAS_ZOOM_STEP);
 }
 
 function zoomFit() {
-const containerRect=resizableContainer.getBoundingClientRect();
-
-canvasContinerScale=1.0;
-$('canvas-container').style.transform=`scale(${canvasContinerScale})`;
-
-const newContentRect=$('canvas-container').getBoundingClientRect();
-const centerX=containerRect.left+containerRect.width/2;
-const centerY=containerRect.top+containerRect.height/2;
-const newScrollLeft=(centerX-newContentRect.width/2-containerRect.left)+resizableContainer.scrollLeft;
-const newScrollTop=(centerY-newContentRect.height/2-containerRect.top)+resizableContainer.scrollTop;
-
-resizableContainer.scrollLeft=newScrollLeft;
-resizableContainer.scrollTop=newScrollTop;
-forcedAdjustCanvasSize();
-
+applyCanvasZoom(1.0);
+const container=getScrollContainer();
+if(container){
+container.scrollLeft=0;
+container.scrollTop=0;
+}
 }
 
 function zoomOut() {
-if (canvasContinerScale>0.1) {
-const containerRect=resizableContainer.getBoundingClientRect();
-
-canvasContinerScale-=0.1;
-$('canvas-container').style.transform=`scale(${canvasContinerScale})`;
-
-const newContentRect=$('canvas-container').getBoundingClientRect();
-const centerX=containerRect.left+containerRect.width/2;
-const centerY=containerRect.top+containerRect.height/2;
-const newScrollLeft=(centerX-newContentRect.width/2-containerRect.left)+resizableContainer.scrollLeft;
-const newScrollTop=(centerY-newContentRect.height/2-containerRect.top)+resizableContainer.scrollTop;
-
-resizableContainer.scrollLeft=newScrollLeft;
-resizableContainer.scrollTop=newScrollTop;
-forcedAdjustCanvasSize();
-}
+applyCanvasZoom(canvasContinerScale-CANVAS_ZOOM_STEP);
 }
 
 
