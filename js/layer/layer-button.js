@@ -195,7 +195,7 @@ buttonsDiv.appendChild(viewButton);
 
 
 function putRunI2IButton(buttonsDiv,layer,index) {
-if(hasNotRole(AI_ROLES.Text2Image)){return;}
+if(hasNotRole(AI_ROLES.Image2Image)){return;}
 
 var runButton=document.createElement("button");
 runButton.id="runButton-"+index;
@@ -245,7 +245,7 @@ buttonsDiv.appendChild(seedButton);
 }
 
 function putRunT2IButton(buttonsDiv,layer,index) {
-if(hasNotRole(AI_ROLES.Image2Image)){return;}
+if(hasNotRole(AI_ROLES.Text2Image)){return;}
 
 var runButton=document.createElement("button");
 runButton.id="runButton-"+index;

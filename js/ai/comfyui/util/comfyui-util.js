@@ -78,8 +78,35 @@ return classTypes;
 }
 
 
+// ObjectInfoはワークフロー設定ウィンドウを開いたときにしか取得されないため、
+// 起動直後は空のまま。空のまま照合すると全ノードが「存在しない」と判定され、
+// 背景削除や生成が一律に中断される。未取得ならここで取得する
+async function fetchAndSaveComfyObjectInfo(repo){
+try{
+var response=await comfyuiFetch(comfyUIUrls.objectInfoOnly);
+if(!response.ok){
+comfyuiLogger.error("ObjectInfo fetch failed: HTTP "+response.status);
+return null;
+}
+var objectInfo=await response.json();
+await repo.saveObjectInfo(objectInfo);
+comfyuiLogger.info("ObjectInfo fetched on demand: "+Object.keys(objectInfo).length+" nodes");
+return Object.keys(objectInfo);
+}catch(error){
+comfyuiLogger.error("ObjectInfo fetch error: "+(error instanceof Error?error.name+" "+error.message:error));
+return null;
+}
+}
+
 async function checkWorkflowNodeVsComfyUI(workflowClassTypes,repo){
 var nodeNames=await repo.getNodeNames();
+if(nodeNames.length===0){
+nodeNames=await fetchAndSaveComfyObjectInfo(repo);
+if(nodeNames===null||nodeNames.length===0){
+createToastError(getText("comfyObjectInfoErrorTitle"),getText("comfyObjectInfoErrorMessage"),1000*10);
+return false;
+}
+}
 var setB=new Set(nodeNames);
 var result=[];
 for(var i=0;i<workflowClassTypes.length;i++){

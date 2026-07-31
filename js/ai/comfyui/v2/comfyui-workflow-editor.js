@@ -110,11 +110,7 @@ firstTab.activate();
 
 this.renderTabs();
 
-comfyui_monitorConnection_v2((isOnline)=>{
-if (isOnline) {
-this.updateObjectInfoAndWorkflows();
-}
-});
+comfyui_monitorConnection_v2(this);
 }
 
 async addDefaultWorkflows() {

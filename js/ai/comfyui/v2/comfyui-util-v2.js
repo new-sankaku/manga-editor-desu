@@ -45,14 +45,37 @@ return false;
 
 let isOnline=false;
 let comfyGuideShownThisSession=false;
-async function comfyui_monitorConnection_v2(){
+let comfyMonitorStarted=false;
+
+// 監視ループは1本だけ動かす。複数動くと接続状態の変化を取り合って
+// ObjectInfoの更新が走らないことがある
+async function comfyui_monitorConnection_v2(editor){
+if(comfyMonitorStarted){
+comfyuiLogger.debug("comfyui_monitorConnection_v2 already running");
+return;
+}
+comfyMonitorStarted=true;
 comfyuiLogger.debug("comfyui_monitorConnection_v2");
+var targetEditor=(editor&&typeof editor.updateObjectInfoAndWorkflows==='function')?editor:null;
 while(true){
-var currentStatus=await comfyui_apiHeartbeat_v2();
+var currentStatus=false;
+try{
+currentStatus=await comfyui_apiHeartbeat_v2();
+}catch(error){
+comfyuiLogger.error("heartbeat error: "+(error instanceof Error?error.name+" "+error.message:error));
+}
 if(currentStatus!==isOnline){
 isOnline=currentStatus;
 if(isOnline){
-comfyUIWorkflowEditor.updateObjectInfoAndWorkflows();
+// 例外で監視ループごと止まるとObjectInfoが二度と更新されなくなる
+try{
+var target=targetEditor||comfyUIWorkflowEditor;
+if(target){
+await target.updateObjectInfoAndWorkflows();
+}
+}catch(error){
+comfyuiLogger.error("updateObjectInfoAndWorkflows error: "+(error instanceof Error?error.name+" "+error.message:error));
+}
 }
 if(typeof ComfyUIGuide!=='undefined'&&!comfyGuideShownThisSession){
 comfyGuideShownThisSession=true;

@@ -12,6 +12,10 @@
 const resources = {
 "20260731100000_001":{
 "ja":{
+"comfyObjectInfoErrorTitle":"ComfyUIのノード構成を取得できません",
+"comfyObjectInfoErrorMessage":"ComfyUIに接続できないため、ワークフローのノード確認ができませんでした。接続先URLとComfyUIの起動状態を確認してください。",
+"comfyWorkflowMissingTitle":"有効なワークフローがありません",
+"comfyWorkflowMissingMessage":"この処理に使う有効なワークフローが設定されていません:",
 "pageAddDialogTitle":"ページサイズを選択",
 "pageAddDialogSubmit":"作成",
 "pageLoadErrorTitle":"ページを開けません",
@@ -24,6 +28,10 @@ const resources = {
 "fontRestoredTitle":"フォントを反映しました"
 },
 "en":{
+"comfyObjectInfoErrorTitle":"Cannot get ComfyUI node list",
+"comfyObjectInfoErrorMessage":"Could not verify workflow nodes because ComfyUI is unreachable. Check the endpoint URL and that ComfyUI is running.",
+"comfyWorkflowMissingTitle":"No enabled workflow",
+"comfyWorkflowMissingMessage":"No enabled workflow is configured for:",
 "pageAddDialogTitle":"Select page size",
 "pageAddDialogSubmit":"Create",
 "pageLoadErrorTitle":"Cannot open page",
@@ -36,6 +44,10 @@ const resources = {
 "fontRestoredTitle":"Font applied"
 },
 "ko":{
+"comfyObjectInfoErrorTitle":"ComfyUI 노드 목록을 가져올 수 없습니다",
+"comfyObjectInfoErrorMessage":"ComfyUI에 연결할 수 없어 워크플로 노드를 확인하지 못했습니다. 접속 URL과 ComfyUI 실행 상태를 확인하세요.",
+"comfyWorkflowMissingTitle":"활성화된 워크플로가 없습니다",
+"comfyWorkflowMissingMessage":"이 작업에 사용할 활성화된 워크플로가 설정되지 않았습니다:",
 "pageAddDialogTitle":"페이지 크기 선택",
 "pageAddDialogSubmit":"만들기",
 "pageLoadErrorTitle":"페이지를 열 수 없습니다",
@@ -48,6 +60,10 @@ const resources = {
 "fontRestoredTitle":"폰트를 적용했습니다"
 },
 "fr":{
+"comfyObjectInfoErrorTitle":"Impossible d'obtenir la liste des nœuds ComfyUI",
+"comfyObjectInfoErrorMessage":"Impossible de vérifier les nœuds du workflow car ComfyUI est injoignable. Vérifiez l'URL et que ComfyUI est démarré.",
+"comfyWorkflowMissingTitle":"Aucun workflow activé",
+"comfyWorkflowMissingMessage":"Aucun workflow activé n'est configuré pour :",
 "pageAddDialogTitle":"Choisir la taille de page",
 "pageAddDialogSubmit":"Créer",
 "pageLoadErrorTitle":"Impossible d'ouvrir la page",
@@ -60,6 +76,10 @@ const resources = {
 "fontRestoredTitle":"Police appliquée"
 },
 "zh":{
+"comfyObjectInfoErrorTitle":"无法获取 ComfyUI 节点列表",
+"comfyObjectInfoErrorMessage":"无法连接 ComfyUI，因此无法校验工作流节点。请检查连接地址和 ComfyUI 是否已启动。",
+"comfyWorkflowMissingTitle":"没有启用的工作流",
+"comfyWorkflowMissingMessage":"未为此操作配置启用的工作流：",
 "pageAddDialogTitle":"选择页面尺寸",
 "pageAddDialogSubmit":"创建",
 "pageLoadErrorTitle":"无法打开页面",
@@ -72,6 +92,10 @@ const resources = {
 "fontRestoredTitle":"已应用字体"
 },
 "ru":{
+"comfyObjectInfoErrorTitle":"Не удалось получить список узлов ComfyUI",
+"comfyObjectInfoErrorMessage":"Не удалось проверить узлы рабочего процесса: ComfyUI недоступен. Проверьте URL и запущен ли ComfyUI.",
+"comfyWorkflowMissingTitle":"Нет включённого рабочего процесса",
+"comfyWorkflowMissingMessage":"Для этой операции не настроен включённый рабочий процесс:",
 "pageAddDialogTitle":"Выберите размер страницы",
 "pageAddDialogSubmit":"Создать",
 "pageLoadErrorTitle":"Не удалось открыть страницу",
@@ -84,6 +108,10 @@ const resources = {
 "fontRestoredTitle":"Шрифт применён"
 },
 "es":{
+"comfyObjectInfoErrorTitle":"No se puede obtener la lista de nodos de ComfyUI",
+"comfyObjectInfoErrorMessage":"No se pudieron verificar los nodos del flujo porque ComfyUI no responde. Revise la URL y que ComfyUI esté en ejecución.",
+"comfyWorkflowMissingTitle":"No hay flujo de trabajo activo",
+"comfyWorkflowMissingMessage":"No hay un flujo de trabajo activo configurado para:",
 "pageAddDialogTitle":"Seleccionar tamaño de página",
 "pageAddDialogSubmit":"Crear",
 "pageLoadErrorTitle":"No se puede abrir la página",
@@ -96,6 +124,10 @@ const resources = {
 "fontRestoredTitle":"Fuente aplicada"
 },
 "de":{
+"comfyObjectInfoErrorTitle":"ComfyUI-Knotenliste nicht abrufbar",
+"comfyObjectInfoErrorMessage":"Workflow-Knoten konnten nicht geprüft werden, da ComfyUI nicht erreichbar ist. Prüfen Sie die URL und ob ComfyUI läuft.",
+"comfyWorkflowMissingTitle":"Kein aktivierter Workflow",
+"comfyWorkflowMissingMessage":"Für diesen Vorgang ist kein aktivierter Workflow konfiguriert:",
 "pageAddDialogTitle":"Seitengröße wählen",
 "pageAddDialogSubmit":"Erstellen",
 "pageLoadErrorTitle":"Seite kann nicht geöffnet werden",
