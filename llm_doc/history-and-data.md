@@ -221,6 +221,8 @@ LZ4圧縮で以下を保存:
 - `loadLz4BlobProjectFile()`は冒頭で`cancelPendingHistory()`する。前ページの未確定コミットが
   クリア済みの`imageMap`に前ページの画像を混ぜてしまうため
 - ページのblobは追加直後だけ`null`。この状態で切り替えるとエラーになるため明示的に弾く
+- ページ削除は「表示中なら隣のページへ移動（後ろ優先、最後尾なら前）、全ページが無くなったら
+  空ページを表示」。キャンバスに内容を残すと一覧に無いページを編集し続けることになる
 
 ### auto-save（auto-save.js）
 `AutoSaveManager`がlocalforage(`autoSaveStorage`)に定期保存。

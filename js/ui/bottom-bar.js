@@ -145,25 +145,23 @@ deleteBtn.className="btm-delete-btn";
 deleteBtn.addEventListener("click",async (e)=>{
 e.stopPropagation();
 if(isProjectBusy())return;
-if(btmGetGuidsSize()>1){
 var isCurrentPage=(getCanvasGUID()===guid);
 var deletedIndex=btmGetGuidIndex(guid);
 btmProjectsMap.delete(guid);
 imageWrapper.remove();
+if(btmGetGuidsSize()>0){
+// 削除したページを表示していた場合は隣のページへ移動する。
+// 後ろのページを優先し、最後尾を削除したときは前のページになる
 if(isCurrentPage){
 var targetIndex=Math.min(deletedIndex,btmGetGuidsSize()-1);
-var targetGuid=btmGetGuidByIndex(targetIndex);
-await chengeCanvasByGuid(targetGuid);
+await chengeCanvasByGuid(btmGetGuidByIndex(targetIndex));
 }
 }else{
-var isCurrentPage=(getCanvasGUID()===guid);
-btmProjectsMap.delete(guid);
-imageWrapper.remove();
-if(isCurrentPage&&getObjectCount()===0){
+// ページが無くなったら空ページを表示する。
+// キャンバスに内容を残すと、一覧に無いページを編集し続けることになる
 initImageHistory();
 setCanvasGUID();
 await btmSaveProjectFile();
-}
 }
 btmUpdateScrollButtons();
 updateAllPageNumbers();
