@@ -128,6 +128,10 @@ function getHistoryChangeCounter(){
 return historyChangeCounter;
 }
 
+function isHistoryRestoreInProgress(){
+return isHistoryRestoring;
+}
+
 function removeByNotSave(obj){
 if (obj) {
 withoutHistory(function(){

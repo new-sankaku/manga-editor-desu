@@ -60,6 +60,11 @@ start();
 
 async function save(){
 if(isSaving)return;
+// ページ切り替え中に保存すると、読み込み途中のキャンバスを現在ページに上書きしてしまう
+if(typeof isProjectBusy==='function'&&isProjectBusy()){
+autoSaveLogger.debug("Skip auto-save: project is loading");
+return;
+}
 if(typeof stateStack==='undefined'||stateStack.length<2)return;
 var guid=getCanvasGUID();
 var hash=computeStateHash();

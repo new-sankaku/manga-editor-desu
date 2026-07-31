@@ -209,6 +209,19 @@ LZ4圧縮で以下を保存:
 保存時は「ローカル登録済みの情報」→「読み込み時に受け取った情報」の順で引き継ぐ。
 引き継がないとフォント未登録の環境で保存し直したときに情報が失われる。
 
+### 複数ページ（bottom-bar.js）
+`btmProjectsMap` が `{guid: {imageLink, blob}}` を保持し、**Mapの挿入順がページ順**。
+ページ切り替えは「現ページを保存 → 対象ページを`loadLz4BlobProjectFile()`」。
+
+- **ページを離れる前に`flushHistory()`が必要。** 保存判定が`stateStack.length>=2`のため、
+  デバウンス中の変更が確定する前に離れると変更が失われる（`btmSaveCurrentPage()`に集約）
+- **読み込み中の保存を禁止する。** `isProjectBusy()`が真の間はページ切り替え・ページ削除・
+  ページ追加・auto-saveを行わない。読み込み途中のキャンバスを現在ページのblobに
+  上書きしてしまうため
+- `loadLz4BlobProjectFile()`は冒頭で`cancelPendingHistory()`する。前ページの未確定コミットが
+  クリア済みの`imageMap`に前ページの画像を混ぜてしまうため
+- ページのblobは追加直後だけ`null`。この状態で切り替えるとエラーになるため明示的に弾く
+
 ### auto-save（auto-save.js）
 `AutoSaveManager`がlocalforage(`autoSaveStorage`)に定期保存。
 - デフォルト60秒間隔（10-600秒で設定可能）

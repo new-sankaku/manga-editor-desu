@@ -12,6 +12,10 @@
 const resources = {
 "20260731100000_001":{
 "ja":{
+"pageAddDialogTitle":"ページサイズを選択",
+"pageAddDialogSubmit":"作成",
+"pageLoadErrorTitle":"ページを開けません",
+"pageLoadErrorMessage":"このページの保存データが見つかりません。",
 "pageSizeMm":"原稿サイズ (mm)",
 "pageSizeUnknownTitle":"原稿サイズが未設定です",
 "pageSizeUnknownMessage":"このプロジェクトには原稿サイズが記録されていないため、A5として出力します。",
@@ -20,6 +24,10 @@ const resources = {
 "fontRestoredTitle":"フォントを反映しました"
 },
 "en":{
+"pageAddDialogTitle":"Select page size",
+"pageAddDialogSubmit":"Create",
+"pageLoadErrorTitle":"Cannot open page",
+"pageLoadErrorMessage":"No saved data was found for this page.",
 "pageSizeMm":"Page Size (mm)",
 "pageSizeUnknownTitle":"Page size not set",
 "pageSizeUnknownMessage":"This project has no recorded page size, so it will be exported as A5.",
@@ -28,6 +36,10 @@ const resources = {
 "fontRestoredTitle":"Font applied"
 },
 "ko":{
+"pageAddDialogTitle":"페이지 크기 선택",
+"pageAddDialogSubmit":"만들기",
+"pageLoadErrorTitle":"페이지를 열 수 없습니다",
+"pageLoadErrorMessage":"이 페이지의 저장 데이터를 찾을 수 없습니다.",
 "pageSizeMm":"원고 크기 (mm)",
 "pageSizeUnknownTitle":"원고 크기가 설정되지 않음",
 "pageSizeUnknownMessage":"이 프로젝트에는 원고 크기가 기록되어 있지 않아 A5로 출력합니다.",
@@ -36,6 +48,10 @@ const resources = {
 "fontRestoredTitle":"폰트를 적용했습니다"
 },
 "fr":{
+"pageAddDialogTitle":"Choisir la taille de page",
+"pageAddDialogSubmit":"Créer",
+"pageLoadErrorTitle":"Impossible d'ouvrir la page",
+"pageLoadErrorMessage":"Aucune donnée enregistrée trouvée pour cette page.",
 "pageSizeMm":"Taille de page (mm)",
 "pageSizeUnknownTitle":"Taille de page non définie",
 "pageSizeUnknownMessage":"Ce projet n'a pas de taille de page enregistrée, il sera exporté en A5.",
@@ -44,6 +60,10 @@ const resources = {
 "fontRestoredTitle":"Police appliquée"
 },
 "zh":{
+"pageAddDialogTitle":"选择页面尺寸",
+"pageAddDialogSubmit":"创建",
+"pageLoadErrorTitle":"无法打开页面",
+"pageLoadErrorMessage":"找不到此页面的保存数据。",
 "pageSizeMm":"原稿尺寸 (mm)",
 "pageSizeUnknownTitle":"未设置原稿尺寸",
 "pageSizeUnknownMessage":"此项目未记录原稿尺寸，将按 A5 输出。",
@@ -52,6 +72,10 @@ const resources = {
 "fontRestoredTitle":"已应用字体"
 },
 "ru":{
+"pageAddDialogTitle":"Выберите размер страницы",
+"pageAddDialogSubmit":"Создать",
+"pageLoadErrorTitle":"Не удалось открыть страницу",
+"pageLoadErrorMessage":"Сохранённые данные для этой страницы не найдены.",
 "pageSizeMm":"Размер страницы (мм)",
 "pageSizeUnknownTitle":"Размер страницы не задан",
 "pageSizeUnknownMessage":"В этом проекте не записан размер страницы, экспорт будет выполнен как A5.",
@@ -60,6 +84,10 @@ const resources = {
 "fontRestoredTitle":"Шрифт применён"
 },
 "es":{
+"pageAddDialogTitle":"Seleccionar tamaño de página",
+"pageAddDialogSubmit":"Crear",
+"pageLoadErrorTitle":"No se puede abrir la página",
+"pageLoadErrorMessage":"No se encontraron datos guardados para esta página.",
 "pageSizeMm":"Tamaño de página (mm)",
 "pageSizeUnknownTitle":"Tamaño de página no definido",
 "pageSizeUnknownMessage":"Este proyecto no tiene un tamaño de página registrado, se exportará como A5.",
@@ -68,6 +96,10 @@ const resources = {
 "fontRestoredTitle":"Fuente aplicada"
 },
 "de":{
+"pageAddDialogTitle":"Seitengröße wählen",
+"pageAddDialogSubmit":"Erstellen",
+"pageLoadErrorTitle":"Seite kann nicht geöffnet werden",
+"pageLoadErrorMessage":"Für diese Seite wurden keine gespeicherten Daten gefunden.",
 "pageSizeMm":"Seitengröße (mm)",
 "pageSizeUnknownTitle":"Seitengröße nicht festgelegt",
 "pageSizeUnknownMessage":"Für dieses Projekt ist keine Seitengröße gespeichert, es wird als A5 exportiert.",

@@ -54,7 +54,24 @@ return {fileBufferList,previewDataUrl};
 
 
 
+var isProjectLoading=false;
+
+// ページ切り替え・プロジェクト読み込みの最中は保存してはいけない。
+// 読み込み途中のキャンバスを現在ページのblobに上書きしてしまう
+function isProjectBusy(){
+return isProjectLoading||isHistoryRestoreInProgress();
+}
+
 async function loadLz4BlobProjectFile(lz4Blob,guid=null){
+if(!lz4Blob){
+compressionLogger.error("[loadLz4BlobProjectFile] blob is empty. guid="+guid);
+throw new Error("Project data is empty");
+}
+isProjectLoading=true;
+try{
+// 前ページの未確定コミットが走ると、クリア済みのimageMapに前ページの画像が
+// 混ざって次ページのプロジェクトファイルに紛れ込む
+cancelPendingHistory();
 stateStack=[];
 imageMap.clear();
 
@@ -128,6 +145,9 @@ lastRedo(guid);
 
 if(guid){
 setCanvasGUID(guid);
+}
+}finally{
+isProjectLoading=false;
 }
 }
 
