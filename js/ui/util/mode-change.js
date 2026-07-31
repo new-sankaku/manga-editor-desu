@@ -124,12 +124,15 @@ borderColor:"#36fd00",
 cornerColor:"green",
 hasRotatingPoint:false,
 selectable:true,
+excludeFromLayerPanel:true,
+excludeFromExport:true,
 });
+setNotSave(cropFrame);
 cropFrame.left=cropActiveObject.left;
 cropFrame.top=cropActiveObject.top;
 cropFrame.width=cropActiveObject.width*cropActiveObject.scaleX;
 cropFrame.height=cropActiveObject.height*cropActiveObject.scaleY;
-canvas.add(cropFrame);
+addByNotSave(cropFrame);
 canvas.setActiveObject(cropFrame);
 canvas.renderAll();
 showCanvasHelpText(getText("cropHelpText"),"Enter");

@@ -24,11 +24,16 @@ activeObject.set('skewY',parseInt(this.value,10));
 break;
 case 'opacity-control':
 var opacity=this.value/100
+if(activeObject.originalOpacity!==undefined){
+activeObject.originalOpacity=opacity;
+}else{
 activeObject.set('opacity',opacity);
+}
 break;
 }
 activeObject.setCoords();
 canvas.requestRenderAll();
+commitHistoryDebounced();
 };
 });
 }
@@ -56,5 +61,6 @@ $("top-control").value=activeObject.top||0;
 $("left-control").value=activeObject.left||0;
 $("skewX-control").value=activeObject.skewX||0;
 $("skewY-control").value=activeObject.skewY||0;
-$("opacity-control").value=activeObject.opacity*100||100;
+var currentOpacity=activeObject.originalOpacity!==undefined?activeObject.originalOpacity:activeObject.opacity;
+$("opacity-control").value=currentOpacity*100||100;
 }

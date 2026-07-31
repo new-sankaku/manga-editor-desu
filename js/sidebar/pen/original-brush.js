@@ -189,13 +189,13 @@ maxY=Math.max(maxY,y);
 }
 }
 if(maxX<minX||maxY<minY){
-changeDoNotSaveHistory();
-if(this.outlineImage){
-this.canvas.remove(this.outlineImage);
-this.outlineImage=null;
+withoutHistory(function(){
+if(self.outlineImage){
+self.canvas.remove(self.outlineImage);
+self.outlineImage=null;
 }
-this.pathDataArray=[];
-changeDoSaveHistory();
+self.pathDataArray=[];
+});
 return;
 }
 var width=maxX-minX+1;
@@ -214,13 +214,13 @@ selectable: false,
 scaleX: 1,
 scaleY: 1
 });
-changeDoNotSaveHistory();
+withoutHistory(function(){
 if(self.outlineImage){
 self.canvas.remove(self.outlineImage);
 self.outlineImage=null;
 }
 self.pathDataArray=[];
-changeDoSaveHistory();
+});
 self.canvas.add(img);
 self.canvas.renderAll();
 });

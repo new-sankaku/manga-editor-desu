@@ -1,7 +1,21 @@
+// 履歴管理（Undo/Redo）: 保存抑止スコープ、コミット集約、復元処理の直列化
+
 const imageMap=new Map();
 var stateStack=[];
 var currentStateIndex=-1;
-var isSaveHistory=true;
+
+var historyLockDepth=0;
+var isHistoryRestoring=false;
+var historyCommitPending=false;
+var historyCommitTimerId=0;
+var historyDebounceTimerId=0;
+var historyRestoreQueueIndex=null;
+var historyRestoreWatchdogId=0;
+var historyChangeCounter=0;
+
+const HISTORY_COMMIT_DELAY=0;
+const HISTORY_DEFAULT_DEBOUNCE=500;
+const HISTORY_RESTORE_TIMEOUT=30000;
 
 
 fabric.Object.prototype.toObject=(function (toObject) {
@@ -12,7 +26,7 @@ return toObject.apply(this,[propertiesToInclude]);
 })(fabric.Object.prototype.toObject);
 
 function isSave(){
-return isSaveHistory;
+return historyLockDepth===0&&!isHistoryRestoring;
 }
 function notSave(){
 return!(isSave());
@@ -54,51 +68,169 @@ return!(isSaveObject(activeObject)) ;
 }
 
 function changeDoNotSaveHistory(){
-isSaveHistory=false;
+historyLockDepth++;
 }
 
 function changeDoSaveHistory(){
-isSaveHistory=true;
+if(historyLockDepth>0){
+historyLockDepth--;
+}else{
+historyLogger.debug("changeDoSaveHistory called while depth is 0");
+}
+if(historyLockDepth===0&&historyCommitPending){
+scheduleHistoryCommit();
+}
+}
+
+function withoutHistory(fn){
+changeDoNotSaveHistory();
+try{
+return fn();
+}finally{
+changeDoSaveHistory();
+}
+}
+
+function resetHistoryLock(){
+if(historyLockDepth!==0){
+historyLogger.warn("history lock depth reset from "+historyLockDepth);
+}
+historyLockDepth=0;
+}
+
+function getHistoryChangeCounter(){
+return historyChangeCounter;
 }
 
 function removeByNotSave(obj){
 if (obj) {
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.remove(obj);
-changeDoSaveHistory();
+});
 }
 }
 
 function addByNotSave(obj){
 if (obj) {
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.add(obj);
-changeDoSaveHistory();
+});
 }
+}
+
+function scheduleHistoryCommit(){
+historyCommitPending=true;
+if(historyCommitTimerId){
+return;
+}
+historyCommitTimerId=window.setTimeout(function(){
+historyCommitTimerId=0;
+flushHistory();
+},HISTORY_COMMIT_DELAY);
+}
+
+function commitHistory(){
+if(notSave()){
+return;
+}
+scheduleHistoryCommit();
+}
+
+function commitHistoryDebounced(delay){
+if(isHistoryRestoring){
+return;
+}
+if(historyDebounceTimerId){
+window.clearTimeout(historyDebounceTimerId);
+}
+historyDebounceTimerId=window.setTimeout(function(){
+historyDebounceTimerId=0;
+scheduleHistoryCommit();
+},delay||HISTORY_DEFAULT_DEBOUNCE);
+}
+
+function cancelPendingHistory(){
+historyCommitPending=false;
+if(historyCommitTimerId){
+window.clearTimeout(historyCommitTimerId);
+historyCommitTimerId=0;
+}
+if(historyDebounceTimerId){
+window.clearTimeout(historyDebounceTimerId);
+historyDebounceTimerId=0;
+}
+}
+
+function flushHistory(){
+if(historyDebounceTimerId){
+window.clearTimeout(historyDebounceTimerId);
+historyDebounceTimerId=0;
+historyCommitPending=true;
+}
+if(historyCommitTimerId){
+window.clearTimeout(historyCommitTimerId);
+historyCommitTimerId=0;
+}
+if(!historyCommitPending){
+return false;
+}
+if(notSave()){
+return false;
+}
+historyCommitPending=false;
+return captureState();
+}
+
+function captureState(){
+if(isHistoryRestoring){
+return false;
+}
+canvas.renderAll();
+const json=JSON.stringify(customToJSON());
+if(currentStateIndex>=0&&stateStack[currentStateIndex]===json){
+return false;
+}
+if(currentStateIndex<stateStack.length-1){
+stateStack.splice(currentStateIndex+1);
+}
+stateStack.push(json);
+currentStateIndex=stateStack.length-1;
+updateLayerPanel();
+return true;
 }
 
 function saveStateByListener(event,eventType) {
 if(!event){
 return;
 }
-if (notSave()) {
-return;
-}
-if(eventType==='object:removed'){
-//ok
-}
 if(isNotSaveObject(event)){
 return;
 }
-saveState();
+historyChangeCounter++;
+if (notSave()) {
+return;
+}
+scheduleHistoryCommit();
+}
+
+function saveState() {
+commitHistory();
 }
 
 function saveStateByManual() {
-saveState();
+commitHistory();
 }
 
+const imageHashCache=new Map();
+
 function generateHash(imageData) {
-return CryptoJS.SHA256(imageData).toString(CryptoJS.enc.Hex);
+const cached=imageHashCache.get(imageData);
+if(cached!==undefined){
+return cached;
+}
+const hash=CryptoJS.SHA256(imageData).toString(CryptoJS.enc.Hex);
+imageHashCache.set(imageData,hash);
+return hash;
 }
 
 async function blobUrlToDataUrl(blobUrl){
@@ -131,7 +263,13 @@ imageMap.set(hash,dataUrl);
 
 function customToJSON() {
 const json=canvas.toJSON(commonProperties);
-json.objects=json.objects.map(obj=>{
+const exportedObjects=canvas.getObjects().filter(obj=>!obj.excludeFromExport);
+json.objects=json.objects.map((obj,index)=>{
+const sourceObject=exportedObjects[index];
+if(sourceObject&&sourceObject.originalOpacity!==undefined){
+obj.opacity=sourceObject.originalOpacity;
+}
+
 if (obj.type==='image'&&obj.src&&typeof obj.src==='string'&&(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))) {
 const hash=generateHash(obj.src);
 if (!imageMap.has(hash)) {
@@ -189,86 +327,119 @@ return obj;
 return parsedJson;
 }
 
-function saveState() {
-if(notSave()){
-return ;
+function startRestoreWatchdog(){
+stopRestoreWatchdog();
+historyRestoreWatchdogId=window.setTimeout(function(){
+historyRestoreWatchdogId=0;
+if(isHistoryRestoring){
+historyLogger.error("loadFromJSON callback did not finish. history restore lock released.");
+isHistoryRestoring=false;
+historyRestoreQueueIndex=null;
 }
-if (currentStateIndex<stateStack.length-1) {
-stateStack.splice(currentStateIndex+1);
-}
-canvas.renderAll();
-const state=customToJSON();
-const json=JSON.stringify(state);
-
-stateStack.push(json);
-currentStateIndex++;
-updateLayerPanel();
+},HISTORY_RESTORE_TIMEOUT);
 }
 
-function undo() {
-if (currentStateIndex>=1) {
-changeDoNotSaveHistory();
-currentStateIndex--;
+function stopRestoreWatchdog(){
+if(historyRestoreWatchdogId){
+window.clearTimeout(historyRestoreWatchdogId);
+historyRestoreWatchdogId=0;
+}
+}
 
-let state=restoreImage(stateStack[currentStateIndex]);
+function finishRestore(){
+stopRestoreWatchdog();
+isHistoryRestoring=false;
+cancelPendingHistory();
+if(historyRestoreQueueIndex!==null){
+const nextIndex=historyRestoreQueueIndex;
+historyRestoreQueueIndex=null;
+applyHistoryState(nextIndex);
+}
+}
+
+function applyHistoryState(index,guid=null){
+if(index<0||index>=stateStack.length){
+return;
+}
+currentStateIndex=index;
+isHistoryRestoring=true;
+startRestoreWatchdog();
+
+let state;
+try{
+state=restoreImage(stateStack[index]);
+}catch(e){
+historyLogger.error("Failed to parse state: "+(e instanceof Error?e.name+" "+e.message:e));
+stopRestoreWatchdog();
+isHistoryRestoring=false;
+historyRestoreQueueIndex=null;
+return;
+}
+
 canvas.loadFromJSON(state,function () {
-
-state.objects.forEach((stateObj,index)=>{
-const canvasObj=canvas.getObjects()[index];
+try{
+state.objects.forEach((stateObj,objectIndex)=>{
+const canvasObj=canvas.getObjects()[objectIndex];
 if (canvasObj) {
 canvasObj.selectable=stateObj.selectable;
 }
 });
 reSetSpeechBubbleText();
-setCanvasGUID(state.canvasGuid);
+setCanvasGUID(guid||state.canvasGuid);
 canvas.renderAll();
 updateLayerPanel();
 resetEventHandlers();
 customSpeechBubbleAllRelocation();
-changeDoSaveHistory();
+}catch(e){
+historyLogger.error("Failed to restore state: "+(e instanceof Error?e.name+" "+e.message:e));
+}finally{
+finishRestore();
+}
 });
 clearJSTSGeometry();
+}
+
+function queueRestore(offset){
+const base=historyRestoreQueueIndex!==null?historyRestoreQueueIndex:currentStateIndex;
+const target=base+offset;
+if(target<0||target>stateStack.length-1){
+return;
+}
+historyRestoreQueueIndex=target;
+}
+
+function undo() {
+if(isHistoryRestoring){
+queueRestore(-1);
+return;
+}
+flushHistory();
+if (currentStateIndex>=1) {
+applyHistoryState(currentStateIndex-1);
 }
 }
 
 function redo() {
+if(isHistoryRestoring){
+queueRestore(1);
+return;
+}
+flushHistory();
 if (currentStateIndex<stateStack.length-1) {
-changeDoNotSaveHistory();
-currentStateIndex++;
-
-let state=restoreImage(stateStack[currentStateIndex]);
-canvas.loadFromJSON(state,function () {
-reSetSpeechBubbleText();
-setCanvasGUID(state.canvasGuid);
-canvas.renderAll();
-updateLayerPanel();
-resetEventHandlers();
-customSpeechBubbleAllRelocation();
-changeDoSaveHistory();
-});
-clearJSTSGeometry();
+applyHistoryState(currentStateIndex+1);
 }
 }
 
 function lastRedo(guid=null) {
-changeDoNotSaveHistory();
-currentStateIndex=stateStack.length-1;
-
-let state=restoreImage(stateStack[stateStack.length-1]);
-canvas.loadFromJSON(state,function () {
-reSetSpeechBubbleText();
-if(guid){
-setCanvasGUID(guid);
-}else{
-setCanvasGUID(state.canvasGuid);
+if(stateStack.length===0){
+return;
 }
-canvas.renderAll();
-updateLayerPanel();
-resetEventHandlers();
-customSpeechBubbleAllRelocation();
-changeDoSaveHistory();
-});
-clearJSTSGeometry();
+cancelPendingHistory();
+if(isHistoryRestoring){
+historyRestoreQueueIndex=stateStack.length-1;
+return;
+}
+applyHistoryState(stateStack.length-1,guid);
 }
 
 function reSetSpeechBubbleText(){
@@ -284,28 +455,27 @@ childObject.targetObject=obj;
 
 
 function allRemove() {
-changeDoNotSaveHistory();
+cancelPendingHistory();
+withoutHistory(function(){
 canvas.clear();
 var bgColorInput=$("bg-color");
 canvas.backgroundColor=bgColorInput.value;
-changeDoSaveHistory();
-saveStateByManual();
-updateLayerPanel();
+});
 currentImage=null;
 
 imageMap.clear();
+imageHashCache.clear();
 stateStack=[];
 currentStateIndex=-1;
+captureState();
 }
 function initImageHistory(){
+resetHistoryLock();
 allRemove();
-imageMap.clear();
-stateStack=[];
-currentStateIndex=-1;
 }
 
 document.addEventListener('DOMContentLoaded',function() {
-saveState();
+captureState();
 });
 
 

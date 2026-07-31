@@ -40,6 +40,7 @@ activeObject.set("shadow",firstTextEffectColorPicker+" 5px 5px 10px");
 activeObject.set("shadow",null);
 }
 canvas.renderAll();
+commitHistory();
 }
 }
 
@@ -68,6 +69,7 @@ canvas.renderAll();
 activeObject.set("fill",gradient);
 canvas.renderAll();
 }
+commitHistory();
 }
 }
 
@@ -87,6 +89,7 @@ offsetY: 5,
 activeObject.set("shadow",null);
 }
 canvas.renderAll();
+commitHistory();
 }
 }
 
@@ -142,6 +145,7 @@ offsetY: 5,
 },
 });
 canvas.renderAll();
+commitHistory();
 }
 }
 
@@ -162,6 +166,7 @@ blur: 20,
 });
 }
 canvas.renderAll();
+commitHistory();
 }
 }
 
@@ -187,6 +192,7 @@ activeObject.set('dirty',true);
 activeObject.set('textAlign',alignment);
 }
 canvas.renderAll();
+commitHistory();
 
 changeSelected(button);
 }
@@ -236,6 +242,7 @@ activeObject.set(
 hasShadow ? null : "rgba(0,0,0,0.3) 5px 5px 5px"
 );
 canvas.renderAll();
+commitHistory();
 }
 }
 
@@ -245,6 +252,7 @@ if(isText(activeObject)){
 var isBold=activeObject.fontWeight==="bold";
 activeObject.set("fontWeight",isBold ? "" : "bold");
 canvas.renderAll();
+commitHistory();
 }
 updateBoldToggleUI();
 }
@@ -278,6 +286,7 @@ updateShapeMetrics(svgObj);
 activeObject.set("fontSize",parseInt(size));
 }
 canvas.renderAll();
+commitHistoryDebounced();
 }
 
 function changeStrokeWidthSize(size) {
@@ -289,6 +298,7 @@ canvas.renderAll();
 activeObject.set("strokeWidth",parseInt(size));
 canvas.renderAll();
 }
+commitHistoryDebounced();
 }
 
 
@@ -302,6 +312,7 @@ canvas.renderAll();
 activeObject.set("fill",color);
 canvas.renderAll();
 }
+commitHistoryDebounced();
 }
 function changeOutlineTextColor(color) {
 var activeObject=canvas.getActiveObject();
@@ -313,6 +324,7 @@ canvas.renderAll();
 activeObject.set("stroke",color);
 canvas.renderAll();
 }
+commitHistoryDebounced();
 }
 function changeTextBgColor(color) {
 var activeObject=canvas.getActiveObject();
@@ -324,6 +336,7 @@ canvas.renderAll();
 activeObject.set("backgroundColor",isTransparent?'':color);
 canvas.renderAll();
 }
+commitHistoryDebounced();
 }
 
 function changeNeonColor(color) {
@@ -364,6 +377,7 @@ activeObject.set("stroke",neonColor);
 activeObject.set("strokeWidth",2);
 }
 canvas.renderAll();
+commitHistoryDebounced();
 }
 }
 

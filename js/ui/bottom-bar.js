@@ -449,9 +449,9 @@ var placeholderUrl=pc.toDataURL('image/jpeg',0.5);
 await btmSaveProjectFile(null,false);
 btmAddImage({href:placeholderUrl},null,newGuid,true);
 reorderImages(currentIndex+1,newGuid);
-changeDoNotSaveHistory();
+withoutHistory(function(){
 resizeCanvasToObject(w,h);
-changeDoSaveHistory();
+});
 initImageHistory();
 setCanvasGUID(newGuid);
 await btmSaveProjectFile(newGuid,false);

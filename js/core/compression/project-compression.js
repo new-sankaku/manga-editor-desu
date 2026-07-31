@@ -29,13 +29,11 @@ return fileBufferList;
 }
 
 async function generateProjectFileBufferList() {
+flushHistory();
 if(currentStateIndex<stateStack.length-1){
 stateStack.splice(currentStateIndex+1);
 }
-var state=customToJSON();
-var json=JSON.stringify(state);
-stateStack.push(json);
-currentStateIndex++;
+captureState();
 await convertImageMapBlobUrls();
 removeGrid();
 var previewLink=getCropAndDownloadLinkByMultiplier(1,'jpeg');

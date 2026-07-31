@@ -204,6 +204,7 @@ offsetY: 0
 selectedObject.set({shadow: null});
 }
 canvas.renderAll();
+commitHistory();
 } else {
 createToastError("Check image!")
 }

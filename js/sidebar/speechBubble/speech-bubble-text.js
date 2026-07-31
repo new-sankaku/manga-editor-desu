@@ -289,10 +289,10 @@ newRect.customType="speechBubbleRect";
 svgObj.lastLeft=svgObj.left;
 svgObj.lastTop=svgObj.top;
 
-changeDoNotSaveHistory();
+withoutHistory(function(){
 // canvas.sendToBack(svgObj);
 canvas.add(newRect);
-changeDoSaveHistory();
+});
 
 canvas.add(newTextbox);
 

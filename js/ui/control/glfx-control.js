@@ -393,12 +393,12 @@ createToastError("Select Image!");
 return;
 }
 
-changeDoNotSaveHistory();
+withoutHistory(function(){
 if (glfxOriginalImage) {
 glfxCopiedImage=glfxOriginalImage.cloneNode();
 glfxApplyFilter();
 }
-changeDoSaveHistory();
+});
 },100)
 );
 });

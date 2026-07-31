@@ -173,6 +173,7 @@ function visibleChange(obj){
 obj.visible=!obj.visible;
 updateLayerPanel();
 canvas.requestRenderAll();
+commitHistory();
 }
 
 function putViewButton(buttonsDiv,layer,index) {
@@ -276,6 +277,7 @@ obj.selectable=!obj.selectable;
 canvas.discardActiveObject();
 canvas.renderAll();
 updateLayerPanel();
+commitHistory();
 }
 
 function putMoveLockButton(buttonsDiv,layer,index) {

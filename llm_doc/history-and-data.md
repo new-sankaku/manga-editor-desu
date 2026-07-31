@@ -1,9 +1,46 @@
 # 履歴管理と画像データ保存
 
 ## 履歴管理（Undo/Redo）
-- 削除+追加を連続する場合、中間状態を履歴に残さない
-- `changeDoNotSaveHistory()` / `changeDoSaveHistory()`で一時無効化
-- 最終結果のみ`saveStateByManual()`で保存
+実装は`js/layer/image-history-management.js`。
+
+### 基本方針
+- **1ユーザー操作＝1履歴エントリ**。同一タスク内で発生した複数のcanvasイベントは自動で1件に集約される
+- 履歴は非同期コミット（0msタイマー）。同期的に`stateStack`を読む処理の前には`flushHistory()`を呼ぶ
+- 直前の状態とJSONが同一なら積まない（重複除去）。そのため`commitHistory()`は空振りしても無害
+
+### API
+| 関数 | 用途 |
+|------|------|
+| `commitHistory()` | 1操作の完了時に呼ぶ。集約＋重複除去つき |
+| `commitHistoryDebounced(ms)` | スライダー・連続キー入力・文字入力など連続操作用（既定500ms） |
+| `saveState()` / `saveStateByManual()` | `commitHistory()`のエイリアス（既存互換） |
+| `flushHistory()` | 保留中のコミットを即時実行。プロジェクト保存やundo前に使用 |
+| `captureState()` | 抑止フラグを無視して即時保存。ベースライン確保など特殊用途のみ |
+| `withoutHistory(fn)` | **推奨**。fn実行中だけ履歴保存を抑止。try/finallyで例外時も必ず解除 |
+| `changeDoNotSaveHistory()` / `changeDoSaveHistory()` | 低レベルAPI。深さカウンタ方式でネスト可 |
+| `getHistoryChangeCounter()` | 抑止中も増える変更検知カウンタ（ドラッグ判定に使用） |
+
+### 抑止スコープの注意
+- 抑止は**深さカウンタ**。内側の`changeDoSaveHistory()`で外側の抑止が解除されることはない
+- 非同期コールバックをまたぐ抑止は、コールバック側を`try{}finally{changeDoSaveHistory();}`で囲む
+- 抑止中に呼ばれた`commitHistory()`は破棄される。抑止区間の結果を残したい場合は解除後に呼ぶ
+- `initImageHistory()`は抑止深さを0にリセットし、必ずベースライン1件を残す
+
+### 復元処理（undo/redo）
+- `canvas.loadFromJSON()`が非同期のため、復元中は`isHistoryRestoring`で全保存をブロック
+- 復元中の追加undo/redoはキューされ、完了後に順次実行（連打しても履歴が壊れない）
+- コールバックはtry/finallyで必ずロック解除。30秒のウォッチドッグつき
+
+### ドラッグ操作
+`mouse:down`で抑止＋プレビュー用に`opacity=0.5`、`mouse:up`で復帰。
+fabric.jsは`object:modified`を`mouse:up`より**先に**発火するため、
+`getHistoryChangeCounter()`の差分で「ドラッグ中に変更があったか」を判定し、
+`mouse:up`後に1件だけコミットする。単なるクリックでは重複除去により履歴は増えない。
+`originalOpacity`が残っているオブジェクトは`customToJSON()`が元のopacityに戻して保存する。
+
+### 削除+追加を連続する場合
+中間状態を履歴に残さない。
+
 ### オブジェクト単位の履歴除外
 `saveHistory`プロパティで個別オブジェクトを履歴保存から除外できる。
 
@@ -33,11 +70,24 @@ removeByNotSave(obj) // changeDoNotSave→remove→changeDoSave
 
 ### 例: オブジェクト置き換え
 ```javascript
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.remove(oldObject);
 canvas.add(newObject);
-changeDoSaveHistory();
+});
 saveStateByManual();
+```
+
+### 例: オブジェクト属性の変更（UIハンドラ）
+canvasイベントが発火しない属性変更は履歴に残らないため、操作の区切りで明示的にコミットする。
+```javascript
+activeObject.set("fill",color);
+canvas.renderAll();
+commitHistoryDebounced();  // スライダー等の連続入力
+```
+```javascript
+canvas.bringForward(activeObject);
+canvas.requestRenderAll();
+commitHistory();           // 単発のボタン操作
 ```
 
 ## 画像データ保存

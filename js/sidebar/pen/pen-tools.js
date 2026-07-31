@@ -423,10 +423,10 @@ selectable: false,
 evented: true
 });
 
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.remove(...existingPaths);
 canvas.add(group);
-changeDoSaveHistory();
+});
 canvas.renderAll();
 updateLayerPanel();
 }

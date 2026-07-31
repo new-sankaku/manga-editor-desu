@@ -14,9 +14,7 @@ var hRandomCount=generateRandomInt($("horizontalRandomPanelCount").value);
 // console.log("hRandomCount", hRandomCount);
 
 
-try {
-changeDoNotSaveHistory();
-
+withoutHistory(function(){
 var cuts=createCuts(vRandomCount,hRandomCount);
 
 var maxRetryCountSum=maxRetryCount*cuts.length;
@@ -38,10 +36,9 @@ panel=getRandomPanel();
 retry++;
 }
 }
-} finally {
-changeDoSaveHistory();
+});
 canvas.requestRenderAll();
-}
+saveStateByManual();
 }
 
 

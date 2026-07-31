@@ -117,20 +117,23 @@ canvas.on('object:removed',function(e) {eventLogger.trace('8: object:removed');p
 canvas.on('path:created',function(e) {eventLogger.trace('9: path:created');saveStateByListener(e,'path:created');});
 canvas.on('canvas:cleared',function(e) {eventLogger.trace('10: canvas:cleared');saveStateByListener(e,'canvas:cleared');});
 
+canvas.on('text:changed',function(e) {eventLogger.trace('10-1: text:changed');if(isNotSaveObject(e)){return;}commitHistoryDebounced();});
+canvas.on('text:editing:exited',function(e) {eventLogger.trace('10-2: text:editing:exited');if(isNotSaveObject(e)){return;}commitHistory();});
+
 
 
 //Crop Mode from start
 canvas.on('selection:cleared',function() {
 eventLogger.trace('11: selection:cleared');
 if (cropFrame) {
-canvas.remove(cropFrame);
+removeByNotSave(cropFrame);
 cropFrame=null;
 }
 });
 canvas.on('selection:updated',function() {
 eventLogger.trace('12: selection:updated');
 if (cropFrame&&canvas.getActiveObject()!==cropFrame) {
-canvas.remove(cropFrame);
+removeByNotSave(cropFrame);
 cropFrame=null;
 }
 });
@@ -314,14 +317,28 @@ obj.set('fill','rgba(255,255,255,0.25)');
 });
 
 let lastCheckObject=null;
+let dragPreviewLocked=false;
+let dragStartChangeCounter=0;
+
+function endDragPreviewLock(){
+if(!dragPreviewLocked){
+return;
+}
+dragPreviewLocked=false;
+changeDoSaveHistory();
+}
+
 canvas.on('mouse:down',function(e) {
 eventLogger.trace('18: mouse:down');
 if(canvas.isDrawingMode||isKnifeMode){
 return;
 }
+endDragPreviewLock();
 if (e.target) {
 if(e.target.isPanel)_dbgFabric.debug("[mouse:down] BEFORE strokeWidth="+e.target.strokeWidth+" stroke="+e.target.stroke);
+dragStartChangeCounter=getHistoryChangeCounter();
 changeDoNotSaveHistory();
+dragPreviewLocked=true;
 e.target.originalOpacity=e.target.opacity;
 e.target.opacity=0.5;
 canvas.renderAll();
@@ -339,8 +356,12 @@ target.opacity=target.originalOpacity;
 delete target.originalOpacity;
 canvas.renderAll();
 if(target.isPanel)_dbgFabric.debug("[mouse:up] AFTER renderAll strokeWidth="+target.strokeWidth+" stroke="+target.stroke);
-changeDoSaveHistory();
 highlightActiveLayerByCanvas(target);
+}
+var changedDuringDrag=dragPreviewLocked&&getHistoryChangeCounter()!==dragStartChangeCounter;
+endDragPreviewLock();
+if(changedDuringDrag){
+commitHistory();
 }
 if(!e.target||canvas.getActiveObject()===e.target){
 lastCheckObject=null;

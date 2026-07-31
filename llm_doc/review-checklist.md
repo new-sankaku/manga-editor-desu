@@ -24,9 +24,12 @@
 | 13 | format | npm run formatで崩れるスペースを入れていないか | 0 |
 | 14 | GUID | 新規オブジェクトにguidを付与しているか | 0 |
 | 15 | イベント | EventDelegatorのパターンに従っているか（直接addEventListenerしていないか） | 0 |
-| 16 | 履歴 | ループやcanvas.add/remove連続呼び出しでsaveStateByManual()が都度発火しないか。都度発火すると大量の履歴スナップショットが生成され、メモリの圧迫・履歴保存による画面の固まり・Undo/Redoで無意味な操作が発生する。複数操作はchangeDoNotSaveHistory()で囲み最後に1回だけ保存 | 1 |
+| 16 | 履歴 | ループやcanvas.add/remove連続呼び出しでsaveStateByManual()が都度発火しないか。都度発火すると大量の履歴スナップショットが生成され、メモリの圧迫・履歴保存による画面の固まり・Undo/Redoで無意味な操作が発生する。複数操作はwithoutHistory(fn)で囲み最後に1回だけ保存（同一タスク内のイベントは自動集約されるが、非同期をまたぐ処理は集約されない） | 1 |
 | 17 | 性能 | forループ等でオブジェクトのプロパティを連続変更する際、毎回canvas.renderAll()を呼んでいないか。都度呼ぶとオブジェクト数×ループ回数分の再描画が走りUIがフリーズする。ループ外で最後に1回だけ呼ぶ | 1 |
 | 18 | ログ | Errorオブジェクトを文字列化する際にJSON.stringifyを使っていないか。Errorのmessage/name/stackは非列挙プロパティのためJSON.stringifyでは`{}`になる。`instanceof Error`で判定し`error.name + error.message`等で展開する | 1 |
 | 19 | ログ | 各ファイルで`new SimpleLogger()`していないか。ロガーは`js/core/logger.js`に集約定義し、各ファイルではグローバル変数として参照する | 1 |
 | 20 | 非同期 | `_comfyUIExecProvider`等のグローバル変数に依存するURL/認証情報を、長時間のawait（WebSocket待機等）をまたいで使っていないか。非同期処理中に別タスクがグローバル変数を上書きし、別プロバイダのURLに接続してしまう。関数冒頭でサーバーアドレス・認証情報をローカル変数にキャプチャして使う | 2 |
 | 21 | fallback | グローバル変数が未設定のときデフォルト値（`'local'`等）にフォールバックしていないか。`_comfyUIExecProvider`がnullのときキーを`'local'`にする、`comfyObjectInfoListMap.get(key)\|\|comfyObjectInfoListMap.get('local')`のように別キーにフォールバックする等はすべて暗黙のfallback。awaitなしで呼ばれたasync関数ではグローバル変数が既にクリアされているため、呼び出し元で値を事前キャプチャして引数で渡す | 1 |
+| 22 | 履歴 | オブジェクト属性を直接変更するUIハンドラ（スライダー、メニュー、レイヤーボタン、ショートカット等）で`commitHistory()`/`commitHistoryDebounced()`を呼んでいるか。fabric.jsのcanvasイベントが発火しない変更は履歴に残らず、次のUndoが1つ前の操作まで巻き戻る | 1 |
+| 23 | 履歴 | `changeDoNotSaveHistory()`の解除漏れがないか。非同期コールバックをまたぐ場合はtry/finallyで囲む。解除漏れは以降の全操作が履歴に残らなくなり、Undoが大きく巻き戻る。同期処理は`withoutHistory(fn)`を使う | 1 |
+| 24 | 履歴 | 一時的なUI用オブジェクト（クロップ枠等）に`setNotSave`/`excludeFromLayerPanel`/`excludeFromExport`を設定し、`addByNotSave`/`removeByNotSave`で追加削除しているか。通常のadd/removeでは無意味な履歴が積まれる | 1 |

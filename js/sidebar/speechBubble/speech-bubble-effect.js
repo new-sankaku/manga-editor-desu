@@ -162,9 +162,9 @@ const selectedValue=getSelectedValueByGroup("sbTextGroup");
 if (name.startsWith("90_focus_")||selectedValue==="Nothing") {
 canvas.add(svgObject);
 }else{
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.add(svgObject);
-changeDoSaveHistory();
+});
 createSpeechBubbleMetrics(svgObject,svgData);
 }
 canvas.setActiveObject(svgObject);

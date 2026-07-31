@@ -268,6 +268,7 @@ var activeObject=canvas.getActiveObject();
 if(isImage(activeObject)){
 activeObject.set("flipX",!activeObject.flipX);
 canvas.renderAll();
+commitHistory();
 }
 },
 
@@ -276,6 +277,7 @@ var activeObject=canvas.getActiveObject();
 if(isImage(activeObject)){
 activeObject.set("flipY",!activeObject.flipY);
 canvas.renderAll();
+commitHistory();
 }
 },
 
@@ -306,10 +308,10 @@ await new Promise(function(resolve){
 fabric.Image.fromURL(webpDataUrl,function(img){
 img.set({left:activeObject.left,top:activeObject.top,scaleX:originalScaleX,scaleY:originalScaleY});
 copy(activeObject,img);
-changeDoNotSaveHistory();
+withoutHistory(function(){
 canvas.remove(activeObject);
 canvas.add(img);
-changeDoSaveHistory();
+});
 canvas.setActiveObject(img);
 canvas.renderAll();
 updateLayerPanel();

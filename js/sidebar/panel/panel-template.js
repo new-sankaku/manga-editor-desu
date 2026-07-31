@@ -23,29 +23,27 @@ OP_updateLoadingState(loading,{
 icon: 'process',step: 'Step2',substep: 'Next Project End',progress: 90
 });
 
-changeDoNotSaveHistory();
+withoutHistory(function(){
 resizeCanvasToObject(width,height);
+});
 if (addPanel) {
 addSquareBySize(width,height);
 } else {
 initImageHistory();
-saveState();
 }
-changeDoSaveHistory();
 panelLogger.info("[loadBookSize] IF branch done. stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size);
 } else {
 panelLogger.info("[loadBookSize] ELSE branch: NOT saving current page (stateStack too short or no user action)");
 setCanvasGUID();
 panelLogger.info("[loadBookSize] ELSE new canvasGUID="+getCanvasGUID());
-changeDoNotSaveHistory();
+withoutHistory(function(){
 resizeCanvasToObject(width,height);
+});
 if (addPanel) {
 addSquareBySize(width,height);
 } else {
 initImageHistory();
-saveState();
 }
-changeDoSaveHistory();
 panelLogger.info("[loadBookSize] ELSE branch done. stateStack.length="+stateStack.length);
 }
 }finally{
@@ -57,8 +55,7 @@ OP_hideLoading(loading);
 function addSquareBySize(width,height) {
 panelLogger.info("[addSquareBySize] START w="+width+" h="+height+" stateStack.length="+stateStack.length+" canvasGUID="+getCanvasGUID());
 initImageHistory();
-saveState();
-panelLogger.info("[addSquareBySize] after initImageHistory+saveState stateStack.length="+stateStack.length);
+panelLogger.info("[addSquareBySize] after initImageHistory stateStack.length="+stateStack.length);
 
 var strokeWidthScale=canvas.width/700;
 var strokeWidth=2*strokeWidthScale;

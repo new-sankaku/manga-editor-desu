@@ -261,12 +261,12 @@ scaleY: scale,
 /** Load SVG(Verfical, Landscope) */
 function loadSVGPlusReset(svgString,isLand=false) {
 initImageHistory();
-saveState();
 changeDoNotSaveHistory();
 // console.log("svgPagging", svgPagging);
 
 skipForcedAdjust=true;
 fabric.loadSVGFromString(svgString,function (objects,options) {
+try{
 resizeCanvasToObject(options.width,options.height);
 
 var strokeWidthScale=canvas.width/700;
@@ -379,7 +379,10 @@ panelStrokeChange()
 skipForcedAdjust=false;
 canvas.renderAll();
 resizeCanvas(canvas.width,canvas.height);
+}finally{
+skipForcedAdjust=false;
 changeDoSaveHistory();
+}
 saveState();
 updateLayerPanel();
 });

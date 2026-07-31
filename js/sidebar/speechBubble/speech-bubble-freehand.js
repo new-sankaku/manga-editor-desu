@@ -134,15 +134,19 @@ perPixelTargetFind: true
 });
 
 sbClear();
-changeDoNotSaveHistory();
+var tb0=0,tb1=0,tb2=0;
+withoutHistory(function(){
 skipForcedAdjust=true;
-var tb0=performance.now();
+try{
+tb0=performance.now();
 canvas.add(bubble);
-var tb1=performance.now();
+tb1=performance.now();
 createFreehandBubbleMetrics(bubble);
-var tb2=performance.now();
+tb2=performance.now();
+}finally{
 skipForcedAdjust=false;
-changeDoSaveHistory();
+}
+});
 saveStateByManual();
 forcedAdjustCanvasSize();
 perfLogger.warn("[PERF:createSpeechBubble] canvas.add:"+Math.round(tb1-tb0)+"ms metrics:"+Math.round(tb2-tb1)+"ms");
