@@ -33,3 +33,4 @@
 | 22 | 履歴 | オブジェクト属性を`obj.left=100`のように直接代入するUIハンドラで`commitHistory()`/`commitHistoryDebounced()`を呼んでいるか。canvasイベントが発火せず、自動コミット網（`_set`フック）も直接代入は検知できないため履歴に残らず、次のUndoが1つ前の操作まで巻き戻る。連続入力（スライダー・キーリピート）は必ずdebounce版を使う | 1 |
 | 23 | 履歴 | `changeDoNotSaveHistory()`の解除漏れがないか。非同期コールバックをまたぐ場合はtry/finallyで囲む。解除漏れは以降の全操作が履歴に残らなくなり、Undoが大きく巻き戻る。同期処理は`withoutHistory(fn)`を使う | 1 |
 | 24 | 履歴 | 一時的なUI用オブジェクト（クロップ枠等）に`setNotSave`/`excludeFromLayerPanel`/`excludeFromExport`を設定し、`addByNotSave`/`removeByNotSave`で追加削除しているか。通常のadd/removeでは無意味な履歴が積まれる | 1 |
+| 25 | 履歴 | 画像を差し替える効果（glfxフィルタ等）で、非同期の完了後にコミットしているか。`setElement()`は`set()`を通らないため自動コミット網で検知できず、抑止スコープも非同期コールバックには効かない。プレビューのまま履歴に残らないと次のUndoが1つ前の操作まで巻き戻る | 1 |

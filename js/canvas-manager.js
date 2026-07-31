@@ -165,6 +165,7 @@ document.addEventListener('DOMContentLoaded',function() {
 $('bg-color').addEventListener('input',function (event) {
 var color=event.target.value;
 canvas.setBackgroundColor(color,canvas.renderAll.bind(canvas));
+commitHistoryDebounced();
 });
 $('bg-color').addEventListener('input',function (event) {
 resizableContainer=$('canvas-container');
