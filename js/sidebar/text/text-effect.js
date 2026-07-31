@@ -1,29 +1,66 @@
 var neonIntensity=2;
 var isNeonEnabled=false;
 
-function updateTextControls(object) {
+// 選択中のテキストの値をサイドバーに反映する。
+// 反映しないと、表示されている値と実際の値が食い違い、
+// スライダーを少し動かしただけで別の値に飛ぶ
+function setColorPickerValue(id,color){
+var picker=$(id);
+if(!picker||!color||typeof color!=='string'){
+return;
+}
+if(picker.jscolor){
+picker.jscolor.fromString(color);
+}else{
+picker.value=rgbToHex(color);
+}
+}
 
-if (isVerticalText(object)) {
-if (object.fill) {
+function updateTextControls(object) {
+if(!isText(object)&&!isVerticalText(object)){
 return;
-} else {
-let hexColor=rgbToHex(object.fill);
-$('textColorPicker').value=hexColor;
 }
-} else if (isText(object)) {
-if (object.fill) {
-return;
-} else {
-let hexColor=rgbToHex(object.fill);
-$('textColorPicker').value=hexColor;
+
+setColorPickerValue('textColorPicker',object.fill);
+setColorPickerValue('textOutlineColorPicker',object.stroke);
+setColorPickerValue('textBgColorPicker',isVerticalText(object)?object.textBackgroundColor:object.backgroundColor);
+
+var fontSizeSlider=$('fontSizeSlider');
+if(fontSizeSlider&&object.fontSize){
+fontSizeSlider.value=object.fontSize;
 }
-$('fontSizeSlider').value=object.fontSize;
+var strokeWidthSlider=$('fontStrokeWidthSlider');
+if(strokeWidthSlider&&object.strokeWidth!==undefined){
+strokeWidthSlider.value=object.strokeWidth;
 }
+
+updateTextAlignUI(object);
+
 if (object.fontFamily) {
 var fmDisplay=$("fm-selected-font-fontSelector");
 if(fmDisplay) fmDisplay.textContent=object.fontFamily;
 }
 updateBoldToggleUI();
+}
+
+function updateTextAlignUI(object){
+var alignment=isVerticalText(object)
+?{top:'left',middle:'center',bottom:'right'}[object.verticalAlign]
+:object.textAlign;
+if(!alignment){
+return;
+}
+['left','center','right'].forEach(function(value){
+var button=$('align-'+value);
+if(!button){
+return;
+}
+if(value===alignment){
+button.classList.add('selected');
+}else{
+button.classList.remove('selected');
+}
+});
 }
 
 function applyCSSTextEffect() {

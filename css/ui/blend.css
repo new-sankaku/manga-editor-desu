@@ -210,6 +210,14 @@ position:relative
 margin-bottom:8px
 }
 
+.blend-empty-notice {
+padding:16px;
+text-align:center;
+font-size:12px;
+color:var(--component-text-color);
+opacity:0.7
+}
+
 .blend-category-header {
 display:flex;
 align-items:center;

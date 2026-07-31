@@ -242,7 +242,14 @@ if(applyBtn)applyBtn.classList.remove("active");
 var info=$("blendSelectedInfo");
 if(info)info.textContent=getText("blendSelectMode");
 const checkedLayers=getCheckedLayers();
-if(checkedLayers.length<2)return;
+if(checkedLayers.length<2){
+// 空欄のままだと操作を間違えたのか処理中なのか分からない
+var notice=document.createElement("div");
+notice.className="blend-empty-notice";
+notice.textContent=getText("blendLowImages");
+blendModesContainer.appendChild(notice);
+return;
+}
 const canvases=checkedLayers.map((layer)=>
 createCanvasFromFabricImage(layer)
 );
@@ -490,7 +497,7 @@ var imageLayerListTemp=null;
 
 async function handleBlend() {
 var imageLayerList=getImageObjectList();
-if(imageLayerList.length<1){
+if(imageLayerList.length<2){
 var blendLowImages=getText("blendLowImages");
 createToastError("Blend error",blendLowImages);
 return;
