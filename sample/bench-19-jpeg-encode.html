@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 19 — JPEG エンコード比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-na{display:inline-block;background:#333;color:#aaa;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improvement{color:#4f4;font-weight:bold}
+.note{font-size:12px;color:#aaa;margin-top:8px;line-height:1.6}
+.size-info{font-size:12px;color:#8bf;margin-top:6px}
+</style>
+</head>
+<body>
+<h1>Bench 19 — JPEG エンコード</h1>
+<p class="subtitle">現行: canvas.toDataURL vs 改善案A: canvas.toBlob（非同期）vs 改善案B: OffscreenCanvas.convertToBlob</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">
+    キャンバスサイズ: 2250×2550px &nbsp;|&nbsp; JPEG品質: 0.85 &nbsp;|&nbsp; 繰り返し: 5回
+  </p>
+  <p class="note">
+    ※ 改善案A・Bは非同期APIのため、ブラウザのエンコーダスレッドを活用できます。<br>
+    ※ 改善案B（OffscreenCanvas）はメインスレッドをブロックしないため、UI応答性が向上します。<br>
+    ※ OffscreenCanvas未対応のブラウザでは改善案Bは「N/A」と表示されます。
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <div class="size-info" id="sizeInfo"></div>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>出力サイズ</th>
+        <th>速度比</th>
+        <th>改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const CANVAS_W = 2250;
+const CANVAS_H = 2550;
+const JPEG_QUALITY = 0.85;
+const REPEAT = 5;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+// テスト用キャンバスを描画（毎回同じ内容）
+function createTestCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = CANVAS_W;
+  canvas.height = CANVAS_H;
+  const ctx = canvas.getContext('2d');
+
+  // 背景
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // グラデーション
+  const grad = ctx.createLinearGradient(0, 0, CANVAS_W, CANVAS_H);
+  grad.addColorStop(0, '#ff6b6b');
+  grad.addColorStop(0.5, '#4ecdc4');
+  grad.addColorStop(1, '#45b7d1');
+  ctx.fillStyle = grad;
+  ctx.fillRect(100, 100, CANVAS_W - 200, CANVAS_H - 200);
+
+  // 多数の図形を描画（ランダムにしないことで毎回同じキャンバス）
+  for (let i = 0; i < 200; i++) {
+    const x = (i * 137) % CANVAS_W;
+    const y = (i * 97) % CANVAS_H;
+    const r = 20 + (i % 80);
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsl(${(i * 18) % 360}, 70%, 50%)`;
+    ctx.globalAlpha = 0.5;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1.0;
+
+  // テキスト
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 72px sans-serif';
+  ctx.fillText('Manga Editor', 100, 200);
+
+  return canvas;
+}
+
+// 現行実装: toDataURL（同期）
+function encodeJpegCurrent(canvas) {
+  return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+}
+
+// 改善案A: toBlob（非同期コールバック）
+function encodeJpegA(canvas) {
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob), 'image/jpeg', JPEG_QUALITY);
+  });
+}
+
+// 改善案B: OffscreenCanvas.convertToBlob
+async function encodeJpegB(canvas) {
+  if (typeof OffscreenCanvas === 'undefined') {
+    throw new Error('OffscreenCanvas not supported');
+  }
+  const offscreen = new OffscreenCanvas(CANVAS_W, CANVAS_H);
+  const ctx = offscreen.getContext('2d');
+  ctx.drawImage(canvas, 0, 0);
+  return offscreen.convertToBlob({ type: 'image/jpeg', quality: JPEG_QUALITY });
+}
+
+function dataURLToBytes(dataURL) {
+  const base64 = dataURL.split(',')[1];
+  return Math.floor(base64.length * 3 / 4);
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const validRows = rows.filter(r => !isNaN(r.avg));
+  const minAvg = Math.min(...validRows.map(r => r.avg));
+  const maxAvg = Math.max(...validRows.map(r => r.avg));
+  const baselineAvg = rows[0].avg;
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const ratio = isNaN(r.avg) ? '-' : (r.avg / minAvg).toFixed(2) + 'x';
+    const improvement = (!isNaN(r.avg) && !isNaN(baselineAvg) && r.avg !== baselineAvg)
+      ? ((baselineAvg - r.avg) / baselineAvg * 100).toFixed(1) + '%'
+      : (r.avg === baselineAvg ? '基準' : '-');
+    const isBest = !isNaN(r.avg) && Math.abs(r.avg - minAvg) < 0.5;
+    const isWorst = !isNaN(r.avg) && Math.abs(r.avg - maxAvg) < 0.5 && validRows.length > 1;
+    const sizeStr = r.size != null ? formatSize(r.size) : (r.na ? 'N/A' : '-');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${isNaN(r.min) ? '-' : r.min.toFixed(1)}</td>
+      <td>${isNaN(r.max) ? '-' : r.max.toFixed(1)}</td>
+      <td>${isNaN(r.avg) ? '-' : r.avg.toFixed(1)}</td>
+      <td>${sizeStr}</td>
+      <td class="speedup">${ratio}</td>
+      <td class="${!isNaN(r.avg) && r.avg < baselineAvg ? 'improvement' : ''}">${improvement}</td>
+      <td>
+        ${r.na ? '<span class="tag-na">N/A</span>' : ''}
+        ${!r.na && isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${!r.na && isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async () => {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    setProgress('テスト用キャンバス描画中...', 3);
+    await new Promise(r => setTimeout(r, 20));
+
+    const canvas = createTestCanvas();
+
+    // --- 現行実装: toDataURL ---
+    const currentTimes = [];
+    let currentSize = null;
+    for (let trial = 0; trial < REPEAT; trial++) {
+      setProgress(`現行実装 (toDataURL) 計測中... (${trial + 1}/${REPEAT})`, 8 + trial * 6);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      const result = encodeJpegCurrent(canvas);
+      currentTimes.push(performance.now() - t0);
+      if (trial === 0) currentSize = dataURLToBytes(result);
+    }
+
+    // --- 改善案A: toBlob ---
+    const aTimes = [];
+    let aSize = null;
+    for (let trial = 0; trial < REPEAT; trial++) {
+      setProgress(`改善案A (toBlob 非同期) 計測中... (${trial + 1}/${REPEAT})`, 40 + trial * 7);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      const blob = await encodeJpegA(canvas);
+      aTimes.push(performance.now() - t0);
+      if (trial === 0) aSize = blob.size;
+    }
+
+    // --- 改善案B: OffscreenCanvas ---
+    const bTimes = [];
+    let bSize = null;
+    let bNA = false;
+    const supportsOffscreen = typeof OffscreenCanvas !== 'undefined';
+    if (supportsOffscreen) {
+      for (let trial = 0; trial < REPEAT; trial++) {
+        setProgress(`改善案B (OffscreenCanvas.convertToBlob) 計測中... (${trial + 1}/${REPEAT})`, 75 + trial * 4);
+        await new Promise(r => setTimeout(r, 10));
+        const t0 = performance.now();
+        const blob = await encodeJpegB(canvas);
+        bTimes.push(performance.now() - t0);
+        if (trial === 0) bSize = blob.size;
+      }
+    } else {
+      bNA = true;
+      setProgress('改善案B: OffscreenCanvas未対応のためスキップ', 95);
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    setProgress('結果集計中...', 97);
+    await new Promise(r => setTimeout(r, 20));
+
+    document.getElementById('sizeInfo').textContent =
+      'キャンバスサイズ: ' + CANVAS_W + '×' + CANVAS_H + 'px | JPEG品質: ' + JPEG_QUALITY;
+
+    const rows = [
+      { label: '現行: canvas.toDataURL(\'image/jpeg\', q)（同期）', ...stats(currentTimes), size: currentSize },
+      { label: '改善案A: canvas.toBlob(callback, \'image/jpeg\', q)（非同期）', ...stats(aTimes), size: aSize },
+    ];
+    if (!bNA) {
+      rows.push({ label: '改善案B: OffscreenCanvas.convertToBlob()（非同期）', ...stats(bTimes), size: bSize });
+    } else {
+      rows.push({ label: '改善案B: OffscreenCanvas.convertToBlob()（未対応）', min: NaN, max: NaN, avg: NaN, size: null, na: true });
+    }
+    renderTable(rows);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('btnRun').click(), 300);
+});
+</script>
+</body>
+</html>

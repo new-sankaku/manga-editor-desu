@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 18 — stateStack JSON→TextEncode パイプライン比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improvement{color:#4f4;font-weight:bold}
+.note{font-size:12px;color:#aaa;margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>Bench 18 — stateStack JSON→TextEncode パイプライン</h1>
+<p class="subtitle">現行: stringify→encode vs 改善案A: encodeInto（バッファ再利用）vs 改善案B: Web Worker並列処理</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">
+    stateStackエントリ数: 30 &nbsp;|&nbsp; 各エントリ: 約100KBのJSON &nbsp;|&nbsp; 繰り返し: 5回
+  </p>
+  <p class="note">
+    ※ 改善案B（Web Worker）はworker生成のオーバーヘッドも含めた実測値です。<br>
+    　少量データでは通信コストが支配的になる場合があります。<br>
+    ※ file://プロトコルではWorkerのBlobURLを使用します。
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const STACK_SIZE = 30;
+const REPEAT = 5;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// 約100KBのJSONデータを持つstateStackエントリ生成
+function createStateStackEntry(index) {
+  const layers = [];
+  for (let i = 0; i < 50; i++) {
+    layers.push({
+      id: 'layer_' + i,
+      type: ['rect', 'ellipse', 'text', 'image', 'group'][i % 5],
+      visible: true,
+      locked: false,
+      opacity: Math.random(),
+      x: Math.random() * 3000,
+      y: Math.random() * 3000,
+      width: Math.random() * 1000 + 100,
+      height: Math.random() * 1000 + 100,
+      rotation: Math.random() * 360,
+      fill: '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0'),
+      stroke: '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0'),
+      strokeWidth: Math.random() * 10,
+      zIndex: i,
+      name: 'Layer_' + index + '_' + i,
+      blendMode: 'normal',
+      filters: [
+        { type: 'blur', radius: Math.random() * 20 },
+        { type: 'brightness', value: Math.random() * 2 },
+        { type: 'contrast', value: Math.random() * 2 },
+      ],
+      transform: {
+        a: Math.random(), b: Math.random(), c: Math.random(),
+        d: Math.random(), e: Math.random(), f: Math.random()
+      },
+      data: Array.from({ length: 30 }, () => Math.random()),
+      metadata: {
+        created: Date.now() - Math.random() * 86400000,
+        modified: Date.now(),
+        author: 'user_' + (i % 5),
+        tags: ['tag_a', 'tag_b', 'tag_c'],
+        description: 'Layer description text for layer ' + i + ' in state ' + index
+      }
+    });
+  }
+  return { version: 2, index, timestamp: Date.now(), layers };
+}
+
+async function createStateStack(size) {
+  const stack = [];
+  for (let i = 0; i < size; i++) {
+    stack.push(createStateStackEntry(i));
+  }
+  return stack;
+}
+
+// 現行実装: stringify → TextEncoder.encode
+function saveStateStackCurrent(stateStack) {
+  return stateStack.map(state => {
+    var json = JSON.stringify(state);
+    var buffer = new TextEncoder().encode(json).buffer;
+    return buffer;
+  });
+}
+
+// 改善案A: TextEncoder.encodeInto で既存バッファ再利用
+function saveStateStackA(stateStack) {
+  const encoder = new TextEncoder();
+  // 最大サイズを事前確保（UTF-8では最大3バイト/文字）
+  const maxJsonLen = 200 * 1024; // 200KB余裕
+  const sharedBuf = new Uint8Array(maxJsonLen);
+  return stateStack.map(state => {
+    const json = JSON.stringify(state);
+    const result = encoder.encodeInto(json, sharedBuf);
+    // 実際に書き込まれた部分だけコピー（転送のためにslice）
+    return sharedBuf.buffer.slice(0, result.written);
+  });
+}
+
+// 改善案B: Web Worker で並列処理
+const WORKER_CODE = `
+self.onmessage = function(e) {
+  var stateStack = e.data;
+  var results = stateStack.map(function(state) {
+    var json = JSON.stringify(state);
+    return new TextEncoder().encode(json).buffer;
+  });
+  self.postMessage(results, results);
+};
+`;
+
+async function saveStateStackB(stateStack) {
+  return new Promise((resolve, reject) => {
+    const blob = new Blob([WORKER_CODE], { type: 'application/javascript' });
+    const url = URL.createObjectURL(blob);
+    const worker = new Worker(url);
+    worker.onmessage = (e) => {
+      worker.terminate();
+      URL.revokeObjectURL(url);
+      resolve(e.data);
+    };
+    worker.onerror = (e) => {
+      worker.terminate();
+      URL.revokeObjectURL(url);
+      reject(new Error('Worker error: ' + e.message));
+    };
+    // Transferableとして送る（コピーなし）
+    worker.postMessage(stateStack);
+  });
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const validRows = rows.filter(r => !isNaN(r.avg));
+  const minAvg = Math.min(...validRows.map(r => r.avg));
+  const maxAvg = Math.max(...validRows.map(r => r.avg));
+  const baselineAvg = rows[0].avg;
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const ratio = isNaN(r.avg) ? '-' : (r.avg / minAvg).toFixed(2) + 'x';
+    const improvement = (!isNaN(r.avg) && !isNaN(baselineAvg) && r.avg !== baselineAvg)
+      ? ((baselineAvg - r.avg) / baselineAvg * 100).toFixed(1) + '%'
+      : (r.avg === baselineAvg ? '基準' : '-');
+    const isBest = !isNaN(r.avg) && Math.abs(r.avg - minAvg) < 0.5;
+    const isWorst = !isNaN(r.avg) && Math.abs(r.avg - maxAvg) < 0.5 && validRows.length > 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${isNaN(r.min) ? '-' : r.min.toFixed(1)}</td>
+      <td>${isNaN(r.max) ? '-' : r.max.toFixed(1)}</td>
+      <td>${isNaN(r.avg) ? '-' : r.avg.toFixed(1)}</td>
+      <td class="speedup">${ratio}</td>
+      <td class="${!isNaN(r.avg) && r.avg < baselineAvg ? 'improvement' : ''}">${improvement}</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async () => {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    setProgress('stateStackデータ生成中...', 3);
+    await new Promise(r => setTimeout(r, 20));
+
+    const stateStack = await createStateStack(STACK_SIZE);
+
+    // データサイズ確認
+    const sampleJson = JSON.stringify(stateStack[0]);
+    console.log('サンプルエントリサイズ:', (sampleJson.length / 1024).toFixed(1), 'KB');
+
+    // 現行実装
+    const currentTimes = [];
+    for (let trial = 0; trial < REPEAT; trial++) {
+      setProgress(`現行実装 (stringify+encode) 計測中... (${trial + 1}/${REPEAT})`, 10 + trial * 6);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      saveStateStackCurrent(stateStack);
+      currentTimes.push(performance.now() - t0);
+    }
+
+    // 改善案A: encodeInto
+    const aTimes = [];
+    for (let trial = 0; trial < REPEAT; trial++) {
+      setProgress(`改善案A (encodeInto バッファ再利用) 計測中... (${trial + 1}/${REPEAT})`, 42 + trial * 6);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      saveStateStackA(stateStack);
+      aTimes.push(performance.now() - t0);
+    }
+
+    // 改善案B: Web Worker
+    const bTimes = [];
+    for (let trial = 0; trial < REPEAT; trial++) {
+      setProgress(`改善案B (Web Worker並列) 計測中... (${trial + 1}/${REPEAT})`, 72 + trial * 4);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      await saveStateStackB(stateStack);
+      bTimes.push(performance.now() - t0);
+    }
+
+    setProgress('結果集計中...', 97);
+    await new Promise(r => setTimeout(r, 20));
+
+    const rows = [
+      { label: '現行: stringify → new TextEncoder().encode()', ...stats(currentTimes) },
+      { label: '改善案A: stringify → encodeInto（バッファ再利用）', ...stats(aTimes) },
+      { label: '改善案B: Web Worker で並列 stringify+encode', ...stats(bTimes) },
+    ];
+    renderTable(rows);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('btnRun').click(), 300);
+});
+</script>
+</body>
+</html>

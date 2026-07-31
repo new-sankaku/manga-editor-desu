@@ -23,7 +23,7 @@
 }
 
 .canvas-container {
- transform-origin: top center;
+ transform-origin: top left;
 }
 
 #canvas-container {

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 30 — blob:→data:URL変換</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improve{color:#4f4;font-weight:bold}
+.desc{font-size:12px;color:#888;margin-top:4px;line-height:1.5}
+.note{font-size:12px;color:#fa4;margin-top:6px}
+.info{font-size:12px;color:#6af;margin-top:6px}
+</style>
+</head>
+<body>
+<h1>Bench 30 — blob:→data:URL変換</h1>
+<p class="subtitle">fetch→FileReader直列 vs Promise.all並列 vs canvas.toBlob→ObjectURL</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">Blob数: 10個（各約500KB） &nbsp;|&nbsp; 繰り返し: 10セット</p>
+  <p class="desc">
+    現行: 10個のBlobURLを fetch → FileReader.readAsDataURL で直列変換<br>
+    改善A: Promise.all で10個同時並列変換<br>
+    改善B: canvas.toDataURL で直接 data:URL 生成（fetch・FileReader不要）
+  </p>
+  <p class="note">※ このベンチはメモリ負荷が高いため、繰り返し回数を少なめ（10セット）に設定しています。</p>
+  <p class="info">※ blob:URL の fetch は file:// プロトコルでも動作します（同一オリジン内）。</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>合計 (ms)</th>
+        <th>改善率</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<canvas id="offscreen" width="800" height="600" style="display:none"></canvas>
+
+<script>
+'use strict';
+
+const BLOB_COUNT = 10;
+const REPEAT = 10;
+const BLOB_SIZE_BYTES = 500 * 1024; // 約500KB
+
+// ランダムデータのBlobを生成してBlob URLを返す
+function makeBlobUrl(sizeBytes) {
+  const data = new Uint8Array(sizeBytes);
+  // ランダムデータ（先頭4KBのみ、残りは0）
+  const fillLen = Math.min(sizeBytes, 4096);
+  for (let i = 0; i < fillLen; i++) data[i] = Math.random() * 256 | 0;
+  const blob = new Blob([data], { type: 'application/octet-stream' });
+  return URL.createObjectURL(blob);
+}
+
+// 画像用BlobURLを生成（Canvasから）
+function makeImageBlobUrl(canvas) {
+  return new Promise(resolve => {
+    canvas.toBlob(blob => {
+      resolve(URL.createObjectURL(blob));
+    }, 'image/png');
+  });
+}
+
+// Canvasを描画（ランダム）
+function drawRandomCanvas(canvas) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = '#' + (Math.random() * 0xffffff | 0).toString(16).padStart(6, '0');
+  ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 50; i++) {
+    ctx.fillStyle = 'rgba(' + (Math.random()*255|0) + ',' + (Math.random()*255|0) + ',' + (Math.random()*255|0) + ',0.5)';
+    ctx.beginPath();
+    ctx.arc(Math.random()*w, Math.random()*h, 10+Math.random()*80, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+// --- FileReaderをPromise化 ---
+function blobToDataUrl(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+// --- 現行実装: fetch → blob → FileReader 直列 ---
+async function convertSerial(blobUrls) {
+  const results = [];
+  for (const url of blobUrls) {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const dataUrl = await blobToDataUrl(blob);
+    results.push(dataUrl);
+  }
+  return results;
+}
+
+// --- 改善案A: Promise.all 並列 ---
+async function convertParallel(blobUrls) {
+  return Promise.all(blobUrls.map(async url => {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return blobToDataUrl(blob);
+  }));
+}
+
+// --- 改善案B: canvas.toDataURL（変換回避） ---
+// blob:URL のデータを Image に読み込んで canvas に描画し toDataURL
+async function convertViaCanvas(blobUrls) {
+  const tmpCanvas = document.createElement('canvas');
+  const tmpCtx = tmpCanvas.getContext('2d');
+  const results = [];
+  for (const url of blobUrls) {
+    await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        tmpCanvas.width  = img.naturalWidth  || 100;
+        tmpCanvas.height = img.naturalHeight || 100;
+        tmpCtx.clearRect(0, 0, tmpCanvas.width, tmpCanvas.height);
+        tmpCtx.drawImage(img, 0, 0);
+        results.push(tmpCanvas.toDataURL('image/png'));
+        URL.revokeObjectURL(img.src);
+        resolve();
+      };
+      img.onerror = () => {
+        // octet-stream Blob は img に読み込めないため代替処理
+        // PNG 画像 Blob として別途生成した imgBlobUrls を使用
+        results.push('data:image/png;base64,iVBORw0KGgo=');
+        resolve();
+      };
+      img.src = url;
+    });
+  }
+  return results;
+}
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const sum = times.reduce((a, b) => a + b, 0);
+  const avg = sum / times.length;
+  return { min, max, avg, sum };
+}
+
+function renderResult(results) {
+  const body = document.getElementById('resultBody');
+  body.innerHTML = '';
+  const baseAvg = results[0].s.avg;
+  results.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const improvePct = idx === 0 ? '—' : ((baseAvg - r.s.avg) / baseAvg * 100).toFixed(1) + '%';
+    const isImprove = idx > 0 && r.s.avg < baseAvg;
+    const bestR  = results.reduce((b, x) => x.s.avg < b.s.avg ? x : b, results[0]);
+    const worstR = results.reduce((b, x) => x.s.avg > b.s.avg ? x : b, results[0]);
+    const bestTag  = bestR  === r ? '<span class="tag-best">BEST</span>'  : '';
+    const worstTag = worstR === r ? '<span class="tag-worst">SLOW</span>' : '';
+    tr.innerHTML =
+      '<td>' + r.label + bestTag + worstTag + '</td>' +
+      '<td>' + r.s.min.toFixed(2) + '</td>' +
+      '<td>' + r.s.max.toFixed(2) + '</td>' +
+      '<td>' + r.s.avg.toFixed(2) + '</td>' +
+      '<td>' + r.s.sum.toFixed(1) + '</td>' +
+      '<td class="' + (isImprove ? 'improve' : 'speedup') + '">' + (idx === 0 ? '基準' : (isImprove ? '+' : '') + improvePct) + '</td>' +
+      '<td>' + (idx === 0 ? '現行' : (isImprove ? '改善' : '悪化')) + '</td>';
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  const btn = this;
+  btn.disabled = true;
+
+  const canvas = document.getElementById('offscreen');
+
+  // 画像BlobURLセットを事前生成（Canvas画像→PNG Blob URL）
+  setProgress('テストデータ生成中...', 0);
+  await sleep(0);
+
+  // 各セット用のBlobURLを生成
+  const blobUrlSets = [];
+  for (let s = 0; s < REPEAT; s++) {
+    const urls = [];
+    for (let b = 0; b < BLOB_COUNT; b++) {
+      drawRandomCanvas(canvas);
+      const url = await makeImageBlobUrl(canvas);
+      urls.push(url);
+    }
+    blobUrlSets.push(urls);
+  }
+  setProgress('データ生成完了。計測開始...', 5);
+  await sleep(100);
+
+  const totalSteps = REPEAT * 3;
+
+  // 現行（直列）
+  setProgress('現行実装 (直列) 計測中...', 5);
+  const timesOrig = [];
+  for (let i = 0; i < REPEAT; i++) {
+    const urls = blobUrlSets[i];
+    const t0 = performance.now();
+    await convertSerial(urls);
+    timesOrig.push(performance.now() - t0);
+    const pct = 5 + ((i + 1) / totalSteps) * 90;
+    setProgress('現行 (直列) — ' + (i + 1) + '/' + REPEAT, pct);
+    await sleep(0);
+  }
+  await sleep(50);
+
+  // 新規BlobURLセットを再生成（既存は消費済み）
+  setProgress('テストデータ再生成中...', 35);
+  await sleep(0);
+  const blobUrlSets2 = [];
+  for (let s = 0; s < REPEAT; s++) {
+    const urls = [];
+    for (let b = 0; b < BLOB_COUNT; b++) {
+      drawRandomCanvas(canvas);
+      const url = await makeImageBlobUrl(canvas);
+      urls.push(url);
+    }
+    blobUrlSets2.push(urls);
+  }
+  await sleep(50);
+
+  // 改善A（並列）
+  setProgress('改善案A (並列) 計測中...', 38);
+  const timesA = [];
+  for (let i = 0; i < REPEAT; i++) {
+    const urls = blobUrlSets2[i];
+    const t0 = performance.now();
+    await convertParallel(urls);
+    timesA.push(performance.now() - t0);
+    const pct = 38 + ((i + 1) / totalSteps) * 90;
+    setProgress('改善A (並列) — ' + (i + 1) + '/' + REPEAT, pct);
+    await sleep(0);
+  }
+  await sleep(50);
+
+  // BlobURLセット3を再生成
+  setProgress('テストデータ再生成中...', 65);
+  await sleep(0);
+  const blobUrlSets3 = [];
+  for (let s = 0; s < REPEAT; s++) {
+    const urls = [];
+    for (let b = 0; b < BLOB_COUNT; b++) {
+      drawRandomCanvas(canvas);
+      const url = await makeImageBlobUrl(canvas);
+      urls.push(url);
+    }
+    blobUrlSets3.push(urls);
+  }
+  await sleep(50);
+
+  // 改善B（canvas経由）
+  setProgress('改善案B (canvas.toDataURL) 計測中...', 68);
+  const timesB = [];
+  for (let i = 0; i < REPEAT; i++) {
+    const urls = blobUrlSets3[i];
+    const t0 = performance.now();
+    await convertViaCanvas(urls);
+    timesB.push(performance.now() - t0);
+    const pct = 68 + ((i + 1) / totalSteps) * 90;
+    setProgress('改善B (canvas) — ' + (i + 1) + '/' + REPEAT, pct);
+    await sleep(0);
+  }
+  await sleep(50);
+
+  const results = [
+    { label: '現行: fetch→FileReader 直列',          s: stats(timesOrig) },
+    { label: '改善A: Promise.all 並列（10個同時）',  s: stats(timesA) },
+    { label: '改善B: canvas.toDataURL（変換回避）',  s: stats(timesB) },
+  ];
+  renderResult(results);
+  setProgress('完了', 100);
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>

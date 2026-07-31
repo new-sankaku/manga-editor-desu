@@ -30,3 +30,5 @@
 | 19 | ログ | 各ファイルで`new SimpleLogger()`していないか。ロガーは`js/core/logger.js`に集約定義し、各ファイルではグローバル変数として参照する | 1 |
 | 20 | 非同期 | `_comfyUIExecProvider`等のグローバル変数に依存するURL/認証情報を、長時間のawait（WebSocket待機等）をまたいで使っていないか。非同期処理中に別タスクがグローバル変数を上書きし、別プロバイダのURLに接続してしまう。関数冒頭でサーバーアドレス・認証情報をローカル変数にキャプチャして使う | 2 |
 | 21 | fallback | グローバル変数が未設定のときデフォルト値（`'local'`等）にフォールバックしていないか。`_comfyUIExecProvider`がnullのときキーを`'local'`にする、`comfyObjectInfoListMap.get(key)\|\|comfyObjectInfoListMap.get('local')`のように別キーにフォールバックする等はすべて暗黙のfallback。awaitなしで呼ばれたasync関数ではグローバル変数が既にクリアされているため、呼び出し元で値を事前キャプチャして引数で渡す | 1 |
+| 22 | 履歴 | 修正対象と同じパターンのコードが他の呼び出し経路にも存在しないか。`putImageInFrame`に`setSave`復帰を入れたが、同一パターンの`initialPutImage`（初回画像追加経路）とナイフ分割が漏れた。片方だけ直すと経路によって直った/直っていないが分かれる。`setNotSave`等の共通ヘルパーを修正する場合はGrepで全使用箇所を確認する | 1 |
+| 23 | 履歴 | 判定関数の全分岐を確認したか。`isSaveObject`が`target.saveHistory===undefined`のみ保存対象とし`===true`を除外していたため、`setSave`で復帰した（true設定した）オブジェクトの操作が履歴に残らなかった。フラグ判定は「除外条件（false）のみ弾く」形にし、true/undefinedを同等に扱う | 1 |

@@ -145,6 +145,7 @@ throw error;
 
 
 async function multiLoadLz4(bufferFileLz4List) {
+let firstLoadedGuid=null;
 for (const file of bufferFileLz4List) {
 let projectFileList=await lz4Compressor.unLz4FilesByBuffer(file.data.buffer);
 const previewBlobBuffer=projectFileList.find(file=>file.name==="preview-image.jpeg");
@@ -200,13 +201,17 @@ if (!canvasGuid) {
 let guid=generateGUID();
 const blob=new Blob([file.data]);
 btmAddImage({href: previewImageUrl},blob,guid);
+canvasGuid=guid;
 }
+if(!firstLoadedGuid)firstLoadedGuid=canvasGuid;
 }
+return firstLoadedGuid;
 }
 
 
 async function multiLoadZip(zip) {
 const zipFiles=Object.keys(zip.files).filter(filename=>filename.endsWith('.zip'));
+let firstLoadedGuid=null;
 
 for (let i=0;i<zipFiles.length;i++) {
 const zipContent=await zip.file(zipFiles[i]).async('blob');
@@ -243,8 +248,11 @@ if(canvasGuid){
 }else{
 let guid=generateGUID();
 btmAddImage({href: previewImageUrl},zipContent,guid);
+canvasGuid=guid;
 }
+if(!firstLoadedGuid)firstLoadedGuid=canvasGuid;
 }
+return firstLoadedGuid;
 }
 
 
@@ -253,6 +261,7 @@ btmAddImage({href: previewImageUrl},zipContent,guid);
 //This is not recommended as it has been changed from Zip management to Lz4 management.
 async function processZip(zip) {
 const zipFiles=Object.keys(zip.files).filter(filename=>filename.endsWith('.zip'));
+let firstLoadedGuid=null;
 
 for (let i=0;i<zipFiles.length;i++) {
 const zipContent=await zip.file(zipFiles[i]).async('blob');
@@ -290,8 +299,11 @@ if(canvasGuid){
 }else{
 let guid=generateGUID();
 btmAddImage({href: previewImageUrl},zipContent,guid);
+canvasGuid=guid;
 }
+if(!firstLoadedGuid)firstLoadedGuid=canvasGuid;
 }
+return firstLoadedGuid;
 }
 
 //This is not recommended as it has been changed from Zip management to Lz4 management.

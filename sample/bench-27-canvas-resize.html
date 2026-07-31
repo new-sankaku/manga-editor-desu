@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 27 — キャンバスリサイズ全オブジェクト再計算</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improve{color:#4f4;font-weight:bold}
+.desc{font-size:12px;color:#888;margin-top:4px;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>Bench 27 — キャンバスリサイズ全オブジェクト再計算</h1>
+<p class="subtitle">オブジェクト配列ループ vs SoA TypedArray vs バッチ変換行列</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">オブジェクト数: 200 &nbsp;|&nbsp; 繰り返し: 1,000回</p>
+  <p class="desc">
+    現行: JS オブジェクト配列を for ループで順次変換（setCoords相当含む）<br>
+    改善A: SoA（Structure of Arrays）方式で Float64Array に状態管理し SIMD的アクセスを促進<br>
+    改善B: バッチ変換行列を事前構築し TypedArray 単一ループで一括適用
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>合計 (ms)</th>
+        <th>改善率</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const OBJ_COUNT = 200;
+const REPEAT = 1000;
+
+// --- データ生成ヘルパー ---
+function makeObjects(count) {
+  const objs = [];
+  for (let i = 0; i < count; i++) {
+    objs.push({
+      left: Math.random() * 1000,
+      top: Math.random() * 800,
+      width: 50 + Math.random() * 200,
+      height: 50 + Math.random() * 200,
+      scaleX: 0.5 + Math.random(),
+      scaleY: 0.5 + Math.random(),
+      strokeWidth: 1 + Math.random() * 4,
+      coords: { tl: {x:0,y:0}, tr: {x:0,y:0}, bl: {x:0,y:0}, br: {x:0,y:0} }
+    });
+  }
+  return objs;
+}
+
+// SoA用 Float64Array を作成
+function makeSoA(count) {
+  return {
+    left:        new Float64Array(count),
+    top:         new Float64Array(count),
+    width:       new Float64Array(count),
+    height:      new Float64Array(count),
+    scaleX:      new Float64Array(count),
+    scaleY:      new Float64Array(count),
+    strokeWidth: new Float64Array(count),
+    // coords (tl/tr/bl/br) x/y — 8値/オブジェクト
+    coords:      new Float64Array(count * 8),
+  };
+}
+function fillSoA(soa, objs) {
+  for (let i = 0; i < objs.length; i++) {
+    soa.left[i]        = objs[i].left;
+    soa.top[i]         = objs[i].top;
+    soa.width[i]       = objs[i].width;
+    soa.height[i]      = objs[i].height;
+    soa.scaleX[i]      = objs[i].scaleX;
+    soa.scaleY[i]      = objs[i].scaleY;
+    soa.strokeWidth[i] = objs[i].strokeWidth;
+  }
+}
+
+// --- 現行実装 ---
+function resizeAllOriginal(objects, scaleX, scaleY) {
+  for (var i = 0; i < objects.length; i++) {
+    var o = objects[i];
+    o.left    *= scaleX;
+    o.top     *= scaleY;
+    o.scaleX  *= scaleX;
+    o.scaleY  *= scaleY;
+    o.strokeWidth = (o.strokeWidth || 1) * ((scaleX + scaleY) / 2);
+    o.coords = {
+      tl: { x: o.left,                         y: o.top },
+      tr: { x: o.left + o.width * o.scaleX,    y: o.top },
+      bl: { x: o.left,                         y: o.top + o.height * o.scaleY },
+      br: { x: o.left + o.width * o.scaleX,    y: o.top + o.height * o.scaleY }
+    };
+  }
+}
+
+// --- 改善案A: SoA TypedArray ---
+function resizeAllSoA(soa, count, scaleX, scaleY) {
+  const avgScale = (scaleX + scaleY) * 0.5;
+  const coords = soa.coords;
+  for (let i = 0; i < count; i++) {
+    soa.left[i]        *= scaleX;
+    soa.top[i]         *= scaleY;
+    soa.scaleX[i]      *= scaleX;
+    soa.scaleY[i]      *= scaleY;
+    soa.strokeWidth[i] *= avgScale;
+    const base = i * 8;
+    const l = soa.left[i], t = soa.top[i];
+    const w = soa.width[i] * soa.scaleX[i];
+    const h = soa.height[i] * soa.scaleY[i];
+    coords[base]     = l;     coords[base + 1] = t;
+    coords[base + 2] = l + w; coords[base + 3] = t;
+    coords[base + 4] = l;     coords[base + 5] = t + h;
+    coords[base + 6] = l + w; coords[base + 7] = t + h;
+  }
+}
+
+// --- 改善案B: バッチ変換行列（2x2行列をフラット化して計算） ---
+// 事前にスケール行列を構築し、TypedArrayへ単一パス適用
+function resizeAllBatch(objects, scaleX, scaleY) {
+  // 変換係数を事前計算
+  const avgScale = (scaleX + scaleY) * 0.5;
+  // 全オブジェクトの数値をフラット Float64Array にコピーして一括変換
+  const n = objects.length;
+  const buf = new Float64Array(n * 6); // left,top,scaleX,scaleY,strokeWidth,dummy
+  for (let i = 0; i < n; i++) {
+    const base = i * 6;
+    buf[base]     = objects[i].left;
+    buf[base + 1] = objects[i].top;
+    buf[base + 2] = objects[i].scaleX;
+    buf[base + 3] = objects[i].scaleY;
+    buf[base + 4] = objects[i].strokeWidth || 1;
+  }
+  // バッチ変換
+  for (let i = 0; i < n; i++) {
+    const base = i * 6;
+    buf[base]     *= scaleX;
+    buf[base + 1] *= scaleY;
+    buf[base + 2] *= scaleX;
+    buf[base + 3] *= scaleY;
+    buf[base + 4] *= avgScale;
+  }
+  // 結果書き戻し + coords計算
+  for (let i = 0; i < n; i++) {
+    const base = i * 6;
+    const o = objects[i];
+    o.left        = buf[base];
+    o.top         = buf[base + 1];
+    o.scaleX      = buf[base + 2];
+    o.scaleY      = buf[base + 3];
+    o.strokeWidth = buf[base + 4];
+    const l = o.left, t = o.top;
+    const w = o.width * o.scaleX, h = o.height * o.scaleY;
+    o.coords.tl.x = l;     o.coords.tl.y = t;
+    o.coords.tr.x = l + w; o.coords.tr.y = t;
+    o.coords.bl.x = l;     o.coords.bl.y = t + h;
+    o.coords.br.x = l + w; o.coords.br.y = t + h;
+  }
+}
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function runBench(label, fn, totalSteps, stepOffset) {
+  const times = [];
+  for (let i = 0; i < REPEAT; i++) {
+    const t0 = performance.now();
+    fn();
+    times.push(performance.now() - t0);
+    const pct = ((stepOffset + i + 1) / totalSteps) * 100;
+    setProgress(label + ' — ' + (i + 1) + '/' + REPEAT, pct);
+    if (i % 50 === 49) await sleep(0);
+  }
+  return times;
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const sum = times.reduce((a, b) => a + b, 0);
+  const avg = sum / times.length;
+  return { min, max, avg, sum };
+}
+
+function renderResult(results) {
+  const body = document.getElementById('resultBody');
+  body.innerHTML = '';
+  const baseAvg = results[0].s.avg;
+  results.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const improvePct = idx === 0 ? '—' : ((baseAvg - r.s.avg) / baseAvg * 100).toFixed(1) + '%';
+    const isImprove = idx > 0 && r.s.avg < baseAvg;
+    const bestR = results.reduce((b, x) => x.s.avg < b.s.avg ? x : b, results[0]);
+    const worstR = results.reduce((b, x) => x.s.avg > b.s.avg ? x : b, results[0]);
+    const bestTag  = bestR  === r ? '<span class="tag-best">BEST</span>'  : '';
+    const worstTag = worstR === r ? '<span class="tag-worst">SLOW</span>' : '';
+    tr.innerHTML =
+      '<td>' + r.label + bestTag + worstTag + '</td>' +
+      '<td>' + r.s.min.toFixed(3) + '</td>' +
+      '<td>' + r.s.max.toFixed(3) + '</td>' +
+      '<td>' + r.s.avg.toFixed(3) + '</td>' +
+      '<td>' + r.s.sum.toFixed(1) + '</td>' +
+      '<td class="' + (isImprove ? 'improve' : 'speedup') + '">' + (idx === 0 ? '基準' : (isImprove ? '+' : '') + improvePct) + '</td>' +
+      '<td>' + (idx === 0 ? '現行' : (isImprove ? '改善' : '悪化')) + '</td>';
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  const btn = this;
+  btn.disabled = true;
+  const totalSteps = REPEAT * 3;
+  const SX = 1.2, SY = 0.9;
+
+  // 現行
+  let objsOrig = makeObjects(OBJ_COUNT);
+  setProgress('現行実装 計測中...', 0);
+  const timesOrig = await runBench('現行実装', () => {
+    resizeAllOriginal(objsOrig, SX, SY);
+    // スケールが蓄積するのでリセット
+    objsOrig = makeObjects(OBJ_COUNT);
+  }, totalSteps, 0);
+  await sleep(50);
+
+  // 改善A (SoA)
+  const soa = makeSoA(OBJ_COUNT);
+  fillSoA(soa, makeObjects(OBJ_COUNT));
+  // SoAはスケールが蓄積するためリセットが必要
+  setProgress('改善案A 計測中...', 33);
+  const timesA = await runBench('改善案A (SoA)', () => {
+    fillSoA(soa, makeObjects(OBJ_COUNT));
+    resizeAllSoA(soa, OBJ_COUNT, SX, SY);
+  }, totalSteps, REPEAT);
+  await sleep(50);
+
+  // 改善B
+  let objsB = makeObjects(OBJ_COUNT);
+  setProgress('改善案B 計測中...', 66);
+  const timesB = await runBench('改善案B (バッチ行列)', () => {
+    resizeAllBatch(objsB, SX, SY);
+    objsB = makeObjects(OBJ_COUNT);
+  }, totalSteps, REPEAT * 2);
+  await sleep(50);
+
+  const results = [
+    { label: '現行: JSオブジェクト配列ループ', s: stats(timesOrig) },
+    { label: '改善A: SoA TypedArray',           s: stats(timesA) },
+    { label: '改善B: バッチ変換行列',             s: stats(timesB) },
+  ];
+  renderResult(results);
+  setProgress('完了', 100);
+  btn.disabled = false;
+});
+</script>
+</body>
+</html>

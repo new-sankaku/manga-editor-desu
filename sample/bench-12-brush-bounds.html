@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 12 — ブラシ境界検出バウンディングボックス</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.note{font-size:12px;color:#888;margin-top:8px}
+.verify{font-size:12px;color:#8f8;margin-top:4px}
+</style>
+</head>
+<body>
+<h1>Bench 12 — ブラシ境界検出バウンディングボックス</h1>
+<p class="subtitle">アルファチャンネルを走査して描画範囲を求める3つの実装の速度比較</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">キャンバスサイズ: 1024×1024 &nbsp;|&nbsp; 描画領域: 中央200×200 &nbsp;|&nbsp; 繰り返し: 20回</p>
+  <p class="note">※ スパース（描画ピクセルが少ない）なデータを使用。改善案Bの早期終了の効果が出やすい条件です。</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <div class="verify" id="verifyMsg"></div>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>現行比 改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const W = 1024, H = 1024;
+const REPEAT = 20;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テスト用データ生成（中央200×200に描画）
+function createBrushData() {
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  // 中央に200×200の描画
+  const cx = W/2, cy = H/2;
+  ctx.fillStyle = 'rgba(0,0,0,0.8)';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 100, 0, Math.PI*2);
+  ctx.fill();
+  // いくつか筆跡を追加
+  ctx.lineWidth = 20;
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+  ctx.beginPath();
+  ctx.moveTo(cx-80, cy-50);
+  ctx.lineTo(cx+80, cy+50);
+  ctx.stroke();
+  return ctx.getImageData(0, 0, W, H);
+}
+
+// 現行実装: 全ピクセルをxy走査
+function implLegacy(imageData) {
+  const data = imageData.data;
+  const width = W, height = H;
+  var minX = width, minY = height, maxX = 0, maxY = 0;
+  for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      var alpha = data[(y * width + x) * 4 + 3];
+      if (alpha > 0) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+// 改善案A: Uint32Arrayで4バイト一括チェック
+function implUint32(imageData) {
+  const src32 = new Uint32Array(imageData.data.buffer);
+  const width = W, height = H;
+  var minX = width, minY = height, maxX = -1, maxY = -1;
+
+  for (var y = 0; y < height; y++) {
+    const rowStart = y * width;
+    for (var x = 0; x < width; x++) {
+      // Uint32でアルファは最上位バイト（>>> 24）
+      if ((src32[rowStart + x] >>> 24) > 0) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  return { minX, minY, maxX, maxY };
+}
+
+// 改善案B: 4辺から内側にスキャン（早期終了）
+function implEdgeScan(imageData) {
+  const data = imageData.data;
+  const width = W, height = H;
+
+  // 上辺スキャン → minY
+  var minY = -1;
+  outer_top: for (var y = 0; y < height; y++) {
+    for (var x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { minY = y; break outer_top; }
+    }
+  }
+  if (minY < 0) return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+
+  // 下辺スキャン → maxY
+  var maxY = -1;
+  outer_bot: for (var y = height - 1; y >= minY; y--) {
+    for (var x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { maxY = y; break outer_bot; }
+    }
+  }
+
+  // 左辺スキャン → minX（minY〜maxYの行のみ）
+  var minX = width;
+  for (var y = minY; y <= maxY; y++) {
+    for (var x = 0; x < minX; x++) {
+      if (data[(y * width + x) * 4 + 3] > 0) { minX = x; break; }
+    }
+  }
+
+  // 右辺スキャン → maxX（minY〜maxYの行のみ）
+  var maxX = -1;
+  for (var y = minY; y <= maxY; y++) {
+    for (var x = width - 1; x > maxX; x--) {
+      if (data[(y * width + x) * 4 + 3] > 0) { maxX = x; break; }
+    }
+  }
+
+  return { minX, minY, maxX, maxY };
+}
+
+async function runBench(name, fn, imageData) {
+  const times = [];
+  let result;
+  for (let r = 0; r < REPEAT; r++) {
+    const t0 = performance.now();
+    result = fn(imageData);
+    times.push(performance.now() - t0);
+    await new Promise(res => setTimeout(res, 0));
+  }
+  return { times, result };
+}
+
+function stats(times) {
+  const mn = Math.min(...times);
+  const mx = Math.max(...times);
+  const avg = times.reduce((a,b)=>a+b,0)/times.length;
+  return { min: mn, max: mx, avg };
+}
+
+function renderRow(name, s, baseAvg, isBest) {
+  const tr = document.createElement('tr');
+  const improvement = baseAvg != null
+    ? ((baseAvg - s.avg) / baseAvg * 100).toFixed(1)
+    : null;
+  const improvStr = improvement != null
+    ? `<span class="speedup">${improvement > 0 ? '+' : ''}${improvement}%</span>`
+    : '<span style="color:#888">—（基準）</span>';
+  const badge = isBest ? '<span class="tag-best">BEST</span>' : (improvement !== null && parseFloat(improvement) < 0 ? '<span class="tag-worst">SLOW</span>' : '');
+  tr.innerHTML = `
+    <td>${name}${badge}</td>
+    <td>${s.min.toFixed(3)}</td>
+    <td>${s.max.toFixed(3)}</td>
+    <td>${s.avg.toFixed(3)}</td>
+    <td>${improvStr}</td>
+    <td style="color:#4af">完了</td>`;
+  document.getElementById('resultBody').appendChild(tr);
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  this.disabled = true;
+  document.getElementById('resultBody').innerHTML = '';
+  document.getElementById('verifyMsg').textContent = '';
+
+  setProgress('テストデータ生成中...', 5);
+  await new Promise(res => setTimeout(res, 0));
+  const imageData = createBrushData();
+
+  setProgress('現行実装 実行中...', 10);
+  const { times: timesLeg, result: rLeg } = await runBench('現行実装', implLegacy, imageData);
+  setProgress('改善案A (Uint32Array) 実行中...', 40);
+  const { times: timesU32, result: rU32 } = await runBench('改善案A', implUint32, imageData);
+  setProgress('改善案B (4辺スキャン) 実行中...', 70);
+  const { times: timesEdge, result: rEdge } = await runBench('改善案B', implEdgeScan, imageData);
+
+  setProgress('完了', 100);
+
+  // 結果の一致を確認
+  const match = rLeg.minX === rU32.minX && rLeg.minY === rU32.minY &&
+                 rLeg.maxX === rU32.maxX && rLeg.maxY === rU32.maxY &&
+                 rLeg.minX === rEdge.minX && rLeg.minY === rEdge.minY &&
+                 rLeg.maxX === rEdge.maxX && rLeg.maxY === rEdge.maxY;
+  document.getElementById('verifyMsg').textContent =
+    match
+    ? `結果一致確認済み — BBox: (${rLeg.minX}, ${rLeg.minY}) - (${rLeg.maxX}, ${rLeg.maxY})`
+    : `結果不一致！ Legacy:(${rLeg.minX},${rLeg.minY})-(${rLeg.maxX},${rLeg.maxY}) U32:(${rU32.minX},${rU32.minY}) Edge:(${rEdge.minX},${rEdge.minY})`;
+
+  const sLeg  = stats(timesLeg);
+  const sU32  = stats(timesU32);
+  const sEdge = stats(timesEdge);
+
+  const bestAvg = Math.min(sLeg.avg, sU32.avg, sEdge.avg);
+
+  renderRow('現行実装（全画素xy走査）', sLeg, null, sLeg.avg === bestAvg);
+  renderRow('改善案A: Uint32Array一括チェック', sU32, sLeg.avg, sU32.avg === bestAvg);
+  renderRow('改善案B: 4辺から内側スキャン', sEdge, sLeg.avg, sEdge.avg === bestAvg);
+
+  this.disabled = false;
+});
+</script>
+</body>
+</html>

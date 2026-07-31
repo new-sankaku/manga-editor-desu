@@ -99,23 +99,13 @@ setAttributes(t2_wild_textSvg,dims);
 }catch(error){}
 }
 function t2_wild_addSvg(left,top){
-const svgString=new XMLSerializer().serializeToString(t2_wild_textSvg);
-const reader=new FileReader();
-reader.onload=({target})=>{
-fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2WildStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
-},{crossOrigin:'anonymous'});
-};
-reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
+t2_addSvgImage(t2_wild_textSvg,left,top,img=>nowT2WildStr=img);
 }
 function t2_wild_updateAll(){
 const position=nowT2WildStr?
 {left:nowT2WildStr.left,top:nowT2WildStr.top}:{left:50,top:100};
 if(nowT2WildStr){
-canvas.remove(nowT2WildStr).renderAll();
+t2_removeSvgImage(nowT2WildStr);
 nowT2WildStr=null;
 }
 t2_wild_deleteSvg();

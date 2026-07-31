@@ -230,6 +230,12 @@ removeSpinner(spinnerId);
 return;
 }
 
+if(!selectedWorkflow){
+createToastError("Generation Error","No enabled workflow found for type: "+Type);
+removeSpinner(spinnerId);
+return;
+}
+
 var classTypeLists=getClassTypeOnlyByJson(selectedWorkflow);
 var objInfoRepo=(_comfyUIExecProvider&&_comfyUIExecProvider.id==='runpodComfyUI')?comfyObjectInfoRepo_runpod:comfyObjectInfoRepo_local;
 if(!await checkWorkflowNodeVsComfyUI(classTypeLists,objInfoRepo)){

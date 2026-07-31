@@ -117,23 +117,13 @@ setAttributes(t2_cloud_textSvg,dims);
 }catch(error){}
 }
 function t2_cloud_addSvg(left,top){
-const svgString=new XMLSerializer().serializeToString(t2_cloud_textSvg);
-const reader=new FileReader();
-reader.onload=({target})=>{
-fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2CloudStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
-},{crossOrigin:'anonymous'});
-};
-reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
+t2_addSvgImage(t2_cloud_textSvg,left,top,img=>nowT2CloudStr=img);
 }
 function t2_cloud_updateAll(){
 const position=nowT2CloudStr?
 {left:nowT2CloudStr.left,top:nowT2CloudStr.top}:{left:50,top:100};
 if(nowT2CloudStr){
-canvas.remove(nowT2CloudStr).renderAll();
+t2_removeSvgImage(nowT2CloudStr);
 nowT2CloudStr=null;
 }
 t2_cloud_deleteSvg();

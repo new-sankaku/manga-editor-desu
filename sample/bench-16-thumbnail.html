@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 16 — レイヤーサムネイル生成比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improvement{color:#4f4;font-weight:bold}
+.note{font-size:12px;color:#aaa;margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>Bench 16 — レイヤーサムネイル生成</h1>
+<p class="subtitle">現行: 毎回Canvas生成+toDataURL vs 改善案A: Canvas再利用+createImageBitmap vs 改善案B: toBlob+URL.createObjectURL</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">
+    レイヤー数: 20枚 &nbsp;|&nbsp; 元画像: 750×850px &nbsp;|&nbsp; サムネイルサイズ: 120×120px<br>
+    繰り返し: 5回（非同期処理のため少なめ）
+  </p>
+  <p class="note">※ 改善案Bはtoблob非同期のため時間が長くなる場合があります。</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const LAYER_COUNT = 20;
+const IMG_W = 750;
+const IMG_H = 850;
+const THUMB_SIZE = 120;
+const REPEAT = 5;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テスト用ソース画像を生成（ランダムピクセルで750x850のImageBitmap配列）
+async function createSourceImages(count) {
+  const images = [];
+  for (let i = 0; i < count; i++) {
+    const c = document.createElement('canvas');
+    c.width = IMG_W;
+    c.height = IMG_H;
+    const ctx = c.getContext('2d');
+    // ランダムな色でグラデーション描画
+    const grad = ctx.createLinearGradient(0, 0, IMG_W, IMG_H);
+    grad.addColorStop(0, `hsl(${(i * 18) % 360},70%,50%)`);
+    grad.addColorStop(1, `hsl(${(i * 18 + 120) % 360},70%,30%)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, IMG_W, IMG_H);
+    ctx.fillStyle = '#fff';
+    ctx.font = '48px sans-serif';
+    ctx.fillText('Layer ' + (i + 1), 20, 80);
+    images.push(c);
+  }
+  return images;
+}
+
+// 現行実装: 毎回新しいcanvasを生成してtoDataURL
+function generateThumbnailsCurrent(images, thumbSize) {
+  var results = [];
+  for (var i = 0; i < images.length; i++) {
+    var c = document.createElement('canvas');
+    c.width = thumbSize; c.height = thumbSize;
+    var ctx = c.getContext('2d');
+    ctx.drawImage(images[i], 0, 0, thumbSize, thumbSize);
+    results.push(c.toDataURL('image/png'));
+  }
+  return results;
+}
+
+// 改善案A: Canvas再利用 + createImageBitmap でリサイズ
+async function generateThumbnailsA(images, thumbSize) {
+  const results = [];
+  const c = document.createElement('canvas');
+  c.width = thumbSize;
+  c.height = thumbSize;
+  const ctx = c.getContext('2d');
+  for (let i = 0; i < images.length; i++) {
+    const bmp = await createImageBitmap(images[i], {
+      resizeWidth: thumbSize,
+      resizeHeight: thumbSize,
+      resizeQuality: 'medium'
+    });
+    ctx.clearRect(0, 0, thumbSize, thumbSize);
+    ctx.drawImage(bmp, 0, 0);
+    bmp.close();
+    results.push(c.toDataURL('image/png'));
+  }
+  return results;
+}
+
+// 改善案B: Canvas再利用 + toBlob + URL.createObjectURL（非同期）
+async function generateThumbnailsB(images, thumbSize) {
+  const results = [];
+  const c = document.createElement('canvas');
+  c.width = thumbSize;
+  c.height = thumbSize;
+  const ctx = c.getContext('2d');
+  for (let i = 0; i < images.length; i++) {
+    ctx.clearRect(0, 0, thumbSize, thumbSize);
+    ctx.drawImage(images[i], 0, 0, thumbSize, thumbSize);
+    const url = await new Promise(resolve => {
+      c.toBlob(blob => resolve(URL.createObjectURL(blob)), 'image/png');
+    });
+    results.push(url);
+  }
+  // ObjectURLは計測外で解放
+  return results;
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const validRows = rows.filter(r => !isNaN(r.avg));
+  const minAvg = Math.min(...validRows.map(r => r.avg));
+  const maxAvg = Math.max(...validRows.map(r => r.avg));
+  const baselineAvg = rows[0].avg; // 現行実装を基準
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const ratio = isNaN(r.avg) ? '-' : (r.avg / minAvg).toFixed(2) + 'x';
+    const improvement = (!isNaN(r.avg) && !isNaN(baselineAvg) && r.avg !== baselineAvg)
+      ? ((baselineAvg - r.avg) / baselineAvg * 100).toFixed(1) + '%'
+      : (r.avg === baselineAvg ? '基準' : '-');
+    const isBest = !isNaN(r.avg) && Math.abs(r.avg - minAvg) < 0.5;
+    const isWorst = !isNaN(r.avg) && Math.abs(r.avg - maxAvg) < 0.5 && validRows.length > 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${isNaN(r.min) ? '-' : r.min.toFixed(1)}</td>
+      <td>${isNaN(r.max) ? '-' : r.max.toFixed(1)}</td>
+      <td>${isNaN(r.avg) ? '-' : r.avg.toFixed(1)}</td>
+      <td class="speedup">${ratio}</td>
+      <td class="${r.avg < baselineAvg ? 'improvement' : ''}">${improvement}</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async () => {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    setProgress('ソース画像生成中...', 5);
+    await new Promise(r => setTimeout(r, 20));
+
+    const images = await createSourceImages(LAYER_COUNT);
+
+    // --- 現行実装 ---
+    const currentTimes = [];
+    for (let rep = 0; rep < REPEAT; rep++) {
+      setProgress(`現行実装 計測中... (${rep + 1}/${REPEAT})`, 10 + rep * 10);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      generateThumbnailsCurrent(images, THUMB_SIZE);
+      currentTimes.push(performance.now() - t0);
+    }
+
+    // --- 改善案A ---
+    const aTimes = [];
+    for (let rep = 0; rep < REPEAT; rep++) {
+      setProgress(`改善案A (Canvas再利用+ImageBitmap) 計測中... (${rep + 1}/${REPEAT})`, 40 + rep * 8);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      await generateThumbnailsA(images, THUMB_SIZE);
+      aTimes.push(performance.now() - t0);
+    }
+
+    // --- 改善案B ---
+    const bTimes = [];
+    for (let rep = 0; rep < REPEAT; rep++) {
+      setProgress(`改善案B (toBlob+ObjectURL) 計測中... (${rep + 1}/${REPEAT})`, 70 + rep * 5);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      const urls = await generateThumbnailsB(images, THUMB_SIZE);
+      bTimes.push(performance.now() - t0);
+      // ObjectURL解放
+      urls.forEach(u => URL.revokeObjectURL(u));
+    }
+
+    setProgress('結果集計中...', 97);
+    await new Promise(r => setTimeout(r, 20));
+
+    const rows = [
+      { label: '現行: 毎回Canvas生成 + toDataURL', ...stats(currentTimes) },
+      { label: '改善案A: Canvas再利用 + createImageBitmap', ...stats(aTimes) },
+      { label: '改善案B: Canvas再利用 + toBlob + ObjectURL（非同期）', ...stats(bTimes) },
+    ];
+    renderTable(rows);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('btnRun').click(), 300);
+});
+</script>
+</body>
+</html>

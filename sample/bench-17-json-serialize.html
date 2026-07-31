@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 17 — Undo/Redo用JSONシリアライズ比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improvement{color:#4f4;font-weight:bold}
+.note{font-size:12px;color:#aaa;margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>Bench 17 — Undo/Redo用JSONシリアライズ</h1>
+<p class="subtitle">現行: JSON.stringify vs 改善案A: structuredClone+stringify vs 改善案B: 差分検出（変更分のみ保存）</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">
+    オブジェクト数: 50個 &nbsp;|&nbsp; 各オブジェクトのプロパティ数: 20個 &nbsp;|&nbsp; 繰り返し: 100回
+  </p>
+  <p class="note">
+    ※ 改善案B（差分検出）は「前回から10%のプロパティが変更された」シナリオで計測します。<br>
+    　差分保存なので比較条件は異なりますが、実用上の速度感を確認できます。
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const OBJ_COUNT = 50;
+const PROP_COUNT = 20;
+const REPEAT = 100;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テスト用オブジェクト配列生成
+function createObjects(count, propCount) {
+  const objects = [];
+  for (let i = 0; i < count; i++) {
+    const obj = {
+      id: 'layer_' + i,
+      type: ['rect', 'ellipse', 'text', 'image'][i % 4],
+      visible: true,
+      locked: false,
+      opacity: Math.random(),
+      x: Math.random() * 2000,
+      y: Math.random() * 2000,
+      width: Math.random() * 800 + 50,
+      height: Math.random() * 800 + 50,
+      rotation: Math.random() * 360,
+      scaleX: Math.random() * 2 + 0.5,
+      scaleY: Math.random() * 2 + 0.5,
+      fill: '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0'),
+      stroke: '#' + Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0'),
+      strokeWidth: Math.random() * 10,
+      zIndex: i,
+      name: 'Layer ' + i,
+      blendMode: 'normal',
+      clipPath: null,
+      metadata: { created: Date.now(), modified: Date.now() }
+    };
+    // 追加プロパティでpropCount個に調整
+    for (let j = Object.keys(obj).length; j < propCount; j++) {
+      obj['prop_' + j] = Math.random() * 1000;
+    }
+    objects.push(obj);
+  }
+  return objects;
+}
+
+// 現行実装: JSON.stringify でシャローコピーしてシリアライズ
+function saveStateCurrent(objects) {
+  var state = { objects: objects.map(o => ({...o})) };
+  return JSON.stringify(state);
+}
+
+// 改善案A: structuredClone でディープコピー後stringify
+function saveStateA(objects) {
+  const state = { objects: structuredClone(objects) };
+  return JSON.stringify(state);
+}
+
+// 改善案B: 差分検出（前回との差分のみ保存）
+function createDiffSaver() {
+  let prevObjects = null;
+  return function saveStateDiff(objects) {
+    if (prevObjects === null) {
+      // 初回は全保存
+      prevObjects = objects.map(o => ({...o}));
+      return JSON.stringify({ type: 'full', objects: prevObjects });
+    }
+    // 変更されたオブジェクトのみ差分として保存
+    const diffs = [];
+    for (let i = 0; i < objects.length; i++) {
+      const curr = objects[i];
+      const prev = prevObjects[i];
+      if (!prev) {
+        diffs.push({ index: i, op: 'add', obj: {...curr} });
+        continue;
+      }
+      const changed = {};
+      let hasChange = false;
+      for (const key of Object.keys(curr)) {
+        if (JSON.stringify(curr[key]) !== JSON.stringify(prev[key])) {
+          changed[key] = curr[key];
+          hasChange = true;
+        }
+      }
+      if (hasChange) {
+        diffs.push({ index: i, op: 'update', changes: changed });
+      }
+    }
+    // 前回状態を更新（シャローコピー）
+    prevObjects = objects.map(o => ({...o}));
+    return JSON.stringify({ type: 'diff', diffs });
+  };
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const validRows = rows.filter(r => !isNaN(r.avg));
+  const minAvg = Math.min(...validRows.map(r => r.avg));
+  const maxAvg = Math.max(...validRows.map(r => r.avg));
+  const baselineAvg = rows[0].avg;
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const ratio = isNaN(r.avg) ? '-' : (r.avg / minAvg).toFixed(2) + 'x';
+    const improvement = (!isNaN(r.avg) && !isNaN(baselineAvg) && r.avg !== baselineAvg)
+      ? ((baselineAvg - r.avg) / baselineAvg * 100).toFixed(1) + '%'
+      : (r.avg === baselineAvg ? '基準' : '-');
+    const isBest = !isNaN(r.avg) && Math.abs(r.avg - minAvg) < 0.01;
+    const isWorst = !isNaN(r.avg) && Math.abs(r.avg - maxAvg) < 0.01 && validRows.length > 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${isNaN(r.min) ? '-' : r.min.toFixed(2)}</td>
+      <td>${isNaN(r.max) ? '-' : r.max.toFixed(2)}</td>
+      <td>${isNaN(r.avg) ? '-' : r.avg.toFixed(2)}</td>
+      <td class="speedup">${ratio}</td>
+      <td class="${!isNaN(r.avg) && r.avg < baselineAvg ? 'improvement' : ''}">${improvement}</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('btnRun').addEventListener('click', async () => {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    setProgress('テストデータ生成中...', 3);
+    await new Promise(r => setTimeout(r, 20));
+
+    // 基本オブジェクト生成
+    const baseObjects = createObjects(OBJ_COUNT, PROP_COUNT);
+
+    // 現行実装: 100回繰り返し
+    const currentTimes = [];
+    setProgress('現行実装 (JSON.stringify) 計測中...', 10);
+    await new Promise(r => setTimeout(r, 20));
+    {
+      const t0 = performance.now();
+      for (let rep = 0; rep < REPEAT; rep++) {
+        // 毎回少し変化させる
+        baseObjects[rep % OBJ_COUNT].x = Math.random() * 2000;
+        saveStateCurrent(baseObjects);
+      }
+      currentTimes.push(performance.now() - t0);
+    }
+    // 複数回計測
+    for (let trial = 1; trial < 5; trial++) {
+      setProgress(`現行実装 計測中... (試行 ${trial + 1}/5)`, 10 + trial * 4);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      for (let rep = 0; rep < REPEAT; rep++) {
+        baseObjects[rep % OBJ_COUNT].x = Math.random() * 2000;
+        saveStateCurrent(baseObjects);
+      }
+      currentTimes.push(performance.now() - t0);
+    }
+
+    // 改善案A: structuredClone
+    const aTimes = [];
+    for (let trial = 0; trial < 5; trial++) {
+      setProgress(`改善案A (structuredClone+stringify) 計測中... (試行 ${trial + 1}/5)`, 35 + trial * 5);
+      await new Promise(r => setTimeout(r, 10));
+      const t0 = performance.now();
+      for (let rep = 0; rep < REPEAT; rep++) {
+        baseObjects[rep % OBJ_COUNT].x = Math.random() * 2000;
+        saveStateA(baseObjects);
+      }
+      aTimes.push(performance.now() - t0);
+    }
+
+    // 改善案B: 差分検出
+    const bTimes = [];
+    for (let trial = 0; trial < 5; trial++) {
+      setProgress(`改善案B (差分検出) 計測中... (試行 ${trial + 1}/5)`, 62 + trial * 5);
+      await new Promise(r => setTimeout(r, 10));
+      const diffSaver = createDiffSaver();
+      const t0 = performance.now();
+      for (let rep = 0; rep < REPEAT; rep++) {
+        // 10%のオブジェクトのみ変更（実際の編集シナリオを模倣）
+        const changedCount = Math.max(1, Math.floor(OBJ_COUNT * 0.1));
+        for (let c = 0; c < changedCount; c++) {
+          const idx = (rep * changedCount + c) % OBJ_COUNT;
+          baseObjects[idx].x = Math.random() * 2000;
+          baseObjects[idx].opacity = Math.random();
+        }
+        diffSaver(baseObjects);
+      }
+      bTimes.push(performance.now() - t0);
+    }
+
+    setProgress('結果集計中...', 97);
+    await new Promise(r => setTimeout(r, 20));
+
+    const rows = [
+      { label: '現行: JSON.stringify（シャローコピー）', ...stats(currentTimes) },
+      { label: '改善案A: structuredClone + JSON.stringify', ...stats(aTimes) },
+      { label: '改善案B: 差分検出（変更オブジェクトのみ保存）', ...stats(bTimes) },
+    ];
+    renderTable(rows);
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('btnRun').click(), 300);
+});
+</script>
+</body>
+</html>

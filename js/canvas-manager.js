@@ -166,65 +166,36 @@ $('bg-color').addEventListener('input',function (event) {
 var color=event.target.value;
 canvas.setBackgroundColor(color,canvas.renderAll.bind(canvas));
 });
-$('bg-color').addEventListener('input',function (event) {
-resizableContainer=$('canvas-container');
-});
+resizableContainer=$('resizable-container');
 });
 
 
 let canvasContinerScale=1;
 
-function zoomIn() {
-const containerRect=resizableContainer.getBoundingClientRect();
-
-canvasContinerScale+=0.1;
-$('canvas-container').style.transform=`scale(${canvasContinerScale})`;
-
-const newContentRect=$('canvas-container').getBoundingClientRect();
-const centerX=containerRect.left+containerRect.width/2;
-const centerY=containerRect.top+containerRect.height/2;
-const newScrollLeft=(centerX-newContentRect.width/2-containerRect.left)+resizableContainer.scrollLeft;
-const newScrollTop=(centerY-newContentRect.height/2-containerRect.top)+resizableContainer.scrollTop;
-
-resizableContainer.scrollLeft=newScrollLeft;
-resizableContainer.scrollTop=newScrollTop;
+//transform-origin:top leftのため、縮小時はtranslateXで中央寄せする。
+//拡大時はtranslateX 0で左端を起点にし、はみ出しを全てスクロール可能領域（右・下方向）に収める。
+function applyCanvasContainerScale() {
+const translateX=canvasContinerScale<1?(1-canvasContinerScale)*50:0;
+$('canvas-container').style.transform=`translateX(${translateX}%) scale(${canvasContinerScale})`;
+resizableContainer.scrollLeft=(resizableContainer.scrollWidth-resizableContainer.clientWidth)/2;
+resizableContainer.scrollTop=(resizableContainer.scrollHeight-resizableContainer.clientHeight)/2;
 forcedAdjustCanvasSize();
 }
 
+function zoomIn() {
+canvasContinerScale+=0.1;
+applyCanvasContainerScale();
+}
+
 function zoomFit() {
-const containerRect=resizableContainer.getBoundingClientRect();
-
 canvasContinerScale=1.0;
-$('canvas-container').style.transform=`scale(${canvasContinerScale})`;
-
-const newContentRect=$('canvas-container').getBoundingClientRect();
-const centerX=containerRect.left+containerRect.width/2;
-const centerY=containerRect.top+containerRect.height/2;
-const newScrollLeft=(centerX-newContentRect.width/2-containerRect.left)+resizableContainer.scrollLeft;
-const newScrollTop=(centerY-newContentRect.height/2-containerRect.top)+resizableContainer.scrollTop;
-
-resizableContainer.scrollLeft=newScrollLeft;
-resizableContainer.scrollTop=newScrollTop;
-forcedAdjustCanvasSize();
-
+applyCanvasContainerScale();
 }
 
 function zoomOut() {
 if (canvasContinerScale>0.1) {
-const containerRect=resizableContainer.getBoundingClientRect();
-
 canvasContinerScale-=0.1;
-$('canvas-container').style.transform=`scale(${canvasContinerScale})`;
-
-const newContentRect=$('canvas-container').getBoundingClientRect();
-const centerX=containerRect.left+containerRect.width/2;
-const centerY=containerRect.top+containerRect.height/2;
-const newScrollLeft=(centerX-newContentRect.width/2-containerRect.left)+resizableContainer.scrollLeft;
-const newScrollTop=(centerY-newContentRect.height/2-containerRect.top)+resizableContainer.scrollTop;
-
-resizableContainer.scrollLeft=newScrollLeft;
-resizableContainer.scrollTop=newScrollTop;
-forcedAdjustCanvasSize();
+applyCanvasContainerScale();
 }
 }
 

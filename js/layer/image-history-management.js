@@ -39,11 +39,8 @@ return false;
 if(activeObject.target===undefined){
 return true;
 }
-
-if(activeObject.target.saveHistory===undefined){
-return true;
-}
-return false;
+//saveHistory===trueはsetSaveで復帰済みのオブジェクト。undefined同様に保存対象（falseのみ除外）
+return activeObject.target.saveHistory!==false;
 }else{
 return false;
 }
@@ -203,6 +200,7 @@ const json=JSON.stringify(state);
 stateStack.push(json);
 currentStateIndex++;
 updateLayerPanel();
+btmScheduleThumbnailRefresh();
 }
 
 function undo() {
@@ -223,6 +221,7 @@ reSetSpeechBubbleText();
 setCanvasGUID(state.canvasGuid);
 canvas.renderAll();
 updateLayerPanel();
+btmScheduleThumbnailRefresh();
 resetEventHandlers();
 customSpeechBubbleAllRelocation();
 changeDoSaveHistory();
@@ -242,6 +241,7 @@ reSetSpeechBubbleText();
 setCanvasGUID(state.canvasGuid);
 canvas.renderAll();
 updateLayerPanel();
+btmScheduleThumbnailRefresh();
 resetEventHandlers();
 customSpeechBubbleAllRelocation();
 changeDoSaveHistory();

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 05 — グリッド構築＋最大矩形探索</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.result-info{font-size:12px;color:#888;margin-top:10px}
+.detail{font-size:12px;color:#888;margin-top:8px;line-height:1.6}
+code{background:#0d1526;padding:1px 5px;border-radius:3px;font-size:12px}
+.phase-label{font-weight:bold;color:#adf}
+</style>
+</head>
+<body>
+<h1>Bench 05 — グリッド構築 + 最大矩形探索</h1>
+<p class="subtitle">Array 2D vs Uint8Array フラット — 800×800 グリッド</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">グリッドサイズ: 800×800 &nbsp;|&nbsp; 繰り返し: 5回 &nbsp;|&nbsp; 白黒比率: 50%</p>
+  <div class="detail">
+    <b>現行:</b> <code>Array(h).fill().map(()=>Array(w).fill(0))</code> + forEach でグリッド構築、スタック法で最大矩形<br>
+    <b>改善案A:</b> <code>Uint8Array(w*h)</code> フラット配列でグリッド構築<br>
+    <b>改善案B:</b> 改善A + スタック処理も <code>Int32Array</code> で（GCプレッシャー削減）
+  </div>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果（グリッド構築 + 最大矩形探索 合計）</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+  <div class="result-info" id="resultInfo"></div>
+</div>
+
+<div class="card" id="phaseCard">
+  <h2>内訳（フェーズ別平均 ms）</h2>
+  <table id="phaseTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>グリッド構築 (ms)</th>
+        <th>最大矩形探索 (ms)</th>
+      </tr>
+    </thead>
+    <tbody id="phaseBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const GW = 800, GH = 800;
+const REPEAT = 5;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// テスト用 imageData 生成: ランダム白黒（黒=0, 白=255）
+function createImageData() {
+  const buf = new ArrayBuffer(GW * GH * 4);
+  const data = new Uint8ClampedArray(buf);
+  for (let i = 0; i < GW * GH; i++) {
+    const v = Math.random() < 0.5 ? 0 : 255;
+    data[i * 4] = v;
+    data[i * 4 + 1] = v;
+    data[i * 4 + 2] = v;
+    data[i * 4 + 3] = 255;
+  }
+  return data;
+}
+
+// ============================================================
+// 現行実装: Array 2D
+// ============================================================
+function createGridOriginal(imageData, w, h) {
+  const grid = Array(h).fill(null).map(() => Array(w).fill(0));
+  grid.forEach((row, y) => row.forEach((cell, x) => {
+    grid[y][x] = imageData[(y * w + x) * 4] === 0 ? 1 : 0;
+  }));
+  return grid;
+}
+
+function findLargestRectangleOriginal(grid, w, h) {
+  let maxArea = 0, maxRect = { x: 0, y: 0, w: 0, h: 0 };
+  const heights = new Array(w).fill(0);
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      heights[x] = grid[y][x] === 1 ? heights[x] + 1 : 0;
+    }
+    // ヒストグラムスタック法
+    const stack = [];
+    for (let x = 0; x <= w; x++) {
+      const h2 = x < w ? heights[x] : 0;
+      while (stack.length > 0 && heights[stack[stack.length - 1]] > h2) {
+        const top = stack.pop();
+        const width2 = stack.length === 0 ? x : x - stack[stack.length - 1] - 1;
+        const area = heights[top] * width2;
+        if (area > maxArea) {
+          maxArea = area;
+          const startX = stack.length === 0 ? 0 : stack[stack.length - 1] + 1;
+          maxRect = { x: startX, y: y - heights[top] + 1, w: width2, h: heights[top] };
+        }
+      }
+      stack.push(x);
+    }
+  }
+  return { area: maxArea, rect: maxRect };
+}
+
+// ============================================================
+// 改善案A: Uint8Array フラット + スタックはJS Array
+// ============================================================
+function createGridOptimizedA(imageData, w, h) {
+  const grid = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    grid[i] = imageData[i * 4] === 0 ? 1 : 0;
+  }
+  return grid;
+}
+
+function findLargestRectangleOptimizedA(grid, w, h) {
+  let maxArea = 0, maxRect = { x: 0, y: 0, w: 0, h: 0 };
+  const heights = new Int32Array(w);
+
+  for (let y = 0; y < h; y++) {
+    const rowOff = y * w;
+    for (let x = 0; x < w; x++) {
+      heights[x] = grid[rowOff + x] === 1 ? heights[x] + 1 : 0;
+    }
+    const stack = [];
+    for (let x = 0; x <= w; x++) {
+      const h2 = x < w ? heights[x] : 0;
+      while (stack.length > 0 && heights[stack[stack.length - 1]] > h2) {
+        const top = stack.pop();
+        const w2 = stack.length === 0 ? x : x - stack[stack.length - 1] - 1;
+        const area = heights[top] * w2;
+        if (area > maxArea) {
+          maxArea = area;
+          const sx = stack.length === 0 ? 0 : stack[stack.length - 1] + 1;
+          maxRect = { x: sx, y: y - heights[top] + 1, w: w2, h: heights[top] };
+        }
+      }
+      stack.push(x);
+    }
+  }
+  return { area: maxArea, rect: maxRect };
+}
+
+// ============================================================
+// 改善案B: Uint8Array フラット + Int32Array スタック
+// ============================================================
+function createGridOptimizedB(imageData, w, h) {
+  // 改善Aと同じグリッド構築
+  const grid = new Uint8Array(w * h);
+  for (let i = 0; i < w * h; i++) {
+    grid[i] = imageData[i * 4] === 0 ? 1 : 0;
+  }
+  return grid;
+}
+
+function findLargestRectangleOptimizedB(grid, w, h) {
+  let maxArea = 0, maxRect = { x: 0, y: 0, w: 0, h: 0 };
+  const heights = new Int32Array(w);
+  // スタックを Int32Array で事前確保（最大 w+1 要素）
+  const stackArr = new Int32Array(w + 2);
+  let stackTop = -1;
+
+  for (let y = 0; y < h; y++) {
+    const rowOff = y * w;
+    for (let x = 0; x < w; x++) {
+      heights[x] = grid[rowOff + x] === 1 ? heights[x] + 1 : 0;
+    }
+    stackTop = -1;
+    for (let x = 0; x <= w; x++) {
+      const h2 = x < w ? heights[x] : 0;
+      while (stackTop >= 0 && heights[stackArr[stackTop]] > h2) {
+        const top = stackArr[stackTop--];
+        const w2 = stackTop < 0 ? x : x - stackArr[stackTop] - 1;
+        const area = heights[top] * w2;
+        if (area > maxArea) {
+          maxArea = area;
+          const sx = stackTop < 0 ? 0 : stackArr[stackTop] + 1;
+          maxRect = { x: sx, y: y - heights[top] + 1, w: w2, h: heights[top] };
+        }
+      }
+      stackArr[++stackTop] = x;
+    }
+  }
+  return { area: maxArea, rect: maxRect };
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const minAvg = Math.min(...rows.map(r => r.avg));
+  const maxAvg = Math.max(...rows.map(r => r.avg));
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    const ratio = (r.avg / minAvg).toFixed(2);
+    const isBest = Math.abs(r.avg - minAvg) < 0.01;
+    const isWorst = Math.abs(r.avg - maxAvg) < 0.01 && rows.length > 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.min.toFixed(1)}</td>
+      <td>${r.max.toFixed(1)}</td>
+      <td>${r.avg.toFixed(1)}</td>
+      <td class="speedup">${ratio}x</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPhaseTable(phases) {
+  const tbody = document.getElementById('phaseBody');
+  tbody.innerHTML = '';
+  phases.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p.label}</td><td>${p.buildAvg.toFixed(1)}</td><td>${p.searchAvg.toFixed(1)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function run() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    const imageData = createImageData();
+    const rows = [];
+    const phases = [];
+    const lastResults = [];
+
+    // 現行実装
+    {
+      const totalTimes = [], buildTimes = [], searchTimes = [];
+      let lastResult;
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`現行実装 (Array 2D) 計測中 (${i + 1}/${REPEAT})...`, 5 + i * 12);
+        await new Promise(r => setTimeout(r, 10));
+        const t0 = performance.now();
+        const grid = createGridOriginal(imageData, GW, GH);
+        const t1 = performance.now();
+        lastResult = findLargestRectangleOriginal(grid, GW, GH);
+        const t2 = performance.now();
+        buildTimes.push(t1 - t0);
+        searchTimes.push(t2 - t1);
+        totalTimes.push(t2 - t0);
+      }
+      rows.push({ label: '現行: Array 2D + JS Array スタック', ...stats(totalTimes) });
+      phases.push({ label: '現行', buildAvg: stats(buildTimes).avg, searchAvg: stats(searchTimes).avg });
+      lastResults.push(lastResult);
+    }
+
+    // 改善案A
+    {
+      const totalTimes = [], buildTimes = [], searchTimes = [];
+      let lastResult;
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案A (Uint8Array フラット) 計測中 (${i + 1}/${REPEAT})...`, 30 + i * 12);
+        await new Promise(r => setTimeout(r, 10));
+        const t0 = performance.now();
+        const grid = createGridOptimizedA(imageData, GW, GH);
+        const t1 = performance.now();
+        lastResult = findLargestRectangleOptimizedA(grid, GW, GH);
+        const t2 = performance.now();
+        buildTimes.push(t1 - t0);
+        searchTimes.push(t2 - t1);
+        totalTimes.push(t2 - t0);
+      }
+      rows.push({ label: '改善案A: Uint8Array フラット + JS Array スタック', ...stats(totalTimes) });
+      phases.push({ label: '改善案A', buildAvg: stats(buildTimes).avg, searchAvg: stats(searchTimes).avg });
+      lastResults.push(lastResult);
+    }
+
+    // 改善案B
+    {
+      const totalTimes = [], buildTimes = [], searchTimes = [];
+      let lastResult;
+      for (let i = 0; i < REPEAT; i++) {
+        setProgress(`改善案B (Uint8Array + Int32Array スタック) 計測中 (${i + 1}/${REPEAT})...`, 60 + i * 10);
+        await new Promise(r => setTimeout(r, 10));
+        const t0 = performance.now();
+        const grid = createGridOptimizedB(imageData, GW, GH);
+        const t1 = performance.now();
+        lastResult = findLargestRectangleOptimizedB(grid, GW, GH);
+        const t2 = performance.now();
+        buildTimes.push(t1 - t0);
+        searchTimes.push(t2 - t1);
+        totalTimes.push(t2 - t0);
+      }
+      rows.push({ label: '改善案B: Uint8Array フラット + Int32Array スタック', ...stats(totalTimes) });
+      phases.push({ label: '改善案B', buildAvg: stats(buildTimes).avg, searchAvg: stats(searchTimes).avg });
+      lastResults.push(lastResult);
+    }
+
+    renderTable(rows);
+    renderPhaseTable(phases);
+
+    // 結果の一致確認（面積）
+    const areas = lastResults.map(r => r.area);
+    const allMatch = areas.every(a => a === areas[0]);
+    document.getElementById('resultInfo').textContent =
+      `最大矩形面積: ${areas[0].toLocaleString()} px² — 全手法一致: ${allMatch ? 'OK' : 'NG (面積が異なります)'}`;
+
+    setProgress('完了', 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnRun').addEventListener('click', run);
+window.addEventListener('load', () => setTimeout(run, 300));
+</script>
+</body>
+</html>

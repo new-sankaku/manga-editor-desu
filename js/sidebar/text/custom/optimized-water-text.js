@@ -165,23 +165,13 @@ textLogger.error('SVG size update error:',error);
 }
 }
 function t2_water_addSvg(left,top){
-const svgString=new XMLSerializer().serializeToString(t2_water_textSvg);
-const reader=new FileReader();
-reader.onload=({target})=>{
-fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2WaterStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
-},{crossOrigin:'anonymous'});
-};
-reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
+t2_addSvgImage(t2_water_textSvg,left,top,img=>nowT2WaterStr=img);
 }
 function t2_water_updateAll(){
 const position=nowT2WaterStr?
 {left:nowT2WaterStr.left,top:nowT2WaterStr.top}:{left:50,top:100};
 if(nowT2WaterStr){
-canvas.remove(nowT2WaterStr).renderAll();
+t2_removeSvgImage(nowT2WaterStr);
 nowT2WaterStr=null;
 }
 t2_water_deleteSvg();

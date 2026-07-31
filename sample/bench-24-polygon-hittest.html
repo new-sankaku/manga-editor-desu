@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 24 — ポリゴン内外判定比較</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.improve{color:#4f4;font-weight:bold}
+.desc{font-size:12px;color:#888;margin-top:6px;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>Bench 24 — ポリゴン内外判定（Ray casting）速度比較</h1>
+<p class="subtitle">現行実装 vs AABB事前判定 vs Float64Arrayフラット配列 — 20ポリゴン×10000ポイント</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">ポリゴン数: 20個（各8頂点） &nbsp;|&nbsp; 判定ポイント数: 10,000点/ポリゴン &nbsp;|&nbsp; 合計: 200,000回判定</p>
+  <p class="desc">
+    現行: Ray casting — 全辺をそのまま走査<br>
+    改善案A: バウンディングボックス（AABB）事前判定 — 範囲外は即早期リターン<br>
+    改善案B: Float64Array フラット配列化 — キャッシュ効率改善
+  </p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>速度比</th>
+        <th>改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody">
+      <tr><td colspan="7" style="color:#666;text-align:center;padding:20px">ベンチマーク開始ボタンを押してください</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const POLYGON_COUNT = 20;
+const VERTICES_PER_POLYGON = 8;
+const POINTS_PER_POLYGON = 10000;
+const AREA_SIZE = 1000;
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// ランダムな凸多角形を生成（簡易版：円周上の点を使用）
+function genPolygon(cx, cy, radius, nVerts) {
+  const polygon = [];
+  for (let i = 0; i < nVerts; i++) {
+    const angle = (2 * Math.PI * i / nVerts) + (Math.random() - 0.5) * (Math.PI / nVerts);
+    const r = radius * (0.7 + Math.random() * 0.3);
+    polygon.push({ x: cx + r * Math.cos(angle), y: cy + r * Math.sin(angle) });
+  }
+  return polygon;
+}
+
+// ランダムなテストポイントを生成
+function genPoints(count) {
+  const points = [];
+  for (let i = 0; i < count; i++) {
+    points.push({ x: Math.random() * AREA_SIZE, y: Math.random() * AREA_SIZE });
+  }
+  return points;
+}
+
+// 現行実装: Ray casting
+function isInsidePolygon(point, polygon) {
+  var inside = false;
+  for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    var xi = polygon[i].x, yi = polygon[i].y;
+    var xj = polygon[j].x, yj = polygon[j].y;
+    if ((yi > point.y) !== (yj > point.y) &&
+        point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+// バウンディングボックスを計算
+function computeBBox(polygon) {
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (let i = 0; i < polygon.length; i++) {
+    if (polygon[i].x < minX) minX = polygon[i].x;
+    if (polygon[i].x > maxX) maxX = polygon[i].x;
+    if (polygon[i].y < minY) minY = polygon[i].y;
+    if (polygon[i].y > maxY) maxY = polygon[i].y;
+  }
+  return { minX, maxX, minY, maxY };
+}
+
+// 改善案A: AABB 事前判定
+function isInsidePolygonAABB(point, polygon, bbox) {
+  // バウンディングボックス外なら即リターン
+  if (point.x < bbox.minX || point.x > bbox.maxX ||
+      point.y < bbox.minY || point.y > bbox.maxY) {
+    return false;
+  }
+  var inside = false;
+  for (var i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    var xi = polygon[i].x, yi = polygon[i].y;
+    var xj = polygon[j].x, yj = polygon[j].y;
+    if ((yi > point.y) !== (yj > point.y) &&
+        point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+// Float64Array フラット配列に変換（x0,y0,x1,y1,...）
+function polygonToFlat(polygon) {
+  const arr = new Float64Array(polygon.length * 2);
+  for (let i = 0; i < polygon.length; i++) {
+    arr[i * 2]     = polygon[i].x;
+    arr[i * 2 + 1] = polygon[i].y;
+  }
+  return arr;
+}
+
+// 改善案B: Float64Array フラット配列で Ray casting
+function isInsidePolygonFlat(px, py, flatPoly, nVerts) {
+  var inside = false;
+  var j = nVerts - 1;
+  for (var i = 0; i < nVerts; i++) {
+    var xi = flatPoly[i * 2],     yi = flatPoly[i * 2 + 1];
+    var xj = flatPoly[j * 2],     yj = flatPoly[j * 2 + 1];
+    if ((yi > py) !== (yj > py) &&
+        px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+    j = i;
+  }
+  return inside;
+}
+
+function stats(times) {
+  const min = Math.min(...times);
+  const max = Math.max(...times);
+  const avg = times.reduce((a, b) => a + b, 0) / times.length;
+  return { min, max, avg };
+}
+
+function renderTable(rows) {
+  const baselineAvg = rows[0].avg;
+  const minAvg = Math.min(...rows.map(r => r.avg));
+  const maxAvg = Math.max(...rows.map(r => r.avg));
+  const tbody = document.getElementById('resultBody');
+  tbody.innerHTML = '';
+  rows.forEach((r, idx) => {
+    const ratio = (r.avg / minAvg).toFixed(2);
+    const improveRate = ((1 - r.avg / baselineAvg) * 100).toFixed(1);
+    const isBest = Math.abs(r.avg - minAvg) < 0.01;
+    const isWorst = Math.abs(r.avg - maxAvg) < 0.01 && rows.length > 1;
+    const isBaseline = idx === 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.label}</td>
+      <td>${r.min.toFixed(2)}</td>
+      <td>${r.max.toFixed(2)}</td>
+      <td>${r.avg.toFixed(2)}</td>
+      <td class="speedup">${ratio}x</td>
+      <td class="${isBaseline ? '' : (parseFloat(improveRate) > 0 ? 'improve' : 'speedup')}">${isBaseline ? '(基準)' : (parseFloat(improveRate) > 0 ? '+' + improveRate + '%' : improveRate + '%')}</td>
+      <td>
+        ${isBest ? '<span class="tag-best">BEST</span>' : ''}
+        ${isWorst ? '<span class="tag-worst">SLOW</span>' : ''}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function runBench() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+
+  try {
+    setProgress('テストデータ生成中...', 5);
+    await new Promise(r => setTimeout(r, 20));
+
+    // ポリゴンとテストポイントを生成
+    const polygons = [];
+    const testPointsPerPoly = [];
+    for (let p = 0; p < POLYGON_COUNT; p++) {
+      const cx = 100 + Math.random() * 800;
+      const cy = 100 + Math.random() * 800;
+      const radius = 50 + Math.random() * 150;
+      polygons.push(genPolygon(cx, cy, radius, VERTICES_PER_POLYGON));
+      testPointsPerPoly.push(genPoints(POINTS_PER_POLYGON));
+    }
+
+    // 改善案A/B 用の事前計算データ
+    const bboxes = polygons.map(computeBBox);
+    const flatPolygons = polygons.map(polygonToFlat);
+
+    // 現行
+    setProgress('現行実装 (Ray casting) 計測中... (1/3)', 15);
+    await new Promise(r => setTimeout(r, 20));
+    const t0Current = performance.now();
+    for (let p = 0; p < POLYGON_COUNT; p++) {
+      const poly = polygons[p];
+      const pts = testPointsPerPoly[p];
+      for (let i = 0; i < POINTS_PER_POLYGON; i++) {
+        isInsidePolygon(pts[i], poly);
+      }
+    }
+    const timeCurrent = performance.now() - t0Current;
+
+    // 改善案A: AABB
+    setProgress('改善案A (AABB事前判定) 計測中... (2/3)', 40);
+    await new Promise(r => setTimeout(r, 20));
+    const t0A = performance.now();
+    for (let p = 0; p < POLYGON_COUNT; p++) {
+      const poly = polygons[p];
+      const bbox = bboxes[p];
+      const pts = testPointsPerPoly[p];
+      for (let i = 0; i < POINTS_PER_POLYGON; i++) {
+        isInsidePolygonAABB(pts[i], poly, bbox);
+      }
+    }
+    const timeA = performance.now() - t0A;
+
+    // 改善案B: Float64Array
+    setProgress('改善案B (Float64Array) 計測中... (3/3)', 65);
+    await new Promise(r => setTimeout(r, 20));
+    const t0B = performance.now();
+    for (let p = 0; p < POLYGON_COUNT; p++) {
+      const flatPoly = flatPolygons[p];
+      const pts = testPointsPerPoly[p];
+      for (let i = 0; i < POINTS_PER_POLYGON; i++) {
+        isInsidePolygonFlat(pts[i].x, pts[i].y, flatPoly, VERTICES_PER_POLYGON);
+      }
+    }
+    const timeB = performance.now() - t0B;
+
+    setProgress('結果集計中...', 95);
+    await new Promise(r => setTimeout(r, 20));
+
+    // 単一計測なので同一値を min/max/avg に設定
+    const rows = [
+      { label: '現行: Ray casting (オブジェクト配列)', min: timeCurrent, max: timeCurrent, avg: timeCurrent },
+      { label: '改善案A: AABB 事前判定 + Ray casting', min: timeA, max: timeA, avg: timeA },
+      { label: '改善案B: Float64Array フラット配列', min: timeB, max: timeB, avg: timeB },
+    ];
+    renderTable(rows);
+    setProgress(`完了 — 合計 ${POLYGON_COUNT * POINTS_PER_POLYGON / 1000}K 回判定`, 100);
+  } catch (e) {
+    setProgress('エラー: ' + e.message, 0);
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('btnRun').addEventListener('click', runBench);
+
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('btnRun').click(), 200);
+});
+</script>
+</body>
+</html>

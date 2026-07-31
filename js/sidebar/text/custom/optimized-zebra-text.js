@@ -117,23 +117,13 @@ setAttributes(t2_zebra_textSvg,dims);
 }catch(error){}
 }
 function t2_zebra_addSvg(left,top){
-const svgString=new XMLSerializer().serializeToString(t2_zebra_textSvg);
-const reader=new FileReader();
-reader.onload=({target})=>{
-fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2ZebraStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
-},{crossOrigin:'anonymous'});
-};
-reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
+t2_addSvgImage(t2_zebra_textSvg,left,top,img=>nowT2ZebraStr=img);
 }
 function t2_zebra_updateAll(){
 const position=nowT2ZebraStr?
 {left:nowT2ZebraStr.left,top:nowT2ZebraStr.top}:{left:50,top:100};
 if(nowT2ZebraStr){
-canvas.remove(nowT2ZebraStr).renderAll();
+t2_removeSvgImage(nowT2ZebraStr);
 nowT2ZebraStr=null;
 }
 t2_zebra_deleteSvg();

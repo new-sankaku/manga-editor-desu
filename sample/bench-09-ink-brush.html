@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 09 — インクブラシ物理シミュレーション</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:20px;font-size:14px}
+h1{font-size:18px;margin-bottom:6px;color:#4af}
+.subtitle{color:#888;font-size:12px;margin-bottom:20px}
+.bench-section{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.bench-section h2{font-size:14px;color:#adf;margin-bottom:8px}
+.bench-section p{font-size:12px;color:#888;margin-bottom:12px;line-height:1.6}
+.progress-bar-wrap{background:#0a0a1a;border-radius:4px;height:8px;margin-bottom:12px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4af,#8af);width:0%;transition:width .1s}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#0f3460}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1a2a50}
+th{color:#4af;font-weight:600;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.winner{color:#4f8;font-weight:700}
+.slower{color:#f84}
+.baseline{color:#aaa}
+.tag-current{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#3a1a0a;color:#f84;margin-left:6px}
+.tag-opt{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#0a3a1a;color:#4f8;margin-left:6px}
+.status{font-size:12px;color:#888;margin-bottom:8px;min-height:18px}
+button{background:#0f3460;color:#4af;border:1px solid #4af;border-radius:5px;padding:8px 20px;cursor:pointer;font-size:13px;margin-bottom:12px}
+button:hover{background:#1a4a80}
+button:disabled{opacity:0.4;cursor:not-allowed}
+</style>
+</head>
+<body>
+<h1>Bench 09 — インクブラシ物理シミュレーション</h1>
+<p class="subtitle">40ストロークの位置・速度・角度を10000回更新する速度比較</p>
+
+<div class="bench-section">
+  <h2>概要</h2>
+  <p>
+    <strong>現行:</strong> オブジェクト配列でストローク状態管理、Math.sqrt/atan2/cos/sinを毎回計算。<br>
+    <strong>改善A:</strong> Float64Arrayでストローク状態を連続メモリに格納し、GC圧を低減。<br>
+    <strong>改善B:</strong> Math.atan2/cos/sinのルックアップテーブル化（角度を整数インデックスに量子化）。
+  </p>
+</div>
+
+<button id="btnRun">ベンチマーク実行</button>
+<div class="status" id="status">ボタンを押すと自動実行します</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>実装</th>
+      <th class="num">合計時間 (ms)</th>
+      <th class="num">更新回数</th>
+      <th class="num">1回あたり (μs)</th>
+      <th class="num">速度比</th>
+    </tr>
+  </thead>
+  <tbody id="results">
+    <tr><td colspan="5" style="color:#555;text-align:center">実行待ち</td></tr>
+  </tbody>
+</table>
+
+<script>
+var STROKE_COUNT = 40;
+var UPDATE_TIMES = 10000;
+
+// ---- 現行実装: オブジェクト配列 ----
+function makeStrokes_current() {
+  var strokes = [];
+  for (var i = 0; i < STROKE_COUNT; i++) {
+    strokes.push({
+      x: Math.random() * 600,
+      y: Math.random() * 400,
+      angle: Math.random() * Math.PI * 2,
+      speed: 2 + Math.random() * 3
+    });
+  }
+  return strokes;
+}
+
+function updateStrokes_current(strokes, mouseX, mouseY) {
+  for (var i = 0; i < strokes.length; i++) {
+    var s = strokes[i];
+    var dx = mouseX - s.x;
+    var dy = mouseY - s.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    s.angle = Math.atan2(dy, dx);
+    s.x += Math.cos(s.angle) * s.speed;
+    s.y += Math.sin(s.angle) * s.speed;
+    s.speed *= 0.95;
+  }
+}
+
+function currentImpl() {
+  var strokes = makeStrokes_current();
+  var mouseX = 300, mouseY = 200;
+  for (var t = 0; t < UPDATE_TIMES; t++) {
+    mouseX = 300 + Math.sin(t * 0.01) * 100;
+    mouseY = 200 + Math.cos(t * 0.013) * 80;
+    updateStrokes_current(strokes, mouseX, mouseY);
+  }
+}
+
+// ---- 改善A: Float64Arrayでストローク状態管理 ----
+// レイアウト: [x0, y0, angle0, speed0, x1, y1, angle1, speed1, ...]
+var STRIDE = 4;
+
+function makeStrokes_typed() {
+  var buf = new Float64Array(STROKE_COUNT * STRIDE);
+  for (var i = 0; i < STROKE_COUNT; i++) {
+    buf[i * STRIDE + 0] = Math.random() * 600;   // x
+    buf[i * STRIDE + 1] = Math.random() * 400;   // y
+    buf[i * STRIDE + 2] = Math.random() * Math.PI * 2; // angle
+    buf[i * STRIDE + 3] = 2 + Math.random() * 3; // speed
+  }
+  return buf;
+}
+
+function updateStrokes_typed(buf, mouseX, mouseY) {
+  for (var i = 0; i < STROKE_COUNT; i++) {
+    var base = i * STRIDE;
+    var x = buf[base];
+    var y = buf[base + 1];
+    var speed = buf[base + 3];
+    var dx = mouseX - x;
+    var dy = mouseY - y;
+    var angle = Math.atan2(dy, dx);
+    buf[base]     = x + Math.cos(angle) * speed;
+    buf[base + 1] = y + Math.sin(angle) * speed;
+    buf[base + 2] = angle;
+    buf[base + 3] = speed * 0.95;
+  }
+}
+
+function optimizedA() {
+  var buf = makeStrokes_typed();
+  var mouseX = 300, mouseY = 200;
+  for (var t = 0; t < UPDATE_TIMES; t++) {
+    mouseX = 300 + Math.sin(t * 0.01) * 100;
+    mouseY = 200 + Math.cos(t * 0.013) * 80;
+    updateStrokes_typed(buf, mouseX, mouseY);
+  }
+}
+
+// ---- 改善B: ルックアップテーブル ----
+var LUT_SIZE = 4096;
+var LUT_COS = new Float64Array(LUT_SIZE);
+var LUT_SIN = new Float64Array(LUT_SIZE);
+var LUT_FACTOR = LUT_SIZE / (Math.PI * 2);
+
+(function() {
+  for (var i = 0; i < LUT_SIZE; i++) {
+    var a = (i / LUT_SIZE) * Math.PI * 2;
+    LUT_COS[i] = Math.cos(a);
+    LUT_SIN[i] = Math.sin(a);
+  }
+})();
+
+function fastAtan2(y, x) {
+  return Math.atan2(y, x); // atan2は高速化が難しいのでネイティブ利用
+}
+
+function updateStrokes_lut(buf, mouseX, mouseY) {
+  for (var i = 0; i < STROKE_COUNT; i++) {
+    var base = i * STRIDE;
+    var x = buf[base];
+    var y = buf[base + 1];
+    var speed = buf[base + 3];
+    var dx = mouseX - x;
+    var dy = mouseY - y;
+    var angle = Math.atan2(dy, dx);
+    // 角度をLUTインデックスに変換（負値対応: [0, 2PI)に正規化）
+    var normAngle = angle < 0 ? angle + Math.PI * 2 : angle;
+    var idx = (normAngle * LUT_FACTOR | 0) % LUT_SIZE;
+    buf[base]     = x + LUT_COS[idx] * speed;
+    buf[base + 1] = y + LUT_SIN[idx] * speed;
+    buf[base + 2] = angle;
+    buf[base + 3] = speed * 0.95;
+  }
+}
+
+function optimizedB() {
+  var buf = makeStrokes_typed();
+  var mouseX = 300, mouseY = 200;
+  for (var t = 0; t < UPDATE_TIMES; t++) {
+    mouseX = 300 + Math.sin(t * 0.01) * 100;
+    mouseY = 200 + Math.cos(t * 0.013) * 80;
+    updateStrokes_lut(buf, mouseX, mouseY);
+  }
+}
+
+function bench(fn, iters) {
+  var start = performance.now();
+  for (var i = 0; i < iters; i++) {
+    fn();
+  }
+  return performance.now() - start;
+}
+
+var OUTER_ITERS = 5;
+
+function setProgress(pct) {
+  document.getElementById('progress').style.width = pct + '%';
+}
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function renderResults(rows) {
+  var baseline = rows[0].ms;
+  var html = '';
+  rows.forEach(function(r) {
+    var ratio = baseline / r.ms;
+    var ratioStr = ratio.toFixed(2) + 'x';
+    var cls = ratio > 1.1 ? 'winner' : ratio < 0.9 ? 'slower' : 'baseline';
+    var totalUpdates = UPDATE_TIMES * OUTER_ITERS;
+    var usEach = (r.ms / totalUpdates * 1000).toFixed(3);
+    html += '<tr>';
+    html += '<td>' + r.label + (r.tag === 'current' ? '<span class="tag-current">現行</span>' : '<span class="tag-opt">最適化</span>') + '</td>';
+    html += '<td class="num">' + r.ms.toFixed(2) + '</td>';
+    html += '<td class="num">' + totalUpdates.toLocaleString() + '</td>';
+    html += '<td class="num">' + usEach + '</td>';
+    html += '<td class="num ' + cls + '">' + ratioStr + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('results').innerHTML = html;
+}
+
+document.getElementById('btnRun').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  setProgress(0);
+  setStatus('現行実装 計測中...');
+  document.getElementById('results').innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center">実行中...</td></tr>';
+
+  setTimeout(function() {
+    var msA = bench(currentImpl, OUTER_ITERS);
+    setProgress(35);
+    setStatus('改善案A 計測中...');
+
+    setTimeout(function() {
+      var msB = bench(optimizedA, OUTER_ITERS);
+      setProgress(70);
+      setStatus('改善案B 計測中...');
+
+      setTimeout(function() {
+        var msC = bench(optimizedB, OUTER_ITERS);
+        setProgress(100);
+        setStatus('完了');
+        renderResults([
+          { label: '現行（オブジェクト配列+Math関数）', ms: msA, tag: 'current' },
+          { label: '改善A（Float64Array）', ms: msB, tag: 'opt' },
+          { label: '改善B（Float64Array+LUT）', ms: msC, tag: 'opt' }
+        ]);
+        btn.disabled = false;
+      }, 50);
+    }, 50);
+  }, 50);
+});
+
+window.addEventListener('load', function() {
+  document.getElementById('btnRun').click();
+});
+</script>
+</body>
+</html>

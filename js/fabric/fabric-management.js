@@ -340,6 +340,10 @@ delete target.originalOpacity;
 canvas.renderAll();
 if(target.isPanel)_dbgFabric.debug("[mouse:up] AFTER renderAll strokeWidth="+target.strokeWidth+" stroke="+target.stroke);
 changeDoSaveHistory();
+//object:modifiedはmouse:upより先に発火し、mouse:downからの履歴保存無効の間に握り潰されるため、変形が確定した場合はここで保存する
+if(e.transform&&e.transform.actionPerformed&&isSaveObject(e.transform)){
+saveStateByManual();
+}
 highlightActiveLayerByCanvas(target);
 }
 if(!e.target||canvas.getActiveObject()===e.target){

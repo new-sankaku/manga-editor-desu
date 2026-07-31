@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 13 — トーンドット生成</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:20px;margin-bottom:6px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:20px}
+.card{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:14px;color:#adf;margin-bottom:10px}
+button{
+  background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;
+  padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;
+}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+.progress{margin-top:12px;font-size:13px;color:#aaa;min-height:18px}
+.progress-bar-wrap{background:#0d1526;border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.progress-bar{height:100%;background:#4af;width:0%;transition:width .15s}
+table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
+th{background:#0d1526;padding:8px 10px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50}
+td{padding:7px 10px;border-bottom:1px solid #1a2a50;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.tag-worst{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 6px;font-size:11px;margin-left:6px}
+.speedup{color:#fd4;font-weight:bold}
+.note{font-size:12px;color:#888;margin-top:8px}
+</style>
+</head>
+<body>
+<h1>Bench 13 — トーンドット生成</h1>
+<p class="subtitle">漫画トーンのドット描画を行う3つの実装の速度比較</p>
+
+<div class="card">
+  <h2>テスト設定</h2>
+  <p style="font-size:13px;color:#aaa">キャンバスサイズ: 2250×2550 &nbsp;|&nbsp; spacing=10 &nbsp;|&nbsp; dotSize=5 &nbsp;|&nbsp; 繰り返し: 5回</p>
+  <p class="note">※ spacing=10の場合、約57,000個のドットが描画されます。ブラウザの負荷が高いため繰り返し回数を少なく設定しています。</p>
+  <div style="margin-top:12px">
+    <button id="btnRun">ベンチマーク開始</button>
+  </div>
+  <div class="progress" id="progress">待機中...</div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pbar"></div></div>
+</div>
+
+<div class="card" id="resultCard">
+  <h2>結果</h2>
+  <table id="resultTable">
+    <thead>
+      <tr>
+        <th>手法</th>
+        <th>最小 (ms)</th>
+        <th>最大 (ms)</th>
+        <th>平均 (ms)</th>
+        <th>現行比 改善率</th>
+        <th>ステータス</th>
+      </tr>
+    </thead>
+    <tbody id="resultBody"></tbody>
+  </table>
+</div>
+
+<script>
+'use strict';
+
+const CX = 2250, CY = 2550;
+const TOTAL_SPACING = 10;
+const DOT_SIZE = 5;
+const BASE_OPACITY = 0.7;
+const GRADIENT_INTENSITY = 0.3;
+const REPEAT = 5;
+
+// グラデーション方向ベクトル
+const DIR_X = 1, DIR_Y = 0;
+const MAX_DIST = Math.sqrt(CX * CX + CY * CY);
+
+function setProgress(msg, pct) {
+  document.getElementById('progress').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+// 現行実装: 2重ループでarc描画
+function implLegacy() {
+  const canvas = document.createElement('canvas');
+  canvas.width = CX; canvas.height = CY;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000000';
+  const canvasSizeX = CX, canvasSizeY = CY;
+  const totalSpacing = TOTAL_SPACING;
+  const dotSize = DOT_SIZE;
+  const dirX = DIR_X, dirY = DIR_Y;
+  const maxDist = MAX_DIST;
+  const baseOpacity = BASE_OPACITY;
+  const gradientIntensity = GRADIENT_INTENSITY;
+
+  for (var y = 0; y < canvasSizeY; y += totalSpacing) {
+    for (var x = 0; x < canvasSizeX; x += totalSpacing) {
+      var gradientValue = (x * dirX + y * dirY) / maxDist;
+      var opacity = baseOpacity + gradientValue * gradientIntensity;
+      ctx.globalAlpha = Math.min(1, Math.max(0, opacity));
+      ctx.beginPath();
+      ctx.arc(x, y, dotSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+// 改善案A: Path2Dバッチ（opacityを丸めてグループ化）
+function implPath2D() {
+  const canvas = document.createElement('canvas');
+  canvas.width = CX; canvas.height = CY;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#000000';
+  const totalSpacing = TOTAL_SPACING;
+  const dotSize = DOT_SIZE;
+  const r = dotSize / 2;
+  const dirX = DIR_X, dirY = DIR_Y;
+  const maxDist = MAX_DIST;
+  const baseOpacity = BASE_OPACITY;
+  const gradientIntensity = GRADIENT_INTENSITY;
+
+  // opacityを0.02刻みでバケツ分け（50段階）
+  const STEPS = 50;
+  const paths = new Array(STEPS);
+  for (let i = 0; i < STEPS; i++) paths[i] = new Path2D();
+
+  for (var y = 0; y < CY; y += totalSpacing) {
+    for (var x = 0; x < CX; x += totalSpacing) {
+      var gradientValue = (x * dirX + y * dirY) / maxDist;
+      var opacity = Math.min(1, Math.max(0, baseOpacity + gradientValue * gradientIntensity));
+      var bucket = Math.min(STEPS - 1, Math.floor(opacity * STEPS));
+      var p = new Path2D();
+      p.arc(x, y, r, 0, Math.PI * 2);
+      paths[bucket].addPath(p);
+    }
+  }
+
+  // バケツごとにまとめて描画
+  for (let i = 0; i < STEPS; i++) {
+    ctx.globalAlpha = (i + 0.5) / STEPS;
+    ctx.fill(paths[i]);
+  }
+}
+
+// 改善案B: ImageDataへの直接描画（円ビットマップを手書き）
+function implImageData() {
+  const canvas = document.createElement('canvas');
+  canvas.width = CX; canvas.height = CY;
+  const ctx = canvas.getContext('2d');
+  const imgData = ctx.createImageData(CX, CY);
+  const buf = imgData.data;
+
+  const totalSpacing = TOTAL_SPACING;
+  const r = DOT_SIZE / 2;
+  const r2 = r * r;
+  const ri = Math.ceil(r);
+  const dirX = DIR_X, dirY = DIR_Y;
+  const maxDist = MAX_DIST;
+  const baseOpacity = BASE_OPACITY;
+  const gradientIntensity = GRADIENT_INTENSITY;
+
+  for (var cy = 0; cy < CY; cy += totalSpacing) {
+    for (var cx = 0; cx < CX; cx += totalSpacing) {
+      var gradientValue = (cx * dirX + cy * dirY) / maxDist;
+      var opacity = Math.min(1, Math.max(0, baseOpacity + gradientValue * gradientIntensity));
+      var alpha255 = (opacity * 255 + 0.5) | 0;
+
+      // 円をピクセル単位で描画
+      var yMin = Math.max(0, cy - ri);
+      var yMax = Math.min(CY - 1, cy + ri);
+      var xMin = Math.max(0, cx - ri);
+      var xMax = Math.min(CX - 1, cx + ri);
+      for (var py = yMin; py <= yMax; py++) {
+        var dy = py - cy;
+        var dy2 = dy * dy;
+        for (var px = xMin; px <= xMax; px++) {
+          var dx = px - cx;
+          if (dx * dx + dy2 <= r2) {
+            var idx = (py * CX + px) * 4;
+            // 既存のalphaと合成（加算）
+            var a = buf[idx + 3];
+            var newA = Math.min(255, a + alpha255 - ((a * alpha255) / 255 | 0));
+            buf[idx] = 0;
+            buf[idx+1] = 0;
+            buf[idx+2] = 0;
+            buf[idx+3] = newA;
+          }
+        }
+      }
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+async function runBench(name, fn) {
+  const times = [];
+  for (let r = 0; r < REPEAT; r++) {
+    setProgress(`${name}: ${r+1}/${REPEAT}回実行中...`, 0);
+    await new Promise(res => setTimeout(res, 0));
+    const t0 = performance.now();
+    fn();
+    times.push(performance.now() - t0);
+    await new Promise(res => setTimeout(res, 0));
+  }
+  return times;
+}
+
+function stats(times) {
+  const mn = Math.min(...times);
+  const mx = Math.max(...times);
+  const avg = times.reduce((a,b)=>a+b,0)/times.length;
+  return { min: mn, max: mx, avg };
+}
+
+function renderRow(name, s, baseAvg, isBest) {
+  const tr = document.createElement('tr');
+  const improvement = baseAvg != null
+    ? ((baseAvg - s.avg) / baseAvg * 100).toFixed(1)
+    : null;
+  const improvStr = improvement != null
+    ? `<span class="speedup">${improvement > 0 ? '+' : ''}${improvement}%</span>`
+    : '<span style="color:#888">—（基準）</span>';
+  const badge = isBest ? '<span class="tag-best">BEST</span>' : (improvement !== null && parseFloat(improvement) < 0 ? '<span class="tag-worst">SLOW</span>' : '');
+  tr.innerHTML = `
+    <td>${name}${badge}</td>
+    <td>${s.min.toFixed(1)}</td>
+    <td>${s.max.toFixed(1)}</td>
+    <td>${s.avg.toFixed(1)}</td>
+    <td>${improvStr}</td>
+    <td style="color:#4af">完了</td>`;
+  document.getElementById('resultBody').appendChild(tr);
+}
+
+document.getElementById('btnRun').addEventListener('click', async function() {
+  this.disabled = true;
+  document.getElementById('resultBody').innerHTML = '';
+
+  setProgress('現行実装 実行中...', 5);
+  const timesLeg  = await runBench('現行実装', implLegacy);
+  setProgress('改善案A (Path2Dバッチ) 実行中...', 38);
+  const timesP2D  = await runBench('改善案A', implPath2D);
+  setProgress('改善案B (ImageData直接書き込み) 実行中...', 70);
+  const timesImg  = await runBench('改善案B', implImageData);
+
+  setProgress('完了', 100);
+
+  const sLeg = stats(timesLeg);
+  const sP2D = stats(timesP2D);
+  const sImg = stats(timesImg);
+  const bestAvg = Math.min(sLeg.avg, sP2D.avg, sImg.avg);
+
+  renderRow('現行実装（arc個別描画）', sLeg, null, sLeg.avg === bestAvg);
+  renderRow('改善案A: Path2Dバッチ描画', sP2D, sLeg.avg, sP2D.avg === bestAvg);
+  renderRow('改善案B: ImageData直接書き込み', sImg, sLeg.avg, sImg.avg === bestAvg);
+
+  this.disabled = false;
+});
+</script>
+</body>
+</html>

@@ -113,23 +113,13 @@ setAttributes(t2_broken_textSvg,dims);
 }catch(error){}
 }
 function t2_broken_addSvg(left,top){
-const svgString=new XMLSerializer().serializeToString(t2_broken_textSvg);
-const reader=new FileReader();
-reader.onload=({target})=>{
-fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2BrokenStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
-},{crossOrigin:'anonymous'});
-};
-reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
+t2_addSvgImage(t2_broken_textSvg,left,top,img=>nowT2BrokenStr=img);
 }
 function t2_broken_updateAll(){
 const position=nowT2BrokenStr?
 {left:nowT2BrokenStr.left,top:nowT2BrokenStr.top}:{left:50,top:100};
 if(nowT2BrokenStr){
-canvas.remove(nowT2BrokenStr).renderAll();
+t2_removeSvgImage(nowT2BrokenStr);
 nowT2BrokenStr=null;
 }
 t2_broken_deleteSvg();

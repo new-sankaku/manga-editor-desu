@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Benchmark Runner — All 30</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:24px;min-height:100vh}
+h1{font-size:22px;margin-bottom:8px;color:#4af}
+.subtitle{font-size:13px;color:#888;margin-bottom:12px}
+.controls{margin-bottom:16px}
+button{background:#2a4a8a;color:#e0e0e0;border:none;border-radius:5px;padding:10px 22px;font-size:14px;cursor:pointer;transition:background .2s;margin-right:8px}
+button:hover{background:#3a5aaa}
+button:disabled{background:#333;color:#666;cursor:not-allowed}
+#status{margin:8px 0;font-size:14px;color:#adf}
+#elapsed{font-size:12px;color:#888;margin-bottom:4px}
+#iframeWrap{width:1px;height:1px;overflow:hidden;position:absolute;left:-9999px}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+th{background:#0d1526;padding:6px 8px;text-align:left;color:#8bf;border-bottom:2px solid #1a2a50;position:sticky;top:0}
+td{padding:5px 8px;border-bottom:1px solid #1a2a50}
+tr.done{opacity:1}
+tr.pending{opacity:0.4}
+tr.running{background:#1a2a50}
+tr.error{background:#2a1a1a}
+.speedup{color:#fd4;font-weight:bold}
+.tag-best{display:inline-block;background:#1a4a1a;color:#4f4;border-radius:3px;padding:1px 5px;font-size:10px}
+.tag-slow{display:inline-block;background:#4a1a1a;color:#f44;border-radius:3px;padding:1px 5px;font-size:10px}
+.tag-same{display:inline-block;background:#3a3a1a;color:#cc4;border-radius:3px;padding:1px 5px;font-size:10px}
+.pbar-wrap{background:#0d1526;border-radius:4px;height:10px;margin:8px 0;overflow:hidden}
+.pbar{height:100%;background:#4af;width:0%;transition:width .3s}
+#copyBtn{background:#1a4a1a;font-size:12px;padding:6px 14px}
+.detail{font-size:10px;color:#888;max-width:220px;line-height:1.4}
+</style>
+</head>
+<body>
+<h1>Benchmark Runner — 30項目一括実行</h1>
+<p class="subtitle">各ベンチマークをiframeで5回実行し、外れ値(最高/最低)を除外した3回平均で比較します。</p>
+<div class="controls">
+  <button id="btnRun">全30件 一括実行 (5周)</button>
+  <button id="copyBtn" disabled>結果をクリップボードにコピー</button>
+</div>
+<div id="status">待機中 — ボタンを押して開始</div>
+<div id="elapsed"></div>
+<div class="pbar-wrap"><div class="pbar" id="pbar"></div></div>
+<div id="iframeWrap"><iframe id="benchFrame" width="900" height="700"></iframe></div>
+
+<table id="resultTable">
+<thead><tr>
+  <th>#</th>
+  <th>ベンチマーク</th>
+  <th>現行 (ms)</th>
+  <th>最速改善 (ms)</th>
+  <th>改善率</th>
+  <th>詳細</th>
+  <th>WASM必要?</th>
+</tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+
+<script>
+'use strict';
+
+const ROUNDS = 5;       // 5周実行
+const TRIM_COUNT = 1;   // 上下1つずつ除外 → 3回平均
+
+const BENCHMARKS = [
+  {id:1, file:'bench-01-sha256.html', name:'SHA-256ハッシュ', wasm:'不要(native API)'},
+  {id:2, file:'bench-02-noise-tone.html', name:'ノイズトーン生成', wasm:'WASM+SIMD推奨'},
+  {id:3, file:'bench-03-dark-enhance.html', name:'暗部強調フィルタ', wasm:'WASM+SIMD推奨'},
+  {id:4, file:'bench-04-transparent-bounds.html', name:'透明境界検出', wasm:'JS改善+WASM'},
+  {id:5, file:'bench-05-grid-rectangle.html', name:'グリッド+最大矩形', wasm:'WASM推奨'},
+  {id:6, file:'bench-06-jsts-polygon.html', name:'ポリゴン計算', wasm:'GEOS-WASM推奨'},
+  {id:7, file:'bench-07-mosaic-brush.html', name:'モザイクブラシ', wasm:'JS改善+WASM'},
+  {id:8, file:'bench-08-outline-brush.html', name:'アウトラインブラシ', wasm:'不要(設計改善)'},
+  {id:9, file:'bench-09-ink-brush.html', name:'インクブラシ物理', wasm:'JS改善可'},
+  {id:10, file:'bench-10-crayon-brush.html', name:'クレヨンブラシ', wasm:'JS改善可'},
+  {id:11, file:'bench-11-mask-bw.html', name:'マスク白黒変換', wasm:'不要(Uint32Array)'},
+  {id:12, file:'bench-12-brush-bounds.html', name:'ブラシ境界検出', wasm:'不要(4辺スキャン)'},
+  {id:13, file:'bench-13-tone-dots.html', name:'トーンドット生成', wasm:'JS改善+WASM'},
+  {id:14, file:'bench-14-focusline.html', name:'フォーカスライン', wasm:'JS改善可'},
+  {id:15, file:'bench-15-blend-preview.html', name:'ブレンドプレビュー', wasm:'不要(Canvas再利用)'},
+  {id:16, file:'bench-16-thumbnail.html', name:'サムネイル生成', wasm:'不要(toBlob)'},
+  {id:17, file:'bench-17-json-serialize.html', name:'JSONシリアライズ', wasm:'不要(差分保存)'},
+  {id:18, file:'bench-18-project-save.html', name:'保存パイプライン', wasm:'JS改善可'},
+  {id:19, file:'bench-19-jpeg-encode.html', name:'JPEGエンコード', wasm:'JS改善可'},
+  {id:20, file:'bench-20-svg-area.html', name:'SVG面積算出', wasm:'不要(forループ化)'},
+  {id:21, file:'bench-21-djb2-hash.html', name:'DJB2ハッシュ', wasm:'JS改善可'},
+  {id:22, file:'bench-22-base64-decode.html', name:'Base64デコード', wasm:'不要(直接確保)'},
+  {id:23, file:'bench-23-glfx-roundtrip.html', name:'toDataURL往復', wasm:'不要(ImageBitmap)'},
+  {id:24, file:'bench-24-polygon-hittest.html', name:'ポリゴン判定', wasm:'不要(BBox事前判定)'},
+  {id:25, file:'bench-25-knife-animation.html', name:'アニメ描画', wasm:'不要(レイヤー分離)'},
+  {id:26, file:'bench-26-snow-tone.html', name:'スノートーン', wasm:'不要(キャッシュ)'},
+  {id:27, file:'bench-27-canvas-resize.html', name:'リサイズ再計算', wasm:'JS改善可'},
+  {id:28, file:'bench-28-lz4-buffer-copy.html', name:'バッファ結合', wasm:'不要(Blob)'},
+  {id:29, file:'bench-29-svg-text-dataurl.html', name:'SVG→dataURL', wasm:'不要(encodeURI)'},
+  {id:30, file:'bench-30-blob-to-dataurl.html', name:'blob変換', wasm:'不要(並列化)'},
+];
+
+const TIMEOUTS = {1:30000,2:60000,3:60000,4:45000,5:45000,6:45000,7:45000,8:45000,
+  9:30000,10:45000,11:120000,12:60000,13:120000,14:30000,15:60000,16:60000,
+  17:30000,18:30000,19:90000,20:45000,21:30000,22:30000,23:60000,24:30000,
+  25:60000,26:45000,27:30000,28:30000,29:30000,30:45000};
+
+const tbody = document.getElementById('tbody');
+BENCHMARKS.forEach(b => {
+  const tr = document.createElement('tr');
+  tr.id = 'row-' + b.id;
+  tr.className = 'pending';
+  tr.innerHTML = `<td>${b.id}</td><td>${b.name}</td><td>—</td><td>—</td><td>—</td><td class="detail">—</td><td style="font-size:11px">${b.wasm}</td>`;
+  tbody.appendChild(tr);
+});
+
+const iframe = document.getElementById('benchFrame');
+let startTime = 0;
+let elapsedTimer = null;
+
+function setStatus(msg, pct) {
+  document.getElementById('status').textContent = msg;
+  document.getElementById('pbar').style.width = pct + '%';
+}
+
+function updateElapsed() {
+  const sec = ((performance.now() - startTime) / 1000) | 0;
+  const min = (sec / 60) | 0;
+  const s = sec % 60;
+  document.getElementById('elapsed').textContent = `経過時間: ${min}分${String(s).padStart(2,'0')}秒`;
+}
+
+/** Trimmed mean: sort, remove top/bottom TRIM_COUNT, average the rest */
+function trimmedMean(values) {
+  if (values.length === 0) return NaN;
+  if (values.length <= TRIM_COUNT * 2) {
+    // Not enough data to trim — just average all
+    return values.reduce((a, b) => a + b, 0) / values.length;
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const trimmed = sorted.slice(TRIM_COUNT, sorted.length - TRIM_COUNT);
+  return trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
+}
+
+/**
+ * Extract results from iframe document.
+ * Returns array of {label, avg} — first entry is "current", rest are improvements.
+ */
+function extractResults(doc) {
+  const results = [];
+  const seen = new Set();
+  try {
+    const tbodies = doc.querySelectorAll('#resultBody, table tbody');
+    for (const tb of tbodies) {
+      const trs = tb.querySelectorAll('tr');
+      for (const tr of trs) {
+        const tds = tr.querySelectorAll('td');
+        if (tds.length < 3) continue;
+
+        const label = tds[0]?.textContent?.trim() || '';
+        if (!label || label === '手法' || label === '#') continue;
+        if (seen.has(label)) continue;
+        seen.add(label);
+
+        let avg = NaN;
+        for (let col of [3, 2, 1]) {
+          if (tds[col]) {
+            const txt = tds[col].textContent.replace(/[^\d.\-]/g, '');
+            const v = parseFloat(txt);
+            if (!isNaN(v) && v >= 0) { avg = v; break; }
+          }
+        }
+        if (!isNaN(avg)) {
+          results.push({ label, avg });
+        }
+      }
+      if (results.length > 0) break;
+    }
+
+    if (results.length === 0) {
+      const text = doc.body?.innerText || '';
+      const lines = text.split('\n');
+      for (const line of lines) {
+        const match = line.match(/(現行|改善|Optimized|Current)[^\d]*(\d+\.?\d*)/i);
+        if (match) {
+          const lbl = line.trim().substring(0, 50);
+          if (!seen.has(lbl)) {
+            seen.add(lbl);
+            results.push({ label: lbl, avg: parseFloat(match[2]) });
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('extractResults error:', e);
+  }
+  return results;
+}
+
+/** Run a single benchmark once in the iframe */
+function runBenchmarkOnce(bench) {
+  const timeout = TIMEOUTS[bench.id] || 60000;
+
+  return new Promise((resolve) => {
+    let resolved = false;
+    function done(results) {
+      if (resolved) return;
+      resolved = true;
+      resolve(results);
+    }
+
+    const overallTimer = setTimeout(() => {
+      console.warn(`Bench ${bench.id} timed out after ${timeout}ms`);
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        done(extractResults(doc));
+      } catch (e) {
+        done([]);
+      }
+    }, timeout);
+
+    iframe.onload = () => {
+      setTimeout(() => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow.document;
+          const btns = doc.querySelectorAll('button');
+          for (const btn of btns) {
+            const txt = btn.textContent || '';
+            if (txt.includes('開始') || txt.includes('Start') || txt.includes('Run')) {
+              btn.click();
+              break;
+            }
+          }
+        } catch (e) { /* cross-origin */ }
+
+        let lastResultCount = 0;
+        let stableCount = 0;
+
+        const pollInterval = setInterval(() => {
+          try {
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const bodyText = doc.body?.innerText || '';
+
+            const isComplete = bodyText.includes('完了') ||
+                               bodyText.includes('Complete') ||
+                               bodyText.includes('Done');
+
+            const currentResults = extractResults(doc);
+
+            if (isComplete && currentResults.length > 0) {
+              clearInterval(pollInterval);
+              clearTimeout(overallTimer);
+              setTimeout(() => {
+                const finalResults = extractResults(doc);
+                done(finalResults);
+              }, 800);
+              return;
+            }
+
+            if (currentResults.length > 0 && currentResults.length === lastResultCount) {
+              stableCount++;
+              if (stableCount >= 6) {
+                clearInterval(pollInterval);
+                clearTimeout(overallTimer);
+                done(currentResults);
+                return;
+              }
+            } else {
+              stableCount = 0;
+              lastResultCount = currentResults.length;
+            }
+          } catch (e) { /* cross-origin */ }
+        }, 500);
+
+      }, 1000);
+    };
+
+    iframe.src = bench.file;
+  });
+}
+
+/**
+ * Update a row with trimmed-mean results from multiple rounds.
+ * allRounds: array of ROUNDS result arrays, each from extractResults.
+ */
+function updateRow(id, allRounds) {
+  const tr = document.getElementById('row-' + id);
+  if (!tr) return;
+  const tds = tr.querySelectorAll('td');
+
+  // Filter out empty rounds
+  const validRounds = allRounds.filter(r => r.length > 0);
+  if (validRounds.length === 0) {
+    tr.className = 'error';
+    tds[2].textContent = 'ERR';
+    tds[3].textContent = 'ERR';
+    tds[4].textContent = '—';
+    tds[5].textContent = '—';
+    return;
+  }
+
+  tr.className = 'done';
+
+  // Collect per-label values across rounds
+  // Index 0 = current implementation, index 1+ = alternatives
+  const maxEntries = Math.max(...validRounds.map(r => r.length));
+  const perLabel = []; // [{label, values:[]}]
+
+  for (let idx = 0; idx < maxEntries; idx++) {
+    const label = validRounds.find(r => r[idx])? validRounds.find(r => r[idx]).label : ('?');
+    // Get label from first round that has this index
+    let foundLabel = '?';
+    for (const round of validRounds) {
+      if (round[idx]) { foundLabel = round[idx].label; break; }
+    }
+    const values = [];
+    for (const round of validRounds) {
+      if (round[idx] && !isNaN(round[idx].avg)) {
+        values.push(round[idx].avg);
+      }
+    }
+    perLabel.push({ label: foundLabel, values });
+  }
+
+  // Compute trimmed means
+  const trimmedResults = perLabel.map(p => ({
+    label: p.label,
+    avg: trimmedMean(p.values),
+    count: p.values.length,
+  }));
+
+  const current = trimmedResults[0];
+  const alternatives = trimmedResults.slice(1);
+
+  // Find best alternative
+  const validAlts = alternatives.filter(a => !isNaN(a.avg) && a.avg >= 0);
+  const bestAlt = validAlts.length > 0
+    ? validAlts.reduce((best, a) => a.avg < best.avg ? a : best)
+    : null;
+
+  // Fill columns
+  tds[2].textContent = (!isNaN(current?.avg)) ? current.avg.toFixed(1) : '—';
+  tds[3].textContent = bestAlt ? bestAlt.avg.toFixed(1) : '—';
+
+  // Improvement ratio
+  if (current && !isNaN(current.avg) && current.avg > 0 && bestAlt) {
+    if (bestAlt.avg < current.avg * 0.95) {
+      const pct = ((current.avg - bestAlt.avg) / current.avg * 100).toFixed(0);
+      const ratio = (current.avg / bestAlt.avg).toFixed(1);
+      tds[4].innerHTML = `<span class="speedup">${ratio}x (${pct}%↑)</span>`;
+    } else if (bestAlt.avg > current.avg * 1.05) {
+      const ratio = (bestAlt.avg / current.avg).toFixed(1);
+      tds[4].innerHTML = `<span class="tag-slow">悪化 ${ratio}x</span>`;
+    } else {
+      tds[4].innerHTML = '<span class="tag-same">≒同等</span>';
+    }
+  } else if (current && !isNaN(current.avg) && !bestAlt) {
+    tds[4].textContent = '—';
+  } else {
+    tds[4].textContent = '—';
+  }
+
+  // Detail column: show all alternatives with their trimmed means
+  if (trimmedResults.length > 1) {
+    const parts = trimmedResults.map((r, i) => {
+      const prefix = i === 0 ? '現行' : `案${String.fromCharCode(64 + i)}`;
+      const val = !isNaN(r.avg) ? r.avg.toFixed(1) + 'ms' : '—';
+      return `${prefix}: ${val}`;
+    });
+    tds[5].textContent = parts.join(' / ');
+  } else {
+    tds[5].textContent = current ? current.avg.toFixed(1) + 'ms (単一)' : '—';
+  }
+}
+
+async function runAll() {
+  const btn = document.getElementById('btnRun');
+  btn.disabled = true;
+  document.getElementById('copyBtn').disabled = true;
+  startTime = performance.now();
+  elapsedTimer = setInterval(updateElapsed, 1000);
+
+  // Reset all rows
+  BENCHMARKS.forEach(b => {
+    const tr = document.getElementById('row-' + b.id);
+    tr.className = 'pending';
+    const tds = tr.querySelectorAll('td');
+    tds[2].textContent = '—';
+    tds[3].textContent = '—';
+    tds[4].textContent = '—';
+    tds[5].textContent = '—';
+  });
+
+  const totalSteps = BENCHMARKS.length * ROUNDS;
+
+  for (let i = 0; i < BENCHMARKS.length; i++) {
+    const bench = BENCHMARKS[i];
+    const tr = document.getElementById('row-' + bench.id);
+    tr.className = 'running';
+
+    const allRounds = [];
+
+    for (let round = 0; round < ROUNDS; round++) {
+      const step = i * ROUNDS + round;
+      setStatus(
+        `実行中: #${bench.id} ${bench.name} — 周回 ${round + 1}/${ROUNDS} (全体 ${i + 1}/30)`,
+        (step / totalSteps * 100)
+      );
+
+      const results = await runBenchmarkOnce(bench);
+      allRounds.push(results);
+
+      // Brief pause between rounds
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    updateRow(bench.id, allRounds);
+
+    // GC pause between benchmarks
+    await new Promise(r => setTimeout(r, 500));
+  }
+
+  clearInterval(elapsedTimer);
+  updateElapsed();
+  setStatus(`全30件完了! (${ROUNDS}周 × 30件、外れ値除外3回平均)`, 100);
+  btn.disabled = false;
+  document.getElementById('copyBtn').disabled = false;
+}
+
+// Copy results to clipboard as markdown
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const rows = [];
+  rows.push('| # | ベンチマーク | 現行(ms) | 最速改善(ms) | 改善率 | 詳細 | WASM必要? |');
+  rows.push('|---|---|---|---|---|---|---|');
+  BENCHMARKS.forEach(b => {
+    const tr = document.getElementById('row-' + b.id);
+    const tds = tr.querySelectorAll('td');
+    rows.push(`| ${tds[0].textContent} | ${tds[1].textContent} | ${tds[2].textContent} | ${tds[3].textContent} | ${tds[4].textContent} | ${tds[5].textContent} | ${tds[6].textContent} |`);
+  });
+  navigator.clipboard.writeText(rows.join('\n')).then(() => {
+    document.getElementById('copyBtn').textContent = 'コピー完了!';
+    setTimeout(() => { document.getElementById('copyBtn').textContent = '結果をクリップボードにコピー'; }, 2000);
+  });
+});
+
+document.getElementById('btnRun').addEventListener('click', runAll);
+</script>
+</body>
+</html>

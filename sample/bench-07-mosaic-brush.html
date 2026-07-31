@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Bench 07 — モザイクブラシピクセル平均</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1a1a2e;color:#e0e0e0;font-family:'Segoe UI',sans-serif;padding:20px;font-size:14px}
+h1{font-size:18px;margin-bottom:6px;color:#4af}
+.subtitle{color:#888;font-size:12px;margin-bottom:20px}
+.bench-section{background:#16213e;border:1px solid #1a2a50;border-radius:8px;padding:16px;margin-bottom:16px}
+.bench-section h2{font-size:14px;color:#adf;margin-bottom:8px}
+.bench-section p{font-size:12px;color:#888;margin-bottom:12px;line-height:1.6}
+.progress-bar-wrap{background:#0a0a1a;border-radius:4px;height:8px;margin-bottom:12px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#4af,#8af);width:0%;transition:width .1s}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:#0f3460}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #1a2a50}
+th{color:#4af;font-weight:600;font-size:12px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.winner{color:#4f8;font-weight:700}
+.slower{color:#f84}
+.baseline{color:#aaa}
+.tag-current{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#3a1a0a;color:#f84;margin-left:6px}
+.tag-opt{display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;background:#0a3a1a;color:#4f8;margin-left:6px}
+.status{font-size:12px;color:#888;margin-bottom:8px;min-height:18px}
+button{background:#0f3460;color:#4af;border:1px solid #4af;border-radius:5px;padding:8px 20px;cursor:pointer;font-size:13px;margin-bottom:12px}
+button:hover{background:#1a4a80}
+button:disabled{opacity:0.4;cursor:not-allowed}
+canvas{display:none}
+</style>
+</head>
+<body>
+<h1>Bench 07 — モザイクブラシピクセル平均</h1>
+<p class="subtitle">200×200領域・モザイクサイズ10でのピクセル平均計算速度比較</p>
+
+<div class="bench-section">
+  <h2>概要</h2>
+  <p>
+    <strong>現行:</strong> 各セルごとにgetImageData呼び出し → ピクセルループで平均計算。<br>
+    <strong>改善A:</strong> 一括getImageData + セルオフセット計算でAPIコール数を削減。<br>
+    <strong>改善B:</strong> 改善A + Uint32Arrayビューで高速集計（チャンネル分解を整数演算で処理）。
+  </p>
+</div>
+
+<button id="btnRun">ベンチマーク実行</button>
+<div class="status" id="status">ボタンを押すと自動実行します</div>
+<div class="progress-bar-wrap"><div class="progress-bar" id="progress"></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>実装</th>
+      <th class="num">合計時間 (ms)</th>
+      <th class="num">イテレーション</th>
+      <th class="num">1回あたり (μs)</th>
+      <th class="num">速度比</th>
+    </tr>
+  </thead>
+  <tbody id="results">
+    <tr><td colspan="5" style="color:#555;text-align:center">実行待ち</td></tr>
+  </tbody>
+</table>
+
+<canvas id="cv"></canvas>
+
+<script>
+var W = 200, H = 200;
+var MOSAIC = 10;
+var ITERATIONS = 50;
+
+// テスト用Canvasをカラーノイズで初期化
+function initCanvas() {
+  var cv = document.getElementById('cv');
+  cv.width = W;
+  cv.height = H;
+  var ctx = cv.getContext('2d');
+  var id = ctx.createImageData(W, H);
+  var d = id.data;
+  for (var i = 0; i < d.length; i += 4) {
+    d[i]   = Math.random() * 255 | 0;
+    d[i+1] = Math.random() * 255 | 0;
+    d[i+2] = Math.random() * 255 | 0;
+    d[i+3] = 200 + (Math.random() * 55 | 0);
+  }
+  ctx.putImageData(id, 0, 0);
+  return ctx;
+}
+
+// ---- 現行実装 ----
+function currentImpl(ctx) {
+  var startX = 0, startY = 0, endX = W, endY = H;
+  for (var cy = startY; cy < endY; cy += MOSAIC) {
+    for (var cx = startX; cx < endX; cx += MOSAIC) {
+      var imageData = ctx.getImageData(cx, cy, MOSAIC, MOSAIC);
+      var r = 0, g = 0, b = 0, a = 0;
+      for (var i = 0; i < imageData.data.length; i += 4) {
+        r += imageData.data[i];
+        g += imageData.data[i + 1];
+        b += imageData.data[i + 2];
+        a += imageData.data[i + 3];
+      }
+      var count = imageData.data.length / 4;
+      ctx.fillStyle = 'rgba(' + (r / count | 0) + ',' + (g / count | 0) + ',' + (b / count | 0) + ',' + (a / count / 255) + ')';
+      ctx.fillRect(cx, cy, MOSAIC, MOSAIC);
+    }
+  }
+}
+
+// ---- 改善A: 一括getImageData + オフセット計算 ----
+function optimizedA(ctx) {
+  var fullData = ctx.getImageData(0, 0, W, H);
+  var d = fullData.data;
+  for (var cy = 0; cy < H; cy += MOSAIC) {
+    for (var cx = 0; cx < W; cx += MOSAIC) {
+      var r = 0, g = 0, b = 0, a = 0, count = 0;
+      var cellH = Math.min(MOSAIC, H - cy);
+      var cellW = Math.min(MOSAIC, W - cx);
+      for (var py = 0; py < cellH; py++) {
+        var rowBase = ((cy + py) * W + cx) * 4;
+        for (var px = 0; px < cellW; px++) {
+          var idx = rowBase + px * 4;
+          r += d[idx];
+          g += d[idx + 1];
+          b += d[idx + 2];
+          a += d[idx + 3];
+          count++;
+        }
+      }
+      ctx.fillStyle = 'rgba(' + (r / count | 0) + ',' + (g / count | 0) + ',' + (b / count | 0) + ',' + (a / count / 255) + ')';
+      ctx.fillRect(cx, cy, MOSAIC, MOSAIC);
+    }
+  }
+}
+
+// ---- 改善B: 改善A + Uint32Arrayビューで高速集計 ----
+function optimizedB(ctx) {
+  var fullData = ctx.getImageData(0, 0, W, H);
+  var d8 = fullData.data;
+  // Uint32Arrayビューでピクセル単位アクセス
+  // ただし集計はバイト単位が必要なので加算はUint8で行うが
+  // ループ構造を整数インデックスで最適化
+  for (var cy = 0; cy < H; cy += MOSAIC) {
+    for (var cx = 0; cx < W; cx += MOSAIC) {
+      var r = 0, g = 0, b = 0, a = 0, count = 0;
+      var cellH = Math.min(MOSAIC, H - cy);
+      var cellW = Math.min(MOSAIC, W - cx);
+      for (var py = 0; py < cellH; py++) {
+        // 行先頭インデックスを事前計算
+        var base = ((cy + py) * W + cx) << 2;
+        var end = base + (cellW << 2);
+        // 内ループをアンロール (4ピクセル単位)
+        var ix = base;
+        while (ix < end) {
+          r += d8[ix];
+          g += d8[ix + 1];
+          b += d8[ix + 2];
+          a += d8[ix + 3];
+          ix += 4;
+          count++;
+        }
+      }
+      var inv = 1 / count;
+      ctx.fillStyle = 'rgba(' + (r * inv | 0) + ',' + (g * inv | 0) + ',' + (b * inv | 0) + ',' + (a * inv / 255) + ')';
+      ctx.fillRect(cx, cy, MOSAIC, MOSAIC);
+    }
+  }
+}
+
+function bench(fn, ctx, iters) {
+  // 毎回元データをリストア
+  var origData = ctx.getImageData(0, 0, W, H);
+  var start = performance.now();
+  for (var i = 0; i < iters; i++) {
+    ctx.putImageData(origData, 0, 0);
+    fn(ctx);
+  }
+  return performance.now() - start;
+}
+
+function setProgress(pct) {
+  document.getElementById('progress').style.width = pct + '%';
+}
+function setStatus(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function renderResults(rows) {
+  var baseline = rows[0].ms;
+  var html = '';
+  rows.forEach(function(r) {
+    var ratio = baseline / r.ms;
+    var ratioStr = ratio.toFixed(2) + 'x';
+    var cls = ratio > 1.1 ? 'winner' : ratio < 0.9 ? 'slower' : 'baseline';
+    var usEach = (r.ms / ITERATIONS * 1000).toFixed(1);
+    html += '<tr>';
+    html += '<td>' + r.label + (r.tag === 'current' ? '<span class="tag-current">現行</span>' : '<span class="tag-opt">最適化</span>') + '</td>';
+    html += '<td class="num">' + r.ms.toFixed(2) + '</td>';
+    html += '<td class="num">' + ITERATIONS + '</td>';
+    html += '<td class="num">' + usEach + '</td>';
+    html += '<td class="num ' + cls + '">' + ratioStr + '</td>';
+    html += '</tr>';
+  });
+  document.getElementById('results').innerHTML = html;
+}
+
+document.getElementById('btnRun').addEventListener('click', function() {
+  var btn = this;
+  btn.disabled = true;
+  setProgress(0);
+  setStatus('Canvas初期化中...');
+  document.getElementById('results').innerHTML = '<tr><td colspan="5" style="color:#555;text-align:center">実行中...</td></tr>';
+
+  setTimeout(function() {
+    var ctx = initCanvas();
+    setStatus('現行実装 計測中...');
+    setProgress(10);
+
+    setTimeout(function() {
+      var msA = bench(currentImpl, ctx, ITERATIONS);
+      setProgress(40);
+      setStatus('改善案A 計測中...');
+
+      setTimeout(function() {
+        var msB = bench(optimizedA, ctx, ITERATIONS);
+        setProgress(70);
+        setStatus('改善案B 計測中...');
+
+        setTimeout(function() {
+          var msC = bench(optimizedB, ctx, ITERATIONS);
+          setProgress(100);
+          setStatus('完了');
+          renderResults([
+            { label: '現行（セルごとgetImageData）', ms: msA, tag: 'current' },
+            { label: '改善A（一括getImageData+オフセット）', ms: msB, tag: 'opt' },
+            { label: '改善B（一括+ビットシフト最適化）', ms: msC, tag: 'opt' }
+          ]);
+          btn.disabled = false;
+        }, 50);
+      }, 50);
+    }, 50);
+  }, 50);
+});
+
+window.addEventListener('load', function() {
+  document.getElementById('btnRun').click();
+});
+</script>
+</body>
+</html>

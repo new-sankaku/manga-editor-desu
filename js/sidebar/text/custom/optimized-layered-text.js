@@ -77,23 +77,13 @@ document.body.removeChild(t2_layered_textSvg);
 t2_layered_addSvg(left,top);
 }
 function t2_layered_addSvg(left,top){
-const svgString=new XMLSerializer().serializeToString(t2_layered_textSvg);
-const reader=new FileReader();
-reader.onload=({target})=>{
-fabric.Image.fromURL(target.result,img=>{
-Object.assign(img,{left,top});
-nowT2LayeredStr=img;
-img.text=getFirstNCharsDefault(t2_text);
-canvas.add(img).setActiveObject(img).renderAll();
-},{crossOrigin:'anonymous'});
-};
-reader.readAsDataURL(new Blob([svgString],{type:"image/svg+xml;charset=utf-8"}));
+t2_addSvgImage(t2_layered_textSvg,left,top,img=>nowT2LayeredStr=img);
 }
 function t2_layered_updateAll(){
 const position=nowT2LayeredStr?
 {left:nowT2LayeredStr.left,top:nowT2LayeredStr.top}:{left:50,top:100};
 if(nowT2LayeredStr){
-canvas.remove(nowT2LayeredStr).renderAll();
+t2_removeSvgImage(nowT2LayeredStr);
 nowT2LayeredStr=null;
 }
 t2_layered_deleteSvg();
