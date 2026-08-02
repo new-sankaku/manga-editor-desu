@@ -1,0 +1,436 @@
+@import url('../root.css');
+
+/* サイドバーの「プリセットを選んで設定を調整する」型のパネル共通スタイル。
+   効果 / ペン / トーン / 画像テキストが対象。
+   パネル幅は200px（狭い画面で140px）しかないため、固定幅は使わず flex で割る */
+
+.left_area.preset-panel {
+ display: flex;
+ flex-direction: column;
+ overflow-y: hidden;
+}
+
+/* ---------- ヘッダー ---------- */
+.preset-panel > .area-header.preset-panel-header {
+ flex: 0 0 auto;
+ display: flex;
+ align-items: center;
+ gap: 6px;
+ text-align: left;
+}
+.preset-panel-header .pp-title {
+ flex: 1 1 auto;
+ min-width: 0;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+.preset-panel-header .pp-help {
+ flex: 0 0 auto;
+ display: inline-flex;
+ align-items: center;
+ color: var(--a-link);
+ text-decoration: none;
+ opacity: 0.8;
+}
+.preset-panel-header .pp-help:hover {
+ opacity: 1;
+ text-decoration: none;
+}
+.preset-panel-header .pp-help .material-icons {
+ font-size: 16px;
+}
+
+/* ---------- 今のプリセット（js/ui/preset-panel.js） ----------
+   押すとピッカーが開く。一覧を常時ここへ並べると設定が下へ押し出されるため、
+   パネルには今のプリセットだけを置き、選ぶときだけ広いピッカーを開く */
+.left_area .preset-current {
+ flex: 0 0 auto;
+ display: block;
+ width: calc(100% - 16px);
+ margin: 8px 8px 4px;
+ padding: 0;
+ overflow: hidden;
+ text-align: left;
+ cursor: pointer;
+ background: var(--btn-bg);
+ border: var(--btn-border);
+ border-radius: 6px;
+ transition: var(--btn-transition);
+}
+.left_area .preset-current:hover {
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
+}
+/* 使用中かどうかは効果パネルのactive-buttonと同じ見た目で示す */
+.left_area .preset-current.is-active {
+ background: var(--btn-active-bg);
+ border-color: var(--btn-active-border-color);
+ box-shadow: var(--btn-active-shadow);
+}
+
+.preset-current-row {
+ display: flex;
+ align-items: center;
+ gap: 4px;
+ padding: 5px 7px 4px;
+}
+.preset-current-name {
+ flex: 1 1 auto;
+ min-width: 0;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+ font-weight: var(--font-weight-bold);
+}
+.preset-current-swap {
+ flex: 0 0 auto;
+ display: inline-flex;
+ align-items: center;
+ gap: 2px;
+ font-size: 10px;
+ opacity: 0.7;
+}
+.left_area .preset-current-swap .material-icons {
+ font-size: 14px;
+}
+
+/* .left_area button img の width:90% / margin:0 auto を上書きし、
+   幅いっぱいの帯にして左端を名前と揃える */
+.left_area .preset-current .preset-current-thumb {
+ display: block;
+ width: 100%;
+ margin: 0;
+ background: rgba(128,128,128,0.12);
+}
+/* まだ何も選んでいない間は見本が無い。上の display:block が
+   [hidden] の既定より強いため、ここで消す */
+.left_area .preset-current .preset-current-thumb[hidden] {
+ display: none;
+}
+
+/* ---------- 本体（ここだけがスクロールする） ---------- */
+.preset-panel-body {
+ flex: 1 1 auto;
+ min-height: 0;
+ overflow-y: auto;
+ overflow-x: hidden;
+ padding: 0 8px 10px;
+ scrollbar-gutter: stable;
+}
+
+/* ---------- グループ見出し ---------- */
+.preset-group-header {
+ display: flex;
+ align-items: baseline;
+ gap: 5px;
+ margin: 10px 0 4px;
+ padding-bottom: 2px;
+ font-size: 10px;
+ letter-spacing: 0.5px;
+ opacity: 0.75;
+ border-bottom: 1px solid rgba(128,128,128,0.22);
+}
+.preset-group-header .preset-group-hint {
+ margin-left: auto;
+ font-size: 9px;
+ opacity: 0.6;
+ text-align: right;
+}
+
+/* 適用範囲が効く範囲を囲みで示す。囲みの外のプリセットには掛からない */
+.preset-section {
+ padding: 6px;
+ background: rgba(128,128,128,0.06);
+ border: 1px solid rgba(128,128,128,0.28);
+ border-radius: 6px;
+}
+
+/* ---------- プリセット一覧 ----------
+   1列。2列だとサムネイルが小さくなり、Color2BW系4種の差が見分けられない */
+.preset-list {
+ display: flex;
+ flex-direction: column;
+ gap: 4px;
+}
+
+.left_area .preset-list .preset-item {
+ display: block;
+ width: 100%;
+ margin: 0;
+ padding: 0;
+ overflow: hidden;
+ text-align: left;
+ cursor: pointer;
+ background: var(--btn-bg);
+ border: var(--btn-border);
+ border-radius: 5px;
+ transition: var(--btn-transition);
+}
+.left_area .preset-list .preset-item:hover {
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
+}
+.left_area .preset-list .preset-item.active-button {
+ background: var(--btn-active-bg);
+ border-color: var(--btn-active-border-color);
+ box-shadow: var(--btn-active-shadow);
+}
+
+.preset-item-name {
+ display: flex;
+ align-items: center;
+ gap: 3px;
+ padding: 3px 6px;
+ font-size: var(--font-size-button);
+ line-height: 1.3;
+}
+.preset-item-name > span {
+ flex: 1 1 auto;
+ min-width: 0;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+/* 押した後どうなるか（設定が出る / プレビュー / 別ウィンドウ）を押す前に示す印 */
+.left_area .preset-item-name .preset-item-mark {
+ flex: 0 0 auto;
+ font-size: 13px;
+ opacity: 0.55;
+ vertical-align: middle;
+}
+
+/* .left_area button img の width:90% / margin:0 auto を上書きし、
+   幅いっぱいの帯にして左端をラベルと揃える */
+.left_area .preset-list .preset-item .preset-item-thumb {
+ display: block;
+ width: 100%;
+ margin: 0;
+ background: rgba(128,128,128,0.12);
+}
+
+/* ---------- 適用範囲 ----------
+   アイコンを外してラベルだけにし、狭い幅でも改行させない */
+.left_area .effect-scope-label {
+ display: block;
+ margin: 0 0 3px;
+ font-size: 10px;
+ opacity: 0.65;
+}
+.preset-section .effect-scope-group {
+ gap: 2px;
+ margin: 0 0 7px;
+ padding-bottom: 7px;
+ border-bottom: 1px solid rgba(128,128,128,0.25);
+}
+.preset-section .effect-scope-group button {
+ flex: 1 1 0;
+ min-width: 0;
+ margin: 0;
+ padding: 4px 2px;
+ font-size: 10px;
+ line-height: 1.2;
+ text-align: center;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+}
+
+/* ---------- 文字を入れてから適用する型（プロンプトの追記） ----------
+   パネル幅は140〜200pxしかないため、入力欄は幅いっぱいで流す */
+.preset-section .preset-field-label {
+ display: block;
+ margin: 6px 0 3px;
+ font-size: 10px;
+ opacity: 0.65;
+}
+.preset-section .preset-field-input {
+ display: block;
+ box-sizing: border-box;
+ width: 100%;
+ margin: 0;
+ padding: 4px;
+ font-size: 11px;
+ line-height: 1.4;
+ resize: vertical;
+}
+
+.preset-section .preset-check {
+ display: flex;
+ align-items: center;
+ gap: 5px;
+ margin: 7px 0 0;
+ font-size: 10px;
+ line-height: 1.3;
+ opacity: 0.8;
+ cursor: pointer;
+}
+.preset-section .preset-check input {
+ flex: 0 0 auto;
+ margin: 0;
+}
+
+/* 主操作の前段（キャラ表の抽出など）。押し間違えないよう主操作より弱く見せる */
+.left_area .preset-section .preset-sub-button {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 4px;
+ width: 100%;
+ margin: 5px 0 0;
+ padding: 4px 6px;
+ font-size: 10px;
+ line-height: 1.3;
+ text-align: center;
+ cursor: pointer;
+ background: var(--btn-bg);
+ color: var(--button-text-color);
+ border: var(--btn-border);
+ border-radius: var(--fjm-button-border-radius);
+ transition: var(--btn-transition);
+}
+.left_area .preset-section .preset-sub-button:hover {
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
+}
+.left_area .preset-section .preset-sub-button .material-icons {
+ flex: 0 0 auto;
+ font-size: 14px;
+}
+
+/* 生成中の状態。空の間は行を作らない */
+.preset-section .preset-status {
+ margin: 5px 0 0;
+ font-size: 10px;
+ line-height: 1.3;
+ opacity: 0.75;
+ overflow-wrap: anywhere;
+}
+.preset-section .preset-status:empty {
+ display: none;
+}
+
+/* 適用範囲の囲みの中に置く主操作。押した先が囲みの中だけであることを見た目で示す */
+.left_area .preset-section .preset-apply-button {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 4px;
+ width: 100%;
+ margin: 8px 0 0;
+ padding: 5px 6px;
+ font-weight: var(--font-weight-bold);
+ line-height: 1.3;
+ text-align: center;
+ cursor: pointer;
+ background: var(--btn-active-bg);
+ color: var(--button-text-color);
+ border: 1px solid var(--btn-active-border-color);
+ border-radius: var(--fjm-button-border-radius);
+ transition: var(--btn-transition);
+}
+.left_area .preset-section .preset-apply-button:hover {
+ filter: brightness(1.25);
+}
+.left_area .preset-section .preset-apply-button .material-icons {
+ flex: 0 0 auto;
+ font-size: 16px;
+}
+
+/* ---------- 設定エリア ----------
+   一覧を消さず、一覧の下に生やす */
+.preset-panel-body > #manga-effect-settings:not(:empty) {
+ margin-top: 10px;
+ padding: 6px 0;
+ border-top: 1px solid rgba(128,128,128,0.28);
+}
+
+/* ---------- 一括適用の取り消し ----------
+   退避は全ページ適用のときだけ作られる。バックアップが無い間は押しても
+   何も起きないので、灰色で置いておかず消す。
+   disabled の切り替えは effectRefreshRestoreButton() が行う */
+.left_area .effect-restore-button {
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 4px;
+ width: 100%;
+ margin: 7px 0 0;
+ padding: 5px 6px;
+ font-size: 10px;
+ line-height: 1.3;
+ text-align: center;
+ cursor: pointer;
+ background: var(--btn-bg);
+ color: var(--button-text-color);
+ border: var(--btn-border);
+ border-radius: var(--fjm-button-border-radius);
+ transition: var(--btn-transition);
+}
+.left_area .effect-restore-button:hover {
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
+}
+.left_area .effect-restore-button:disabled {
+ display: none;
+}
+.left_area .effect-restore-button .material-icons {
+ flex: 0 0 auto;
+ font-size: 14px;
+}
+
+/* ---------- パネル下端の主操作 ----------
+   設定が長くなってもスクロールで隠れないよう、本体の外に固定で置く */
+.left_area .preset-panel-foot {
+ flex: 0 0 auto;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ gap: 4px;
+ width: 100%;
+ margin: 0;
+ padding: 8px 6px;
+ font-weight: var(--font-weight-bold);
+ line-height: 1.3;
+ text-align: center;
+ cursor: pointer;
+ background: var(--btn-active-bg);
+ color: var(--button-text-color);
+ border: none;
+ border-top: 1px solid var(--btn-active-border-color);
+ border-radius: 0;
+ transition: var(--btn-transition);
+}
+.left_area .preset-panel-foot:hover {
+ filter: brightness(1.25);
+}
+.left_area .preset-panel-foot .material-icons {
+ flex: 0 0 auto;
+ font-size: 16px;
+}
+
+/* ---------- GLFX のフィルタ ----------
+   <select>は値の保持元として残し、選択はPresetPickerで行う。
+   画面には選択中のフィルタ名だけを見出しとして出す */
+.glfx-filter-select {
+ display: none;
+}
+.glfx-filter-name {
+ margin: 0 0 6px;
+ padding: 4px 6px;
+ font-weight: var(--font-weight-bold);
+ background: var(--btn-active-bg);
+ border: 1px solid var(--btn-active-border-color);
+ border-radius: var(--fjm-button-border-radius);
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+.glfx-filter-name:empty {
+ display: none;
+}
+
+.light-mode .preset-section {
+ background: rgba(0,0,0,0.03);
+ border-color: rgba(0,0,0,0.15);
+}

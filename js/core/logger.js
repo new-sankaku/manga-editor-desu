@@ -204,3 +204,5 @@ const inpaintMaskLogger=SimpleLogger('inpaintMask',LogLevel.WARN);
 const inpaintWorkflowLogger=SimpleLogger('inpaintWorkflow',LogLevel.WARN);
 const _dbgLogger=SimpleLogger('DBG-panel',LogLevel.WARN);
 const historyLogger=SimpleLogger('history',LogLevel.WARN);
+const llmLogger=SimpleLogger('llm',LogLevel.WARN);
+const promptLogger=SimpleLogger('prompt',LogLevel.WARN);

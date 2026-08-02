@@ -17,6 +17,8 @@ providerRegistry.register(new LocalComfyUIProvider());
 providerRegistry.register(new LocalSDWebUIProvider());
 providerRegistry.register(new RunPodComfyUIProvider());
 providerRegistry.register(new FalAIProvider());
+providerRegistry.register(new GrokProvider());
+providerRegistry.register(new OllamaProvider());
 providerRegistry.mapApiMode(apis.COMFYUI,'localComfyUI');
 providerRegistry.mapApiMode(apis.A1111,'localSDWebUI');
 providerRegistry.mapApiMode(apis.RUNPOD_COMFYUI,'runpodComfyUI');
@@ -86,6 +88,42 @@ allowedFalaiSelectIds.forEach(function(id){
 $(id).addEventListener('change',function(){updateFalaiModelBtnVisibility(id);});
 updateFalaiModelBtnVisibility(id);
 });
+
+var grokProvider=providerRegistry.get('grok');
+var ollamaProvider=providerRegistry.get('ollama');
+$('grokApiKeyToggle').addEventListener('click',function(event){
+event.stopPropagation();
+var input=$('grokApiKey');
+input.type=input.type==='password'?'text':'password';
+});
+$('grokApiKey').addEventListener('change',function(){
+if(this.value.trim()){
+grokProvider.fetchModels();
+}else{
+grokProvider._populateSelects([]);
+}
+});
+$('grokReloadModels').addEventListener('click',function(event){
+event.stopPropagation();
+grokProvider.fetchModels();
+});
+$('ollamaUrlDefaultUrl').addEventListener('click',function(event){
+event.stopPropagation();
+$('ollamaUrl').value='http://127.0.0.1:11434';
+$('ollamaUrl').dispatchEvent(new Event('change'));
+});
+$('ollamaUrl').addEventListener('change',function(){
+if(this.value.trim()){
+ollamaProvider.fetchModels();
+}else{
+ollamaProvider._populateSelects([]);
+}
+});
+$('ollamaReloadModels').addEventListener('click',function(event){
+event.stopPropagation();
+ollamaProvider.fetchModels();
+});
+llmFetchModelsIfInUse();
 
 setInterval(apiHeartbeat,1000*15);
 $('apiHeartbeatCheckbox').addEventListener('change',function () {

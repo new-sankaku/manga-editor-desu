@@ -14,6 +14,9 @@ return this.getSupportedRoles().includes(role);
 needsApiKey(){
 return false;
 }
+getStatusReason(){
+return'';
+}
 getApiKey(){
 return null;
 }

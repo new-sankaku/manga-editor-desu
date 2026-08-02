@@ -32,6 +32,7 @@
 | 文字入力 | `text:changed`が1文字ごと | 同上。加えて編集終了時に1件 |
 | ボタン1回の操作（重ね順、反転、表示切替等） | なし | `commitHistory()`で即1件 |
 | glfxの色彩フィルタ（明るさ・コントラスト・色相・彩度等） | なし（非同期でsetElement） | スライダー停止から700ms後に1件 |
+| エフェクトの一括適用（白黒・薄いカラー化・黒強調） | なし（非同期でsetElement） | ページ内の全枚数で1件 |
 | 背景色 | なし（canvasの属性） | 入力停止から500ms後に1件 |
 | フォント変更 | なし | `commitHistory()`で即1件 |
 
@@ -149,10 +150,19 @@ commitHistory();           // 単発のボタン操作
 ```javascript
 saveSettingsLocalStrage(silent)  // 全UIから値を収集→localStorage保存
 loadSettingsLocalStrage()        // localStorage→UI要素に復元
+applySettingValue(el,val)        // 復元時の値設定。selectはoptionを補ってから選択する
 ```
+
+### selectの復元（applySettingValue）
+モデル一覧などAPI取得後に`<option>`が生成されるselectは、復元時点で選択肢が存在しない。
+`el.value=保存値`はマッチするoptionが無いと**無言で`''`になる**ため、そのままだと自動保存で
+localStorage側の保存値まで空で上書きされ、選択が二度と戻らない。
+`applySettingValue()`は該当optionが無い場合に保存値のoptionを生成してから選択する。
+LLMプロバイダの`_populateSelect()`も同じ関数を使い、取得失敗時も選択値を保持する。
 
 ### 設定の自動保存
 `initSettingsAutoSave()`でUI要素のinput/changeイベントを監視。500msデバウンスで自動保存（`settingsAutoSaveCheckbox`がON時のみ）。
+**全項目を一括で保存するため、DOM上で空になっている項目は空のまま保存される。**
 
 ### サイドバーツール値（sidebar-ui.js）
 localStorageキー別にMap保存。500msデバウンス。
@@ -214,16 +224,91 @@ LZ4圧縮で以下を保存:
 `btmProjectsMap` が `{guid: {imageLink, blob}}` を保持し、**Mapの挿入順がページ順**。
 ページ切り替えは「現ページを保存 → 対象ページを`loadLz4BlobProjectFile()`」。
 
-- **ページを離れる前に`flushHistory()`が必要。** 保存判定が`stateStack.length>=2`のため、
-  デバウンス中の変更が確定する前に離れると変更が失われる（`btmSaveCurrentPage()`に集約）
+- **保存するかの判定は`btmShouldSaveCurrentPage()`（bottom-bar.js）に集約。** 「`btmProjectsMap`に
+  登録済み（＝既存ページなのでサムネイル更新が要る）」または「初期メッセージ以外の
+  オブジェクトがある」で真。初期メッセージは`isInitMessage:true`で識別する。
+  履歴件数（旧`stateStack.length>=2`）で判定すると、キャンバスのリサイズ等で履歴が積まれた
+  起動直後の空白ページまでページとして登録されてしまう。ページ切り替え・Templateコマ割り・
+  ページ追加・プロジェクト読み込み前の退避・auto-saveはすべてこの関数を通す
+- **ページを離れる前に`flushHistory()`が必要。** デバウンス中の変更が確定する前に離れると
+  変更が失われる（`btmSaveCurrentPage()`に集約）
 - **読み込み中の保存を禁止する。** `isProjectBusy()`が真の間はページ切り替え・ページ削除・
   ページ追加・auto-saveを行わない。読み込み途中のキャンバスを現在ページのblobに
   上書きしてしまうため
 - `loadLz4BlobProjectFile()`は冒頭で`cancelPendingHistory()`する。前ページの未確定コミットが
   クリア済みの`imageMap`に前ページの画像を混ぜてしまうため
+- **`chengeCanvasByGuid()`のawaitが返ってもキャンバスはまだ構築されていない。**
+  内部の`lastRedo()`→`applyHistoryState()`が`canvas.loadFromJSON()`をコールバック方式で
+  呼ぶだけで完了を待たないため。直後に`getObjectList()`／`getImageObjectList()`を呼ぶと
+  **0件が返る**。ページを開いて中身を触る処理は`isProjectBusy()`がfalseになるまで待つこと
+  待ち受けは`btmWaitForPageReady()`（bottom-bar.js）に集約してある
 - ページのblobは追加直後だけ`null`。この状態で切り替えるとエラーになるため明示的に弾く
 - ページ削除は「表示中なら隣のページへ移動（後ろ優先、最後尾なら前）、全ページが無くなったら
   空ページを表示」。キャンバスに内容を残すと一覧に無いページを編集し続けることになる
+
+### エフェクトの一括適用（sidebar/effect/effect-batch.js）
+適用範囲は`effectApplyScope`セレクトで「選択画像 / このページ全部 / 全ページ全部」を切り替える。
+1画像への適用は`c2bwApplyToImage` / `c2cApplyToImage` / `enhanceDarkToImage`に集約され、
+単体適用と一括適用が同じ経路を通る。
+
+- 対象は`effectIsBatchTarget()`で選別。**非表示・ロック・AI生成中・一時オブジェクト
+  （`saveHistory=false` / `excludeFromLayerPanel`）・コマ・アイコンは除外**
+- 履歴は`changeDoNotSaveHistory()`〜`changeDoSaveHistory()`で囲み、
+  **ページ内の全枚数で1件**。非同期をまたぐため`withoutHistory()`は使えない
+- 1枚失敗したら**打ち切って何枚目まで適用したかをToastで出す**。
+  握りつぶして次へ進むとどこまで掛かったのか分からなくなる
+- 進捗は`OP_showLoading(opts,true)`。`OP_isCancelled()`を画像とページの境界で見る
+
+**全ページ一括はUndoで戻せない。** 履歴はページ単位のキャンバスに紐づくため。
+代わりに実行直前の全ページblobを**メモリ上の変数`effectBatchBackup`**へ退避し、
+「一括適用前の状態に戻す」ボタン（`effectRestoreBatchBackup()`）で復元する。
+
+**この退避は永続化しない。リロード・タブを閉じた時点で失われる。**
+目的は「今やった一括適用を取り消す」ことだけで次のセッションへ持ち越す必要がなく、
+中身は全ページのblobで容量が大きいため。永続化するとブラウザに残り続け、
+プロジェクトごとのスロット管理・世代上限・古いものの掃除が別途必要になる。
+その旨は`effectRestoreBatchHint`（ボタンのツールチップ）でユーザーにも伝える。
+
+リロードせずにプロジェクトを切り替えると退避だけが残るため、
+`effectBackupMatchesCurrentProject()`が退避時のページGUIDと`btmGetGuids()`を
+突き合わせて別プロジェクトのものを弾く。ページGUID（`canvasGuid`）は
+`commonProperties`に含まれ`state_*.json`としてプロジェクトファイルに保存され、
+読み込み後も同じ値が復元されるため識別に使える。
+判定はボタンの表示制御（`effectRefreshRestoreButton()`）と復元の実行直前の
+**両方**で行う。取り違えると現在のプロジェクトが丸ごと置き換わる。
+
+バックアップが無い間はボタンを`disabled`にし、CSS（`:disabled{display:none}`）で
+消す。押せないボタンを灰色で置いておかない。
+起動直後はページ未読込で判定できないため、`toggleVisibility()`が効果パネルを
+開くたびに`effectRefreshRestoreButton()`を呼び直す。
+
+**確認ダイアログは出さない。** 実行は止めずToastで知らせるだけにする
+（Toastは`--z-toast:2000`で進捗オーバーレイ`--z-modal:1000`より上に出る）。
+**auto-saveのストアは使えない。** 単一スロットを毎回上書きするうえ、
+スキップ判定が表示中ページの履歴状態ハッシュなので次のタイマーで確実に潰れる。
+
+### コマのプロンプトの書き込みとページ送り（ai/prompt/prompt-apply.js）
+プロンプトパネル（`prompt-manager-area`）のLLM生成（→`ai-system.md`）が作った
+プロンプトを、コマ（`isPanel`）の`text2img_prompt`へ書き込む側。
+範囲は`storyApplyScope`で「選択中のコマ / このページのコマすべて / 全ページのコマすべて」。
+見た目と構造は効果パネルの適用範囲（`effect-scope-group`）と同じものを使う。
+
+- 1コマへの書き込みは`promptApplyToPanel()`に集約。追記も置き換えも同じ経路を通る。
+  追記は既存の末尾のカンマを均して`", "`で繋ぎ、既存が空なら区切りを付けない
+- **ロック（`selectable=false`）は除外しない。** ひな形が作るコマは既定でロック状態のため、
+  効果と同じ基準で除外すると大半のコマが対象外になる
+- 選択範囲は`canvas.getActiveObjects()`を見る。`getActiveObject()`だけだと
+  複数選択時にActiveSelectionが返り「コマが選択されていません」になる
+- カスタム属性への直接代入は`set()`を通らず自動コミット網に検知されないため、
+  ページごとに`saveStateByManual()`で1件だけ積む
+- ページ送りは`storyForEachPage(loading,stepText,onPage)`に集約。
+  `onPage`はページが完全に読み込まれてから呼ばれ、trueを返したページだけ保存する。
+  終わったら開始時のページへ戻す
+- 送りの前に`btmSaveCurrentPage()`してから`btmGetGuids()`を取り直す。
+  未登録のページを開いたまま送ると、切り替えた時点でその内容ごと失われる
+- **全ページはUndoで戻せない**（履歴はページ単位のキャンバスに紐づくため）。
+  実行前にトーストで明示する。効果の一括適用と違い画像は変わらず文字が入るだけなので、
+  全ページblobの退避は持たない
 
 ### auto-save（auto-save.js）
 `AutoSaveManager`がlocalforage(`autoSaveStorage`)に定期保存。

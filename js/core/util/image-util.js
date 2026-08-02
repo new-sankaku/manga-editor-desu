@@ -42,6 +42,34 @@ tempCtx.restore();
 return tempCanvas;
 },
 
+// setElementはwidth/heightを画像の実寸で上書きするため、差し替え前の値を復元する。
+// オブジェクトを作り直さないのでguid・clipPath・重ね順・レイヤー名がそのまま残る
+replaceImageElement:function(object,element){
+var top=object.top;
+var left=object.left;
+var scaleX=object.scaleX;
+var scaleY=object.scaleY;
+var width=object.width;
+var height=object.height;
+object.setElement(element);
+object.set({left:left,top:top,scaleX:scaleX,scaleY:scaleY,width:width,height:height});
+},
+
+replaceImageByDataURL:function(object,dataUrl){
+return new Promise(function(resolve,reject){
+var img=new Image();
+img.onload=function(){
+ImageUtil.replaceImageElement(object,img);
+canvas.requestRenderAll();
+resolve();
+};
+img.onerror=function(){
+reject(new Error('replaceImageByDataURL: failed to decode the processed image'));
+};
+img.src=dataUrl;
+});
+},
+
 fabricImage2ImageData:async function(fabricImage){
 var img=fabricImage.getElement();
 var tempCanvas=document.createElement('canvas');
@@ -281,21 +309,12 @@ commitHistory();
 }
 },
 
-enhanceDarkImage:async function(){
-var loading=OP_showLoading({icon:'process',step:'Step1',substep:'Start up',progress:0});
-await new Promise(function(resolve){setTimeout(resolve,10);});
-try{
-var activeObject=canvas.getActiveObject();
-var img=activeObject.getElement();
-var originalScaleX=activeObject.scaleX||1;
-var originalScaleY=activeObject.scaleY||1;
-var intensity=parseFloat($('effectEnhanceDarkIntensity').value);
-var originalImageData=await ImageUtil.fabricImage2ImageData(activeObject);
-OP_updateLoadingState(loading,{icon:'process',step:'Step2',substep:'Dark enhance',progress:25});
-await new Promise(function(resolve){setTimeout(resolve,10);});
+// 1画像に黒強調を適用する。履歴コミットと進捗表示は呼び出し側が持つ。
+// 一括適用からも同じ経路を通す
+enhanceDarkToImage:async function(object,intensity){
+var img=object.getElement();
+var originalImageData=await ImageUtil.fabricImage2ImageData(object);
 var processedImageData=HtmlCanvasUtil.enhanceDarkRegionsCPU(originalImageData,intensity);
-OP_updateLoadingState(loading,{icon:'process',step:'Step3',substep:'Image marge',progress:90});
-await new Promise(function(resolve){setTimeout(resolve,10);});
 var tempCanvas=document.createElement('canvas');
 tempCanvas.width=img.naturalWidth;
 tempCanvas.height=img.naturalHeight;
@@ -303,22 +322,21 @@ var tempCtx=tempCanvas.getContext('2d',{alpha:true,willReadFrequently:true});
 tempCtx.imageSmoothingEnabled=true;
 tempCtx.imageSmoothingQuality='high';
 tempCtx.putImageData(processedImageData,0,0);
-var webpDataUrl=tempCanvas.toDataURL('image/webp',1.0);
-await new Promise(function(resolve){
-fabric.Image.fromURL(webpDataUrl,function(img){
-img.set({left:activeObject.left,top:activeObject.top,scaleX:originalScaleX,scaleY:originalScaleY});
-copy(activeObject,img);
-withoutHistory(function(){
-canvas.remove(activeObject);
-canvas.add(img);
-});
-canvas.setActiveObject(img);
-canvas.renderAll();
+await ImageUtil.replaceImageByDataURL(object,tempCanvas.toDataURL('image/webp',1.0));
+},
+
+enhanceDarkImage:async function(){
+var loading=OP_showLoading({icon:'process',step:'Step1',substep:'Start up',progress:0});
+await new Promise(function(resolve){setTimeout(resolve,10);});
+try{
+var activeObject=canvas.getActiveObject();
+var intensity=parseFloat($('effectEnhanceDarkIntensity').value);
+OP_updateLoadingState(loading,{icon:'process',step:'Step2',substep:'Dark enhance',progress:25});
+await new Promise(function(resolve){setTimeout(resolve,10);});
+await ImageUtil.enhanceDarkToImage(activeObject,intensity);
+OP_updateLoadingState(loading,{icon:'process',step:'Step3',substep:'Image marge',progress:90});
 updateLayerPanel();
 saveStateByManual();
-resolve();
-});
-});
 }catch(err){
 imageLogger.error('Process error:',err);
 }finally{
@@ -533,6 +551,9 @@ var cropImage=ImageUtil.cropImage;
 var flipHorizontally=ImageUtil.flipHorizontally;
 var flipVertically=ImageUtil.flipVertically;
 var enhanceDarkImage=ImageUtil.enhanceDarkImage;
+var enhanceDarkToImage=ImageUtil.enhanceDarkToImage;
+var replaceImageElement=ImageUtil.replaceImageElement;
+var replaceImageByDataURL=ImageUtil.replaceImageByDataURL;
 var sendHtmlCanvas2FabricCanvas=ImageUtil.sendHtmlCanvas2FabricCanvas;
 var blobUrlToDataUrl=ImageUtil.blobUrlToDataUrl;
 var canvas2DataURL=ImageUtil.canvas2DataURL;

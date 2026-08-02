@@ -3,14 +3,15 @@
 .role-assign-btn-submit:hover{background:#a00;}
 .role-matrix{width:100%;border-collapse:collapse;border:1px solid var(--color-tertiary);table-layout:fixed;}
 .role-matrix th{font-size:10px;color:#fff;font-weight:600;padding:8px 4px;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.25);word-wrap:break-word;overflow-wrap:break-word;}
-.role-matrix th:first-child{text-align:left;color:var(--color-component-minitext);font-weight:bold;width:auto;}
-.role-matrix td{padding:10px 4px;text-align:center;border:1px solid rgba(255,255,255,0.25);vertical-align:middle;height:36px;}
-.role-matrix td:first-child{text-align:left;font-size:11px;color:var(--color-text-secondary);font-weight:bold;background:rgba(255,255,255,0.02);white-space:nowrap;width:auto;}
+.role-matrix th:first-child{text-align:left;color:var(--color-component-minitext);font-weight:bold;width:30%;}
+.role-matrix td{padding:10px 2px;text-align:center;border:1px solid rgba(255,255,255,0.25);vertical-align:middle;height:36px;}
+.role-matrix td:first-child{text-align:left;font-size:11px;color:var(--color-text-secondary);font-weight:bold;background:rgba(255,255,255,0.02);white-space:normal;overflow-wrap:break-word;width:30%;padding:6px 6px;line-height:1.35;}
+.role-matrix .role-col-none{width:9%;}
 .role-matrix tbody tr{background:transparent;}
 .role-matrix tr:hover td{background:rgba(255,255,255,0.06);}
 input.role-radio{cursor:pointer;margin:0;padding:0;vertical-align:middle;flex-shrink:0;accent-color:var(--color-accent);width:18px;height:18px;}
 .role-provider-unavailable input.role-radio{display:none;}
 .role-provider-unavailable::after{content:'—';color:rgba(255,255,255,0.15);font-size:14px;}
 .role-assign-note{margin-top:12px;font-size:10px;color:#888;}
-.role-assign-trigger{font-size:11px;padding:1px 6px;margin-left:auto;color:var(--color-component-minitext);border:1px solid rgba(160,48,48,0.4);background:rgba(129,0,0,0.2);border-radius:4px;cursor:pointer;white-space:nowrap;}
-.role-assign-trigger:hover{background:rgba(129,0,0,0.4);border-color:rgba(160,48,48,0.6);color:#fff;}
+.role-assign-trigger{font-size:11px;padding:1px 6px;margin-left:auto;color:var(--color-action-text);border:1px solid var(--color-action-border);background:var(--color-action-bg);border-radius:4px;cursor:pointer;white-space:nowrap;}
+.role-assign-trigger:hover{background:var(--color-action-bg-hover);border-color:var(--color-action-text);color:#fff;}

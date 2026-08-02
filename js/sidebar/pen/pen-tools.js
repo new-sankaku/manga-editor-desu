@@ -64,9 +64,7 @@ canvas.freeDrawingBrush=getEraserBrush();
 canvas.freeDrawingBrush=new fabric[type+"Brush"](canvas);
 
 }
-clearPenActiveButton();
-
-$(type+'Button').classList.add('active-button');
+presetPanelSetActive('pen',type);
 applyBrushSettings();
 }
 
@@ -355,16 +353,10 @@ canvas.freeDrawingBrush.strokeDashArray=[brushWidth,brushWidth*4];
 
 
 
+// 描画中かどうかはカードの使用中表示で示す。どのペンを選んでいたかは残す
 function clearPenActiveButton() {
 uiLogger.debug("clearPenActiveButton is call");
-$(MODE_PEN_PENCIL+'Button').classList.remove('active-button');
-$(MODE_PEN_OUTLINE+'Button').classList.remove('active-button');
-$(MODE_PEN_CIRCLE+'Button').classList.remove('active-button');
-$(MODE_PEN_CRAYON+'Button').classList.remove('active-button');
-$(MODE_PEN_INK+'Button').classList.remove('active-button');
-$(MODE_PEN_MARKER+'Button').classList.remove('active-button');
-$(MODE_PEN_ERASER+'Button').classList.remove('active-button');
-$(MODE_PEN_MOSAIC+'Button').classList.remove('active-button');
+presetPanelClearActive('pen');
 }
 
 function setupContextTopBrush(brush) {

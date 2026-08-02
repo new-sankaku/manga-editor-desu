@@ -73,6 +73,164 @@ JS内:
 getText("keyName")  // i18next.t()のラッパー
 ```
 
+`updateContent()`は`data-i18n`要素に対し`element.innerHTML = translation`するだけで、
+**属性の翻訳には対応していない**。`data-i18n="[title]keyName"`のような記法は無効で、
+キー文字列がそのまま本文に差し込まれ`material-icons`のリガチャが壊れる。
+ツールチップは`data-tip`属性に置き、`addTooltipsByAttribute()`（tippy.js）で登録する:
+```html
+<i class="material-icons" data-tip="keyName">tune</i>
+```
+`setLanguage()`が`removeTooltips()`→再登録まで面倒を見るため、要素を増やしても
+登録処理を書き足す必要はない。
+
+### 後から差し込んだDOMへの翻訳適用
+モーダルやフローティングウィンドウを`insertAdjacentHTML`等で後から追加した場合、
+その中の`data-i18n`要素は起動時の`updateContent()`より後に生えるため未翻訳になる。
+自前で翻訳を当てるときは以下を守る:
+
+- **走査範囲を挿入したコンテナ配下に限定する**。`document.querySelectorAll('[data-i18n]')`
+  で全体を走査すると、既に翻訳済みの他モジュールのUIまで巻き込んで上書きする。
+- **`textContent`ではなく`innerHTML`を使う**。翻訳値には`&#128295;`のような
+  HTML実体参照やタグが含まれるものがあり、`textContent`だとそれが文字列のまま表示される
+  （`updateContent()`本体も`innerHTML`）。
+
+```javascript
+const root=$('fm-modalOverlay');
+root.querySelectorAll('[data-i18n]').forEach(el=>{
+el.innerHTML=i18next.t(el.getAttribute('data-i18n'));
+});
+```
+
+## プリセット型サイドバーパネル（preset-panel.css）
+「プリセットを選んで設定を調整する」パネル（効果・ペン・トーン・画像テキスト）の共通構造。
+一覧の出し方が2通りある:
+
+| 型 | 使うパネル | 理由 |
+|----|-----------|------|
+| 一覧をパネルに常時置く | 効果 | 押した後の挙動が4通りあり、グループ見出しで違いを示す必要がある |
+| 今のプリセットだけ置く（`preset-current`） | ペン・トーン・画像テキスト | 一度に使うのは1つだけ。一覧を常時置くと設定が画面外へ押し出される |
+
+### A. 一覧を常時置く型
+
+```html
+<div class="left_area preset-panel" id="..." style="display: none;">
+  <div class="area-header preset-panel-header">
+    <span class="pp-title" data-i18n="..."></span>
+    <a class="pp-help" href="..." target="_blank" data-tip="help"><i class="material-icons">help_outline</i></a>
+  </div>
+  <div class="preset-panel-body">          <!-- ここだけがスクロールする -->
+    <div class="preset-group-header">
+      <span data-i18n="..."></span>
+      <span class="preset-group-hint" data-i18n="..."></span>
+    </div>
+    <div class="preset-section">           <!-- 適用範囲が効く範囲を囲みで示す -->
+      <div class="preset-list">
+        <button class="preset-item">
+          <span class="preset-item-name">
+            <span data-i18n="..."></span>
+            <i class="material-icons preset-item-mark" data-tip="...">tune</i>
+          </span>
+          <img class="preset-item-thumb" src="..." alt="">
+        </button>
+      </div>
+    </div>
+    <div id="..-settings"></div>           <!-- 一覧を消さず下に出す -->
+  </div>
+  <button class="preset-panel-foot" data-action="..."></button>
+</div>
+```
+
+守る点:
+- **一覧は1列**。2列にするとサムネイルが小さくなり、Color2BW系4種のような
+  見た目でしか区別できないプリセットが判別不能になる
+- **一覧に`max-height`を付けない**。パネル本体（`preset-panel-body`）だけを
+  スクロールさせる。一覧側にも付けると二重スクロールになる
+- **設定は一覧と入れ替えず下に出す**。入れ替えると他のプリセットへ切り替えられなくなる
+- **押した後の挙動が違うものには`preset-item-mark`を付ける**
+  （`tune`=設定してから適用 / `visibility`=プレビュー付き / `open_in_new`=別ウィンドウ）
+- 適用範囲など「対象を選ぶUI」は、それが効く項目だけを含む`preset-section`の内側に置く
+- 文字を入れてから実行する型（プロンプトパネル）は`preset-section`の中に
+  `preset-field-label` / `preset-field-input` / `preset-check` /
+  `preset-sub-button`（前段の操作） / `preset-apply-button`（主操作） /
+  `preset-status`（実行中の表示）を並べる。適用範囲は効果と同じ
+  `effect-scope-label` + `input-group-multi effect-scope-group`を使い、
+  パネルごとに見た目を作り分けない
+- **チェックボックスの`<label>`に`data-i18n`を付けない。** `updateContent()`が
+  `innerHTML`ごと差し替えて`<input>`が消える。内側に`<span data-i18n>`を置く
+
+### B. 今のプリセットだけ置く型（preset-panel.js）
+
+```html
+<div class="left_area preset-panel" id="tool-area" style="display: none;">
+  <div class="area-header preset-panel-header">
+    <span class="pp-title" data-i18n="side-label-pen"></span>
+  </div>
+  <button class="preset-current" id="penPresetCurrent"
+          data-action="openPresetPicker" data-preset-kind="pen" data-tip="presetCurrentHintToggle">
+    <span class="preset-current-row">
+      <span class="preset-current-name" data-i18n="presetNotSelected"></span>
+      <span class="preset-current-swap">
+        <i class="material-icons">unfold_more</i><span data-i18n="presetChange"></span>
+      </span>
+    </span>
+    <img class="preset-current-thumb" alt="" hidden>   <!-- 未選択の間は出さない -->
+  </button>
+  <div class="preset-panel-body" id="tool-settings"></div>   <!-- ここだけがスクロールする -->
+</div>
+```
+
+一覧・見出し・サムネイルは`PRESET_PANELS`（`js/ui/preset-panel.js`）に1か所だけ持ち、
+カードもピッカーも同じ定義から作る。項目を増やすときはここだけを直す。
+
+守る点:
+- **カードの更新は各マネージャが元から持つ「activeを付け外しする1か所」からだけ呼ぶ**
+  （`switchPencilType` / `switchMangaTone` / `switchText2Ui`）。切り替え経路ごとに
+  `presetPanelSetActive()`を書き足すと更新漏れになる。
+  `clearPenActiveButton()`/`clearActiveToneButton()`は`presetPanelClearActive()`の入口として残す
+  （`ModeManager.pencil.disable()`等、パネル外からも呼ばれるため）
+- **使用中かどうかをカードに出す**（`.preset-current.is-active`）。一覧を畳んだ分、
+  ここを省くと描画モードに入っているかがパネルから読み取れなくなる
+- **未選択の間はプリセット名を出さない**（`presetNotSelected`）。最初の1件を
+  既定として見せると、押していないものが選ばれているように誤認させる
+- **選び直しの結果はボタン時代と同じ**。使用中のものをもう一度選べばペン／トーンは終了する。
+  一覧を畳むとこれが見えなくなるため`data-tip`で示す
+
+## プリセットピッカー（preset-picker.js）
+項目数が多く`<select>`では選びにくい一覧をポップアップで選ばせる。
+`<select>`を値の保持元として残したまま、見た目だけ差し替えるのが基本形:
+
+```javascript
+PresetPicker.openFromSelect($("glfxFilter"), getText("glfxFilterPickerTitle"));
+```
+
+`openFromSelect()`は`<option>`から一覧を組み立て、選択時に`select.value`へ代入して
+`change`イベントを発火する。**既存のchangeハンドラがそのまま動く**ため、
+項目を増やすときは`<select>`だけを直せばよい（一覧を二重に持たない）。
+
+任意の一覧を出す場合:
+```javascript
+PresetPicker.open({
+  title: getText("..."),
+  items: [{value:"a", label:"A", hint:"説明"}],
+  currentValue: "a",
+  onPick: function(value){ /* ... */ }
+});
+```
+
+閉じる操作は「×ボタン」「Escape」「ピッカーの外をクリック」の3つ。
+外側クリックは`document`のmousedown（capture）1か所で判定する
+（暗幕はパネルの右側しか覆っていないため、暗幕への`click`だけでは
+サイドバー側のクリックを拾えない）。`pointerdown`ではなくmousedownなのは、
+pointerdownの時点で暗幕を消すと直後のmousedownが下のキャンバスに届くため。
+
+注意点:
+- カードに表示中の名前は`<option>`のtextContentから写す。名前を別に持つと
+  項目追加時の修正漏れになる
+- 写した表示名は`updateContent()`の対象外なので、言語切替時に取り直す
+  （`changeLanguage()`から`glfxSyncFilterCard()`を呼んでいる）
+- 後から`innerHTML`で差し込んだ`data-i18n`要素は`applyLabelTranslations()`では
+  翻訳されない（あちらは`data-i18n-label`専用）。`updateContent()`を呼ぶ
+
 ## 永続化
 | ストア | 用途 |
 |--------|------|
@@ -112,6 +270,28 @@ nowT2XxxStr=t2PlaceImageTextObject(img,'xxx',left,top);  // 退避した内容�
 - 選択時は`syncImageTextControls()`がサイドバーを該当種類・値に戻し、
   以降の編集がそのオブジェクトに向くよう`t2_xxx_setCurrent()`を呼ぶ
 - これがないと**直前に作った1つしか編集できない**
+
+操作の分担:
+
+| 操作 | 関数 | 結果 |
+|------|------|------|
+| 種類を選ぶ | `switchText2(type)` | 選択中の画像テキストがあればその現物を差し替え。無ければ設定を切り替えるだけ |
+| 挿入する | `text2Insert()` | ここだけがキャンバスに1つ増やす |
+| 値を変える | `updateText2()` | 編集対象（`t2GetCurrentObject()`）を作り直す。対象が無ければ何もしない |
+
+守る点:
+- **「選ぶ」で増やさない**。選ぶたびに新規作成すると、既定位置(50,100)固定のため
+  同じ場所に重なって増え、見た目が変わらないまま履歴とレイヤーだけが増える
+- **`t2_xxx_deleteSvg()`はキャンバスから消さない**。組み立て用変数と
+  `nowT2XxxStr`をnullにするだけ。現物を消すのは`t2BeginReplace()`
+- **`imageTextParams`はDOMの入力要素から集める**（`t2CollectParams()`）。
+  `sidebarValueMap`は利用者が触った項目しか持たないため、そこから集めると
+  未変更の項目が欠け、別のオブジェクトを選び直したときに前の値が画面に残る
+- **選び直しでは種類が同じでも必ず値を入れ替える**。`nowText2===type`のときに
+  何もしないと、アアアを選んだあとイイイを選んでもアアアの値が表示され続ける
+- **textareaの中身をHTMLに埋め込まない**。`addTextArea()`は翻訳された既定文
+  専用で、利用者の入力を埋めると`</textarea>`を含む文字でDOMが壊れる。
+  記憶した文字は`switchText2Ui()`が代入で戻す
 
 ## 外部ライブラリ
 `file://`で動作させるため、実行に必要なライブラリは`third/`に同梱する。

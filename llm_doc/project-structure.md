@@ -9,15 +9,19 @@ manga-editor-desu/
 │   ├── fabric/         fabric.js Canvas管理（fabric-management.js）
 │   ├── layer/          レイヤー管理（layer-management.js, blend, floating-window）
 │   ├── ui/             UI部品（toast, overlay, control, event-delegator, prompt-manager）
+│   │   ├── preset-picker.js  一覧から1件選ぶポップアップ
+│   │   └── preset-panel.js   ペン/トーン/画像テキストの「今のプリセット」カード定義
 │   │   └── control/object-control-sync.js  選択オブジェクト値の各パネルへの反映
 │   ├── sidebar/        サイドバーツール
 │   │   ├── pen/        ブラシ（crayon, ink, marker, spray, drip, stroke）
 │   │   ├── text/       テキスト（vertical-text, custom effects 10種）
 │   │   ├── speechBubble/ 吹き出し
 │   │   ├── tone/       トーン（speedline, focusline, snow, noise）
-│   │   ├── effect/     エフェクト（c2bw, c2c）
+│   │   ├── effect/     エフェクト（c2bw, c2c, effect-batch）
 │   │   └── panel/      コマ割り（panel-manager, knife/）
 │   ├── ai/             AI生成系（→ ai-system.md参照）
+│   │   ├── prompt/llm/llm-story-*.js  ストーリー→コマのプロンプト（プロンプトパネル）
+│   │   └── prompt/prompt-apply.js     コマへの書き込みとページ送り
 │   ├── db/             永続化（user-font-repository）
 │   ├── dashboard/      ダッシュボード（統計、プロンプト頻度）
 │   ├── svg/            SVGテンプレート（コマ割り、吹き出し）

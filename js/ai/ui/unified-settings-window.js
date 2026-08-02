@@ -5,9 +5,10 @@ if(!overlayEl)overlayEl=$('unifiedSettingsOverlay');
 overlayEl.classList.add('active');
 roleAssignmentUI.buildMatrix();
 var falaiProvider=providerRegistry.get('falai');
-if(falaiProvider&&falaiProvider.getApiKey()){
+if(falaiProvider&&falaiProvider.getApiKey()&&isProviderInUse('falai')){
 falaiProvider.fetchModelsIfNeeded();
 }
+llmFetchModelsIfConfigured();
 }
 function close(){
 if(!overlayEl)return;

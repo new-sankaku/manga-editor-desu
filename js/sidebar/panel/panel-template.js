@@ -6,8 +6,8 @@ const loading=OP_showLoading({
 icon: 'process',step: 'Step1',substep: 'Next Project',progress: 0
 });
 try{
-var shouldSave=(addPanel||newPage)&&stateStack.length>=2;
-panelLogger.info("[loadBookSize] shouldSave="+shouldSave+" (addPanel||newPage)="+(addPanel||newPage)+" stateStack.length>=2="+(stateStack.length>=2));
+var shouldSave=(addPanel||newPage)&&btmShouldSaveCurrentPage();
+panelLogger.info("[loadBookSize] shouldSave="+shouldSave+" (addPanel||newPage)="+(addPanel||newPage));
 if (shouldSave) {
 panelLogger.info("[loadBookSize] IF branch: saving current page to bottom bar");
 OP_updateLoadingState(loading,{
@@ -33,7 +33,7 @@ initImageHistory();
 }
 panelLogger.info("[loadBookSize] IF branch done. stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size);
 } else {
-panelLogger.info("[loadBookSize] ELSE branch: NOT saving current page (stateStack too short or no user action)");
+panelLogger.info("[loadBookSize] ELSE branch: NOT saving current page (empty canvas or no user action)");
 setCanvasGUID();
 panelLogger.info("[loadBookSize] ELSE new canvasGUID="+getCanvasGUID());
 withoutHistory(function(){

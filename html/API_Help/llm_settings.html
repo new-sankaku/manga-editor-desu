@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="title">LLM Setup</title>
+<link rel="stylesheet" href="../common.css">
+<script src="../../third/i18next/i18next.min.js"></script>
+</head>
+<body>
+<div class="container">
+<div class="lang-buttons">
+<button class="lang-btn active" onclick="changeLanguage('en')">English</button>
+<button class="lang-btn" onclick="changeLanguage('ja')">日本語</button>
+<button class="lang-btn" onclick="changeLanguage('ko')">한국어</button>
+<button class="lang-btn" onclick="changeLanguage('zh')">中文</button>
+<button class="lang-btn" onclick="changeLanguage('fr')">Français</button>
+</div>
+
+<h1 data-i18n="title">LLM Setup Guide</h1>
+<p data-i18n="intro"></p>
+
+<div class="tab-menu">
+<button class="tab-btn active" onclick="openTab(event,'grok')">Grok (xAI)</button>
+<button class="tab-btn" onclick="openTab(event,'ollama')">Ollama</button>
+<button class="tab-btn" onclick="openTab(event,'usage')" data-i18n="tab_usage">Usage</button>
+</div>
+
+<div id="grok" class="tab-content active">
+<div class="card">
+<h2 data-i18n="grok_step_key"></h2>
+<p data-i18n="grok_key_desc"></p>
+<code>https://console.x.ai</code>
+<p class="notice" data-i18n="grok_key_notice"></p>
+</div>
+<div class="card">
+<h2 data-i18n="grok_step_config"></h2>
+<p data-i18n="grok_config_desc"></p>
+<p data-i18n="grok_config_models"></p>
+<p class="notice" data-i18n="grok_cors_ok"></p>
+</div>
+</div>
+
+<div id="ollama" class="tab-content">
+<div class="card">
+<h2 data-i18n="ollama_step_install"></h2>
+<p data-i18n="ollama_install_desc"></p>
+<code>https://ollama.com/download</code>
+<h3 data-i18n="ollama_step_pull"></h3>
+<p data-i18n="ollama_pull_desc"></p>
+<code>ollama pull qwen2.5:7b</code>
+<p data-i18n="ollama_pull_vision_desc"></p>
+<code>ollama pull llava</code>
+</div>
+
+<div class="card">
+<h2 data-i18n="ollama_step_cors"></h2>
+<p class="notice" data-i18n="ollama_cors_reason"></p>
+<p data-i18n="ollama_cors_symptom"></p>
+<h3 data-i18n="ollama_cors_windows"></h3>
+<p data-i18n="ollama_cors_windows_desc"></p>
+<code>setx OLLAMA_ORIGINS "*"</code>
+<h3 data-i18n="ollama_cors_mac"></h3>
+<p data-i18n="ollama_cors_mac_desc"></p>
+<code>launchctl setenv OLLAMA_ORIGINS "*"</code>
+<h3 data-i18n="ollama_cors_linux"></h3>
+<p data-i18n="ollama_cors_linux_desc"></p>
+<code>systemctl edit ollama.service</code>
+<code>[Service]
+Environment="OLLAMA_ORIGINS=*"</code>
+<p class="notice" data-i18n="ollama_cors_restart"></p>
+<p data-i18n="ollama_cors_null_note"></p>
+<code>OLLAMA_ORIGINS=null</code>
+</div>
+
+<div class="card">
+<h2 data-i18n="ollama_step_verify"></h2>
+<p data-i18n="ollama_verify_desc"></p>
+<code>http://127.0.0.1:11434</code>
+<p data-i18n="ollama_verify_models"></p>
+</div>
+</div>
+
+<div id="usage" class="tab-content">
+<div class="card">
+<h2 data-i18n="usage_roles"></h2>
+<p data-i18n="usage_roles_desc"></p>
+<h3 data-i18n="usage_role_t2p"></h3>
+<p data-i18n="usage_role_t2p_desc"></p>
+<h3 data-i18n="usage_role_i2p"></h3>
+<p data-i18n="usage_role_i2p_desc"></p>
+<h3 data-i18n="usage_role_t2t"></h3>
+<p data-i18n="usage_role_t2t_desc"></p>
+</div>
+<div class="card">
+<h2 data-i18n="usage_model_choice"></h2>
+<p data-i18n="usage_model_choice_desc"></p>
+<p class="notice" data-i18n="usage_model_vision_note"></p>
+</div>
+</div>
+</div>
+
+<script>
+const resources = {
+en: {
+translation: {
+"title": "LLM Setup Guide",
+"intro": "This guide explains how to connect Grok (xAI) and Ollama to this editor for prompt generation, image tagging and dialogue writing.",
+"tab_usage": "Usage",
+"grok_step_key": "1. Get an API key",
+"grok_key_desc": "Create an API key in the xAI console and paste it into the Grok row of the AI settings window.",
+"grok_key_notice": "The key is stored in your browser only. Note that billing follows your xAI account.",
+"grok_step_config": "2. Configure the editor",
+"grok_config_desc": "Open the AI settings window, enter the API key, then press Reload.",
+"grok_config_models": "Choose a text model and a vision model from the lists.",
+"grok_cors_ok": "Grok needs no extra setup: the xAI API accepts browser requests from file:// pages.",
+"ollama_step_install": "1. Install Ollama",
+"ollama_install_desc": "Download and install Ollama from the official site.",
+"ollama_step_pull": "Pull models",
+"ollama_pull_desc": "Pull a text model for prompt generation and dialogue.",
+"ollama_pull_vision_desc": "Pull a vision model if you want Image to Prompt.",
+"ollama_step_cors": "2. Allow CORS (required)",
+"ollama_cors_reason": "This editor runs from a file:// page, so the browser sends 'Origin: null'. Ollama rejects such requests with 403 unless OLLAMA_ORIGINS allows them.",
+"ollama_cors_symptom": "Symptom: the settings window shows a red 'CORS' warning under the Ollama URL, and the model list stays empty even though Ollama is running.",
+"ollama_cors_windows": "Windows",
+"ollama_cors_windows_desc": "Quit Ollama from the tray, run the command below, then start Ollama again.",
+"ollama_cors_mac": "macOS",
+"ollama_cors_mac_desc": "Run the command below, then restart Ollama.",
+"ollama_cors_linux": "Linux (systemd)",
+"ollama_cors_linux_desc": "Add the environment variable to the service unit, then reload and restart.",
+"ollama_cors_restart": "Ollama must be restarted for the change to take effect.",
+"ollama_cors_null_note": "If the connection still fails after setting \"*\", set the origin explicitly to null and restart again.",
+"ollama_step_verify": "3. Configure the editor",
+"ollama_verify_desc": "Enter the Ollama URL in the AI settings window.",
+"ollama_verify_models": "Press Reload to list the installed models, then choose a text model and a vision model.",
+"usage_roles": "Assigning roles",
+"usage_roles_desc": "In the AI settings window, the service matrix decides which service handles each task. The three LLM rows are:",
+"usage_role_t2p": "Text to Prompt",
+"usage_role_t2p_desc": "Turns a plain description of a scene into Danbooru style tags for image generation.",
+"usage_role_i2p": "Image to Prompt (LLM)",
+"usage_role_i2p_desc": "Reads a generated image and writes tags for it. Useful when you use ComfyUI or Fal.ai, which have no tagger of their own.",
+"usage_role_t2t": "Text and Translation",
+"usage_role_t2t_desc": "Writes and rewrites dialogue, and translates it. Open it from the Text panel with a text object selected.",
+"usage_model_choice": "Text model and vision model",
+"usage_model_choice_desc": "Each service has two model slots. The text slot is used for prompts and dialogue, the vision slot for reading images.",
+"usage_model_vision_note": "Image to Prompt needs a model that can read images. If you pick a text-only model the request fails with an error from the service."
+}
+},
+ja: {
+translation: {
+"title": "LLM セットアップガイド",
+"intro": "このガイドではGrok（xAI）とOllamaをこのエディタに接続し、プロンプト生成・画像のタグ付け・セリフ生成に使う手順を説明します。",
+"tab_usage": "使い方",
+"grok_step_key": "1. APIキーの取得",
+"grok_key_desc": "xAIコンソールでAPIキーを作成し、生成AI設定ウインドウのGrokの行に貼り付けます。",
+"grok_key_notice": "キーはブラウザ内にのみ保存されます。課金はxAIのアカウントに対して発生します。",
+"grok_step_config": "2. エディタ側の設定",
+"grok_config_desc": "生成AI設定ウインドウを開き、APIキーを入力して「再取得」を押します。",
+"grok_config_models": "一覧からテキスト用モデルと画像認識用モデルを選択します。",
+"grok_cors_ok": "GrokはCORSの追加設定は不要です。xAI APIはfile://ページからのブラウザリクエストを受け付けます。",
+"ollama_step_install": "1. Ollamaのインストール",
+"ollama_install_desc": "公式サイトからOllamaをダウンロードしてインストールします。",
+"ollama_step_pull": "モデルの取得",
+"ollama_pull_desc": "プロンプト生成やセリフ生成に使うテキストモデルを取得します。",
+"ollama_pull_vision_desc": "画像からプロンプトを作る場合は画像認識モデルも取得します。",
+"ollama_step_cors": "2. CORSの許可（必須）",
+"ollama_cors_reason": "このエディタはfile://で動作するため、ブラウザは'Origin: null'を送ります。OLLAMA_ORIGINSで許可しない限り、Ollamaは403で拒否します。",
+"ollama_cors_symptom": "症状: 設定ウインドウのOllama URLの下に赤い「CORS」警告が出て、Ollamaが起動しているのにモデル一覧が空のままになります。",
+"ollama_cors_windows": "Windows",
+"ollama_cors_windows_desc": "タスクトレイからOllamaを終了し、下記コマンドを実行してからOllamaを起動し直します。",
+"ollama_cors_mac": "macOS",
+"ollama_cors_mac_desc": "下記コマンドを実行してからOllamaを再起動します。",
+"ollama_cors_linux": "Linux (systemd)",
+"ollama_cors_linux_desc": "サービスユニットに環境変数を追加し、リロードして再起動します。",
+"ollama_cors_restart": "設定を反映するにはOllamaの再起動が必要です。",
+"ollama_cors_null_note": "「*」を設定しても接続できない場合は、明示的にnullを指定して再起動してください。",
+"ollama_step_verify": "3. エディタ側の設定",
+"ollama_verify_desc": "生成AI設定ウインドウにOllamaのURLを入力します。",
+"ollama_verify_models": "「再取得」を押すとインストール済みモデルが一覧表示されるので、テキスト用と画像認識用のモデルを選択します。",
+"usage_roles": "ロールの割り当て",
+"usage_roles_desc": "生成AI設定ウインドウの「使用サービス」表で、どの処理にどのサービスを使うかを決めます。LLM関連の3行は次のとおりです。",
+"usage_role_t2p": "文章 → プロンプト",
+"usage_role_t2p_desc": "情景を書いた文章をDanbooru形式のタグに変換し、画像生成のプロンプトにします。",
+"usage_role_i2p": "画像 → プロンプト (LLM)",
+"usage_role_i2p_desc": "生成された画像を読み取ってタグを書き起こします。タグ付け機能を持たないComfyUIやFal.aiを使っている場合に有効です。",
+"usage_role_t2t": "文章生成・翻訳",
+"usage_role_t2t_desc": "セリフの推敲・口調変更・文字数調整・翻訳を行います。テキストを選択した状態で「テキスト」パネルから開きます。",
+"usage_model_choice": "テキストモデルと画像認識モデル",
+"usage_model_choice_desc": "各サービスにモデル枠が2つあります。テキスト枠はプロンプトとセリフに、画像認識枠は画像の読み取りに使われます。",
+"usage_model_vision_note": "「画像 → プロンプト」には画像を読めるモデルが必要です。テキスト専用モデルを選ぶとサービス側のエラーで失敗します。"
+}
+},
+ko: {
+translation: {
+"title": "LLM 설정 가이드",
+"intro": "이 가이드는 Grok(xAI)과 Ollama를 이 에디터에 연결하여 프롬프트 생성, 이미지 태깅, 대사 작성에 사용하는 방법을 설명합니다.",
+"tab_usage": "사용법",
+"grok_step_key": "1. API 키 발급",
+"grok_key_desc": "xAI 콘솔에서 API 키를 만들고 생성 AI 설정 창의 Grok 행에 붙여넣습니다.",
+"grok_key_notice": "키는 브라우저에만 저장됩니다. 요금은 xAI 계정으로 청구됩니다.",
+"grok_step_config": "2. 에디터 설정",
+"grok_config_desc": "생성 AI 설정 창을 열고 API 키를 입력한 뒤 '다시 가져오기'를 누릅니다.",
+"grok_config_models": "목록에서 텍스트용 모델과 이미지 인식용 모델을 선택합니다.",
+"grok_cors_ok": "Grok은 추가 CORS 설정이 필요 없습니다. xAI API는 file:// 페이지의 브라우저 요청을 허용합니다.",
+"ollama_step_install": "1. Ollama 설치",
+"ollama_install_desc": "공식 사이트에서 Ollama를 내려받아 설치합니다.",
+"ollama_step_pull": "모델 받기",
+"ollama_pull_desc": "프롬프트 생성과 대사 생성에 사용할 텍스트 모델을 받습니다.",
+"ollama_pull_vision_desc": "이미지에서 프롬프트를 만들려면 이미지 인식 모델도 받습니다.",
+"ollama_step_cors": "2. CORS 허용 (필수)",
+"ollama_cors_reason": "이 에디터는 file://로 동작하므로 브라우저가 'Origin: null'을 보냅니다. OLLAMA_ORIGINS로 허용하지 않으면 Ollama가 403으로 거부합니다.",
+"ollama_cors_symptom": "증상: 설정 창의 Ollama URL 아래에 빨간 'CORS' 경고가 표시되고, Ollama가 실행 중인데도 모델 목록이 비어 있습니다.",
+"ollama_cors_windows": "Windows",
+"ollama_cors_windows_desc": "트레이에서 Ollama를 종료하고 아래 명령을 실행한 뒤 Ollama를 다시 시작합니다.",
+"ollama_cors_mac": "macOS",
+"ollama_cors_mac_desc": "아래 명령을 실행한 뒤 Ollama를 재시작합니다.",
+"ollama_cors_linux": "Linux (systemd)",
+"ollama_cors_linux_desc": "서비스 유닛에 환경변수를 추가하고 리로드 후 재시작합니다.",
+"ollama_cors_restart": "설정을 반영하려면 Ollama를 재시작해야 합니다.",
+"ollama_cors_null_note": "\"*\"를 설정해도 연결되지 않으면 null을 명시적으로 지정하고 다시 시작하세요.",
+"ollama_step_verify": "3. 에디터 설정",
+"ollama_verify_desc": "생성 AI 설정 창에 Ollama URL을 입력합니다.",
+"ollama_verify_models": "'다시 가져오기'를 누르면 설치된 모델이 표시됩니다. 텍스트용과 이미지 인식용 모델을 선택하세요.",
+"usage_roles": "역할 할당",
+"usage_roles_desc": "생성 AI 설정 창의 '사용 서비스' 표에서 각 작업에 어떤 서비스를 쓸지 정합니다. LLM 관련 3개 행은 다음과 같습니다.",
+"usage_role_t2p": "문장 → 프롬프트",
+"usage_role_t2p_desc": "장면을 적은 문장을 Danbooru 형식 태그로 변환하여 이미지 생성 프롬프트로 만듭니다.",
+"usage_role_i2p": "이미지 → 프롬프트 (LLM)",
+"usage_role_i2p_desc": "생성된 이미지를 읽어 태그를 만듭니다. 태거가 없는 ComfyUI나 Fal.ai를 쓸 때 유용합니다.",
+"usage_role_t2t": "문장 생성·번역",
+"usage_role_t2t_desc": "대사의 다듬기·말투 변경·글자 수 조정·번역을 합니다. 텍스트를 선택한 상태에서 '텍스트' 패널에서 엽니다.",
+"usage_model_choice": "텍스트 모델과 이미지 인식 모델",
+"usage_model_choice_desc": "각 서비스에 모델 칸이 두 개 있습니다. 텍스트 칸은 프롬프트와 대사에, 이미지 인식 칸은 이미지 읽기에 사용됩니다.",
+"usage_model_vision_note": "'이미지 → 프롬프트'에는 이미지를 읽을 수 있는 모델이 필요합니다. 텍스트 전용 모델을 고르면 서비스 오류로 실패합니다."
+}
+},
+zh: {
+translation: {
+"title": "LLM 设置指南",
+"intro": "本指南说明如何将 Grok (xAI) 和 Ollama 接入本编辑器，用于提示词生成、图像打标和台词写作。",
+"tab_usage": "使用方法",
+"grok_step_key": "1. 获取 API Key",
+"grok_key_desc": "在 xAI 控制台创建 API Key，并粘贴到生成 AI 设置窗口的 Grok 行。",
+"grok_key_notice": "密钥仅保存在浏览器中。费用按您的 xAI 账户计算。",
+"grok_step_config": "2. 编辑器端设置",
+"grok_config_desc": "打开生成 AI 设置窗口，输入 API Key 后点击「重新获取」。",
+"grok_config_models": "从列表中选择文本模型和图像识别模型。",
+"grok_cors_ok": "Grok 无需额外的 CORS 设置：xAI API 接受来自 file:// 页面的浏览器请求。",
+"ollama_step_install": "1. 安装 Ollama",
+"ollama_install_desc": "从官方网站下载并安装 Ollama。",
+"ollama_step_pull": "拉取模型",
+"ollama_pull_desc": "拉取用于提示词生成和台词生成的文本模型。",
+"ollama_pull_vision_desc": "如需从图像生成提示词，请同时拉取图像识别模型。",
+"ollama_step_cors": "2. 允许 CORS（必需）",
+"ollama_cors_reason": "本编辑器以 file:// 运行，浏览器会发送 'Origin: null'。除非用 OLLAMA_ORIGINS 允许，否则 Ollama 会返回 403 拒绝。",
+"ollama_cors_symptom": "症状：设置窗口中 Ollama URL 下方显示红色「CORS」警告，即使 Ollama 正在运行，模型列表仍为空。",
+"ollama_cors_windows": "Windows",
+"ollama_cors_windows_desc": "从托盘退出 Ollama，执行下面的命令后重新启动 Ollama。",
+"ollama_cors_mac": "macOS",
+"ollama_cors_mac_desc": "执行下面的命令后重启 Ollama。",
+"ollama_cors_linux": "Linux (systemd)",
+"ollama_cors_linux_desc": "在服务单元中添加环境变量，然后重新加载并重启。",
+"ollama_cors_restart": "需要重启 Ollama 才能生效。",
+"ollama_cors_null_note": "若设置「*」后仍无法连接，请显式指定 null 并重启。",
+"ollama_step_verify": "3. 编辑器端设置",
+"ollama_verify_desc": "在生成 AI 设置窗口中输入 Ollama 的 URL。",
+"ollama_verify_models": "点击「重新获取」会列出已安装的模型，然后分别选择文本模型和图像识别模型。",
+"usage_roles": "角色分配",
+"usage_roles_desc": "在生成 AI 设置窗口的「使用服务」表中，决定各项处理使用哪个服务。LLM 相关的三行如下：",
+"usage_role_t2p": "文本 → 提示词",
+"usage_role_t2p_desc": "把描述场景的文字转换成 Danbooru 风格标签，作为图像生成的提示词。",
+"usage_role_i2p": "图像 → 提示词 (LLM)",
+"usage_role_i2p_desc": "读取生成的图像并写出标签。在使用没有打标功能的 ComfyUI 或 Fal.ai 时很有用。",
+"usage_role_t2t": "文本生成·翻译",
+"usage_role_t2t_desc": "进行台词的润色、语气变更、字数调整和翻译。选中文本后从「文本」面板打开。",
+"usage_model_choice": "文本模型与图像识别模型",
+"usage_model_choice_desc": "每个服务有两个模型槽。文本槽用于提示词和台词，图像识别槽用于读取图像。",
+"usage_model_vision_note": "「图像 → 提示词」需要能读取图像的模型。若选择纯文本模型，请求会因服务端错误而失败。"
+}
+},
+fr: {
+translation: {
+"title": "Guide de Configuration LLM",
+"intro": "Ce guide explique comment connecter Grok (xAI) et Ollama à cet éditeur pour générer des prompts, étiqueter des images et écrire des dialogues.",
+"tab_usage": "Utilisation",
+"grok_step_key": "1. Obtenir une clé API",
+"grok_key_desc": "Créez une clé API dans la console xAI et collez-la dans la ligne Grok de la fenêtre des réglages IA.",
+"grok_key_notice": "La clé est stockée uniquement dans votre navigateur. La facturation suit votre compte xAI.",
+"grok_step_config": "2. Configurer l'éditeur",
+"grok_config_desc": "Ouvrez la fenêtre des réglages IA, saisissez la clé API, puis appuyez sur Recharger.",
+"grok_config_models": "Choisissez un modèle de texte et un modèle de vision dans les listes.",
+"grok_cors_ok": "Grok ne demande aucun réglage CORS : l'API xAI accepte les requêtes des pages file://.",
+"ollama_step_install": "1. Installer Ollama",
+"ollama_install_desc": "Téléchargez et installez Ollama depuis le site officiel.",
+"ollama_step_pull": "Télécharger les modèles",
+"ollama_pull_desc": "Téléchargez un modèle de texte pour les prompts et les dialogues.",
+"ollama_pull_vision_desc": "Téléchargez un modèle de vision pour convertir une image en prompt.",
+"ollama_step_cors": "2. Autoriser CORS (obligatoire)",
+"ollama_cors_reason": "Cet éditeur fonctionne en file://, le navigateur envoie donc 'Origin: null'. Ollama répond 403 tant que OLLAMA_ORIGINS ne l'autorise pas.",
+"ollama_cors_symptom": "Symptôme : un avertissement rouge « CORS » apparaît sous l'URL Ollama et la liste des modèles reste vide alors qu'Ollama tourne.",
+"ollama_cors_windows": "Windows",
+"ollama_cors_windows_desc": "Quittez Ollama depuis la barre système, exécutez la commande ci-dessous, puis relancez Ollama.",
+"ollama_cors_mac": "macOS",
+"ollama_cors_mac_desc": "Exécutez la commande ci-dessous, puis redémarrez Ollama.",
+"ollama_cors_linux": "Linux (systemd)",
+"ollama_cors_linux_desc": "Ajoutez la variable d'environnement au service, puis rechargez et redémarrez.",
+"ollama_cors_restart": "Ollama doit être redémarré pour appliquer le changement.",
+"ollama_cors_null_note": "Si la connexion échoue toujours avec \"*\", indiquez explicitement null puis redémarrez.",
+"ollama_step_verify": "3. Configurer l'éditeur",
+"ollama_verify_desc": "Saisissez l'URL d'Ollama dans la fenêtre des réglages IA.",
+"ollama_verify_models": "Appuyez sur Recharger pour lister les modèles installés, puis choisissez un modèle de texte et un modèle de vision.",
+"usage_roles": "Attribution des rôles",
+"usage_roles_desc": "Dans la fenêtre des réglages IA, le tableau des services décide quel service traite chaque tâche. Les trois lignes LLM sont :",
+"usage_role_t2p": "Texte → Prompt",
+"usage_role_t2p_desc": "Transforme la description d'une scène en tags de style Danbooru pour la génération d'images.",
+"usage_role_i2p": "Image → Prompt (LLM)",
+"usage_role_i2p_desc": "Lit une image générée et en écrit les tags. Utile avec ComfyUI ou Fal.ai, qui n'ont pas d'outil d'étiquetage.",
+"usage_role_t2t": "Texte et traduction",
+"usage_role_t2t_desc": "Peaufine, change le ton, ajuste la longueur et traduit les dialogues. À ouvrir depuis le panneau Texte avec un texte sélectionné.",
+"usage_model_choice": "Modèle de texte et modèle de vision",
+"usage_model_choice_desc": "Chaque service dispose de deux emplacements de modèle. Le texte sert aux prompts et dialogues, la vision à la lecture d'images.",
+"usage_model_vision_note": "« Image → Prompt » exige un modèle capable de lire les images. Un modèle texte seul échouera avec une erreur du service."
+}
+}
+};
+
+function openTab(evt, tabName) {
+document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+document.getElementById(tabName).classList.add('active');
+evt.currentTarget.classList.add('active');
+}
+
+function openTabByHash() {
+const name = window.location.hash.replace('#', '');
+if (!name) return;
+const target = document.getElementById(name);
+if (!target) return;
+document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+target.classList.add('active');
+const index = ['grok', 'ollama', 'usage'].indexOf(name);
+const buttons = document.querySelectorAll('.tab-btn');
+if (index >= 0 && buttons[index]) buttons[index].classList.add('active');
+}
+
+i18next.init({
+lng: 'en',
+resources: resources
+}, function(err, t) {
+updateContent();
+openTabByHash();
+});
+
+window.addEventListener('hashchange', openTabByHash);
+
+function updateContent() {
+document.title = i18next.t('title');
+document.querySelectorAll('[data-i18n]').forEach(function(elem) {
+elem.textContent = i18next.t(elem.getAttribute('data-i18n'));
+});
+}
+
+function changeLanguage(lng) {
+document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+event.target.classList.add('active');
+i18next.changeLanguage(lng, function(err, t) {
+updateContent();
+});
+}
+</script>
+</body>
+</html>

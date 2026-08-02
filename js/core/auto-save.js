@@ -65,7 +65,9 @@ if(typeof isProjectBusy==='function'&&isProjectBusy()){
 autoSaveLogger.debug("Skip auto-save: project is loading");
 return;
 }
-if(typeof stateStack==='undefined'||stateStack.length<2)return;
+// 空白ページしか無い状態では保存しない。
+// 履歴件数で判定すると、キャンバスのリサイズ等で履歴が積まれた空白ページが登録されてしまう
+if(!btmShouldSaveCurrentPage()&&btmGetGuidsSize()===0)return;
 var guid=getCanvasGUID();
 var hash=computeStateHash();
 if(hash!==null&&hash===lastSavedHash&&guid===lastSavedGuid){
@@ -75,7 +77,9 @@ return;
 isSaving=true;
 autoSaveLogger.info("Auto-save starting...");
 try{
+if(btmShouldSaveCurrentPage()){
 await btmSaveProjectFile(null,false);
+}
 lastSavedHash=computeStateHash();
 lastSavedGuid=guid;
 var pages=[];

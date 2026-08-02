@@ -47,11 +47,12 @@ document.head.appendChild(style);
     document.body.insertAdjacentHTML("beforeend", modalHTML);
     this.initializeTagify();
     this.setupFileUploadHandler();
-    document.querySelectorAll("[data-i18n]").forEach((element) => {
+    const modalRoot = $("fm-modalOverlay");
+    modalRoot.querySelectorAll("[data-i18n]").forEach((element) => {
       const key = element.getAttribute("data-i18n");
-      element.textContent = i18next.t(key);
+      element.innerHTML = i18next.t(key);
     });
-    document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+    modalRoot.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
       const key = element.getAttribute("data-i18n-placeholder");
       element.placeholder = i18next.t(key);
     });

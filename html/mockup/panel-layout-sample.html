@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サイドバーパネル レイアウト比較サンプル</title>
+
+<!-- 本体と同じCSSを読み込む（現状側を実物どおりに再現するため） -->
+<link rel="stylesheet" href="../../css/core/main-component.css">
+<link rel="stylesheet" href="../../css/common.css">
+<link rel="stylesheet" href="../../css/components.css">
+<link rel="stylesheet" href="../../css/layout.css">
+<link rel="stylesheet" href="../../css/form.css">
+<link rel="stylesheet" href="../../css/icon.css">
+<link rel="stylesheet" href="../../css/ui/custom-html-components.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+/* ============================================================
+   このファイル専用の比較用スタイル（本体には入りません）
+   ============================================================ */
+body{
+ margin:0;
+ padding:16px;
+ background:var(--background-color-A);
+ color:var(--text-color-B);
+ font-family:"Noto Sans JP",sans-serif;
+}
+.mk-toolbar{
+ display:flex;
+ flex-wrap:wrap;
+ align-items:center;
+ gap:12px;
+ margin-bottom:14px;
+ padding:8px 12px;
+ background:rgba(128,128,128,0.12);
+ border-radius:6px;
+}
+.mk-toolbar h1{font-size:15px;margin:0;font-weight:bold;}
+.mk-toolbar label{display:flex;align-items:center;gap:4px;font-size:12px;margin:0;}
+.mk-note{font-size:11px;opacity:.75;margin:0 0 14px;line-height:1.7;}
+.mk-note code{font-size:11px;opacity:.9;}
+
+.mk-stage{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start;}
+.mk-col{display:flex;flex-direction:column;gap:6px;}
+.mk-col>h2{
+ font-size:12px;margin:0;padding:3px 8px;border-radius:4px;
+ font-weight:bold;letter-spacing:.5px;
+}
+.mk-col.is-before>h2{background:rgba(180,60,60,.35);}
+.mk-col.is-after >h2{background:rgba(60,140,90,.35);}
+.mk-row{display:flex;gap:12px;align-items:flex-start;}
+
+/* パネルの高さは本体の .left_area と同条件（calc(100vh - 5vh)）だが、
+   このサンプルでは比較しやすいよう固定値にする */
+.mk-stage .left_area{
+ height:560px;max-height:560px;
+ margin-right:0;
+}
+
+/* ============================================================
+   ▼ 改善案：4パネル共通のプリセット一覧クラス
+      本体に入れる場合は css/components.css へ移す想定
+   ============================================================ */
+
+/* パネル全体を「ヘッダー / 一覧 / 設定」の縦3ペインにする。
+   一覧は内容分だけ縮み、設定エリアが残りを取ってスクロールする。
+   これにより「一覧の中にもう一段スクロールができる」二重スクロールが消える */
+.left_area.preset-panel{
+ display:flex;
+ flex-direction:column;
+ overflow-y:hidden;
+}
+.preset-panel>.area-header{flex:0 0 auto;}
+
+/* --- ヘッダー：タイトル＋ヘルプリンクを1行に揃える --- */
+.preset-panel>.area-header{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:6px;
+ text-align:left;
+}
+.preset-panel>.area-header .ph-title{
+ flex:1 1 auto;
+ min-width:0;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+.preset-panel>.area-header .ph-help{
+ flex:0 0 auto;
+ display:inline-flex;
+ align-items:center;
+ opacity:.8;
+ text-decoration:none;
+}
+.preset-panel>.area-header .ph-help:hover{opacity:1;text-decoration:none;}
+.preset-panel>.area-header .ph-help .material-icons{font-size:15px;}
+.preset-panel>.area-header .ph-actions{flex:0 0 auto;display:flex;gap:2px;}
+.preset-panel>.area-header .ph-actions button{
+ background:rgba(128,128,128,0.18);
+ border:none;
+ color:var(--text-color-B);
+ margin:0;padding:1px 3px;
+ border-radius:var(--fjm-button-border-radius);
+}
+.preset-panel>.area-header .ph-actions button:disabled{opacity:.35;cursor:default;}
+.preset-panel>.area-header .ph-actions .material-icons{font-size:15px;}
+
+/* --- 一覧：4パネル共通。1列縦積み ---
+   一覧側を伸縮担当にすることで
+   ・設定が短いプリセット → 一覧が広く使える
+   ・設定が長いプリセット → 設定が最大55%まで伸び、一覧は残りをスクロール
+   という挙動になる（どちらでも設定エリアが画面外に押し出されない） */
+.preset-grid{
+ flex:1 1 auto;
+ min-height:96px;      /* 最低1枚は必ず見える */
+ overflow-y:auto;
+ display:flex;
+ flex-direction:column;
+ gap:4px;
+ padding:6px;
+ margin:0;
+ scrollbar-gutter:stable;
+}
+
+.preset-item{
+ display:block;
+ width:100%;
+ box-sizing:border-box;
+ margin:0;
+ padding:0;
+ overflow:hidden;
+ text-align:left;
+ background:var(--btn-bg);
+ border:var(--btn-border);
+ border-radius:var(--fjm-button-border-radius);
+ cursor:pointer;
+ transition:var(--btn-transition);
+}
+.preset-item:hover{
+ background:var(--btn-hover-bg);
+ border-color:var(--btn-hover-border-color);
+}
+
+/* ラベルは画像の上・左寄せで固定。画像とラベルの軸ズレを解消 */
+.preset-item .pi-label{
+ display:block;
+ padding:3px 6px;
+ font-size:var(--font-size-button);
+ line-height:1.3;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
+
+/* 素材ごとの縦横比の差をここで吸収する。
+   画像自体を作り直さなくてもボタン高さが揃う */
+.preset-item .pi-thumb{
+ display:block;
+ width:100%;
+ aspect-ratio:1015 / 190;
+ object-fit:cover;
+ object-position:center;
+ margin:0;
+ background:rgba(128,128,128,0.10);
+}
+/* ペン・トーンは元素材が横長なので、専用の比率にすると余白が出ない */
+.preset-panel[data-preset="pen"]  .preset-item .pi-thumb{aspect-ratio:3099 / 610;}
+.preset-panel[data-preset="tone"] .preset-item .pi-thumb{aspect-ratio: 801 / 150;}
+
+/* 選択状態：4パネル共通で同じ見た目にする（画像テキストにも適用） */
+.preset-item.active-button,
+.preset-item.selected{
+ background:var(--btn-active-bg);
+ border-color:var(--btn-active-border-color);
+ box-shadow:var(--btn-active-shadow);
+}
+.preset-item.active-button .pi-label,
+.preset-item.selected .pi-label{font-weight:bold;}
+
+/* 一覧と設定の境界。<hr> の代わりに区切りラベルを置き、
+   下の領域が「選んだプリセットの設定」だと分かるようにする */
+.preset-divider{
+ flex:0 0 auto;
+ display:flex;
+ align-items:center;
+ gap:6px;
+ margin:2px 6px 0;
+ padding:3px 0;
+ font-size:10px;
+ letter-spacing:.5px;
+ opacity:.7;
+ border-top:1px solid rgba(128,128,128,0.28);
+}
+.preset-divider .material-icons{font-size:13px;}
+
+/* --- 設定エリア：内容の分だけ伸びるが、パネルの55%を超えない --- */
+.preset-settings{
+ flex:0 1 auto;
+ min-height:0;
+ max-height:55%;
+ overflow-y:auto;
+ padding:2px 0 8px;
+ scrollbar-gutter:stable;
+}
+.preset-settings:empty::after{
+ content:attr(data-empty-text);
+ display:block;
+ padding:14px 8px;
+ text-align:center;
+ font-size:11px;
+ opacity:.55;
+ line-height:1.6;
+}
+
+/* 効果パネルの「適用範囲」はヘッダー直下の固定行として扱う */
+.preset-panel>.effect-scope-row{
+ flex:0 0 auto;
+ padding:4px 6px 2px;
+}
+.preset-panel>.effect-scope-row>.effect-scope-label{
+ display:block;
+ font-size:10px;
+ opacity:.7;
+ margin:0 0 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="mk-toolbar">
+  <h1>サイドバーパネル レイアウト比較サンプル</h1>
+  <label><input type="checkbox" id="mkLightMode"> ライトモード</label>
+  <label><input type="checkbox" id="mkNarrow"> 狭い画面（幅140px）</label>
+  <label><input type="checkbox" id="mkFillSettings" checked> 設定エリアに内容を入れる</label>
+</div>
+
+<p class="mk-note">
+左=現状（本体のCSSをそのまま読み込んだ実物）／右=改善案。プリセット画像・色・フォントは本体と同じものを参照しています。<br>
+改善案の共通クラスは <code>.preset-panel</code> / <code>.preset-grid</code> / <code>.preset-item</code> / <code>.preset-settings</code> の4つだけです。
+</p>
+
+<div class="mk-stage">
+
+<!-- ============================================================
+     現状
+     ============================================================ -->
+<div class="mk-col is-before">
+<h2>現状（BEFORE）</h2>
+<div class="mk-row">
+
+  <!-- 画像テキスト -->
+  <div class="left_area" style="display:block;">
+    <div class="area-header"><a href="#">Custom Text(Help)</a></div>
+    <!-- 本体では id="tool-buttons" がペンパネルと重複している。ここも実物どおりに再現する -->
+    <div id="tool-buttons">
+      <div class="text-preview-area2"><button><span>Shadow</span><img src="../../03_images/preset/text/t2_shadow.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>wild</span><img src="../../03_images/preset/text/t2_wild.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>scratch</span><img src="../../03_images/preset/text/t2_scratch.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>broken</span><img src="../../03_images/preset/text/t2_broken.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>cloud</span><img src="../../03_images/preset/text/t2_cloud.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>layered</span><img src="../../03_images/preset/text/t2_layered.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>mesh</span><img src="../../03_images/preset/text/t2_mesh.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>thrill</span><img src="../../03_images/preset/text/t2_thrill.webp" style="width:100%;"></button></div>
+      <div class="text-preview-area2"><button><span>zebra</span><img src="../../03_images/preset/text/t2_zebra.webp" style="width:100%;"></button></div>
+    </div>
+    <hr>
+    <div id="text-area2-settings" class="mk-settings-before"></div>
+  </div>
+
+  <!-- ペン -->
+  <div class="left_area" style="display:block;">
+    <div class="area-header">Tools</div>
+    <div id="tool-buttons">
+      <button class="active-button"><span>Marker</span><img src="../../03_images/preset/brush/Marker.webp" style="width:100%;"></button>
+      <button><span>Ink</span><img src="../../03_images/preset/brush/Ink.webp" style="width:100%;"></button>
+      <button><span>Crayon</span><img src="../../03_images/preset/brush/Crayon.webp" style="width:100%;"></button>
+      <button><span>Pencil</span><img src="../../03_images/preset/brush/Pencil.webp" style="width:100%;"></button>
+      <button><span>OutlinePen</span><img src="../../03_images/preset/brush/OutlinePen.webp" style="width:100%;"></button>
+      <button><span>Circle</span><img src="../../03_images/preset/brush/Circle.webp" style="width:100%;"></button>
+      <button><span>Mosaic</span><img src="../../03_images/preset/brush/Mosaic1.webp" style="width:100%;"></button>
+      <button><span>Eraser</span><img src="../../03_images/preset/brush/Eraser.webp" style="width:100%;"></button>
+    </div>
+    <hr>
+    <div id="tool-settings" class="mk-settings-before"></div>
+  </div>
+
+  <!-- トーン -->
+  <div class="left_area" style="display:block;">
+    <div class="area-header"><a href="#">Screen Tone (Help)</a></div>
+    <div id="manga-tone-buttons">
+      <button><span>Tone</span><img src="../../03_images/preset/tone/Tone.webp" style="width:100%;"></button>
+      <button class="active-button"><span>Noise Tone</span><img src="../../03_images/preset/tone/ToneNoise.webp" style="width:100%;"></button>
+      <button><span>Snow Tone</span><img src="../../03_images/preset/tone/ToneSnow.webp" style="width:100%;"></button>
+      <button><span>Speed Line</span><img src="../../03_images/preset/tone/SpeedLine.webp" style="width:100%;"></button>
+      <button><span>Focusing Line</span><img src="../../03_images/preset/tone/FocusingLine.webp" style="width:100%;"></button>
+    </div>
+    <hr>
+    <div id="manga-tone-settings" class="mk-settings-before"></div>
+  </div>
+
+  <!-- 効果 -->
+  <div class="left_area" style="display:block;">
+    <div class="area-header effect-area-header">
+      <a href="#">Fast Effect (Help)</a>
+      <button disabled><i class="material-icons">restore</i></button>
+    </div>
+    <label class="effect-scope-label">Apply to</label>
+    <div class="input-group-multi effect-scope-group">
+      <button class="selected"><i class="material-icons">image</i><span>Selected</span></button>
+      <button><i class="material-icons">description</i><span>Page</span></button>
+      <button><i class="material-icons">library_books</i><span>All</span></button>
+    </div>
+    <hr>
+    <div id="manga-effect-buttons">
+      <button><span>Color2BlackWhiteLight</span><img src="../../03_images/preset/effect/color2monoLight.webp" style="width:100%;"></button>
+      <button><span>Color2BlackWhiteDark</span><img src="../../03_images/preset/effect/color2monoDark.webp" style="width:100%;"></button>
+      <button><span>Color2BlackWhiteRough</span><img src="../../03_images/preset/effect/color2monoRough.webp" style="width:100%;"></button>
+      <button><span>Color2BlackWhiteSimple</span><img src="../../03_images/preset/effect/color2monoSimple.webp" style="width:100%;"></button>
+      <button><span>Color2BlackLightColor</span><img src="../../03_images/preset/effect/Color2BlackLightColor.webp" style="width:100%;"></button>
+      <button><span>EnhanceDark</span><img src="../../03_images/preset/effect/enhanceDark.webp" style="width:100%;"></button>
+      <button><span>25 blends</span><img src="../../03_images/preset/effect/25_blend.webp" style="width:100%;"></button>
+      <button class="active-button"><span>Glow</span><img src="../../03_images/preset/effect/glow.webp" style="width:100%;"></button>
+      <button><span>GLFX</span><img src="../../03_images/preset/effect/glfx.webp" style="width:100%;"></button>
+    </div>
+    <hr>
+    <div id="manga-effect-settings" class="mk-settings-before"></div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ============================================================
+     改善案
+     ============================================================ -->
+<div class="mk-col is-after">
+<h2>改善案（AFTER）</h2>
+<div class="mk-row">
+
+  <!-- 画像テキスト -->
+  <div class="left_area preset-panel" data-preset="text2">
+    <div class="area-header">
+      <span class="ph-title">画像テキスト</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <div class="preset-grid">
+      <button class="preset-item active-button"><span class="pi-label">Shadow</span><img class="pi-thumb" src="../../03_images/preset/text/t2_shadow.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Wild</span><img class="pi-thumb" src="../../03_images/preset/text/t2_wild.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Scratch</span><img class="pi-thumb" src="../../03_images/preset/text/t2_scratch.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Broken</span><img class="pi-thumb" src="../../03_images/preset/text/t2_broken.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Cloud</span><img class="pi-thumb" src="../../03_images/preset/text/t2_cloud.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Layered</span><img class="pi-thumb" src="../../03_images/preset/text/t2_layered.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Mesh</span><img class="pi-thumb" src="../../03_images/preset/text/t2_mesh.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Thrill</span><img class="pi-thumb" src="../../03_images/preset/text/t2_thrill.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Zebra</span><img class="pi-thumb" src="../../03_images/preset/text/t2_zebra.webp" alt=""></button>
+    </div>
+    <div class="preset-divider"><i class="material-icons">tune</i><span>Shadow の設定</span></div>
+    <div class="preset-settings" data-empty-text="上から種類を選ぶと、ここに設定が表示されます"></div>
+  </div>
+
+  <!-- ペン -->
+  <div class="left_area preset-panel" data-preset="pen">
+    <div class="area-header">
+      <span class="ph-title">ペン</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <div class="preset-grid">
+      <button class="preset-item active-button"><span class="pi-label">Marker</span><img class="pi-thumb" src="../../03_images/preset/brush/Marker.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Ink</span><img class="pi-thumb" src="../../03_images/preset/brush/Ink.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Crayon</span><img class="pi-thumb" src="../../03_images/preset/brush/Crayon.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Pencil</span><img class="pi-thumb" src="../../03_images/preset/brush/Pencil.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">OutlinePen</span><img class="pi-thumb" src="../../03_images/preset/brush/OutlinePen.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Circle</span><img class="pi-thumb" src="../../03_images/preset/brush/Circle.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Mosaic</span><img class="pi-thumb" src="../../03_images/preset/brush/Mosaic1.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Eraser</span><img class="pi-thumb" src="../../03_images/preset/brush/Eraser.webp" alt=""></button>
+    </div>
+    <div class="preset-divider"><i class="material-icons">tune</i><span>Marker の設定</span></div>
+    <div class="preset-settings" data-empty-text="上からペンを選ぶと、ここに設定が表示されます"></div>
+  </div>
+
+  <!-- トーン -->
+  <div class="left_area preset-panel" data-preset="tone">
+    <div class="area-header">
+      <span class="ph-title">トーン</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <div class="preset-grid">
+      <button class="preset-item"><span class="pi-label">Tone</span><img class="pi-thumb" src="../../03_images/preset/tone/Tone.webp" alt=""></button>
+      <button class="preset-item active-button"><span class="pi-label">Noise Tone</span><img class="pi-thumb" src="../../03_images/preset/tone/ToneNoise.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Snow Tone</span><img class="pi-thumb" src="../../03_images/preset/tone/ToneSnow.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Speed Line</span><img class="pi-thumb" src="../../03_images/preset/tone/SpeedLine.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Focusing Line</span><img class="pi-thumb" src="../../03_images/preset/tone/FocusingLine.webp" alt=""></button>
+    </div>
+    <div class="preset-divider"><i class="material-icons">tune</i><span>Noise Tone の設定</span></div>
+    <div class="preset-settings" data-empty-text="上からトーンを選ぶと、ここに設定が表示されます"></div>
+  </div>
+
+  <!-- 効果 -->
+  <div class="left_area preset-panel" data-preset="effect">
+    <div class="area-header">
+      <span class="ph-title">効果</span>
+      <span class="ph-actions"><button disabled title="バックアップから復元"><i class="material-icons">restore</i></button></span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <div class="effect-scope-row">
+      <label class="effect-scope-label">適用範囲</label>
+      <div class="input-group-multi effect-scope-group">
+        <button class="selected"><i class="material-icons">image</i><span>選択</span></button>
+        <button><i class="material-icons">description</i><span>ページ</span></button>
+        <button><i class="material-icons">library_books</i><span>全体</span></button>
+      </div>
+    </div>
+    <div class="preset-grid">
+      <button class="preset-item"><span class="pi-label">Color2BW Light</span><img class="pi-thumb" src="../../03_images/preset/effect/color2monoLight.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Color2BW Dark</span><img class="pi-thumb" src="../../03_images/preset/effect/color2monoDark.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Color2BW Rough</span><img class="pi-thumb" src="../../03_images/preset/effect/color2monoRough.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Color2BW Simple</span><img class="pi-thumb" src="../../03_images/preset/effect/color2monoSimple.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">Color2Black LightColor</span><img class="pi-thumb" src="../../03_images/preset/effect/Color2BlackLightColor.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">EnhanceDark</span><img class="pi-thumb" src="../../03_images/preset/effect/enhanceDark.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">25 blends</span><img class="pi-thumb" src="../../03_images/preset/effect/25_blend.webp" alt=""></button>
+      <button class="preset-item active-button"><span class="pi-label">Glow</span><img class="pi-thumb" src="../../03_images/preset/effect/glow.webp" alt=""></button>
+      <button class="preset-item"><span class="pi-label">GLFX</span><img class="pi-thumb" src="../../03_images/preset/effect/glfx.webp" alt=""></button>
+    </div>
+    <div class="preset-divider"><i class="material-icons">tune</i><span>Glow の設定</span></div>
+    <div class="preset-settings" data-empty-text="上から効果を選ぶと、ここに設定が表示されます"></div>
+  </div>
+
+</div>
+</div>
+
+</div>
+
+<script>
+// ---- 設定エリアのダミー内容（本体の addSlider / addColor と同じマークアップ） ----
+var SETTINGS_HTML = ''
+ + '<div class="pen-input-2group"><label>Color</label><input type="text" value="#000000"></div>'
+ + '<div class="input-container-leftSpace" data-label="Size"><input type="range" min="1" max="150" value="20"></div>'
+ + '<div class="input-container-leftSpace" data-label="Opacity"><input type="range" min="1" max="100" value="100"></div>'
+ + '<div class="pen-input-2group"><label>Shadow</label><input type="text" value="#000000"></div>'
+ + '<div class="input-container-leftSpace" data-label="Shadow Size"><input type="range" min="0" max="150" value="0"></div>'
+ + '<div class="input-container-leftSpace" data-label="Offset X"><input type="range" min="1" max="150" value="5"></div>'
+ + '<div class="input-container-leftSpace" data-label="Offset Y"><input type="range" min="1" max="150" value="5"></div>'
+ + '<div class="input-2group"><label>Line Style</label><select><option>solid</option><option>dashed</option></select></div>';
+
+function applySettings(fill){
+ var targets = document.querySelectorAll('.mk-settings-before, .preset-settings');
+ for (var i=0;i<targets.length;i++){
+  targets[i].innerHTML = fill ? SETTINGS_HTML : '';
+ }
+}
+
+document.getElementById('mkFillSettings').addEventListener('change', function(){
+ applySettings(this.checked);
+});
+
+document.getElementById('mkLightMode').addEventListener('change', function(){
+ document.body.classList.toggle('light-mode', this.checked);
+ document.documentElement.classList.toggle('light-mode', this.checked);
+});
+
+document.getElementById('mkNarrow').addEventListener('change', function(){
+ var narrow = this.checked;
+ var panels = document.querySelectorAll('.mk-stage .left_area');
+ for (var i=0;i<panels.length;i++){
+  panels[i].style.width    = narrow ? '140px' : '';
+  panels[i].style.minWidth = narrow ? '140px' : '';
+  panels[i].style.maxWidth = narrow ? '140px' : '';
+ }
+});
+
+// プリセット選択のデモ（改善案側のみ）
+document.addEventListener('click', function(e){
+ var item = e.target.closest ? e.target.closest('.preset-item') : null;
+ if(!item) return;
+ var grid = item.parentNode;
+ var all = grid.querySelectorAll('.preset-item');
+ for (var i=0;i<all.length;i++){ all[i].classList.remove('active-button'); }
+ item.classList.add('active-button');
+ var divider = grid.parentNode.querySelector('.preset-divider span');
+ var label = item.querySelector('.pi-label');
+ if (divider && label){ divider.textContent = label.textContent + ' の設定'; }
+});
+
+applySettings(true);
+</script>
+
+</body>
+</html>

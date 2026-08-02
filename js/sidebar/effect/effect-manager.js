@@ -1,5 +1,3 @@
-const effectMap=new Map();
-
 const MODE_EFFECT_C2BW_LIGHT="Color2BlackWhiteLight";
 const MODE_EFFECT_C2BW_DARK="Color2BlackWhiteDark";
 const MODE_EFFECT_C2BW_ROUGHT="Color2BlackWhiteRough";
@@ -18,7 +16,31 @@ var effectEnhanceDarkIntensity=null;
 var effectEnhanceDarkSubmit=null;
 
 let nowEffect=null;
+
+// 適用範囲が「選択画像」以外なら一括側へ流す。選択が無くても実行できるよう
+// checkActiveImage()より前で分岐する
+function runMangaEffectByScope(type) {
+const scope=effectGetScope();
+if (scope===EFFECT_SCOPE_PAGE) {
+effectApplyToCurrentPage(type);
+return true;
+}
+if (scope===EFFECT_SCOPE_ALL_PAGES) {
+effectApplyToAllPages(type);
+return true;
+}
+return false;
+}
+
 function switchMangaEffect(type) {
+
+// 一括は現在のパネル状態を変えずに実行する。nowEffectを消すと
+// 開いているGlow等のパネルが反応しなくなる
+if (effectIsBatchType(type)&&type!==MODE_EFFECT_ENHANCE_DARK) {
+if (runMangaEffectByScope(type)) {
+return;
+}
+}
 
 switch (type) {
 case MODE_EFFECT_ENHANCE_DARK:
@@ -29,7 +51,9 @@ case MODE_EFFECT_C2BW_SIMPLE:
 case MODE_EFFECT_C2BC_LIGHT:
 case MODE_EFFECT_GLOW:
 case MODE_EFFECT_GLFX:
-if (!checkActiveImage()) {
+// 黒強調は設定パネルを開いてからSubmitで実行する。一括適用では選択が不要なため
+// 選択画像スコープのときだけ選択を要求する
+if (effectGetScope()===EFFECT_SCOPE_SELECTED&&!checkActiveImage()) {
 return;
 }
 break;
@@ -109,8 +133,8 @@ let settingsHTML='';
 switch (type) {
 case MODE_EFFECT_GLOW:
 settingsHTML+=addCheckBox("addGlowEffectCheckBox","outloneGlow",false)
-settingsHTML+=addSlider("glowOutLineSlider","glowOutLineSize",0,250,effectMap.getOrDefault("glowOutLineSlider",20));
-settingsHTML+=addColor("glowOutLineColorPicker","glowOutLineColor",effectMap.getOrDefault("glowOutLineColorPicker",'#FFFFFF'));
+settingsHTML+=addSlider("glowOutLineSlider","glowOutLineSize",0,250,effectValueMap.getOrDefault("glowOutLineSlider",20));
+settingsHTML+=addColor("glowOutLineColorPicker","glowOutLineColor",effectValueMap.getOrDefault("glowOutLineColorPicker",'#FFFFFF'));
 settingsHTML+=addTextArea("glowInfomation","glowInfomation");
 $('manga-effect-settings').innerHTML=settingsHTML;
 effectCheck=$("addGlowEffectCheckBox");
@@ -121,7 +145,7 @@ case MODE_EFFECT_GLFX:
 $('manga-effect-settings').innerHTML=gpifHTML;
 break;
 case MODE_EFFECT_ENHANCE_DARK:
-settingsHTML+=addSlider("effectEnhanceDarkIntensity","effectEnhanceDarkIntensity",0.1,20.0,effectMap.getOrDefault("effectEnhanceDarkIntensity",2.0),0.1);
+settingsHTML+=addSlider("effectEnhanceDarkIntensity","effectEnhanceDarkIntensity",0.1,20.0,effectValueMap.getOrDefault("effectEnhanceDarkIntensity",2.0),0.1);
 settingsHTML+=addSimpleSubmitButton("effectEnhanceDarkSubmit");
 $('manga-effect-settings').innerHTML=settingsHTML;
 effectEnhanceDarkIntensity=$("effectEnhanceDarkIntensity");
@@ -157,6 +181,7 @@ effectCheck=null;
 effectSize1=null;
 effectColor=null;
 effectEnhanceDarkIntensity=null;
+effectEnhanceDarkSubmit=null;
 }
 
 
@@ -171,12 +196,15 @@ effectColor
 if(effectEnhanceDarkSubmit){
 effectEnhanceDarkSubmit.addEventListener('click',()=>{
 if (nowEffect==MODE_EFFECT_ENHANCE_DARK) {
+if (runMangaEffectByScope(MODE_EFFECT_ENHANCE_DARK)) {
+return;
+}
 const selectedObject=canvas.getActiveObject();
-if (selectedObject) {
+if (isImage(selectedObject)) {
 effectLogger.debug("enhanceDarkImage","start");
 enhanceDarkImage();
 } else {
-createToastError("Check image!")
+createToastError(getText("nothingImage"),"",2000);
 }
 }
 });

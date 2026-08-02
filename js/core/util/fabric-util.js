@@ -904,7 +904,9 @@ fontFamily: 'Arial',
 originX: 'center',
 originY: 'center',
 selectable: false,
-hoverCursor: 'default'
+hoverCursor: 'default',
+// ページが空かどうかの判定（btmShouldSaveCurrentPage）で除外するための目印
+isInitMessage: true
 });
 
 setNotSave(text);

@@ -48,3 +48,5 @@
 #msSDWebuiContainer .textarea-control label{display:block;font-size:10px;color:#888;margin-bottom:2px;}
 #msSDWebuiContainer .textarea-control textarea{width:100%;box-sizing:border-box;font-size:11px;padding:5px 8px;border:1px solid var(--color-tertiary);border-radius:4px;background:var(--color-secondary);color:var(--color-text-secondary);}
 #unifiedSettingsOverlay>.us-window{width:70vw;height:70vh;}
+.us-conn-notice{margin-top:6px;font-size:10px;line-height:1.5;color:var(--color-accent);background:rgba(129,0,0,0.12);border:1px solid rgba(160,48,48,0.5);border-radius:4px;padding:5px 7px;word-break:break-word;}
+.us-conn-notice .us-link-btn{margin-left:6px;color:var(--color-component-minitext);opacity:1;}

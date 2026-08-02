@@ -204,11 +204,14 @@ function getElementClasses(element) {
 <!-- <link rel="stylesheet" href="css/anime.css?v=7.2"> -->
 <link rel="stylesheet" href="css/layout-layer.css?v=7.2">
 <link rel="stylesheet" href="css/toast.css?v=7.2">
+<link rel="stylesheet" href="css/ui/preset-panel.css?v=7.5">
+<link rel="stylesheet" href="css/ui/preset-picker.css?v=7.5">
 <link rel="stylesheet" href="css/ui/mode-change.css?v=7.2">
 <link rel="stylesheet" href="css/ui/object-menu.css?v=7.2">
 <link rel="stylesheet" href="css/ui/share.css?v=7.2" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/floating-window.css?v=7.2">
 <link rel="stylesheet" href="css/ui/image-prompt-helper.css?v=7.2">
+<link rel="stylesheet" href="css/ui/llm-prompt.css?v=7.5">
 <link rel="stylesheet" href="css/ui/overlay-progress.css?v=7.2" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/inpaint-editor.css?v=7.3" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/angle-editor.css?v=7.3" media="print" onload="this.media='all'">
@@ -543,6 +546,10 @@ function getElementClasses(element) {
                             <a class="dropdown-item" href="html/Minual/effect.html" target="_blank">
                                 <i class="material-icons">filter_b_and_w</i>
                                 <span>Effect</span>
+                            </a>
+                            <a class="dropdown-item" href="html/API_Help/llm_settings.html" target="_blank">
+                                <i class="material-icons">smart_toy</i>
+                                <span>LLM (Grok / Ollama)</span>
                             </a>
                         </ul>
                     </li>
@@ -915,6 +922,10 @@ function getElementClasses(element) {
                             <i class="material-icons">generating_tokens</i>
                             <span data-i18n="promptMultiAutoGenerate">Multi Prompt Generate</span>
                         </button>
+                        <button id="" onclick="openLLMStoryboardWindow()">
+                            <i class="material-icons">smart_toy</i>
+                            <span data-i18n="llmStoryboardButton">Storyboard from Text</span>
+                        </button>
                     </div>
 
                     <div class="param-group">
@@ -933,14 +944,78 @@ function getElementClasses(element) {
 
 
 <!-- ========== Panel: Prompt Manager ========== -->
-<div class="left_area" id="prompt-manager-area" style="display: none;">
-    <div class="area-header" data-i18n="prompt"></div>
-    <div class="prompt-manager-items">
-     <div class="input-group">
-      <button onclick="createImagePromptHelperFlotingWindow()">
-       <span data-i18n="prompt_gallery">Prompt Gallery</span>
-      </button>
-     </div>
+<div class="left_area preset-panel" id="prompt-manager-area" style="display: none;">
+    <div class="area-header preset-panel-header">
+        <span class="pp-title" data-i18n="prompt"></span>
+    </div>
+
+    <div class="preset-panel-body">
+
+        <!-- ストーリーからコマのプロンプトを作る。作る範囲はこのグループの内側だけに効く -->
+        <div class="preset-group-header">
+            <span data-i18n="storyPromptGroup">Story to prompts</span>
+            <span class="preset-group-hint" data-i18n="storyPromptGroupHint">LLM</span>
+        </div>
+        <div class="preset-section">
+            <label class="effect-scope-label" data-i18n="storyApplyScope">Create for</label>
+            <div class="input-group-multi effect-scope-group" data-group="storyApplyScope">
+                <button id="storyScopeSelectedButton" data-value="selected" class="selected" onclick="changeSelected(this)">
+                    <span data-i18n="storyScopeSelectedShort">Panel</span>
+                </button>
+                <button id="storyScopePageButton" data-value="page" onclick="changeSelected(this)">
+                    <span data-i18n="storyScopePageShort">Page</span>
+                </button>
+                <button id="storyScopeAllPagesButton" data-value="allPages" onclick="changeSelected(this)">
+                    <span data-i18n="storyScopeAllPagesShort">All</span>
+                </button>
+            </div>
+
+            <label class="preset-field-label" for="storyPromptInput" data-i18n="storyInputLabel">Story</label>
+            <textarea class="preset-field-input" id="storyPromptInput" rows="5"></textarea>
+
+            <!-- 各コマで同じ外見タグを使い回すためのキャラ表。空でも動く -->
+            <label class="preset-field-label" for="storyCharacterInput" data-i18n="storyCharacterLabel">Characters</label>
+            <textarea class="preset-field-input" id="storyCharacterInput" rows="3"></textarea>
+
+            <!-- 同じ場所のコマで同じ背景タグを使い回すためのロケーション表。空でも動く -->
+            <label class="preset-field-label" for="storyLocationInput" data-i18n="storyLocationLabel">Locations</label>
+            <textarea class="preset-field-input" id="storyLocationInput" rows="3"></textarea>
+
+            <button class="preset-sub-button" id="storySheetButton" data-action="llmStoryExtractSheets">
+                <i class="material-icons">person_search</i>
+                <span data-i18n="storyCharacterExtract">Extract from story</span>
+            </button>
+
+            <!-- 画風はLLMに毎回書かせると揺れるので、書き込む側で足す -->
+            <label class="preset-field-label" for="storyArtStyle" data-i18n="storyArtStyleLabel">Art style</label>
+            <select class="preset-field-input" id="storyArtStyle">
+                <option value="none" data-i18n="storyArtStyleNone">Do not add</option>
+                <option value="screentone" data-i18n="storyArtStyleScreentone">Monochrome + screentone</option>
+                <option value="lineart" data-i18n="storyArtStyleLineart">Monochrome line art</option>
+            </select>
+
+            <label class="preset-check">
+                <input type="checkbox" id="storyRightToLeft" checked>
+                <span data-i18n="llmStoryboardRightToLeft">Read right to left</span>
+            </label>
+
+            <button class="preset-apply-button" id="storyGenerateButton" data-action="llmStoryGenerate">
+                <i class="material-icons">auto_awesome</i>
+                <span data-i18n="storyGenerate">Create prompts</span>
+            </button>
+            <div class="preset-status" id="storyPromptStatus"></div>
+        </div>
+
+        <div class="preset-group-header">
+            <span data-i18n="promptToolsGroup">Tools</span>
+        </div>
+        <div class="prompt-manager-items">
+            <div class="input-group">
+                <button onclick="createImagePromptHelperFlotingWindow()">
+                    <span data-i18n="prompt_gallery">Prompt Gallery</span>
+                </button>
+            </div>
+        </div>
     </div>
    </div>
 
@@ -1118,6 +1193,14 @@ function getElementClasses(element) {
                     </div>
 
                     <div class="param-group">
+                        <div class="param-group-header" data-i18n="secLlmDialogue"></div>
+                        <button onclick="openLLMDialogueWindow()">
+                            <i class="material-icons">smart_toy</i>
+                            <span data-i18n="llmDialogueButton">Dialogue Assist</span>
+                        </button>
+                    </div>
+
+                    <div class="param-group">
                         <div class="param-group-header" data-i18n="secFontSettings"></div>
                         <div class="input-group">
                             <div id="fontSelector"></div>
@@ -1170,72 +1253,29 @@ function getElementClasses(element) {
 
 
 <!-- ========== Panel: Image Text ========== -->
-            <div class="left_area" id="text-area2" style="display: none;">
-                <div class="area-header" data-i18n="image_text">
-                    <a href="html/Minual/custom-text.html" target="_blank">
-                        Custom Text(Help)
-                    </a>
+            <div class="left_area preset-panel" id="text-area2" style="display: none;">
+                <div class="area-header preset-panel-header">
+                    <span class="pp-title" data-i18n="side-label-image-text">Image Text</span>
                 </div>
 
-                <div id="tool-buttons">
-                    <div class="text-preview-area2">
-                        <button id="shadowButton" onclick="switchText2('shadow')">
-                            <span data-i18n="shadow">Shadow</span>
-                            <img src="03_images/preset/text/t2_shadow.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="wildButton" onclick="switchText2('wild')">
-                            <span data-i18n="wild">wild</span>
-                            <img src="03_images/preset/text/t2_wild.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="scratchButton" onclick="switchText2('scratch')">
-                            <span data-i18n="scratch">scratch</span>
-                            <img src="03_images/preset/text/t2_scratch.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="brokenButton" onclick="switchText2('broken')">
-                            <span data-i18n="broken">broken</span>
-                            <img src="03_images/preset/text/t2_broken.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="cloudButton" onclick="switchText2('cloud')">
-                            <span data-i18n="cloud">cloud</span>
-                            <img src="03_images/preset/text/t2_cloud.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="layeredButton" onclick="switchText2('layered')">
-                            <span data-i18n="layered">layered</span>
-                            <img src="03_images/preset/text/t2_layered.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="meshButton" onclick="switchText2('mesh')">
-                            <span data-i18n="mesh">mesh</span>
-                            <img src="03_images/preset/text/t2_mesh.webp" style="width: 100%;">
-                        </button>
-                    </div>
+                <button class="preset-current" id="imageTextPresetCurrent" data-action="openPresetPicker" data-preset-kind="text2" data-tip="presetCurrentHintCreate">
+                    <span class="preset-current-row">
+                        <span class="preset-current-name" data-i18n="presetNotSelected"></span>
+                        <span class="preset-current-swap">
+                            <i class="material-icons">unfold_more</i>
+                            <span data-i18n="presetChange"></span>
+                        </span>
+                    </span>
+                    <img class="preset-current-thumb" alt="" hidden>
+                </button>
 
-                    <div class="text-preview-area2">
-                        <button id="thrillButton" onclick="switchText2('thrill')">
-                            <span data-i18n="thrill">thrill</span>
-                            <img src="03_images/preset/text/t2_thrill.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                    <div class="text-preview-area2">
-                        <button id="zebraButton" onclick="switchText2('zebra')">
-                            <span data-i18n="zebra">zebra</span>
-                            <img src="03_images/preset/text/t2_zebra.webp" style="width: 100%;">
-                        </button>
-                    </div>
-                </div>
-                <hr>
-                <div id="text-area2-settings"></div>
+                <div class="preset-panel-body" id="text-area2-settings"></div>
+
+                <!-- 種類を選ぶだけでは増やさない。キャンバスに増えるのはこの操作だけ -->
+                <button class="preset-panel-foot" id="imageTextInsertButton" data-action="insertImageText">
+                    <i class="material-icons">add</i>
+                    <span data-i18n="imageTextInsert"></span>
+                </button>
             </div>
 
 
@@ -1243,58 +1283,106 @@ function getElementClasses(element) {
 
 
 <!-- ========== Panel: Manga Effect ========== -->
-            <div class="left_area" id="manga-effect-area">
-                <div class="area-header">
-                    <a href="html/Minual/effect.html" target="_blank">
-                        Fast Effect (Help)
+            <div class="left_area preset-panel" id="manga-effect-area" style="display: none;">
+                <div class="area-header preset-panel-header">
+                    <span class="pp-title" data-i18n="side-label-effect">効果</span>
+                    <a class="pp-help" href="html/Minual/effect.html" target="_blank" data-tip="help">
+                        <i class="material-icons">help_outline</i>
                     </a>
                 </div>
-                <div id="manga-effect-buttons">
 
-                    <button id="Color2BlackWhiteLightButton" onclick="switchMangaEffect('Color2BlackWhiteLight')">
-                        <span data-i18n="Color2BlackWhiteLight">Color2BlackWhiteLight</span>
-                        <img src="03_images/preset/effect/color2monoLight.webp" style="width: 100%;">
-                    </button>
-                    <button id="Color2BlackWhiteDarkButton" onclick="switchMangaEffect('Color2BlackWhiteDark')">
-                        <span data-i18n="Color2BlackWhiteDark">Color2BlackWhiteDark</span>
-                        <img src="03_images/preset/effect/color2monoDark.webp" style="width: 100%;">
-                    </button>
-                    <button id="Color2BlackWhiteNoDotButton" onclick="switchMangaEffect('Color2BlackWhiteRough')">
-                        <span data-i18n="Color2BlackWhiteRough">Color2BlackWhiteRough</span>
-                        <img src="03_images/preset/effect/color2monoRough.webp" style="width: 100%;">
-                    </button>
-                    <button id="Color2BlackWhiteSimpleButton" onclick="switchMangaEffect('Color2BlackWhiteSimple')">
-                        <span data-i18n="Color2BlackWhiteSimple">Color2BlackWhiteSimple</span>
-                        <img src="03_images/preset/effect/color2monoSimple.webp" style="width: 100%;">
-                    </button>
+                <div class="preset-panel-body">
 
-                    <button id="Color2BlackLightColorButton" onclick="switchMangaEffect('Color2BlackLightColor')">
-                        <span data-i18n="Color2BlackLightColor">Color2BlackLightColor</span>
-                        <img src="03_images/preset/effect/Color2BlackLightColor.webp" style="width: 100%;">
-                    </button>
+                    <!-- 変換：適用範囲に従う。範囲の選択はこのグループの内側に置き、
+                         下の「1枚ずつ調整」には掛からないことを見た目で示す -->
+                    <div class="preset-group-header">
+                        <span data-i18n="effectGroupConvert">変換</span>
+                        <span class="preset-group-hint" data-i18n="effectGroupConvertHint">押すと即適用</span>
+                    </div>
+                    <div class="preset-section">
+                        <label class="effect-scope-label" data-i18n="effectApplyScope">Apply to</label>
+                        <div class="input-group-multi effect-scope-group" data-group="effectApplyScope">
+                            <button id="effectScopeSelectedButton" data-value="selected" class="selected" onclick="changeSelected(this)">
+                                <span data-i18n="effectScopeSelectedShort">Selected</span>
+                            </button>
+                            <button id="effectScopePageButton" data-value="page" onclick="changeSelected(this)">
+                                <span data-i18n="effectScopePageShort">Page</span>
+                            </button>
+                            <button id="effectScopeAllPagesButton" data-value="allPages" onclick="changeSelected(this)">
+                                <span data-i18n="effectScopeAllPagesShort">All</span>
+                            </button>
+                        </div>
 
+                        <div class="preset-list" id="manga-effect-buttons">
+                            <button class="preset-item" id="Color2BlackWhiteLightButton" onclick="switchMangaEffect('Color2BlackWhiteLight')">
+                                <span class="preset-item-name" data-i18n="Color2BlackWhiteLight">Color2BlackWhiteLight</span>
+                                <img class="preset-item-thumb" src="03_images/preset/effect/color2monoLight.webp" alt="">
+                            </button>
+                            <button class="preset-item" id="Color2BlackWhiteDarkButton" onclick="switchMangaEffect('Color2BlackWhiteDark')">
+                                <span class="preset-item-name" data-i18n="Color2BlackWhiteDark">Color2BlackWhiteDark</span>
+                                <img class="preset-item-thumb" src="03_images/preset/effect/color2monoDark.webp" alt="">
+                            </button>
+                            <button class="preset-item" id="Color2BlackWhiteNoDotButton" onclick="switchMangaEffect('Color2BlackWhiteRough')">
+                                <span class="preset-item-name" data-i18n="Color2BlackWhiteRough">Color2BlackWhiteRough</span>
+                                <img class="preset-item-thumb" src="03_images/preset/effect/color2monoRough.webp" alt="">
+                            </button>
+                            <button class="preset-item" id="Color2BlackWhiteSimpleButton" onclick="switchMangaEffect('Color2BlackWhiteSimple')">
+                                <span class="preset-item-name" data-i18n="Color2BlackWhiteSimple">Color2BlackWhiteSimple</span>
+                                <img class="preset-item-thumb" src="03_images/preset/effect/color2monoSimple.webp" alt="">
+                            </button>
+                            <button class="preset-item" id="Color2BlackLightColorButton" onclick="switchMangaEffect('Color2BlackLightColor')">
+                                <span class="preset-item-name" data-i18n="Color2BlackLightColor">Color2BlackLightColor</span>
+                                <img class="preset-item-thumb" src="03_images/preset/effect/Color2BlackLightColor.webp" alt="">
+                            </button>
+                            <!-- 一括型で唯一パラメータを持つ。設定を出してからSubmitで確定する -->
+                            <button class="preset-item" id="EnhanceDarkButton" onclick="switchMangaEffect('EnhanceDark')">
+                                <span class="preset-item-name">
+                                    <span data-i18n="EnhanceDark">EnhanceDark</span>
+                                    <i class="material-icons preset-item-mark" data-tip="effectMarkParam">tune</i>
+                                </span>
+                                <img class="preset-item-thumb" src="03_images/preset/effect/enhanceDark.webp" alt="">
+                            </button>
+                        </div>
 
-                    <button id="EnhanceDarkButton" onclick="switchMangaEffect('EnhanceDark')">
-                        <span data-i18n="EnhanceDark">EnhanceDark</span>
-                        <img src="03_images/preset/effect/enhanceDark.webp" style="width: 100%;">
-                    </button>
+                        <!-- 退避は全ページ適用のときだけ作られる。バックアップが無い間は
+                             effectRefreshRestoreButton()がdisabledにし、CSSで非表示になる -->
+                        <button class="effect-restore-button" id="effectRestoreBatchButton" data-action="effectRestoreBatchBackup" disabled>
+                            <i class="material-icons">restore</i>
+                            <span data-i18n="effectRestoreBatch">Undo batch apply</span>
+                        </button>
+                    </div>
 
+                    <div class="preset-group-header">
+                        <span data-i18n="effectGroupAdjust">1枚ずつ調整</span>
+                        <span class="preset-group-hint" data-i18n="effectGroupAdjustHint">選択中の1枚のみ</span>
+                    </div>
+                    <div class="preset-list">
+                        <button class="preset-item" id="EffectGlowButton" onclick="switchMangaEffect('EffectGlow')">
+                            <span class="preset-item-name">
+                                <span data-i18n="Glow"></span>
+                                <i class="material-icons preset-item-mark" data-tip="effectMarkPreview">visibility</i>
+                            </span>
+                            <img class="preset-item-thumb" src="03_images/preset/effect/glow.webp" alt="">
+                        </button>
+                        <button class="preset-item" id="EffectGLFXButton" onclick="switchMangaEffect('EffectGLFX')">
+                            <span class="preset-item-name">
+                                <span data-i18n="GLFX"></span>
+                                <i class="material-icons preset-item-mark" data-tip="effectMarkPreview">visibility</i>
+                            </span>
+                            <img class="preset-item-thumb" src="03_images/preset/effect/glfx.webp" alt="">
+                        </button>
+                        <button class="preset-item" id="blendButton" onclick="switchMangaEffect('EffectBlend')">
+                            <span class="preset-item-name">
+                                <span data-i18n="25blends"></span>
+                                <i class="material-icons preset-item-mark" data-tip="effectMarkDialog">open_in_new</i>
+                            </span>
+                            <img class="preset-item-thumb" src="03_images/preset/effect/25_blend.webp" alt="">
+                        </button>
+                    </div>
 
-                    <button id="blendButton" onclick="switchMangaEffect('EffectBlend')">
-                        <span data-i18n="25blends"></span>
-                        <img src="03_images/preset/effect/25_blend.webp" style="width: 100%;">
-                    </button>
-                    <button id="EffectGlowButton" onclick="switchMangaEffect('EffectGlow')">
-                        <span data-i18n="Glow"></span>
-                        <img src="03_images/preset/effect/glow.webp" style="width: 100%;">
-                    </button>
-                    <button id="EffectGLFXButton" onclick="switchMangaEffect('EffectGLFX')">
-                        <span data-i18n="GLFX"></span>
-                        <img src="03_images/preset/effect/glfx.webp" style="width: 100%;">
-                    </button>
+                    <!-- 選んだ効果の設定。一覧を消さず、この下に出す -->
+                    <div id="manga-effect-settings"></div>
                 </div>
-                <hr>
-                <div id="manga-effect-settings"></div>
             </div>
 
 
@@ -1307,46 +1395,25 @@ function getElementClasses(element) {
 
 
 <!-- ========== Panel: Pen Tools ========== -->
-            <div class="left_area" id="tool-area" style="display: none;">
-                <div class="area-header" data-i18n="tools">Tools</div>
-                <div id="tool-buttons">
-                    <button id="MarkerButton" onclick="switchPencilType('Marker')">
-                        <span data-i18n="Marker">Marker</span>
-                        <img src="03_images/preset/brush/Marker.webp" alt="Marker Icon" style="width: 100%;">
-                    </button>
-                    <button id="InkButton" onclick="switchPencilType('Ink')">
-                        <span data-i18n="ink">Ink</span>
-                        <img src="03_images/preset/brush/Ink.webp" alt="Ink Icon" style="width: 100%;">
-                    </button>
-                    <button id="CrayonButton" onclick="switchPencilType('Crayon')">
-                        <span data-i18n="crayon">Crayon</span>
-                        <img src="03_images/preset/brush/Crayon.webp" alt="Crayon Icon" style="width: 100%;">
-                    </button>
-                    <button id="PencilButton" onclick="switchPencilType('Pencil')">
-                        <span data-i18n="Pencil">Pencil</span>
-                        <img src="03_images/preset/brush/Pencil.webp" alt="Pencil Icon" style="width: 100%;">
-                    </button>
-                    <button id="OutlinePenButton" onclick="switchPencilType('OutlinePen')">
-                        <span data-i18n="OutlinePen">OutlinePen</span>
-                        <img src="03_images/preset/brush/OutlinePen.webp" alt="OutlinePen Icon" style="width: 100%;">
-                    </button>
-                    <button id="CircleButton" onclick="switchPencilType('Circle')">
-                        <span data-i18n="Circle">Circle</span>
-                        <img src="03_images/preset/brush/Circle.webp" alt="Circle Icon" style="width: 100%;">
-                    </button>
-
-                    <button id="MosaicButton" onclick="switchPencilType('Mosaic')">
-                        <span data-i18n="Mosaic">Mosaic</span>
-                        <img src="03_images/preset/brush/Mosaic1.webp" alt="Mosaic Icon" style="width: 100%;">
-                    </button>
-                    <button id="EraserButton" onclick="switchPencilType('Eraser')">
-                        <span data-i18n="Eraser">Eraser</span>
-                        <img src="03_images/preset/brush/Eraser.webp" alt="Mosaic Icon" style="width: 100%;">
-                    </button>
-
+            <div class="left_area preset-panel" id="tool-area" style="display: none;">
+                <div class="area-header preset-panel-header">
+                    <span class="pp-title" data-i18n="side-label-pen">Pen</span>
                 </div>
-                <hr>
-                <div id="tool-settings"></div>
+
+                <!-- 8種の一覧は押したときだけピッカーに出す。パネルには今のペンだけを置き、
+                     残り全部を設定に使う -->
+                <button class="preset-current" id="penPresetCurrent" data-action="openPresetPicker" data-preset-kind="pen" data-tip="presetCurrentHintToggle">
+                    <span class="preset-current-row">
+                        <span class="preset-current-name" data-i18n="presetNotSelected"></span>
+                        <span class="preset-current-swap">
+                            <i class="material-icons">unfold_more</i>
+                            <span data-i18n="presetChange"></span>
+                        </span>
+                    </span>
+                    <img class="preset-current-thumb" alt="" hidden>
+                </button>
+
+                <div class="preset-panel-body" id="tool-settings"></div>
             </div>
 
 
@@ -1354,36 +1421,26 @@ function getElementClasses(element) {
 
 
 <!-- ========== Panel: Manga Tone ========== -->
-            <div class="left_area" id="manga-tone-area">
-                <div class="area-header">
-                    <a href="html/Minual/screen-tone.html" target="_blank">
-                        Screen Tone (Help)
+            <div class="left_area preset-panel" id="manga-tone-area" style="display: none;">
+                <div class="area-header preset-panel-header">
+                    <span class="pp-title" data-i18n="side-label-tone">Screen Tone</span>
+                    <a class="pp-help" href="html/Minual/screen-tone.html" target="_blank" data-tip="help">
+                        <i class="material-icons">help_outline</i>
                     </a>
                 </div>
-                <div id="manga-tone-buttons">
-                    <button id="ToneButton" onclick="switchMangaTone('Tone')">
-                        <span data-i18n="Tone">Tone</span>
-                        <img src="03_images/preset/tone/Tone.webp" style="width: 100%;">
-                    </button>
-                    <button id="ToneNoiseButton" onclick="switchMangaTone('ToneNoise')">
-                        <span data-i18n="ToneNoise">Noise Tone</span>
-                        <img src="03_images/preset/tone/ToneNoise.webp" style="width: 100%;">
-                    </button>
-                    <button id="ToneSnowButton" onclick="switchMangaTone('ToneSnow')">
-                        <span data-i18n="ToneSnow">Snow Tone</span>
-                        <img src="03_images/preset/tone/ToneSnow.webp" style="width: 100%;">
-                    </button>
-                    <button id="SpeedLineButton" onclick="switchMangaTone('SpeedLine')">
-                        <span data-i18n="SpeedLine">Speed Line</span>
-                        <img src="03_images/preset/tone/SpeedLine.webp" style="width: 100%;">
-                    </button>
-                    <button id="FocusingLineButton" onclick="switchMangaTone('FocusingLine')">
-                        <span data-i18n="FocusingLine">Focusing Line</span>
-                        <img src="03_images/preset/tone/FocusingLine.webp" style="width: 100%;">
-                    </button>
-                </div>
-                <hr>
-                <div id="manga-tone-settings"></div>
+
+                <button class="preset-current" id="tonePresetCurrent" data-action="openPresetPicker" data-preset-kind="tone" data-tip="presetCurrentHintToggle">
+                    <span class="preset-current-row">
+                        <span class="preset-current-name" data-i18n="presetNotSelected"></span>
+                        <span class="preset-current-swap">
+                            <i class="material-icons">unfold_more</i>
+                            <span data-i18n="presetChange"></span>
+                        </span>
+                    </span>
+                    <img class="preset-current-thumb" alt="" hidden>
+                </button>
+
+                <div class="preset-panel-body" id="manga-tone-settings"></div>
             </div>
 
 
@@ -1794,7 +1851,7 @@ function getElementClasses(element) {
 <div id="unifiedSettingsOverlay" class="us-overlay" onclick="if(event.target===this)unifiedSettingsWindow.close()">
 <div class="us-window">
 <div class="us-header">
-<h2 data-i18n="usWindowTitle">&#9881; 生成AI設定</h2>
+<h2 data-i18n="usWindowTitle">⚙ 生成AI設定</h2>
 <button class="us-close" onclick="unifiedSettingsWindow.close()">&times;</button>
 </div>
 <div class="us-body">
@@ -1810,10 +1867,13 @@ function getElementClasses(element) {
 <thead>
 <tr>
 <th></th>
+<th class="role-col-none" data-i18n="roleNone">なし</th>
 <th>ComfyUI</th>
 <th>RunPod<br>ComfyUI</th>
 <th>SD WebUI<br>(A1111/Forge)</th>
 <th>Fal.ai</th>
+<th>Grok</th>
+<th>Ollama</th>
 </tr>
 </thead>
 <tbody id="roleMatrixBody"></tbody>
@@ -1887,6 +1947,48 @@ function getElementClasses(element) {
 <td><input type="number" id="falaiConcurrency" value="1" min="1" max="10"></td>
 <td></td>
 </tr>
+<tr>
+<td rowspan="4">Grok</td>
+<td class="us-field-label">API Key</td>
+<td><input type="password" id="grokApiKey" value="" placeholder="API Key" autocomplete="off"><div id="grokConnNotice" class="us-conn-notice" style="display:none"></div></td>
+<td><button id="grokApiKeyToggle" class="us-btn-s" data-i18n="usBtnShow">表示</button><button id="grokReloadModels" class="us-btn-s" data-i18n="falaiReloadModels">再取得</button><a href="html/API_Help/llm_settings.html#grok" target="_blank" class="us-btn-s">?</a><a href="https://console.x.ai" target="_blank" class="us-link-btn" data-i18n="usDashboard">Web ↗</a></td>
+</tr>
+<tr>
+<td class="us-field-label" data-i18n="llmModelText">テキスト</td>
+<td><select id="grokModelText" disabled><option value="" data-i18n="llmSelectModel">モデルを選択してください</option></select></td>
+<td></td>
+</tr>
+<tr>
+<td class="us-field-label" data-i18n="llmModelVision">画像認識</td>
+<td><select id="grokModelVision" disabled><option value="" data-i18n="llmSelectModel">モデルを選択してください</option></select></td>
+<td></td>
+</tr>
+<tr>
+<td class="us-field-label" data-i18n="usConcurrency">同時実行数</td>
+<td><input type="number" id="grokConcurrency" value="1" min="1" max="10"></td>
+<td></td>
+</tr>
+<tr>
+<td rowspan="4">Ollama</td>
+<td class="us-field-label">URL</td>
+<td><input type="text" id="ollamaUrl" value="http://127.0.0.1:11434" placeholder="http://127.0.0.1:11434"><div id="ollamaConnNotice" class="us-conn-notice" style="display:none"></div></td>
+<td><button id="ollamaUrlDefaultUrl" class="us-btn-s" data-i18n="usBtnReset">初期値</button><button id="ollamaReloadModels" class="us-btn-s" data-i18n="falaiReloadModels">再取得</button><a href="html/API_Help/llm_settings.html#ollama" target="_blank" class="us-btn-s">?</a></td>
+</tr>
+<tr>
+<td class="us-field-label" data-i18n="llmModelText">テキスト</td>
+<td><select id="ollamaModelText" disabled><option value="" data-i18n="llmSelectModel">モデルを選択してください</option></select></td>
+<td></td>
+</tr>
+<tr>
+<td class="us-field-label" data-i18n="llmModelVision">画像認識</td>
+<td><select id="ollamaModelVision" disabled><option value="" data-i18n="llmSelectModel">モデルを選択してください</option></select></td>
+<td></td>
+</tr>
+<tr>
+<td class="us-field-label" data-i18n="usConcurrency">同時実行数</td>
+<td><input type="number" id="ollamaConcurrency" value="1" min="1" max="10"></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1900,7 +2002,7 @@ function getElementClasses(element) {
 <div id="modelSettingsOverlay" class="us-overlay" onclick="if(event.target===this)modelSettingsWindow.close()">
 <div class="us-window">
 <div class="us-header">
-<h2 data-i18n="modelSettingsTitle">&#128295; 使用モデル・ワークフロー設定</h2>
+<h2 data-i18n="modelSettingsTitle">🔧 使用モデル・ワークフロー設定</h2>
 <button class="us-close" onclick="modelSettingsWindow.close()">&times;</button>
 </div>
 <div class="us-tabs">
@@ -1970,6 +2072,7 @@ function getElementClasses(element) {
     <script src="js/ui/util/focus-trap.js?v=7.2" defer></script>
     <script src="js/core/global-error-handler.js?v=7.2" defer></script>
 
+    <script src="js/ui/preset-picker.js?v=7.5" defer></script>
     <script src="js/ui/glfx-ui.js?v=7.2" defer></script>
     <script src="js/ui/canvas-object-menu.js?v=7.2" defer></script>
     <script src="js/ui/third/intro.js?v=7.2" defer></script>
@@ -1977,6 +2080,7 @@ function getElementClasses(element) {
     <script src="js/ui/toast.js?v=7.2" defer></script>
     <script src="js/ui/util/ui-util.js?v=7.2" defer></script>
     <script src="js/ui/util/event-delegator.js?v=7.2" defer></script>
+    <script src="js/ui/preset-panel.js?v=7.5" defer></script>
     <script src="js/ui/third/tippy.js?v=7.2" defer></script>
 
     <script src="js/ui/third/base-translation/base-de.js?v=7.2" defer></script>
@@ -2026,6 +2130,17 @@ function getElementClasses(element) {
     <script src="js/ai/provider/local-sdwebui-provider.js?v=7.3" defer></script>
     <script src="js/ai/provider/runpod-comfyui-provider.js?v=7.3" defer></script>
     <script src="js/ai/provider/falai-provider.js?v=7.3" defer></script>
+    <script src="js/ai/provider/llm-provider.js?v=7.5" defer></script>
+    <script src="js/ai/provider/grok-provider.js?v=7.5" defer></script>
+    <script src="js/ai/provider/ollama-provider.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-prompt-service.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-prompt-ui.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-storyboard-service.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-storyboard-ui.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-story-service.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-story-ui.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-dialogue-service.js?v=7.5" defer></script>
+    <script src="js/ai/prompt/llm/llm-dialogue-ui.js?v=7.5" defer></script>
     <script src="js/ai/queue/spinner.js?v=7.2" defer></script>
     <script src="js/ai/queue/task-queue.js?v=7.2" defer></script>
     <script src="js/ai/queue/generation-task-manager.js?v=7.2" defer></script>
@@ -2048,6 +2163,7 @@ function getElementClasses(element) {
     <script src="js/ai/angle/angle-editor.js?v=7.3" defer></script>
     <script src="js/ai/ui/ai-ui-util.js?v=7.2" defer></script>
     <script src="js/ai/prompt/base-event-listener.js?v=7.2" defer></script>
+    <script src="js/ai/prompt/prompt-apply.js?v=7.5" defer></script>
     <script src="js/layer/floating-window-management.js?v=7.2" defer></script>
     <script src="js/layer/layer-button.js?v=7.2" defer></script>
     <script src="js/layer/layer-management.js?v=7.2" defer></script>
@@ -2085,6 +2201,7 @@ function getElementClasses(element) {
     <script src="js/sidebar/effect/effect-manager.js?v=7.2" defer></script>
     <script src="js/sidebar/effect/c2bw_tone.js?v=7.2" defer></script>
     <script src="js/sidebar/effect/c2c.js?v=7.2" defer></script>
+    <script src="js/sidebar/effect/effect-batch.js?v=7.2" defer></script>
     <script src="js/sidebar/panel/knife/knife-constants.js?v=7.2" defer></script>
     <script src="js/sidebar/panel/knife/knife-state.js?v=7.2" defer></script>
     <script src="js/sidebar/panel/knife/knife-geometry.js?v=7.2" defer></script>
@@ -2114,7 +2231,6 @@ function getElementClasses(element) {
     <script src="js/core/font/font-dropdown.js?v=7.2" defer></script>
     <script src="js/core/font/project-font.js?v=7.2" defer></script>
 
-    <script src="service-worker.js?v=7.2" defer></script>
     <script src="js/core/service/worker-register.js?v=7.2" defer></script>
 
     <script src="js/core/compression/lz4.js?v=7.2"></script>

@@ -1,7 +1,7 @@
 let flowWindowCount=0;
 
 function createImagePromptHelperFlotingWindow(){
-flowCreateFloatingWindow('Image Prompt Helper',iphHtmlContent,'rgba(0, 38, 255, 0.7)',95,95,0);
+const flowWindow=flowCreateFloatingWindow('Image Prompt Helper',iphHtmlContent,'rgba(0, 38, 255, 0.7)',95,95,0);
 
 setTimeout(()=>{
 const saveButton=$('iph-save-button');
@@ -9,13 +9,13 @@ const nameInput=$('iph-name-input');
 const freeInput=$('iph-free-input');
 
 function updateContent() {
-document.querySelectorAll('[data-i18n]').forEach(element=>{
+flowWindow.querySelectorAll('[data-i18n]').forEach(element=>{
 const key=element.getAttribute('data-i18n');
 if(key.startsWith('[')){
 const attr=key.match(/\[(.*?)\]/)[1];
 element.setAttribute(attr,getText(key.substring(key.indexOf(']')+1)));
 }else{
-element.textContent=getText(key);
+element.innerHTML=getText(key);
 }
 });
 }
@@ -124,6 +124,8 @@ window.addEventListener('resize',resizeHandler);
 flowWindow.addEventListener('remove',function() {
 window.removeEventListener('resize',resizeHandler);
 });
+
+return flowWindow;
 }
 
 function flowCloseWindow(flowWindowId) {

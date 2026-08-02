@@ -1,0 +1,179 @@
+@import url('../root.css');
+
+/* 一覧から1件選ぶポップアップ（js/ui/preset-picker.js）。
+   画面中央のモーダルにはしない。開いているサイドバーパネルのすぐ右、
+   キャンバスの上に出して「どのパネルの操作か」を切らさない。
+   幅はパネル(200px)に縛られないので clamp で画面に合わせて広げる */
+
+/* 暗幕。leftはJS側でパネルの右端に合わせるため、パネル自体は暗くならない */
+.preset-picker-back {
+ position: fixed;
+ top: 0;
+ right: 0;
+ bottom: 0;
+ left: 0;
+ z-index: 1100;
+ display: none;
+ background: rgba(0,0,0,0.35);
+}
+.preset-picker-back.is-open {
+ display: block;
+}
+
+.preset-picker {
+ position: fixed;
+ top: 10px;
+ left: 10px;
+ display: flex;
+ flex-direction: column;
+ width: clamp(300px, 34vw, 520px);
+ max-height: calc(100vh - 20px);
+ background: var(--background-color-A);
+ color: var(--text-color-B);
+ border: 1px solid rgba(128,128,128,0.4);
+ border-radius: 8px;
+ box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+ overflow: hidden;
+}
+/* パネルが見つからないときだけ中央に置く */
+.preset-picker.is-centered {
+ top: 50%;
+ left: 50%;
+ transform: translate(-50%, -50%);
+}
+
+.ppk-head {
+ flex: 0 0 auto;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ padding: 8px 10px;
+ border-bottom: 1px solid rgba(128,128,128,0.25);
+}
+.ppk-title {
+ flex: 0 0 auto;
+ margin: 0;
+ font-size: 12px;
+ font-weight: var(--font-weight-bold);
+}
+.ppk-search {
+ flex: 1 1 auto;
+ min-width: 0;
+ display: flex;
+ align-items: center;
+ gap: 4px;
+ padding: 3px 7px;
+ background: rgba(128,128,128,0.14);
+ border: 1px solid rgba(128,128,128,0.25);
+ border-radius: 4px;
+}
+.ppk-search .material-icons {
+ font-size: 14px;
+ opacity: 0.6;
+}
+.ppk-search-input {
+ flex: 1 1 auto;
+ min-width: 0;
+ margin: 0;
+ padding: 0;
+ background: none;
+ border: none;
+ outline: none;
+ color: inherit;
+ font-size: 11px;
+}
+.ppk-close {
+ flex: 0 0 auto;
+ display: inline-flex;
+ margin: 0;
+ padding: 2px;
+ background: none;
+ border: none;
+ color: inherit;
+ cursor: pointer;
+ opacity: 0.7;
+ border-radius: 4px;
+}
+.ppk-close:hover {
+ opacity: 1;
+ background: rgba(128,128,128,0.2);
+}
+.ppk-close .material-icons {
+ font-size: 18px;
+}
+
+.ppk-list {
+ flex: 1 1 auto;
+ min-height: 0;
+ overflow-y: auto;
+ padding: 8px;
+ display: grid;
+ grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+ gap: 8px;
+ align-content: start;
+}
+
+.ppk-item {
+ display: block;
+ margin: 0;
+ padding: 0;
+ overflow: hidden;
+ text-align: left;
+ cursor: pointer;
+ background: var(--btn-bg);
+ border: var(--btn-border);
+ border-radius: 6px;
+ color: inherit;
+ transition: var(--btn-transition);
+}
+.ppk-item:hover {
+ background: var(--btn-hover-bg);
+ border-color: var(--btn-hover-border-color);
+}
+.ppk-item.is-current {
+ background: var(--btn-active-bg);
+ border-color: var(--btn-active-border-color);
+ box-shadow: var(--btn-active-shadow);
+}
+.ppk-item-name {
+ display: block;
+ padding: 4px 7px 3px;
+ font-size: 11px;
+ font-weight: var(--font-weight-bold);
+}
+.ppk-item-hint {
+ display: block;
+ padding: 0 7px 4px;
+ font-size: 10px;
+ opacity: 0.6;
+ line-height: 1.3;
+}
+/* 見本画像。効果はCSSで掛けるため、画像自体は1枚を使い回す */
+.ppk-item-thumb {
+ display: block;
+ width: 100%;
+ margin: 0;
+ background: rgba(128,128,128,0.12);
+}
+
+.ppk-empty {
+ grid-column: 1 / -1;
+ margin: 0;
+ padding: 24px 8px;
+ text-align: center;
+ font-size: 11px;
+ opacity: 0.55;
+}
+
+.ppk-foot {
+ flex: 0 0 auto;
+ padding: 5px 10px;
+ font-size: 10px;
+ opacity: 0.6;
+ border-top: 1px solid rgba(128,128,128,0.25);
+}
+
+.light-mode .preset-picker {
+ border-color: rgba(0,0,0,0.2);
+ box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}

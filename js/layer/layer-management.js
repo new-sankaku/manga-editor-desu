@@ -218,6 +218,9 @@ var spinner=createSpinnerSuccess(getGUID(layer),'TAG');sdwebuiInterrogate(layer,
 putActionButton(actionBar,"link","actClip",function(){
 var spinner=createSpinnerSuccess(getGUID(layer),'TAG');sdwebuiInterrogate(layer,"clip",spinner.id);
 },AI_ROLES.Image2Prompt_CLIP);
+putActionButton(actionBar,"smart_toy","actLlmTag",function(){
+var spinner=createSpinnerSuccess(getGUID(layer),'TAG');llmImage2Prompt(layer,spinner.id);
+},AI_ROLES.Image2Prompt_LLM);
 putActionBarSeparator(actionBar);
 putActionButton(actionBar,"text_snippet","actPromptApply",function(){
 if(layer.tempPrompt){layer.text2img_prompt=layer.tempPrompt;createToast("Apply Prompt",layer.text2img_prompt);}else{createToastError("Nothing Prompt","");}

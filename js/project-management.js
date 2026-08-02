@@ -125,7 +125,7 @@ createToastError(title,message,4000);
 
 if (firstLoadedGuid) {
 OP_updateLoadingState(loading,{icon: 'process',step: 'Step5',substep: 'Open Page 1',progress: 90});
-if(stateStack.length>=btmSaveStateThreshold){
+if(btmShouldSaveCurrentPage()){
 await btmSaveProjectFile(null,false);
 }
 await chengeCanvasByGuid(firstLoadedGuid);
@@ -222,6 +222,14 @@ falaiModelI2I:{id:'falaiModelI2I',default:''},
 falaiModelUpscale:{id:'falaiModelUpscale',default:''},
 falaiModelRembg:{id:'falaiModelRembg',default:''},
 falaiConcurrency:{id:'falaiConcurrency',default:'1'},
+grokApiKey:{id:'grokApiKey',default:''},
+grokModelText:{id:'grokModelText',default:''},
+grokModelVision:{id:'grokModelVision',default:''},
+ollamaUrl:{id:'ollamaUrl',default:'http://127.0.0.1:11434'},
+ollamaModelText:{id:'ollamaModelText',default:''},
+ollamaModelVision:{id:'ollamaModelVision',default:''},
+grokConcurrency:{id:'grokConcurrency',default:'1'},
+ollamaConcurrency:{id:'ollamaConcurrency',default:'1'},
 apiHeartbeatCheckbox:{id:'apiHeartbeatCheckbox',default:true,type:'checkbox'},
 autoSaveEnabled:{id:'autoSaveCheckbox',default:true,type:'checkbox'},
 autoSaveInterval:{id:'autoSaveInterval',default:'60'},
@@ -297,6 +305,24 @@ basePrompt_text2img_hr_step:{id:'text2img_hr_step',key:'text2img_hr_step'},
 basePrompt_text2img_hr_denoise:{id:'text2img_hr_denoise',key:'text2img_hr_denoise'}
 };
 
+// selectは復元時点でoptionが未生成のことがある（モデル一覧はAPI取得後に作られる）。
+// そのままvalueを代入すると無言で''に落ち、設定の自動保存で保存値まで空で上書きされるため、
+// 該当optionが無い場合は保存値のoptionを補ってから選択する
+function applySettingValue(el,val){
+if(el.tagName!=='SELECT'||val===''||val===undefined||val===null){
+el.value=val;
+return;
+}
+var text=String(val);
+el.value=text;
+if(el.value===text)return;
+var opt=document.createElement('option');
+opt.value=text;
+opt.textContent=text;
+el.appendChild(opt);
+el.value=text;
+}
+
 function loadSettingsLocalStrage(){
 createToast('Settings Load',['Loading settings...','Load Completed!!'],1500);
 var stored=localStorage.getItem('localSettingsData');
@@ -308,7 +334,7 @@ var el=$(cfg.id);
 if(!el)return;
 var val=(data[key]!==undefined)?data[key]:cfg.default;
 if(cfg.type==='checkbox')el.checked=val;
-else el.value=val;
+else applySettingValue(el,val);
 });
 var bgEl=$('bg-color');
 bgEl.dispatchEvent(new Event('input',{bubbles:true,cancelable:true}));
@@ -318,7 +344,7 @@ var cfg=BASEPROMPT_SCHEMA[key];
 var val=(data[key]!==undefined)?data[key]:basePrompt[cfg.key];
 if(cfg.id){
 var el=$(cfg.id);
-if(el)el.value=val;
+if(el)applySettingValue(el,val);
 }
 basePrompt[cfg.key]=val;
 });

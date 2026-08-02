@@ -2,6 +2,8 @@
 const sdQueue=new TaskQueue(1);
 const comfyuiQueue=new TaskQueue(1);
 const falaiQueue=new TaskQueue(1);
+const grokQueue=new TaskQueue(1);
+const ollamaQueue=new TaskQueue(1);
 
 var firstSDConnection=true;
 var firstComfyConnection=true;
@@ -11,6 +13,14 @@ var falConc=$('falaiConcurrency');
 if(falConc&&parseInt(falConc.value)>1){
 falaiQueue.setConcurrency(parseInt(falConc.value));
 }
+var grokConc=$('grokConcurrency');
+if(grokConc&&parseInt(grokConc.value)>1){
+grokQueue.setConcurrency(parseInt(grokConc.value));
+}
+var ollamaConc=$('ollamaConcurrency');
+if(ollamaConc&&parseInt(ollamaConc.value)>1){
+ollamaQueue.setConcurrency(parseInt(ollamaConc.value));
+}
 });
 
 $('falaiConcurrency').addEventListener('change',function(){
@@ -19,6 +29,22 @@ if(val<1)val=1;
 if(val>10)val=10;
 this.value=val;
 falaiQueue.setConcurrency(val);
+});
+
+$('grokConcurrency').addEventListener('change',function(){
+var val=parseInt(this.value)||1;
+if(val<1)val=1;
+if(val>10)val=10;
+this.value=val;
+grokQueue.setConcurrency(val);
+});
+
+$('ollamaConcurrency').addEventListener('change',function(){
+var val=parseInt(this.value)||1;
+if(val<1)val=1;
+if(val>10)val=10;
+this.value=val;
+ollamaQueue.setConcurrency(val);
 });
 
 $('sdWebUIPageUrlDefaultUrl').addEventListener('click',(event)=>{
@@ -50,6 +76,14 @@ const falQueueStatus=falaiQueue.getStatus();
 if(falQueueStatus.total>0){
 return true;
 }
+const grokQueueStatus=grokQueue.getStatus();
+if(grokQueueStatus.total>0){
+return true;
+}
+const ollamaQueueStatus=ollamaQueue.getStatus();
+if(ollamaQueueStatus.total>0){
+return true;
+}
 return false;
 }
 
@@ -57,8 +91,10 @@ function clearAllQueues() {
 const sdCleared=sdQueue.clearQueue();
 const comfyCleared=comfyuiQueue.clearQueue();
 const falCleared=falaiQueue.clearQueue();
-logger.info(`All queues cleared: SD=${sdCleared}, ComfyUI=${comfyCleared}, Fal=${falCleared}`);
-return sdCleared+comfyCleared+falCleared;
+const grokCleared=grokQueue.clearQueue();
+const ollamaCleared=ollamaQueue.clearQueue();
+logger.info(`All queues cleared: SD=${sdCleared}, ComfyUI=${comfyCleared}, Fal=${falCleared}, Grok=${grokCleared}, Ollama=${ollamaCleared}`);
+return sdCleared+comfyCleared+falCleared+grokCleared+ollamaCleared;
 }
 
 
@@ -115,18 +151,23 @@ provider.fetchDiffusionInformation();
 }
 
 
+// 使用サービス表で実際に選ばれているサービスだけを対象にする。
+// 「なし」や未対応（—）の行のサービスは接続チェックしない
 function getInUseProviders(){
-var assignments=providerRegistry.getAllRoleAssignments();
 var ids={};
-Object.keys(assignments).forEach(function(role){
-var pid=assignments[role];
-if(pid&&pid!=='default')ids[pid]=true;
+ROLE_MATRIX_ROWS.forEach(function(row){
+var provider=providerRegistry.getProviderForRole(row.role);
+if(provider)ids[provider.id]=true;
 });
-var activeId=providerRegistry.getActiveId();
-if(activeId)ids[activeId]=true;
 return Object.keys(ids).map(function(id){
 return providerRegistry.get(id);
 }).filter(Boolean);
+}
+
+function isProviderInUse(providerId){
+return getInUseProviders().some(function(provider){
+return provider.id===providerId;
+});
 }
 
 function renderProviderStatusChips(results){
@@ -136,6 +177,7 @@ container.innerHTML='';
 results.forEach(function(r){
 var chip=document.createElement('span');
 chip.className='provider-status-chip';
+if(r.reason)chip.title=r.name+': '+r.reason;
 var dot=document.createElement('span');
 dot.className='provider-status-dot '+(r.online?'on':'off');
 var text=document.createTextNode(r.name);
@@ -165,7 +207,7 @@ online=await p.heartbeat();
 }catch(e){
 online=false;
 }
-results.push({id:p.id,name:p.name,online:!!online});
+results.push({id:p.id,name:p.name,online:!!online,reason:online?'':p.getStatusReason()});
 }
 renderProviderStatusChips(results);
 

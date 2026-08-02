@@ -52,9 +52,8 @@ otherControlsMini.innerHTML=`
     <div class="control">
         <button id="promptRun"">Generate</button>
     </div>
-    <div class="control" style="visibility: hidden;">
-        <input type="number" id="dummy2024100039">
-        <span class="label">dummy202410180039</span>
+    <div class="control">
+        ${llmPromptButtonHtml()}
     </div>
 </div>
     `;
@@ -67,6 +66,8 @@ return;
 var spinner=createSpinner(getGUID(layer),'T2I');
 T2I(layer,spinner);
 });
+
+bindLLMPromptButton(layer);
 
 
 $("text2img_prompt").addEventListener("input",function () {
@@ -150,9 +151,8 @@ otherControlsMini.innerHTML=`
     <div class="control">
         <button id="promptRun"">Generate</button>
     </div>
-    <div class="control" style="visibility: hidden;">
-        <input type="number" id="dummy2024100039">
-        <span class="label">dummy202410180039</span>
+    <div class="control">
+        ${llmPromptButtonHtml()}
     </div>
 </div>
   `;
@@ -164,6 +164,8 @@ return;
 var spinner=createSpinner(getGUID(activeObject),'T2I');
 T2I(activeObject,spinner);
 });
+
+bindLLMPromptButton(layer);
 
 
 $("text2img_prompt").addEventListener("input",function () {
@@ -186,6 +188,20 @@ layer.img2img_denoise=this.value;
 });
 
 setAutoSizeingControlMini();
+}
+
+function refreshPromptPanel(layer) {
+if (!layer) {
+return;
+}
+if (canvas.getActiveObject()!==layer) {
+return;
+}
+if (isPanel(layer)) {
+showT2IPrompts(layer);
+} else if (isImage(layer)) {
+showI2IPrompts(layer);
+}
 }
 
 function adjustToMultipleOfEight(elementId) {

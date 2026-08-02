@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>パネル再設計プロトタイプ</title>
+
+<link rel="stylesheet" href="../../css/root.css">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+/* ============================================================
+   プロトタイプ共通
+   ============================================================ */
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+ background:var(--background-color-A);
+ color:var(--text-color-B);
+ font-family:"Noto Sans JP",sans-serif;
+ font-size:var(--font-size-base);
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+}
+
+.pt-bar{
+ flex:0 0 auto;
+ display:flex;
+ flex-wrap:wrap;
+ align-items:center;
+ gap:14px;
+ padding:7px 12px;
+ background:rgba(128,128,128,0.12);
+ border-bottom:1px solid rgba(128,128,128,0.25);
+}
+.pt-bar h1{font-size:13px;margin:0;font-weight:bold;}
+.pt-bar label{display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;}
+.pt-bar .pt-hint{font-size:11px;opacity:.65;margin-left:auto;}
+
+.pt-main{flex:1 1 auto;display:flex;min-height:0;position:relative;}
+
+/* ---------- アイコンレール（現状と同じ） ---------- */
+.pt-rail{
+ flex:0 0 auto;
+ width:62px;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ padding:8px 0;
+ gap:2px;
+ background:var(--sidebar-gradient);
+ border-right:1px solid rgba(128,128,128,0.25);
+ overflow-y:auto;
+}
+.pt-rail button{
+ width:54px;
+ background:none;border:none;color:var(--sidebar-icon-color);
+ display:flex;flex-direction:column;align-items:center;gap:1px;
+ padding:5px 2px;border-radius:6px;cursor:pointer;
+ font-size:9px;line-height:1.2;
+ transition:background .15s,color .15s;
+}
+.pt-rail button:hover{background:rgba(128,128,128,0.18);}
+.pt-rail button.is-active{background:var(--btn-active-bg);color:var(--color-text-primary);}
+.pt-rail .material-icons{font-size:20px;}
+
+/* ---------- 200px パネル ---------- */
+.pt-panel{
+ flex:0 0 auto;
+ width:200px;min-width:200px;max-width:200px;
+ display:flex;flex-direction:column;
+ min-height:0;
+ border-right:1px solid rgba(128,128,128,0.25);
+ background:var(--background-color-A);
+}
+.pt-panel.is-hidden{display:none;}
+
+/* ---------- キャンバス ---------- */
+.pt-canvas-wrap{
+ flex:1 1 auto;min-width:0;
+ display:flex;align-items:center;justify-content:center;
+ padding:16px;
+ background:repeating-conic-gradient(rgba(128,128,128,.10) 0% 25%, transparent 0% 50%) 0 0/16px 16px;
+ overflow:auto;
+ position:relative;
+}
+#ptPage{
+ height:100%;max-height:100%;width:auto;
+ box-shadow:0 4px 20px rgba(0,0,0,.4);
+ background:#fff;
+ transition:filter .12s linear;
+}
+
+/* ============================================================
+   ▼ 提案1：パネルは「今のツール ＋ その設定」だけを持つ
+   ============================================================ */
+.panel-head{
+ flex:0 0 auto;
+ display:flex;align-items:center;gap:6px;
+ padding:6px 8px;
+ font-weight:bold;
+ background:rgba(0,0,0,0.30);
+ box-shadow:0 2px 6px rgba(0,0,0,0.25);
+}
+.light-mode .panel-head{background:rgba(0,0,0,0.07);box-shadow:0 2px 4px rgba(0,0,0,0.08);}
+.panel-head .ph-title{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.panel-head .ph-help{flex:0 0 auto;color:var(--a-link);display:inline-flex;text-decoration:none;opacity:.8;}
+.panel-head .ph-help:hover{opacity:1;}
+.panel-head .material-icons{font-size:16px;}
+
+/* 現在のツールカード。ここを押すとピッカーが開く＝「選ぶ」の入口 */
+.tool-current{
+ flex:0 0 auto;
+ display:block;
+ width:calc(100% - 16px);
+ margin:8px 8px 4px;
+ padding:0;overflow:hidden;
+ text-align:left;cursor:pointer;
+ background:var(--btn-bg);
+ border:var(--btn-border);
+ border-radius:6px;
+ transition:var(--btn-transition);
+}
+.tool-current:hover{background:var(--btn-hover-bg);border-color:var(--btn-hover-border-color);}
+.tool-current .tc-row{display:flex;align-items:center;gap:4px;padding:5px 7px 4px;}
+.tool-current .tc-name{flex:1 1 auto;min-width:0;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tool-current .tc-swap{flex:0 0 auto;display:inline-flex;align-items:center;gap:2px;font-size:10px;opacity:.7;}
+.tool-current .tc-swap .material-icons{font-size:14px;}
+.tool-current .tc-thumb{display:block;width:100%;background:rgba(128,128,128,.12);}
+
+/* 設定エリア。パネルの残り全部を使い、ここだけがスクロールする */
+.tool-settings{
+ flex:1 1 auto;min-height:0;
+ overflow-y:auto;
+ padding:4px 8px 12px;
+ scrollbar-gutter:stable;
+}
+.settings-group-title{
+ font-size:10px;letter-spacing:.5px;opacity:.6;
+ margin:8px 0 3px;padding-bottom:2px;
+ border-bottom:1px solid rgba(128,128,128,.22);
+}
+.settings-group-title:first-child{margin-top:2px;}
+
+.f-row{display:flex;align-items:center;gap:6px;margin:5px 0;}
+.f-row>label{flex:0 0 38%;font-size:11px;opacity:.85;}
+.f-row>input[type=range]{flex:1 1 auto;min-width:0;}
+.f-row>.f-val{flex:0 0 30px;text-align:right;font-size:10px;opacity:.7;font-variant-numeric:tabular-nums;}
+.f-row>input[type=color]{flex:0 0 34px;height:20px;padding:0;border:1px solid rgba(128,128,128,.35);background:none;border-radius:3px;cursor:pointer;}
+.f-row>select{flex:1 1 auto;min-width:0;font-size:11px;}
+
+/* ============================================================
+   ▼ 提案2：「選ぶ」は幅広ポップオーバー（キャンバス上に一時的に開く）
+   ============================================================ */
+.pt-scrim{
+ position:absolute;inset:0;z-index:40;
+ background:rgba(0,0,0,.35);
+ display:none;
+}
+.pt-scrim.is-open{display:block;}
+
+.picker{
+ position:absolute;z-index:50;
+ top:10px;left:10px;
+ width:clamp(300px,34vw,520px);
+ max-height:calc(100% - 20px);
+ display:none;
+ flex-direction:column;
+ background:var(--background-color-A);
+ border:1px solid rgba(128,128,128,.4);
+ border-radius:8px;
+ box-shadow:0 12px 40px rgba(0,0,0,.55);
+ overflow:hidden;
+}
+.picker.is-open{display:flex;}
+
+.picker-head{
+ flex:0 0 auto;display:flex;align-items:center;gap:8px;
+ padding:8px 10px;
+ border-bottom:1px solid rgba(128,128,128,.25);
+}
+.picker-head h3{margin:0;font-size:12px;font-weight:bold;flex:0 0 auto;}
+.picker-search{
+ flex:1 1 auto;min-width:0;
+ display:flex;align-items:center;gap:4px;
+ padding:3px 7px;
+ background:rgba(128,128,128,.14);
+ border:1px solid rgba(128,128,128,.25);
+ border-radius:4px;
+}
+.picker-search .material-icons{font-size:14px;opacity:.6;}
+.picker-search input{
+ flex:1 1 auto;min-width:0;
+ background:none;border:none;outline:none;
+ color:inherit;font-size:11px;
+}
+.picker-close{
+ flex:0 0 auto;background:none;border:none;color:inherit;
+ cursor:pointer;opacity:.7;display:inline-flex;padding:2px;border-radius:4px;
+}
+.picker-close:hover{opacity:1;background:rgba(128,128,128,.2);}
+
+.picker-list{
+ flex:1 1 auto;min-height:0;overflow-y:auto;
+ padding:8px;
+ display:grid;
+ grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+ gap:8px;
+ align-content:start;
+}
+.picker-item{
+ display:block;padding:0;overflow:hidden;
+ text-align:left;cursor:pointer;
+ background:var(--btn-bg);
+ border:var(--btn-border);
+ border-radius:6px;
+ transition:var(--btn-transition);
+}
+.picker-item:hover{background:var(--btn-hover-bg);border-color:var(--btn-hover-border-color);}
+.picker-item.is-current{background:var(--btn-active-bg);border-color:var(--btn-active-border-color);box-shadow:var(--btn-active-shadow);}
+.picker-item .pi-name{display:block;padding:4px 7px 3px;font-size:11px;font-weight:bold;}
+.picker-item .pi-desc{display:block;padding:0 7px 4px;font-size:10px;opacity:.6;line-height:1.3;}
+.picker-item img{display:block;width:100%;background:rgba(128,128,128,.12);}
+.picker-empty{grid-column:1/-1;padding:24px 8px;text-align:center;font-size:11px;opacity:.55;}
+
+.picker-foot{
+ flex:0 0 auto;
+ padding:5px 10px;font-size:10px;opacity:.6;
+ border-top:1px solid rgba(128,128,128,.25);
+}
+
+/* ============================================================
+   ▼ 提案3：効果は「コマンド＋ライブプレビュー＋適用/取消」
+   ============================================================ */
+.scope-row{padding:0 0 7px;margin-bottom:7px;border-bottom:1px solid rgba(128,128,128,.25);}
+.scope-row>span{display:block;font-size:10px;opacity:.65;margin-bottom:3px;}
+.seg{display:flex;gap:2px;}
+.seg button{
+ flex:1 1 0;min-width:0;
+ padding:4px 2px;margin:0;
+ font-size:10px;line-height:1.2;text-align:center;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ background:var(--btn-bg);border:var(--btn-border);
+ color:inherit;border-radius:4px;cursor:pointer;
+}
+.seg button.is-on{background:var(--btn-active-bg);border-color:var(--btn-active-border-color);}
+
+#ptFxIdle{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;}
+
+.fx-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 8px 10px;scrollbar-gutter:stable;}
+
+.fx-group-title{
+ display:flex;align-items:baseline;gap:5px;
+ font-size:10px;letter-spacing:.5px;opacity:.75;
+ margin:10px 0 4px;padding-bottom:2px;
+ border-bottom:1px solid rgba(128,128,128,.22);
+}
+.fx-group-title span{font-size:9px;opacity:.6;margin-left:auto;}
+
+/* 適用範囲が「変換」グループにだけ掛かることを、囲みで示す */
+.fx-section{
+ border:1px solid rgba(128,128,128,.28);
+ border-radius:6px;
+ padding:6px;
+ background:rgba(128,128,128,.06);
+}
+
+/* 1列。サムネが小さいと見分けられないため、幅いっぱいに使う */
+.fx-grid{display:flex;flex-direction:column;gap:4px;}
+.fx-chip{
+ display:block;padding:0;overflow:hidden;
+ text-align:left;cursor:pointer;
+ background:var(--btn-bg);border:var(--btn-border);
+ color:inherit;border-radius:5px;
+ transition:var(--btn-transition);
+}
+.fx-chip:hover{background:var(--btn-hover-bg);border-color:var(--btn-hover-border-color);}
+.fx-chip img{display:block;width:100%;background:rgba(128,128,128,.12);}
+.fx-chip .fc-name{
+ display:flex;align-items:center;gap:3px;
+ padding:3px 6px;font-size:11px;line-height:1.3;
+}
+.fx-chip .fc-name span{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fx-chip .fc-name .material-icons{flex:0 0 auto;font-size:12px;opacity:.55;}
+
+/* パラメータを持つ一括型（EnhanceDark）だけ、その場で開いて確定する */
+.fx-inline{
+ grid-column:1/-1;
+ padding:6px 7px;margin:2px 0 4px;
+ background:rgba(128,128,128,.12);
+ border:1px solid rgba(128,128,128,.28);
+ border-radius:5px;
+}
+.fx-inline .fi-title{font-size:10px;font-weight:bold;margin-bottom:2px;}
+.fx-inline .fi-foot{display:flex;gap:5px;margin-top:5px;}
+.fx-inline .fi-foot button{
+ flex:1 1 0;padding:4px;font-size:10px;cursor:pointer;
+ border-radius:4px;border:var(--btn-border);
+ background:var(--btn-bg);color:inherit;
+}
+.fx-inline .fi-foot .is-primary{
+ background:var(--btn-active-bg);border-color:var(--btn-active-border-color);font-weight:bold;
+}
+
+.fx-restore{
+ flex:0 0 auto;
+ display:flex;align-items:center;justify-content:center;gap:4px;
+ margin:0;padding:7px;width:100%;
+ font-size:10px;cursor:pointer;
+ background:var(--btn-bg);color:inherit;
+ border:none;border-top:1px solid rgba(128,128,128,.25);
+}
+.fx-restore:hover:not(:disabled){background:var(--btn-hover-bg);}
+.fx-restore:disabled{opacity:.35;cursor:default;}
+.fx-restore .material-icons{font-size:14px;}
+
+/* 一括適用の結果表示。確認ダイアログを挟まず、実行後に取り消せるようにする */
+.pt-toast{
+ position:absolute;left:50%;bottom:18px;transform:translateX(-50%);
+ z-index:60;display:none;align-items:center;gap:10px;
+ padding:8px 14px;border-radius:6px;
+ background:rgba(20,20,20,.94);color:#f2f2f2;
+ border:1px solid rgba(255,255,255,.18);
+ box-shadow:0 6px 24px rgba(0,0,0,.5);
+ font-size:11px;
+}
+.pt-toast.is-on{display:flex;}
+.pt-toast button{
+ background:none;border:none;color:#ffb9b9;
+ font-size:11px;font-weight:bold;cursor:pointer;text-decoration:underline;padding:0;
+}
+
+/* プレビュー中の設定。一覧を消さず、一覧の下に生やす */
+.fx-preview{
+ margin-top:10px;
+ border:1px solid var(--btn-active-border-color);
+ border-radius:6px;
+ overflow:hidden;
+ background:rgba(128,128,128,.08);
+}
+.fx-preview .pp-head{
+ display:flex;align-items:center;gap:5px;
+ padding:5px 7px;
+ background:var(--btn-active-bg);
+}
+.fx-preview .pp-head .material-icons{font-size:15px;}
+.fx-preview .pp-head b{font-size:11px;}
+.fx-preview>[data-role="settings"]{padding:2px 7px;}
+.fx-preview .pp-note{font-size:10px;opacity:.6;line-height:1.5;margin:4px 7px 0;}
+.fx-preview .pp-foot{
+ display:flex;gap:5px;padding:7px;
+}
+.fx-preview .pp-foot button{
+ flex:1 1 0;padding:6px 4px;font-size:11px;cursor:pointer;
+ border-radius:5px;border:var(--btn-border);
+ background:var(--btn-bg);color:inherit;
+}
+.fx-preview .pp-foot .is-primary{
+ background:var(--btn-active-bg);
+ border-color:var(--btn-active-border-color);
+ font-weight:bold;
+}
+.fx-preview .pp-foot button:hover{background:var(--btn-hover-bg);}
+.fx-preview .pp-foot .is-primary:hover{filter:brightness(1.25);}
+
+/* CSSフィルタで近似できないものは、その旨をピッカー上で明示する */
+.pi-approx{font-size:9px;opacity:.65;}
+
+/* 25 blends のダイアログ */
+.pt-dialog-back{
+ position:absolute;inset:0;z-index:70;
+ display:none;align-items:center;justify-content:center;
+ background:rgba(0,0,0,.45);
+}
+.pt-dialog-back.is-open{display:flex;}
+.pt-dialog{
+ width:clamp(300px,40vw,560px);max-height:80%;
+ display:flex;flex-direction:column;
+ background:var(--background-color-A);
+ border:1px solid rgba(128,128,128,.4);
+ border-radius:8px;
+ box-shadow:0 12px 40px rgba(0,0,0,.55);
+ overflow:hidden;
+}
+.pd-head{display:flex;align-items:center;padding:8px 10px;border-bottom:1px solid rgba(128,128,128,.25);}
+.pd-head b{flex:1 1 auto;font-size:12px;}
+.pd-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:10px;}
+.pd-note{font-size:11px;opacity:.65;margin:0 0 8px;}
+.pd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:6px;}
+.pd-mode{
+ padding:5px 4px;font-size:10px;cursor:pointer;text-align:center;
+ background:var(--btn-bg);border:var(--btn-border);color:inherit;border-radius:4px;
+}
+.pd-mode:hover{background:var(--btn-hover-bg);}
+.pd-mode.is-on{background:var(--btn-active-bg);border-color:var(--btn-active-border-color);font-weight:bold;}
+.pd-foot{display:flex;gap:6px;padding:8px;border-top:1px solid rgba(128,128,128,.25);}
+.pd-foot button{
+ flex:1 1 0;padding:6px;font-size:11px;cursor:pointer;
+ border-radius:5px;border:var(--btn-border);background:var(--btn-bg);color:inherit;
+}
+.pd-foot .is-primary{background:var(--btn-active-bg);border-color:var(--btn-active-border-color);font-weight:bold;}
+
+/* キャンバス上のプレビューバッジ */
+.pv-badge{
+ position:absolute;top:12px;left:50%;transform:translateX(-50%);
+ z-index:30;display:none;align-items:center;gap:6px;
+ padding:5px 12px;border-radius:99px;
+ background:var(--btn-active-bg);
+ border:1px solid var(--btn-active-border-color);
+ box-shadow:0 4px 14px rgba(0,0,0,.4);
+ font-size:11px;
+}
+.pv-badge.is-on{display:flex;}
+.pv-badge .material-icons{font-size:15px;}
+
+.pt-empty{
+ flex:1 1 auto;display:flex;align-items:center;justify-content:center;
+ padding:20px;text-align:center;font-size:11px;opacity:.5;line-height:1.7;
+}
+</style>
+</head>
+<body>
+
+<div class="pt-bar">
+  <h1>パネル再設計プロトタイプ</h1>
+  <label><input type="checkbox" id="ptLight"> ライトモード</label>
+  <span class="pt-hint">左のアイコンでパネル切替 ／ ツール名を押すとピッカー ／ 効果は押すとプレビュー</span>
+</div>
+
+<div class="pt-main">
+
+  <!-- ========== アイコンレール ========== -->
+  <nav class="pt-rail">
+    <button data-panel="pen" class="is-active"><i class="material-icons">brush</i><span>ペン</span></button>
+    <button data-panel="tone"><i class="material-icons">blur_linear</i><span>トーン</span></button>
+    <button data-panel="effect"><i class="material-icons">filter_b_and_w</i><span>効果</span></button>
+    <button data-panel="text2"><i class="material-icons">text_increase</i><span>画像テキスト</span></button>
+  </nav>
+
+  <!-- ========== ペン ========== -->
+  <aside class="pt-panel" data-panel="pen">
+    <div class="panel-head">
+      <span class="ph-title">ペン</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <button class="tool-current" data-picker="pen">
+      <span class="tc-row">
+        <span class="tc-name" data-role="name">Marker</span>
+        <span class="tc-swap"><i class="material-icons">unfold_more</i>変更</span>
+      </span>
+      <img class="tc-thumb" data-role="thumb" src="../../03_images/preset/brush/Marker.webp" alt="">
+    </button>
+    <div class="tool-settings" data-role="settings"></div>
+  </aside>
+
+  <!-- ========== トーン ========== -->
+  <aside class="pt-panel is-hidden" data-panel="tone">
+    <div class="panel-head">
+      <span class="ph-title">トーン</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <button class="tool-current" data-picker="tone">
+      <span class="tc-row">
+        <span class="tc-name" data-role="name">Noise Tone</span>
+        <span class="tc-swap"><i class="material-icons">unfold_more</i>変更</span>
+      </span>
+      <img class="tc-thumb" data-role="thumb" src="../../03_images/preset/tone/ToneNoise.webp" alt="">
+    </button>
+    <div class="tool-settings" data-role="settings"></div>
+  </aside>
+
+  <!-- ========== 効果 ==========
+       選び方はペン／トーン／画像テキストと完全に同じ（カード → 共通ピッカー）。
+       違うのは「選んだ後」だけ＝プレビューして適用／取消する。 -->
+  <aside class="pt-panel is-hidden" data-panel="effect">
+    <div class="panel-head">
+      <span class="ph-title">効果</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+
+    <!-- 待機中 ------------------------------------------------
+         適用範囲を先頭に固定する。「何に効くか」を決めてから効果を押す順序にし、
+         選択は記憶されるので2回目以降は効果を押すだけで済む -->
+    <div id="ptFxIdle">
+      <div class="fx-body">
+
+        <!-- 変換：適用範囲に従う。範囲の選択はこのグループの内側に置き、
+             下の「1枚ずつ調整」には掛からないことを見た目で示す -->
+        <div class="fx-group-title">
+          変換
+          <span>押すと即適用</span>
+        </div>
+        <div class="fx-section">
+          <div class="scope-row">
+            <span>適用範囲</span>
+            <div class="seg" id="ptScope">
+              <button class="is-on" data-scope="selected">選択</button>
+              <button data-scope="page">ページ</button>
+              <button data-scope="all">全体</button>
+            </div>
+          </div>
+          <div class="fx-grid" id="ptFxBatch"></div>
+        </div>
+
+        <div class="fx-group-title">
+          1枚ずつ調整
+          <span>選択中の1枚のみ</span>
+        </div>
+        <div class="fx-grid" id="ptFxSingle"></div>
+
+        <!-- プレビュー中の設定。一覧を消さず、下に生やす -->
+        <section class="fx-preview" id="ptPreviewPane" style="display:none;">
+          <div class="pp-head">
+            <i class="material-icons">visibility</i>
+            <b data-role="name">—</b>
+          </div>
+
+          <div data-role="settings"></div>
+          <p class="pp-note">選択中の画像1枚にだけ効きます。確定するまで元の画像は変更されません。</p>
+          <div class="pp-foot">
+            <button id="ptCancel">取消</button>
+            <button id="ptApply" class="is-primary">適用</button>
+          </div>
+        </section>
+      </div>
+
+      <button class="fx-restore" id="ptRestore" disabled>
+        <i class="material-icons">restore</i>一括適用を元に戻す
+      </button>
+    </div>
+  </aside>
+
+  <!-- ========== 画像テキスト ========== -->
+  <aside class="pt-panel is-hidden" data-panel="text2">
+    <div class="panel-head">
+      <span class="ph-title">画像テキスト</span>
+      <a class="ph-help" href="#" title="ヘルプ"><i class="material-icons">help_outline</i></a>
+    </div>
+    <button class="tool-current" data-picker="text2">
+      <span class="tc-row">
+        <span class="tc-name" data-role="name">Shadow</span>
+        <span class="tc-swap"><i class="material-icons">unfold_more</i>変更</span>
+      </span>
+      <img class="tc-thumb" data-role="thumb" src="../../03_images/preset/text/t2_shadow.webp" alt="">
+    </button>
+    <div class="tool-settings" data-role="settings"></div>
+  </aside>
+
+  <!-- ========== キャンバス ========== -->
+  <div class="pt-canvas-wrap">
+    <svg id="ptPage" viewBox="0 0 420 594" xmlns="http://www.w3.org/2000/svg">
+      <rect width="420" height="594" fill="#ffffff"/>
+      <g stroke="#111" stroke-width="2.5" fill="none">
+        <rect x="24" y="24" width="372" height="150"/>
+        <rect x="24" y="186" width="176" height="180"/>
+        <rect x="212" y="186" width="184" height="180"/>
+        <rect x="24" y="378" width="372" height="192"/>
+      </g>
+      <!-- コマ1：空と地平線 -->
+      <g>
+        <rect x="26" y="26" width="368" height="146" fill="#dfe7f0"/>
+        <rect x="26" y="126" width="368" height="46" fill="#b9c6b0"/>
+        <circle cx="330" cy="66" r="22" fill="#f6e3a8"/>
+        <path d="M60 126 L110 70 L160 126 Z" fill="#8d9aa6"/>
+        <path d="M130 126 L190 60 L250 126 Z" fill="#7a8794"/>
+      </g>
+      <!-- コマ2：人物 -->
+      <g>
+        <rect x="26" y="188" width="172" height="176" fill="#f2e4d8"/>
+        <circle cx="112" cy="248" r="30" fill="#f7d9bf" stroke="#111" stroke-width="2"/>
+        <path d="M82 246 a30 30 0 0 1 60 0 a30 22 0 0 0 -60 0 Z" fill="#3b3b3b"/>
+        <circle cx="101" cy="250" r="3.2" fill="#111"/><circle cx="123" cy="250" r="3.2" fill="#111"/>
+        <path d="M104 264 q8 6 16 0" stroke="#111" stroke-width="2" fill="none"/>
+        <path d="M112 280 L112 336 M112 292 L86 316 M112 292 L138 316 M112 336 L94 362 M112 336 L130 362"
+              stroke="#111" stroke-width="6" stroke-linecap="round"/>
+      </g>
+      <!-- コマ3：建物 -->
+      <g>
+        <rect x="214" y="188" width="180" height="176" fill="#cdd6de"/>
+        <rect x="236" y="236" width="60" height="128" fill="#9aa7b4" stroke="#111" stroke-width="2"/>
+        <rect x="308" y="206" width="64" height="158" fill="#8593a1" stroke="#111" stroke-width="2"/>
+        <g fill="#f4efc9">
+          <rect x="246" y="250" width="14" height="18"/><rect x="270" y="250" width="14" height="18"/>
+          <rect x="246" y="284" width="14" height="18"/><rect x="270" y="284" width="14" height="18"/>
+          <rect x="318" y="224" width="16" height="20"/><rect x="344" y="224" width="16" height="20"/>
+          <rect x="318" y="262" width="16" height="20"/><rect x="344" y="262" width="16" height="20"/>
+        </g>
+      </g>
+      <!-- コマ4：夕景 -->
+      <g>
+        <rect x="26" y="380" width="368" height="188" fill="#f0cba8"/>
+        <circle cx="210" cy="486" r="46" fill="#e88a5a"/>
+        <rect x="26" y="512" width="368" height="56" fill="#5d5348"/>
+        <path d="M60 512 L96 452 L132 512 Z M150 512 L200 434 L250 512 Z M268 512 L312 460 L356 512 Z" fill="#4a4239"/>
+      </g>
+      <g id="ptInserted"></g>
+    </svg>
+
+    <div class="pv-badge" id="ptBadge"><i class="material-icons">visibility</i><span data-role="text">プレビュー中</span></div>
+    <div class="pt-toast" id="ptToast"><span data-role="text"></span><button id="ptToastUndo">元に戻す</button></div>
+    <div class="pt-scrim" id="ptScrim"></div>
+
+    <!-- 25 blends のダイアログ（既存 handleBlend() 相当。押すと直接ここが開く） -->
+    <div class="pt-dialog-back" id="ptBlendBack">
+      <div class="pt-dialog">
+        <div class="pd-head"><b>25 blends</b>
+          <button class="picker-close" id="ptBlendClose"><i class="material-icons">close</i></button>
+        </div>
+        <div class="pd-body">
+          <p class="pd-note">重ねる画像と合成モードを選ぶダイアログです。</p>
+          <div class="pd-grid" id="ptBlendGrid"></div>
+        </div>
+        <div class="pd-foot">
+          <button id="ptBlendCancel">取消</button>
+          <button class="is-primary" id="ptBlendApply">合成する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ピッカー -->
+    <div class="picker" id="ptPicker">
+      <div class="picker-head">
+        <h3 data-role="title">ペンを選ぶ</h3>
+        <div class="picker-search">
+          <i class="material-icons">search</i>
+          <input type="text" id="ptSearch" placeholder="名前で絞り込む">
+        </div>
+        <button class="picker-close" id="ptPickerClose"><i class="material-icons">close</i></button>
+      </div>
+      <div class="picker-list" id="ptPickerList"></div>
+      <div class="picker-foot">選ぶと閉じます　／　Esc でも閉じます</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   データ定義
+   ============================================================ */
+var IMG_BRUSH='../../03_images/preset/brush/';
+var IMG_TONE ='../../03_images/preset/tone/';
+var IMG_TEXT ='../../03_images/preset/text/';
+var IMG_FX   ='../../03_images/preset/effect/';
+
+// --- ツール型（ペン／トーン／画像テキスト）------------------
+var TOOLS={
+ pen:{
+  title:'ペンを選ぶ',
+  items:[
+   {id:'Marker',    name:'Marker',     desc:'半透明で重ねられる',   img:IMG_BRUSH+'Marker.webp',
+    settings:[['color','色','#000000'],['size','太さ',5,1,150],['opacity','不透明度',100,1,100]]},
+   {id:'Ink',       name:'Ink',        desc:'入り抜きのあるペン',   img:IMG_BRUSH+'Ink.webp',
+    settings:[['color','色','#000000'],['size','太さ',5,1,150]]},
+   {id:'Crayon',    name:'Crayon',     desc:'かすれた質感',         img:IMG_BRUSH+'Crayon.webp',
+    settings:[['color','色','#000000'],['size','太さ',5,1,150],['opacity','不透明度',100,1,100]]},
+   {id:'Pencil',    name:'Pencil',     desc:'影と線種を指定できる', img:IMG_BRUSH+'Pencil.webp',
+    settings:[['color','色','#000000'],['size','太さ',5,1,150],['opacity','不透明度',100,1,100],
+              ['group','影'],['color','影の色','#000000'],['size','影の太さ',0,0,150],
+              ['size','X オフセット',5,1,150],['size','Y オフセット',5,1,150],
+              ['select','線種',['solid','dashed','dotted']]]},
+   {id:'OutlinePen',name:'OutlinePen', desc:'二重の縁取り付き',     img:IMG_BRUSH+'OutlinePen.webp',
+    settings:[['color','本体の色','#000000'],['size','本体の太さ',10,1,150],
+              ['group','縁取り1'],['color','色','#ffffff'],['size','太さ',2,1,150],['opacity','不透明度',100,1,100],
+              ['group','縁取り2'],['color','色','#ff0000'],['size','太さ',1,1,150],['opacity','不透明度',100,1,100]]},
+   {id:'Circle',    name:'Circle',     desc:'円を連ねた線',         img:IMG_BRUSH+'Circle.webp',
+    settings:[['color','色','#000000'],['size','太さ',5,1,150],
+              ['group','影'],['color','影の色','#000000'],['size','影の太さ',0,0,150]]},
+   {id:'Mosaic',    name:'Mosaic',     desc:'なぞった所をぼかす',   img:IMG_BRUSH+'Mosaic1.webp',
+    settings:[['size','ブラシ径',40,1,250],['size','モザイク粒',8,1,250]]},
+   {id:'Eraser',    name:'Eraser',     desc:'消しゴム',             img:IMG_BRUSH+'Eraser.webp',
+    settings:[['size','太さ',5,1,150]]}
+  ]
+ },
+ tone:{
+  title:'トーンを選ぶ',
+  items:[
+   {id:'Tone',        name:'Tone',          desc:'網点。濃度と階調を指定', img:IMG_TONE+'Tone.webp',
+    settings:[['select','点の形',['circle','square','triangle','star','cross','heart']],['color','色','#000000'],
+              ['size','点の大きさ',5,1,100],['size','点の間隔',5,1,100],
+              ['group','グラデーション'],['select','方向',['上→下','下→上','左→右','右→左']],
+              ['size','開始',0,0,100],['size','終了',100,0,100]]},
+   {id:'ToneNoise',   name:'Noise Tone',    desc:'砂目状のノイズ',         img:IMG_TONE+'ToneNoise.webp',
+    settings:[['color','色','#000000'],['size','ノイズ最大',95,0,100],['size','ノイズ最小',100,0,100],
+              ['group','グラデーション'],['size','開始 X',0,0,100],['size','開始 Y',0,0,100],
+              ['size','終了 X',100,0,100],['size','終了 Y',100,0,100]]},
+   {id:'ToneSnow',    name:'Snow Tone',     desc:'手前と奥の粒で雪を表現', img:IMG_TONE+'ToneSnow.webp',
+    settings:[['color','手前の色','#ffffff'],['color','奥の色','#cccccc'],['size','密度',1000,1,3000],
+              ['size','手前の粒',10,1,50],['size','奥の粒',3,1,50],['size','角度',140,0,180]]},
+   {id:'SpeedLine',   name:'Speed Line',    desc:'流線。方向を選べる',     img:IMG_TONE+'SpeedLine.webp',
+    settings:[['color','色','#000000'],['select','向き',['横','縦','十字']],
+              ['size','密度',150,1,1500],['size','開始',0,0,100],['size','終了',100,0,100]]},
+   {id:'FocusingLine',name:'Focusing Line', desc:'集中線。中心を動かせる', img:IMG_TONE+'FocusingLine.webp',
+    settings:[['color','色','#000000'],['size','本数',200,1,500],['size','線の長さ',50,1,500],
+              ['size','内半径',20,1,200],['size','外半径',60,1,200],
+              ['group','中心'],['size','中心 X',0,0,100],['size','中心 Y',0,0,100]]}
+  ]
+ },
+ text2:{
+  title:'文字スタイルを選ぶ',
+  items:[
+   {id:'shadow', name:'Shadow',  desc:'落ち影付き',       img:IMG_TEXT+'t2_shadow.webp'},
+   {id:'wild',   name:'Wild',    desc:'荒々しい輪郭',     img:IMG_TEXT+'t2_wild.webp'},
+   {id:'scratch',name:'Scratch', desc:'引っかき傷',       img:IMG_TEXT+'t2_scratch.webp'},
+   {id:'broken', name:'Broken',  desc:'砕けた形',         img:IMG_TEXT+'t2_broken.webp'},
+   {id:'cloud',  name:'Cloud',   desc:'もこもこ',         img:IMG_TEXT+'t2_cloud.webp'},
+   {id:'layered',name:'Layered', desc:'多重の縁取り',     img:IMG_TEXT+'t2_layered.webp'},
+   {id:'mesh',   name:'Mesh',    desc:'網掛け',           img:IMG_TEXT+'t2_mesh.webp'},
+   {id:'thrill', name:'Thrill',  desc:'震えた線',         img:IMG_TEXT+'t2_thrill.webp'},
+   {id:'zebra',  name:'Zebra',   desc:'縞模様',           img:IMG_TEXT+'t2_zebra.webp'}
+  ],
+  commonSettings:[
+   ['text','文字','ドドドド'],
+   ['group','体裁'],['color','文字色','#111111'],['color','縁の色','#ffffff'],
+   ['size','サイズ',48,7,150],['size','縁の太さ',2,0,20],
+   ['select','向き',['横書き','縦書き']]
+  ]
+ }
+};
+
+// --- 効果 ----------------------------------------------------
+// batch: 一括適用に対応するか。js/sidebar/effect/effect-batch.js の
+//        EFFECT_BATCH_TYPES と同じ区分（Glow/GLFX/Blendは1枚ずつ調整する種類）
+// filter: プレビュー／適用の見た目。params の値を受け取って CSS filter を返す
+var EFFECTS=[
+ {id:'c2bwLight', batch:true,  name:'Color2BW Light',   note:'白めのモノクロ2値', img:IMG_FX+'color2monoLight.webp',
+  params:[], filter:function(){return 'grayscale(1) brightness(1.15) contrast(2.2)';}},
+ {id:'c2bwDark',  batch:true,  name:'Color2BW Dark',    note:'黒めのモノクロ2値', img:IMG_FX+'color2monoDark.webp',
+  params:[], filter:function(){return 'grayscale(1) brightness(0.82) contrast(2.6)';}},
+ {id:'c2bwRough', batch:true,  name:'Color2BW Rough',   note:'粗いモノクロ',      img:IMG_FX+'color2monoRough.webp',
+  params:[], filter:function(){return 'grayscale(1) contrast(3.2)';}},
+ {id:'c2bwSimple',batch:true,  name:'Color2BW Simple',  note:'単純なモノクロ',    img:IMG_FX+'color2monoSimple.webp',
+  params:[], filter:function(){return 'grayscale(1)';}},
+ {id:'c2black',   batch:true,  name:'Color2Black LightColor', note:'色を残したモノクロ寄り', img:IMG_FX+'Color2BlackLightColor.webp',
+  params:[], filter:function(){return 'saturate(0.35) contrast(1.25)';}},
+ // 一括型だが唯一パラメータを持つ。押した場所で開いて確定する
+ {id:'enhance',   batch:true,  name:'EnhanceDark',      note:'暗部を締める',      img:IMG_FX+'enhanceDark.webp',
+  params:[['強さ',20,1,100]],
+  filter:function(p){return 'brightness('+(1.1-p[0]/100*0.45)+') contrast('+(1+p[0]/100*1.2)+')';}},
+
+ {id:'glow',      batch:false, name:'Glow',             note:'発光させる',        img:IMG_FX+'glow.webp',
+  params:[['広がり',20,0,100],['明るさ',40,0,100]],
+  filter:function(p){return 'brightness('+(1+p[1]/100*0.5)+') drop-shadow(0 0 '+(p[0]/100*24)+'px rgba(255,240,190,.95))';}},
+ // GLFX は15種のサブフィルタを持つ（js/ui/glfx-ui.js の <select id="glfxFilter">）。
+ // 中身は GLFX_FILTERS 側で切り替える
+ {id:'glfx',      batch:false, name:'GLFX',             note:'15種から選んで調整', img:IMG_FX+'glfx.webp',
+  glfx:true, params:[]},
+ // ダイアログが開くだけなので、ピッカーには載せない
+ {id:'blend',     batch:false, name:'25 blends',        note:'複数レイヤーの合成',img:IMG_FX+'25_blend.webp',
+  external:true}
+];
+
+function findEffect(id){
+ var found=null;
+ EFFECTS.forEach(function(f){if(f.id===id)found=f;});
+ return found;
+}
+
+// --- GLFX のサブフィルタ（js/ui/glfx-ui.js と同じ並び）--------
+// filter はプロトタイプ用の近似。approx:true はCSSフィルタでは表現できないもの
+var GLFX_FILTERS=[
+ {id:'brightnessContrast',name:'Brightness / Contrast',desc:'明るさとコントラスト',
+  params:[['明るさ',0,-100,100],['コントラスト',0,-100,100]],
+  filter:function(p){return 'brightness('+(1+p[0]/100)+') contrast('+(1+p[1]/100)+')';}},
+ {id:'hueSaturation',name:'Hue / Saturation',desc:'色相と彩度',
+  params:[['色相',0,-100,100],['彩度',0,-100,100]],
+  filter:function(p){return 'hue-rotate('+(p[0]*1.8)+'deg) saturate('+(1+p[1]/100)+')';}},
+ {id:'sepia',name:'Sepia',desc:'セピア調',
+  params:[['強さ',50,0,100]],
+  filter:function(p){return 'sepia('+(p[0]/100)+')';}},
+ {id:'unsharpMask',name:'Unsharp Mask',desc:'輪郭を立てる',
+  params:[['半径',20,0,100],['強さ',50,0,100]],
+  filter:function(p){return 'contrast('+(1+p[1]/100*0.8)+') saturate('+(1+p[0]/200)+')';}},
+ {id:'vibrance',name:'Vibrance',desc:'鮮やかさ',
+  params:[['強さ',50,-100,100]],
+  filter:function(p){return 'saturate('+(1+p[0]/100)+')';}},
+ {id:'vignette',name:'Vignette',desc:'周辺を落とす',approx:true,
+  params:[['大きさ',50,0,100],['強さ',50,0,100]],
+  filter:function(p){return 'brightness('+(1-p[1]/300)+') contrast('+(1+p[0]/200)+')';}},
+ {id:'lensBlur',name:'Lens Blur',desc:'レンズぼけ',
+  params:[['半径',10,0,50]],
+  filter:function(p){return 'blur('+(p[0]/10)+'px)';}},
+ {id:'triangleBlur',name:'Triangle Blur',desc:'均一なぼかし',
+  params:[['半径',10,0,50]],
+  filter:function(p){return 'blur('+(p[0]/12)+'px)';}},
+ {id:'zoomBlur',name:'Zoom Blur',desc:'放射状のぼかし',approx:true,
+  params:[['強さ',20,0,100]],
+  filter:function(p){return 'blur('+(p[0]/40)+'px) contrast('+(1+p[0]/200)+')';}},
+ {id:'colorHalftone',name:'Color Halftone',desc:'カラー網点',approx:true,
+  params:[['点の大きさ',10,1,50],['角度',0,0,180]],
+  filter:function(p){return 'contrast('+(1.3+p[0]/50)+') saturate(1.4)';}},
+ {id:'dotScreen',name:'Dot Screen',desc:'モノクロ網点',approx:true,
+  params:[['点の大きさ',10,1,50],['角度',0,0,180]],
+  filter:function(p){return 'grayscale(1) contrast('+(1.5+p[0]/25)+')';}},
+ {id:'edgeWork',name:'Edge Work',desc:'輪郭抽出',approx:true,
+  params:[['半径',10,1,50]],
+  filter:function(p){return 'grayscale(1) invert(1) contrast('+(1+p[0]/20)+')';}},
+ {id:'hexagonalPixelate',name:'Hexagonal Pixelate',desc:'六角モザイク',approx:true,
+  params:[['大きさ',20,1,80]],
+  filter:function(p){return 'blur('+(p[0]/20)+'px) contrast(1.2)';}},
+ {id:'ink',name:'Ink',desc:'ペン画風',
+  params:[['強さ',30,0,100]],
+  filter:function(p){return 'grayscale(1) contrast('+(1.5+p[0]/25)+') brightness(1.1)';}},
+ {id:'swirl',name:'Swirl',desc:'渦巻き',approx:true,
+  params:[['角度',30,-180,180],['半径',40,1,100]],
+  filter:function(p){return 'hue-rotate('+p[0]+'deg) saturate(1.2)';}}
+];
+
+function findGlfx(id){
+ var found=null;
+ GLFX_FILTERS.forEach(function(f){if(f.id===id)found=f;});
+ return found;
+}
+var glfxCurrent='brightnessContrast';
+
+/* ============================================================
+   汎用
+   ============================================================ */
+function el(id){return document.getElementById(id);}
+
+// 設定行のマークアップを組み立てる（本体の addSlider/addColor 相当）
+function buildSettings(defs,onInput){
+ var host=document.createElement('div');
+ if(!defs||!defs.length){
+  host.innerHTML='<p style="font-size:11px;opacity:.5;padding:10px 2px;line-height:1.6;">'
+   +'調整できる項目はありません。</p>';
+  return host;
+ }
+ defs.forEach(function(d,idx){
+  var kind=d[0];
+  if(kind==='group'){
+   var g=document.createElement('div');
+   g.className='settings-group-title';
+   g.textContent=d[1];
+   host.appendChild(g);
+   return;
+  }
+  var row=document.createElement('div');
+  row.className='f-row';
+  var lab=document.createElement('label');
+  lab.textContent=d[1];
+  row.appendChild(lab);
+
+  if(kind==='color'){
+   var c=document.createElement('input');
+   c.type='color'; c.value=d[2];
+   row.appendChild(c);
+  }else if(kind==='select'){
+   var s=document.createElement('select');
+   d[2].forEach(function(o){
+    var op=document.createElement('option'); op.textContent=o; s.appendChild(op);
+   });
+   row.appendChild(s);
+  }else if(kind==='text'){
+   var t=document.createElement('input');
+   t.type='text'; t.value=d[2];
+   t.style.flex='1 1 auto'; t.style.minWidth='0'; t.style.fontSize='11px';
+   row.appendChild(t);
+  }else{ // size / opacity → スライダー
+   var r=document.createElement('input');
+   r.type='range'; r.min=d[3]; r.max=d[4]; r.value=d[2];
+   var v=document.createElement('span');
+   v.className='f-val'; v.textContent=d[2];
+   r.addEventListener('input',function(){
+    v.textContent=r.value;
+    if(onInput)onInput(idx,Number(r.value));
+   });
+   row.appendChild(r); row.appendChild(v);
+  }
+  host.appendChild(row);
+ });
+ return host;
+}
+
+/* ============================================================
+   パネル切替
+   ============================================================ */
+var rail=document.querySelectorAll('.pt-rail button');
+for(var i=0;i<rail.length;i++){
+ rail[i].addEventListener('click',function(){
+  var target=this.dataset.panel;
+  for(var j=0;j<rail.length;j++)rail[j].classList.toggle('is-active',rail[j]===this);
+  var panels=document.querySelectorAll('.pt-panel');
+  for(var k=0;k<panels.length;k++){
+   panels[k].classList.toggle('is-hidden',panels[k].dataset.panel!==target);
+  }
+  cancelPreview();
+  closePicker();
+  closeInline();
+ });
+}
+
+/* ============================================================
+   ツール型パネル
+   ============================================================ */
+var current={pen:'Marker',tone:'ToneNoise',text2:'shadow'};
+
+function renderTool(kind){
+ var conf=TOOLS[kind];
+ var item=null;
+ conf.items.forEach(function(it){if(it.id===current[kind])item=it;});
+ if(!item)return;
+
+ var panel=document.querySelector('.pt-panel[data-panel="'+kind+'"]');
+ panel.querySelector('[data-role="name"]').textContent=item.name;
+ panel.querySelector('[data-role="thumb"]').src=item.img;
+
+ var defs=item.settings||conf.commonSettings||[];
+ var host=panel.querySelector('[data-role="settings"]');
+ host.innerHTML='';
+ host.appendChild(buildSettings(defs));
+
+ // 画像テキストは「挿入する」までが1操作なので、確定ボタンを持つ
+ if(kind==='text2'){
+  var b=document.createElement('button');
+  b.textContent='キャンバスに挿入';
+  b.style.cssText='width:100%;margin-top:10px;padding:7px;font-size:11px;cursor:pointer;'
+   +'border-radius:5px;font-weight:bold;border:1px solid var(--btn-active-border-color);'
+   +'background:var(--btn-active-bg);color:inherit;';
+  b.addEventListener('click',function(){insertText(item.name);});
+  host.appendChild(b);
+ }
+}
+
+var insertedCount=0;
+function insertText(styleName){
+ insertedCount++;
+ var y=430+((insertedCount-1)%3)*44;
+ var g=document.createElementNS('http://www.w3.org/2000/svg','text');
+ g.setAttribute('x','60'); g.setAttribute('y',String(y));
+ g.setAttribute('font-size','40');
+ g.setAttribute('font-weight','bold');
+ g.setAttribute('fill','#1a1a1a');
+ g.setAttribute('stroke','#ffffff');
+ g.setAttribute('stroke-width','5');
+ g.setAttribute('paint-order','stroke');
+ g.textContent='ドドドド';
+ el('ptInserted').appendChild(g);
+}
+
+/* ============================================================
+   ピッカー（幅広ポップオーバー）
+   ペン／トーン／画像テキスト／効果 の4つとも、選ぶ操作はここに一本化する。
+   違いが出るのは「選んだ後」の pick() の中だけ。
+   ============================================================ */
+var pickerKind=null;
+
+// 4種を同じ形（title / items / currentId）に揃えて扱う
+function pickerConfig(kind){
+ if(kind==='effect'){
+  return {
+   title:'効果を選ぶ',
+   currentId:null,          // コマンドなので「現在の効果」は存在しない
+   // 25 blends はダイアログが開くだけなので一覧に載せない
+   items:EFFECTS.filter(function(fx){return !fx.external;}).map(function(fx){
+    return {id:fx.id,name:fx.name,desc:fx.note,img:fx.img};
+   })
+  };
+ }
+ if(kind==='glfx'){
+  return {
+   title:'GLFX のフィルタを選ぶ',
+   currentId:glfxCurrent,
+   items:GLFX_FILTERS.map(function(f){
+    return {id:f.id,name:f.name,desc:f.desc,img:IMG_FX+'glfx.webp',
+            // サムネに実際の効果を掛けて見せる
+            thumbFilter:f.filter(f.params.map(function(p){return p[1];})),
+            approx:!!f.approx};
+   })
+  };
+ }
+ return {title:TOOLS[kind].title,currentId:current[kind],items:TOOLS[kind].items};
+}
+
+// 選んだ後の振る舞いだけが操作の性質で分かれる
+function pick(kind,id){
+ if(kind==='glfx'){
+  glfxCurrent=id;
+  closePicker();
+  renderGlfxSettings();
+  return;
+ }
+ if(kind==='effect'){
+  var fx=findEffect(id);
+  if(!fx)return;
+  closePicker();
+  // ピッカーから選んでも、パネルのチップから押したときと同じ結果になる
+  var chip=document.querySelector('#ptFxBatch .fx-chip[data-fx="'+id+'"]');
+  activateEffect(fx,chip);
+  return;
+ }
+ current[kind]=id;
+ renderTool(kind);
+ closePicker();
+}
+
+function openPicker(kind){
+ pickerKind=kind;
+ el('ptPicker').querySelector('[data-role="title"]').textContent=pickerConfig(kind).title;
+ el('ptSearch').value='';
+ renderPickerList('');
+ el('ptPicker').classList.add('is-open');
+ el('ptScrim').classList.add('is-open');
+ el('ptSearch').focus();
+}
+function closePicker(){
+ pickerKind=null;
+ el('ptPicker').classList.remove('is-open');
+ el('ptScrim').classList.remove('is-open');
+}
+function renderPickerList(q){
+ var list=el('ptPickerList');
+ list.innerHTML='';
+ var kind=pickerKind;
+ var conf=pickerConfig(kind);
+ var needle=q.trim().toLowerCase();
+ var hit=0;
+ conf.items.forEach(function(it){
+  if(needle && it.name.toLowerCase().indexOf(needle)<0 && it.desc.toLowerCase().indexOf(needle)<0)return;
+  hit++;
+  var b=document.createElement('button');
+  b.className='picker-item'+(it.id===conf.currentId?' is-current':'');
+  b.innerHTML='<span class="pi-name"></span><span class="pi-desc"></span>';
+  b.querySelector('.pi-name').textContent=it.name;
+  var descEl=b.querySelector('.pi-desc');
+  descEl.textContent=it.desc;
+  if(it.approx){
+   var ap=document.createElement('span');
+   ap.className='pi-approx';
+   ap.textContent='（試作では近似表示）';
+   descEl.appendChild(ap);
+  }
+  var im=document.createElement('img');
+  im.src=it.img; im.alt='';
+  if(it.thumbFilter)im.style.filter=it.thumbFilter;
+  b.appendChild(im);
+  b.addEventListener('click',function(){pick(kind,it.id);});
+  list.appendChild(b);
+ });
+ if(!hit){
+  var e=document.createElement('div');
+  e.className='picker-empty';
+  e.textContent='「'+q+'」に一致するものはありません';
+  list.appendChild(e);
+ }
+}
+
+document.querySelectorAll('.tool-current').forEach(function(b){
+ b.addEventListener('click',function(){openPicker(this.dataset.picker);});
+});
+el('ptPickerClose').addEventListener('click',closePicker);
+el('ptScrim').addEventListener('click',function(){closePicker();cancelPreview();});
+el('ptSearch').addEventListener('input',function(){renderPickerList(this.value);});
+document.addEventListener('keydown',function(e){
+ if(e.key!=='Escape')return;
+ if(el('ptBlendBack').classList.contains('is-open'))closeBlendDialog();
+ else if(pickerKind)closePicker();
+ else if(previewFx)cancelPreview();
+});
+
+/* ============================================================
+   効果：コマンド一覧 → ライブプレビュー → 適用／取消
+   ============================================================ */
+var committedFilter='';   // 適用済み（確定した見た目）
+var previewFx=null;       // プレビュー中の効果
+var previewParams=[];
+
+// 適用範囲ごとの対象枚数（本番は effectIsBatchTarget() で数える）
+var SCOPE_COUNT={selected:1,page:4,all:12};
+var scope='selected';
+
+function scopeLabel(){
+ if(scope==='selected')return '選択中の画像';
+ if(scope==='page')return 'このページの画像';
+ return '全ページの画像';
+}
+
+// 一覧は消さない。プレビュー用の設定を一覧の下に出し入れするだけ
+function setPreviewMode(on){
+ el('ptPreviewPane').style.display=on?'':'none';
+ el('ptBadge').classList.toggle('is-on',on);
+}
+
+/* ---- 一括型：押したら即実行し、トーストで取り消せるようにする ---- */
+var undoFilter=null;   // 直前の一括適用を取り消すための退避
+
+function runBatch(fx,params){
+ undoFilter=committedFilter;
+ committedFilter=(committedFilter?committedFilter+' ':'')+fx.filter(params||[]);
+ el('ptPage').style.filter=committedFilter;
+ el('ptRestore').disabled=false;
+ showToast(fx.name+' を'+scopeLabel()+' '+SCOPE_COUNT[scope]+'枚に適用しました');
+}
+
+var toastTimer=null;
+function showToast(msg,canUndo){
+ var t=el('ptToast');
+ t.querySelector('[data-role="text"]').textContent=msg;
+ el('ptToastUndo').style.display=(canUndo===false)?'none':'';
+ t.classList.add('is-on');
+ if(toastTimer)clearTimeout(toastTimer);
+ toastTimer=setTimeout(function(){t.classList.remove('is-on');},6000);
+}
+function undoBatch(){
+ if(undoFilter===null)return;
+ committedFilter=undoFilter;
+ undoFilter=null;
+ el('ptPage').style.filter=committedFilter;
+ el('ptRestore').disabled=true;
+ el('ptToast').classList.remove('is-on');
+}
+
+/* ---- 効果チップの描画 ---- */
+function renderFxGrids(){
+ renderFxGrid(el('ptFxBatch'),true);
+ renderFxGrid(el('ptFxSingle'),false);
+}
+function renderFxGrid(host,isBatch){
+ host.innerHTML='';
+ EFFECTS.forEach(function(fx){
+  if(!!fx.batch!==isBatch)return;
+  var b=document.createElement('button');
+  b.className='fx-chip';
+  b.dataset.fx=fx.id;
+  var im=document.createElement('img');
+  im.src=fx.img; im.alt='';
+  var nm=document.createElement('span');
+  nm.className='fc-name';
+  var tx=document.createElement('span');
+  tx.textContent=fx.name;
+  nm.appendChild(tx);
+  // 押した後どうなるかを、押す前にアイコンで示す
+  var mark=fx.external?'open_in_new':(fx.batch?(fx.params.length?'tune':''):'visibility');
+  if(mark){
+   var ic=document.createElement('i');
+   ic.className='material-icons';
+   ic.textContent=mark;
+   ic.title=fx.external?'別ウィンドウが開きます'
+     :(fx.batch?'数値を決めてから適用します':'プレビューしてから適用します');
+   nm.appendChild(ic);
+  }
+  b.appendChild(im); b.appendChild(nm);
+  b.addEventListener('click',function(){activateEffect(fx,b);});
+  host.appendChild(b);
+ });
+}
+
+// 効果を押したときの分岐。押す前にアイコンで予告してある3通りだけ
+function activateEffect(fx,chipEl){
+ closeInline();
+ if(fx.external){          // 押したらダイアログが直接開く
+  openBlendDialog();
+  return;
+ }
+ if(!fx.batch){
+  startPreview(fx);
+  // GLFX は15種から選ぶのが前提なので、押した時点でピッカーまで開く
+  if(fx.glfx)openPicker('glfx');
+  return;
+ }
+ if(!fx.params.length){    // 一括型・パラメータなし → 即実行
+  runBatch(fx,[]);
+  return;
+ }
+ openInline(fx,chipEl);    // 一括型・パラメータあり → その場で開く
+}
+
+/* ---- パラメータ付き一括型（EnhanceDark）のインライン展開 ---- */
+function closeInline(){
+ var old=document.querySelector('.fx-inline');
+ if(old)old.remove();
+}
+function openInline(fx,chipEl){
+ var vals=fx.params.map(function(p){return p[1];});
+ var box=document.createElement('div');
+ box.className='fx-inline';
+ var t=document.createElement('div');
+ t.className='fi-title';
+ t.textContent=fx.name;
+ box.appendChild(t);
+ box.appendChild(buildSettings(
+  fx.params.map(function(p){return ['size',p[0],p[1],p[2],p[3]];}),
+  function(i,v){vals[i]=v;}
+ ));
+ var foot=document.createElement('div');
+ foot.className='fi-foot';
+ var cancel=document.createElement('button');
+ cancel.textContent='取消';
+ cancel.addEventListener('click',closeInline);
+ var ok=document.createElement('button');
+ ok.className='is-primary';
+ ok.textContent='適用';
+ ok.addEventListener('click',function(){runBatch(fx,vals);closeInline();});
+ foot.appendChild(cancel); foot.appendChild(ok);
+ box.appendChild(foot);
+ chipEl.parentNode.insertBefore(box,chipEl.nextSibling);
+}
+
+function startPreview(fx){
+ previewFx=fx;
+ var pane=el('ptPreviewPane');
+ pane.querySelector('[data-role="name"]').textContent=fx.name;
+
+ if(fx.glfx){
+  renderGlfxSettings();
+ }else{
+  previewParams=(fx.params||[]).map(function(p){return p[1];});
+  var defs=(fx.params||[]).map(function(p){return ['size',p[0],p[1],p[2],p[3]];});
+  var host=pane.querySelector('[data-role="settings"]');
+  host.innerHTML='';
+  host.appendChild(buildSettings(defs,function(idx,val){
+   previewParams[idx]=val;
+   paintPreview();
+  }));
+ }
+
+ setPreviewMode(true);
+ el('ptBadge').querySelector('[data-role="text"]').textContent=fx.name+' をプレビュー中';
+ paintPreview();
+ pane.scrollIntoView({block:'nearest'});
+}
+
+// GLFX：選ばれているサブフィルタの設定に差し替える。
+// 見出しに「GLFX ─ Dot Screen」と出すので、枠内に選択カードは置かない
+function renderGlfxSettings(){
+ var f=findGlfx(glfxCurrent);
+ if(!f)return;
+ el('ptPreviewPane').querySelector('[data-role="name"]').textContent='GLFX ─ '+f.name;
+ previewParams=f.params.map(function(p){return p[1];});
+ var host=el('ptPreviewPane').querySelector('[data-role="settings"]');
+ host.innerHTML='';
+ host.appendChild(buildSettings(
+  f.params.map(function(p){return ['size',p[0],p[1],p[2],p[3]];}),
+  function(idx,val){previewParams[idx]=val;paintPreview();}
+ ));
+ paintPreview();
+}
+
+// プレビュー中の filter。GLFX は選択中サブフィルタのものを使う
+function currentPreviewFilter(){
+ if(!previewFx)return '';
+ if(previewFx.glfx){
+  var f=findGlfx(glfxCurrent);
+  return f?f.filter(previewParams):'';
+ }
+ return previewFx.filter(previewParams);
+}
+
+function paintPreview(){
+ if(!previewFx)return;
+ el('ptPage').style.filter=(committedFilter?committedFilter+' ':'')+currentPreviewFilter();
+}
+
+function cancelPreview(){
+ if(!previewFx)return;
+ previewFx=null;
+ el('ptPage').style.filter=committedFilter;
+ setPreviewMode(false);
+}
+
+function applyPreview(){
+ if(!previewFx)return;
+ committedFilter=(committedFilter?committedFilter+' ':'')+currentPreviewFilter();
+ previewFx=null;
+ el('ptPage').style.filter=committedFilter;
+ setPreviewMode(false);
+}
+
+el('ptCancel').addEventListener('click',cancelPreview);
+el('ptApply').addEventListener('click',applyPreview);
+el('ptToastUndo').addEventListener('click',undoBatch);
+el('ptRestore').addEventListener('click',undoBatch);
+
+/* ---- 25 blends のダイアログ ---- */
+var BLEND_MODES=['normal','multiply','screen','overlay','darken','lighten','color-dodge',
+ 'color-burn','hard-light','soft-light','difference','exclusion','hue','saturation',
+ 'color','luminosity','plus-lighter','add','subtract','divide','linear-burn',
+ 'vivid-light','pin-light','hard-mix','reflect'];
+
+function openBlendDialog(){
+ var g=el('ptBlendGrid');
+ if(!g.childNodes.length){
+  BLEND_MODES.forEach(function(m,i){
+   var b=document.createElement('button');
+   b.className='pd-mode'+(i===0?' is-on':'');
+   b.textContent=m;
+   b.addEventListener('click',function(){
+    g.querySelectorAll('.pd-mode').forEach(function(x){x.classList.toggle('is-on',x===b);});
+   });
+   g.appendChild(b);
+  });
+ }
+ el('ptBlendBack').classList.add('is-open');
+}
+function closeBlendDialog(){el('ptBlendBack').classList.remove('is-open');}
+
+el('ptBlendClose').addEventListener('click',closeBlendDialog);
+el('ptBlendCancel').addEventListener('click',closeBlendDialog);
+el('ptBlendApply').addEventListener('click',function(){
+ closeBlendDialog();
+ showToast('25 blends で合成しました',false);
+});
+el('ptBlendBack').addEventListener('click',function(e){
+ if(e.target===this)closeBlendDialog();
+});
+
+el('ptScope').addEventListener('click',function(e){
+ var b=e.target.closest('button');
+ if(!b)return;
+ this.querySelectorAll('button').forEach(function(x){x.classList.toggle('is-on',x===b);});
+ scope=b.dataset.scope;   // 記憶される：2回目以降は効果を押すだけ
+ closeInline();
+});
+
+
+/* ============================================================
+   初期化
+   ============================================================ */
+el('ptLight').addEventListener('change',function(){
+ document.body.classList.toggle('light-mode',this.checked);
+ document.documentElement.classList.toggle('light-mode',this.checked);
+});
+
+renderTool('pen');
+renderTool('tone');
+renderTool('text2');
+renderFxGrids();
+</script>
+
+</body>
+</html>

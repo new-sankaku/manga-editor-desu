@@ -8,6 +8,11 @@
   --color-text-primary:      #ffffff;
   --color-text-secondary:    #dedede;
   --color-component-minitext:#ff7c7c;
+  /* 設定を開く等の中立操作用。--color-accentの赤は警告に見えるため分けている */
+  --color-action-bg:         rgba(42,86,130,0.28);
+  --color-action-bg-hover:   rgba(42,86,130,0.55);
+  --color-action-border:     rgba(96,156,214,0.45);
+  --color-action-text:       #9fc7ec;
   --color-hr:                #ff9532;
   --color-scllor:            #480000;
   --slider-accent:           #888888;

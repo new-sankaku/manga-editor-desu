@@ -78,6 +78,15 @@ tippyInstances.push(instance);
 });
 }
 
+// i18nextのupdateContent()はinnerHTML代入のみで属性翻訳に対応していない。
+// 属性に説明文を持たせるとアイコンのリガチャが壊れるため、data-tip属性を
+// 走査してtippy側で持つ。要素を増やすたびに登録を書き足す必要をなくす
+function addTooltipsByAttribute(){
+document.querySelectorAll('[data-tip]').forEach(function(element){
+addTooltipByElement(element,element.dataset.tip);
+});
+}
+
 function setLanguage(language){
 i18next.changeLanguage(language,function(){
 uiLogger.debug("setLanguage start");
@@ -89,5 +98,6 @@ addTooltip('clearMode','clearMode');
 addTooltip('undo','undo');
 addTooltip('redo','redo');
 addSidebarTooltips();
+addTooltipsByAttribute();
 });
 }

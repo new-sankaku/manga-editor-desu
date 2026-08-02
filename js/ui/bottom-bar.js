@@ -7,7 +7,6 @@ const btmImageContainer=$("btm-image-container");
 const btmScrollLeftBtn=$("btm-scroll-left");
 const btmScrollRightBtn=$("btm-scroll-right");
 
-var btmSaveStateThreshold=2;
 let btmScrollPosition=0;
 let btmIsDragging=false;
 let btmIgnoreClose=false;
@@ -52,12 +51,38 @@ btmNavRight.style.visibility="hidden";
 }
 }
 
+// 現在のキャンバスをページとしてボトムバーへ残すべきかを判定する。
+// 履歴件数で判定すると、キャンバスのリサイズ等で履歴が積まれた空白ページまで
+// ページとして登録されてしまうため、キャンバスの実体の有無で判定する。
+// 既に登録済みのページは、内容を空にした場合でもサムネイル更新のため保存する
+function btmShouldSaveCurrentPage() {
+if(btmProjectsMap.has(getCanvasGUID())){
+return true;
+}
+// 初期メッセージだけが乗っているキャンバスは空ページとみなす
+return canvas.getObjects().some(obj=>!obj.isInitMessage);
+}
+
 // 保留中のコミットを確定してから保存判定する。
 // 先に判定すると、直前の変更が履歴に入る前にページを離れて変更が失われる
 async function btmSaveCurrentPage() {
 flushHistory();
-if(stateStack.length>=btmSaveStateThreshold){
+if(btmShouldSaveCurrentPage()){
 await btmSaveProjectFile();
+}
+}
+
+// chengeCanvasByGuid()は履歴復元の完了を待たずに返る。applyHistoryState()の
+// canvas.loadFromJSON()がコールバック方式のため。待たずにキャンバスの中身を
+// 数えると0件になり、何もせずページだけが切り替わる
+async function btmWaitForPageReady(timeoutMs) {
+const limit=timeoutMs||60000;
+const start=performance.now();
+while (isProjectBusy()) {
+if (performance.now()-start>limit) {
+throw new Error("btmWaitForPageReady: timed out waiting for the page to finish loading");
+}
+await new Promise(requestAnimationFrame);
 }
 }
 
@@ -497,7 +522,9 @@ var pctx=pc.getContext('2d');
 pctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--color-tertiary').trim()||'#505050';
 pctx.fillRect(0,0,pc.width,pc.height);
 var placeholderUrl=pc.toDataURL('image/jpeg',0.5);
+if(btmShouldSaveCurrentPage()){
 await btmSaveProjectFile(null,false);
+}
 btmAddImage({href:placeholderUrl},null,newGuid,true);
 reorderImages(currentIndex+1,newGuid);
 withoutHistory(function(){

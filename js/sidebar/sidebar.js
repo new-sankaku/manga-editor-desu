@@ -31,6 +31,11 @@ $("shape-area").style.display="none";
 $("control-area").style.display="none";
 element.style.display="block";
 lazyLoadSvgData(id);
+// 一括適用の退避が今のプロジェクトのものかは、開いているページのGUIDで判断する。
+// 起動直後はページ未読込で判定できないため、パネルを開くたびに取り直す
+if (id==="manga-effect-area") {
+effectRefreshRestoreButton();
+}
 } else {
 element.style.display="none";
 }

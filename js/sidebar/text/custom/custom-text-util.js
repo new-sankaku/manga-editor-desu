@@ -130,15 +130,20 @@ canvas.renderAll();
 return img;
 }
 
-// サイドバーの入力値をオブジェクトに持たせて、あとから選び直しても編集できるようにする
+// サイドバーの入力値をオブジェクトに持たせて、あとから選び直しても編集できるようにする。
+// 集める先はDOMの入力要素。sidebarValueMapは「利用者が触った項目」しか持たないため、
+// そちらから集めると未変更の項目が欠け、別の画像テキストを選び直したときに
+// 前のオブジェクトの値が画面に残る
 function t2CollectParams(type){
 var params={};
-if(typeof sidebarValueMap==='undefined'||!sidebarValueMap){
+var host=$('text-area2-settings');
+if(!host){
 return params;
 }
-sidebarValueMap.forEach(function(value,key){
-if(key.indexOf(type+'-')===0){
-params[key]=value;
+// setupSlider()が足す値表示のspanも同じ接頭辞のidを持つため、入力要素だけを見る
+host.querySelectorAll('input[id],select[id],textarea[id]').forEach(function(element){
+if(element.id.indexOf(type+'-')===0){
+params[element.id]=element.value;
 }
 });
 return params;

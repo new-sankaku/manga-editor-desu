@@ -89,8 +89,7 @@ updateDrawingSpeedlines();
 effectLogger.error("unknown type",type);
 }
 
-clearActiveToneButton();
-$(type+'Button').classList.add('active-button');
+presetPanelSetActive('tone',type);
 nowTone=type;
 }
 
@@ -313,12 +312,9 @@ saveValueMap(element);
 
 
 
+// 編集中かどうかはカードの使用中表示で示す。どのトーンを選んでいたかは残す
 function clearActiveToneButton() {
-$(MODE_TONE+'Button').classList.remove('active-button');
-$(MODE_TONE_NOISE+'Button').classList.remove('active-button');
-$(MODE_TONE_SNOW+'Button').classList.remove('active-button');
-$(MODE_FOCUSING_LINE+'Button').classList.remove('active-button');
-$(MODE_SPEED_LINE+'Button').classList.remove('active-button');
+presetPanelClearActive('tone');
 }
 
 

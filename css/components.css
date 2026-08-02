@@ -1,25 +1,8 @@
 @import url('root.css');
 
-#text-area2-settings {
- /* display: flex; */
- flex-wrap: wrap;
- gap: 5px;
- margin: 0px;
- padding: 0px;
- max-height: 60%;
- overflow-y: auto;
-}
-
-
-#tool-settings {
- display: flex;
- flex-wrap: wrap;
- gap: 0px;
- margin: 0px;
- padding: 0px;
- max-height: 40%;
- overflow-y: auto;
-}
+/* 設定エリアの高さ制限とスクロールは持たせない。
+   パネル本体（.preset-panel-body）だけをスクロールさせる。
+   両方に付けると二重スクロールになり、設定が画面外へ押し出される */
 
 .control-group{
   margin-left: 3px;
@@ -86,13 +69,6 @@
  padding: 0px;
 }
 
-
-#tool-buttons,
-.text-preview-area2 {
- max-height: 40%;
- overflow-y: auto;
- width: 100%;
-}
 
 #svg_icon_results {
 display:flex;
@@ -178,6 +154,14 @@ font-size:12px;
  padding-top: 2px;
  padding-bottom: 2px;
  cursor: pointer;
+}
+
+/* エフェクトの適用範囲。3等分の見た目は css/ui/preset-panel.css 側で定義する */
+.effect-scope-group button span {
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ max-width: 100%;
 }
 
 button.selected {

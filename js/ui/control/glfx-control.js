@@ -46,6 +46,41 @@ $("glfxSwirlAngle").value=0;
 
 var fxCanvas,texture;
 
+// fx.canvas()はWebGLコンテキストを1つ消費する。呼ぶたびに生成するとブラウザの
+// コンテキスト上限（16程度）に達し、古いコンテキストがロストして結果が壊れる。
+// 一括適用で必ず踏むため1個だけ生成して使い回す
+var glfxSharedCanvas=null;
+// fxCanvas.texture()も呼ぶたびにGPU上へ新規テクスチャを確保して解放されない。
+// 1個をloadContentsOfで詰め替える
+var glfxSharedTexture=null;
+
+function glfxGetSharedCanvas() {
+if (!glfxSharedCanvas) {
+glfxSharedCanvas=fx.canvas();
+}
+return glfxSharedCanvas;
+}
+
+function glfxLoadSharedTexture(fxCanvasObject,element) {
+if (glfxSharedTexture) {
+glfxSharedTexture.loadContentsOf(element);
+} else {
+glfxSharedTexture=fxCanvasObject.texture(element);
+}
+return glfxSharedTexture;
+}
+
+// デコード済みの要素はそのままGPUへ渡せる。canvas要素もloadContentsOfが受け付ける
+function glfxIsDecodedElement(element) {
+if (!element) {
+return false;
+}
+if (element.tagName==="CANVAS") {
+return true;
+}
+return!!(element.complete&&element.naturalWidth>0);
+}
+
 function glfxApplyFilter(filter=null) {
 // console.log("glfxApplyFilter: Start");
 if (!canvas) {
@@ -69,8 +104,8 @@ function glfxApplyFilterToCanvas(filter=null) {
 var fabricCanvas=canvas.upperCanvasEl;
 var img=new Image();
 img.onload=function () {
-fxCanvas=fx.canvas();
-texture=fxCanvas.texture(img);
+fxCanvas=glfxGetSharedCanvas();
+texture=glfxLoadSharedTexture(fxCanvas,img);
 fxCanvas.draw(texture);
 applySelectedFilter(fxCanvas,filter);
 fxCanvas.update();
@@ -82,29 +117,30 @@ img.src=fabricCanvas.toDataURL();
 }
 
 function glfxApplyFilterToObject(object,filter=null,filterValues=null) {
+return glfxApplyFilterChainToObject(object,[filter],filterValues);
+}
+
+// filterListのフィルタをGPU上で連続適用し、最後に1回だけ画像化する。
+// 1フィルタごとにtoDataURL→再デコードすると1画像あたりの往復が増えるため、
+// 複数フィルタのプリセット（白黒・薄いカラー化）ではまとめて掛ける。
+// テクスチャは8bit RGBAなので、途中で画像化した場合と精度は変わらない
+function glfxApplyFilterChainToObject(object,filterList,filterValues=null) {
 return new Promise((resolve)=>{
 if (!glfxOriginalImage) {
-// console.log("glfxApplyFilterToObject: glfxOriginalImage is null");
 return resolve();
 }
 
-var img=new Image();
-img.onload=function () {
-// console.log("glfxApplyFilterToObject: Image loaded for filtering");
-fxCanvas=fx.canvas();
-texture=fxCanvas.texture(img);
+const applyToElement=function (sourceElement) {
+fxCanvas=glfxGetSharedCanvas();
+texture=glfxLoadSharedTexture(fxCanvas,sourceElement);
 fxCanvas.draw(texture);
+filterList.forEach(function (filter) {
 applySelectedFilter(fxCanvas,filter,filterValues);
+});
 fxCanvas.update();
 
 var filteredImage=new Image();
-filteredImage.src=fxCanvas.toDataURL();
 filteredImage.onload=function () {
-// console.log("glfxApplyFilterToObject: Filtered image loaded");
-
-// Log the object state before applying the filter
-// console.log("Before applying filter:", object);
-
 var top=object.top;
 var left=object.left;
 var scaleX=object.scaleX;
@@ -120,9 +156,6 @@ object.scaleY=scaleY;
 object.width=width;
 object.height=height;
 
-// Log the object state after applying the filter
-// console.log("After applying filter:", object);
-
 object.set({
 left: left,
 top: top,
@@ -134,15 +167,33 @@ height: height,
 
 canvas.requestRenderAll();
 
-// Log to confirm the canvas is rendered
-// console.log("Canvas rendered with filtered image");
-
 resolve();
 };
+filteredImage.src=fxCanvas.toDataURL();
 };
 
+if (glfxIsDecodedElement(glfxOriginalImage)) {
+applyToElement(glfxOriginalImage);
+} else {
+var img=new Image();
+img.onload=function () {
+applyToElement(img);
+};
 img.src=glfxOriginalImage.src;
+}
 });
+}
+
+// 一括適用用。グローバルのglfxOriginalImageを対象オブジェクトで上書きしてから
+// 適用し、必ず後始末する。GLFXパネルの編集途中の状態を持ち越さない
+async function glfxApplyPresetToImage(object,filterList,filterValues) {
+try {
+glfxOriginalImage=object.getElement();
+await glfxApplyFilterChainToObject(object,filterList,filterValues);
+} finally {
+glfxCopiedImage=null;
+glfxOriginalImage=null;
+}
 }
 
 
@@ -372,7 +423,20 @@ timeout=setTimeout(()=>func.apply(context,args),wait);
 }
 
 
+// 見出しの表示名は<select>の選択中optionから取る。名前を別に持つと
+// フィルタ追加時の修正漏れになる
+function glfxSyncFilterName(){
+var select=$("glfxFilter");
+var name=$("glfxFilterName");
+if (!select||!name) {
+return;
+}
+var option=select.options[select.selectedIndex];
+name.textContent=option ? option.textContent : "";
+}
+
 function glfxAddEvent(){
+// gpifHTMLごと差し替わるため、ここで張り直しても多重登録にはならない
 $("glfxFilter").addEventListener("change",function () {
 var value=this.value;
 document.querySelectorAll(".glfxCcontrol-group").forEach(function (group) {
@@ -381,7 +445,14 @@ group.style.display="none";
 if (value) {
 $(value).style.display="block";
 }
+glfxSyncFilterName();
 });
+
+glfxSyncFilterName();
+
+// GLFXは15種から選ぶのが前提なので、押した時点でピッカーまで開く。
+// glfxAddEvent()はGLFXボタンのクリック経由でしか呼ばれない
+PresetPicker.openFromSelect($("glfxFilter"),getText("glfxFilterPickerTitle"),glfxBuildFilterPickerMeta());
 document.querySelectorAll(".glfxControls input").forEach(function (input) {
 input.addEventListener("input",debounceGlfx(function () {
 var activeObject=canvas.getActiveObject();

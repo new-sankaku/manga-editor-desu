@@ -68,6 +68,7 @@ roleAssignments[key]=data[key];
 }
 function getProviderForRole(role){
 var assignedId=roleAssignments[role];
+if(assignedId===ROLE_NONE)return null;
 if(assignedId&&assignedId!=='default'){
 var provider=providers[assignedId];
 if(provider&&provider.supportsRole(role)){

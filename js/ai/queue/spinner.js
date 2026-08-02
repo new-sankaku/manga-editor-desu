@@ -49,6 +49,8 @@ function _getQueueByName(name){
 if(name==='comfyui'&&typeof comfyuiQueue!=='undefined')return comfyuiQueue;
 if(name==='sd'&&typeof sdQueue!=='undefined')return sdQueue;
 if(name==='falai'&&typeof falaiQueue!=='undefined')return falaiQueue;
+if(name==='grok'&&typeof grokQueue!=='undefined')return grokQueue;
+if(name==='ollama'&&typeof ollamaQueue!=='undefined')return ollamaQueue;
 return null;
 }
 

@@ -34,22 +34,100 @@ let buttonElementsT2=[];
 
 let nowText2=null;
 
-function switchText2(type) {
-switchText2Ui(type);
+// 種類を跨いでも同じ意味を持つ設定。種類を変えたときはこれだけ引き継ぐ。
+// 引き継がないと入力中の文字が新しい種類の記憶値に戻り、
+// 「同じ文字のまま見た目だけ変える」ができない
+const T2_COMMON_SETTINGS=["Text","FontSize","LineHeight","LetterSpacing","TextColor","FillOpacity"];
 
+// 挿入位置。同じ座標に重ねると増えたことが見た目で分からないため押すたびにずらす
+const T2_INSERT_LEFT=50;
+const T2_INSERT_TOP=100;
+const T2_INSERT_STEP=20;
+const T2_INSERT_WRAP=8;
+let t2InsertCount=0;
+
+function t2CaptureCommonValues(type) {
+var values={};
+T2_COMMON_SETTINGS.forEach(function (name) {
+var element=$(type+'-'+name);
+if (element) {
+values[name]=element.value;
+}
+});
+return values;
+}
+
+function t2RestoreCommonValues(type,values) {
+Object.keys(values).forEach(function (name) {
+var element=$(type+'-'+name);
+if (!element) {
+return;
+}
+// jscolorのピッカーはvalue代入では見た目が変わらない
+if (element.jscolor) {
+element.jscolor.fromString(values[name]);
+} else {
+element.value=values[name];
+}
+sidebarValueMap.set(type+'-'+name,values[name]);
+});
+}
+
+// キャンバスで選んでいる画像テキスト。種類を変えたときの差し替え対象になる
+function t2GetSelectedImageText() {
+var activeObject=canvas.getActiveObject();
+if (activeObject&&activeObject.imageTextType) {
+return activeObject;
+}
+return null;
+}
+
+// 種類を選ぶ。選択中の画像テキストがあればその現物を新しい種類へ差し替え、
+// 無ければ設定を切り替えるだけ。キャンバスに増やすのはtext2Insert()だけが行う
+function switchText2(type) {
+if (type===nowText2) {
+return;
+}
+
+var editing=t2GetSelectedImageText();
+var carried=nowText2 ? t2CaptureCommonValues(nowText2) : null;
+
+if (editing) {
+// 変形・重ね順・GUIDを退避してキャンバスから外す。
+// 下のcreateText2()がこれを引き継いで同じ場所に作り直す
+t2BeginReplace(editing);
+}
 if (nowText2) {
 deleteText2();
 clearT2Settings();
-nowText2=null;
 }
 
-createText2(type);
-
-if(type){
-addT2EventListener();
+switchText2Ui(type);
 nowText2=type;
+if (carried) {
+t2RestoreCommonValues(type,carried);
+}
+addT2EventListener();
+
+if (editing) {
+createText2(type);
 }
 }
+
+// 「キャンバスに挿入」。今の種類・今の設定で1つ追加する
+function text2Insert() {
+if (!nowText2) {
+createToastError(getText("imageTextSelectStyleFirst"),"",2000);
+return;
+}
+var offset=(t2InsertCount%T2_INSERT_WRAP)*T2_INSERT_STEP;
+t2InsertCount++;
+createText2(nowText2,T2_INSERT_LEFT+offset,T2_INSERT_TOP+offset);
+}
+
+EventDelegator.register('insertImageText',function () {
+text2Insert();
+});
 
 
 function switchText2Ui(type) {
@@ -127,6 +205,12 @@ $('text-area2-settings').innerHTML=settingsHTML;
 jsColorSet();
 
 t2_text=$(type+'-'+"Text");
+// addTextArea()は翻訳された既定文しか埋め込めない（利用者の入力をHTMLに
+// 埋めると</textarea>を含む文字でDOMが壊れる）。記憶した文字はここで代入する
+var savedText=sidebarValueMap.get(type+'-'+"Text");
+if (savedText!==undefined&&t2_text) {
+t2_text.value=savedText;
+}
 t2_fontSize=$(type+'-'+"FontSize");
 t2_fillColor=$(type+'-'+"TextColor");
 t2_fillOpacity=$(type+'-'+"FillOpacity");
@@ -202,6 +286,10 @@ const sliders2=document.querySelectorAll('.input-container-leftSpace input[type=
 sliders2.forEach(slider=>{
 setupSlider(slider,'.input-container-leftSpace')
 });
+
+// キャンバス上の画像テキストを選び直したときもここを通るため、
+// カードは常に「今編集している種類」を指す
+presetPanelSetActive('text2',type);
 }
 
 function clearT2Settings() {
@@ -264,6 +352,11 @@ updateText2();
 
 
 function updateText2(){
+// 編集対象が無いときは何もしない。ここで作り直すと、挿入していないのに
+// スライダーを触っただけでキャンバスに現れる
+if(!t2GetCurrentObject()){
+return;
+}
 switch (nowText2) {
 case MODE_T2_aurora:
 t2_aurora_updateAll();
@@ -308,44 +401,46 @@ break;
 }
 
 
-function createText2(type){
+// left/topを渡さないと各createSvgの既定位置になる。差し替え時は
+// t2BeginReplace()が退避した変形が優先されるため位置は引き継がれる
+function createText2(type,left,top){
 let nowImageTextObject=null;
 switch (type) {
 case MODE_T2_aurora:
-t2_aurora_createSvg();
+t2_aurora_createSvg(left,top);
 break;
 case MODE_T2_broken:
-t2_broken_createSvg();
+t2_broken_createSvg(left,top);
 break;
 case MODE_T2_cloud :
-t2_cloud_createSvg();
+t2_cloud_createSvg(left,top);
 break;
 case MODE_T2_layered:
-t2_layered_createSvg();
+t2_layered_createSvg(left,top);
 break;
 case MODE_T2_mesh  :
-t2_mesh_createSvg();
+t2_mesh_createSvg(left,top);
 break;
 case MODE_T2_night :
-t2_nightlights_createSvg();
+t2_nightlights_createSvg(left,top);
 break;
 case MODE_T2_scratch:
-t2_scratch_createSvg();
+t2_scratch_createSvg(left,top);
 break;
 case MODE_T2_thrill:
-t2_thrill_createSvg();
+t2_thrill_createSvg(left,top);
 break;
 case MODE_T2_water :
-t2_water_createSvg();
+t2_water_createSvg(left,top);
 break;
 case MODE_T2_wild  :
-t2_wild_createSvg();
+t2_wild_createSvg(left,top);
 break;
 case MODE_T2_zebra :
-t2_zebra_createSvg();
+t2_zebra_createSvg(left,top);
 break;
 case MODE_T2_SHADOW:
-t2_shadow_createSvg();
+t2_shadow_createSvg(left,top);
 nowImageTextObject=nowT2ShadowStr;
 break;
 default:
@@ -417,6 +512,28 @@ wild:function(obj){t2_wild_setCurrent(obj);},
 zebra:function(obj){t2_zebra_setCurrent(obj);}
 };
 
+// t2SetCurrentMapの取得側。今どのオブジェクトを編集しているかの判定に使う
+const t2GetCurrentMap={
+aurora:function(){return nowT2AuroraStr;},
+broken:function(){return nowT2BrokenStr;},
+cloud:function(){return nowT2CloudStr;},
+layered:function(){return nowT2LayeredStr;},
+mesh:function(){return nowT2MeshStr;},
+scratch:function(){return nowT2ScratchStr;},
+shadow:function(){return nowT2ShadowStr;},
+thrill:function(){return nowT2ThrillStr;},
+water:function(){return nowT2WaterStr;},
+wild:function(){return nowT2WildStr;},
+zebra:function(){return nowT2ZebraStr;}
+};
+
+function t2GetCurrentObject(){
+if(!nowText2||!t2GetCurrentMap[nowText2]){
+return null;
+}
+return t2GetCurrentMap[nowText2]();
+}
+
 // キャンバス上の画像テキストを選び直したとき、サイドバーをその種類・値に戻し、
 // 以降の編集がそのオブジェクトに向くようにする。
 // これをしないと直前に作った1つしか編集できない
@@ -429,18 +546,19 @@ if(!t2SetCurrentMap[type]){
 textLogger.error("unknown imageTextType: "+type);
 return;
 }
-if(activeObject.imageTextParams){
-Object.keys(activeObject.imageTextParams).forEach(function(key){
-sidebarValueMap.set(key,activeObject.imageTextParams[key]);
+var params=activeObject.imageTextParams||{};
+Object.keys(params).forEach(function(key){
+sidebarValueMap.set(key,params[key]);
 });
-}
 if(nowText2!==type){
+clearT2Settings();
 switchText2Ui(type);
-addT2EventListener();
 nowText2=type;
-}else{
-restoreT2SettingValues(activeObject.imageTextParams);
+addT2EventListener();
 }
+// 種類が同じでも必ず選び直した相手の値へ入れ替える。
+// 入れ替えないと、アアアを選んだあとイイイを選んでもアアアの値が残る
+restoreT2SettingValues(params);
 t2SetCurrentMap[type](activeObject);
 }
 

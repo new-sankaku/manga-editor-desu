@@ -220,7 +220,7 @@ const loading=OP_showLoading({
 icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if(stateStack.length>=btmSaveStateThreshold){
+if(btmShouldSaveCurrentPage()){
 panelLogger.info("[verticalTemplate] saving current page to bottom bar");
 OP_updateLoadingState(loading,{
 icon:'process',step:'Step2',substep:'Zip Start',progress:20
@@ -231,7 +231,7 @@ setCanvasGUID();
 loadSVGPlusReset(item.svg);
 });
 }else{
-panelLogger.info("[verticalTemplate] skipping save (stateStack too short)");
+panelLogger.info("[verticalTemplate] skipping save (empty canvas)");
 setCanvasGUID();
 loadSVGPlusReset(item.svg);
 }
@@ -256,7 +256,7 @@ const loading=OP_showLoading({
 icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if(stateStack.length>=btmSaveStateThreshold){
+if(btmShouldSaveCurrentPage()){
 panelLogger.info("[landscapeTemplate] saving current page to bottom bar");
 OP_updateLoadingState(loading,{
 icon:'process',step:'Step2',substep:'Zip Start',progress:20
@@ -267,7 +267,7 @@ setCanvasGUID();
 loadSVGPlusReset(item.svg,true);
 });
 }else{
-panelLogger.info("[landscapeTemplate] skipping save (stateStack too short)");
+panelLogger.info("[landscapeTemplate] skipping save (empty canvas)");
 setCanvasGUID();
 loadSVGPlusReset(item.svg,true);
 }

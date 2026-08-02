@@ -1,0 +1,27 @@
+.llm-prompt-window{width:min(420px,90vw);}
+.llm-prompt-field{margin:8px 5px;display:flex;flex-direction:column;gap:4px;}
+.llm-prompt-field label{font-size:11px;color:var(--color-component-minitext);}
+.llm-prompt-field textarea,.llm-storyboard-row textarea{width:100%;box-sizing:border-box;font-size:12px;padding:6px 8px;border:1px solid var(--color-tertiary);border-radius:4px;background:var(--color-secondary);color:var(--color-text-secondary);resize:vertical;}
+.llm-prompt-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 5px;}
+.llm-prompt-actions button{margin:0;font-size:12px;padding:4px 10px;}
+.llm-prompt-status{font-size:11px;color:var(--color-component-minitext);}
+.llm-storyboard-window{width:min(520px,92vw);max-height:80vh;overflow-y:auto;}
+.llm-storyboard-check{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-secondary);}
+.llm-storyboard-check input{margin:0;}
+.llm-storyboard-preview{margin:6px 5px;display:flex;flex-direction:column;gap:6px;}
+.llm-storyboard-row{display:flex;align-items:flex-start;gap:6px;}
+.llm-storyboard-index{flex:0 0 auto;min-width:64px;font-size:11px;color:var(--color-component-minitext);padding-top:6px;}
+.llm-storyboard-row textarea{flex:1 1 auto;min-width:0;}
+.llm-story-window{width:min(560px,92vw);max-height:80vh;overflow-y:auto;}
+.llm-story-window .llm-storyboard-row textarea{width:100%;box-sizing:border-box;font-size:12px;padding:6px 8px;border:1px solid var(--color-tertiary);border-radius:4px;background:var(--color-secondary);color:var(--color-text-secondary);resize:vertical;flex:1 1 auto;min-width:0;}
+.llm-story-note{display:block;margin:0 5px 6px;line-height:1.4;}
+.llm-rhythm-warning{color:var(--btn-danger-color);}
+.llm-story-plan{opacity:0.85;}
+/* ページ行は「場所・時間」の1行入力とあらすじを縦に積む */
+.llm-story-fields{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px;}
+.llm-story-place{width:100%;box-sizing:border-box;font-size:11px;padding:4px 8px;border:1px solid var(--color-tertiary);border-radius:4px;background:var(--color-secondary);color:var(--color-text-secondary);}
+/* コマ番号の下に役割（引き・情景…）を出す。番号の桁で位置がずれないよう縦に積む */
+.llm-storyboard-index{display:flex;flex-direction:column;gap:2px;}
+.llm-panel-role{font-size:10px;opacity:0.75;}
+.llm-dialogue-window{width:min(440px,92vw);max-height:85vh;overflow-y:auto;}
+.llm-dialogue-window select,.llm-dialogue-window input[type="text"],.llm-dialogue-window input[type="number"]{width:100%;box-sizing:border-box;font-size:12px;padding:5px 8px;border:1px solid var(--color-tertiary);border-radius:4px;background:var(--color-secondary);color:var(--color-text-secondary);}

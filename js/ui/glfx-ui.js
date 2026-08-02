@@ -1,6 +1,48 @@
+// ピッカーに並べる見本。名前だけではDot ScreenとColor Halftoneのように
+// 区別できないものがあるため、見本画像に効果を掛けて見せる。
+// imgFilter は「どんな系統の効果か」を伝えるためのCSSによる近似で、
+// 実際の出力そのものではない。キーは下の<select>のoption値と対応させる
+const GLFX_FILTER_SAMPLE="03_images/preset/effect/glfx.webp";
+const GLFX_FILTER_META={
+glfxBrightnessContrast:{hintKey:"glfxDescBrightnessContrast",imgFilter:"brightness(1.25) contrast(1.4)"},
+glfxHueSaturation:{hintKey:"glfxDescHueSaturation",imgFilter:"hue-rotate(90deg) saturate(1.6)"},
+glfxSepia:{hintKey:"glfxDescSepia",imgFilter:"sepia(0.8)"},
+glfxUnsharpMask:{hintKey:"glfxDescUnsharpMask",imgFilter:"contrast(1.5) saturate(1.15)"},
+glfxVibrance:{hintKey:"glfxDescVibrance",imgFilter:"saturate(1.8)"},
+glfxVignette:{hintKey:"glfxDescVignette",imgFilter:"brightness(0.8) contrast(1.25)"},
+glfxLensBlur:{hintKey:"glfxDescLensBlur",imgFilter:"blur(1.5px)"},
+glfxTriangleBlur:{hintKey:"glfxDescTriangleBlur",imgFilter:"blur(1.2px)"},
+glfxZoomBlur:{hintKey:"glfxDescZoomBlur",imgFilter:"blur(1px) contrast(1.15)"},
+glfxColorHalftone:{hintKey:"glfxDescColorHalftone",imgFilter:"contrast(1.6) saturate(1.5)"},
+glfxDotScreen:{hintKey:"glfxDescDotScreen",imgFilter:"grayscale(1) contrast(2)"},
+glfxEdgeWork:{hintKey:"glfxDescEdgeWork",imgFilter:"grayscale(1) invert(1) contrast(1.6)"},
+glfxHexagonalPixelate:{hintKey:"glfxDescHexagonalPixelate",imgFilter:"blur(1.6px) contrast(1.2)"},
+glfxInk:{hintKey:"glfxDescInk",imgFilter:"grayscale(1) contrast(2.4) brightness(1.1)"},
+glfxSwirl:{hintKey:"glfxDescSwirl",imgFilter:"hue-rotate(140deg) saturate(1.3)"}
+};
+
+// 表示直前に翻訳を引く。言語切替後も開き直せば新しい言語で出る
+function glfxBuildFilterPickerMeta() {
+const meta={};
+Object.keys(GLFX_FILTER_META).forEach(function (key) {
+const item=GLFX_FILTER_META[key];
+meta[key]={
+hint: getText(item.hintKey),
+img: GLFX_FILTER_SAMPLE,
+imgFilter: item.imgFilter
+};
+});
+return meta;
+}
+
 let gpifHTML=`
 <div class="control-content glfxControls">
-    <select id="glfxFilter">
+    <!-- フィルタは15種あり<select>だと閉じている間中身が見えない。GLFXを押した
+         時点でPresetPickerを開く。<select>は値の保持元として残し、既存の change
+         処理をそのまま使う（項目の追加はこの<select>だけを直せばよい）。
+         選び直すときは「1枚ずつ調整」のGLFXをもう一度押す -->
+    <div id="glfxFilterName" class="glfx-filter-name"></div>
+    <select id="glfxFilter" class="glfx-filter-select">
         <option value="" data-i18n="select">Select</option>
         <option value="glfxBrightnessContrast" data-i18n="brightnessContrast">Brightness / Contrast</option>
         <option value="glfxHueSaturation" data-i18n="hueSaturation">Hue / Saturation</option>
