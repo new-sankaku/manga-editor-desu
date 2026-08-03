@@ -425,8 +425,12 @@ LLMに「1ページをどう割るか」を判断させるための基準。
 | 息を呑む | `parted lips` / `wide-eyed` | 727,304 / 51,882 |
 | 顔に影 | `shaded face` | 80,075 |
 
-**これは例であって、この中から選べという一覧ではない。**
-「顔に何が起きているか」を書けばよく、Danbooruの語彙はモデルが知っている。
+**この表はプロンプトにそのまま渡している**（`MANGA_EXPRESSION_TAGS`）。
+散文で「強すぎる」「抑えめに」と説明するより、**件数を見せて自分で判断させるほうが確実**。
+件数＝そのタグがどれだけ強く効くか。数千は軽い後押し、100万超は他を上書きする。
+
+**この中から選べという一覧ではない。** 表に無いタグを使ってよい。
+存在するかどうかと強さの目安として渡している。
 
 ### 口は指定しないと開く
 
@@ -449,6 +453,9 @@ LLMに「1ページをどう割るか」を判断させるための基準。
 | 手を組む・祈る | `own hands together` | 113,983 |
 | 胸に手を当てる | `hand on own chest` | 87,895 |
 | 手を隠す | `hands in pockets` | 33,901 |
+| 腕を組む | `crossed arms` | 119,928 |
+| 腰に手 | `hand on own hip` | 224,177 |
+| 首をかしげる | `head tilt` | 171,323 |
 
 **これも例。** 場面に合う仕草を選ぶ。
 
@@ -456,7 +463,8 @@ LLMに「1ページをどう割るか」を判断させるための基準。
 
 | 書きがち | 件数 | 代わりに使う |
 |---|---:|---|
-| `arms crossed` | 0 | `crossed arms` |
+| `arms crossed` | 0 | `crossed arms`（119,928） |
+| `sweating profusely` | 0 | `sweat`（751,974） |
 | `biting lip` | 0 | `frown` / `clenched teeth` |
 | `hand over mouth` | 0 | `covering face` / `hand on own face` |
 | `teary eyes` | 0 | `tearing up` / `tears` |

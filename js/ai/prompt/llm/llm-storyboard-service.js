@@ -17,6 +17,36 @@ const MANGA_PANEL_ROLES=[
 '  the moment the page is built on  impact  the strongest beat. tilted or steep viewpoint, and the background may drop'
 ].join('\n');
 
+// 表情と仕草のタグ。数字はDanbooruのポスト数＝そのタグがどれだけ強く効くか。
+// LLMに「顔に起きていることを書け」と言うだけでは、実在しないタグ（biting lip等）を
+// 書いたり、強さの見当が付かなかったりする。件数ごと渡して自分で判断させる。
+// 使うタグをこの中に限定するものではない。存在と強さの目安として渡す
+const MANGA_EXPRESSION_TAGS=[
+'  brow      v-shaped eyebrows 260k, raised eyebrow 12k',
+'  eyes      closed eyes 1.03M, parted lips 727k, half-closed eyes 141k, wide-eyed 52k,',
+'            narrowed eyes 10k, tears 292k, tearing up 71k',
+'  mouth     open mouth 3.43M, closed mouth 1.91M, frown 151k, clenched teeth 104k,',
+'            wavy mouth 101k, pout 37k, light smile 107k, grin 349k, smirk 36k',
+'  face      blush 4.01M, expressionless 177k, embarrassed 139k, shaded face 80k,',
+'            serious 39k, annoyed 20k, nervous 18k, glaring 12k, scowl 6k',
+'  gaze      looking at viewer 4.79M, looking at another 424k, looking back 359k,',
+'            from behind 323k, looking to the side 274k, profile 178k, looking down 136k,',
+'            looking up 99k, eye contact 68k, looking away 35k, averting eyes 20k',
+'  hands     hand on own hip 224k, own hands together 114k, hand on own chest 88k,',
+'            clenched hand 86k, hand on own face 72k, clenched hands 60k,',
+'            hands in pockets 34k, covering face 10k',
+'  body      head tilt 171k, leaning forward 159k, crossed arms 120k, trembling 106k,',
+'            turning head 18k',
+'  state     sweat 752k, sweatdrop 321k',
+'',
+'  do not use, these are the labels    smile 4.08M, crying 112k, surprised 73k, angry 61k,',
+'                                      laughing 22k, sad 18k',
+'  do not exist, nothing is drawn      biting lip, hand over mouth, teary eyes, arms crossed,',
+'                                      sweating profusely',
+'  too rare to land                    downcast eyes 202, slouching 1k, fidgeting 1.5k,',
+'                                      hunched over 2k, head down 4k'
+].join('\n');
+
 const MANGA_PANEL_ROLE_NAMES=['establishing','scenery','insert','full','medium','closeup','impact'];
 
 // 人物を出さないコマの役割。この3つだけが「間」を作れる
@@ -124,28 +154,23 @@ MANGA_PANEL_ROLES,
 '  motion. A crowded picture under a crowded balloon gets neither read.',
 '',
 // 指針13章。感情ラベルは構図ラベルと同じ構造の問題。しかもこちらは強く効いてしまう。
-// 段階の一覧を並べると写経されるので、原則と少数の例に絞り、例だと明示する
-'Feelings. Same trap as the framing tags, and worse:',
-'- "angry", "sad", "happy", "surprised", "smiling" are labels somebody put on a finished picture.',
-'  They are not instructions either. The difference is that these ones do land, and land hard.',
-'  The model learnt faces from single illustrations where one picture had to carry the whole',
-'  feeling, so it draws the loudest version of whatever you name. Do not name any of them.',
-'  Not even the mild sounding ones: "smile" on its own always comes back as a full open grin.',
-'- Write what is happening on the face instead. The brow, the eyes, the mouth, where they are',
-'  looking. A character holding back anger is a flat face, or a small frown, or eyes turned away.',
-'  A character barely pleased is the faintest version of a smile with the mouth still shut.',
-'  Reach for that level first and only sharpen it if the panel really is the loud one.',
-'- "open mouth" is one of the commonest tags there is, so the mouth opens unless you close it.',
-'  Say the mouth is shut on any panel where the feeling is being held in.',
+// 散文で強さを説明するより、件数ごとタグ表を渡して自分で判断させる
+'Feelings:',
+'- Do not name an emotion. "angry", "sad", "happy", "surprised", "smiling" are labels put on a',
+'  finished picture, and the model draws the loudest version of any of them.',
+'- Name what the face is doing: the brow, the eyes, the mouth, and where they are looking.',
+'- Decide the gesture before the expression, and keep the expression the smaller of the two.',
+'  In a manga the hands, the shoulders, the sweat and the shadow carry more of a feeling than',
+'  the face does.',
+'- Say the mouth is closed on any panel where the feeling is being held in. Otherwise it opens.',
+'- Do not put the same expression on two panels in a row.',
 '',
-// 指針13章。仕草のほうが表情より強い。ここも一覧にせず種類だけ言う
-'- What actually carries a feeling in a manga is rarely the face. It is the body:',
-'  what the hands are doing, whether they are closed or hidden or covering something, the sweat,',
-'  the shaking, the shoulders, whether the figure is leaning in or turned away, the shadow across',
-'  the face. Decide the gesture before you decide the expression, and let the face stay small.',
-'  A held fist and a flat face read angrier than a shouting face does.',
-'- Do not repeat the same expression on two panels in a row. A face that never changes reads as',
-'  a mask, and the reader stops looking at it.',
+// タグ表は「この中から選べ」ではない。存在と強さの目安として渡す
+'The vocabulary for that, with how many pictures on Danbooru carry each tag. The count is how hard',
+'a tag lands: a few thousand is a nudge, a million overrides whatever else you wrote. This is not a',
+'list to choose from, and tags outside it are fine. It is here so you can see what exists and how',
+'strong it is.',
+MANGA_EXPRESSION_TAGS,
 
 // 指針11章。擬音はアプリのテキストで入れる。画像に文字を描かせない
 'Sound effects belong to the editor as text on top. Never ask the image for lettering.',
