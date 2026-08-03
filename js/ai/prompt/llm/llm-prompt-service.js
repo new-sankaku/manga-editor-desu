@@ -1,23 +1,88 @@
 // LLMによるプロンプト生成: 文章→タグ（Text2Prompt）と画像→タグ（Image2Prompt_LLM）
 const LLM_TEXT2PROMPT_SYSTEM=[
-'You are a prompt engineer for anime and manga style Stable Diffusion image generation.',
-'Convert the scene description into Danbooru style tags.',
-'Rules:',
-'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings, no code fences.',
-'- Use common Danbooru tag vocabulary such as 1girl, solo, school uniform, rooftop, crying, from below.',
-'- Cover subject count, appearance, clothing, expression, pose, camera angle, background and lighting when the description implies them.',
-'- Do not invent character names or series names that the description does not mention.',
-'- Output between 15 and 40 tags.'
+'場面の説明を、漫画のコマ1つ分の画像生成タグ（Danbooru形式）に変換してください。',
+'',
+'──────────────────────────────',
+'',
+'■ 何を書くか',
+'',
+'説明から読み取れるものを書きます。人数、外見、服、表情、ポーズ、アングル、背景、光。',
+'読み取れないものは足しません。',
+'',
+'■ 距離の決め方',
+'',
+// 指針16章。フレーミングタグが効かないことと、その代わりに何を書くか
+'"full body" "wide shot" "upper body" "close-up" は出来上がった絵に付いたラベルで、',
+'書いてもその距離にはなりません。距離はどれを名指しするかで決まります。',
+'    頭から靴まで … 靴、脚、立っている床を名指しする',
+'    腰から上     … 腰から上の服、手。靴も床も名指ししない',
+'    顔           … 目、口、髪、表情。肩から下は名指ししない',
+'    その場所     … その場所にあってフレームに収まらない大きさのもの。人は出さないか遠くに置く',
+'欲しいフレームの外にあるものを名指しすると、それを含めるために視点が引きます。',
+'',
+'■ 顔と体',
+'',
+// 指針13章。素の感情ラベルは使わせない
+'"angry" "sad" "happy" "surprised" "smiling" は、かすかな状態から極端な状態までを',
+'ひとつの語で覆っているため、書くと極端な側が出ます。',
+'感情の名前ではなく、顔が何をしているかを名指ししてください。',
+'',
+// 指針10章。カメラ目線は既定なので明示的に外す
+'指定しないとモデルは「1人・胸から膝・正面・カメラ目線」を出します。',
+'視線の方向を書くとそこから外れます。',
+'',
+'【必ず守ること】',
+'',
+'・表情・視線・仕草は、次のタグだけを使う',
+MANGA_EXPRESSION_TAGS,
+'  それ以外（場所・服・動作・物）は通常のDanbooru語彙から自由に選ぶ',
+'',
+'・説明に出てこないキャラ名・作品名を作らない',
+'',
+'・"comic" "panel" "border" "speech bubble" "text" "4koma" は出さない。',
+'  枠と吹き出しはエディタが描く。フレームが人物を切ることについても書かない',
+'',
+'・タグの数は、その絵が見せる必要のあるものを書いて止める。',
+'  少なすぎるとモデルが勝手に埋め、多すぎると1つ1つが弱くなって距離も決まらなくなる',
+'',
+'【出力】',
+'・小文字のタグをカンマ区切りで並べたものだけ。文章・説明・見出し・コードフェンスを入れない'
 ].join('\n');
 
 const LLM_IMAGE2PROMPT_SYSTEM=[
-'You are an image tagger for anime and manga style illustrations.',
-'Describe the given image as Danbooru style tags.',
-'Rules:',
-'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings, no code fences.',
-'- Describe only what is actually visible: subject count, hair, eyes, clothing, expression, pose, composition, background, lighting and art style.',
-'- Do not guess character names or series names.',
-'- Output between 15 and 40 tags.'
+'与えられた画像を、Danbooru形式のタグで書き出してください。',
+'',
+'──────────────────────────────',
+'',
+'■ 何を書くか',
+'',
+'実際に見えているものだけ。人数、髪、目、服、表情、ポーズ、構図、背景、光、画風。',
+'そこに在るはずだと思ったものは書きません。',
+'',
+'■ 顔',
+'',
+// これらのタグは再生成のプロンプトとして使われる。感情ラベルで書くと次の絵が振り切れる。
+// 顔の部位で書くほうが記述としても正確
+'感情の名前ではなく、顔が何をしているかを名指しします。',
+'"angry" "sad" "happy" "surprised" "smiling" は書かないでください。',
+'このタグは画像生成のプロンプトとして再利用され、これらの語はその感情の極端な側を出します。',
+'部位で書くほうが、記述としても正確です。',
+'',
+'【必ず守ること】',
+'',
+'・表情・視線・仕草は、次のタグだけを使う',
+MANGA_EXPRESSION_TAGS,
+'  それ以外（場所・服・動作・物）は通常のDanbooru語彙から自由に選ぶ',
+'',
+'・キャラ名・作品名を推測しない',
+'',
+'・"comic" "panel" "border" "speech bubble" "text" "4koma" は、画像に写っていても出さない。',
+'  枠と吹き出しはエディタが描く',
+'',
+'・画像に無いタグを足すと、元の絵から離れる',
+'',
+'【出力】',
+'・小文字のタグをカンマ区切りで並べたものだけ。文章・説明・見出し・コードフェンスを入れない'
 ].join('\n');
 
 const LLM_PROVIDER_IDS=['grok','ollama'];
@@ -85,9 +150,9 @@ return tags.join(', ');
 
 async function llmText2Prompt(description,existingPrompt){
 var target=requireLLMProvider(AI_ROLES.Text2Prompt);
-var userPrompt='Scene description:\n'+description;
+var userPrompt='場面の説明:\n'+description;
 if(existingPrompt&&existingPrompt.trim()){
-userPrompt+='\n\nTags already present in the prompt (do not repeat them):\n'+existingPrompt;
+userPrompt+='\n\n既にプロンプトへ入っているタグ（繰り返さないでください）:\n'+existingPrompt;
 }
 var messages=target.provider.buildTextMessages(LLM_TEXT2PROMPT_SYSTEM,userPrompt);
 var raw=await target.queue.add(function(){
@@ -112,7 +177,7 @@ return;
 var dataUrl=imageObject2DataURL(layer);
 var messages=target.provider.buildVisionMessages(
 LLM_IMAGE2PROMPT_SYSTEM,
-'Tag this image.',
+'この画像をタグにしてください。',
 dataUrl
 );
 var p=target.queue.add(function(){
@@ -126,11 +191,8 @@ if(!tags){
 createToastError(i18next.t('llmImage2PromptTitle'),i18next.t('llmErrorEmptyResponse'));
 return;
 }
-if(layer.text2img_prompt){
-layer.text2img_prompt=layer.text2img_prompt+', '+tags;
-}else{
-layer.text2img_prompt=tags;
-}
+// 画風タグと見切れのネガティブはコマ一括経路と同じものを通す
+promptApplyTagsToLayer(layer,tags,true);
 createToast(i18next.t('llmImage2PromptTitle'),tags);
 refreshPromptPanel(layer);
 }).catch(function(error){

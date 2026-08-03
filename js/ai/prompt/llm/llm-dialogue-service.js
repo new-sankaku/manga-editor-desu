@@ -10,12 +10,29 @@ const LLM_DIALOGUE_LANGUAGES=[
 {code:'ru',label:'Русский'}
 ];
 
+// 文面は llm_doc/manga-page-guideline.md の11章がそのまま元
 const LLM_DIALOGUE_BASE_RULES=[
-'You rewrite dialogue for a manga speech balloon.',
-'Rules:',
-'- Output ONLY the resulting line. No explanation, no quotation marks, no labels, no code fences.',
-'- Keep it speakable dialogue. Do not turn it into narration.',
-'- Keep any line breaks that the balloon needs, but do not add new ones without reason.'
+'このセリフは漫画の吹き出しに入ります。',
+'',
+'■ 吹き出しに入る言葉',
+'',
+'・声に出して言える言葉にする。吹き出しに入るのは誰かが口に出したことで、地の文ではありません',
+'・1つの吹き出しは短いほうが読まれます。主語 → 目的語 → 動作の順に置くと読みやすい',
+'',
+// 指針11章。絵が言っていることをセリフで繰り返さない
+'・絵が既に見せていることを言い直すと、その分の文字が読者に何も渡しません。',
+'  どこにいるか、何をしているかはコマが見せています',
+'',
+// 指針11章。モノローグは情景描写ではなく心理の変化
+'・口に出さず心の中で言う言葉なら、その人物の考えが何から何へ変わったかを書くと効きます。',
+'  情景の描写を入れると、絵と重なります',
+'',
+'【必ず守ること】',
+'',
+'・吹き出しに要る改行は残す。理由なく増やさない',
+'',
+'【出力】',
+'・書き直した1行だけ。説明・引用符・ラベル・コードフェンスを入れない'
 ].join('\n');
 
 function estimateTextCapacity(textObject){
@@ -34,17 +51,17 @@ return perLine*lines;
 function buildDialogueMessages(provider,operation,sourceText,option){
 var instruction;
 if(operation==='polish'){
-instruction='Polish this line so it reads naturally and sounds like real manga dialogue. Keep the same meaning, the same speaker and the same language.';
+instruction='このセリフを、漫画のセリフとして自然に読めるように推敲してください。意味・話し手・言語は変えないでください。';
 }else if(operation==='tone'){
-instruction='Rewrite this line in the following tone or speech style, keeping the same meaning and the same language.\nTone: '+option;
+instruction='このセリフを次の口調・話し方で書き直してください。意味と言語は変えないでください。\n口調: '+option;
 }else if(operation==='fit'){
-instruction='Rewrite this line so that it fits in at most '+option+' characters, keeping the same meaning, the same speaker and the same language. Shorten wording rather than dropping information when possible.';
+instruction='このセリフを'+option+'文字以内に収まるように書き直してください。意味・話し手・言語は変えないでください。情報を落とすより先に、言い回しを短くしてください。';
 }else if(operation==='translate'){
-instruction='Translate this line into '+option+'. Keep it natural spoken dialogue for a manga balloon rather than a literal translation.';
+instruction='このセリフを'+option+'に翻訳してください。逐語訳ではなく、漫画の吹き出しに入る自然な話し言葉にしてください。';
 }else{
 throw new Error('Unknown dialogue operation: '+operation);
 }
-var userPrompt=instruction+'\n\nLine:\n'+sourceText;
+var userPrompt=instruction+'\n\nセリフ:\n'+sourceText;
 return provider.buildTextMessages(LLM_DIALOGUE_BASE_RULES,userPrompt);
 }
 

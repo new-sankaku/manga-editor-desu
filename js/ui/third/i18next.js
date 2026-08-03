@@ -10,6 +10,202 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20260803180000_001":{
+"ja":{
+"storyExpand":"ページ数に合わせる",
+"storyExpandTitle":"ページ数に合わせたストーリー",
+"storyExpandHint":"編集してから入れてください。ページ数:",
+"storyExpandApply":"ストーリー欄へ入れる",
+"storyExpandApplied":"ストーリー欄に入れました",
+"storyExpanding":"ストーリーをページ数に合わせています…",
+"storyExpandNoPage":"ページがありません。先にページを作ってください"
+},
+"en":{
+"storyExpand":"Fit to page count",
+"storyExpandTitle":"Story fitted to the pages",
+"storyExpandHint":"Edit before putting it in. Pages:",
+"storyExpandApply":"Put into the story field",
+"storyExpandApplied":"Put into the story field",
+"storyExpanding":"Fitting the story to the pages...",
+"storyExpandNoPage":"There are no pages yet. Create pages first"
+},
+"ko":{
+"storyExpand":"페이지 수에 맞추기",
+"storyExpandTitle":"페이지 수에 맞춘 스토리",
+"storyExpandHint":"편집한 뒤 넣어 주세요. 페이지 수:",
+"storyExpandApply":"스토리 칸에 넣기",
+"storyExpandApplied":"스토리 칸에 넣었습니다",
+"storyExpanding":"스토리를 페이지 수에 맞추는 중…",
+"storyExpandNoPage":"페이지가 없습니다. 먼저 페이지를 만들어 주세요"
+},
+"fr":{
+"storyExpand":"Ajuster au nombre de pages",
+"storyExpandTitle":"Histoire ajustée aux pages",
+"storyExpandHint":"Modifiez avant de l'insérer. Pages :",
+"storyExpandApply":"Insérer dans le champ Histoire",
+"storyExpandApplied":"Inséré dans le champ Histoire",
+"storyExpanding":"Ajustement de l'histoire…",
+"storyExpandNoPage":"Aucune page. Créez d'abord des pages"
+},
+"zh":{
+"storyExpand":"按页数调整",
+"storyExpandTitle":"按页数调整后的故事",
+"storyExpandHint":"编辑后再填入。页数：",
+"storyExpandApply":"填入故事栏",
+"storyExpandApplied":"已填入故事栏",
+"storyExpanding":"正在按页数调整故事…",
+"storyExpandNoPage":"还没有页面。请先创建页面"
+},
+"ru":{
+"storyExpand":"Подогнать под число страниц",
+"storyExpandTitle":"История под число страниц",
+"storyExpandHint":"Отредактируйте перед вставкой. Страниц:",
+"storyExpandApply":"Вставить в поле истории",
+"storyExpandApplied":"Вставлено в поле истории",
+"storyExpanding":"Подгоняю историю под страницы…",
+"storyExpandNoPage":"Страниц пока нет. Сначала создайте страницы"
+},
+"es":{
+"storyExpand":"Ajustar al número de páginas",
+"storyExpandTitle":"Historia ajustada a las páginas",
+"storyExpandHint":"Edítala antes de insertarla. Páginas:",
+"storyExpandApply":"Insertar en el campo de historia",
+"storyExpandApplied":"Insertado en el campo de historia",
+"storyExpanding":"Ajustando la historia…",
+"storyExpandNoPage":"Todavía no hay páginas. Crea páginas primero"
+},
+"de":{
+"storyExpand":"An die Seitenzahl anpassen",
+"storyExpandTitle":"An die Seiten angepasste Geschichte",
+"storyExpandHint":"Vor dem Einfügen bearbeiten. Seiten:",
+"storyExpandApply":"In das Story-Feld einfügen",
+"storyExpandApplied":"In das Story-Feld eingefügt",
+"storyExpanding":"Geschichte wird angepasst…",
+"storyExpandNoPage":"Es gibt noch keine Seiten. Bitte zuerst Seiten anlegen"
+}
+},
+"20260803120000_001":{
+"ja":{
+"storyToneLabel":"どんな漫画か",
+"storyToneGeneral":"一般（距離に緩急）",
+"storyToneSeinen":"青年向け（引き多め）",
+"storyToneShonen":"少年向け（見せ場重視）",
+"storyToneShojo":"少女漫画（表情重視）",
+"storyToneAdult":"成人向け（寄り多め）",
+"storyToneNone":"伝えない",
+"storyToneDetail":"LLMへ伝える文面を編集",
+"storyToneHint":"どのコマを寄りにして、どのコマを引きにするかはLLMが判断します。ここはその判断材料です",
+"storyToneReset":"プリセットに戻す",
+"storyFrameNegativeLabel":"常にネガティブへ入れる（見切れ）",
+"storyFrameNegativeHint":"腕や足が枠で切れた絵は後から直せません。意図して切りたいときは、生成後に画像をコマの枠へ接させてください",
+"storyPanelSize":"生成サイズをコマの形に合わせる"
+},
+"en":{
+"storyToneLabel":"Kind of manga",
+"storyToneGeneral":"General (varied distance)",
+"storyToneSeinen":"Seinen (wider views)",
+"storyToneShonen":"Shonen (impact)",
+"storyToneShojo":"Shojo (expression)",
+"storyToneAdult":"Adult (closer views)",
+"storyToneNone":"Do not tell",
+"storyToneDetail":"Edit what the LLM is told",
+"storyToneHint":"The LLM decides which panels are close and which are wide. This is what it decides from",
+"storyToneReset":"Reset to preset",
+"storyFrameNegativeLabel":"Always negative (cut off by the frame)",
+"storyFrameNegativeHint":"An arm or foot sliced by the frame cannot be fixed afterwards. To crop on purpose, move the image against the panel edge after generating",
+"storyPanelSize":"Match size to panel shape"
+},
+"ko":{
+"storyToneLabel":"어떤 만화인가",
+"storyToneGeneral":"일반(거리에 완급)",
+"storyToneSeinen":"청년물(롱숏 위주)",
+"storyToneShonen":"소년물(액션 위주)",
+"storyToneShojo":"순정만화(표정 위주)",
+"storyToneAdult":"성인물(클로즈업 위주)",
+"storyToneNone":"전달하지 않음",
+"storyToneDetail":"LLM에 전달할 문장 편집",
+"storyToneHint":"어느 칸을 가깝게, 어느 칸을 멀게 잡을지는 LLM이 판단합니다. 여기는 그 판단 근거입니다",
+"storyToneReset":"프리셋으로 되돌리기",
+"storyFrameNegativeLabel":"항상 네거티브에 넣기(잘림)",
+"storyFrameNegativeHint":"팔이나 발이 칸에 잘린 그림은 나중에 고칠 수 없습니다. 의도적으로 자르려면 생성 후 이미지를 칸 테두리에 붙이세요",
+"storyPanelSize":"생성 크기를 칸 모양에 맞추기"
+},
+"fr":{
+"storyToneLabel":"Type de manga",
+"storyToneGeneral":"Général (distances variées)",
+"storyToneSeinen":"Seinen (plans larges)",
+"storyToneShonen":"Shonen (impact)",
+"storyToneShojo":"Shojo (expressions)",
+"storyToneAdult":"Adulte (plans rapprochés)",
+"storyToneNone":"Ne rien indiquer",
+"storyToneDetail":"Modifier ce qui est dit au LLM",
+"storyToneHint":"Le LLM décide quelles cases sont rapprochées et lesquelles sont larges. Voici ce sur quoi il se base",
+"storyToneReset":"Revenir au préréglage",
+"storyFrameNegativeLabel":"Toujours en négatif (coupé par le cadre)",
+"storyFrameNegativeHint":"Un bras ou un pied coupé par le cadre ne se corrige pas après coup. Pour recadrer volontairement, collez l\'image au bord de la case après la génération",
+"storyPanelSize":"Adapter la taille à la forme de la case"
+},
+"zh":{
+"storyToneLabel":"哪种漫画",
+"storyToneGeneral":"通用（远近有变化）",
+"storyToneSeinen":"青年向（多用远景）",
+"storyToneShonen":"少年向（重看点）",
+"storyToneShojo":"少女漫画（重表情）",
+"storyToneAdult":"成人向（多用近景）",
+"storyToneNone":"不告知",
+"storyToneDetail":"编辑告知 LLM 的内容",
+"storyToneHint":"哪一格用近景、哪一格用远景由 LLM 判断。这里是它的判断依据",
+"storyToneReset":"恢复为预设",
+"storyFrameNegativeLabel":"始终加入负面（被框切掉）",
+"storyFrameNegativeHint":"手臂或脚被框切掉的画面事后无法修正。若要刻意裁切，请在生成后把图像贴到分格边缘",
+"storyPanelSize":"生成尺寸匹配分格形状"
+},
+"ru":{
+"storyToneLabel":"Какая это манга",
+"storyToneGeneral":"Обычная (разная дальность)",
+"storyToneSeinen":"Сэйнэн (общие планы)",
+"storyToneShonen":"Сёнэн (акцент на экшене)",
+"storyToneShojo":"Сёдзё (акцент на эмоциях)",
+"storyToneAdult":"Для взрослых (крупные планы)",
+"storyToneNone":"Не сообщать",
+"storyToneDetail":"Изменить текст для LLM",
+"storyToneHint":"Какие кадры крупные, а какие общие, решает LLM. Это то, на что она опирается",
+"storyToneReset":"Вернуть пресет",
+"storyFrameNegativeLabel":"Всегда в негатив (обрезано рамкой)",
+"storyFrameNegativeHint":"Руку или ногу, срезанную рамкой, потом не исправить. Чтобы обрезать намеренно, после генерации придвиньте изображение к краю кадра",
+"storyPanelSize":"Размер генерации по форме кадра"
+},
+"es":{
+"storyToneLabel":"Tipo de manga",
+"storyToneGeneral":"General (distancias variadas)",
+"storyToneSeinen":"Seinen (planos abiertos)",
+"storyToneShonen":"Shonen (impacto)",
+"storyToneShojo":"Shojo (expresión)",
+"storyToneAdult":"Adulto (planos cerrados)",
+"storyToneNone":"No indicar",
+"storyToneDetail":"Editar lo que se le dice al LLM",
+"storyToneHint":"El LLM decide qué viñetas son cercanas y cuáles abiertas. Esto es en lo que se basa",
+"storyToneReset":"Volver al preajuste",
+"storyFrameNegativeLabel":"Siempre en negativo (cortado por el marco)",
+"storyFrameNegativeHint":"Un brazo o un pie cortado por el marco no se puede arreglar después. Para recortar a propósito, pega la imagen al borde de la viñeta tras generar",
+"storyPanelSize":"Ajustar el tamaño a la forma de la viñeta"
+},
+"de":{
+"storyToneLabel":"Art des Mangas",
+"storyToneGeneral":"Allgemein (wechselnde Distanz)",
+"storyToneSeinen":"Seinen (weitere Einstellungen)",
+"storyToneShonen":"Shonen (Höhepunkte)",
+"storyToneShojo":"Shojo (Mimik)",
+"storyToneAdult":"Erwachsene (nähere Einstellungen)",
+"storyToneNone":"Nicht mitteilen",
+"storyToneDetail":"Text für das LLM bearbeiten",
+"storyToneHint":"Welche Panels nah und welche weit sind, entscheidet das LLM. Das hier ist seine Grundlage",
+"storyToneReset":"Auf Voreinstellung zurücksetzen",
+"storyFrameNegativeLabel":"Immer negativ (vom Rahmen angeschnitten)",
+"storyFrameNegativeHint":"Ein vom Rahmen abgeschnittener Arm oder Fuß lässt sich nachträglich nicht beheben. Für einen gewollten Anschnitt das Bild nach der Generierung an den Panelrand schieben",
+"storyPanelSize":"Größe an Panelform anpassen"
+}
+},
 "20260802210000_001":{
 "ja":{
 "storyLocationLabel":"ロケーション設定（任意）",
@@ -176,7 +372,7 @@ const resources = {
 "ja":{
 "promptToolsGroup":"ツール",
 "storyPromptGroup":"ストーリーからコマのプロンプト",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"①合わせる→②抽出→③作成",
 "storyApplyScope":"作る範囲",
 "storyScopeSelected":"選択中のコマ",
 "storyScopePage":"このページのコマすべて",
@@ -210,7 +406,7 @@ const resources = {
 "en":{
 "promptToolsGroup":"Tools",
 "storyPromptGroup":"Story to panel prompts",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Fit  2 Extract  3 Create",
 "storyApplyScope":"Create for",
 "storyScopeSelected":"Selected panel",
 "storyScopePage":"All panels on this page",
@@ -244,7 +440,7 @@ const resources = {
 "ko":{
 "promptToolsGroup":"도구",
 "storyPromptGroup":"스토리로 칸 프롬프트 만들기",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"①맞추기→②추출→③생성",
 "storyApplyScope":"만들 범위",
 "storyScopeSelected":"선택 중인 칸",
 "storyScopePage":"이 페이지의 모든 칸",
@@ -278,7 +474,7 @@ const resources = {
 "fr":{
 "promptToolsGroup":"Outils",
 "storyPromptGroup":"Histoire vers prompts de cases",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Ajuster 2 Extraire 3 Créer",
 "storyApplyScope":"Créer pour",
 "storyScopeSelected":"Panneau sélectionné",
 "storyScopePage":"Tous les panneaux de cette page",
@@ -312,7 +508,7 @@ const resources = {
 "zh":{
 "promptToolsGroup":"工具",
 "storyPromptGroup":"由剧情生成分格提示词",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"①调整→②抽取→③生成",
 "storyApplyScope":"生成范围",
 "storyScopeSelected":"选中的分格",
 "storyScopePage":"本页的所有分格",
@@ -346,7 +542,7 @@ const resources = {
 "ru":{
 "promptToolsGroup":"Инструменты",
 "storyPromptGroup":"История в промпты кадров",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Подогнать 2 Извлечь 3 Создать",
 "storyApplyScope":"Создать для",
 "storyScopeSelected":"Выбранная панель",
 "storyScopePage":"Все панели этой страницы",
@@ -380,7 +576,7 @@ const resources = {
 "es":{
 "promptToolsGroup":"Herramientas",
 "storyPromptGroup":"Historia a prompts de viñetas",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Ajustar 2 Extraer 3 Crear",
 "storyApplyScope":"Crear para",
 "storyScopeSelected":"Panel seleccionado",
 "storyScopePage":"Todos los paneles de esta página",
@@ -414,7 +610,7 @@ const resources = {
 "de":{
 "promptToolsGroup":"Werkzeuge",
 "storyPromptGroup":"Geschichte zu Panel-Prompts",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Anpassen 2 Extrahieren 3 Erstellen",
 "storyApplyScope":"Erstellen für",
 "storyScopeSelected":"Ausgewähltes Panel",
 "storyScopePage":"Alle Panels dieser Seite",

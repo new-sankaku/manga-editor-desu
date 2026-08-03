@@ -48,7 +48,9 @@ return tag&&!promptHasTag(prompt,tag);
 return missing.length>0?prompt+", "+missing.join(", "):prompt;
 }
 
-// 追記は末尾のカンマを均してから繋ぐ。既存が空なら区切りを付けない
+// 追記は末尾のカンマを均してから繋ぐ。既存が空なら区切りを付けない。
+// どの距離で描くかはLLMが決める。ここで足すのは判断の余地がないものだけ
+// （画風タグと、後から直せない見切れのネガティブ）
 function promptApplyToPanel(panel,tags,append) {
 const value=(tags||"").trim();
 if (!value) {
@@ -56,6 +58,22 @@ return false;
 }
 const current=(panel.text2img_prompt||"").trim().replace(/,+$/,"").trim();
 panel.text2img_prompt=appendMangaStyleSuffix((append&&current)?current+", "+value:value);
+panelApplyFrameNegative(panel);
+panelCompositionApplySize(panel);
+return true;
+}
+
+// コマ一括ではなく、1レイヤーへ手動で書き込む経路（文章→タグ / 画像→タグ）用。
+// 画風タグと見切れのネガティブは、どちらの経路から書いても同じでなければならない。
+// 生成解像度だけは足さない。同じパネルのWidth/Heightにユーザーが入れた値を黙って潰すため
+function promptApplyTagsToLayer(layer,tags,append) {
+const value=(tags||"").trim();
+if (!value) {
+return false;
+}
+const current=(layer.text2img_prompt||"").trim().replace(/,+$/,"").trim();
+layer.text2img_prompt=appendMangaStyleSuffix((append&&current)?current+", "+value:value);
+panelApplyFrameNegative(layer);
 return true;
 }
 

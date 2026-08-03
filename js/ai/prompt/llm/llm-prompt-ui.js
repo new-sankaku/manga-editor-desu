@@ -86,11 +86,8 @@ if(!tags){
 $('llmPromptStatus').textContent=i18next.t('llmText2PromptNeedResult');
 return;
 }
-if(append&&layer.text2img_prompt){
-layer.text2img_prompt=layer.text2img_prompt+', '+tags;
-}else{
-layer.text2img_prompt=tags;
-}
+// 画風タグと見切れのネガティブはコマ一括経路と同じものを通す
+promptApplyTagsToLayer(layer,tags,append);
 refreshPromptPanel(layer);
 createToast(i18next.t('llmText2PromptTitle'),layer.text2img_prompt);
 closeLLMPromptWindow();

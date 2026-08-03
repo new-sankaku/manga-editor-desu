@@ -26,6 +26,7 @@ $("storyPromptStatus").textContent=text||'';
 function llmStorySetBusy(busy) {
 $("storyGenerateButton").disabled=busy;
 $("storySheetButton").disabled=busy;
+$("storyExpandButton").disabled=busy;
 }
 
 function llmStoryShowError(error) {
@@ -65,6 +66,78 @@ llmStoryShowError(error);
 } finally {
 llmStorySetBusy(false);
 }
+}
+
+// ストーリーをページ数に合わせる（短ければ足し、長ければ削る）。
+// ユーザーの入力を黙って書き換えず、一度プレビューへ出して
+// 編集させてから「ストーリー欄へ入れる」を押させる
+async function llmStoryFitStory() {
+if (!llmStoryRequireProvider()) {
+return;
+}
+const story=llmStoryGetStory();
+if (!story) {
+llmStorySetStatus(getText("storyNeedInput"));
+return;
+}
+// 何ページ分に合わせるかはキャンバスのページ数で決まる
+const pageCount=btmGetGuidsSize();
+if (!pageCount) {
+createToastError(getText("storyTitle"),getText("storyExpandNoPage"),4000);
+return;
+}
+llmStorySetBusy(true);
+llmStorySetStatus(getText("storyExpanding"));
+try {
+openLLMStoryFitWindow(await llmStoryFitToPages(story,pageCount),pageCount);
+llmStorySetStatus('');
+} catch (error) {
+llmStoryShowError(error);
+} finally {
+llmStorySetBusy(false);
+}
+}
+
+function closeLLMStoryFitWindow() {
+const existing=document.querySelector('.llm-story-fit-window');
+if (existing) {
+existing.remove();
+}
+}
+
+function openLLMStoryFitWindow(text,pageCount) {
+closeLLMStoryFitWindow();
+const win=document.createElement('div');
+win.className='floating-windowPromptClass llm-story-fit-window';
+win.style.cursor='move';
+win.innerHTML=`
+<h4>${getText('storyExpandTitle')}</h4>
+<div class="llm-prompt-status llm-story-note">${getText('storyExpandHint')} ${pageCount}</div>
+<div class="llm-prompt-field">
+<textarea id="llmStoryFitText" rows="14"></textarea>
+</div>
+<div class="llm-prompt-actions">
+<button id="llmStoryFitApply">${getText('storyExpandApply')}</button>
+<button id="llmStoryFitClose">${getText('llmText2PromptClose')}</button>
+</div>
+`;
+document.body.appendChild(win);
+makeDraggable(win);
+// 利用者の入力をテンプレートリテラルに埋めるとDOMが壊れる。valueへ代入する
+$('llmStoryFitText').value=text;
+
+$('llmStoryFitApply').addEventListener('click',function () {
+const value=$('llmStoryFitText').value.trim();
+if (!value) {
+return;
+}
+$("storyPromptInput").value=value;
+closeLLMStoryFitWindow();
+createToast(getText("storyTitle"),getText("storyExpandApplied"),3000);
+});
+$('llmStoryFitClose').addEventListener('click',function () {
+closeLLMStoryFitWindow();
+});
 }
 
 // 1コマ / 1ページ: ストーリー全文をそのまま1ページ分として渡すと、どのコマにも
@@ -527,6 +600,11 @@ llmStoryGenerate();
 EventDelegator.register('llmStoryExtractSheets',function () {
 // awaitしないのでcatchが要る。中でトーストまで出す
 llmStoryExtractSheets().catch(function (error) {
+llmStoryShowError(error);
+});
+});
+EventDelegator.register('llmStoryExpand',function () {
+llmStoryFitStory().catch(function (error) {
 llmStoryShowError(error);
 });
 });

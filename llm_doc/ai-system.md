@@ -26,6 +26,7 @@ ai-management.js（ルーター）
 │   ├─ model-settings-window.js（モデル・ワークフロー設定フローティングウインドウ）
 │   └─ ai-ui-util.js
 ├─ prompt/auto/（自動プロンプト生成）
+├─ prompt/panel-composition.js（役割→構図タグ、SDXLバケット）
 ├─ prompt/llm/llm-story-service.js, -ui.js（ストーリー→コマのプロンプト）
 └─ prompt/prompt-apply.js（コマへの書き込みとページ送り）
 ```
@@ -162,8 +163,9 @@ LLM呼び出しは3種類。いずれも`response_format:{type:'json_object'}`�
 - コマの並べ替え（`sortPanelsInReadingOrder`）・レイアウト要約（`buildPanelLayoutSummary`）・
   コマ応答のパース（`parseStoryboardResponse`）・役割の検証と再依頼（`requestPanelPrompts`）は
   **llm-storyboard-service.jsの関数をそのまま使う**。同じ処理を二重に持たない
-- **キャラ表は各コマのプロンプトへそのままコピーさせる。** これがないとコマごとに
-  見た目が変わる。空でも動く（任意項目）
+- **キャラ表は、そのコマのフレームに入る範囲だけ使わせる。** 顔と髪は毎回入れて同じ人物と
+  分かるようにし、服は身体が入るとき、靴は足が入るときだけ。全部そのまま入れると
+  顔だけのコマにも靴が入り、それを収めようとして絵が引く。空でも動く（任意項目）
 - **ロケ表（`storyLocationInput`）も同じくそのままコピーさせる。** 同じ場所のコマで
   背景タグが揺れると場所が飛んで見える。キャラ表と1回の呼び出しでまとめて抽出する
   （`llmStorySheets`／ボタンは`llmStoryExtractSheets`）
@@ -225,13 +227,16 @@ LLM呼び出しは3種類。いずれも`response_format:{type:'json_object'}`�
   背の高いコマが後続の段を飲み込んでしまうため
 - `buildPanelLayoutSummary()`が各コマの形状・キャンバス比・面積シェア・
   `bleed`（断ち切り＝紙面端に接する）・`first` / `last`をLLMに渡す。
-  これで「大ゴマ＝引きの見せ場、小ゴマ＝リアクション、断ち切り＝広がり」の配分が効く
+  **これは判断材料であって割り当て表ではない。** どの形にどの役割を当てるかは
+  LLMが決める（大ゴマは引きか見せ場を担えるが、決まりではない）
 - **タグを直接書かせず、先にコマの役割（`role`）を宣言させる。**
   `MANGA_PANEL_ROLE_NAMES` = establishing / scenery / insert / full / medium / closeup / impact。
   役割を挟まないと、どのコマもキャラのバストアップに収束してページの緩急が消える
-- **役割の配分をコード側で検証する**（`findPanelRhythmProblem(entries,sceneChange)`）。
-  - 人物なしコマの枚数: `requiredEmptyPanelCount()`が4コマ以上で1枚、7コマ以上で2枚を要求し、
-    `MANGA_EMPTY_ROLES`かつ`no humans`タグ付きのコマを数える
+- **壊れ方だけをコード側で拾う**（`findPanelRhythmProblem(entries,sceneChange)`）。
+  **枚数の割り当て表は持たない。** 何枚を人物なしにするかはLLMの判断。
+  - `MANGA_MIN_PANELS_NEEDING_BREATH`（4）以上のコマ数で、`MANGA_EMPTY_ROLES`かつ
+    `no humans`タグ付きのコマが**1枚も無い**とき。LLMを放置すると全コマを人物の
+    バストアップで埋めるので、その一点だけ拾う
   - 場面転換: `sceneChange`が真なら1コマ目の役割が`establishing`であること
   
   違反があれば`requestPanelPrompts()`が内容を添えて**1度だけ**作り直す。
@@ -241,9 +246,50 @@ LLM呼び出しは3種類。いずれも`response_format:{type:'json_object'}`�
   1..Nの全indexが揃っているか検証し、欠けていたら**欠番を挙げてエラー**にする。
   足りない分を埋めたり黙って部分適用したりしない。知らない役割名は空にする
   （近い役割へ寄せると人物なしコマを数え違えるため）
+- **フレーミングの作り方をシステムプロンプトで教えている。** `full body`や`wide shot`は
+  結果に付いたラベルであって指示ではなく、単独では効かない。全身を描かせたいなら
+  足元にあるもの（ブーツ・脚・床）を名指しさせる。顔だけなら靴や地面を書かせない。
+  詳しくは`llm_doc/prompt-composition.md`
+- 見切れについては書かせない。判断が揺れるうえ、後から直せない事故になるため
+  書き込み側で常にネガティブへ入れる
+- **人数タグ（1girl / 2girls / solo）はコマ側で決める。** キャラ表には入れさせない。
+  2人のコマでキャラ表を2つ並べると`1girl`が2回入り、soloへの偏りと噛み合って破綻する
+- **キャラ表はそのコマのフレームに入る範囲だけ使わせる。** 顔と髪は毎回、服は身体が
+  入るとき、靴は足が入るときだけ。全部をそのままコピーさせると、顔だけのコマにも
+  靴が入って勝手に引いた絵になる。**システムプロンプトとユーザーメッセージの両方で
+  同じことを言う**（片方が「そのままコピー」のままだと食い違う）
 - 生成結果はコマ単位のtextareaでプレビューし、編集してから「設定」「追記」を選ぶ。
   コマ番号の下に役割名（引き・情景…）を出し、ページの緩急を目で確認できるようにする。
   textareaにフォーカスすると該当コマがキャンバス上で選択され、対応を確認できる
+
+## コマの構図（panel-composition.js）
+漫画のコマと、画像生成AIが既定で描く絵の差を埋める。**知見の本体は
+`llm_doc/prompt-composition.md`**。ここには実装の置き場所だけ書く。
+
+**どのコマを寄りにしてどのコマを引きにするかはLLMが判断する。**
+役割ごとにタグを決め打つ表は持たない。`full body` / `wide shot` のような
+フレーミングタグは効きが弱く、表で機械的に入れても補助にしかならないため。
+
+このファイルが持つのは判断の余地がない3つだけ:
+
+- **作品傾向**（`MANGA_TONE_PRESETS`）— タグではなくLLMに読ませる指示文。
+  `general` / `seinen` / `shonen` / `shojo` / `adult` / `none`。
+  入口は左パネル「プロンプト」内の「どんな漫画か」。
+  **プリセットは欄（`storyToneGuidance`）を書き換えるだけで、真実は欄の中身。**
+  何をLLMへ渡しているかが常に画面に出ている状態にする。
+  文面は`llmStoryboard()`と`llmStoryPanelPrompts()`の両方でユーザープロンプトの先頭に入る
+- **見切れのネガティブ**（`MANGA_FRAME_NEGATIVE_DEFAULT` → `panelApplyFrameNegative()`）—
+  枠で切れた腕や脚は後から直せないので常に入れる。**手書きのネガティブは消さない**（足す側に回る）。
+  ポジティブに入っているタグは打ち消し合うので除く。同じコマに2回書き込んでも増えない。
+  意図して見切れさせたいときはプロンプトではなく、生成後に画像をコマの枠へ接させる
+- **コマの形→生成解像度**（`PANEL_SDXL_BUCKETS` → `panelCompositionApplySize()`、既定オフ）—
+  横長コマに引きの絵を頼んでも正方形で生成して嵌めると上下が切られ、結局バストアップに見えるため
+
+フレーミングの作り方（要素を名指しさせる）はシステムプロンプト側
+（`buildPanelSystemPrompt()`）に書いてLLMに実行させる。
+
+書き込みは`promptApplyToPanel()`の1か所だけ。ネーム窓とストーリー→コマの
+両方がここを通るので、片方だけ効かない状態にならない。
 
 ## セリフ支援（llm-dialogue-service.js / -ui.js）
 選択中のテキストオブジェクトに対して推敲・口調変更・文字数調整・翻訳を行う。
