@@ -5,7 +5,7 @@
 // 「伝えたいこと → 役割 → フレームに入れるもの」の対応表。
 // 役割をラベル（バストアップ等）で定義すると「upper bodyと書けばそうなる」という
 // 誤解を招くので、フレームに何が入るかで書く。
-// 文面は llm_doc/manga-page-guideline.md の4章と11章がそのまま元
+// 文面は llm_doc/manga-page-guideline.md の4・15章がそのまま元
 const MANGA_PANEL_ROLES=[
 '  telling the reader        role           what is inside the frame',
 '  where they are            establishing   the place. things too big to fit the frame. no one, or people small enough to be dots',
@@ -76,7 +76,9 @@ MANGA_PANEL_ROLES,
 '- Tilt at most one panel on the page. Do it more and none of them read as unsteady.',
 '',
 'Using the panel layout you were given:',
-'- Large, or marked "bleed": the place, or the one panel the page is built on.',
+'- Large: the place, or the one panel the page is built on.',
+'- Marked "bleed": the picture runs off the paper, which pushes the figure at the reader and carries',
+'  speed. It reads as strong only while the panels around it stay inside their frames.',
 '- Small: a face or one detail. Never the place. Shrunk down there is nothing to see.',
 '- Landscape: the place, or people side by side.',
 '- Portrait: a standing figure head to toe.',
@@ -94,7 +96,31 @@ MANGA_PANEL_ROLES,
 '  to carry speed, radiating lines to hit. Reaching for the same one every time makes the page',
 '  look mechanical.',
 '',
-// 指針11章。フレーミングタグが効かないことと、その代わりに何を書くか
+// 指針10章。視線でコマをつなぐ。左右の向きはDanbooruにタグが無いので指定しない
+'Where the eyes go:',
+'- After the balloons, the strongest thing pulling the reader through a page is where the people',
+'  in it are looking. Point them at whatever comes next.',
+'- Two people talking look at each other, so the reader bounces between them.',
+'- Someone turned away, or looking off to the side, carries the reader on to the following panel.',
+'- Meeting the reader\'s eye stops them dead. That is why almost no panel should do it, and why',
+'  the one that should is the panel you want them to stop on: the end of the page, the moment',
+'  itself, a line spoken to the reader. Everywhere else, put the eyes on something in the scene.',
+'',
+// 指針11章（セリフとコマ）。吹き出しはアプリが後から乗せるので、絵で潰さない
+'Leaving room for the words:',
+'- The balloons are drawn by the editor afterwards, over the picture you asked for. Fill the frame',
+'  with a face and the balloon lands on it.',
+'- A panel carrying a lot of speech should not sit as close as it otherwise would. Leave the figure',
+'  room above or beside it.',
+'- A panel with nothing said in it can use the whole frame. That is where the wide views and the',
+'  big moments go.',
+'- The more there is to read in a panel, the simpler the picture: drop the background, still the',
+'  motion. A crowded picture under a crowded balloon gets neither read.',
+'',
+// 指針11章。擬音はアプリのテキストで入れる。画像に文字を描かせない
+'Sound effects belong to the editor as text on top. Never ask the image for lettering.',
+'',
+// 指針15章。フレーミングタグが効かないことと、その代わりに何を書くか
 'Getting the distance you decided on. This is where most panels go wrong:',
 '- "wide shot", "full body", "upper body", "close-up" are labels that were put on finished pictures.',
 '  They are not instructions. Writing "full body" does not make the model draw a whole body.',
@@ -110,7 +136,8 @@ MANGA_PANEL_ROLES,
 '',
 'What the model does when you do not say:',
 '- It falls back on one person, chest to knee, facing front, looking at the camera. A manga panel',
-'  rarely does any of that. Say where the eyes are going when it matters.',
+'  rarely does any of that, so say where the eyes are going. The exception is the panel you want',
+'  the reader to stop on, where meeting their eye is the point.',
 '- Count the people in each panel and open the prompt with the count tags for that panel. Count them',
 '  in that panel; do not carry the count over from the panel before. Write "solo" only when one',
 '  person really is alone.',

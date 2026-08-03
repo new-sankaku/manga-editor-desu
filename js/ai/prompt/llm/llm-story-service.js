@@ -4,7 +4,7 @@
 
 // ユーザーの入力はページ数に対して短すぎるか長すぎる。短ければ各ページが空になり、
 // 長ければ1ページに詰め込みすぎる。配分の前に両方向へ合わせる。
-// 文面は llm_doc/manga-page-guideline.md の9章がそのまま元
+// 文面は llm_doc/manga-page-guideline.md の9・12・13章がそのまま元
 const LLM_STORY_FIT_SYSTEM=[
 'Rewrite the story so that it fits the given number of pages. Add, condense and cut as needed.',
 '',
@@ -54,6 +54,18 @@ const LLM_STORY_FIT_SYSTEM=[
 '  in. Too few and a scene is stretched over four or more pages and goes slack.',
 '',
 '- Give the characters plain names, so that the later steps can refer to them.',
+'',
+// 指針12章。設定を細かく作るのではなく、1つか2つを強く出す
+'- A character the reader remembers is missing something and wants something. The lack is what makes',
+'  them worth watching; the want is what makes them move. Give each of them one of each, and let the',
+'  first thing they do on the page show it rather than telling us about it.',
+'  Do not build out a full profile. One or two things stated strongly beat ten stated evenly.',
+'',
+// 指針12章。AI生成は似た見た目を描き分けられない
+'- Make the characters tell apart at a glance: different hair length, different hair colour,',
+'  different kind of clothing, and one thing each that nothing else in the story has (glasses, a hat,',
+'  a scar, something they always carry). This is not decoration. The drawing is done by an image',
+'  model, so two characters with similar hair and similar clothes come back mixed together.',
 '',
 '- Write one paragraph per scene. Each paragraph says where it is, who is there, and what happens.',
 '',
@@ -108,6 +120,12 @@ const LLM_STORY_SHEET_SYSTEM=[
 '- Character tags are appearance and nothing else: age, hair, eyes, face, clothing, body type,',
 '  accessories, shoes.',
 '',
+// 指針12章。似た見た目のキャラはAI生成で混ざる。ここで分けておく
+'- Two characters must not read the same. Across the cast, vary hair length, hair colour and the kind',
+'  of clothing, and give each one a tag nobody else has: glasses, a hat, a hair ornament, a scar,',
+'  something they carry. The image model has nothing but these tags to tell them apart, so two',
+'  characters tagged alike come back as the same face. If the story does not say, decide it here.',
+'',
 '- Do not put pose, expression, camera angle or background in character tags. Those change from',
 '  panel to panel, and a sheet is copied into every panel that character appears in.',
 '',
@@ -127,7 +145,7 @@ const LLM_STORY_SHEET_SYSTEM=[
 ].join('\n');
 
 // 起承転結を型として渡すと必ず4分割してくる。手順と判断の材料だけ渡す。
-// 文面は llm_doc/manga-page-guideline.md の10章がそのまま元
+// 文面は llm_doc/manga-page-guideline.md の11・14章がそのまま元
 const LLM_STORY_PAGEPLAN_SYSTEM=[
 'Spread this story over the pages you are given, and write what happens on each one.',
 '',
@@ -161,6 +179,12 @@ const LLM_STORY_PAGEPLAN_SYSTEM=[
 '  silent, far then close. A run of pages at one pitch stops registering whatever happens in them.',
 '',
 '- A page with many panels carries several beats. A page with few panels carries one moment.',
+'  A page with many panels also has less room in each of them, so keep what happens on it simple.',
+'',
+// 指針11章。読者は絵より先にセリフを読む
+'- The reader reads the words before they look at the picture. A page carrying a lot of talk cannot',
+'  also carry the big view; a page carrying the big view has to be quiet. Decide which one each',
+'  page is doing.',
 '',
 '- Keep "location" and "time" worded exactly the same while the story stays in one place, and change',
 '  the wording only when the story actually moves. The next step reads those two strings to decide',
