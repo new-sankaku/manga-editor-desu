@@ -2,6 +2,59 @@
 // コマの並べ替え・レイアウト要約・コマ応答のパース・役割の検証はllm-storyboard-service.jsの
 // 関数をそのまま使い、実装を二重に持たない
 
+// ユーザーが書くストーリーは短い。1行のこともある。そのままページへ配ると
+// 1ページに1文も割り当たらず、各ページが空になる。先にページ数に見合う量まで膨らませる。
+// 文面は llm_doc/manga-page-guideline.md の9章がそのまま元
+const LLM_STORY_EXPAND_SYSTEM=[
+'You receive a short premise for a manga and the number of pages it has to fill.',
+'Write it out as a story long enough to fill those pages.',
+'Rules:',
+'- Return JSON only, shaped exactly as {"story":"..."}.',
+'- Write in the same language as the premise.',
+'- Keep everything the premise already says. You are filling in what it leaves out, not replacing it.',
+'- Add only what the story needs: who the characters are and how they know each other, where it',
+'  happens, why someone wants what they want, what stands in their way, the one scene the story is',
+'  being told for, and how it ends.',
+'- Give the characters plain names, so that the later steps can refer to them.',
+// 人数と場所の上限は物語の都合ではない。同一人物を保つ手段がタグの一致しかないため
+'- Keep the cast to three or four people, and the places to two or three. This is not a preference',
+'  about storytelling. The drawing is done by an image model that has only matching tags to hold a',
+'  face or a place steady, so every extra character and every extra location is one more thing that',
+'  will drift from panel to panel.',
+'- One scene runs one to three pages. Work out how many scenes the page count can hold before you',
+'  write. Too many scenes and a scene gets less than a page, which is not enough to draw anything in.',
+'  Too few and a scene is stretched over four or more pages and goes slack.',
+'- Write one paragraph per scene. Each paragraph says where it is, who is there, and what happens.',
+'- Write what happens, not what is true. Not "he had always liked her", but "he started to speak to',
+'  her, no words came, and he turned away".',
+'- Do not break it into pages or panels here. That comes later.'
+].join('\n');
+
+function parseStoryExpand(raw) {
+const parsed=parseLLMJsonBody(raw);
+const story=parsed&&typeof parsed.story==='string' ? parsed.story.trim() : '';
+if (!story) {
+throw new Error(i18next.t('llmErrorEmptyResponse'));
+}
+return story;
+}
+
+// 戻り値: 膨らませたストーリー本文
+async function llmStoryExpand(story,pageCount) {
+const target=requireLLMProvider(AI_ROLES.Text2Prompt);
+const userPrompt=[
+'Pages to fill: '+pageCount,
+'',
+'Premise:',
+story
+].join('\n');
+const messages=target.provider.buildTextMessages(LLM_STORY_EXPAND_SYSTEM,userPrompt);
+const raw=await target.queue.add(function () {
+return target.provider.chat(messages,{temperature: 0.8,jsonObject: true});
+});
+return parseStoryExpand(raw);
+}
+
 // キャラとロケーションを1回の呼び出しでまとめて作る。どちらも同じストーリーから引くため
 const LLM_STORY_SHEET_SYSTEM=[
 // 肩書きを名乗らせても後続のルールが全部を決めるので情報が増えない。

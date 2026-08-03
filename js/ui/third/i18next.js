@@ -10,6 +10,80 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20260803180000_001":{
+"ja":{
+"storyExpand":"ページ数に合わせて膨らませる",
+"storyExpandTitle":"膨らませたストーリー",
+"storyExpandHint":"編集してから入れてください。ページ数:",
+"storyExpandApply":"ストーリー欄へ入れる",
+"storyExpandApplied":"ストーリー欄に入れました",
+"storyExpanding":"ストーリーを膨らませています…",
+"storyExpandNoPage":"ページがありません。先にページを作ってください"
+},
+"en":{
+"storyExpand":"Expand to page count",
+"storyExpandTitle":"Expanded story",
+"storyExpandHint":"Edit before putting it in. Pages:",
+"storyExpandApply":"Put into the story field",
+"storyExpandApplied":"Put into the story field",
+"storyExpanding":"Expanding the story...",
+"storyExpandNoPage":"There are no pages yet. Create pages first"
+},
+"ko":{
+"storyExpand":"페이지 수에 맞춰 늘리기",
+"storyExpandTitle":"늘린 스토리",
+"storyExpandHint":"편집한 뒤 넣어 주세요. 페이지 수:",
+"storyExpandApply":"스토리 칸에 넣기",
+"storyExpandApplied":"스토리 칸에 넣었습니다",
+"storyExpanding":"스토리를 늘리는 중…",
+"storyExpandNoPage":"페이지가 없습니다. 먼저 페이지를 만들어 주세요"
+},
+"fr":{
+"storyExpand":"Développer selon le nombre de pages",
+"storyExpandTitle":"Histoire développée",
+"storyExpandHint":"Modifiez avant de l'insérer. Pages :",
+"storyExpandApply":"Insérer dans le champ Histoire",
+"storyExpandApplied":"Inséré dans le champ Histoire",
+"storyExpanding":"Développement de l'histoire…",
+"storyExpandNoPage":"Aucune page. Créez d'abord des pages"
+},
+"zh":{
+"storyExpand":"按页数扩写",
+"storyExpandTitle":"扩写后的故事",
+"storyExpandHint":"编辑后再填入。页数：",
+"storyExpandApply":"填入故事栏",
+"storyExpandApplied":"已填入故事栏",
+"storyExpanding":"正在扩写故事…",
+"storyExpandNoPage":"还没有页面。请先创建页面"
+},
+"ru":{
+"storyExpand":"Развернуть под число страниц",
+"storyExpandTitle":"Развёрнутая история",
+"storyExpandHint":"Отредактируйте перед вставкой. Страниц:",
+"storyExpandApply":"Вставить в поле истории",
+"storyExpandApplied":"Вставлено в поле истории",
+"storyExpanding":"Разворачиваю историю…",
+"storyExpandNoPage":"Страниц пока нет. Сначала создайте страницы"
+},
+"es":{
+"storyExpand":"Ampliar al número de páginas",
+"storyExpandTitle":"Historia ampliada",
+"storyExpandHint":"Edítala antes de insertarla. Páginas:",
+"storyExpandApply":"Insertar en el campo de historia",
+"storyExpandApplied":"Insertado en el campo de historia",
+"storyExpanding":"Ampliando la historia…",
+"storyExpandNoPage":"Todavía no hay páginas. Crea páginas primero"
+},
+"de":{
+"storyExpand":"Auf Seitenzahl ausbauen",
+"storyExpandTitle":"Ausgebaute Geschichte",
+"storyExpandHint":"Vor dem Einfügen bearbeiten. Seiten:",
+"storyExpandApply":"In das Story-Feld einfügen",
+"storyExpandApplied":"In das Story-Feld eingefügt",
+"storyExpanding":"Geschichte wird ausgebaut…",
+"storyExpandNoPage":"Es gibt noch keine Seiten. Bitte zuerst Seiten anlegen"
+}
+},
 "20260803120000_001":{
 "ja":{
 "storyToneLabel":"どんな漫画か",
