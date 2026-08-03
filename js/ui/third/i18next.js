@@ -12,75 +12,75 @@
 const resources = {
 "20260803180000_001":{
 "ja":{
-"storyExpand":"ページ数に合わせて膨らませる",
-"storyExpandTitle":"膨らませたストーリー",
+"storyExpand":"ページ数に合わせる",
+"storyExpandTitle":"ページ数に合わせたストーリー",
 "storyExpandHint":"編集してから入れてください。ページ数:",
 "storyExpandApply":"ストーリー欄へ入れる",
 "storyExpandApplied":"ストーリー欄に入れました",
-"storyExpanding":"ストーリーを膨らませています…",
+"storyExpanding":"ストーリーをページ数に合わせています…",
 "storyExpandNoPage":"ページがありません。先にページを作ってください"
 },
 "en":{
-"storyExpand":"Expand to page count",
-"storyExpandTitle":"Expanded story",
+"storyExpand":"Fit to page count",
+"storyExpandTitle":"Story fitted to the pages",
 "storyExpandHint":"Edit before putting it in. Pages:",
 "storyExpandApply":"Put into the story field",
 "storyExpandApplied":"Put into the story field",
-"storyExpanding":"Expanding the story...",
+"storyExpanding":"Fitting the story to the pages...",
 "storyExpandNoPage":"There are no pages yet. Create pages first"
 },
 "ko":{
-"storyExpand":"페이지 수에 맞춰 늘리기",
-"storyExpandTitle":"늘린 스토리",
+"storyExpand":"페이지 수에 맞추기",
+"storyExpandTitle":"페이지 수에 맞춘 스토리",
 "storyExpandHint":"편집한 뒤 넣어 주세요. 페이지 수:",
 "storyExpandApply":"스토리 칸에 넣기",
 "storyExpandApplied":"스토리 칸에 넣었습니다",
-"storyExpanding":"스토리를 늘리는 중…",
+"storyExpanding":"스토리를 페이지 수에 맞추는 중…",
 "storyExpandNoPage":"페이지가 없습니다. 먼저 페이지를 만들어 주세요"
 },
 "fr":{
-"storyExpand":"Développer selon le nombre de pages",
-"storyExpandTitle":"Histoire développée",
+"storyExpand":"Ajuster au nombre de pages",
+"storyExpandTitle":"Histoire ajustée aux pages",
 "storyExpandHint":"Modifiez avant de l'insérer. Pages :",
 "storyExpandApply":"Insérer dans le champ Histoire",
 "storyExpandApplied":"Inséré dans le champ Histoire",
-"storyExpanding":"Développement de l'histoire…",
+"storyExpanding":"Ajustement de l'histoire…",
 "storyExpandNoPage":"Aucune page. Créez d'abord des pages"
 },
 "zh":{
-"storyExpand":"按页数扩写",
-"storyExpandTitle":"扩写后的故事",
+"storyExpand":"按页数调整",
+"storyExpandTitle":"按页数调整后的故事",
 "storyExpandHint":"编辑后再填入。页数：",
 "storyExpandApply":"填入故事栏",
 "storyExpandApplied":"已填入故事栏",
-"storyExpanding":"正在扩写故事…",
+"storyExpanding":"正在按页数调整故事…",
 "storyExpandNoPage":"还没有页面。请先创建页面"
 },
 "ru":{
-"storyExpand":"Развернуть под число страниц",
-"storyExpandTitle":"Развёрнутая история",
+"storyExpand":"Подогнать под число страниц",
+"storyExpandTitle":"История под число страниц",
 "storyExpandHint":"Отредактируйте перед вставкой. Страниц:",
 "storyExpandApply":"Вставить в поле истории",
 "storyExpandApplied":"Вставлено в поле истории",
-"storyExpanding":"Разворачиваю историю…",
+"storyExpanding":"Подгоняю историю под страницы…",
 "storyExpandNoPage":"Страниц пока нет. Сначала создайте страницы"
 },
 "es":{
-"storyExpand":"Ampliar al número de páginas",
-"storyExpandTitle":"Historia ampliada",
+"storyExpand":"Ajustar al número de páginas",
+"storyExpandTitle":"Historia ajustada a las páginas",
 "storyExpandHint":"Edítala antes de insertarla. Páginas:",
 "storyExpandApply":"Insertar en el campo de historia",
 "storyExpandApplied":"Insertado en el campo de historia",
-"storyExpanding":"Ampliando la historia…",
+"storyExpanding":"Ajustando la historia…",
 "storyExpandNoPage":"Todavía no hay páginas. Crea páginas primero"
 },
 "de":{
-"storyExpand":"Auf Seitenzahl ausbauen",
-"storyExpandTitle":"Ausgebaute Geschichte",
+"storyExpand":"An die Seitenzahl anpassen",
+"storyExpandTitle":"An die Seiten angepasste Geschichte",
 "storyExpandHint":"Vor dem Einfügen bearbeiten. Seiten:",
 "storyExpandApply":"In das Story-Feld einfügen",
 "storyExpandApplied":"In das Story-Feld eingefügt",
-"storyExpanding":"Geschichte wird ausgebaut…",
+"storyExpanding":"Geschichte wird angepasst…",
 "storyExpandNoPage":"Es gibt noch keine Seiten. Bitte zuerst Seiten anlegen"
 }
 },

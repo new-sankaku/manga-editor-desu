@@ -68,9 +68,10 @@ llmStorySetBusy(false);
 }
 }
 
-// ストーリーを膨らませる。ユーザーの入力を黙って書き換えず、一度プレビューへ出して
+// ストーリーをページ数に合わせる（短ければ足し、長ければ削る）。
+// ユーザーの入力を黙って書き換えず、一度プレビューへ出して
 // 編集させてから「ストーリー欄へ入れる」を押させる
-async function llmStoryExpandStory() {
+async function llmStoryFitStory() {
 if (!llmStoryRequireProvider()) {
 return;
 }
@@ -79,7 +80,7 @@ if (!story) {
 llmStorySetStatus(getText("storyNeedInput"));
 return;
 }
-// 何ページ分に膨らませるかはキャンバスのページ数で決まる
+// 何ページ分に合わせるかはキャンバスのページ数で決まる
 const pageCount=btmGetGuidsSize();
 if (!pageCount) {
 createToastError(getText("storyTitle"),getText("storyExpandNoPage"),4000);
@@ -88,7 +89,7 @@ return;
 llmStorySetBusy(true);
 llmStorySetStatus(getText("storyExpanding"));
 try {
-openLLMStoryExpandWindow(await llmStoryExpand(story,pageCount),pageCount);
+openLLMStoryFitWindow(await llmStoryFitToPages(story,pageCount),pageCount);
 llmStorySetStatus('');
 } catch (error) {
 llmStoryShowError(error);
@@ -97,45 +98,45 @@ llmStorySetBusy(false);
 }
 }
 
-function closeLLMStoryExpandWindow() {
-const existing=document.querySelector('.llm-story-expand-window');
+function closeLLMStoryFitWindow() {
+const existing=document.querySelector('.llm-story-fit-window');
 if (existing) {
 existing.remove();
 }
 }
 
-function openLLMStoryExpandWindow(text,pageCount) {
-closeLLMStoryExpandWindow();
+function openLLMStoryFitWindow(text,pageCount) {
+closeLLMStoryFitWindow();
 const win=document.createElement('div');
-win.className='floating-windowPromptClass llm-story-expand-window';
+win.className='floating-windowPromptClass llm-story-fit-window';
 win.style.cursor='move';
 win.innerHTML=`
 <h4>${getText('storyExpandTitle')}</h4>
 <div class="llm-prompt-status llm-story-note">${getText('storyExpandHint')} ${pageCount}</div>
 <div class="llm-prompt-field">
-<textarea id="llmStoryExpandText" rows="14"></textarea>
+<textarea id="llmStoryFitText" rows="14"></textarea>
 </div>
 <div class="llm-prompt-actions">
-<button id="llmStoryExpandApply">${getText('storyExpandApply')}</button>
-<button id="llmStoryExpandClose">${getText('llmText2PromptClose')}</button>
+<button id="llmStoryFitApply">${getText('storyExpandApply')}</button>
+<button id="llmStoryFitClose">${getText('llmText2PromptClose')}</button>
 </div>
 `;
 document.body.appendChild(win);
 makeDraggable(win);
 // 利用者の入力をテンプレートリテラルに埋めるとDOMが壊れる。valueへ代入する
-$('llmStoryExpandText').value=text;
+$('llmStoryFitText').value=text;
 
-$('llmStoryExpandApply').addEventListener('click',function () {
-const value=$('llmStoryExpandText').value.trim();
+$('llmStoryFitApply').addEventListener('click',function () {
+const value=$('llmStoryFitText').value.trim();
 if (!value) {
 return;
 }
 $("storyPromptInput").value=value;
-closeLLMStoryExpandWindow();
+closeLLMStoryFitWindow();
 createToast(getText("storyTitle"),getText("storyExpandApplied"),3000);
 });
-$('llmStoryExpandClose').addEventListener('click',function () {
-closeLLMStoryExpandWindow();
+$('llmStoryFitClose').addEventListener('click',function () {
+closeLLMStoryFitWindow();
 });
 }
 
@@ -603,7 +604,7 @@ llmStoryShowError(error);
 });
 });
 EventDelegator.register('llmStoryExpand',function () {
-llmStoryExpandStory().catch(function (error) {
+llmStoryFitStory().catch(function (error) {
 llmStoryShowError(error);
 });
 });

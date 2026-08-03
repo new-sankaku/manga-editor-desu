@@ -2,35 +2,51 @@
 // コマの並べ替え・レイアウト要約・コマ応答のパース・役割の検証はllm-storyboard-service.jsの
 // 関数をそのまま使い、実装を二重に持たない
 
-// ユーザーが書くストーリーは短い。1行のこともある。そのままページへ配ると
-// 1ページに1文も割り当たらず、各ページが空になる。先にページ数に見合う量まで膨らませる。
+// ユーザーの入力はページ数に対して短すぎるか長すぎる。短ければ各ページが空になり、
+// 長ければ1ページに詰め込みすぎる。配分の前に両方向へ合わせる。
 // 文面は llm_doc/manga-page-guideline.md の9章がそのまま元
-const LLM_STORY_EXPAND_SYSTEM=[
-'You receive a short premise for a manga and the number of pages it has to fill.',
-'Write it out as a story long enough to fill those pages.',
-'Rules:',
-'- Return JSON only, shaped exactly as {"story":"..."}.',
-'- Write in the same language as the premise.',
-'- Keep everything the premise already says. You are filling in what it leaves out, not replacing it.',
-'- Add only what the story needs: who the characters are and how they know each other, where it',
-'  happens, why someone wants what they want, what stands in their way, the one scene the story is',
-'  being told for, and how it ends.',
-'- Give the characters plain names, so that the later steps can refer to them.',
+const LLM_STORY_FIT_SYSTEM=[
+'Rewrite the story so that it fits the given number of pages. Add, condense and cut as needed.',
+'',
+'Watch these points:',
+'',
+'- Do not change what the story already decides: who is in it, what happens, how it ends.',
+'  Everything else is yours to add, shorten or drop so that the length comes out right.',
+'',
+'- When the story is too short for the pages, add what it leaves out: who the characters are and',
+'  how they know each other, where it happens, why someone wants what they want, what stands in',
+'  their way, the one scene the story is being told for, and how it ends.',
+'',
+'- When the story is too long for the pages, cut in this order: scenes that only explain something',
+'  (travel, time passing, flashback), then minor characters and their scenes, then scenes that show',
+'  the same thing twice, then the scenes furthest from the one you are telling it for.',
+'  Keep that scene and the ending to the last. Cut those and there is no story left.',
+'',
 // 人数と場所の上限は物語の都合ではない。同一人物を保つ手段がタグの一致しかないため
-'- Keep the cast to three or four people, and the places to two or three. This is not a preference',
+'- Keep the cast to three or four people and the places to two or three. This is not a preference',
 '  about storytelling. The drawing is done by an image model that has only matching tags to hold a',
 '  face or a place steady, so every extra character and every extra location is one more thing that',
-'  will drift from panel to panel.',
-'- One scene runs one to three pages. Work out how many scenes the page count can hold before you',
-'  write. Too many scenes and a scene gets less than a page, which is not enough to draw anything in.',
-'  Too few and a scene is stretched over four or more pages and goes slack.',
+'  drifts from panel to panel. When cutting a long story, get down to this first.',
+'',
+'- One scene runs one to three pages. Work out how many scenes the page count holds before you',
+'  write. Too many scenes and a scene gets less than a page, which is not enough to draw anything',
+'  in. Too few and a scene is stretched over four or more pages and goes slack.',
+'',
+'- Give the characters plain names, so that the later steps can refer to them.',
+'',
 '- Write one paragraph per scene. Each paragraph says where it is, who is there, and what happens.',
+'',
 '- Write what happens, not what is true. Not "he had always liked her", but "he started to speak to',
 '  her, no words came, and he turned away".',
-'- Do not break it into pages or panels here. That comes later.'
+'',
+'- Do not break it into pages or panels. That comes later.',
+'',
+'- Write in the same language as the story.',
+'',
+'- Return JSON only, shaped exactly as {"story":"..."}.'
 ].join('\n');
 
-function parseStoryExpand(raw) {
+function parseStoryFit(raw) {
 const parsed=parseLLMJsonBody(raw);
 const story=parsed&&typeof parsed.story==='string' ? parsed.story.trim() : '';
 if (!story) {
@@ -39,20 +55,20 @@ throw new Error(i18next.t('llmErrorEmptyResponse'));
 return story;
 }
 
-// 戻り値: 膨らませたストーリー本文
-async function llmStoryExpand(story,pageCount) {
+// 戻り値: ページ数に合わせたストーリー本文
+async function llmStoryFitToPages(story,pageCount) {
 const target=requireLLMProvider(AI_ROLES.Text2Prompt);
 const userPrompt=[
-'Pages to fill: '+pageCount,
+'Pages: '+pageCount,
 '',
-'Premise:',
+'Story:',
 story
 ].join('\n');
-const messages=target.provider.buildTextMessages(LLM_STORY_EXPAND_SYSTEM,userPrompt);
+const messages=target.provider.buildTextMessages(LLM_STORY_FIT_SYSTEM,userPrompt);
 const raw=await target.queue.add(function () {
 return target.provider.chat(messages,{temperature: 0.8,jsonObject: true});
 });
-return parseStoryExpand(raw);
+return parseStoryFit(raw);
 }
 
 // キャラとロケーションを1回の呼び出しでまとめて作る。どちらも同じストーリーから引くため
