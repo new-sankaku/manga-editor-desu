@@ -171,6 +171,13 @@ return info.page;
 // 戻り値: {entries:[{prompt,role}], warning:string|null}
 async function llmStoryPanelPrompts(context) {
 const lines=[];
+// 作品傾向。どのコマを寄りにして、どのコマを引きにするかはこれを読んでLLMが決める
+const tone=mangaToneGuidance();
+if (tone) {
+lines.push('What kind of manga this is:');
+lines.push(tone);
+lines.push('');
+}
 if (context.characterSheet) {
 lines.push('Character sheet (copy these appearance tags verbatim):');
 lines.push(context.characterSheet);

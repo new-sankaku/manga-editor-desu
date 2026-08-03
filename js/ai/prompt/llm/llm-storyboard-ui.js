@@ -102,13 +102,8 @@ label.appendChild(role);
 var area=document.createElement('textarea');
 area.rows=2;
 area.value=entry.prompt;
-// 役割から決まる構図タグを読み取り専用で併記する。何が足されるか隠さない
-var note=document.createElement('div');
-note.className='llm-panel-composition';
-note.textContent=buildPanelCompositionNote(entry.panel,entry.role,entry.prompt);
 area.addEventListener('input',function(){
 llmStoryboardResult.entries[i].prompt=this.value;
-note.textContent=buildPanelCompositionNote(entry.panel,entry.role,this.value);
 });
 area.addEventListener('focus',function(){
 canvas.setActiveObject(entry.panel);
@@ -116,7 +111,6 @@ canvas.renderAll();
 });
 row.appendChild(label);
 row.appendChild(area);
-row.appendChild(note);
 container.appendChild(row);
 });
 $('llmStoryboardReplace').disabled=false;
@@ -130,7 +124,7 @@ return;
 }
 var applied=0;
 llmStoryboardResult.entries.forEach(function(entry){
-if(promptApplyToPanel(entry.panel,entry.prompt,append,entry.role)){
+if(promptApplyToPanel(entry.panel,entry.prompt,append)){
 applied++;
 }
 });

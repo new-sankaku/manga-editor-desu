@@ -85,9 +85,6 @@ const commonProperties=[
 'text2img_height',
 'text2img_samplingMethod',
 'text2img_samplingSteps',
-// 構図タグとして足した分。作り直しで役割が変わったとき、前の役割のタグだけを
-// 外すために覚えておく（panel-composition.js）
-'text2img_composition',
 'initial',
 'clipPath.initial',
 'name',

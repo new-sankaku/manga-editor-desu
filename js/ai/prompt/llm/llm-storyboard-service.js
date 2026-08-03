@@ -54,6 +54,17 @@ MANGA_PANEL_ROLES,
 '- If the place or the time of day changes on this page, the first panel after the change is establishing.',
 '- The panel with "last":true lands the emotion or leaves a hook. Do not end the page on a flat medium shot.',
 '',
+'How to actually get the framing you want. Read this carefully:',
+'- Tags like "wide shot", "full body", "upper body" and "close-up" are labels, not instructions.',
+'  Writing "full body" does not make the model draw the whole body. They nudge, nothing more.',
+'- What decides the framing is which parts you name. To show a character head to toe, name what',
+'  sits at the bottom of the frame too: the footwear, the legs, and the floor or ground they stand on.',
+'- To show only a face, name only what belongs inside that frame. Do not name shoes, legs or the',
+'  ground, or the view pulls back on its own to fit them in.',
+'- To show a place, name the things that fill it: buildings, sky, road, furniture, a window.',
+'  Leave the people out, or say they are small and far away.',
+'- You may add one framing tag as a hint. Never make it the only means. The tags you name have to agree with it.',
+'',
 'Background:',
 '- Every establishing, scenery, full and medium panel must carry at least two tags naming the place, and one tag for the light or the time of day.',
 '- Panels that happen in the same place must repeat the same place tags word for word, so the reader stays in one location.',
@@ -75,9 +86,9 @@ MANGA_PANEL_ROLES,
 ].concat(consistencyRules).concat([
 '- Do not invent character names or series names that you were not given.',
 '- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma". The editor draws the frames and the balloons itself.',
-// 構図タグは役割から書き込み側で足す（panel-composition.js）。ここでも書かせると
-// 「引きのコマにupper body」のように打ち消し合う
-'- Never output camera framing tags: "wide shot", "very wide shot", "full body", "upper body", "cowboy shot", "portrait", "close-up", "from above", "from below", "dutch angle", "looking at viewer". The editor adds those from the panel role.'
+// 見切れのネガティブは書き込み側が常に足す（panel-composition.js）。
+// ここで扱わせると判断が揺れるうえ、後から直せない事故になる
+'- Do not write anything about the frame cutting the character off. The editor handles that.'
 ]).join('\n');
 }
 
@@ -253,13 +264,15 @@ throw new Error(i18next.t('llmStoryboardErrorNoPanel'));
 }
 var ordered=sortPanelsInReadingOrder(panels,rightToLeft);
 var layout=buildPanelLayoutSummary(ordered);
-var userPrompt=[
+// 作品傾向。どのコマを寄りにして、どのコマを引きにするかはこれを読んでLLMが決める
+var tone=mangaToneGuidance();
+var userPrompt=(tone ? ['What kind of manga this is:',tone,''] : []).concat([
 'Synopsis of this page:',
 synopsis,
 '',
 'Panel layout in reading order ('+(rightToLeft ? 'right to left' : 'left to right')+'):',
 JSON.stringify(layout)
-].join('\n');
+]).join('\n');
 // ネーム窓は1ページ単体。前のページが無いので必ず場面の始まりとして扱う
 var result=await requestPanelPrompts(LLM_STORYBOARD_SYSTEM,userPrompt,ordered.length,true);
 return {

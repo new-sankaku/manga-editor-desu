@@ -1,83 +1,45 @@
-// コマの役割（role）から構図タグを決めて、書き込み側で足す。
+// コマの構図まわり。ここが持つのは3つだけ。
 //
-// なぜLLMに書かせないか: 学習データの偏りを埋めるのが目的なので、毎回同じ強さで
-// 入っていないと意味がない。画風タグ（appendMangaStyleSuffix）と同じ理由で決め打つ。
-//
-// なぜ必要か: Danbooruの件数を見ると cowboy_shot 831,263件に対し wide_shot 23,183件、
-// very_wide_shot 2,190件。looking_at_viewer は 4,793,726件で全体の過半数。
-// 何も指定しなければ「1人・膝上・正面・カメラ目線」に落ちる。漫画のコマが取らない構図。
+// 1. 作品傾向をLLMへ渡す文面（MANGA_TONE_PRESETS）
+//    どのコマを寄りにして、どのコマを引きにするかは**LLMに判断させる**。
+//    役割ごとにタグを決め打つ表は持たない。フレーミングタグは効きが弱く、
+//    表で入れても補助にしかならないため（→ llm_doc/prompt-composition.md）
+// 2. 見切れのネガティブ（MANGA_FRAME_NEGATIVE_DEFAULT）
+//    これだけは判断の余地がないので固定で入れる。見切れは後から直せない
+// 3. コマの形からSDXLの学習解像度を選ぶ（PANEL_SDXL_BUCKETS）
 
-const PANEL_COMPOSITION_ROLE_ORDER=['establishing','scenery','insert','full','medium','closeup','impact'];
-
-// 役割ごとの土台。プリセットはこれを上書きして作る
-const PANEL_COMPOSITION_BASE={
-establishing:{
-positive:'(wide shot:1.3), scenery, from above',
-negative:'close-up, portrait, upper body, cowboy shot, solo, looking at viewer'
-},
-scenery:{
-positive:'scenery, (wide shot:1.2)',
-negative:'close-up, portrait, upper body, cowboy shot, looking at viewer'
-},
-insert:{
-positive:'close-up, cut-in, depth of field',
-negative:'full body, wide shot, scenery, looking at viewer'
-},
-full:{
-positive:'full body',
-negative:'close-up, portrait, upper body, looking at viewer'
-},
-medium:{
-positive:'upper body, looking at another',
-negative:'close-up, wide shot, looking at viewer'
-},
-closeup:{
-positive:'close-up, portrait',
-negative:'full body, wide shot, cowboy shot'
-},
-impact:{
-positive:'dutch angle, from below, foreshortening, (emphasis lines:1.2)',
-negative:'straight-on, looking at viewer'
-}
+// 作品傾向。タグではなく、LLMに読ませる指示文。
+// 「常に同じ調整が要るわけではない」ので、寄りと引きのどちらへ寄せるかだけを伝える
+const MANGA_TONE_PRESETS={
+none: '',
+general:
+'This is a general manga page. Vary the distance from panel to panel: '
++'some panels show the place, some show a whole figure, some show only a face. '
++'A page where every panel sits at the same distance reads flat.',
+seinen:
+'This work reads like seinen manga. The reader is often shown where the characters are '
++'and how small they are inside it, so lean towards panels that keep the surroundings in view. '
++'Tight close-ups are saved for the moments that earn them.',
+shonen:
+'This work reads like shonen manga. The page builds towards one strong panel. '
++'Tilted and low viewpoints, motion and impact belong on that panel, '
++'and the largest panel on the page should carry it.',
+shojo:
+'This work reads like shojo manga. Faces and feelings carry the page. '
++'Favour close views of expressions and small telling details, '
++'and let the background fall away behind them.',
+adult:
+'This work focuses on the characters themselves. Close and partial views dominate the page. '
++'Wide views appear only when the reader needs to be told where the scene is, '
++'typically at a change of place.'
 };
 
-// 作品の傾向。土台からの差分だけ書く。
-// 「常に同じ調整が要るわけではない」ので、傾向ごとに寄せる先を変える
-const PANEL_COMPOSITION_PRESETS={
-none:null,
-general:{},
-// 青年向け: 引きと間で読ませる。ミドルも膝上まで引く
-seinen:{
-establishing:{positive:'(wide shot:1.4), (very wide shot:1.2), scenery, from above, atmospheric perspective'},
-scenery:{positive:'scenery, (wide shot:1.3), atmospheric perspective'},
-full:{positive:'full body, (wide shot:1.2)'},
-medium:{positive:'cowboy shot, looking at another',negative:'close-up, portrait, upper body, looking at viewer'},
-impact:{positive:'dutch angle, from below, perspective, foreshortening'}
-},
-// 少年向け: 見せ場を強く。あおりと効果線は件数が少ないので重みで底上げする
-shonen:{
-medium:{positive:'upper body, looking at another, dutch angle'},
-closeup:{positive:'close-up, portrait, (emphasis lines:1.1)'},
-impact:{positive:'dutch angle, (from below:1.2), foreshortening, (speed lines:1.3), (emphasis lines:1.3), motion blur'}
-},
-// 少女漫画: 表情と余白。背景は落として人物を浮かせる
-shojo:{
-establishing:{positive:'(wide shot:1.2), scenery'},
-insert:{positive:'close-up, cut-in, depth of field, blurry background'},
-medium:{positive:'upper body, looking at another, blurry background'},
-closeup:{positive:'close-up, portrait, blurry background, bokeh'},
-impact:{positive:'dutch angle, foreshortening, (emphasis lines:1.2), bokeh'}
-},
-// 成人向け: 局所の寄りが主。引きは場所を示す最低限に留める
-adult:{
-establishing:{positive:'(wide shot:1.2), scenery'},
-scenery:{positive:'scenery, (wide shot:1.1)'},
-insert:{positive:'(close-up:1.3), cut-in, depth of field',negative:'full body, wide shot, scenery'},
-medium:{positive:'(close-up:1.1), upper body, looking at another'},
-closeup:{positive:'(close-up:1.3), portrait',negative:'full body, wide shot, cowboy shot, scenery'},
-impact:{positive:'dutch angle, from below, foreshortening'}
-}
-};
+// 見切れ。腕や足が枠で切れた絵は後から直しようがないので常にネガティブへ入れる。
+// 意図して切りたいときは、生成後にコマの枠へ接するよう画像側を動かす。
+// Danbooruに実在する表記だけを使う（hand out of frame は0件なので入れない）
+const MANGA_FRAME_NEGATIVE_DEFAULT='out of frame, cropped, cropped legs, cropped torso, '
++'cropped arms, cropped shoulders, head out of frame, feet out of frame, '
++'foot out of frame, knees out of frame';
 
 // 重み記法の付け方が違うだけの同じタグを二重に入れないため、素のタグ名で比べる。
 // (wide shot:1.3) → wide shot
@@ -135,135 +97,20 @@ const joined=add.join(', ');
 return base ? base+', '+joined : joined;
 }
 
-// 前回この仕組みが足したタグだけを外す。ユーザーが手で書いたタグには触らない。
-// 役割が変わって作り直したときに、前の役割のタグが残り続けるのを防ぐ
-function compositionStrip(text,added) {
-if (!added) {
-return String(text||'').trim().replace(/,+$/,'').trim();
-}
-const drop={};
-compositionSplit(added).forEach(function (part) {
-const key=compositionTagKey(part);
-if (key) drop[key]=true;
-});
-return compositionSplit(text).filter(function (part) {
-return!drop[compositionTagKey(part)];
-}).join(', ');
+// 画面の欄が真実。プリセットは欄を書き換えるだけで、何をLLMへ渡すかは常に見えている
+function mangaToneGuidance() {
+return $('storyToneGuidance').value.trim();
 }
 
-// プリセットを役割ごとの表に展開する。none は空
-function panelCompositionPreset(name) {
-const diff=PANEL_COMPOSITION_PRESETS[name];
-if (!diff) {
-return {};
-}
-const table={};
-PANEL_COMPOSITION_ROLE_ORDER.forEach(function (role) {
-const base=PANEL_COMPOSITION_BASE[role];
-const over=diff[role]||{};
-table[role]={
-positive: typeof over.positive==='string' ? over.positive : base.positive,
-negative: typeof over.negative==='string' ? over.negative : base.negative
-};
-});
-return table;
+function mangaFrameNegative() {
+return $('storyFrameNegative').value.trim();
 }
 
-// 詳細編集の欄に出す文面。1行1役割
-function panelCompositionToText(table,field) {
-return PANEL_COMPOSITION_ROLE_ORDER.filter(function (role) {
-return table[role]&&table[role][field];
-}).map(function (role) {
-return role+': '+table[role][field];
-}).join('\n');
-}
-
-// 戻り値: {map:{role:tags}, unknown:[表記]}
-// 知らない役割名は黙って捨てずに返す。捨てると効いていないことに気付けない
-function parsePanelCompositionText(text) {
-const map={};
-const unknown=[];
-String(text||'').split('\n').forEach(function (line) {
-const raw=line.trim();
-if (!raw||raw.charAt(0)==='#') {
-return;
-}
-const sep=raw.indexOf(':');
-if (sep<0) {
-unknown.push(raw);
-return;
-}
-const role=raw.slice(0,sep).trim().toLowerCase();
-const tags=raw.slice(sep+1).trim();
-if (PANEL_COMPOSITION_ROLE_ORDER.indexOf(role)<0) {
-unknown.push(raw.slice(0,sep).trim());
-return;
-}
-if (!tags) {
-return;
-}
-map[role]=map[role] ? map[role]+', '+tags : tags;
-});
-return {map: map,unknown: unknown};
-}
-
-// 画面で編集された表を読む。欄が真実であり、プリセットは欄を書き換えるだけ。
-// 何が足されるかは常に画面に出ている状態にする
-function panelCompositionTable() {
-return {
-positive: parsePanelCompositionText($('storyCompositionTags').value),
-negative: parsePanelCompositionText($('storyCompositionNegative').value)
-};
-}
-
-// 役割に対して足すタグ。役割が空（LLMが知らない名前を返した）なら何も足さない
-function panelCompositionForRole(role) {
-if (!role) {
-return {positive: '',negative: ''};
-}
-const table=panelCompositionTable();
-return {
-positive: table.positive.map[role]||'',
-negative: table.negative.map[role]||''
-};
-}
-
-// 詳細編集の欄に書かれた知らない役割名。生成前に画面へ出す
-function panelCompositionUnknownRoles() {
-const table=panelCompositionTable();
-const seen={};
-const list=[];
-table.positive.unknown.concat(table.negative.unknown).forEach(function (name) {
-if (!name||seen[name]) {
-return;
-}
-seen[name]=true;
-list.push(name);
-});
-return list;
-}
-
-// プレビューに併記する読み取り専用の1〜2行。実際に足されるものだけを出す。
-// 既にプロンプトへ入っているタグは足されないので、ここにも出さない
-function buildPanelCompositionNote(panel,role,prompt) {
-const composition=panelCompositionForRole(role);
-if (!composition.positive&&!composition.negative) {
-return '';
-}
-const added=panel.text2img_composition||{positive: '',negative: ''};
-const merged=appendMangaStyleSuffix(compositionStrip(prompt,added.positive));
-const addPositive=compositionMissingTags(merged,composition.positive,'');
-const finalPositive=compositionJoin(merged,addPositive);
-const currentNegative=compositionStrip(panel.text2img_negative,added.negative);
-const addNegative=compositionMissingTags(currentNegative,composition.negative,finalPositive);
-const lines=[];
-if (addPositive.length>0) {
-lines.push(i18next.t('storyCompositionAdd')+' '+addPositive.join(', '));
-}
-if (addNegative.length>0) {
-lines.push(i18next.t('storyCompositionDrop')+' '+addNegative.join(', '));
-}
-return lines.join('\n');
+// 見切れのネガティブを足す。手書きのネガティブは消さない。
+// ポジティブに書かれているタグは打ち消し合うので入れない
+function panelApplyFrameNegative(panel) {
+const add=compositionMissingTags(panel.text2img_negative,mangaFrameNegative(),panel.text2img_prompt);
+panel.text2img_negative=compositionJoin(panel.text2img_negative,add);
 }
 
 // SDXLの学習解像度。これ以外の比率で描かせると構図が破綻する。
@@ -297,45 +144,11 @@ best=bucket;
 return best;
 }
 
-// プリセットを欄へ書き出す。欄が真実なので、選び直したら見えている文面も入れ替える。
-// 設定の自動保存はinputイベントを見ているので、代入だけでは保存されない
-function panelCompositionFillFromPreset() {
-const table=panelCompositionPreset($('storyComposition').value);
-[['storyCompositionTags','positive'],['storyCompositionNegative','negative']].forEach(function (pair) {
-const el=$(pair[0]);
-el.value=panelCompositionToText(table,pair[1]);
-el.dispatchEvent(new Event('input',{bubbles: true}));
-});
-panelCompositionValidate();
-}
-
-// 知らない役割名を書いても黙って無視すると、効いていないことに気付けない
-function panelCompositionValidate() {
-const unknown=panelCompositionUnknownRoles();
-llmStorySetStatus(unknown.length>0
-? i18next.t('storyCompositionUnknown')+' '+unknown.join(', ')
-: '');
-}
-
-document.addEventListener('DOMContentLoaded',function () {
-const tags=$('storyCompositionTags');
-const negative=$('storyCompositionNegative');
-// 設定の復元より後に動く。保存された文面があればそれを残し、
-// 初回だけプリセットを流し込む
-if (!tags.value.trim()&&!negative.value.trim()) {
-panelCompositionFillFromPreset();
-}
-$('storyComposition').addEventListener('change',panelCompositionFillFromPreset);
-tags.addEventListener('input',panelCompositionValidate);
-negative.addEventListener('input',panelCompositionValidate);
-EventDelegator.register('llmStoryCompositionReset',panelCompositionFillFromPreset);
-});
-
 function panelCompositionSizeEnabled() {
 return $('storyPanelSizeFromShape').checked;
 }
 
-// コマの形から生成解像度を決める。横長コマに引きの絵を割り当てても、
+// コマの形から生成解像度を決める。横長コマに引きの絵を頼んでも、
 // 正方形で生成して嵌めると上下が切られて結局バストアップに見えるため
 function panelCompositionApplySize(panel) {
 if (!panelCompositionSizeEnabled()) {
@@ -349,3 +162,30 @@ return;
 panel.text2img_width=bucket.width;
 panel.text2img_height=bucket.height;
 }
+
+// プリセットを欄へ書き出す。設定の自動保存はinputイベントを見ているので、
+// 代入だけでは保存されない
+function mangaToneFillFromPreset() {
+const el=$('storyToneGuidance');
+el.value=MANGA_TONE_PRESETS[$('storyComposition').value]||'';
+el.dispatchEvent(new Event('input',{bubbles: true}));
+}
+
+function mangaFrameNegativeReset() {
+const el=$('storyFrameNegative');
+el.value=MANGA_FRAME_NEGATIVE_DEFAULT;
+el.dispatchEvent(new Event('input',{bubbles: true}));
+}
+
+document.addEventListener('DOMContentLoaded',function () {
+// 設定の復元より後に動く。保存された文面があればそれを残し、初回だけ流し込む
+if (!$('storyToneGuidance').value.trim()) {
+mangaToneFillFromPreset();
+}
+if (!$('storyFrameNegative').value.trim()) {
+mangaFrameNegativeReset();
+}
+$('storyComposition').addEventListener('change',mangaToneFillFromPreset);
+EventDelegator.register('llmStoryToneReset',mangaToneFillFromPreset);
+EventDelegator.register('llmStoryFrameNegativeReset',mangaFrameNegativeReset);
+});
