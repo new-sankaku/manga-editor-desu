@@ -11,11 +11,14 @@ const LLM_STORY_SHEET_SYSTEM=[
 '- Return JSON only, shaped exactly as {"characters":[{"name":"...","tags":"tag, tag"}],"locations":[{"name":"...","tags":"tag, tag"}]}.',
 '- "name" is how the synopsis refers to it. Keep the language of the synopsis.',
 '- All "tags" are comma separated lowercase Danbooru style tags.',
-'- Character tags cover appearance only: sex, age, hair, eyes, clothing, body type, accessories. 6 to 15 tags each.',
+'- Character tags cover appearance only: age, hair, eyes, face, clothing, body type, accessories, footwear.',
+// コマ側は「フレームに入る範囲だけ使う」ので、頭から下へ順に並んでいないと切り出せない
+'- Order character tags from the head downwards: hair and face first, then the body and what it wears, then the footwear last.',
+'  A panel that only shows a face has to be able to take the front of that list and stop.',
 '- Do not put pose, expression, camera angle or background in character tags. Those change from panel to panel.',
 // 2人のコマでキャラ表を2つ並べると1girlが2回入り、solo寄りの偏りと噛み合って破綻する
 '- Do not put a count tag such as "1girl", "1boy", "solo" or "multiple girls" in character tags. How many people are in a panel is decided panel by panel.',
-'- Location tags cover the kind of place, its notable objects, the time of day and the light. 5 to 12 tags each.',
+'- Location tags cover the kind of place, its notable objects, the time of day and the light.',
 '- Do not put people, pose or camera angle in location tags.',
 '- Only characters and places that actually appear in the synopsis. Do not invent extra ones.',
 '- At most 6 characters and at most 6 places.'
@@ -40,8 +43,12 @@ const LLM_STORY_PAGEPLAN_SYSTEM=[
 const LLM_STORY_PANEL_SYSTEM=buildPanelSystemPrompt(
 'what happens on one manga page',
 [
-'- When a character sheet is given, copy those appearance tags verbatim into every panel where the character appears, so the same person stays recognisable.',
-'- When a location sheet is given, copy those place tags verbatim into every panel that happens in that place, so the reader stays in one location.'
+// キャラ表をそのまま全部コピーさせると、顔だけのコマにも靴が入って勝手に引いた絵になる。
+// フレームに入る範囲だけ使わせる（→ llm_doc/prompt-composition.md）
+'- When a character sheet is given, take from it only what is inside that panel\'s frame.'
++' Face and hair every time, so the same person stays recognisable. Clothing when the body is in frame.'
++' Footwear only when the feet are in frame. Naming a part that is outside the frame drags the view back to it.',
+'- When a location sheet is given, copy those place tags word for word into every panel that happens in that place, so the reader stays in one location.'
 ]
 );
 

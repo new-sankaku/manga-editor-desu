@@ -226,13 +226,16 @@ LLM呼び出しは3種類。いずれも`response_format:{type:'json_object'}`�
   背の高いコマが後続の段を飲み込んでしまうため
 - `buildPanelLayoutSummary()`が各コマの形状・キャンバス比・面積シェア・
   `bleed`（断ち切り＝紙面端に接する）・`first` / `last`をLLMに渡す。
-  これで「大ゴマ＝引きの見せ場、小ゴマ＝リアクション、断ち切り＝広がり」の配分が効く
+  **これは判断材料であって割り当て表ではない。** どの形にどの役割を当てるかは
+  LLMが決める（大ゴマは引きか見せ場を担えるが、決まりではない）
 - **タグを直接書かせず、先にコマの役割（`role`）を宣言させる。**
   `MANGA_PANEL_ROLE_NAMES` = establishing / scenery / insert / full / medium / closeup / impact。
   役割を挟まないと、どのコマもキャラのバストアップに収束してページの緩急が消える
-- **役割の配分をコード側で検証する**（`findPanelRhythmProblem(entries,sceneChange)`）。
-  - 人物なしコマの枚数: `requiredEmptyPanelCount()`が4コマ以上で1枚、7コマ以上で2枚を要求し、
-    `MANGA_EMPTY_ROLES`かつ`no humans`タグ付きのコマを数える
+- **壊れ方だけをコード側で拾う**（`findPanelRhythmProblem(entries,sceneChange)`）。
+  **枚数の割り当て表は持たない。** 何枚を人物なしにするかはLLMの判断。
+  - `MANGA_MIN_PANELS_NEEDING_BREATH`（4）以上のコマ数で、`MANGA_EMPTY_ROLES`かつ
+    `no humans`タグ付きのコマが**1枚も無い**とき。LLMを放置すると全コマを人物の
+    バストアップで埋めるので、その一点だけ拾う
   - 場面転換: `sceneChange`が真なら1コマ目の役割が`establishing`であること
   
   違反があれば`requestPanelPrompts()`が内容を添えて**1度だけ**作り直す。
@@ -250,6 +253,10 @@ LLM呼び出しは3種類。いずれも`response_format:{type:'json_object'}`�
   書き込み側で常にネガティブへ入れる
 - **人数タグ（1girl / 2girls / solo）はコマ側で決める。** キャラ表には入れさせない。
   2人のコマでキャラ表を2つ並べると`1girl`が2回入り、soloへの偏りと噛み合って破綻する
+- **キャラ表はそのコマのフレームに入る範囲だけ使わせる。** 顔と髪は毎回、服は身体が
+  入るとき、靴は足が入るときだけ。全部をverbatimでコピーさせると、顔だけのコマにも
+  靴が入って勝手に引いた絵になる。そのため`LLM_STORY_SHEET_SYSTEM`は
+  **キャラ表を頭から下へ順に並べさせる**（靴が最後）。前から取って止められるようにするため
 - 生成結果はコマ単位のtextareaでプレビューし、編集してから「設定」「追記」を選ぶ。
   コマ番号の下に役割名（引き・情景…）を出し、ページの緩急を目で確認できるようにする。
   textareaにフォーカスすると該当コマがキャンバス上で選択され、対応を確認できる
