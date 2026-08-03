@@ -35,7 +35,19 @@ const LLM_STORY_PAGEPLAN_SYSTEM=[
 '- "location" is the place this page happens in, as a short noun phrase in the same language as the story.',
 '- "time" is the time of day, as a short word in the same language as the story.',
 '- Reuse the exact same "location" and "time" wording whenever the story stays in the same place, and change it only when the story really moves. The artist decides where to draw the establishing shots from this.',
-'- Pace the story so that it opens on the first page and resolves on the last page.',
+// 起承転結を型として渡すと必ず4分割してくる。何を見て配分を決めるかだけを渡す
+'How to spread the story over the pages:',
+'- The reader needs a reason to keep going before they are given an explanation. Open on something',
+'  happening, or on something withheld. Background the reader has not asked for yet can wait.',
+'- Weight is pages. A beat you give three pages to reads as important. The same beat in half a page',
+'  reads as a passing detail. Spend the pages on what the story is actually about, and move fast',
+'  through what only has to be true.',
+'- Somewhere the story has to turn: the thing the reader expected stops being what happens. Decide',
+'  where that page is. Put it too near the end and there is no room left for the reader to feel it.',
+'- The last page is what the reader is left holding. It answers the question the first page raised,',
+'  or answers it in a way they did not see coming.',
+'- A page is what the reader takes in at once, and the page break is a pause. Keep one beat on one',
+'  page unless the pause itself does something for you.',
 '- A page with many panels carries several beats. A page with few panels carries one big moment.',
 '- Do not write it panel by panel here. That comes in a later step.'
 ].join('\n');
