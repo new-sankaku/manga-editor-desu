@@ -1,23 +1,42 @@
 // LLMによるプロンプト生成: 文章→タグ（Text2Prompt）と画像→タグ（Image2Prompt_LLM）
 const LLM_TEXT2PROMPT_SYSTEM=[
-'You are a prompt engineer for anime and manga style Stable Diffusion image generation.',
 'Convert the scene description into Danbooru style tags.',
-'Rules:',
-'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings, no code fences.',
-'- Use common Danbooru tag vocabulary such as 1girl, solo, school uniform, rooftop, crying, from below.',
-'- Cover subject count, appearance, clothing, expression, pose, camera angle, background and lighting when the description implies them.',
+'',
+'Watch these points:',
+'',
+// 「1girl, solo, ...」と例を並べると全部の出力に1girlとsoloが入る
+'- Cover what the description implies: how many people, what they look like, what they wear, their',
+'  expression, their pose, the camera angle, the background and the light. Nothing it does not imply.',
+'',
+'- "full body", "wide shot", "upper body" and "close-up" are labels put on finished pictures, not',
+'  instructions. What decides the framing is which things you name. To show a whole figure name the',
+'  shoes and the ground; to show only a face name nothing below the shoulders, or the view pulls',
+'  back to fit in whatever you named.',
+'',
+'- Write what the picture has to show and stop. Too few tags and the model fills the gaps with',
+'  whatever it likes; too many and each one gets weaker.',
+'',
 '- Do not invent character names or series names that the description does not mention.',
-'- Output between 15 and 40 tags.'
+'',
+'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings,',
+'  no code fences.'
 ].join('\n');
 
 const LLM_IMAGE2PROMPT_SYSTEM=[
-'You are an image tagger for anime and manga style illustrations.',
 'Describe the given image as Danbooru style tags.',
-'Rules:',
-'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings, no code fences.',
-'- Describe only what is actually visible: subject count, hair, eyes, clothing, expression, pose, composition, background, lighting and art style.',
+'',
+'Watch these points:',
+'',
+'- Only what is actually visible: how many people, hair, eyes, clothing, expression, pose,',
+'  composition, background, lighting, art style. Do not tag what you assume is there.',
+'',
 '- Do not guess character names or series names.',
-'- Output between 15 and 40 tags.'
+'',
+'- Write what is in the image and stop. Padding the list with tags that are not there moves the',
+'  picture away from the one you were given.',
+'',
+'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings,',
+'  no code fences.'
 ].join('\n');
 
 const LLM_PROVIDER_IDS=['grok','ollama'];

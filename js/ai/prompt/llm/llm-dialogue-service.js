@@ -11,11 +11,15 @@ const LLM_DIALOGUE_LANGUAGES=[
 ];
 
 const LLM_DIALOGUE_BASE_RULES=[
-'You rewrite dialogue for a manga speech balloon.',
-'Rules:',
-'- Output ONLY the resulting line. No explanation, no quotation marks, no labels, no code fences.',
-'- Keep it speakable dialogue. Do not turn it into narration.',
-'- Keep any line breaks that the balloon needs, but do not add new ones without reason.'
+'This line goes inside a manga speech balloon.',
+'',
+'Watch these points:',
+'',
+'- Keep it speakable. A balloon holds what someone says out loud, not narration.',
+'',
+'- Keep the line breaks the balloon needs. Do not add new ones without a reason.',
+'',
+'- Output ONLY the resulting line. No explanation, no quotation marks, no labels, no code fences.'
 ].join('\n');
 
 function estimateTextCapacity(textObject){

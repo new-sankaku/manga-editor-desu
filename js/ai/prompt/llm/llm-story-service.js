@@ -73,64 +73,84 @@ return parseStoryFit(raw);
 
 // キャラとロケーションを1回の呼び出しでまとめて作る。どちらも同じストーリーから引くため
 const LLM_STORY_SHEET_SYSTEM=[
-// 肩書きを名乗らせても後続のルールが全部を決めるので情報が増えない。
-// 出力の語彙（Danbooru形式）と何のために作るのかだけ言う
-'You receive the synopsis of a manga story.',
-'Fix the recurring characters and the recurring places as Danbooru style tags, so that every panel can reuse them.',
-'Rules:',
-'- Return JSON only, shaped exactly as {"characters":[{"name":"...","tags":"tag, tag"}],"locations":[{"name":"...","tags":"tag, tag"}]}.',
-'- "name" is how the synopsis refers to it. Keep the language of the synopsis.',
-'- All "tags" are comma separated lowercase Danbooru style tags.',
-'- Character tags cover appearance only: age, hair, eyes, face, clothing, body type, accessories, shoes.',
-'- Do not put pose, expression, camera angle or background in character tags. Those change from panel to panel.',
+'Fix the recurring characters and the recurring places of this story as Danbooru style tags,',
+'so that every panel can reuse them.',
+'',
+'Watch these points:',
+'',
+'- A sheet is for something that comes back. Someone who passes through one scene and is never seen',
+'  again does not need one, and neither does a place the story only mentions.',
+'',
+'- Only what actually appears in the story. Do not invent extra characters or places.',
+'',
+'- Character tags are appearance and nothing else: age, hair, eyes, face, clothing, body type,',
+'  accessories, shoes.',
+'',
+'- Do not put pose, expression, camera angle or background in character tags. Those change from',
+'  panel to panel, and a sheet is copied into every panel that character appears in.',
+'',
 // 2人のコマでキャラ表を2つ並べると1girlが2回入り、solo寄りの偏りと噛み合って破綻する
-'- Do not put a count tag such as "1girl", "1boy", "solo" or "multiple girls" in character tags. How many people are in a panel is decided panel by panel.',
-'- Location tags cover the kind of place, its notable objects, the time of day and the light.',
-'- Do not put people, pose or camera angle in location tags.',
-// 「最大6」は根拠がないうえ、7人目を黙って落とす。どのキャラが消えたかは画面に出ない。
-// 上限ではなく「作る対象は何か」を言う
-'- Only characters and places that actually appear in the synopsis. Do not invent extra ones.',
-'- A sheet is for something that comes back. Someone who passes through one scene and is never',
-'  seen again does not need one, and neither does a place the story only mentions.'
+'- Do not put a count tag in character tags: no "1girl", "1boy", "solo", "multiple girls".',
+'  Two characters in one panel would then carry two count tags and the picture breaks.',
+'  How many people are in a panel is decided panel by panel.',
+'',
+'- Location tags are the kind of place, the things in it worth naming, the time of day and the light.',
+'  No people, no pose, no camera angle.',
+'',
+'- "name" is however the story refers to it, in the language of the story.',
+'',
+'- Return JSON only, shaped exactly as',
+'  {"characters":[{"name":"...","tags":"tag, tag"}],"locations":[{"name":"...","tags":"tag, tag"}]}.',
+'  All tags are comma separated lowercase Danbooru style tags.'
 ].join('\n');
 
+// 起承転結を型として渡すと必ず4分割してくる。手順と判断の材料だけ渡す。
+// 文面は llm_doc/manga-page-guideline.md の10章がそのまま元
 const LLM_STORY_PAGEPLAN_SYSTEM=[
-'You are a manga editor breaking a story down into pages.',
-'You receive the whole story and the list of pages with how many panels each page has.',
-'Write what happens on each page so that the story fits exactly into the given pages.',
-'Rules:',
-'- Return JSON only, shaped exactly as {"pages":[{"page":1,"summary":"...","location":"...","time":"..."}]}.',
-'- Give one entry for every page number you received. Do not add or drop pages.',
-'- "summary" is 1 to 3 sentences in the same language as the story. Name the characters who are present.',
-'- "location" is the place this page happens in, as a short noun phrase in the same language as the story.',
-'- "time" is the time of day, as a short word in the same language as the story.',
-'- Reuse the exact same "location" and "time" wording whenever the story stays in the same place, and change it only when the story really moves. The artist decides where to draw the establishing shots from this.',
-// 起承転結を型として渡すと必ず4分割してくる。何を見て配分を決めるかだけを渡す
-'How to spread the story over the pages:',
-'- The reader needs a reason to keep going before they are given an explanation. Open on something',
-'  happening, or on something withheld. Background the reader has not asked for yet can wait.',
-'- Weight is pages. A beat you give three pages to reads as important. The same beat in half a page',
-'  reads as a passing detail. Spend the pages on what the story is actually about, and move fast',
-'  through what only has to be true.',
-'- Somewhere the story has to turn: the thing the reader expected stops being what happens. Decide',
-'  where that page is. Put it too near the end and there is no room left for the reader to feel it.',
-'- The last page is what the reader is left holding. It answers the question the first page raised,',
-'  or answers it in a way they did not see coming.',
-'- A page is what the reader takes in at once, and the page break is a pause. Keep one beat on one',
-'  page unless the pause itself does something for you.',
-'- A page with many panels carries several beats. A page with few panels carries one big moment.',
-'- Do not write it panel by panel here. That comes in a later step.'
+'Spread this story over the pages you are given, and write what happens on each one.',
+'',
+'Work in this order:',
+'1. Decide the one scene the story is being told for.',
+'2. Decide which page that scene lands on. Two thirds to three quarters of the way through.',
+'3. Spread what leads up to it over the pages before.',
+'4. Spread what follows over the pages after.',
+'',
+'Watch these points:',
+'',
+'- Pages are weight. A scene given three pages reads as important; the same scene in half a page',
+'  reads as something passed on the way. Spend them accordingly:',
+'    a scene that only explains something (travel, time passing)  one page or less, or cut it',
+'    a scene where the story moves                                one or two pages',
+'    the scene the story is being told for                        two or three pages',
+'',
+'- Page 1 has to give the reader a reason to keep going before it gives them anything to understand.',
+'  Open in the middle of something happening, or with something withheld. Not on the setting.',
+'',
+'- The last page answers what page 1 raised, or answers it in a way the reader did not expect.',
+'',
+'- A page with many panels carries several beats. A page with few panels carries one moment.',
+'',
+'- Keep "location" and "time" worded exactly the same while the story stays in one place, and change',
+'  the wording only when the story actually moves. The next step reads those two strings to decide',
+'  which pages open on the place, so a reworded string reads as a new place.',
+'',
+'- Do not break it down panel by panel. That comes later.',
+'',
+'- Return JSON only, shaped exactly as',
+'  {"pages":[{"page":1,"summary":"...","location":"...","time":"..."}]}.',
+'  One entry for every page number you received; do not add or drop pages.',
+'  "summary" is 1 to 3 sentences naming the characters who are present. "location" is a short noun',
+'  phrase, "time" a short word. All three in the language of the story.'
 ].join('\n');
 
 const LLM_STORY_PANEL_SYSTEM=buildPanelSystemPrompt(
-'what happens on one manga page',
 [
 // キャラ表をそのまま全部コピーさせると、顔だけのコマにも靴が入って勝手に引いた絵になる。
 // フレームに入る範囲だけ使わせる（→ llm_doc/prompt-composition.md）
-'- When a character sheet is given, take from it only what is inside that panel\'s frame.'
-+' Face and hair every time, so the same person stays recognisable. Clothing when the body is in frame.'
-+' Footwear only when the feet are in frame. Naming a part that is outside the frame drags the view back to it.',
-'- When a location sheet is given, copy those place tags word for word into every panel that happens in that place, so the reader stays in one location.'
+'- From the character sheet take only what is inside that panel\'s frame. Face and hair every time,'
++' so the reader knows it is the same person. Clothing when the body is in frame. Shoes only when'
++' the feet are in frame. Naming a part that sits outside the frame drags the view back out to it.',
+'- Copy the location sheet tags word for word into every panel that happens in that place.'
 ]
 );
 
