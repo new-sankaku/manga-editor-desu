@@ -139,169 +139,185 @@ LLMは放っておくと全コマを人物のバストアップで埋めるた�
 **タグ以外に手が無いのが現状の限界。** LLM側でこれ以上できることは無く、
 ここから先はアプリの機能追加になる。
 
-## 9. 判断させるなら判断軸を渡す
+## 9. 1ページを最初から最後まで通す
 
-決め打ちをやめると「LLMが判断する」項目が増える。**判断軸を渡していない指示は、
-決め打ちを外しただけで何も改善していない。** 指示を足すときはこの表を更新する。
+表にまとめると何が起きているか分からなくなるので、実際の1ページをそのまま並べる。
+**ここに出てくる文字列はすべて実際にコードを走らせて取ったもの**で、書き直していない。
 
-判断軸とは「何を見て決めるか」と「外したら何が起きるか」の2つ。
+### 題材
 
-以下、共通の例として **5コマのページ／校舎の屋上／放課後／
-「彼女が黙っている。彼が問い詰める。手首を掴まれる」** を使う。
+- ページ4／全12ページ、5コマ
+- 場所: 校舎の屋上／放課後（**前のページは教室なので場面が変わる**）
+- 起きること: 屋上。彼女が黙っている。彼が問い詰める。彼女は手首を掴まれる。
+- 画風: モノクロ＋トーン
 
----
+### 段1. コマを採寸する
 
-### ① どの役割にするか
+キャンバス1380x2000。上に横長の断ち切り、その下に2段。
+`buildPanelLayoutSummary()`がこれを作ってLLMへ渡す。
 
-**判断軸** — そのコマで読者が新しく知ることは何か。
-どこに居るか／誰が居るか／誰が何を感じたか／誰が何をしたか。
-それが決まれば距離が決まる。役割はその距離の名前でしかない。
+```json
+{"index":1,"shape":"landscape","widthPercent":100,"heightPercent":26,"areaSharePercent":28,"bleed":true,"first":true,"last":false}
+{"index":2,"shape":"square","widthPercent":48,"heightPercent":32,"areaSharePercent":17,"bleed":true,"first":false,"last":false}
+{"index":3,"shape":"square","widthPercent":48,"heightPercent":32,"areaSharePercent":17,"bleed":true,"first":false,"last":false}
+{"index":4,"shape":"square","widthPercent":48,"heightPercent":37,"areaSharePercent":19,"bleed":true,"first":false,"last":false}
+{"index":5,"shape":"square","widthPercent":48,"heightPercent":37,"areaSharePercent":19,"bleed":true,"first":false,"last":true}
+```
 
-| コマ | 読者が新しく知ること | → 役割 |
-|---|---|---|
-| 1 | 場所が屋上に変わった | establishing |
-| 2 | 彼が問い詰めている | medium |
-| 3 | 彼女が答えられずにいる | closeup |
-| 4 | 2人の距離（離れて立っている） | full |
-| 5 | 手首を掴まれた | impact |
+**この数字が判断材料になる。** コマ1は面積28%で最大かつ`landscape`かつ`first`。
+コマ2と3は17%で最小。コマ5は`last`。
 
-**外すと**: 全コマ medium になる。読者は場所も感情も分からないまま会話だけ見せられる。
+### 段2. LLMへ送るユーザーメッセージ
 
----
+システムプロンプト（原則が書いてある側）は別途送られる。こちらはこのページ固有の情報。
 
-### ② タグを何個書くか
+```
+What kind of manga this is:
+Nothing pulls this page in one direction. Let the distance follow what the reader still
+has to learn: where they are, then who is there, then what that person feels.
+A page where every panel sits at the same distance reads flat.
 
-**判断軸** — 読者がそのコマで見る必要があるものだけ書いて止める。
-少ないとモデルが勝手に埋め、多いと1つ1つが薄まってフレーミングを決めるタグまで効かなくなる。
+Character sheet. Tags run from the head downwards. Take what is inside the panel frame and stop:
+ミナ: short black hair, brown eyes, blazer, pleated skirt, loafers
+カイ: messy brown hair, tall, gakuran, school shoes
 
-| コマ | 出力例 | 数 |
-|---|---|---|
-| 1（場所） | `no humans, school rooftop, chain link fence, water tower, city skyline, overcast sky, afternoon light, concrete floor` | 8 |
-| 3（顔だけ） | `1girl, short black hair, brown eyes, biting lip, downcast eyes, simple background` | 6 |
+Location sheet. Copy these word for word into every panel that shows this place:
+屋上: school rooftop, chain link fence, water tower, city skyline, overcast sky, concrete floor
 
-**外すと**: 顔だけのコマに15個書き、`school rooftop` まで入れて引いた絵になる。
+This is page 4 of 12.
+Where and when this page happens: 校舎の屋上 / 放課後
+This page opens a new scene.
+What happens on this page:
+屋上。彼女が黙っている。彼が問い詰める。彼女は手首を掴まれる。
 
----
+What happened on the previous page (教室 / 放課後):
+教室で彼が彼女を探している。
 
-### ③ フレーミングの作り方
+What happens on the next page. Lead into it, do not draw it:
+彼女が振り払って階段を駆け下りる。
 
-**判断軸** — 欲しいフレームの端にあるものを名指しすればフレームが広がる。
-逆に、フレーム外のものを名指しすると視点がそこまで引き戻される。
+Panel layout in reading order (right to left):
+[段1のJSON]
+```
 
-| 狙い | 書く | 書かない |
-|---|---|---|
-| 全身（コマ4） | `loafers, socks, concrete floor, standing` ← 足元と地面 | — |
-| 顔だけ（コマ3） | `brown eyes, biting lip` | `loafers` `concrete floor` `pleated skirt` |
+`This page opens a new scene.` は、前ページの`place`（教室 / 放課後）と
+今ページの`place`（校舎の屋上 / 放課後）の**文字列が違う**ことから自動で入る。
 
-**外すと**: `full body` と書いただけで全身になると思い、バストアップが返る。
+### 段3. LLMが返すもの
 
----
+```json
+{"index":1,"role":"establishing","prompt":"no humans, school rooftop, chain link fence, water tower, city skyline, concrete floor, overcast sky, afternoon light"}
+{"index":2,"role":"medium","prompt":"1boy, 1girl, messy brown hair, gakuran, short black hair, brown eyes, blazer, school rooftop, chain link fence, afternoon light, leaning forward, mouth open"}
+{"index":3,"role":"closeup","prompt":"1girl, short black hair, brown eyes, biting lip, downcast eyes, looking away, simple background"}
+{"index":4,"role":"full","prompt":"1boy, 1girl, messy brown hair, gakuran, short black hair, blazer, pleated skirt, loafers, socks, concrete floor, school rooftop, chain link fence, afternoon light, standing, facing each other"}
+{"index":5,"role":"impact","prompt":"1boy, 1girl, grabbing another's wrist, arm, hand, short black hair, blazer, emphasis lines, dutch angle, simple background"}
+```
 
-### ④ 人物なしのコマを何枚入れるか
+**この5コマが、どの指示からそう決まったのかを1つずつ見る。**
 
-**判断軸** — 人のいないコマはページの隙間ではなく、3つの仕事のどれかを担う。
-**時間の経過を見せる／読者に現在地を伝える／直前のコマの余韻を保つ。**
-担うものがあるなら入れ、無いなら入れない。
+#### コマ1 — なぜ `establishing` で、なぜ人が居ないか
 
-| 状況 | 判断 |
-|---|---|
-| このページで場所が屋上に変わった | 現在地を伝える必要がある → コマ1を establishing |
-| 手首を掴まれた直後に沈黙がある | 余韻を保つ必要がある → insert か scenery を1枚 |
-| 同じ場所で会話が続くだけの5コマ | 担う仕事がない → 0枚でよい |
+前ページが教室なので場面が変わる。読者はまだ屋上に居ることを知らない。
+「読者が新しく知ることは何か」＝**どこに居るか**。だから距離は引きになる。
 
-**外すと**: 「4コマ以上なら1枚」のような枚数で入れることになり、
-仕事のない空きコマが挟まる。逆に必要な場面で入らない。
+面積28%で最大、`landscape`、`bleed:true`。大ゴマは読者が長く留まるので広い絵に耐える。
 
----
+タグは`no humans`から始まり、屋上を埋めるもの（フェンス・給水塔・スカイライン・コンクリート床）を
+名指ししている。**`wide shot`とは書いていない。** それでも引きになるのは、
+名指ししたものがフレームに収まりきらない大きさだから。
 
-### ⑤ どのコマに何を置くか
+ロケ表の`school rooftop, chain link fence, water tower, city skyline, overcast sky, concrete floor`が
+一字一句そのまま入っている。
 
-**判断軸** — **コマの大きさ＝読者がそこに留まる時間。**
-大ゴマは見られるので引きや見せ場に耐える。小ゴマは一瞬なので1つのことしか運べない。
+#### コマ2 — なぜ `medium` で、なぜ靴が無いか
 
-| 渡している材料 | 値 | 判断 |
-|---|---|---|
-| `areaSharePercent` | コマ1が28%（最大） | 引きか見せ場を置ける |
-| `areaSharePercent` | コマ2が17%（最小） | 顔かディテール1つ |
-| `shape` | `landscape` | 横に広い絵が入る |
-| `bleed` | `true` | 紙の外へ抜ける＝境界を感じない辺 |
-| `last` | `true` | 読者がページをめくる理由を担う |
+読者が新しく知るのは**誰が居て何をしているか**。彼が問い詰めている。
 
-**外すと**: 小さいコマに引きを置いて、読者には何も見えない。
+面積17%で最小のひとつ。小さいコマは一瞬で過ぎるので1つのことしか運べない。
 
----
+キャラ表は頭から下へ`short black hair, brown eyes, blazer, pleated skirt, loafers`と並んでいる。
+腰から上のコマなので**`blazer`まで取って止めている**。`pleated skirt`も`loafers`も入っていない。
+入れれば、それを収めようとして絵が引く。
 
-### ⑥ 背景を落とすか
+場所はまだ入っている（`school rooftop, chain link fence`）。読者は場所を繰り返されないと忘れる。
 
-**判断軸** — 落とすのは読者を1点に引き寄せるときか、時間を止めるとき。
-**そのページで場所を見せる前に落とすと、読者は置き場所が無くページが浮く。**
+#### コマ3 — なぜ背景を落としてよいか
 
-| コマ | 判断 |
-|---|---|
-| 1 | 場所をまだ見せていない → 落とさない |
-| 3 | 場所は1で見せた。感情に寄せたい → 落としてよい |
-| 5 | 見せ場。時間を止めたい → 落として効果線 |
+読者が新しく知るのは**彼女が何を感じているか**。答えられずにいる。顔が情報。
 
-**外すと**: 1コマ目から `simple background` になり、どこの話か分からない。
+キャラ表は`short black hair, brown eyes`で止まっている。**服も靴も無い。**
+肩から下を名指ししないから顔だけのフレームになる。
 
----
+`simple background`で背景を落としている。**落としてよいのは、コマ1で既に場所を見せたから。**
+1コマ目で落としていたら、読者はこのページがどこの話か分からないまま進むことになる。
 
-### ⑦ 同じ場所のタグを揃える
+#### コマ4 — なぜ全身になるか
 
-**判断軸** — 読者は場所を見せるコマから現在地を組み立て、繰り返されないと忘れる。
-**言い換えると別の場所として読まれる。**
+読者が新しく知るのは**2人の距離**。離れて向かい合っている。それには足元まで要る。
 
-コマ1が `school rooftop, chain link fence` なら、コマ2・4も一字一句同じ。
-`rooftop` `wire fence` と書き換えると別の屋上になる。
+タグに`loafers, socks, concrete floor, standing`が入っている。
+**`full body`とは書いていない。** 足元と地面を名指ししたからフレームが下まで伸びる。
 
----
+キャラ表を最後（`loafers`）まで取っているのはこのコマだけ。
 
-### ⑧ キャラ表のどこまで使うか
+#### コマ5 — なぜ見せ場になるか
 
-**判断軸** — そのコマのフレームに入る範囲だけ。
+`last:true`。読者がページをめくる理由を担う。次のページは「振り払って駆け下りる」なので、
+掴まれた瞬間で切ればフックになる。
 
-キャラ表（**頭から下へ順に並べさせている**）:
-`short black hair, brown eyes, blazer, pleated skirt, loafers`
+`grabbing another's wrist, arm, hand`で腕と手に寄り、`emphasis lines, dutch angle`で
+時間を止めている。背景は落とす。
 
-| コマ | 取る範囲 |
-|---|---|
-| 3（顔だけ） | `short black hair, brown eyes` ← ここで止める |
-| 2（腰から上） | `short black hair, brown eyes, blazer` |
-| 4（全身） | 全部 + `concrete floor` |
+`emphasis lines`が出ているのはこのコマだけ。**指示に効果線のタグ名を書いていないから、
+全コマに入らずに済んでいる**（→ 10章）。
 
-**外すと**: 顔だけのコマにも `loafers` が入り、それを収めようとして勝手に引く。
+### 段4. コマに書き込まれる最終プロンプト
 
----
+`promptApplyToPanel()`が、LLMのタグに**画風タグ**と**見切れのネガティブ**を足す。
+どちらも判断の余地がないので、LLMには書かせず書き込み側で固定して入れる。
 
-### ⑨ ストーリーをページへ配分する
+**コマ1（引き）**
+```
+positive: no humans, school rooftop, chain link fence, water tower, city skyline,
+          concrete floor, overcast sky, afternoon light,
+          greyscale, monochrome, manga, screentone, halftone, high contrast
+negative: out of frame, cropped, cropped legs, cropped torso, cropped arms,
+          cropped shoulders, head out of frame, feet out of frame,
+          foot out of frame, knees out of frame
+```
 
-**判断軸** — 起承転結を型として渡すと必ず4分割してくる。渡すのは軸だけ。
+**コマ3（顔だけ）**
+```
+positive: 1girl, short black hair, brown eyes, biting lip, downcast eyes, looking away,
+          simple background,
+          greyscale, monochrome, manga, screentone, halftone, high contrast
+negative: （コマ1と同じ）
+```
 
-| 軸 | 内容 |
-|---|---|
-| 掴み | 読者は説明より先に読み続ける理由を要る。何かが起きているか、何かが伏せられている状態で開く |
-| 重み＝ページ数 | 3ページ割いた場面は重要に読まれ、半ページなら通りすがりに読まれる |
-| 転 | 読者が予期したことが起きなくなる地点。終盤すぎると読者が感じる余地が無い |
-| 締め | 最初のページが立てた問いに答えるか、予期しない形で答える |
-| ページの切れ目 | 1つの場面は1ページに収める。切れ目は「間」なので、間が効くところだけで割る |
+**コマ4（全身）**
+```
+positive: 1boy, 1girl, messy brown hair, gakuran, short black hair, blazer, pleated skirt,
+          loafers, socks, concrete floor, school rooftop, chain link fence, afternoon light,
+          standing, facing each other,
+          greyscale, monochrome, manga, screentone, halftone, high contrast
+negative: （コマ1と同じ）
+```
 
-**外すと**: 全ページが同じ密度で進み、どこが山場か読者に伝わらない。
+後半の`greyscale, monochrome, manga, screentone, halftone, high contrast`が画風タグ
+（`storyArtStyle`で「モノクロ＋トーン」を選んだ場合）。
+ネガティブは全コマ同じで、これが見切れ対策。
 
----
+「生成サイズをコマの形に合わせる」をONにしていれば、ここで
+コマ1に`1536x640`、コマ4に`1024x1024`が入る。
 
-### 判断軸を渡していない＝決め打ちのまま残しているもの
+### この通しで確認できること
 
-判断ではなく不変条件なので軸が要らない。
-
-| 固定値 | 理由 |
-|--------|------|
-| 見切れのネガティブ | 後から直せない。意図的な見切れはアプリ側（コマ枠へ接させる）で行う |
-| `MANGA_MIN_PANELS_NEEDING_BREATH`（4） | 3コマ以下は1場面を割っただけのことがある、という下限 |
-| キャラ・ロケーション各6件まで | 暴走の歯止め |
-| `PANEL_SDXL_BUCKETS` | モデルの学習解像度そのもの |
-| 出力JSONの形 | 機械が読む形式 |
-
----
+- **`wide shot`も`full body`も1つも出ていない。** それでも引きと全身になる
+- **同じ`school rooftop, chain link fence`が3コマに一字一句同じで入っている**
+- **`loafers`はコマ4にしか無い。** 顔だけのコマ・腰から上のコマには入らない
+- **`simple background`はコマ3と5だけ。** 場所を見せたコマ1の後にしか出ない
+- **`emphasis lines`はコマ5だけ**
+- ネガティブは全コマ共通で見切れのみ
 
 ## 10. 例を書くと全コマに入れてくる
 

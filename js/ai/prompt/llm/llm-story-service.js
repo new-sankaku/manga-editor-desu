@@ -198,12 +198,14 @@ lines.push(tone);
 lines.push('');
 }
 if (context.characterSheet) {
-lines.push('Character sheet (copy these appearance tags verbatim):');
+// 「verbatim」と書くとシステムプロンプト側の「フレームに入る範囲だけ取れ」と食い違い、
+// 顔だけのコマにも靴が入る。並びは頭から下なので、そこまで取って止めればよい
+lines.push('Character sheet. Tags run from the head downwards. Take what is inside the panel frame and stop:');
 lines.push(context.characterSheet);
 lines.push('');
 }
 if (context.locationSheet) {
-lines.push('Location sheet (copy these place tags verbatim):');
+lines.push('Location sheet. Copy these word for word into every panel that shows this place:');
 lines.push(context.locationSheet);
 lines.push('');
 }
