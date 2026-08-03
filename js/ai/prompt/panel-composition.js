@@ -15,24 +15,25 @@
 const MANGA_TONE_PRESETS={
 none: '',
 general:
-'Nothing pulls this page in one direction. Let the distance follow what the reader still has to '
-+'learn: where they are, then who is there, then what that person feels. '
-+'A page where every panel sits at the same distance reads flat.',
+'Nothing pulls this page in one direction. Set the distance by what the reader still has to learn: '
++'where they are, then who is there, then what that person feels. '
++'A page where every panel sits at the same distance has no variation for the reader to follow.',
 seinen:
-'This work reads like seinen manga. The reader is following a situation as much as a person, so '
-+'they want to see where things are happening and how the characters sit inside it. '
-+'Keep the surroundings in view, and save the tight close-ups for the moments that earn them.',
+'This work follows the conventions of seinen manga. The reader is following the situation as much '
++'as the person, so show where events are happening and how the characters are placed inside it. '
++'Keep the surroundings in view. Use tight close-ups only on the panels that require them.',
 shonen:
-'This work reads like shonen manga. The reader is here for the moment the page builds to. '
-+'Everything before it is setup and should keep moving. Put the tilt, the low viewpoint and the '
-+'motion on that one panel, and give it the room on the page.',
+'This work follows the conventions of shonen manga. The page builds towards one moment. Keep '
++'everything before it moving. Put the tilt, the low viewpoint and the motion on that one panel, '
++'and give it the space on the page.',
 shojo:
-'This work reads like shojo manga. The reader is following what someone feels, so the face is the '
-+'information and the background is not. Small details stand in for what is not said out loud.',
+'This work follows the conventions of shojo manga. The reader is following what a character feels, '
++'so the face carries the information and the background does not. Use small details in place of '
++'what is not said aloud.',
 adult:
 'This work focuses on the characters themselves. The reader\'s attention is on the bodies, so the '
-+'place only has to be established once and can then stay out of the way. '
-+'Close and partial views carry the page; a wide view is for telling the reader the scene has moved.'
++'place only has to be established once and can then be left out. Close and partial views carry '
++'the page. Use a wide view to tell the reader the scene has moved.'
 };
 
 // 見切れ。腕や足が枠で切れた絵は後から直しようがないので常にネガティブへ入れる。
