@@ -10,28 +10,29 @@
 
 // 作品傾向。タグではなく、LLMに読ませる指示文。
 // 「常に同じ調整が要るわけではない」ので、寄りと引きのどちらへ寄せるかだけを伝える
+// 「こう描け」ではなく「読者が何を求めて読んでいるか」を書く。
+// 距離を決めるのはLLMなので、決めるための材料の側を渡す
 const MANGA_TONE_PRESETS={
 none: '',
 general:
-'This is a general manga page. Vary the distance from panel to panel: '
-+'some panels show the place, some show a whole figure, some show only a face. '
+'Nothing pulls this page in one direction. Let the distance follow what the reader still has to '
++'learn: where they are, then who is there, then what that person feels. '
 +'A page where every panel sits at the same distance reads flat.',
 seinen:
-'This work reads like seinen manga. The reader is often shown where the characters are '
-+'and how small they are inside it, so lean towards panels that keep the surroundings in view. '
-+'Tight close-ups are saved for the moments that earn them.',
+'This work reads like seinen manga. The reader is following a situation as much as a person, so '
++'they want to see where things are happening and how the characters sit inside it. '
++'Keep the surroundings in view, and save the tight close-ups for the moments that earn them.',
 shonen:
-'This work reads like shonen manga. The page builds towards one strong panel. '
-+'Tilted and low viewpoints, motion and impact belong on that panel, '
-+'and the largest panel on the page should carry it.',
+'This work reads like shonen manga. The reader is here for the moment the page builds to. '
++'Everything before it is setup and should keep moving. Put the tilt, the low viewpoint and the '
++'motion on that one panel, and give it the room on the page.',
 shojo:
-'This work reads like shojo manga. Faces and feelings carry the page. '
-+'Favour close views of expressions and small telling details, '
-+'and let the background fall away behind them.',
+'This work reads like shojo manga. The reader is following what someone feels, so the face is the '
++'information and the background is not. Small details stand in for what is not said out loud.',
 adult:
-'This work focuses on the characters themselves. Close and partial views dominate the page. '
-+'Wide views appear only when the reader needs to be told where the scene is, '
-+'typically at a change of place.'
+'This work focuses on the characters themselves. The reader\'s attention is on the bodies, so the '
++'place only has to be established once and can then stay out of the way. '
++'Close and partial views carry the page; a wide view is for telling the reader the scene has moved.'
 };
 
 // 見切れ。腕や足が枠で切れた絵は後から直しようがないので常にネガティブへ入れる。
