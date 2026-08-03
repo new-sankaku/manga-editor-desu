@@ -177,7 +177,7 @@ Nothing pulls this page in one direction. Let the distance follow what the reade
 has to learn: where they are, then who is there, then what that person feels.
 A page where every panel sits at the same distance reads flat.
 
-Character sheet. Tags run from the head downwards. Take what is inside the panel frame and stop:
+Character sheet. Use the parts of it that are inside the panel frame:
 ミナ: short black hair, brown eyes, blazer, pleated skirt, loafers
 カイ: messy brown hair, tall, gakuran, school shoes
 
@@ -235,8 +235,9 @@ Panel layout in reading order (right to left):
 
 面積17%で最小のひとつ。小さいコマは一瞬で過ぎるので1つのことしか運べない。
 
-キャラ表は頭から下へ`short black hair, brown eyes, blazer, pleated skirt, loafers`と並んでいる。
-腰から上のコマなので**`blazer`まで取って止めている**。`pleated skirt`も`loafers`も入っていない。
+キャラ表は`short black hair, brown eyes, blazer, pleated skirt, loafers`。
+腰から上のコマなので**`blazer`までしか入っていない**。`pleated skirt`も`loafers`も無い。
+入れれば、それを収めようとして絵が引く。
 入れれば、それを収めようとして絵が引く。
 
 場所はまだ入っている（`school rooftop, chain link fence`）。読者は場所を繰り返されないと忘れる。
@@ -414,6 +415,7 @@ negative: （コマ1と同じ）
 
 **一貫性** — キャラ表からは**そのコマのフレームに入る範囲だけ**を取る。
 顔と髪は毎回、服は身体が入るとき、靴は足が入るときだけ。
+（並び順には依存させない。順番を仕様にすると、手で編集したときに黙って崩れる）
 フレーム外のものを名指しすると視点がそこまで引き戻される /
 ロケ表は一字一句そのまま / 与えられていない作品名・キャラ名を作らない /
 `comic` `panel` `border` `speech bubble` `text` `4koma` は出さない（枠と吹き出しはアプリが描く）/

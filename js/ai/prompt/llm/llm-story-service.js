@@ -4,24 +4,25 @@
 
 // キャラとロケーションを1回の呼び出しでまとめて作る。どちらも同じストーリーから引くため
 const LLM_STORY_SHEET_SYSTEM=[
-'You are a character designer and an art director for anime and manga style Stable Diffusion image generation.',
+// 肩書きを名乗らせても後続のルールが全部を決めるので情報が増えない。
+// 出力の語彙（Danbooru形式）と何のために作るのかだけ言う
 'You receive the synopsis of a manga story.',
 'Fix the recurring characters and the recurring places as Danbooru style tags, so that every panel can reuse them.',
 'Rules:',
 '- Return JSON only, shaped exactly as {"characters":[{"name":"...","tags":"tag, tag"}],"locations":[{"name":"...","tags":"tag, tag"}]}.',
 '- "name" is how the synopsis refers to it. Keep the language of the synopsis.',
 '- All "tags" are comma separated lowercase Danbooru style tags.',
-'- Character tags cover appearance only: age, hair, eyes, face, clothing, body type, accessories, footwear.',
-// コマ側は「フレームに入る範囲だけ使う」ので、頭から下へ順に並んでいないと切り出せない
-'- Order character tags from the head downwards: hair and face first, then the body and what it wears, then the footwear last.',
-'  A panel that only shows a face has to be able to take the front of that list and stop.',
+'- Character tags cover appearance only: age, hair, eyes, face, clothing, body type, accessories, shoes.',
 '- Do not put pose, expression, camera angle or background in character tags. Those change from panel to panel.',
 // 2人のコマでキャラ表を2つ並べると1girlが2回入り、solo寄りの偏りと噛み合って破綻する
 '- Do not put a count tag such as "1girl", "1boy", "solo" or "multiple girls" in character tags. How many people are in a panel is decided panel by panel.',
 '- Location tags cover the kind of place, its notable objects, the time of day and the light.',
 '- Do not put people, pose or camera angle in location tags.',
+// 「最大6」は根拠がないうえ、7人目を黙って落とす。どのキャラが消えたかは画面に出ない。
+// 上限ではなく「作る対象は何か」を言う
 '- Only characters and places that actually appear in the synopsis. Do not invent extra ones.',
-'- At most 6 characters and at most 6 places.'
+'- A sheet is for something that comes back. Someone who passes through one scene and is never',
+'  seen again does not need one, and neither does a place the story only mentions.'
 ].join('\n');
 
 const LLM_STORY_PAGEPLAN_SYSTEM=[
@@ -199,8 +200,8 @@ lines.push('');
 }
 if (context.characterSheet) {
 // 「verbatim」と書くとシステムプロンプト側の「フレームに入る範囲だけ取れ」と食い違い、
-// 顔だけのコマにも靴が入る。並びは頭から下なので、そこまで取って止めればよい
-lines.push('Character sheet. Tags run from the head downwards. Take what is inside the panel frame and stop:');
+// 顔だけのコマにも靴が入る
+lines.push('Character sheet. Use the parts of it that are inside the panel frame:');
 lines.push(context.characterSheet);
 lines.push('');
 }
