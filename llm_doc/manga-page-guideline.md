@@ -381,93 +381,88 @@ LLMに「1ページをどう割るか」を判断させるための基準。
 
 ---
 
-## 13. 表情は振り切れる
+## 13. 感情ラベルを書かない。顔に起きていることと仕草を書く
 
-**素の喜怒哀楽タグ（`angry` `sad` `smile` `surprised`）を書くと、大げさな顔になる。**
+**構図と同じ構造の問題。** `full body` が「全身の絵に後から付いたラベル」であるように、
+`angry` `sad` `smile` `surprised` は**出来上がった絵に付いた感情のラベル**であって、
+「そう描け」という指示ではない。
 
-学習データは1枚絵のイラストで、1枚だけで感情を伝えるため表情が強い。
-漫画のコマは、セリフ・視線・仕草・前後のコマで感情を伝えるので、**表情自体は抑えめでよい**。
+そして構図タグと違い、**感情ラベルは強く効いてしまう。**
+学習データは1枚絵のイラストで、1枚だけで感情を伝えるため表情が大げさ。
+`angry` と書けばV字眉と大口の怒鳴り顔、`smile` と書けば全開の笑顔になる。
 
-`angry` と書くとV字眉・大口の怒鳴り顔になる。
-実際の漫画の「怒っている」はほとんどが、ムッとした口元・真顔・目をそらす・拳を握る、の組み合わせ。
+漫画の「怒っている」は、ムッとした口元・真顔・目をそらす・拳を握る、の組み合わせ。
+`angry` が出す絵とは別物。
 
-### 素のタグがどれだけ強いか
+### 素の感情語は使わない
 
-| タグ | Danbooru件数 | 出るもの |
+| 使わない | Danbooru件数 | 出るもの |
 |---|---:|---|
-| `smile` | 4,076,048 | 全開の笑顔 |
-| `blush` | 4,014,266 | 真っ赤 |
-| `open mouth` | 3,429,508 | 大きく開いた口。**どの感情タグと組んでも叫び顔になる** |
-| `closed mouth` | 1,908,889 | 閉じた口 |
-| `v-shaped eyebrows` | 260,067 | 漫画的な怒り眉。`angry` に付いてくる |
+| `angry` | 60,690 | V字眉＋大口の怒鳴り顔 |
+| `smile` | 4,076,048 | 全開の笑顔。**単体で使うと必ず強すぎる** |
+| `sad` | 17,500 | 泣き顔寄り |
+| `surprised` | 72,763 | 目と口を見開いた驚愕 |
+| `crying` | 112,051 | 号泣 |
 
-**指定しないと口は開く。抑えた表情には `closed mouth` を明示する。**
+**代わりに、顔に何が起きているかを書く。**
 
-### 怒り — 段階で選ぶ
+### 顔の状態で書く
 
-| 強さ | タグ | 件数 |
+| 伝えたいこと | 書くもの | 件数 |
 |---|---|---:|
-| **真顔で押す（一番よく使う）** | `expressionless` + `closed mouth` | 176,796 |
-| 硬い顔 | `serious` + `closed mouth` | 39,081 |
-| ムッとする | `frown` + `closed mouth` | 151,309 |
-| 冷たく見る・呆れる | `half-closed eyes` + `frown` | 140,901 |
-| 目をそらす | `averting eyes` + `frown` | 20,171 |
-| 睨む | `glaring` | 12,185 |
-| 手で見せる | `clenched hand` + `frown` | 85,820 |
-| 食いしばる | `clenched teeth` | 103,571 |
-| **爆発（1ページに1回まで）** | `angry` + `v-shaped eyebrows` + `open mouth` | 60,690 |
+| 怒りを抑えている | `expressionless` / `serious` + `closed mouth` | 176,796 / 39,081 |
+| ムッとしている | `frown` + `closed mouth` | 151,309 |
+| 冷めている・呆れている | `half-closed eyes` + `frown` | 140,901 |
+| 目をそらしている | `averting eyes` | 20,171 |
+| 睨んでいる | `glaring` | 12,185 |
+| 食いしばっている | `clenched teeth` | 103,571 |
+| 眉を寄せている（強い） | `v-shaped eyebrows` | 260,067 |
+| 沈んでいる | `looking down` + `closed mouth` | 136,399 |
+| こらえている | `closed eyes` + `frown` | 1,034,697 |
+| 泣きそう | `tearing up` / `wavy mouth` | 71,045 / 100,833 |
+| 涙が出ている | `tears` | 291,533 |
+| かすかに笑う | `light smile` + `closed mouth` | 106,773 |
+| 息を呑む | `parted lips` / `wide-eyed` | 727,304 / 51,882 |
+| 顔に影 | `shaded face` | 80,075 |
 
-### 悲しみ
+**これは例であって、この中から選べという一覧ではない。**
+「顔に何が起きているか」を書けばよく、Danbooruの語彙はモデルが知っている。
 
-| 強さ | タグ |
-|---|---|
-| 沈む | `looking down` + `closed mouth` |
-| こらえる | `closed eyes` + `frown` |
-| 泣きそう | `tearing up` / `wavy mouth` |
-| 涙が出る | `tears` |
-| **号泣（1回まで）** | `crying` + `open mouth` |
+### 口は指定しないと開く
 
-### 喜び
+`open mouth` は 3,429,508件で、**指定しないと勝手に口が開く。**
+感情を抑えているコマには `closed mouth`（1,908,889件）を明示する。
 
-| 強さ | タグ |
-|---|---|
-| かすかに | `light smile` + `closed mouth` |
-| 微笑む | `smile` + `closed mouth` |
-| 笑う | `smile` + `open mouth` |
-| **大笑い（1回まで）** | `laughing` / `grin` |
+### 仕草のほうが強い
 
-### 驚き
+**漫画で感情を運ぶのは、表情より仕草。**
+顔を小さく抑えて、手・肩・体の向き・汗で見せるほうが漫画に見える。
 
-| 強さ | タグ |
-|---|---|
-| 息を呑む | `parted lips` / `wide-eyed` |
-| 驚く | `surprised` + `closed mouth` |
-| **仰天（1回まで）** | `surprised` + `open mouth` |
+| 伝えたいこと | 仕草 | 件数 |
+|---|---|---:|
+| 怒りを抑える | 拳を握る `clenched hand` / `clenched hands` | 85,820 / 60,295 |
+| 動揺 | `sweat` / `sweatdrop` / `trembling` | 751,974 / 321,145 / 106,438 |
+| 落胆 | うつむく `looking down` / 顔に影 `shaded face` | 136,399 / 80,075 |
+| 拒絶 | 背を向ける `from behind` / 目をそらす `averting eyes` | 323,026 / 20,171 |
+| 詰め寄る | `leaning forward` | 159,475 |
+| 顔を覆う | `covering face` / `hand on own face` | 10,253 / 71,542 |
+| 手を組む・祈る | `own hands together` | 113,983 |
+| 胸に手を当てる | `hand on own chest` | 87,895 |
+| 手を隠す | `hands in pockets` | 33,901 |
 
-### 表情より仕草で見せる
-
-漫画では表情そのものより、**仕草と視線**が感情を運ぶ。
-
-| 感情 | 仕草のタグ |
-|---|---|
-| 怒り | `clenched hand`（拳）/ `averting eyes`（目をそらす） |
-| 動揺 | `sweat` / `sweatdrop` / `trembling` |
-| 落胆 | `looking down` / `shaded face`（顔に影） |
-| ためらい | `from behind`（背を向ける） |
-
-`shaded face`（80,075）は漫画的な「顔に影を落とす」表現そのもの。
-沈んだ感情に効く。
+**これも例。** 場面に合う仕草を選ぶ。
 
 ### 存在しないタグを書かない
 
-**書きがちだが Danbooru に無い（＝効かない）タグ。**
-
 | 書きがち | 件数 | 代わりに使う |
 |---|---:|---|
+| `arms crossed` | 0 | `crossed arms` |
 | `biting lip` | 0 | `frown` / `clenched teeth` |
-| `hand over mouth` | 0 | `covering face`（10,253） |
-| `teary eyes` | 0 | `tearing up`（71,045）/ `tears` |
-| `downcast eyes` | 202 | `looking down`（136,399） |
+| `hand over mouth` | 0 | `covering face` / `hand on own face` |
+| `teary eyes` | 0 | `tearing up` / `tears` |
+| `downcast eyes` | 202 | `looking down` |
+| `head down` | 3,681 | `looking down` |
+| `hunched over` | 1,980 | `leaning forward` |
 
 ---
 
@@ -663,7 +658,7 @@ LLMに「1ページをどう割るか」を判断させるための基準。
 - [ ] セリフが多いコマで、人物に寄りすぎて吹き出しの置き場所が無くなっていないか
 - [ ] 登場人物どうしが、髪型・髪色・服・目立つ1点のどれかで見分けられるか
 - [ ] 断ち切りが全コマになっていないか
-- [ ] 素の喜怒哀楽タグ（angry / sad / smile / surprised）を安易に使っていないか
+- [ ] 素の感情ラベル（angry / sad / smile / surprised / crying）を使っていないか
 - [ ] 抑えた表情のコマに closed mouth を入れたか
-- [ ] 振り切った表情がページに2つ以上出ていないか
+- [ ] 表情だけで感情を出そうとして、仕草を使っていないコマが無いか
 - [ ] 喋るコマを closeup にして、吹き出しの置き場所を潰していないか
