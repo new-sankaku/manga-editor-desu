@@ -372,7 +372,7 @@ const resources = {
 "ja":{
 "promptToolsGroup":"ツール",
 "storyPromptGroup":"ストーリーからコマのプロンプト",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"①合わせる→②抽出→③作成",
 "storyApplyScope":"作る範囲",
 "storyScopeSelected":"選択中のコマ",
 "storyScopePage":"このページのコマすべて",
@@ -406,7 +406,7 @@ const resources = {
 "en":{
 "promptToolsGroup":"Tools",
 "storyPromptGroup":"Story to panel prompts",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Fit  2 Extract  3 Create",
 "storyApplyScope":"Create for",
 "storyScopeSelected":"Selected panel",
 "storyScopePage":"All panels on this page",
@@ -440,7 +440,7 @@ const resources = {
 "ko":{
 "promptToolsGroup":"도구",
 "storyPromptGroup":"스토리로 칸 프롬프트 만들기",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"①맞추기→②추출→③생성",
 "storyApplyScope":"만들 범위",
 "storyScopeSelected":"선택 중인 칸",
 "storyScopePage":"이 페이지의 모든 칸",
@@ -474,7 +474,7 @@ const resources = {
 "fr":{
 "promptToolsGroup":"Outils",
 "storyPromptGroup":"Histoire vers prompts de cases",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Ajuster 2 Extraire 3 Créer",
 "storyApplyScope":"Créer pour",
 "storyScopeSelected":"Panneau sélectionné",
 "storyScopePage":"Tous les panneaux de cette page",
@@ -508,7 +508,7 @@ const resources = {
 "zh":{
 "promptToolsGroup":"工具",
 "storyPromptGroup":"由剧情生成分格提示词",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"①调整→②抽取→③生成",
 "storyApplyScope":"生成范围",
 "storyScopeSelected":"选中的分格",
 "storyScopePage":"本页的所有分格",
@@ -542,7 +542,7 @@ const resources = {
 "ru":{
 "promptToolsGroup":"Инструменты",
 "storyPromptGroup":"История в промпты кадров",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Подогнать 2 Извлечь 3 Создать",
 "storyApplyScope":"Создать для",
 "storyScopeSelected":"Выбранная панель",
 "storyScopePage":"Все панели этой страницы",
@@ -576,7 +576,7 @@ const resources = {
 "es":{
 "promptToolsGroup":"Herramientas",
 "storyPromptGroup":"Historia a prompts de viñetas",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Ajustar 2 Extraer 3 Crear",
 "storyApplyScope":"Crear para",
 "storyScopeSelected":"Panel seleccionado",
 "storyScopePage":"Todos los paneles de esta página",
@@ -610,7 +610,7 @@ const resources = {
 "de":{
 "promptToolsGroup":"Werkzeuge",
 "storyPromptGroup":"Geschichte zu Panel-Prompts",
-"storyPromptGroupHint":"LLM",
+"storyPromptGroupHint":"1 Anpassen 2 Extrahieren 3 Erstellen",
 "storyApplyScope":"Erstellen für",
 "storyScopeSelected":"Ausgewähltes Panel",
 "storyScopePage":"Alle Panels dieser Seite",
