@@ -994,6 +994,40 @@ function getElementClasses(element) {
                 <option value="lineart" data-i18n="storyArtStyleLineart">Monochrome line art</option>
             </select>
 
+            <!-- 学習データの偏りを埋める構図タグ。Danbooruでは cowboy_shot 83万件に対し
+                 wide_shot 2.3万件、looking_at_viewer は全体の過半数。何も指定しないと
+                 「1人・膝上・正面・カメラ目線」に落ちて漫画のコマにならない。
+                 画風タグと同じくLLMには書かせず、役割ごとに決め打つ -->
+            <label class="preset-field-label" for="storyComposition" data-i18n="storyCompositionLabel">Composition</label>
+            <select class="preset-field-input" id="storyComposition">
+                <option value="general" data-i18n="storyCompositionGeneral">Manga basics</option>
+                <option value="seinen" data-i18n="storyCompositionSeinen">Seinen</option>
+                <option value="shonen" data-i18n="storyCompositionShonen">Shonen</option>
+                <option value="shojo" data-i18n="storyCompositionShojo">Shojo</option>
+                <option value="adult" data-i18n="storyCompositionAdult">Adult</option>
+                <option value="none" data-i18n="storyCompositionNone">Do not add</option>
+            </select>
+
+            <details class="preset-details">
+                <summary data-i18n="storyCompositionDetail">Edit composition tags</summary>
+                <div class="preset-details-hint" data-i18n="storyCompositionRoleHint"></div>
+                <label class="preset-field-label" for="storyCompositionTags" data-i18n="storyCompositionTagsLabel">Add</label>
+                <textarea class="preset-field-input" id="storyCompositionTags" rows="7"></textarea>
+                <label class="preset-field-label" for="storyCompositionNegative" data-i18n="storyCompositionNegativeLabel">Negative</label>
+                <textarea class="preset-field-input" id="storyCompositionNegative" rows="7"></textarea>
+                <button class="preset-sub-button" data-action="llmStoryCompositionReset">
+                    <i class="material-icons">restart_alt</i>
+                    <span data-i18n="storyCompositionReset">Reset to preset</span>
+                </button>
+            </details>
+
+            <!-- コマの形と生成解像度が繋がっていないと、横長コマに引きの絵を割り当てても
+                 正方形で生成して嵌める段で上下が切られ、結局バストアップに見える -->
+            <label class="preset-check">
+                <input type="checkbox" id="storyPanelSizeFromShape">
+                <span data-i18n="storyPanelSize">Match size to panel shape</span>
+            </label>
+
             <label class="preset-check">
                 <input type="checkbox" id="storyRightToLeft" checked>
                 <span data-i18n="llmStoryboardRightToLeft">Read right to left</span>
@@ -2163,6 +2197,7 @@ function getElementClasses(element) {
     <script src="js/ai/angle/angle-editor.js?v=7.3" defer></script>
     <script src="js/ai/ui/ai-ui-util.js?v=7.2" defer></script>
     <script src="js/ai/prompt/base-event-listener.js?v=7.2" defer></script>
+    <script src="js/ai/prompt/panel-composition.js?v=7.6" defer></script>
     <script src="js/ai/prompt/prompt-apply.js?v=7.5" defer></script>
     <script src="js/layer/floating-window-management.js?v=7.2" defer></script>
     <script src="js/layer/layer-button.js?v=7.2" defer></script>

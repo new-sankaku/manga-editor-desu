@@ -48,14 +48,33 @@ return tag&&!promptHasTag(prompt,tag);
 return missing.length>0?prompt+", "+missing.join(", "):prompt;
 }
 
-// 追記は末尾のカンマを均してから繋ぐ。既存が空なら区切りを付けない
-function promptApplyToPanel(panel,tags,append) {
+// 追記は末尾のカンマを均してから繋ぐ。既存が空なら区切りを付けない。
+// role: コマの役割。構図タグ（panel-composition.js）をここで足す。画風タグと同じく
+// LLMには書かせず書き込み側で決め打つ。学習データの偏りを埋めるのが目的なので、
+// 毎回同じ強さで入っていないと意味がないため
+function promptApplyToPanel(panel,tags,append,role) {
 const value=(tags||"").trim();
 if (!value) {
 return false;
 }
-const current=(panel.text2img_prompt||"").trim().replace(/,+$/,"").trim();
-panel.text2img_prompt=appendMangaStyleSuffix((append&&current)?current+", "+value:value);
+// 前回この仕組みが足した構図タグを先に外す。役割が変わって作り直したときに
+// 前の役割のタグが残り続けるのを防ぐ。ユーザーが手で書いたタグには触らない
+const added=panel.text2img_composition||{positive: "",negative: ""};
+const current=compositionStrip(panel.text2img_prompt,added.positive);
+const merged=appendMangaStyleSuffix((append&&current)?current+", "+value:value);
+
+const composition=panelCompositionForRole(role);
+const addPositive=compositionMissingTags(merged,composition.positive,"");
+panel.text2img_prompt=compositionJoin(merged,addPositive);
+
+// ネガティブはLLMが作らないので置き換える相手がいない。手書きのネガティブを
+// 消さないよう常に足す側に回る。ポジティブに入っているタグは打ち消し合うので外す
+const currentNegative=compositionStrip(panel.text2img_negative,added.negative);
+const addNegative=compositionMissingTags(currentNegative,composition.negative,panel.text2img_prompt);
+panel.text2img_negative=compositionJoin(currentNegative,addNegative);
+
+panel.text2img_composition={positive: addPositive.join(", "),negative: addNegative.join(", ")};
+panelCompositionApplySize(panel);
 return true;
 }
 
@@ -64,7 +83,7 @@ return true;
 function promptApplyToOrderedPanels(ordered,results,append) {
 let applied=0;
 ordered.forEach(function (item,i) {
-if (promptApplyToPanel(item.panel,results[i].prompt,append)) {
+if (promptApplyToPanel(item.panel,results[i].prompt,append,results[i].role)) {
 applied++;
 }
 });

@@ -9,7 +9,7 @@
 .llm-storyboard-check{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--color-text-secondary);}
 .llm-storyboard-check input{margin:0;}
 .llm-storyboard-preview{margin:6px 5px;display:flex;flex-direction:column;gap:6px;}
-.llm-storyboard-row{display:flex;align-items:flex-start;gap:6px;}
+.llm-storyboard-row{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;}
 .llm-storyboard-index{flex:0 0 auto;min-width:64px;font-size:11px;color:var(--color-component-minitext);padding-top:6px;}
 .llm-storyboard-row textarea{flex:1 1 auto;min-width:0;}
 .llm-story-window{width:min(560px,92vw);max-height:80vh;overflow-y:auto;}
@@ -23,5 +23,8 @@
 /* コマ番号の下に役割（引き・情景…）を出す。番号の桁で位置がずれないよう縦に積む */
 .llm-storyboard-index{display:flex;flex-direction:column;gap:2px;}
 .llm-panel-role{font-size:10px;opacity:0.75;}
+/* 役割から決まる構図タグの併記。読み取り専用。プロンプト欄の下へ折り返す */
+.llm-panel-composition{flex:1 0 100%;font-size:10px;line-height:1.4;opacity:0.7;white-space:pre-line;word-break:break-word;}
+.llm-panel-composition:empty{display:none;}
 .llm-dialogue-window{width:min(440px,92vw);max-height:85vh;overflow-y:auto;}
 .llm-dialogue-window select,.llm-dialogue-window input[type="text"],.llm-dialogue-window input[type="number"]{width:100%;box-sizing:border-box;font-size:12px;padding:5px 8px;border:1px solid var(--color-tertiary);border-radius:4px;background:var(--color-secondary);color:var(--color-text-secondary);}

@@ -67,10 +67,17 @@ MANGA_PANEL_ROLES,
 '- When the next page is given, lead into it. Do not draw it.',
 '- Do not put a character in a panel unless what happens on this page implies that they are there.',
 '',
+'How many people are in the panel:',
+'- Begin every panel that shows people with the count tags for that panel, such as "1girl", "1boy, 1girl" or "2girls".',
+'- Only write "solo" when that panel really shows one person alone. Two people in one panel must never carry "solo".',
+'',
 'Consistency:'
 ].concat(consistencyRules).concat([
 '- Do not invent character names or series names that you were not given.',
-'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma". The editor draws the frames and the balloons itself.'
+'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma". The editor draws the frames and the balloons itself.',
+// 構図タグは役割から書き込み側で足す（panel-composition.js）。ここでも書かせると
+// 「引きのコマにupper body」のように打ち消し合う
+'- Never output camera framing tags: "wide shot", "very wide shot", "full body", "upper body", "cowboy shot", "portrait", "close-up", "from above", "from below", "dutch angle", "looking at viewer". The editor adds those from the panel role.'
 ]).join('\n');
 }
 

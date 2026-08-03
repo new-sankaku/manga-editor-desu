@@ -301,11 +301,19 @@ label.appendChild(role);
 const area=document.createElement('textarea');
 area.rows=isPages?3:2;
 area.value=isPages?entry.summary:entry.prompt;
+// 役割から決まる構図タグを読み取り専用で併記する。何が足されるか隠さない。
+// ページ単位のプレビューはまだコマが決まっていないので出さない
+const note=document.createElement('div');
+note.className='llm-panel-composition';
+if (!isPages) {
+note.textContent=buildPanelCompositionNote(entry.panel,entry.role,entry.prompt);
+}
 area.addEventListener('input',function () {
 if (isPages) {
 llmStoryResult.entries[i].summary=this.value;
 } else {
 llmStoryResult.entries[i].prompt=this.value;
+note.textContent=buildPanelCompositionNote(entry.panel,entry.role,this.value);
 }
 });
 if (!isPages) {
@@ -323,6 +331,7 @@ fields.appendChild(area);
 row.appendChild(fields);
 } else {
 row.appendChild(area);
+row.appendChild(note);
 }
 container.appendChild(row);
 });
@@ -347,7 +356,7 @@ function llmStoryApplyPanels(append) {
 const entries=llmStoryResult.entries;
 let applied=0;
 entries.forEach(function (entry) {
-if (promptApplyToPanel(entry.panel,entry.prompt,append)) {
+if (promptApplyToPanel(entry.panel,entry.prompt,append,entry.role)) {
 applied++;
 }
 });

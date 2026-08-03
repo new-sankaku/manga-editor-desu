@@ -13,6 +13,8 @@ const LLM_STORY_SHEET_SYSTEM=[
 '- All "tags" are comma separated lowercase Danbooru style tags.',
 '- Character tags cover appearance only: sex, age, hair, eyes, clothing, body type, accessories. 6 to 15 tags each.',
 '- Do not put pose, expression, camera angle or background in character tags. Those change from panel to panel.',
+// 2人のコマでキャラ表を2つ並べると1girlが2回入り、solo寄りの偏りと噛み合って破綻する
+'- Do not put a count tag such as "1girl", "1boy", "solo" or "multiple girls" in character tags. How many people are in a panel is decided panel by panel.',
 '- Location tags cover the kind of place, its notable objects, the time of day and the light. 5 to 12 tags each.',
 '- Do not put people, pose or camera angle in location tags.',
 '- Only characters and places that actually appear in the synopsis. Do not invent extra ones.',

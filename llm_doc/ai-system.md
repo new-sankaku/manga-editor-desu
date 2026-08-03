@@ -26,6 +26,7 @@ ai-management.js（ルーター）
 │   ├─ model-settings-window.js（モデル・ワークフロー設定フローティングウインドウ）
 │   └─ ai-ui-util.js
 ├─ prompt/auto/（自動プロンプト生成）
+├─ prompt/panel-composition.js（役割→構図タグ、SDXLバケット）
 ├─ prompt/llm/llm-story-service.js, -ui.js（ストーリー→コマのプロンプト）
 └─ prompt/prompt-apply.js（コマへの書き込みとページ送り）
 ```
@@ -241,9 +242,44 @@ LLM呼び出しは3種類。いずれも`response_format:{type:'json_object'}`�
   1..Nの全indexが揃っているか検証し、欠けていたら**欠番を挙げてエラー**にする。
   足りない分を埋めたり黙って部分適用したりしない。知らない役割名は空にする
   （近い役割へ寄せると人物なしコマを数え違えるため）
+- **構図タグ（wide shot / upper body / close-up / from above / dutch angle /
+  looking at viewer など）はLLMに書かせない。** 役割から書き込み側が足すので、
+  ここでも書かせると「引きのコマにupper body」のように打ち消し合う（→構図タグの節）
+- **人数タグ（1girl / 2girls / solo）はコマ側で決める。** キャラ表には入れさせない。
+  2人のコマでキャラ表を2つ並べると`1girl`が2回入り、soloへの偏りと噛み合って破綻する
 - 生成結果はコマ単位のtextareaでプレビューし、編集してから「設定」「追記」を選ぶ。
   コマ番号の下に役割名（引き・情景…）を出し、ページの緩急を目で確認できるようにする。
   textareaにフォーカスすると該当コマがキャンバス上で選択され、対応を確認できる
+
+## 構図タグ（panel-composition.js）
+漫画のコマの構図と、画像生成モデルが既定で描く構図の差を埋める。
+**画風タグ（`appendMangaStyleSuffix`）と同じくLLMには書かせず、書き込み側で決め打つ。**
+偏りを埋めるのが目的なので、毎回同じ強さで入っていないと意味がないため。
+
+差の実態（Danbooruのポスト数）:
+`cowboy_shot` 831,263 / `upper_body` 1,165,014 に対し `wide_shot` 23,183、
+`very_wide_shot` 2,190。`looking_at_viewer` は 4,793,726 で全体の過半数。
+**何も指定しないと「1人・膝上・正面・カメラ目線」に落ちる。** 漫画のコマが取らない構図。
+
+- 入口は左パネル「プロンプト」内の「構図タグを足す」。作品傾向のプリセットは
+  `general` / `seinen` / `shonen` / `shojo` / `adult` / `none`。
+  `PANEL_COMPOSITION_BASE`（役割ごとの土台）を`PANEL_COMPOSITION_PRESETS`が上書きする
+- **プリセットは欄を書き換えるだけで、真実は画面の欄**（`storyCompositionTags` /
+  `storyCompositionNegative`）。1行1役割の`role: tag, tag`形式。何が足されるかを
+  隠さないため、プレビューの各コマにも読み取り専用で併記する（`.llm-panel-composition`）
+- 知らない役割名は黙って捨てず`storyPromptStatus`に出す。捨てると効いていないことに
+  気付けない
+- **ネガティブはLLMが作らないので置き換える相手がいない。** 手書きのネガティブを
+  消さないよう常に足す側に回る。ポジティブに入っているタグは打ち消し合うので除く
+- 前回足した分は`panel.text2img_composition`（`commonProperties`に登録）に覚えておき、
+  次に書き込む前に外す。**役割が変わって作り直したとき、前の役割のタグが残らないように。**
+  同じ役割で2回押しても結果は変わらない
+- 「生成サイズをコマの形に合わせる」（既定オフ）で`PANEL_SDXL_BUCKETS`から最寄りの
+  学習解像度を選び`text2img_width/height`へ入れる。**横長コマに引きの絵を割り当てても、
+  正方形で生成して嵌めると上下が切られて結局バストアップに見えるため。**
+  極端な帯コマは端のバケットに寄せて生成し、コマ側で切り出す
+- 追加・削除は`promptApplyToPanel()`の1か所だけ。ネーム窓とストーリー→コマの
+  両方がここを通るので、片方だけ効かない状態にならない
 
 ## セリフ支援（llm-dialogue-service.js / -ui.js）
 選択中のテキストオブジェクトに対して推敲・口調変更・文字数調整・翻訳を行う。

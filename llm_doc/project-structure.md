@@ -21,6 +21,7 @@ manga-editor-desu/
 │   │   └── panel/      コマ割り（panel-manager, knife/）
 │   ├── ai/             AI生成系（→ ai-system.md参照）
 │   │   ├── prompt/llm/llm-story-*.js  ストーリー→コマのプロンプト（プロンプトパネル）
+│   │   ├── prompt/panel-composition.js 役割→構図タグの表とSDXLバケット
 │   │   └── prompt/prompt-apply.js     コマへの書き込みとページ送り
 │   ├── db/             永続化（user-font-repository）
 │   ├── dashboard/      ダッシュボード（統計、プロンプト頻度）
