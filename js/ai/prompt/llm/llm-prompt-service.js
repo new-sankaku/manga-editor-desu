@@ -1,22 +1,40 @@
 // LLMによるプロンプト生成: 文章→タグ（Text2Prompt）と画像→タグ（Image2Prompt_LLM）
 const LLM_TEXT2PROMPT_SYSTEM=[
-'Convert the scene description into Danbooru style tags.',
+'Convert the scene description into Danbooru style tags for one manga panel.',
 '',
 'Watch these points:',
 '',
-// 「1girl, solo, ...」と例を並べると全部の出力に1girlとsoloが入る
 '- Cover what the description implies: how many people, what they look like, what they wear, their',
 '  expression, their pose, the camera angle, the background and the light. Nothing it does not imply.',
 '',
-'- "full body", "wide shot", "upper body" and "close-up" are labels put on finished pictures, not',
-'  instructions. What decides the framing is which things you name. To show a whole figure name the',
-'  shoes and the ground; to show only a face name nothing below the shoulders, or the view pulls',
-'  back to fit in whatever you named.',
+// 指針16章。フレーミングタグが効かないことと、その代わりに何を書くか
+'- "full body", "wide shot", "upper body" and "close-up" are labels applied to finished pictures,',
+'  not instructions. The distance is set by which things you name:',
+'    head to shoes  -> name the shoes, the legs, and the floor they stand on',
+'    waist up       -> the clothes above the waist, the hands. not the shoes, not the floor',
+'    the face       -> eyes, mouth, hair, expression. nothing below the shoulders',
+'    the place      -> things in that place too large to fit inside a frame. people out, or far away',
+'  Naming something outside the frame you want makes the view pull back to include it.',
 '',
-'- Write what the picture has to show and stop. Too few tags and the model fills the gaps with',
-'  whatever it likes; too many and each one gets weaker.',
+// 指針13章。素の感情ラベルは使わせない
+'- Do not name an emotion. "angry", "sad", "happy", "surprised" and "smiling" each cover everything',
+'  from faint to extreme, and the result is always at the extreme end. Name what the face is doing',
+'  instead, and use these tags for expression, gaze and body language and no others:',
+MANGA_EXPRESSION_TAGS,
+'  Everything else - the place, the clothes, the action, the objects - is ordinary Danbooru',
+'  vocabulary with no list.',
+'',
+// 指針10章。カメラ目線は既定なので明示的に外す
+'- Without a gaze direction the model produces one person, chest to knee, facing front, looking at',
+'  the camera. A manga panel is rarely any of those. State where the eyes go.',
+'',
+'- Write what the picture has to show, then stop. With too few tags the model fills the gaps on its',
+'  own. With too many each tag gets weaker, including the ones that set the distance.',
 '',
 '- Do not invent character names or series names that the description does not mention.',
+'',
+'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma". The editor draws',
+'  the frames and the balloons. Do not write anything about the frame cutting a character off.',
 '',
 '- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings,',
 '  no code fences.'
@@ -30,10 +48,22 @@ const LLM_IMAGE2PROMPT_SYSTEM=[
 '- Only what is actually visible: how many people, hair, eyes, clothing, expression, pose,',
 '  composition, background, lighting, art style. Do not tag what you assume is there.',
 '',
+// これらのタグは再生成のプロンプトとして使われる。感情ラベルで書くと次の絵が振り切れる。
+// 顔の部位で書くほうが記述としても正確
+'- For the face, name what it is doing rather than the emotion. Do not write "angry", "sad",',
+'  "happy", "surprised" or "smiling": these tags are reused as a generation prompt, and each of',
+'  them produces the extreme version of that emotion. Naming the parts is also the more accurate',
+'  description. Use these tags for expression, gaze and body language and no others:',
+MANGA_EXPRESSION_TAGS,
+'  Everything else in the image is ordinary Danbooru vocabulary with no list.',
+'',
 '- Do not guess character names or series names.',
 '',
-'- Write what is in the image and stop. Padding the list with tags that are not there moves the',
-'  picture away from the one you were given.',
+'- Write what is in the image, then stop. Adding tags that are not there moves the picture away',
+'  from the one you were given.',
+'',
+'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma", even if the image',
+'  contains them. The editor draws the frames and the balloons.',
 '',
 '- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings,',
 '  no code fences.'
@@ -145,11 +175,8 @@ if(!tags){
 createToastError(i18next.t('llmImage2PromptTitle'),i18next.t('llmErrorEmptyResponse'));
 return;
 }
-if(layer.text2img_prompt){
-layer.text2img_prompt=layer.text2img_prompt+', '+tags;
-}else{
-layer.text2img_prompt=tags;
-}
+// 画風タグと見切れのネガティブはコマ一括経路と同じものを通す
+promptApplyTagsToLayer(layer,tags,true);
 createToast(i18next.t('llmImage2PromptTitle'),tags);
 refreshPromptPanel(layer);
 }).catch(function(error){

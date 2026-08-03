@@ -2179,9 +2179,11 @@ function getElementClasses(element) {
     <script src="js/ai/provider/llm-provider.js?v=7.5" defer></script>
     <script src="js/ai/provider/grok-provider.js?v=7.5" defer></script>
     <script src="js/ai/provider/ollama-provider.js?v=7.5" defer></script>
-    <script src="js/ai/prompt/llm/llm-prompt-service.js?v=7.5" defer></script>
+    <!-- llm-storyboard-service.js が先。MANGA_EXPRESSION_TAGS を
+         llm-prompt-service.js が読み込み時に参照するため -->
+    <script src="js/ai/prompt/llm/llm-storyboard-service.js?v=7.6" defer></script>
+    <script src="js/ai/prompt/llm/llm-prompt-service.js?v=7.6" defer></script>
     <script src="js/ai/prompt/llm/llm-prompt-ui.js?v=7.5" defer></script>
-    <script src="js/ai/prompt/llm/llm-storyboard-service.js?v=7.5" defer></script>
     <script src="js/ai/prompt/llm/llm-storyboard-ui.js?v=7.5" defer></script>
     <script src="js/ai/prompt/llm/llm-story-service.js?v=7.5" defer></script>
     <script src="js/ai/prompt/llm/llm-story-ui.js?v=7.5" defer></script>

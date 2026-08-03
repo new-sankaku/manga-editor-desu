@@ -63,6 +63,20 @@ panelCompositionApplySize(panel);
 return true;
 }
 
+// コマ一括ではなく、1レイヤーへ手動で書き込む経路（文章→タグ / 画像→タグ）用。
+// 画風タグと見切れのネガティブは、どちらの経路から書いても同じでなければならない。
+// 生成解像度だけは足さない。同じパネルのWidth/Heightにユーザーが入れた値を黙って潰すため
+function promptApplyTagsToLayer(layer,tags,append) {
+const value=(tags||"").trim();
+if (!value) {
+return false;
+}
+const current=(layer.text2img_prompt||"").trim().replace(/,+$/,"").trim();
+layer.text2img_prompt=appendMangaStyleSuffix((append&&current)?current+", "+value:value);
+panelApplyFrameNegative(layer);
+return true;
+}
+
 // 現在のページのコマへ順に書き込む。履歴は積まず、まとめ方は呼び出し側に任せる。
 // results: [{prompt,role}]
 function promptApplyToOrderedPanels(ordered,results,append) {

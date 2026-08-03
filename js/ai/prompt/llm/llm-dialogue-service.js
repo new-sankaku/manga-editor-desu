@@ -10,12 +10,23 @@ const LLM_DIALOGUE_LANGUAGES=[
 {code:'ru',label:'Русский'}
 ];
 
+// 文面は llm_doc/manga-page-guideline.md の11章がそのまま元
 const LLM_DIALOGUE_BASE_RULES=[
 'This line goes inside a manga speech balloon.',
 '',
 'Watch these points:',
 '',
 '- Keep it speakable. A balloon holds what someone says out loud, not narration.',
+'',
+'- Keep one balloon short. Order it subject, then object, then action.',
+'',
+// 指針11章。絵が言っていることをセリフで繰り返さない
+'- Do not describe what the picture already shows. The panel shows where they are and what they',
+'  are doing, so a line that states either of those is wasted.',
+'',
+// 指針11章。モノローグは情景描写ではなく心理の変化
+'- For a line the character thinks rather than says, write the change in what they think, not a',
+'  description of the scene.',
 '',
 '- Keep the line breaks the balloon needs. Do not add new ones without a reason.',
 '',
