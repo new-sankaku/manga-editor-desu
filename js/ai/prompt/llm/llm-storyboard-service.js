@@ -5,7 +5,7 @@
 // 「伝えたいこと → 役割 → フレームに入れるもの」の対応表。
 // 役割をラベル（バストアップ等）で定義すると「upper bodyと書けばそうなる」という
 // 誤解を招くので、フレームに何が入るかで書く。
-// 文面は llm_doc/manga-page-guideline.md の4・15章がそのまま元
+// 文面は llm_doc/manga-page-guideline.md の4・16章がそのまま元
 const MANGA_PANEL_ROLES=[
 '  telling the reader        role           what is inside the frame',
 '  where they are            establishing   the place. things too big to fit the frame. no one, or people small enough to be dots',
@@ -110,17 +110,45 @@ MANGA_PANEL_ROLES,
 'Leaving room for the words:',
 '- The balloons are drawn by the editor afterwards, over the picture you asked for. Fill the frame',
 '  with a face and the balloon lands on it.',
-'- A panel carrying a lot of speech should not sit as close as it otherwise would. Leave the figure',
-'  room above or beside it.',
+'- Asking for room is not something a tag can do. Two things actually make room, and nothing else:',
+'    pull the distance back a step. A panel where someone speaks more than a line or two is not a',
+'      closeup. Waist up at the closest, and further out the more there is to say. The smaller the',
+'      figure sits in the frame, the more of the frame is left over.',
+'    name something that sits above their head, and the frame opens upward to hold it: the sky and',
+'      clouds outdoors, the ceiling or a light indoors, a wall or a window along a corridor.',
+'- Do not write "space", "empty space" or "room for text". Nothing opens up unless you named',
+'  something that has to fit.',
 '- A panel with nothing said in it can use the whole frame. That is where the wide views and the',
 '  big moments go.',
 '- The more there is to read in a panel, the simpler the picture: drop the background, still the',
 '  motion. A crowded picture under a crowded balloon gets neither read.',
 '',
+// 指針13章。素の喜怒哀楽タグは1枚絵の学習データのせいで振り切れる
+'Faces overshoot:',
+'- The model learnt faces from single illustrations, where one picture has to carry the whole',
+'  feeling, so the plain emotion tags come back enormous. "angry" gives you a shouting face with',
+'  the eyebrows down. Almost no panel in a manga looks like that. A character who is angry is',
+'  usually holding a flat face, or a small frown, or looking away, or has a hand closed into a fist.',
+'- Pick the strength the panel actually needs. Roughly, from held-in to blown open:',
+'    anger      expressionless, serious / frown / half-closed eyes / averting eyes / glaring /',
+'               clenched hand / clenched teeth / and only at the very end, angry',
+'    sadness    looking down / closed eyes with a frown / tearing up, wavy mouth / tears /',
+'               and only at the very end, crying',
+'    joy        light smile / smile with the mouth closed / smile with it open /',
+'               and only at the very end, laughing or grin',
+'    surprise   parted lips, wide-eyed / surprised / and only at the very end, surprised with the',
+'               mouth open',
+'  The far end of any of those rows is worth at most one panel on a page, and most pages need none.',
+'- "open mouth" is one of the most common tags there is, so a mouth opens unless you say otherwise.',
+'  Write "closed mouth" on every panel where the feeling is being held in.',
+'- What carries the feeling in a manga is usually not the face. It is the hands, the sweat, the',
+'  shoulders, where the eyes go, the shadow across the face. Reach for those first and let the',
+'  expression stay small.',
+'',
 // 指針11章。擬音はアプリのテキストで入れる。画像に文字を描かせない
 'Sound effects belong to the editor as text on top. Never ask the image for lettering.',
 '',
-// 指針15章。フレーミングタグが効かないことと、その代わりに何を書くか
+// 指針16章。フレーミングタグが効かないことと、その代わりに何を書くか
 'Getting the distance you decided on. This is where most panels go wrong:',
 '- "wide shot", "full body", "upper body", "close-up" are labels that were put on finished pictures.',
 '  They are not instructions. Writing "full body" does not make the model draw a whole body.',

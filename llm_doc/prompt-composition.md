@@ -208,7 +208,7 @@ Panel layout in reading order (right to left):
 ```json
 {"index":1,"role":"establishing","prompt":"no humans, school rooftop, chain link fence, water tower, city skyline, concrete floor, overcast sky, afternoon light"}
 {"index":2,"role":"medium","prompt":"1boy, 1girl, messy brown hair, gakuran, short black hair, brown eyes, blazer, school rooftop, chain link fence, afternoon light, leaning forward, mouth open"}
-{"index":3,"role":"closeup","prompt":"1girl, short black hair, brown eyes, biting lip, downcast eyes, looking away, simple background"}
+{"index":3,"role":"closeup","prompt":"1girl, short black hair, brown eyes, frown, looking down, looking away, simple background"}
 {"index":4,"role":"full","prompt":"1boy, 1girl, messy brown hair, gakuran, short black hair, blazer, pleated skirt, loafers, socks, concrete floor, school rooftop, chain link fence, afternoon light, standing, facing each other"}
 {"index":5,"role":"impact","prompt":"1boy, 1girl, grabbing another's wrist, arm, hand, short black hair, blazer, emphasis lines, dutch angle, simple background"}
 ```
@@ -289,7 +289,7 @@ negative: out of frame, cropped, cropped legs, cropped torso, cropped arms,
 
 **コマ3（顔だけ）**
 ```
-positive: 1girl, short black hair, brown eyes, biting lip, downcast eyes, looking away,
+positive: 1girl, short black hair, brown eyes, frown, looking down, looking away,
           simple background,
           greyscale, monochrome, manga, screentone, halftone, high contrast
 negative: （コマ1と同じ）
