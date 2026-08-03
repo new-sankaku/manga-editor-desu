@@ -1,72 +1,88 @@
 // LLMによるプロンプト生成: 文章→タグ（Text2Prompt）と画像→タグ（Image2Prompt_LLM）
 const LLM_TEXT2PROMPT_SYSTEM=[
-'Convert the scene description into Danbooru style tags for one manga panel.',
+'場面の説明を、漫画のコマ1つ分の画像生成タグ（Danbooru形式）に変換してください。',
 '',
-'Watch these points:',
+'──────────────────────────────',
 '',
-'- Cover what the description implies: how many people, what they look like, what they wear, their',
-'  expression, their pose, the camera angle, the background and the light. Nothing it does not imply.',
+'■ 何を書くか',
+'',
+'説明から読み取れるものを書きます。人数、外見、服、表情、ポーズ、アングル、背景、光。',
+'読み取れないものは足しません。',
+'',
+'■ 距離の決め方',
 '',
 // 指針16章。フレーミングタグが効かないことと、その代わりに何を書くか
-'- "full body", "wide shot", "upper body" and "close-up" are labels applied to finished pictures,',
-'  not instructions. The distance is set by which things you name:',
-'    head to shoes  -> name the shoes, the legs, and the floor they stand on',
-'    waist up       -> the clothes above the waist, the hands. not the shoes, not the floor',
-'    the face       -> eyes, mouth, hair, expression. nothing below the shoulders',
-'    the place      -> things in that place too large to fit inside a frame. people out, or far away',
-'  Naming something outside the frame you want makes the view pull back to include it.',
+'"full body" "wide shot" "upper body" "close-up" は出来上がった絵に付いたラベルで、',
+'書いてもその距離にはなりません。距離はどれを名指しするかで決まります。',
+'    頭から靴まで … 靴、脚、立っている床を名指しする',
+'    腰から上     … 腰から上の服、手。靴も床も名指ししない',
+'    顔           … 目、口、髪、表情。肩から下は名指ししない',
+'    その場所     … その場所にあってフレームに収まらない大きさのもの。人は出さないか遠くに置く',
+'欲しいフレームの外にあるものを名指しすると、それを含めるために視点が引きます。',
+'',
+'■ 顔と体',
 '',
 // 指針13章。素の感情ラベルは使わせない
-'- Do not name an emotion. "angry", "sad", "happy", "surprised" and "smiling" each cover everything',
-'  from faint to extreme, and the result is always at the extreme end. Name what the face is doing',
-'  instead, and use these tags for expression, gaze and body language and no others:',
-MANGA_EXPRESSION_TAGS,
-'  Everything else - the place, the clothes, the action, the objects - is ordinary Danbooru',
-'  vocabulary with no list.',
+'"angry" "sad" "happy" "surprised" "smiling" は、かすかな状態から極端な状態までを',
+'ひとつの語で覆っているため、書くと極端な側が出ます。',
+'感情の名前ではなく、顔が何をしているかを名指ししてください。',
 '',
 // 指針10章。カメラ目線は既定なので明示的に外す
-'- Without a gaze direction the model produces one person, chest to knee, facing front, looking at',
-'  the camera. A manga panel is rarely any of those. State where the eyes go.',
+'指定しないとモデルは「1人・胸から膝・正面・カメラ目線」を出します。',
+'視線の方向を書くとそこから外れます。',
 '',
-'- Write what the picture has to show, then stop. With too few tags the model fills the gaps on its',
-'  own. With too many each tag gets weaker, including the ones that set the distance.',
+'【必ず守ること】',
 '',
-'- Do not invent character names or series names that the description does not mention.',
+'・表情・視線・仕草は、次のタグだけを使う',
+MANGA_EXPRESSION_TAGS,
+'  それ以外（場所・服・動作・物）は通常のDanbooru語彙から自由に選ぶ',
 '',
-'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma". The editor draws',
-'  the frames and the balloons. Do not write anything about the frame cutting a character off.',
+'・説明に出てこないキャラ名・作品名を作らない',
 '',
-'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings,',
-'  no code fences.'
+'・"comic" "panel" "border" "speech bubble" "text" "4koma" は出さない。',
+'  枠と吹き出しはエディタが描く。フレームが人物を切ることについても書かない',
+'',
+'・タグの数は、その絵が見せる必要のあるものを書いて止める。',
+'  少なすぎるとモデルが勝手に埋め、多すぎると1つ1つが弱くなって距離も決まらなくなる',
+'',
+'【出力】',
+'・小文字のタグをカンマ区切りで並べたものだけ。文章・説明・見出し・コードフェンスを入れない'
 ].join('\n');
 
 const LLM_IMAGE2PROMPT_SYSTEM=[
-'Describe the given image as Danbooru style tags.',
+'与えられた画像を、Danbooru形式のタグで書き出してください。',
 '',
-'Watch these points:',
+'──────────────────────────────',
 '',
-'- Only what is actually visible: how many people, hair, eyes, clothing, expression, pose,',
-'  composition, background, lighting, art style. Do not tag what you assume is there.',
+'■ 何を書くか',
+'',
+'実際に見えているものだけ。人数、髪、目、服、表情、ポーズ、構図、背景、光、画風。',
+'そこに在るはずだと思ったものは書きません。',
+'',
+'■ 顔',
 '',
 // これらのタグは再生成のプロンプトとして使われる。感情ラベルで書くと次の絵が振り切れる。
 // 顔の部位で書くほうが記述としても正確
-'- For the face, name what it is doing rather than the emotion. Do not write "angry", "sad",',
-'  "happy", "surprised" or "smiling": these tags are reused as a generation prompt, and each of',
-'  them produces the extreme version of that emotion. Naming the parts is also the more accurate',
-'  description. Use these tags for expression, gaze and body language and no others:',
+'感情の名前ではなく、顔が何をしているかを名指しします。',
+'"angry" "sad" "happy" "surprised" "smiling" は書かないでください。',
+'このタグは画像生成のプロンプトとして再利用され、これらの語はその感情の極端な側を出します。',
+'部位で書くほうが、記述としても正確です。',
+'',
+'【必ず守ること】',
+'',
+'・表情・視線・仕草は、次のタグだけを使う',
 MANGA_EXPRESSION_TAGS,
-'  Everything else in the image is ordinary Danbooru vocabulary with no list.',
+'  それ以外（場所・服・動作・物）は通常のDanbooru語彙から自由に選ぶ',
 '',
-'- Do not guess character names or series names.',
+'・キャラ名・作品名を推測しない',
 '',
-'- Write what is in the image, then stop. Adding tags that are not there moves the picture away',
-'  from the one you were given.',
+'・"comic" "panel" "border" "speech bubble" "text" "4koma" は、画像に写っていても出さない。',
+'  枠と吹き出しはエディタが描く',
 '',
-'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma", even if the image',
-'  contains them. The editor draws the frames and the balloons.',
+'・画像に無いタグを足すと、元の絵から離れる',
 '',
-'- Output ONLY comma separated lowercase tags. No sentences, no explanation, no headings,',
-'  no code fences.'
+'【出力】',
+'・小文字のタグをカンマ区切りで並べたものだけ。文章・説明・見出し・コードフェンスを入れない'
 ].join('\n');
 
 const LLM_PROVIDER_IDS=['grok','ollama'];
@@ -134,9 +150,9 @@ return tags.join(', ');
 
 async function llmText2Prompt(description,existingPrompt){
 var target=requireLLMProvider(AI_ROLES.Text2Prompt);
-var userPrompt='Scene description:\n'+description;
+var userPrompt='場面の説明:\n'+description;
 if(existingPrompt&&existingPrompt.trim()){
-userPrompt+='\n\nTags already present in the prompt (do not repeat them):\n'+existingPrompt;
+userPrompt+='\n\n既にプロンプトへ入っているタグ（繰り返さないでください）:\n'+existingPrompt;
 }
 var messages=target.provider.buildTextMessages(LLM_TEXT2PROMPT_SYSTEM,userPrompt);
 var raw=await target.queue.add(function(){
@@ -161,7 +177,7 @@ return;
 var dataUrl=imageObject2DataURL(layer);
 var messages=target.provider.buildVisionMessages(
 LLM_IMAGE2PROMPT_SYSTEM,
-'Tag this image.',
+'この画像をタグにしてください。',
 dataUrl
 );
 var p=target.queue.add(function(){

@@ -15,25 +15,27 @@
 const MANGA_TONE_PRESETS={
 none: '',
 general:
-'Nothing pulls this page in one direction. Set the distance by what the reader still has to learn: '
-+'where they are, then who is there, then what that person feels. '
-+'A page where every panel sits at the same distance has no variation for the reader to follow.',
+'特定の傾向に寄せない作品です。'
++'読者がまだ知らないもの（どこか → 誰がいるか → その人物が何を感じているか）を基準に距離を決めると、'
++'ページが読み進められます。'
++'全コマが同じ距離のページは、読者が追う変化がありません。',
 seinen:
-'This work follows the conventions of seinen manga. The reader is following the situation as much '
-+'as the person, so show where events are happening and how the characters are placed inside it. '
-+'Keep the surroundings in view. Use tight close-ups only on the panels that require them.',
+'青年漫画の作りに寄せた作品です。'
++'読者は人物と同じくらい状況を追っているので、どこで起きているか、'
++'その中で人物がどう配置されているかが見えていると読めます。'
++'周囲が見えている絵を多めに、寄りはそれが要るコマに絞る、という配分が合います。',
 shonen:
-'This work follows the conventions of shonen manga. The page builds towards one moment. Keep '
-+'everything before it moving. Put the tilt, the low viewpoint and the motion on that one panel, '
-+'and give it the space on the page.',
+'少年漫画の作りに寄せた作品です。'
++'ページは1つの瞬間へ向かって積み上がります。そこまでを動かし続け、'
++'傾き・煽り・動きをその1コマへ集め、紙面もそこへ割く、という作りが合います。',
 shojo:
-'This work follows the conventions of shojo manga. The reader is following what a character feels, '
-+'so the face carries the information and the background does not. Use small details in place of '
-+'what is not said aloud.',
+'少女漫画の作りに寄せた作品です。'
++'読者は人物が感じていることを追っているので、情報を運ぶのは顔で、背景ではありません。'
++'言葉にしていないものを、小さなディテールに置き換えると伝わります。',
 adult:
-'This work focuses on the characters themselves. The reader\'s attention is on the bodies, so the '
-+'place only has to be established once and can then be left out. Close and partial views carry '
-+'the page. Use a wide view to tell the reader the scene has moved.'
+'人物そのものに寄せた作品です。'
++'読者の注意は体に向いているので、場所は一度見せれば、その後は落として構いません。'
++'寄りと部分の絵がページを運びます。場面が移ったことは、引きの絵で伝えると分かります。'
 };
 
 // 見切れ。腕や足が枠で切れた絵は後から直しようがないので常にネガティブへ入れる。

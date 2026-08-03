@@ -7,35 +7,32 @@
 // 誤解を招くので、フレームに何が入るかで書く。
 // 文面は llm_doc/manga-page-guideline.md の4・16章がそのまま元
 const MANGA_PANEL_ROLES=[
-'  showing the reader        role           what is inside the frame',
-'  where they are            establishing   the place. things too large to fit the frame. no people, or people small enough to be dots',
-'  the mood, or time passing scenery        the place with no people in it, without motion',
-'  who is where, how they stand  full       one or more people head to shoes, and the floor they stand on',
-'  what someone is doing     medium         waist up, and the hands. the feet and the floor are outside the frame',
-'  what someone feels        closeup        the face. eyes and mouth. nothing below the shoulders',
-'  what an object is         insert         one detail alone. an object, a hand, an eye',
-'  the most important moment impact         tilted or steep viewpoint. the background may be dropped'
+'  見せたいもの                役割           フレームに入るもの',
+'  どこにいるか                establishing   その場所。フレームに収まらない大きさのもの。人はいないか、点になるほど小さい',
+'  空気・時間の経過            scenery        その場所を人なしで、動きなしで',
+'  誰がどこにどう立っているか  full           1人以上を頭から靴まで、立っている床ごと',
+'  誰が何をしているか          medium         腰から上と手。足と床はフレームの外',
+'  誰が何を感じているか        closeup        顔。目と口。肩から下は入らない',
+'  物が何であるか              insert         ディテール1つだけ。物、手、目',
+'  そのページで一番の瞬間      impact         傾いたか煽った視点。背景は落としてよい'
 ].join('\n');
 
 // 表情・視線・仕草はここに挙げたタグだけを使わせる（閉じた語彙）。
 // 全部Danbooruで件数を確認した実在タグ。件数は渡さない。
-// 渡すと「件数は何を意味するか」の説明が要るうえ、効き目の強さと取り違える。
-// 素の感情ラベル（smile / angry / sad / surprised / crying / laughing）は入れない。
-// 指す絵の幅が広く、モデルが中心として学んだのがイラスト規模の表情のため
-// （→ llm_doc/manga-page-guideline.md 13章）
+// 素の感情ラベル（smile / angry / sad / surprised / crying / laughing）は入れない
 const MANGA_EXPRESSION_TAGS=[
-'  brow    v-shaped eyebrows, raised eyebrow',
-'  eyes    closed eyes, half-closed eyes, narrowed eyes, wide-eyed, parted lips, tears, tearing up',
-'  mouth   closed mouth, open mouth, frown, clenched teeth, wavy mouth, pout, light smile,',
-'          grin, smirk',
-'  face    expressionless, serious, glaring, annoyed, scowl, nervous, embarrassed, blush,',
-'          shaded face',
-'  gaze    looking at another, looking to the side, looking down, looking up, looking away,',
-'          averting eyes, looking back, profile, from behind, looking at viewer, eye contact',
-'  hands   clenched hand, clenched hands, own hands together, hand on own chest, hand on own face,',
-'          hand on own hip, hands in pockets, covering face',
-'  body    leaning forward, crossed arms, head tilt, turning head, trembling',
-'  state   sweat, sweatdrop'
+'  眉    v-shaped eyebrows, raised eyebrow',
+'  目    closed eyes, half-closed eyes, narrowed eyes, wide-eyed, parted lips, tears, tearing up',
+'  口    closed mouth, open mouth, frown, clenched teeth, wavy mouth, pout, light smile,',
+'        grin, smirk',
+'  顔    expressionless, serious, glaring, annoyed, scowl, nervous, embarrassed, blush,',
+'        shaded face',
+'  視線  looking at another, looking to the side, looking down, looking up, looking away,',
+'        averting eyes, looking back, profile, from behind, looking at viewer, eye contact',
+'  手    clenched hand, clenched hands, own hands together, hand on own chest, hand on own face,',
+'        hand on own hip, hands in pockets, covering face',
+'  体    leaning forward, crossed arms, head tilt, turning head, trembling',
+'  状態  sweat, sweatdrop'
 ].join('\n');
 
 const MANGA_PANEL_ROLE_NAMES=['establishing','scenery','insert','full','medium','closeup','impact'];
@@ -50,157 +47,172 @@ const MANGA_MIN_PANELS_NEEDING_BREATH=4;
 // ネーム用とストーリー用でルール本体を共有する。片方だけ直して食い違うのを防ぐ。
 // consistencyRules: 呼び出し側だけに要る一貫性のルール
 //
-// 書き方の決まり: 命令か事実の断定だけを書く。比喩・言い換え・反語を使わない。
-// 理由を書くときは「守らないと何が起きるか」を事実として書く
+// 書き方の決まり:
+// - 判断の余地があるものは「こうしろ」と書かず、選べる手を並べる。
+//   決め打ちで書くと毎回同じ出力になる
+// - 判断の余地がないもの（出力形式・モデルの挙動・アプリの制約）だけ断定する
+// - 比喩・言い換え・反語を使わない
 function buildPanelSystemPrompt(consistencyRules) {
 return [
-'Write the prompt for every panel on this page.',
+'このページの全コマ分の、画像生成用プロンプトを書いてください。',
 '',
-'Work in this order:',
-'1. List what the reader learns on this page. One line each.',
-'2. Check whether the place changed from the page before.',
-'3. Assign one item from that list to each panel.',
-'4. Decide the distance for each panel.',
-'5. Decide the angle for each panel.',
-'6. Write the tags.',
+'進め方の目安です。ページによって前後して構いません。',
+'  1. このページで読者が新しく知ることを書き出す',
+'  2. 前のページから場所が変わったか見る',
+'  3. 各コマに何を担当させるか決める',
+'  4. 距離を決める',
+'  5. アングルを決める',
+'  6. タグに落とす',
 '',
-'Watch these points:',
+'──────────────────────────────',
 '',
-'Splitting the page up:',
-'- Put one item in one panel. With two items in one panel the reader registers neither.',
-'- More items than panels: drop the least important. Do not move them to the next page.',
-'- Fewer items than panels: split one item across two panels. Do not add items.',
+'■ ページに何をどう配るか',
 '',
-'Where the reader is:',
-'- If the place changed from the page before, show the place in the first panel. Without it the',
-'  reader assumes the scene is still in the previous location.',
-'- If the place did not change, do not show it again.',
+'・1コマに1つの内容だと読みやすい。2つ入れると両方読み飛ばされやすい',
+'・書き出した内容がコマ数より多いとき',
+'    重要でないものを落とす / 近い2つを1コマにまとめる / 次ページの担当にせず削る',
+'・少ないとき',
+'    1つを複数コマに割る（手が伸びる → 掴まれる） / 人物のいないコマを挟む /',
+'    1コマを引きにして状況を足す',
 '',
-'Distance:',
+'■ 場所が変わったとき',
+'',
+'前のページと場所が違う場合、読者は前の場所のつもりでページをめくります。',
+'よく使われる手:',
+'・1コマ目で場所を見せる（一番確実）',
+'・その場所にある物の寄りから入り、次のコマで引く',
+'・人物の後ろに場所の特徴を大きく入れて、場所と人物を同時に見せる',
+'場所が変わっていないなら、見せ直さなくて構いません。',
+'',
+'■ 距離の選び方',
+'',
+'読者に何を見せたいかで距離が決まります。',
 MANGA_PANEL_ROLES,
-'- Change the distance when the kind of item you are showing changes, not on every panel.',
-'- If the same distance runs three panels or more, check that those panels show the same kind of',
-'  item. If they do not, change the distance.',
-'- Use a panel with no people in it only for one of three purposes: the place changed, time passed,',
-'  or the previous panel needs to be held. For any other reason, do not use one.',
 '',
-'Angle:',
-'- Use eye level unless there is a reason not to.',
-'- From below: the subject appears larger. Use for the character applying pressure, or for the',
-'  viewpoint of a character looking up.',
-'- From above: the subject appears smaller and the surroundings become readable. Use to show the',
-'  place, or to show a character alone in it.',
-'- Tilted: unstable. Use for shock or action.',
-'- Tilt one panel per page at most.',
+'・見せたいものが変わったところで距離を変えると、変化が読者に伝わりやすい',
+'・同じ距離が3コマ以上続くときは、本当に同じものを見せているか一度確かめる',
+'・人物のいないコマは、場所・時間経過・直前の余韻のどれかを担うと効きます。',
+'  どれも担っていないと、ただの空きコマになりやすい',
 '',
-'Using the panel layout you were given:',
-'- Large: the place, or the most important panel on the page.',
-'- Marked "bleed": the picture extends past the edge of the paper. Use for an open view or for the',
-'  most important panel. This only works while the other panels stay inside their frames.',
-'- Small: a face or one detail. Do not put a wide view in a small panel. It is unreadable at that size.',
-'- Landscape: the place, or people side by side.',
-'- Portrait: a standing figure head to toe.',
-'- Marked "last": the reader decides at this panel whether to turn the page. Cut mid action, or on',
-'  a face, or before the answer. Do not end the page on an explanation.',
+'■ アングル',
 '',
-'Background:',
-'- establishing, scenery, full and medium panels: two tags naming the place, and one for the light',
-'  or the time of day.',
-'- closeup and insert panels: the background may be dropped.',
-'- Do not drop it before the place has been shown on this page. The reader does not yet know where',
-'  the scene is.',
-'- Panels in the same place repeat the same place tags word for word. Different wording is read as',
-'  a different place.',
-'- What replaces a dropped background depends on the reason for dropping it: emptiness to isolate,',
-'  motion to carry speed, radiating lines for impact. Do not use the same one on every panel.',
+'・目線の高さ … 中立。特に理由がないとき',
+'・煽り（下から）… 対象が大きく見える。圧力をかける側／見上げている人物の視点',
+'・俯瞰（上から）… 対象が小さく見え、周囲が読める。場所の説明／人物を1人にする',
+'・傾き … 不安定。衝撃・アクション',
+'傾きを1ページで何度も使うと、どれも不安定に見えなくなります。',
 '',
-// 指針10章。視線でコマをつなぐ。左右の向きはDanbooruにタグが無いので指定しない
-'Where the characters look:',
-'- The direction the characters look moves the reader through the page. Direct it at what comes next.',
-'- Two characters talking: have them look at each other.',
-'- To carry the reader on to the next panel: turn the character away, or to the side.',
-'- Eye contact with the reader stops the movement. Use it only where the reader should stop: the',
-'  last panel, the most important panel, or a line addressed to the reader. On every other panel,',
-'  direct the gaze at something in the scene.',
+'■ 渡されたコマ配置の使い方',
 '',
-// 指針11章（セリフとコマ）。吹き出しはアプリが後から乗せるので、絵で潰さない
-'Leaving room for the words:',
-'- The balloons are added by the editor on top of the picture. A face filling the frame leaves no',
-'  room for them.',
-'- Two things make room, and nothing else does:',
-'    reduce the distance by one step. A panel with more than a line or two of speech is not a',
-'      closeup. Use waist up at the closest, and further out as the amount of speech increases.',
-'    name something above the character\'s head. The frame extends upward to include it. What that',
-'      is depends on the location.',
-'- Do not write "space", "empty space" or "room for text". The frame only extends to include',
-'  something you named.',
-'- A panel with no speech can use the whole frame. Put the wide views and the important panels there.',
-'- The more speech a panel carries, the simpler the picture: drop the background, remove motion.',
+'コマの大きさと形は既に決まっています。それに合う内容を割り当てると読みやすくなります。',
+'・大きいコマ … 引きの絵／そのページで一番重要な瞬間',
+'・小さいコマ … 顔／ディテール1つ。引きの絵はそのサイズでは読めません',
+'・横長 … 引きの絵／並んだ人物',
+'・縦長 … 立っている人物を頭から爪先まで',
+'・"bleed" … 絵が紙の端を越えて続く。開けた絵／一番重要なコマ。',
+'  他のコマが枠に収まっている間だけ強く見えます',
+'・"last" … 読者はここでページをめくるか決めます。よく使われる手:',
+'    動作の途中で切る／表情で切る／答えの前で切る／問いかけで切る',
+'  説明で終わると、めくる理由が無くなりやすい',
 '',
-// 指針13章。素の感情ラベルは使わせず、閉じた語彙から顔と仕草を書かせる
-'Feelings:',
-'- Do not name an emotion. "angry", "sad", "happy", "surprised" and "smiling" each cover everything',
-'  from faint to extreme, and the result is always at the extreme end.',
-'- Name what the face is doing. Decide the gesture before the expression: in a manga the hands,',
-'  the shoulders, the sweat and the shadow show more of a feeling than the face does.',
-'- State that the mouth is closed on any panel where the feeling is held in. Otherwise it opens.',
-'- Do not use the same expression on two panels in a row.',
+'■ 背景',
 '',
-'For expression, gaze and body language, use these tags and no others:',
+'・場所を見せるコマ（establishing / scenery / full / medium）',
+'    場所が分かるタグ2つ以上と、光か時間帯を1つ入れると場所が伝わります',
+'・寄り・インサート … 背景を落としてよい',
+'・そのページでまだ場所を見せていないうちに落とすと、読者は場面がどこか分からないまま進みます',
+'・同じ場所のコマは、同じ場所タグを一字一句そのまま繰り返す。',
+'  言い回しを変えると別の場所として描かれます',
+'・落とした背景の代わりに置くもの（例）:',
+'    孤立させたいなら空白／速さを運ぶなら動き／衝撃なら放射する線',
+'  全コマで同じものを使うと、ページが単調になります',
+'',
+'■ 人物がどこを見るか',
+'',
+'人物が見ている方向が、読者をページの中で動かします。',
+'・2人が会話しているコマ … 互いを見せると視線が2人の間を往復します',
+'・次のコマへ運びたい … 人物を背けるか、横へ向ける',
+'・読者と目が合うコマは、そこで視線が止まります。止めたいコマで使うと効きます。',
+'  最後のコマ／一番重要なコマ／読者に向けたセリフ。',
+'  それ以外のコマで使うと、ページの流れが切れやすい',
+'',
+'■ セリフの場所を残す',
+'',
+'吹き出しはエディタが後から絵の上に描きます。顔でフレームを埋めると置く場所が無くなります。',
+'余白を作る方法は次の2つです。それ以外の書き方では空きません。',
+'・距離を1段引く。セリフが1〜2行を超えるコマは closeup にしない。',
+'  人物が小さいほどフレームに余りが出ます',
+'・人物の頭より上にあるものを名指しする。フレームがそれを含めるために上へ伸びます。',
+'  何があるかは場所によります',
+'"space" "empty space" "room for text" と書いても空きません。',
+'セリフの無いコマはフレーム全部を使えます。引きの絵と重要なコマはそこに置けます。',
+'セリフが多いコマは絵を単純にする（背景を落とす／動きを止める）と、どちらも読まれます。',
+'',
+'■ 感情',
+'',
+'"angry" "sad" "happy" "surprised" "smiling" は、かすかな状態から極端な状態までを',
+'ひとつの語で覆っているため、書くと極端な側が出ます。使わずに、',
+'顔が何をしているかを名指ししてください。',
+'',
+'漫画では、手・肩・汗・顔の影のほうが顔より多くの感情を運ぶことがよくあります。',
+'表情より先に仕草を決めると、抑えた芝居になりやすい。',
+'',
+'感情を抑えているコマでは、口が閉じていると書いてください。書かないと口が開きます。',
+'同じ表情が2コマ続くと、変化が読者に伝わりません。',
+'',
+'──────────────────────────────',
+'',
+'【必ず守ること】',
+'',
+'・表情・視線・仕草は、次のタグだけを使う',
 MANGA_EXPRESSION_TAGS,
-'Everything else in a panel - the place, the clothes, the action, the objects - is ordinary',
-'Danbooru vocabulary with no list.',
+'  それ以外（場所・服・動作・物）は通常のDanbooru語彙から自由に選ぶ',
 '',
-'Sound effects are added by the editor as text. Do not ask the image for lettering.',
+'・"wide shot" "full body" "upper body" "close-up" は出来上がった絵に付いたラベルで、',
+'  書いてもその距離にはならない。距離はどれを名指しするかで決まる',
+'    頭から靴まで … 靴、脚、立っている床を名指しする',
+'    腰から上     … 腰から上の服、手。靴も床も名指ししない',
+'    顔           … 目、口、髪、表情。肩から下は名指ししない',
+'    その場所     … その場所にあってフレームに収まらない大きさのもの',
+'  欲しいフレームの外にあるものを名指しすると、それを含めるために視点が引きます。',
+'  フレーミングタグを補助として足すのは構いませんが、名指しした内容と矛盾しないこと',
 '',
-// 指針16章。フレーミングタグが効かないことと、その代わりに何を書くか
-'Getting the distance you decided on:',
-'- "wide shot", "full body", "upper body" and "close-up" are labels applied to finished pictures.',
-'  They are not instructions. Writing "full body" does not produce a whole body.',
-'- The distance is set by which things you name:',
-'    head to shoes  -> name the shoes, the legs, and the floor they stand on',
-'    waist up       -> the clothes above the waist, the hands. not the shoes, not the floor',
-'    the face       -> eyes, mouth, hair, expression. nothing below the shoulders',
-'    the place      -> things in that place too large to fit inside a frame. people out, or far away',
-'- Naming something outside the frame you want makes the view pull back to include it. A face panel',
-'  with shoes named in it comes back as a whole body.',
-'- A framing tag may be added on top as a hint. It must agree with what you named. On its own it',
-'  does nothing.',
+'・指定しないとモデルは「1人・胸から膝・正面・カメラ目線」を出します。',
+'  視線の方向を書いて外してください',
 '',
-'What the model produces when you do not specify:',
-'- One person, chest to knee, facing front, looking at the camera. State the gaze direction to',
-'  avoid this.',
-'- Count the people in each panel and open the prompt with the count tags for that panel. Count',
-'  them in that panel. Do not carry the count over from the panel before. Write "solo" only when',
-'  one person is alone in it.',
+'・各コマにいる人数を数え、そのコマの人数タグでプロンプトを始める。',
+'  そのコマで数える。前のコマから引き継がない。1人だけのときにだけ "solo"',
 '',
-'Tags:',
-'- Write the tags the reader has to see in that panel, then stop. With too few the model fills the',
-'  gaps on its own. With too many each tag gets weaker, including the ones that set the distance.',
-'  A panel showing a place needs many. A panel showing one face needs few.',
-'- Anything named in these instructions other than the expression list above is an example of a',
-'  kind of thing, not a tag to use. Pick the tag this panel needs, in this place, for these people.',
-'- Before you answer, check your panels. If a tag that is not a character or a place appears in',
-'  most of them, it was copied from these instructions. Remove it.',
-'- Never output "comic", "panel", "border", "speech bubble", "text" or "4koma". The editor draws',
-'  the frames and the balloons.',
-'- Do not write anything about the frame cutting a character off. The editor handles that.',
+'・"comic" "panel" "border" "speech bubble" "text" "4koma" は出さない。',
+'  枠と吹き出しはエディタが描きます。擬音もエディタがテキストで足すので、',
+'  画像に文字を求めないでください',
 '',
-'Keeping people and places the same:'
+'・フレームが人物を切ることについて書かない。エディタが扱います',
+'',
+'・上の表情タグ一覧を除き、この指示に出てくるタグや語は「どういう種類か」を示す例です。',
+'  このコマ・この場所・この人物に要るものを選んでください。',
+'  答える前に見渡して、キャラでも場所でもないタグが大半のコマに出ていたら、',
+'  この指示から写したものなので外してください',
+'',
+'・タグの数は、読者がそのコマで見る必要があるものを書いて止める。',
+'  少なすぎるとモデルが勝手に埋め、多すぎると1つ1つが弱くなって距離も決まらなくなります。',
+'  場所を見せるコマは多く、顔1つのコマは少なくなります',
+'',
+'■ 人物と場所を同じに保つ'
 ].concat(consistencyRules).concat([
-'- Do not invent character names or series names that you were not given.',
+'・与えられていないキャラ名・作品名を作らない',
 '',
-'Output:',
-'- Return JSON only, shaped exactly as {"panels":[{"index":1,"role":"<role name>","prompt":"<tags>"}]}.',
-'- Give one entry for every panel index you received, in the same order. Do not add or drop panels.',
-'- "role" must be one of: '+MANGA_PANEL_ROLE_NAMES.join(', ')+'.',
-'- "prompt" must be comma separated lowercase Danbooru style tags. No sentences, no explanation.'
+'【出力】',
+'・JSONのみ。形は {"panels":[{"index":1,"role":"<役割名>","prompt":"<タグ>"}]}',
+'・受け取ったコマindexすべてに1件ずつ、同じ順で。増やさない・落とさない',
+'・"role" は次のどれか: '+MANGA_PANEL_ROLE_NAMES.join(', '),
+'・"prompt" は小文字のDanbooru形式タグをカンマ区切り。文章も説明も入れない'
 ]).join('\n');
 }
 
 const LLM_STORYBOARD_SYSTEM=buildPanelSystemPrompt(
-['- Repeat a character\'s face and hair tags every time they appear, so the reader knows it is the'
-+' same person. Their clothes go in only when that part of them is inside the frame.']
+['・同じ人物だと読者が分かるよう、そのキャラが出るたびに顔と髪のタグを繰り返す。'
++'服はその部分がフレームに入るときだけ入れる']
 );
 
 function sortPanelsInReadingOrder(panels,rightToLeft) {
@@ -286,17 +298,17 @@ var empty=entries.filter(function (entry) {
 return MANGA_EMPTY_ROLES.indexOf(entry.role)>=0&&promptHasTag(entry.prompt,'no humans');
 }).length;
 if (empty===0) {
-problems.push('Every panel on this page has a person in it. The page has '+entries.length
-+' panels, so it needs somewhere for the reader to breathe. Give at least one panel '
-+'the role establishing, scenery or insert, with "no humans" in its prompt. '
-+'How many it needs beyond that is up to you.');
+problems.push('このページは'+entries.length+'コマ全部に人物が入っています。'
++'人物のいないコマが1枚も無いと、読者に息を継ぐところがありません。'
++'establishing / scenery / insert のどれかで、プロンプトに "no humans" が入るコマを'
++'少なくとも1つ作ってください。何枚要るかは内容次第です。');
 }
 }
 // 場面転換の直後に場所が見えないと、読者はどこの話か分からないまま次のコマへ進む
 if (sceneChange&&entries.length>0&&entries[0].role!=='establishing') {
-problems.push('This page opens a new scene, so the reader has to be shown where they are '
-+'before anything else happens. Panel 1 is "'+(entries[0].role||'unknown')+'". '
-+'Make it establishing.');
+problems.push('このページは新しい場面から始まります。読者は前のページの場所のつもりで'
++'めくってくるので、他のことが起きる前に現在地を見せる必要があります。'
++'1コマ目が "'+(entries[0].role||'unknown')+'" になっています。establishing にしてください。');
 }
 return problems.length>0 ? problems.join('\n') : null;
 }
@@ -359,7 +371,7 @@ var target=requireLLMProvider(AI_ROLES.Text2Prompt);
 var entries=await callPanelPrompts(target,systemPrompt,userPrompt,expectedCount);
 var problem=findPanelRhythmProblem(entries,sceneChange);
 if (problem) {
-var retryPrompt=userPrompt+'\n\nYour previous answer was rejected:\n'+problem;
+var retryPrompt=userPrompt+'\n\n前の回答は次の理由で受け付けられませんでした:\n'+problem;
 entries=await callPanelPrompts(target,systemPrompt,retryPrompt,expectedCount);
 problem=findPanelRhythmProblem(entries,sceneChange);
 }
@@ -376,11 +388,11 @@ var ordered=sortPanelsInReadingOrder(panels,rightToLeft);
 var layout=buildPanelLayoutSummary(ordered);
 // 作品傾向。どのコマを寄りにして、どのコマを引きにするかはこれを読んでLLMが決める
 var tone=mangaToneGuidance();
-var userPrompt=(tone ? ['What kind of manga this is:',tone,''] : []).concat([
-'Synopsis of this page:',
+var userPrompt=(tone ? ['どんな漫画か:',tone,''] : []).concat([
+'このページのあらすじ:',
 synopsis,
 '',
-'Panel layout in reading order ('+(rightToLeft ? 'right to left' : 'left to right')+'):',
+'コマ配置（読み順は'+(rightToLeft ? '右から左' : '左から右')+'）:',
 JSON.stringify(layout)
 ]).join('\n');
 // ネーム窓は1ページ単体。前のページが無いので必ず場面の始まりとして扱う
