@@ -197,7 +197,6 @@ return false;
 }
 
 async function comfyuiHandleProcessQueue(layer,spinnerId,Type='T2I',extraData) {
-var startTime=Date.now();
 var serverAddress=getComfyUIServerAddress();
 var authHeaders=getComfyUIAuthHeaders();
 if (!comfyuiGetSocket()) comfyuiConnect();
@@ -308,7 +307,6 @@ if (result&&result.error) {
 createToastError("Generation Error",result.message);
 throw new Error(result.message);
 } else if (result) {
-DashboardUI.recordGeneration(Type,Date.now()-startTime,requestData.prompt||'',requestData.model||'');
 if(isPageChanged(canvasGuid)){
 var applied=await applyGeneratedImageToOriginalPage(canvasGuid,result);
 if(applied){
@@ -340,7 +338,6 @@ if(error.message==='Queue cancelled'||error.message==='Task cancelled'){
 comfyuiLogger.debug("Generation cancelled by user");
 return;
 }
-DashboardUI.recordFailure(Type);
 let help=getText("comfyUI_workflowErrorHelp");
 createToastError("Generation Error",[error.message,help],8000);
 comfyuiLogger.error("Error:",error);

@@ -215,7 +215,6 @@ function getElementClasses(element) {
 <link rel="stylesheet" href="css/ui/overlay-progress.css?v=7.2" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/inpaint-editor.css?v=7.3" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/ui/angle-editor.css?v=7.3" media="print" onload="this.media='all'">
-<link rel="stylesheet" href="css/ui/dashboard.css?v=7.3" media="print" onload="this.media='all'">
 
 <link rel="stylesheet" href="third/tippy/tippy.css">
 <link rel="stylesheet" href="third/Bootstrup/bootstrap.min.css">
@@ -233,8 +232,6 @@ function getElementClasses(element) {
 <script src="third/tagify/tagify.min.js?v=7.2"></script>
 <link href="third/tagify/tagify.min.css?v=7.2" rel="stylesheet" type="text/css" />
 <script src="https://unpkg.com/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" defer></script>
-<script src="third/chartjs/chart.min.js?v=7.2" defer></script>
-<script src="third/wordcloud/wordcloud.min.js?v=7.2" defer></script>
 
 <link rel="stylesheet" href="css/comfyui-workflow-editor.css?v=7.2" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/responsive.css?v=7.3">
@@ -467,13 +464,6 @@ function getElementClasses(element) {
                                     step="1" min="0" max="100">
                             </a>
                         </ul>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="openDashboardModal();return false;">
-                            <span data-i18n="dashboard">Dashboard</span>
-                        </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
@@ -2138,9 +2128,6 @@ function getElementClasses(element) {
     <script src="js/ui/third/base-translation/base-ru.js?v=7.2" defer></script>
     <script src="js/ui/third/base-translation/base-zh.js?v=7.2" defer></script>
     <script src="js/ui/third/i18next.js?v=7.2" defer></script>
-    <script src="js/dashboard/performance-storage.js?v=7.3" defer></script>
-    <script src="js/dashboard/prompt-frequency-storage.js?v=7.3" defer></script>
-    <script src="js/dashboard/dashboard-ui.js?v=7.3" defer></script>
 
     <script src="js/ui/util/mode-change.js?v=7.2" defer></script>
     <script src="js/ui/util/mode-manager.js?v=7.2" defer></script>
@@ -2426,250 +2413,6 @@ oninput="document.getElementById('inpaint-denoise-label').textContent=this.value
 <textarea id="angle-prompt" rows="3" placeholder=""></textarea>
 </div>
 <button id="angle-generate-btn" data-i18n="angleGenerate_btn">Generate</button>
-</div>
-</div>
-</div>
-
-<!-- ========== Modal: Dashboard ========== -->
-<div id="dashboard-modal" class="dashboard-modal-overlay" style="display:none;">
-<div class="dashboard-modal-content">
-<button id="dashboard-close-btn" class="dashboard-modal-close-btn">&#10005;</button>
-<div class="dashboard-container">
-<div class="dashboard-header">
-<h3 data-i18n="dashboardTitle">Performance Dashboard</h3>
-<button class="dashboard-clear-btn" id="dashboardClearStats" data-i18n="dashboardClearAll">Clear All</button>
-</div>
-<div class="dashboard-summary">
-<div class="summary-card">
-<div class="summary-value" id="dashboardTotalGenerations">0</div>
-<div class="summary-label" data-i18n="dashboardTotal">Total</div>
-</div>
-<div class="summary-card">
-<div class="summary-value" id="dashboardGlobalAvg">-</div>
-<div class="summary-label" data-i18n="dashboardAvg">AVG</div>
-</div>
-<div class="summary-card">
-<div class="summary-value" id="dashboardGlobalMin">-</div>
-<div class="summary-label" data-i18n="dashboardMin">MIN</div>
-</div>
-<div class="summary-card">
-<div class="summary-value" id="dashboardGlobalMax">-</div>
-<div class="summary-label" data-i18n="dashboardMax">MAX</div>
-</div>
-<div class="summary-card">
-<div class="summary-value" id="dashboardUniqueTags">0</div>
-<div class="summary-label" data-i18n="dashboardTags">Tags</div>
-</div>
-<div class="summary-card">
-<div class="summary-value" id="dashboardLaunchCount">0</div>
-<div class="summary-label" data-i18n="dashboardLaunch">Launch</div>
-</div>
-<div class="summary-card">
-<div class="summary-value" id="dashboardFirstLaunch">-</div>
-<div class="summary-label" data-i18n="dashboardSince">Since</div>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardModeStats">Mode Statistics</h4>
-</div>
-<div class="stats-table-container">
-<table class="stats-table">
-<thead>
-<tr>
-<th data-i18n="dashboardMode">Mode</th>
-<th data-i18n="dashboardCount">Count</th>
-<th data-i18n="dashboardAvgMs">AVG (ms)</th>
-<th data-i18n="dashboardMinMs">MIN (ms)</th>
-<th data-i18n="dashboardMaxMs">MAX (ms)</th>
-</tr>
-</thead>
-<tbody id="dashboardStatsTable"></tbody>
-</table>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardTimeGraph">Generation Time Graph</h4>
-<select id="dashboardModeSelector" class="mode-selector">
-<option value="T2I">T2I</option>
-<option value="I2I">I2I</option>
-<option value="I2I_Angle">I2I Angle</option>
-<option value="Inpaint">Inpaint</option>
-<option value="Upscaler">Upscaler</option>
-<option value="Rembg">Rembg</option>
-</select>
-</div>
-<div class="chart-container">
-<canvas id="dashboardChart" width="600" height="200"></canvas>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardHourlyHeatmap">Hourly Activity Heatmap</h4>
-</div>
-<div class="heatmap-container" id="dashboardHeatmap"></div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardTrendGraph">Generation Trend</h4>
-<select id="dashboardTrendSelector" class="mode-selector">
-<option value="daily" data-i18n="dashboardDaily">Daily</option>
-<option value="weekly" data-i18n="dashboardWeekly">Weekly</option>
-<option value="monthly" data-i18n="dashboardMonthly">Monthly</option>
-</select>
-</div>
-<div class="chart-container">
-<canvas id="dashboardTrendChart" width="600" height="200"></canvas>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardTopTags">Most Used Tags</h4>
-<button class="dashboard-clear-btn-small" id="dashboardClearTags" data-i18n="dashboardClearTags">Clear Tags</button>
-</div>
-<div class="top-tags-container" id="dashboardTopTags">
-<div class="no-tags" data-i18n="dashboardNoTags">No tags recorded</div>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardWordcloud">Word Cloud</h4>
-<button class="dashboard-download-btn" id="dashboardDownloadWordcloud" data-i18n="dashboardDownload">Download</button>
-</div>
-<div class="wordcloud-container">
-<canvas id="dashboardWordcloud" width="600" height="300"></canvas>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardStreak">Streak</h4>
-</div>
-<div class="streak-session-row">
-<div class="streak-card">
-<div class="streak-icon">&#x1F525;</div>
-<div class="streak-value" id="dashboardCurrentStreak">0</div>
-<div class="streak-label" data-i18n="dashboardCurrentStreak">Current</div>
-</div>
-<div class="streak-card">
-<div class="streak-icon">&#x1F3C6;</div>
-<div class="streak-value" id="dashboardLongestStreak">0</div>
-<div class="streak-label" data-i18n="dashboardLongestStreak">Longest</div>
-</div>
-<div class="streak-card">
-<div class="streak-icon">&#x1F4C5;</div>
-<div class="streak-value" id="dashboardTodayCount">0</div>
-<div class="streak-label" data-i18n="dashboardToday">Today</div>
-</div>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardSessionStats">Session</h4>
-</div>
-<div class="streak-session-row">
-<div class="streak-card">
-<div class="streak-value" id="dashboardCurrentSession">0m</div>
-<div class="streak-label" data-i18n="dashboardCurrentSession">This Session</div>
-</div>
-<div class="streak-card">
-<div class="streak-value" id="dashboardSessionGenCount">0</div>
-<div class="streak-label" data-i18n="dashboardGenPerSession">Gens</div>
-</div>
-<div class="streak-card">
-<div class="streak-value" id="dashboardAvgSession">0m</div>
-<div class="streak-label" data-i18n="dashboardAvgSession">Avg Session</div>
-</div>
-<div class="streak-card">
-<div class="streak-value" id="dashboardTotalSessions">0</div>
-<div class="streak-label" data-i18n="dashboardTotalSessions">Sessions</div>
-</div>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardCalendar">Activity Calendar</h4>
-</div>
-<div class="calendar-container" id="dashboardCalendar"></div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardSuccessRate">Success Rate</h4>
-</div>
-<div class="success-rate-container">
-<canvas id="dashboardSuccessRateChart" width="300" height="150"></canvas>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardPromptLength">Prompt Length</h4>
-</div>
-<div class="chart-container">
-<canvas id="dashboardPromptLengthChart" width="600" height="200"></canvas>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardCoOccurrence">Tag Co-occurrence</h4>
-</div>
-<div class="stats-table-container">
-<table class="stats-table cooccurrence-table">
-<thead>
-<tr>
-<th data-i18n="dashboardTagPair">Tag Pair</th>
-<th data-i18n="dashboardPairCount">Count</th>
-</tr>
-</thead>
-<tbody id="dashboardCoOccurrenceTable"></tbody>
-</table>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardModelUsage">Model Usage</h4>
-</div>
-<div class="chart-container model-chart-container">
-<canvas id="dashboardModelChart" width="600" height="200"></canvas>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardGoals">Goals</h4>
-</div>
-<div class="goal-container">
-<div class="goal-row">
-<span class="goal-label" data-i18n="dashboardDailyGoal">Daily Goal</span>
-<input type="number" id="dashboardDailyGoalInput" class="goal-input" min="1" max="9999" placeholder="0">
-<button class="dashboard-download-btn goal-save-btn" id="dashboardSaveDailyGoal" data-i18n="dashboardGoalSave">Save</button>
-</div>
-<div class="goal-progress-wrap">
-<div class="goal-progress-bar" id="dashboardDailyProgressBar"><span id="dashboardDailyProgressText"></span></div>
-</div>
-<div class="goal-row">
-<span class="goal-label" data-i18n="dashboardWeeklyGoal">Weekly Goal</span>
-<input type="number" id="dashboardWeeklyGoalInput" class="goal-input" min="1" max="9999" placeholder="0">
-<button class="dashboard-download-btn goal-save-btn" id="dashboardSaveWeeklyGoal" data-i18n="dashboardGoalSave">Save</button>
-</div>
-<div class="goal-progress-wrap">
-<div class="goal-progress-bar" id="dashboardWeeklyProgressBar"><span id="dashboardWeeklyProgressText"></span></div>
-</div>
-</div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardBadges">Badges</h4>
-</div>
-<div class="badge-grid" id="dashboardBadgeGrid"></div>
-</div>
-<div class="dashboard-section">
-<div class="section-header">
-<h4 data-i18n="dashboardExport">Export</h4>
-</div>
-<div class="export-section">
-<button class="dashboard-download-btn" id="dashboardExportJSON" data-i18n="dashboardExportJSON">JSON</button>
-<button class="dashboard-download-btn" id="dashboardExportCSV" data-i18n="dashboardExportCSV">CSV</button>
-</div>
-</div>
 </div>
 </div>
 </div>

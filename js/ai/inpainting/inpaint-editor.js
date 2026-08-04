@@ -107,7 +107,6 @@ var spinner=createSpinner(getGUID(layer),'IP');
 var spinnerId=spinner.id;
 setCurrentAiTask(spinnerId);
 updateAiTaskCancelInfo(spinnerId,{queueName:'comfyui'});
-var startTime=Date.now();
 InpaintWorkflow.generate(imageDataUrl,maskDataUrl,prompt,negative,denoise)
 .then(function(result){
 if(!result) return;
@@ -120,7 +119,6 @@ else reject(new Error("Failed to create fabric.Image"));
 })
 .then(function(newImg){
 if(!newImg) return;
-DashboardUI.recordGeneration('Inpaint',Date.now()-startTime,prompt,'');
 if(layer.clipPath){
 var center=calculateCenter(layer);
 var targetParent=layer.relatedPoly||layer;
@@ -139,7 +137,6 @@ if(error.message==='Queue cancelled'||error.message==='Task cancelled'){
 inpaintLogger.debug("Inpaint cancelled by user");
 return;
 }
-DashboardUI.recordFailure('Inpaint');
 var help=getText("comfyUI_workflowErrorHelp");
 createToastError("Inpaint Error",[error.message,help],8000);
 inpaintLogger.error("Inpaint error:",error);

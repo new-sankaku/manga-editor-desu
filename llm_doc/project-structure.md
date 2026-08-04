@@ -24,7 +24,6 @@ manga-editor-desu/
 │   │   ├── prompt/panel-composition.js 役割→構図タグの表とSDXLバケット
 │   │   └── prompt/prompt-apply.js     コマへの書き込みとページ送り
 │   ├── db/             永続化（user-font-repository）
-│   ├── dashboard/      ダッシュボード（統計、プロンプト頻度）
 │   ├── svg/            SVGテンプレート（コマ割り、吹き出し）
 │   ├── core/font/project-font.js  プロジェクトのフォント情報保存・復元
 │   ├── canvas-manager.js    キャンバスリサイズ・ズーム、原稿サイズ(mm)

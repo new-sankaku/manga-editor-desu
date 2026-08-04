@@ -138,7 +138,7 @@ commitHistory();           // 単発のボタン操作
 | バックエンド | 用途 |
 |-------------|------|
 | `localStorage` | アプリ設定、basePrompt、サイドバーツール値（軽量・同期アクセス） |
-| `localforage`(IndexedDB) | auto-save、フォント、ワークフロー、統計（大容量・非同期） |
+| `localforage`(IndexedDB) | auto-save、フォント、ワークフロー（大容量・非同期） |
 
 ### アプリ設定（project-management.js）
 `localStorage`キー`localSettingsData`に全設定を一括JSON保存。
@@ -322,5 +322,7 @@ LZ4圧縮で以下を保存:
 | `fm-fontStorage` | ユーザーフォント（buffer, URL） |
 | `workflowStorage` | ComfyUIカスタムワークフロー |
 | `objectInfoStorage` | ComfyUIノード定義キャッシュ |
-| `MangaEditor_Performance` | 生成時間統計 |
-| `MangaEditor_PromptFrequency` | タグ頻度分析 |
+
+`MangaEditor_Performance`（生成時間統計）と`MangaEditor_PromptFrequency`（タグ頻度分析）は
+ダッシュボード削除に伴い**読み書きするコードが無くなった**。削除前から使っていた環境には
+IndexedDBにデータが残るが、量が小さいため消去処理は入れていない。同名で作り直さないこと。

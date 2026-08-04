@@ -297,7 +297,7 @@ nowT2XxxStr=t2PlaceImageTextObject(img,'xxx',left,top);  // 退避した内容�
 `file://`で動作させるため、実行に必要なライブラリは`third/`に同梱する。
 CDN参照だとオフラインで読み込みに失敗し、jscolorなら色ピッカーが
 ただのテキスト入力に化ける。
-同梱済み: jscolor / tagify / stacktrace / chart.js / wordcloud / three.js
+同梱済み: jscolor / tagify / stacktrace / three.js
 （Google Fontsとflag-iconsは未同梱。読み込めなくても代替表示で機能は動く）
 
 ## キャンバスの拡大縮小（canvas-manager.js）
