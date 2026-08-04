@@ -20,6 +20,7 @@
 - `llm_doc/ai-system.md` - AI画像生成の修正時。プロバイダ構成、TaskQueue、ロール割り当て、ComfyUIワークフロー
 - `llm_doc/manga-page-guideline.md` - 漫画のページを作る指針。LLMプロンプトはここから作る（これが正）
 - `llm_doc/prompt-composition.md` - コマのプロンプトを作る処理を触るとき。漫画の構図と画像生成AIの差、効くタグと効かないタグ、見切れ対策
+- `llm_doc/consistency.md` - キャラ・絵柄・色のブレを止めるとき。LoRA、参照画像（IPAdapter）、カラーマッチ、実装順と落とし穴
 - `llm_doc/layer-structure.md` - レイヤーやキャンバスオブジェクトの操作時。GUID連携、リンク機構、AIタスク進捗管理
 - `llm_doc/coding-rules.md` - コードを書く前に確認。命名規則、ログ出力、npm run format の挙動
 - `llm_doc/history-and-data.md` - Undo/Redo周りや画像保存の修正時。履歴スタック操作、data:URL制約
