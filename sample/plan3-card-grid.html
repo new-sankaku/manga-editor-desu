@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案3: カード型グリッド（GPU並列表示）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#212121;color:#dedede;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;}
+
+.us-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;}
+.us-window{background:#212121;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:85vw;height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.6);overflow:hidden;}
+.us-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #505050;flex-shrink:0;}
+.us-header h2{font-size:14px;font-weight:bold;color:#ff7c7c;}
+.us-close{background:none;border:none;font-size:18px;color:#888;cursor:pointer;padding:2px 6px;border-radius:4px;}
+
+/* --- card grid area --- */
+.card-area{flex:1;overflow-y:auto;padding:20px;}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:20px;}
+
+/* --- GPU card --- */
+.gpu-card{background:#2a2a2a;border:1px solid rgba(255,255,255,0.08);border-radius:8px;overflow:hidden;transition:border-color 0.15s;}
+.gpu-card:hover{border-color:rgba(255,255,255,0.2);}
+.gpu-card.expanded{grid-column:1/-1;}
+
+.card-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,0.06);cursor:pointer;}
+.card-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+.status-badge{font-size:9px;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;}
+.status-badge.online{background:rgba(76,175,80,0.15);color:#4caf50;border:1px solid rgba(76,175,80,0.3);}
+.status-badge.offline{background:rgba(255,255,255,0.05);color:#666;border:1px solid rgba(255,255,255,0.1);}
+.status-badge.error{background:rgba(244,67,54,0.15);color:#f44336;border:1px solid rgba(244,67,54,0.3);}
+.card-expand{font-size:10px;color:#888;cursor:pointer;padding:4px 8px;border-radius:4px;background:rgba(255,255,255,0.05);border:none;}
+.card-expand:hover{background:rgba(255,255,255,0.1);color:#dedede;}
+
+.card-body{padding:12px 16px;}
+.card-summary{display:flex;flex-direction:column;gap:8px;}
+.summary-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;}
+.summary-label{color:#888;}
+.summary-value{color:#dedede;text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.card-roles{padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid rgba(255,255,255,0.04);}
+.role-chip{font-size:9px;padding:2px 8px;border-radius:8px;}
+.role-chip.assigned{background:rgba(129,0,0,0.3);color:#ff7c7c;border:1px solid rgba(129,0,0,0.4);}
+.role-chip.available{background:rgba(255,255,255,0.05);color:#666;border:1px solid rgba(255,255,255,0.08);}
+
+/* --- expanded card detail --- */
+.card-detail{padding:0 16px 16px;display:none;}
+.gpu-card.expanded .card-detail{display:block;}
+.detail-section{margin-bottom:14px;}
+.detail-title{font-size:10px;font-weight:600;color:#ff7c7c;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.form-label{font-size:11px;color:#888;min-width:110px;flex-shrink:0;}
+.form-input{font-size:11px;padding:5px 8px;border:1px solid #505050;border-radius:4px;background:#333;color:#dedede;flex:1;min-width:0;}
+.form-select{font-size:11px;padding:5px 8px;border:1px solid #505050;border-radius:4px;background:#333;color:#dedede;flex:1;min-width:0;}
+.form-btn{font-size:10px;padding:3px 8px;border:1px solid #505050;border-radius:4px;background:#505050;color:#dedede;cursor:pointer;}
+.form-btn:hover{background:rgba(255,255,255,0.15);}
+
+/* --- role bar (cross-GPU) --- */
+.role-bar{background:#2a2a2a;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:14px 20px;}
+.role-bar-title{font-size:12px;font-weight:600;color:#ff7c7c;margin-bottom:10px;}
+.role-matrix{width:100%;border-collapse:collapse;}
+.role-matrix th{font-size:10px;color:#888;font-weight:600;padding:6px 8px;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
+.role-matrix th:first-child{text-align:left;}
+.role-matrix td{padding:6px 8px;border:1px solid rgba(255,255,255,0.08);text-align:center;font-size:11px;}
+.role-matrix td:first-child{text-align:left;color:#dedede;}
+.role-matrix input[type="radio"]{accent-color:#810000;}
+.role-matrix .unavailable{color:#444;font-size:10px;}
+
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#212121;}
+::-webkit-scrollbar-thumb{background:#480000;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="us-overlay">
+<div class="us-window">
+<div class="us-header">
+  <h2>&#9881; 生成AI設定</h2>
+  <button class="us-close">&times;</button>
+</div>
+<div class="card-area">
+  <!-- Card Grid -->
+  <div class="card-grid">
+    <!-- ComfyUI (expanded) -->
+    <div class="gpu-card expanded">
+      <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="card-title">ComfyUI (Local)<span class="status-badge online">接続中</span></div>
+        <button class="card-expand">&#9660; 詳細</button>
+      </div>
+      <div class="card-body">
+        <div class="card-summary">
+          <div class="summary-row"><span class="summary-label">URL</span><span class="summary-value">http://127.0.0.1:8188</span></div>
+          <div class="summary-row"><span class="summary-label">LLM Vision</span><span class="summary-value">GPT-4o</span></div>
+          <div class="summary-row"><span class="summary-label">Checkpoint</span><span class="summary-value">animagine-xl-3.1.safetensors</span></div>
+        </div>
+      </div>
+      <div class="card-roles">
+        <span class="role-chip assigned">T2I</span>
+        <span class="role-chip assigned">I2I</span>
+        <span class="role-chip assigned">Inpaint</span>
+        <span class="role-chip assigned">Angle</span>
+        <span class="role-chip available">Upscaler</span>
+        <span class="role-chip available">RemBG</span>
+      </div>
+      <div class="card-detail">
+        <div class="detail-section">
+          <div class="detail-title">接続</div>
+          <div class="form-row">
+            <span class="form-label">URL</span>
+            <input type="text" class="form-input" value="http://127.0.0.1:8188">
+            <button class="form-btn">初期値</button>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">LLM Vision</div>
+          <div class="form-row">
+            <span class="form-label">プロバイダ</span>
+            <select class="form-select"><option>OpenAI (GPT-4o)</option></select>
+          </div>
+          <div class="form-row">
+            <span class="form-label">API Key</span>
+            <input type="password" class="form-input" placeholder="API Key">
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">AIモデル</div>
+          <div class="form-row">
+            <span class="form-label">Checkpoint</span>
+            <select class="form-select"><option>animagine-xl-3.1.safetensors</option></select>
+          </div>
+          <div class="form-row">
+            <span class="form-label">VAE</span>
+            <select class="form-select"><option>sdxl_vae.safetensors</option></select>
+          </div>
+          <div class="form-row">
+            <span class="form-label">Sampler</span>
+            <select class="form-select"><option>euler_ancestral</option></select>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-title">設定値</div>
+          <div class="form-row">
+            <span class="form-label">Steps</span>
+            <input type="number" class="form-input" value="28" style="flex:0 0 80px;">
+          </div>
+          <div class="form-row">
+            <span class="form-label">CFG Scale</span>
+            <input type="number" class="form-input" value="7" style="flex:0 0 80px;">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RunPod (collapsed) -->
+    <div class="gpu-card">
+      <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="card-title">RunPod ComfyUI<span class="status-badge offline">未接続</span></div>
+        <button class="card-expand">&#9654; 詳細</button>
+      </div>
+      <div class="card-body">
+        <div class="card-summary">
+          <div class="summary-row"><span class="summary-label">URL</span><span class="summary-value" style="color:#666;">未設定</span></div>
+          <div class="summary-row"><span class="summary-label">LLM Vision</span><span class="summary-value" style="color:#666;">未設定</span></div>
+          <div class="summary-row"><span class="summary-label">Checkpoint</span><span class="summary-value" style="color:#666;">未設定</span></div>
+        </div>
+      </div>
+      <div class="card-roles">
+        <span class="role-chip available">T2I</span>
+        <span class="role-chip available">I2I</span>
+        <span class="role-chip available">Inpaint</span>
+        <span class="role-chip available">Upscaler</span>
+        <span class="role-chip available">RemBG</span>
+        <span class="role-chip available">Angle</span>
+      </div>
+    </div>
+
+    <!-- SD WebUI (collapsed) -->
+    <div class="gpu-card">
+      <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="card-title">SD WebUI (A1111)<span class="status-badge error">エラー</span></div>
+        <button class="card-expand">&#9654; 詳細</button>
+      </div>
+      <div class="card-body">
+        <div class="card-summary">
+          <div class="summary-row"><span class="summary-label">URL</span><span class="summary-value">http://127.0.0.1:7860</span></div>
+          <div class="summary-row"><span class="summary-label">LLM Vision</span><span class="summary-value" style="color:#666;">未設定</span></div>
+          <div class="summary-row"><span class="summary-label">Model</span><span class="summary-value">pony-diffusion-v6</span></div>
+        </div>
+      </div>
+      <div class="card-roles">
+        <span class="role-chip assigned">CLIP</span>
+        <span class="role-chip assigned">DeepD</span>
+        <span class="role-chip available">T2I</span>
+        <span class="role-chip available">I2I</span>
+        <span class="role-chip available">RemBG</span>
+      </div>
+    </div>
+
+    <!-- Fal.ai (collapsed) -->
+    <div class="gpu-card">
+      <div class="card-header" onclick="this.parentElement.classList.toggle('expanded')">
+        <div class="card-title">Fal.ai<span class="status-badge online">接続中</span></div>
+        <button class="card-expand">&#9654; 詳細</button>
+      </div>
+      <div class="card-body">
+        <div class="card-summary">
+          <div class="summary-row"><span class="summary-label">API Key</span><span class="summary-value">&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;abc123</span></div>
+          <div class="summary-row"><span class="summary-label">LLM Vision</span><span class="summary-value">Claude 3.5 Sonnet</span></div>
+          <div class="summary-row"><span class="summary-label">T2I Model</span><span class="summary-value">fal-ai/flux/schnell</span></div>
+        </div>
+      </div>
+      <div class="card-roles">
+        <span class="role-chip assigned">Upscaler</span>
+        <span class="role-chip assigned">RemBG</span>
+        <span class="role-chip available">T2I</span>
+        <span class="role-chip available">I2I</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Role Bar -->
+  <div class="role-bar">
+    <div class="role-bar-title">&#128279; ロール割り当て</div>
+    <table class="role-matrix">
+      <thead>
+        <tr>
+          <th></th>
+          <th>ComfyUI (Local)</th>
+          <th>RunPod ComfyUI</th>
+          <th>SD WebUI</th>
+          <th>Fal.ai</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Text2Image</td><td><input type="radio" name="r_t2i" checked></td><td><input type="radio" name="r_t2i"></td><td><input type="radio" name="r_t2i"></td><td><input type="radio" name="r_t2i"></td></tr>
+        <tr><td>Image2Image</td><td><input type="radio" name="r_i2i" checked></td><td><input type="radio" name="r_i2i"></td><td><input type="radio" name="r_i2i"></td><td><input type="radio" name="r_i2i"></td></tr>
+        <tr><td>Inpaint</td><td><input type="radio" name="r_inp" checked></td><td><input type="radio" name="r_inp"></td><td><span class="unavailable">&mdash;</span></td><td><span class="unavailable">&mdash;</span></td></tr>
+        <tr><td>Upscaler</td><td><input type="radio" name="r_up"></td><td><input type="radio" name="r_up"></td><td><span class="unavailable">&mdash;</span></td><td><input type="radio" name="r_up" checked></td></tr>
+        <tr><td>RemoveBG</td><td><input type="radio" name="r_bg"></td><td><input type="radio" name="r_bg"></td><td><input type="radio" name="r_bg"></td><td><input type="radio" name="r_bg" checked></td></tr>
+        <tr><td>Angle</td><td><input type="radio" name="r_ang" checked></td><td><input type="radio" name="r_ang"></td><td><span class="unavailable">&mdash;</span></td><td><span class="unavailable">&mdash;</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+</div>
+</body>
+</html>

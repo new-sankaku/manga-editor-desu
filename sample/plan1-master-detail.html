@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案1: マスター・ディテール型（GPU縦タブ + 右ペイン詳細）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#212121;color:#dedede;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;}
+
+/* --- overlay / window --- */
+.us-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;}
+.us-window{background:#212121;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:80vw;height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.6);overflow:hidden;}
+.us-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #505050;flex-shrink:0;}
+.us-header h2{font-size:14px;font-weight:bold;color:#ff7c7c;margin:0;}
+.us-close{background:none;border:none;font-size:18px;color:#888;cursor:pointer;padding:2px 6px;border-radius:4px;}
+
+/* --- split layout --- */
+.gpu-split{display:flex;flex:1;overflow:hidden;}
+
+/* --- left: GPU list --- */
+.gpu-list{width:220px;min-width:180px;border-right:1px solid #505050;display:flex;flex-direction:column;background:rgba(255,255,255,0.02);}
+.gpu-list-header{padding:12px 14px 8px;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.gpu-item{padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:all 0.15s;}
+.gpu-item:hover{background:rgba(255,255,255,0.04);}
+.gpu-item.active{background:rgba(129,0,0,0.15);border-left-color:#810000;}
+.gpu-item-name{font-size:12px;font-weight:600;color:#dedede;display:flex;align-items:center;gap:8px;}
+.gpu-item-roles{margin-top:4px;display:flex;flex-wrap:wrap;gap:3px;}
+.gpu-chip{font-size:9px;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,0.08);color:#888;}
+.gpu-chip.assigned{background:rgba(129,0,0,0.3);color:#ff7c7c;}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-dot.online{background:#4caf50;box-shadow:0 0 4px rgba(76,175,80,0.5);}
+.status-dot.offline{background:#666;}
+.status-dot.error{background:#f44336;box-shadow:0 0 4px rgba(244,67,54,0.5);}
+
+/* --- right: detail pane --- */
+.gpu-detail{flex:1;overflow-y:auto;padding:0;}
+.gpu-detail-empty{display:flex;align-items:center;justify-content:center;height:100%;color:#555;font-size:13px;}
+
+/* --- accordion sections --- */
+.acc-section{border-bottom:1px solid rgba(255,255,255,0.06);}
+.acc-header{padding:12px 20px;font-size:12px;font-weight:600;color:#ff7c7c;cursor:pointer;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.02);user-select:none;transition:background 0.15s;}
+.acc-header:hover{background:rgba(255,255,255,0.05);}
+.acc-header .arrow{font-size:10px;transition:transform 0.2s;color:#888;}
+.acc-header.open .arrow{transform:rotate(90deg);}
+.acc-body{padding:8px 20px 16px;display:none;}
+.acc-header.open+.acc-body{display:block;}
+
+/* --- form elements --- */
+.form-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.form-label{font-size:11px;color:#888;min-width:120px;flex-shrink:0;}
+.form-input{font-size:11px;padding:5px 10px;border:1px solid #505050;border-radius:4px;background:#333;color:#dedede;flex:1;min-width:0;}
+.form-input:focus{outline:none;border-color:#810000;}
+.form-select{font-size:11px;padding:5px 10px;border:1px solid #505050;border-radius:4px;background:#333;color:#dedede;flex:1;min-width:0;}
+.form-btn{font-size:11px;padding:4px 10px;border:1px solid #505050;border-radius:4px;background:#505050;color:#dedede;cursor:pointer;white-space:nowrap;}
+.form-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
+
+/* --- role matrix (bottom) --- */
+.role-section{border-top:2px solid rgba(255,255,255,0.08);padding:16px 20px;background:rgba(255,255,255,0.02);}
+.role-section-title{font-size:12px;font-weight:600;color:#ff7c7c;margin-bottom:10px;}
+.role-matrix{width:100%;border-collapse:collapse;}
+.role-matrix th{font-size:10px;color:#888;font-weight:600;padding:6px 8px;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);}
+.role-matrix th:first-child{text-align:left;}
+.role-matrix td{padding:6px 8px;border:1px solid rgba(255,255,255,0.08);text-align:center;font-size:11px;}
+.role-matrix td:first-child{text-align:left;color:#dedede;}
+.role-matrix input[type="radio"]{accent-color:#810000;}
+.role-matrix .unavailable{color:#444;font-size:10px;}
+
+/* --- scrollbar --- */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#212121;}
+::-webkit-scrollbar-thumb{background:#480000;border-radius:3px;}
+
+/* --- slider --- */
+.form-slider-wrap{flex:1;display:flex;align-items:center;gap:8px;}
+.form-slider{flex:1;accent-color:#810000;height:4px;}
+.form-slider-val{font-size:11px;color:#888;min-width:30px;text-align:right;}
+</style>
+</head>
+<body>
+<div class="us-overlay">
+<div class="us-window">
+<div class="us-header">
+  <h2>&#9881; 生成AI設定</h2>
+  <button class="us-close">&times;</button>
+</div>
+<div class="gpu-split">
+  <!-- LEFT: GPU List -->
+  <div class="gpu-list">
+    <div class="gpu-list-header">GPU / サービス</div>
+    <div class="gpu-item active">
+      <div class="gpu-item-name"><span class="status-dot online"></span>ComfyUI (Local)</div>
+      <div class="gpu-item-roles">
+        <span class="gpu-chip assigned">T2I</span>
+        <span class="gpu-chip assigned">I2I</span>
+        <span class="gpu-chip assigned">Inpaint</span>
+        <span class="gpu-chip assigned">Angle</span>
+      </div>
+    </div>
+    <div class="gpu-item">
+      <div class="gpu-item-name"><span class="status-dot offline"></span>RunPod ComfyUI</div>
+      <div class="gpu-item-roles">
+        <span class="gpu-chip">T2I</span>
+        <span class="gpu-chip">I2I</span>
+      </div>
+    </div>
+    <div class="gpu-item">
+      <div class="gpu-item-name"><span class="status-dot error"></span>SD WebUI (A1111)</div>
+      <div class="gpu-item-roles">
+        <span class="gpu-chip assigned">CLIP</span>
+        <span class="gpu-chip assigned">DeepD</span>
+      </div>
+    </div>
+    <div class="gpu-item">
+      <div class="gpu-item-name"><span class="status-dot online"></span>Fal.ai</div>
+      <div class="gpu-item-roles">
+        <span class="gpu-chip assigned">Upscale</span>
+        <span class="gpu-chip assigned">RemBG</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Detail Pane -->
+  <div class="gpu-detail">
+    <!-- Connection -->
+    <div class="acc-section">
+      <div class="acc-header open" onclick="this.classList.toggle('open')">
+        <span class="arrow">&#9654;</span>接続
+      </div>
+      <div class="acc-body">
+        <div class="form-row">
+          <span class="form-label">URL</span>
+          <input type="text" class="form-input" value="http://127.0.0.1:8188" placeholder="URL">
+          <button class="form-btn">初期値</button>
+          <button class="form-btn">?</button>
+        </div>
+        <div class="form-row">
+          <span class="form-label">ステータス</span>
+          <span style="color:#4caf50;font-size:11px;">&#9679; 接続中 &mdash; ComfyUI v0.2.4</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LLM Vision -->
+    <div class="acc-section">
+      <div class="acc-header open" onclick="this.classList.toggle('open')">
+        <span class="arrow">&#9654;</span>LLM Vision
+      </div>
+      <div class="acc-body">
+        <div class="form-row">
+          <span class="form-label">プロバイダ</span>
+          <select class="form-select">
+            <option>OpenAI (GPT-4o)</option>
+            <option>Anthropic (Claude)</option>
+            <option>Google (Gemini)</option>
+            <option>ローカル (LLaVA)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <span class="form-label">API Key</span>
+          <input type="password" class="form-input" placeholder="API Key">
+          <button class="form-btn">表示</button>
+        </div>
+        <div class="form-row">
+          <span class="form-label">モデル</span>
+          <select class="form-select">
+            <option>gpt-4o</option>
+            <option>gpt-4o-mini</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Models -->
+    <div class="acc-section">
+      <div class="acc-header open" onclick="this.classList.toggle('open')">
+        <span class="arrow">&#9654;</span>AIモデル
+      </div>
+      <div class="acc-body">
+        <div class="form-row">
+          <span class="form-label">Checkpoint</span>
+          <select class="form-select">
+            <option>animagine-xl-3.1.safetensors</option>
+            <option>pony-diffusion-v6.safetensors</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <span class="form-label">VAE</span>
+          <select class="form-select">
+            <option>sdxl_vae.safetensors</option>
+            <option>auto</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <span class="form-label">Sampler</span>
+          <select class="form-select">
+            <option>euler_ancestral</option>
+            <option>dpmpp_2m_sde</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <span class="form-label">Scheduler</span>
+          <select class="form-select">
+            <option>normal</option>
+            <option>karras</option>
+            <option>sgm_uniform</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <span class="form-label">ワークフロー設定</span>
+          <button class="form-btn">ワークフローエディタを開く</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="acc-section">
+      <div class="acc-header open" onclick="this.classList.toggle('open')">
+        <span class="arrow">&#9654;</span>設定値
+      </div>
+      <div class="acc-body">
+        <div class="form-row">
+          <span class="form-label">同時実行数</span>
+          <input type="number" class="form-input" value="1" min="1" max="10" style="flex:0 0 80px;">
+        </div>
+        <div class="form-row">
+          <span class="form-label">CFG Scale</span>
+          <div class="form-slider-wrap">
+            <input type="range" class="form-slider" min="1" max="30" value="7">
+            <span class="form-slider-val">7.0</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">Steps</span>
+          <div class="form-slider-wrap">
+            <input type="range" class="form-slider" min="1" max="100" value="28">
+            <span class="form-slider-val">28</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <span class="form-label">Denoising</span>
+          <div class="form-slider-wrap">
+            <input type="range" class="form-slider" min="0" max="100" value="60">
+            <span class="form-slider-val">0.60</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Assignment (cross-GPU) -->
+    <div class="role-section">
+      <div class="role-section-title">&#128279; ロール割り当て（全GPU横断）</div>
+      <table class="role-matrix">
+        <thead>
+          <tr>
+            <th></th>
+            <th>ComfyUI<br>(Local)</th>
+            <th>RunPod<br>ComfyUI</th>
+            <th>SD WebUI<br>(A1111)</th>
+            <th>Fal.ai</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Text2Image</td>
+            <td><input type="radio" name="r_t2i" checked></td>
+            <td><input type="radio" name="r_t2i"></td>
+            <td><input type="radio" name="r_t2i"></td>
+            <td><input type="radio" name="r_t2i"></td>
+          </tr>
+          <tr>
+            <td>Image2Image</td>
+            <td><input type="radio" name="r_i2i" checked></td>
+            <td><input type="radio" name="r_i2i"></td>
+            <td><input type="radio" name="r_i2i"></td>
+            <td><input type="radio" name="r_i2i"></td>
+          </tr>
+          <tr>
+            <td>Inpaint</td>
+            <td><input type="radio" name="r_inp" checked></td>
+            <td><input type="radio" name="r_inp"></td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><span class="unavailable">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td>Upscaler</td>
+            <td><input type="radio" name="r_up"></td>
+            <td><input type="radio" name="r_up"></td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><input type="radio" name="r_up" checked></td>
+          </tr>
+          <tr>
+            <td>RemoveBG</td>
+            <td><input type="radio" name="r_bg"></td>
+            <td><input type="radio" name="r_bg"></td>
+            <td><input type="radio" name="r_bg"></td>
+            <td><input type="radio" name="r_bg" checked></td>
+          </tr>
+          <tr>
+            <td>Angle</td>
+            <td><input type="radio" name="r_ang" checked></td>
+            <td><input type="radio" name="r_ang"></td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><span class="unavailable">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td>CLIP</td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><input type="radio" name="r_clip" checked></td>
+            <td><span class="unavailable">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td>DeepDanbooru</td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><span class="unavailable">&mdash;</span></td>
+            <td><input type="radio" name="r_dd" checked></td>
+            <td><span class="unavailable">&mdash;</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</body>
+</html>

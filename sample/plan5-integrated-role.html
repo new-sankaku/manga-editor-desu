@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案5: GPU縦タブ + 統合ロール型（案1改良）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#212121;color:#dedede;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;}
+
+.us-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;}
+.us-window{background:#212121;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:80vw;height:82vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.6);overflow:hidden;}
+.us-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #505050;flex-shrink:0;}
+.us-header h2{font-size:14px;font-weight:bold;color:#ff7c7c;}
+.us-close{background:none;border:none;font-size:18px;color:#888;cursor:pointer;padding:2px 6px;border-radius:4px;}
+
+/* --- split --- */
+.gpu-split{display:flex;flex:1;overflow:hidden;}
+
+/* --- left: GPU list --- */
+.gpu-list{width:230px;min-width:190px;border-right:1px solid #505050;display:flex;flex-direction:column;background:rgba(255,255,255,0.02);}
+.gpu-list-header{padding:12px 14px 8px;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid rgba(255,255,255,0.06);}
+
+.gpu-item{padding:10px 14px;cursor:pointer;border-left:3px solid transparent;transition:all 0.15s;}
+.gpu-item:hover{background:rgba(255,255,255,0.04);}
+.gpu-item.active{background:rgba(129,0,0,0.15);border-left-color:#810000;}
+.gpu-item-top{display:flex;align-items:center;gap:8px;}
+.gpu-item-name{font-size:12px;font-weight:600;color:#dedede;}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-dot.online{background:#4caf50;box-shadow:0 0 4px rgba(76,175,80,0.5);}
+.status-dot.offline{background:#666;}
+.status-dot.error{background:#f44336;box-shadow:0 0 4px rgba(244,67,54,0.5);}
+
+/* role chips in left panel */
+.gpu-item-roles{margin-top:5px;display:flex;flex-wrap:wrap;gap:3px;}
+.role-chip{font-size:9px;padding:1px 6px;border-radius:8px;}
+.role-chip.assigned{background:rgba(129,0,0,0.3);color:#ff7c7c;}
+.role-chip.available{background:rgba(255,255,255,0.06);color:#555;}
+
+/* --- right: detail pane --- */
+.gpu-detail{flex:1;overflow-y:auto;padding:0;}
+
+/* --- sections --- */
+.detail-section{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.section-title{font-size:11px;font-weight:600;color:#ff7c7c;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+
+/* --- role toggles (inline) --- */
+.role-toggles{display:flex;flex-wrap:wrap;gap:6px;}
+.role-toggle{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);cursor:pointer;transition:all 0.15s;user-select:none;}
+.role-toggle:hover{border-color:rgba(255,255,255,0.2);}
+.role-toggle.on{background:rgba(129,0,0,0.2);border-color:rgba(129,0,0,0.4);}
+.role-toggle-label{font-size:11px;color:#dedede;}
+.role-toggle.unavailable{opacity:0.3;cursor:not-allowed;}
+.role-toggle.unavailable .role-toggle-label{color:#555;}
+
+/* toggle switch */
+.toggle-switch{position:relative;width:32px;height:16px;border-radius:8px;background:#444;transition:background 0.2s;flex-shrink:0;}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#888;transition:all 0.2s;}
+.role-toggle.on .toggle-switch{background:#810000;}
+.role-toggle.on .toggle-switch::after{left:18px;background:#ff7c7c;}
+
+/* conflict toast */
+.conflict-hint{font-size:10px;color:#ff9532;margin-top:6px;display:none;}
+.conflict-hint.show{display:block;}
+
+/* --- form elements --- */
+.form-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.form-label{font-size:11px;color:#888;min-width:120px;flex-shrink:0;}
+.form-input{font-size:11px;padding:5px 10px;border:1px solid #505050;border-radius:4px;background:#333;color:#dedede;flex:1;min-width:0;}
+.form-input:focus{outline:none;border-color:#810000;}
+.form-select{font-size:11px;padding:5px 10px;border:1px solid #505050;border-radius:4px;background:#333;color:#dedede;flex:1;min-width:0;}
+.form-btn{font-size:11px;padding:4px 10px;border:1px solid #505050;border-radius:4px;background:#505050;color:#dedede;cursor:pointer;white-space:nowrap;}
+.form-btn:hover{background:rgba(255,255,255,0.15);color:#fff;}
+.form-slider-wrap{flex:1;display:flex;align-items:center;gap:8px;}
+.form-slider{flex:1;accent-color:#810000;height:4px;}
+.form-slider-val{font-size:11px;color:#888;min-width:30px;text-align:right;}
+
+/* --- previous owner info --- */
+.prev-owner{font-size:10px;color:#666;font-style:italic;margin-left:4px;}
+
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#212121;}
+::-webkit-scrollbar-thumb{background:#480000;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="us-overlay">
+<div class="us-window">
+<div class="us-header">
+  <h2>&#9881; 生成AI設定</h2>
+  <button class="us-close">&times;</button>
+</div>
+<div class="gpu-split">
+  <!-- LEFT: GPU List with role chips -->
+  <div class="gpu-list">
+    <div class="gpu-list-header">GPU / サービス</div>
+    <div class="gpu-item active">
+      <div class="gpu-item-top"><span class="status-dot online"></span><span class="gpu-item-name">ComfyUI (Local)</span></div>
+      <div class="gpu-item-roles">
+        <span class="role-chip assigned">T2I</span>
+        <span class="role-chip assigned">I2I</span>
+        <span class="role-chip assigned">Inpaint</span>
+        <span class="role-chip assigned">Angle</span>
+      </div>
+    </div>
+    <div class="gpu-item">
+      <div class="gpu-item-top"><span class="status-dot offline"></span><span class="gpu-item-name">RunPod ComfyUI</span></div>
+      <div class="gpu-item-roles">
+        <span class="role-chip available">T2I</span>
+        <span class="role-chip available">I2I</span>
+      </div>
+    </div>
+    <div class="gpu-item">
+      <div class="gpu-item-top"><span class="status-dot error"></span><span class="gpu-item-name">SD WebUI (A1111)</span></div>
+      <div class="gpu-item-roles">
+        <span class="role-chip assigned">CLIP</span>
+        <span class="role-chip assigned">DeepD</span>
+      </div>
+    </div>
+    <div class="gpu-item">
+      <div class="gpu-item-top"><span class="status-dot online"></span><span class="gpu-item-name">Fal.ai</span></div>
+      <div class="gpu-item-roles">
+        <span class="role-chip assigned">Upscale</span>
+        <span class="role-chip assigned">RemBG</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Detail with integrated roles -->
+  <div class="gpu-detail">
+    <!-- Role Assignment (integrated into GPU view) -->
+    <div class="detail-section">
+      <div class="section-title">&#127918; このGPUのロール</div>
+      <div class="role-toggles">
+        <div class="role-toggle on" onclick="this.classList.toggle('on')">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">Text2Image</span>
+        </div>
+        <div class="role-toggle on" onclick="this.classList.toggle('on')">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">Image2Image</span>
+        </div>
+        <div class="role-toggle on" onclick="this.classList.toggle('on')">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">Inpaint</span>
+        </div>
+        <div class="role-toggle" onclick="this.classList.toggle('on')">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">Upscaler</span>
+          <span class="prev-owner">&#8592; Fal.ai</span>
+        </div>
+        <div class="role-toggle" onclick="this.classList.toggle('on')">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">RemoveBG</span>
+          <span class="prev-owner">&#8592; Fal.ai</span>
+        </div>
+        <div class="role-toggle on" onclick="this.classList.toggle('on')">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">Angle</span>
+        </div>
+        <div class="role-toggle unavailable">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">CLIP</span>
+        </div>
+        <div class="role-toggle unavailable">
+          <div class="toggle-switch"></div>
+          <span class="role-toggle-label">DeepDanbooru</span>
+        </div>
+      </div>
+      <div class="conflict-hint show">&#9888; Upscaler を ON にすると、Fal.ai から割り当てが移動します</div>
+    </div>
+
+    <!-- Connection -->
+    <div class="detail-section">
+      <div class="section-title">&#128279; 接続</div>
+      <div class="form-row">
+        <span class="form-label">URL</span>
+        <input type="text" class="form-input" value="http://127.0.0.1:8188">
+        <button class="form-btn">初期値</button>
+        <button class="form-btn">?</button>
+      </div>
+      <div class="form-row">
+        <span class="form-label">ステータス</span>
+        <span style="color:#4caf50;font-size:11px;">&#9679; 接続中 &mdash; ComfyUI v0.2.4</span>
+      </div>
+    </div>
+
+    <!-- LLM Vision -->
+    <div class="detail-section">
+      <div class="section-title">&#128065; LLM Vision</div>
+      <div class="form-row">
+        <span class="form-label">プロバイダ</span>
+        <select class="form-select">
+          <option>OpenAI (GPT-4o)</option>
+          <option>Anthropic (Claude)</option>
+          <option>Google (Gemini)</option>
+          <option>ローカル (LLaVA)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="form-label">API Key</span>
+        <input type="password" class="form-input" placeholder="API Key">
+        <button class="form-btn">表示</button>
+      </div>
+      <div class="form-row">
+        <span class="form-label">モデル</span>
+        <select class="form-select">
+          <option>gpt-4o</option>
+          <option>gpt-4o-mini</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- AI Models -->
+    <div class="detail-section">
+      <div class="section-title">&#129302; AIモデル</div>
+      <div class="form-row">
+        <span class="form-label">Checkpoint</span>
+        <select class="form-select">
+          <option>animagine-xl-3.1.safetensors</option>
+          <option>pony-diffusion-v6.safetensors</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="form-label">VAE</span>
+        <select class="form-select">
+          <option>sdxl_vae.safetensors</option>
+          <option>auto</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="form-label">Sampler</span>
+        <select class="form-select">
+          <option>euler_ancestral</option>
+          <option>dpmpp_2m_sde</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="form-label">Scheduler</span>
+        <select class="form-select">
+          <option>normal</option>
+          <option>karras</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <span class="form-label">ワークフロー設定</span>
+        <button class="form-btn">ワークフローエディタを開く</button>
+      </div>
+    </div>
+
+    <!-- Settings Values -->
+    <div class="detail-section">
+      <div class="section-title">&#9881; 設定値</div>
+      <div class="form-row">
+        <span class="form-label">同時実行数</span>
+        <input type="number" class="form-input" value="1" min="1" max="10" style="flex:0 0 80px;">
+      </div>
+      <div class="form-row">
+        <span class="form-label">CFG Scale</span>
+        <div class="form-slider-wrap">
+          <input type="range" class="form-slider" min="1" max="30" value="7">
+          <span class="form-slider-val">7.0</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <span class="form-label">Steps</span>
+        <div class="form-slider-wrap">
+          <input type="range" class="form-slider" min="1" max="100" value="28">
+          <span class="form-slider-val">28</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <span class="form-label">Denoising</span>
+        <div class="form-slider-wrap">
+          <input type="range" class="form-slider" min="0" max="100" value="60">
+          <span class="form-slider-val">0.60</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</body>
+</html>

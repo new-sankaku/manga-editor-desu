@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>案4: スプレッドシート型（GPU × 設定項目マトリクス）</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#212121;color:#dedede;font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;}
+
+.us-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;}
+.us-window{background:#212121;border:1px solid rgba(255,255,255,0.1);border-radius:8px;width:90vw;height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.6);overflow:hidden;}
+.us-header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid #505050;flex-shrink:0;}
+.us-header h2{font-size:14px;font-weight:bold;color:#ff7c7c;}
+.us-close{background:none;border:none;font-size:18px;color:#888;cursor:pointer;padding:2px 6px;border-radius:4px;}
+
+/* --- matrix area --- */
+.matrix-area{flex:1;overflow:auto;padding:16px;}
+
+/* --- the big table --- */
+.ss-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+
+/* column header (GPU names) */
+.ss-table thead th{position:sticky;top:0;z-index:2;font-size:11px;color:#dedede;font-weight:600;padding:10px 12px;text-align:center;background:#2a2a2a;border:1px solid rgba(255,255,255,0.1);min-width:180px;}
+.ss-table thead th:first-child{text-align:left;min-width:140px;background:#212121;z-index:3;position:sticky;left:0;}
+.ss-table thead th .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;}
+.ss-table thead th .status-dot.online{background:#4caf50;}
+.ss-table thead th .status-dot.offline{background:#666;}
+.ss-table thead th .status-dot.error{background:#f44336;}
+
+/* category group row */
+.ss-group{cursor:pointer;user-select:none;}
+.ss-group td{padding:8px 12px;font-size:11px;font-weight:600;color:#ff7c7c;background:rgba(129,0,0,0.1);border:1px solid rgba(255,255,255,0.06);letter-spacing:0.3px;}
+.ss-group td:first-child{position:sticky;left:0;background:rgba(129,0,0,0.15);z-index:1;}
+.ss-group .arrow{font-size:9px;margin-right:6px;display:inline-block;transition:transform 0.2s;}
+.ss-group.collapsed .arrow{transform:rotate(-90deg);}
+
+/* data row */
+.ss-table tbody td{padding:6px 10px;border:1px solid rgba(255,255,255,0.06);vertical-align:middle;font-size:11px;}
+.ss-table tbody td:first-child{color:#888;background:#262626;position:sticky;left:0;z-index:1;font-size:11px;}
+.ss-table tbody tr:hover td{background:rgba(255,255,255,0.03);}
+.ss-table tbody tr:hover td:first-child{background:#2e2e2e;}
+
+/* cell inputs */
+.cell-input{font-size:11px;padding:4px 6px;border:1px solid #505050;border-radius:3px;background:#333;color:#dedede;width:100%;box-sizing:border-box;}
+.cell-input:focus{border-color:#810000;outline:none;}
+.cell-select{font-size:11px;padding:4px 6px;border:1px solid #505050;border-radius:3px;background:#333;color:#dedede;width:100%;box-sizing:border-box;}
+.cell-na{color:#444;font-size:10px;text-align:center;}
+.cell-radio{text-align:center;}
+.cell-radio input[type="radio"]{accent-color:#810000;}
+.cell-unavailable{background:rgba(0,0,0,0.15) !important;}
+.cell-slider{display:flex;align-items:center;gap:6px;}
+.cell-slider input[type="range"]{flex:1;accent-color:#810000;height:3px;}
+.cell-slider span{font-size:10px;color:#888;min-width:24px;text-align:right;}
+
+/* --- scrollbar --- */
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:#212121;}
+::-webkit-scrollbar-thumb{background:#480000;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="us-overlay">
+<div class="us-window">
+<div class="us-header">
+  <h2>&#9881; 生成AI設定</h2>
+  <button class="us-close">&times;</button>
+</div>
+<div class="matrix-area">
+<table class="ss-table">
+<thead>
+  <tr>
+    <th></th>
+    <th><span class="status-dot online"></span>ComfyUI (Local)</th>
+    <th><span class="status-dot offline"></span>RunPod ComfyUI</th>
+    <th><span class="status-dot error"></span>SD WebUI (A1111)</th>
+    <th><span class="status-dot online"></span>Fal.ai</th>
+  </tr>
+</thead>
+<tbody>
+  <!-- ロール割り当て Group -->
+  <tr class="ss-group" onclick="toggleGroup(this)"><td colspan="5"><span class="arrow">&#9660;</span>ロール割り当て</td></tr>
+  <tr>
+    <td>Text2Image</td>
+    <td class="cell-radio"><input type="radio" name="r_t2i" checked></td>
+    <td class="cell-radio"><input type="radio" name="r_t2i"></td>
+    <td class="cell-radio"><input type="radio" name="r_t2i"></td>
+    <td class="cell-radio"><input type="radio" name="r_t2i"></td>
+  </tr>
+  <tr>
+    <td>Image2Image</td>
+    <td class="cell-radio"><input type="radio" name="r_i2i" checked></td>
+    <td class="cell-radio"><input type="radio" name="r_i2i"></td>
+    <td class="cell-radio"><input type="radio" name="r_i2i"></td>
+    <td class="cell-radio"><input type="radio" name="r_i2i"></td>
+  </tr>
+  <tr>
+    <td>Inpaint</td>
+    <td class="cell-radio"><input type="radio" name="r_inp" checked></td>
+    <td class="cell-radio"><input type="radio" name="r_inp"></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>Upscaler</td>
+    <td class="cell-radio"><input type="radio" name="r_up"></td>
+    <td class="cell-radio"><input type="radio" name="r_up"></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-radio"><input type="radio" name="r_up" checked></td>
+  </tr>
+  <tr>
+    <td>RemoveBG</td>
+    <td class="cell-radio"><input type="radio" name="r_bg"></td>
+    <td class="cell-radio"><input type="radio" name="r_bg"></td>
+    <td class="cell-radio"><input type="radio" name="r_bg"></td>
+    <td class="cell-radio"><input type="radio" name="r_bg" checked></td>
+  </tr>
+  <tr>
+    <td>Angle</td>
+    <td class="cell-radio"><input type="radio" name="r_ang" checked></td>
+    <td class="cell-radio"><input type="radio" name="r_ang"></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>CLIP</td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-radio"><input type="radio" name="r_clip" checked></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>DeepDanbooru</td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-radio"><input type="radio" name="r_dd" checked></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+
+  <!-- 接続 Group -->
+  <tr class="ss-group" onclick="toggleGroup(this)"><td colspan="5"><span class="arrow">&#9660;</span>接続</td></tr>
+  <tr>
+    <td>URL / API Key</td>
+    <td><input type="text" class="cell-input" value="http://127.0.0.1:8188"></td>
+    <td><input type="text" class="cell-input" placeholder="https://{pod-id}-8188.proxy..."></td>
+    <td><input type="text" class="cell-input" value="http://127.0.0.1:7860"></td>
+    <td><input type="password" class="cell-input" placeholder="API Key"></td>
+  </tr>
+  <tr>
+    <td>ステータス</td>
+    <td style="color:#4caf50;font-size:10px;">&#9679; 接続中</td>
+    <td style="color:#666;font-size:10px;">&#9675; 未接続</td>
+    <td style="color:#f44336;font-size:10px;">&#9679; エラー</td>
+    <td style="color:#4caf50;font-size:10px;">&#9679; 接続中</td>
+  </tr>
+  <tr>
+    <td>同時実行数</td>
+    <td><input type="number" class="cell-input" value="1" style="width:60px;"></td>
+    <td><input type="number" class="cell-input" value="1" style="width:60px;"></td>
+    <td><input type="number" class="cell-input" value="1" style="width:60px;"></td>
+    <td><input type="number" class="cell-input" value="1" style="width:60px;"></td>
+  </tr>
+
+  <!-- LLM Vision Group -->
+  <tr class="ss-group" onclick="toggleGroup(this)"><td colspan="5"><span class="arrow">&#9660;</span>LLM Vision</td></tr>
+  <tr>
+    <td>プロバイダ</td>
+    <td><select class="cell-select"><option>OpenAI</option><option>Anthropic</option><option>Google</option></select></td>
+    <td><select class="cell-select"><option>OpenAI</option><option>Anthropic</option></select></td>
+    <td><select class="cell-select"><option>OpenAI</option><option>Anthropic</option></select></td>
+    <td><select class="cell-select"><option>Anthropic</option></select></td>
+  </tr>
+  <tr>
+    <td>モデル</td>
+    <td><select class="cell-select"><option>gpt-4o</option><option>gpt-4o-mini</option></select></td>
+    <td><select class="cell-select"><option>gpt-4o</option></select></td>
+    <td><select class="cell-select"><option>gpt-4o</option></select></td>
+    <td><select class="cell-select"><option>claude-3.5-sonnet</option></select></td>
+  </tr>
+  <tr>
+    <td>API Key</td>
+    <td><input type="password" class="cell-input" placeholder="API Key"></td>
+    <td><input type="password" class="cell-input" placeholder="API Key"></td>
+    <td><input type="password" class="cell-input" placeholder="API Key"></td>
+    <td><input type="password" class="cell-input" placeholder="API Key"></td>
+  </tr>
+
+  <!-- AIモデル Group -->
+  <tr class="ss-group" onclick="toggleGroup(this)"><td colspan="5"><span class="arrow">&#9660;</span>AIモデル</td></tr>
+  <tr>
+    <td>Checkpoint</td>
+    <td><select class="cell-select"><option>animagine-xl-3.1</option></select></td>
+    <td><select class="cell-select"><option>animagine-xl-3.1</option></select></td>
+    <td><select class="cell-select"><option>pony-diffusion-v6</option></select></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>VAE</td>
+    <td><select class="cell-select"><option>sdxl_vae.safetensors</option></select></td>
+    <td><select class="cell-select"><option>sdxl_vae.safetensors</option></select></td>
+    <td><select class="cell-select"><option>auto</option></select></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>Sampler</td>
+    <td><select class="cell-select"><option>euler_ancestral</option></select></td>
+    <td><select class="cell-select"><option>euler_ancestral</option></select></td>
+    <td><select class="cell-select"><option>DPM++ 2M SDE</option></select></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>T2Iモデル (Fal.ai)</td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+    <td><select class="cell-select"><option>fal-ai/flux/schnell</option></select></td>
+  </tr>
+
+  <!-- 設定値 Group -->
+  <tr class="ss-group" onclick="toggleGroup(this)"><td colspan="5"><span class="arrow">&#9660;</span>設定値</td></tr>
+  <tr>
+    <td>Steps</td>
+    <td><div class="cell-slider"><input type="range" min="1" max="100" value="28"><span>28</span></div></td>
+    <td><div class="cell-slider"><input type="range" min="1" max="100" value="28"><span>28</span></div></td>
+    <td><div class="cell-slider"><input type="range" min="1" max="100" value="20"><span>20</span></div></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>CFG Scale</td>
+    <td><div class="cell-slider"><input type="range" min="1" max="30" value="7"><span>7.0</span></div></td>
+    <td><div class="cell-slider"><input type="range" min="1" max="30" value="7"><span>7.0</span></div></td>
+    <td><div class="cell-slider"><input type="range" min="1" max="30" value="7"><span>7.0</span></div></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+  <tr>
+    <td>Denoising</td>
+    <td><div class="cell-slider"><input type="range" min="0" max="100" value="60"><span>0.60</span></div></td>
+    <td><div class="cell-slider"><input type="range" min="0" max="100" value="60"><span>0.60</span></div></td>
+    <td><div class="cell-slider"><input type="range" min="0" max="100" value="50"><span>0.50</span></div></td>
+    <td class="cell-unavailable"><span class="cell-na">&mdash;</span></td>
+  </tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<script>
+function toggleGroup(el){
+  el.classList.toggle('collapsed');
+  var next=el.nextElementSibling;
+  while(next && !next.classList.contains('ss-group')){
+    next.style.display=el.classList.contains('collapsed')?'none':'';
+    next=next.nextElementSibling;
+  }
+}
+</script>
+</body>
+</html>
