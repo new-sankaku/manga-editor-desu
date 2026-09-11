@@ -294,6 +294,7 @@ if(isActive&&(isPanel(layer)||isImage(layer))){
 var actionBar=document.createElement("div");
 actionBar.className="layer-action-bar";
 if(isPanel(layer)){
+putActionButton(actionBar,"draw","actWhiteboard",function(){whiteboardOpen(layer);});
 putActionButton(actionBar,"directions_run","actAiGenerate",function(){
 var spinner=createSpinner(getGUID(layer),'T2I');T2I(layer,spinner);
 },AI_ROLES.Image2Image);
@@ -307,6 +308,7 @@ imageObject2DataURLByCrop(layer).then(function(croppedDataURL){if(croppedDataURL
 putMoreMenuActionButton(actionBar,layer);
 }
 if(isImage(layer)){
+putActionButton(actionBar,"draw","actWhiteboard",function(){whiteboardOpen(layer);});
 putActionButton(actionBar,"directions_run","actAiGenerate",function(){
 var spinner=createSpinner(getGUID(layer),'I2I');I2I(layer,spinner);
 },AI_ROLES.Text2Image);

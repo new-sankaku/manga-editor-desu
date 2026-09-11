@@ -1,5 +1,9 @@
 # 履歴管理と画像データ保存
 
+## ホワイトボードのプレビュー
+
+ホワイトボード結果は受信しただけでは履歴へ確定しない。`changeDoNotSaveHistory()`中に一時配置し、「本採用」で1回だけ`saveStateByManual()`、「破棄」で一時画像を除去する。盤IDと保管庫asset情報はFabricオブジェクトの追加プロパティとして通常保存される。
+
 ## 履歴管理（Undo/Redo）
 実装は`js/layer/image-history-management.js`。
 

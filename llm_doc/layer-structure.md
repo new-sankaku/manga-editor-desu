@@ -1,5 +1,9 @@
 # レイヤー構造
 
+## ホワイトボード往復
+
+`js/layer/whiteboard-integration.js` がpanel/imageのアクションバーから8190を別タブで開く。`wb.apply`は対象ページ・GUIDを照合してから一時画像を置き、本採用時だけ`saveStateByManual()`する。`wbBoardId`、`wbAssetId`、`wbImageUrl`は`commonProperties`に含まれるため、通常のプロジェクト保存・再読込で保持される。破棄では一時画像を削除し、隠していた旧画像を戻す。
+
 ## オブジェクト間のリンク機構
 | リンク方式 | 方向 | 用途 |
 |-----------|------|------|
