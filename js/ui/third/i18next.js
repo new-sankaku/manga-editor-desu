@@ -10,6 +10,16 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20260912090000_001":{
+"ja":{"actWhiteboard":"ホワイトボードで描く","wbPreviewReady":"ホワイトボード結果をプレビュー中","wbApply":"本採用","wbDiscard":"破棄"},
+"en":{"actWhiteboard":"Draw in Whiteboard","wbPreviewReady":"Previewing Whiteboard result","wbApply":"Apply","wbDiscard":"Discard"},
+"ko":{"actWhiteboard":"화이트보드에서 그리기","wbPreviewReady":"화이트보드 결과 미리보기","wbApply":"적용","wbDiscard":"취소"},
+"fr":{"actWhiteboard":"Dessiner dans Whiteboard","wbPreviewReady":"Aperçu du résultat Whiteboard","wbApply":"Appliquer","wbDiscard":"Rejeter"},
+"zh":{"actWhiteboard":"在白板中绘制","wbPreviewReady":"正在预览白板结果","wbApply":"应用","wbDiscard":"放弃"},
+"ru":{"actWhiteboard":"Рисовать в Whiteboard","wbPreviewReady":"Предпросмотр результата Whiteboard","wbApply":"Применить","wbDiscard":"Отменить"},
+"es":{"actWhiteboard":"Dibujar en Whiteboard","wbPreviewReady":"Vista previa del resultado","wbApply":"Aplicar","wbDiscard":"Descartar"},
+"de":{"actWhiteboard":"In Whiteboard zeichnen","wbPreviewReady":"Whiteboard-Ergebnis als Vorschau","wbApply":"Übernehmen","wbDiscard":"Verwerfen"}
+},
 "20260829150000_001":{
 "ja":{
 "missingValue":"ワークフローに、ComfyUI側に無い値を指している項目があります",

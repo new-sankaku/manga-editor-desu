@@ -310,7 +310,10 @@ if(sourceObject&&sourceObject.originalOpacity!==undefined){
 obj.opacity=sourceObject.originalOpacity;
 }
 
-if (obj.type==='image'&&obj.src&&typeof obj.src==='string'&&(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))) {
+if(obj.type==='image'&&obj.wbAssetId&&obj.wbImageUrl){
+imageMap.set(obj.wbAssetId,obj.wbImageUrl);
+obj.src=obj.wbAssetId;
+}else if (obj.type==='image'&&obj.src&&typeof obj.src==='string'&&(obj.src.startsWith('data:')||obj.src.startsWith('blob:'))) {
 const hash=generateHash(obj.src);
 if (!imageMap.has(hash)) {
 imageMap.set(hash,obj.src);
