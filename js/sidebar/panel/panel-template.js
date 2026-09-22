@@ -5,8 +5,13 @@
 // 中身の作り方（コマを置くか空にするか）と原稿サイズの決め方をここに集約する。
 // 原稿サイズ(mm)は resizeCanvasToObject() が比率から決めるため、
 // 呼び出し側で setPageSizeMm() を書かない
-async function loadBookSize(width,height,addPanel,newPage=false) {
+async function loadBookSize(width,height,addPanel,newPage=false,pageOperationLocked=false) {
 const createsNewPage=(addPanel||newPage);
+if(createsNewPage&&!pageOperationLocked){
+return btmRunPageOperation(function(){
+return loadBookSize(width,height,addPanel,newPage,true);
+});
+}
 panelLogger.info("[loadBookSize] START w="+width+" h="+height+" addPanel="+addPanel+" newPage="+newPage+" createsNewPage="+createsNewPage);
 panelLogger.info("[loadBookSize] stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size+" canvasGUID="+getCanvasGUID()+" objectCount="+getObjectCount());
 const loading=OP_showLoading({

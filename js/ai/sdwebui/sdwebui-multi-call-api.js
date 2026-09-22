@@ -150,14 +150,15 @@ method: 'GET',
 headers: {'Accept': 'application/json'}
 })
 .then(function(response){
-if (apiMode==apis.A1111) {
 if (response.ok) {
 if(firstSDConnection){
-getDiffusionInformation();
+var provider=providerRegistry.get('localSDWebUI');
+if(provider){
+provider.fetchDiffusionInformation();
+}
 firstSDConnection=false;
 }
 return true;
-}
 }
 return false;
 })

@@ -152,13 +152,18 @@ obj.set({left: x,top: y});
 }
 setNotSave(obj);
 
+// AI generation can be started from either the panel itself or an image that is
+// already clipped to that panel.  Always resolve the real panel before deciding
+// where the new content belongs.
+var resolvedTargetLayer=targetLayer&&targetLayer.relatedPoly?targetLayer.relatedPoly:targetLayer;
+
 if(notReplace){
 //skip
 }else{
 canvas.add(obj);
 }
 
-var targetFrameIndex=targetLayer?canvas.getObjects().indexOf(targetLayer):findTargetFrame(x,y);
+var targetFrameIndex=resolvedTargetLayer?canvas.getObjects().indexOf(resolvedTargetLayer):findTargetFrame(x,y);
 panelLogger.debug("targetFrameIndex",targetFrameIndex);
 if (targetFrameIndex!==-1) {
 var targetFrame=canvas.item(targetFrameIndex);
@@ -182,6 +187,9 @@ obj.name=targetFrame.name+"-"+obj.name;
 obj.name=targetFrame.name+" In Image";
 }
 setGUID(targetFrame,obj);
+if(!notReplace){
+stackFrameContentBelowOverlays(obj,targetFrame);
+}
 } else {
 if(isFit){
 var scaleToCanvasWidth=300/obj.width;
@@ -210,6 +218,34 @@ return obj;
 }
 
 return obj;
+}
+
+// Fabric adds new objects at the very top of the canvas.  A generated panel
+// image would therefore cover dialogue text and speech bubbles, which are not
+// children of the panel.  Keep all clipped panel content together immediately
+// above its panel, preserving the existing child order and placing the newest
+// result on top of the older panel images but below independent overlays.
+function stackFrameContentBelowOverlays(newObject,targetFrame) {
+if(!isPanel(targetFrame)){
+return;
+}
+
+var objects=canvas.getObjects().slice();
+var insertIndex=objects.indexOf(targetFrame)+1;
+if(insertIndex===0){
+return;
+}
+
+objects
+.filter(function(candidate){
+return candidate!==newObject&&candidate.relatedPoly===targetFrame;
+})
+.forEach(function(candidate){
+candidate.moveTo(insertIndex);
+insertIndex++;
+});
+
+newObject.moveTo(insertIndex);
 }
 
 
@@ -442,6 +478,7 @@ scaleY: scale,
 
 /** Load SVG(Verfical, Landscope) */
 function loadSVGPlusReset(svgString,isLand=false) {
+return new Promise(function(resolve,reject){
 initImageHistory();
 changeDoNotSaveHistory();
 // console.log("svgPagging", svgPagging);
@@ -561,12 +598,24 @@ panelStrokeChange()
 skipForcedAdjust=false;
 canvas.renderAll();
 resizeCanvas(canvas.width,canvas.height);
+}catch(error){
+reject(error);
+return;
 }finally{
 skipForcedAdjust=false;
 changeDoSaveHistory();
 }
+try{
+// saveState()は次のtickへコミットするため、ページ登録より先に明示的に確定する。
+// ここまで待って初めて呼び出し側へ完了を返す。
 saveState();
+flushHistory();
 updateLayerPanel();
+resolve();
+}catch(error){
+reject(error);
+}
+});
 });
 }
 

@@ -230,29 +230,25 @@ img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
 img.addEventListener("click",async function(){
+await btmRunPageOperation(async function(){
 panelLogger.info("[verticalTemplate] stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size+" canvasGUID="+getCanvasGUID()+" objectCount="+getObjectCount());
 const loading=OP_showLoading({
 icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if(btmShouldSaveCurrentPage()){
 panelLogger.info("[verticalTemplate] saving current page to bottom bar");
 OP_updateLoadingState(loading,{
 icon:'process',step:'Step2',substep:'Zip Start',progress:20
 });
-await btmSaveProjectFile().then(()=>{
-panelLogger.info("[verticalTemplate] btmSaveProjectFile done. btmProjectsMap.size="+btmProjectsMap.size);
+await btmSaveCurrentPage(false);
+panelLogger.info("[verticalTemplate] current page saved. btmProjectsMap.size="+btmProjectsMap.size);
 setCanvasGUID();
-loadSVGPlusReset(item.svg);
-});
-}else{
-panelLogger.info("[verticalTemplate] skipping save (empty canvas)");
-setCanvasGUID();
-loadSVGPlusReset(item.svg);
-}
+await loadSVGPlusReset(item.svg);
+await btmRegisterCurrentPage(true);
 }finally{
 OP_hideLoading(loading);
 }
+});
 });
 previewAreaVertical.appendChild(img);
 });
@@ -266,29 +262,25 @@ img.src="data:image/svg+xml;utf8,"+encodeURIComponent(item.svg);
 img.classList.add("svg-preview");
 img.alt=item.name;
 img.addEventListener("click",async function(){
+await btmRunPageOperation(async function(){
 panelLogger.info("[landscapeTemplate] stateStack.length="+stateStack.length+" btmProjectsMap.size="+btmProjectsMap.size+" canvasGUID="+getCanvasGUID()+" objectCount="+getObjectCount());
 const loading=OP_showLoading({
 icon:'process',step:'Step1',substep:'New Page',progress:0
 });
 try{
-if(btmShouldSaveCurrentPage()){
 panelLogger.info("[landscapeTemplate] saving current page to bottom bar");
 OP_updateLoadingState(loading,{
 icon:'process',step:'Step2',substep:'Zip Start',progress:20
 });
-await btmSaveProjectFile().then(()=>{
-panelLogger.info("[landscapeTemplate] btmSaveProjectFile done. btmProjectsMap.size="+btmProjectsMap.size);
+await btmSaveCurrentPage(false);
+panelLogger.info("[landscapeTemplate] current page saved. btmProjectsMap.size="+btmProjectsMap.size);
 setCanvasGUID();
-loadSVGPlusReset(item.svg,true);
-});
-}else{
-panelLogger.info("[landscapeTemplate] skipping save (empty canvas)");
-setCanvasGUID();
-loadSVGPlusReset(item.svg,true);
-}
+await loadSVGPlusReset(item.svg,true);
+await btmRegisterCurrentPage(true);
 }finally{
 OP_hideLoading(loading);
 }
+});
 });
 previewAreaLandscape.appendChild(img);
 });

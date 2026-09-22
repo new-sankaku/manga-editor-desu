@@ -1,5 +1,5 @@
 // Service Worker: Cache management for HTTP/HTTPS deployment
-var CACHE_VERSION='manga-editor-v4';
+var CACHE_VERSION='manga-editor-v4-local1';
 
 // Fingerprinted or rarely-changing assets. Served cache-first: the URL is
 // expected to change (?v=x.y) when the content changes.

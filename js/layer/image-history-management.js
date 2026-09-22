@@ -434,7 +434,11 @@ canvas.renderAll();
 updateLayerPanel();
 btmScheduleThumbnailRefresh();
 resetEventHandlers();
-customSpeechBubbleAllRelocation();
+// The serialized page already contains the final speech-bubble text geometry.
+// Recalculating it on every page restore changes left/top/width slightly due to
+// font metrics and makes dialogue drift after repeated page navigation.
+// Keep the saved geometry authoritative; live edits still call the relocation
+// logic through the speech-bubble editing handlers.
 }catch(e){
 historyLogger.error("Failed to restore state: "+(e instanceof Error?e.name+" "+e.message:e));
 }finally{

@@ -10,11 +10,34 @@ const btmScrollRightBtn=$("btm-scroll-right");
 let btmScrollPosition=0;
 let btmIsDragging=false;
 let btmIgnoreClose=false;
+let btmPageOperationRunning=false;
+let btmPageOperationBlockUntil=0;
 var btmNavLeft=null;
 var btmNavCenter=null;
 var btmNavRight=null;
 var btmHandleLabel=null;
 var btmHandleCount=null;
+
+// ページ保存・切替・追加は同じcanvas/stateStackを共有する。
+// 圧縮中にもう一度押せると、後から終わった処理が別ページのGUIDや一覧を
+// 上書きするため、ページ単位の処理は必ず1本ずつ実行する。
+async function btmRunPageOperation(operation) {
+if(btmPageOperationRunning||Date.now()<btmPageOperationBlockUntil||isProjectBusy())return false;
+btmPageOperationRunning=true;
+try{
+await operation();
+return true;
+}finally{
+btmPageOperationRunning=false;
+// dblclickの2発目は、1発目の圧縮が速いと完了後に届くことがある。
+// 通常のクリック間隔より少し長い間だけ同じ種類のページ操作を受け付けない。
+btmPageOperationBlockUntil=Date.now()+1000;
+}
+}
+
+function btmIsPageOperationBusy(){
+return btmPageOperationRunning||Date.now()<btmPageOperationBlockUntil||isProjectBusy();
+}
 
 function btmToggleDrawer() {
 btmDrawer.classList.toggle("btm-closed");
@@ -127,15 +150,16 @@ document.removeEventListener('visibilitychange',onVisibilityChange);
 }
 
 async function btmNavigatePage(direction) {
-if(isProjectBusy())return;
+return btmRunPageOperation(async function(){
 var currentGuid=getCanvasGUID();
 var currentIndex=btmGetGuidIndex(currentGuid);
 var targetIndex=currentIndex+direction;
 if(targetIndex<0||targetIndex>=btmGetGuidsSize())return;
 var targetGuid=btmGetGuidByIndex(targetIndex);
-await btmSaveCurrentPage();
+await btmSaveCurrentPage(false);
 await chengeCanvasByGuid(targetGuid);
 btmUpdateHandleText();
+});
 }
 
 function btmAddImage(imageLink,blob,guid,openDrawer=true) {
@@ -187,10 +211,11 @@ if(imageLink&&imageLink.href)image.src=imageLink.href;
 image.className="btm-image";
 image.dataset.index=guid;
 image.addEventListener("click",async ()=>{
-if(isProjectBusy())return;
+await btmRunPageOperation(async function(){
 await btmSaveCurrentPage();
 await chengeCanvasByGuid(guid);
 btmUpdateHandleText();
+});
 });
 
 const moveRightBtn=document.createElement("button");
@@ -570,10 +595,11 @@ cancelButton.addEventListener("click",function(){
 document.body.removeChild(dialog);
 });
 submitButton.addEventListener("click",async function(){
-if(isProjectBusy())return;
+await btmRunPageOperation(async function(){
 var selectedSize=document.querySelector('input[name="page-size"]:checked').value;
 document.body.removeChild(dialog);
 var currentIndex=btmGetGuidIndex(guid);
+if(currentIndex<0)return;
 var newGuid=generateGUID();
 var w,h;
 if(selectedSize==="portrait"){w=210;h=297;}
@@ -593,5 +619,6 @@ await btmRegisterCurrentPage(true);
 reorderImages(currentIndex+1,newGuid);
 updateAllPageNumbers();
 btmUpdateHandleText();
+});
 });
 }
