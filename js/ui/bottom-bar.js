@@ -10,11 +10,61 @@ const btmScrollRightBtn=$("btm-scroll-right");
 let btmScrollPosition=0;
 let btmIsDragging=false;
 let btmIgnoreClose=false;
+var btmPageOperationTail=Promise.resolve();
+var btmLastPendingOperation=null;
+var btmDedupeTimer=null;
+var btmDedupeWindowUntil=0;
 var btmNavLeft=null;
 var btmNavCenter=null;
 var btmNavRight=null;
 var btmHandleLabel=null;
 var btmHandleCount=null;
+
+// ページ保存・切替・追加は同じcanvas/stateStackを共有するため、
+// 必ず1本ずつ順に実行する。
+// 押された操作は落としてはいけない（落すと「押しても反応がない」に見える）。
+// 前の処理完了後に続くようチェーンへ積み、dblclickの2発目・誤った連打は
+// まだ実行前の直前操作と350ms以内なら1本に集約する。実行中は取り替えない。
+function btmRunPageOperation(operation) {
+if(isProjectBusy()){
+createToastInfo(getText("pageOperationBusy"));
+return Promise.resolve(false);
+}
+var chain=btmPageOperationTail;
+var run=new Promise(function(resolve){
+chain.then(function(){
+var now=Date.now();
+if(btmLastPendingOperation===operation&&now<btmDedupeWindowUntil){
+btmLastPendingOperation=null;
+resolve(false);
+return;
+}
+var task=(async function(){
+try{
+await operation();
+resolve(true);
+}catch(error){
+uiLogger.error("btmRunPageOperation:",error);
+resolve(false);
+}
+})();
+btmLastPendingOperation=operation;
+if(btmDedupeTimer)clearTimeout(btmDedupeTimer);
+btmDedupeWindowUntil=Date.now()+350;
+btmDedupeTimer=setTimeout(function(){
+btmDedupeTimer=null;
+btmLastPendingOperation=null;
+},350);
+return task;
+});
+});
+btmPageOperationTail=run;
+return run;
+}
+
+function btmIsPageOperationBusy(){
+return isProjectBusy();
+}
 
 function btmToggleDrawer() {
 btmDrawer.classList.toggle("btm-closed");
@@ -127,15 +177,16 @@ document.removeEventListener('visibilitychange',onVisibilityChange);
 }
 
 async function btmNavigatePage(direction) {
-if(isProjectBusy())return;
+return btmRunPageOperation(async function(){
 var currentGuid=getCanvasGUID();
 var currentIndex=btmGetGuidIndex(currentGuid);
 var targetIndex=currentIndex+direction;
 if(targetIndex<0||targetIndex>=btmGetGuidsSize())return;
 var targetGuid=btmGetGuidByIndex(targetIndex);
-await btmSaveCurrentPage();
+await btmSaveCurrentPage(false);
 await chengeCanvasByGuid(targetGuid);
 btmUpdateHandleText();
+});
 }
 
 function btmAddImage(imageLink,blob,guid,openDrawer=true) {
@@ -187,10 +238,11 @@ if(imageLink&&imageLink.href)image.src=imageLink.href;
 image.className="btm-image";
 image.dataset.index=guid;
 image.addEventListener("click",async ()=>{
-if(isProjectBusy())return;
+await btmRunPageOperation(async function(){
 await btmSaveCurrentPage();
 await chengeCanvasByGuid(guid);
 btmUpdateHandleText();
+});
 });
 
 const moveRightBtn=document.createElement("button");
@@ -570,10 +622,11 @@ cancelButton.addEventListener("click",function(){
 document.body.removeChild(dialog);
 });
 submitButton.addEventListener("click",async function(){
-if(isProjectBusy())return;
+await btmRunPageOperation(async function(){
 var selectedSize=document.querySelector('input[name="page-size"]:checked').value;
 document.body.removeChild(dialog);
 var currentIndex=btmGetGuidIndex(guid);
+if(currentIndex<0)return;
 var newGuid=generateGUID();
 var w,h;
 if(selectedSize==="portrait"){w=210;h=297;}
@@ -593,5 +646,6 @@ await btmRegisterCurrentPage(true);
 reorderImages(currentIndex+1,newGuid);
 updateAllPageNumbers();
 btmUpdateHandleText();
+});
 });
 }

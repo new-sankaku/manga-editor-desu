@@ -188,7 +188,7 @@ return provider.executeAngle(layer,spinner.id,anglePrompt);
 
 
 function getDiffusionInformation() {
-var provider=providerRegistry.getActive();
+var provider=providerRegistry.getProviderForRole(AI_ROLES.Text2Image)||providerRegistry.getActive();
 if(provider){
 provider.fetchDiffusionInformation();
 }
@@ -330,17 +330,13 @@ return str.replace(/\s*\[[^\]]+\]\s*$/,'');
 }
 
 $('basePrompt_model').addEventListener('change',function(event){
-if (apiMode==apis.A1111) {
+if(isProviderInUse('localSDWebUI')){
 sendModelToServer();
-}else if(apiMode==apis.COMFYUI){
-//TODO
 }
 });
 
 $('clipDropdownId').addEventListener('change',function(event){
-if (apiMode==apis.A1111) {
+if(isProviderInUse('localSDWebUI')){
 sendClipToServer();
-}else if(apiMode==apis.COMFYUI){
-//TODO
 }
 });
