@@ -10,33 +10,60 @@ const btmScrollRightBtn=$("btm-scroll-right");
 let btmScrollPosition=0;
 let btmIsDragging=false;
 let btmIgnoreClose=false;
-let btmPageOperationRunning=false;
-let btmPageOperationBlockUntil=0;
+var btmPageOperationTail=Promise.resolve();
+var btmLastPendingOperation=null;
+var btmDedupeTimer=null;
+var btmDedupeWindowUntil=0;
 var btmNavLeft=null;
 var btmNavCenter=null;
 var btmNavRight=null;
 var btmHandleLabel=null;
 var btmHandleCount=null;
 
-// ページ保存・切替・追加は同じcanvas/stateStackを共有する。
-// 圧縮中にもう一度押せると、後から終わった処理が別ページのGUIDや一覧を
-// 上書きするため、ページ単位の処理は必ず1本ずつ実行する。
-async function btmRunPageOperation(operation) {
-if(btmPageOperationRunning||Date.now()<btmPageOperationBlockUntil||isProjectBusy())return false;
-btmPageOperationRunning=true;
+// ページ保存・切替・追加は同じcanvas/stateStackを共有するため、
+// 必ず1本ずつ順に実行する。
+// 押された操作は落としてはいけない（落すと「押しても反応がない」に見える）。
+// 前の処理完了後に続くようチェーンへ積み、dblclickの2発目・誤った連打は
+// まだ実行前の直前操作と350ms以内なら1本に集約する。実行中は取り替えない。
+function btmRunPageOperation(operation) {
+if(isProjectBusy()){
+createToastInfo(getText("pageOperationBusy"));
+return Promise.resolve(false);
+}
+var chain=btmPageOperationTail;
+var run=new Promise(function(resolve){
+chain.then(function(){
+var now=Date.now();
+if(btmLastPendingOperation===operation&&now<btmDedupeWindowUntil){
+btmLastPendingOperation=null;
+resolve(false);
+return;
+}
+var task=(async function(){
 try{
 await operation();
-return true;
-}finally{
-btmPageOperationRunning=false;
-// dblclickの2発目は、1発目の圧縮が速いと完了後に届くことがある。
-// 通常のクリック間隔より少し長い間だけ同じ種類のページ操作を受け付けない。
-btmPageOperationBlockUntil=Date.now()+1000;
+resolve(true);
+}catch(error){
+uiLogger.error("btmRunPageOperation:",error);
+resolve(false);
 }
+})();
+btmLastPendingOperation=operation;
+if(btmDedupeTimer)clearTimeout(btmDedupeTimer);
+btmDedupeWindowUntil=Date.now()+350;
+btmDedupeTimer=setTimeout(function(){
+btmDedupeTimer=null;
+btmLastPendingOperation=null;
+},350);
+return task;
+});
+});
+btmPageOperationTail=run;
+return run;
 }
 
 function btmIsPageOperationBusy(){
-return btmPageOperationRunning||Date.now()<btmPageOperationBlockUntil||isProjectBusy();
+return isProjectBusy();
 }
 
 function btmToggleDrawer() {
