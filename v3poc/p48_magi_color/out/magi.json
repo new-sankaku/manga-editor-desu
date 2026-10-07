@@ -1,0 +1,3242 @@
+[
+ {
+  "file": "p15_shots\\out\\color_bg_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    896
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    1,
+    579,
+    1537
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    2,
+    1,
+    578,
+    1537
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    2,
+    578,
+    1537
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1536,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_bg_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1536,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_chara_only_71.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    272,
+    20,
+    575,
+    1180
+   ]
+  ],
+  "characters": [
+   [
+    298,
+    97,
+    549,
+    1155
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_chara_only_72.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    242,
+    -5,
+    563,
+    1201
+   ]
+  ],
+  "characters": [
+   [
+    291,
+    27,
+    550,
+    1191
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_chara_only_73.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    190,
+    -14,
+    576,
+    1186
+   ]
+  ],
+  "characters": [
+   [
+    263,
+    38,
+    532,
+    1181
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_full_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    896
+   ]
+  ],
+  "characters": [
+   [
+    531,
+    330,
+    641,
+    824
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_full_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    1,
+    1151,
+    897
+   ]
+  ],
+  "characters": [
+   [
+    491,
+    437,
+    584,
+    834
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_full_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    896
+   ]
+  ],
+  "characters": [
+   [
+    538,
+    421,
+    648,
+    857
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_long_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    2,
+    0,
+    578,
+    1536
+   ]
+  ],
+  "characters": [
+   [
+    261,
+    1051,
+    372,
+    1525
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_long_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    0,
+    577,
+    1536
+   ]
+  ],
+  "characters": [
+   [
+    236,
+    1109,
+    324,
+    1533
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_long_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    2,
+    1,
+    577,
+    1536
+   ]
+  ],
+  "characters": [
+   [
+    284,
+    1184,
+    368,
+    1533
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_long_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    741,
+    250,
+    811,
+    524
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_long_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    842,
+    289,
+    927,
+    563
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\color_long_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    1014,
+    364,
+    1062,
+    546
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    15,
+    1,
+    1116,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    3,
+    1144,
+    891
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    -2,
+    578,
+    1534
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    0,
+    578,
+    1536
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    204,
+    412,
+    228,
+    488
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    25,
+    9,
+    564,
+    1522
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    418,
+    712,
+    446,
+    836
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1532,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    1,
+    0,
+    1537,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_bg_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    209,
+    370,
+    244,
+    456
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\pen_chara_only_71.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    226,
+    -2,
+    593,
+    1209
+   ]
+  ],
+  "characters": [
+   [
+    295,
+    31,
+    552,
+    1191
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_chara_only_72.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    232,
+    -4,
+    564,
+    1201
+   ]
+  ],
+  "characters": [
+   [
+    264,
+    24,
+    536,
+    1185
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_chara_only_73.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    240,
+    -4,
+    586,
+    1199
+   ]
+  ],
+  "characters": [
+   [
+    268,
+    40,
+    566,
+    1202
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_full_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [
+   [
+    534,
+    385,
+    640,
+    813
+   ]
+  ],
+  "texts": [
+   [
+    325,
+    8,
+    363,
+    214
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\pen_full_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [
+   [
+    955,
+    187,
+    983,
+    253
+   ],
+   [
+    498,
+    436,
+    580,
+    790
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_full_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [
+   [
+    570,
+    398,
+    683,
+    856
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_long_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    -1,
+    578,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    278,
+    1057,
+    370,
+    1495
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_long_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    2,
+    -1,
+    577,
+    1534
+   ]
+  ],
+  "characters": [
+   [
+    257,
+    1050,
+    352,
+    1446
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_long_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    -1,
+    578,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    282,
+    1063,
+    380,
+    1510
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_long_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    852,
+    320,
+    904,
+    521
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_long_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    741,
+    250,
+    820,
+    548
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\pen_long_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -2,
+    1,
+    1534,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    1014,
+    364,
+    1060,
+    508
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    2,
+    -1,
+    1153,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -2,
+    -1,
+    1149,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    -1,
+    578,
+    1535
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    438,
+    831,
+    480,
+    1055
+   ],
+   [
+    358,
+    979,
+    385,
+    1119
+   ],
+   [
+    185,
+    795,
+    211,
+    991
+   ],
+   [
+    201,
+    1154,
+    223,
+    1226
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    3,
+    578,
+    1538
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    20,
+    5,
+    566,
+    1525
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    417,
+    719,
+    448,
+    848
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1536,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1536,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_bg_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    0,
+    1536,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    354,
+    265,
+    567,
+    348
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\retro_chara_only_71.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    265,
+    -1,
+    574,
+    1207
+   ]
+  ],
+  "characters": [
+   [
+    283,
+    36,
+    553,
+    1196
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_chara_only_72.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    199,
+    -1,
+    562,
+    1211
+   ]
+  ],
+  "characters": [
+   [
+    266,
+    19,
+    508,
+    1204
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_chara_only_73.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    207,
+    -7,
+    600,
+    1202
+   ]
+  ],
+  "characters": [
+   [
+    268,
+    35,
+    560,
+    1198
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_full_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [
+   [
+    381,
+    427,
+    404,
+    509
+   ],
+   [
+    757,
+    429,
+    775,
+    483
+   ],
+   [
+    523,
+    332,
+    642,
+    815
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_full_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    0,
+    1151,
+    895
+   ]
+  ],
+  "characters": [
+   [
+    495,
+    415,
+    601,
+    841
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_full_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1150,
+    894
+   ]
+  ],
+  "characters": [
+   [
+    581,
+    158,
+    764,
+    867
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_long_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    0,
+    577,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    272,
+    1062,
+    372,
+    1494
+   ]
+  ],
+  "texts": [
+   [
+    435,
+    722,
+    461,
+    922
+   ],
+   [
+    185,
+    808,
+    212,
+    972
+   ],
+   [
+    37,
+    762,
+    82,
+    880
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\retro_long_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    -1,
+    578,
+    1534
+   ]
+  ],
+  "characters": [
+   [
+    257,
+    1061,
+    361,
+    1458
+   ]
+  ],
+  "texts": [
+   [
+    365,
+    314,
+    390,
+    444
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\retro_long_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    0,
+    578,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    313,
+    1173,
+    381,
+    1503
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_long_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -2,
+    1,
+    1534,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    722,
+    277,
+    795,
+    523
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_long_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1536,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    743,
+    244,
+    823,
+    558
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\retro_long_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -3,
+    1,
+    1533,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    1015,
+    368,
+    1055,
+    494
+   ],
+   [
+    791,
+    262,
+    883,
+    572
+   ],
+   [
+    793,
+    261,
+    886,
+    570
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    3,
+    -1,
+    1154,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -2,
+    0,
+    1148,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    1028,
+    151,
+    1137,
+    320
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    0,
+    578,
+    1536
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    366,
+    258,
+    395,
+    385
+   ],
+   [
+    436,
+    783,
+    474,
+    1008
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    4,
+    -1,
+    577,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    199,
+    1210,
+    232,
+    1270
+   ]
+  ],
+  "texts": [
+   [
+    355,
+    873,
+    383,
+    968
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    20,
+    21,
+    565,
+    585
+   ],
+   [
+    17,
+    599,
+    562,
+    822
+   ],
+   [
+    19,
+    828,
+    564,
+    1136
+   ],
+   [
+    20,
+    1147,
+    565,
+    1504
+   ]
+  ],
+  "characters": [
+   [
+    21,
+    1150,
+    570,
+    1497
+   ],
+   [
+    22,
+    834,
+    567,
+    1123
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1535,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    1,
+    1,
+    1537,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_bg_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_chara_only_71.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    273,
+    42,
+    565,
+    1159
+   ]
+  ],
+  "characters": [
+   [
+    293,
+    100,
+    549,
+    1153
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_chara_only_72.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    202,
+    -5,
+    574,
+    1204
+   ]
+  ],
+  "characters": [
+   [
+    265,
+    26,
+    528,
+    1188
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_chara_only_73.png",
+  "w": 832,
+  "h": 1216,
+  "panels": [
+   [
+    131,
+    -5,
+    623,
+    1208
+   ]
+  ],
+  "characters": [
+   [
+    261,
+    29,
+    552,
+    1194
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_full_std_71.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [
+   [
+    536,
+    387,
+    638,
+    823
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_full_std_72.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [
+   [
+    499,
+    433,
+    578,
+    784
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_full_std_73.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1150,
+    894
+   ]
+  ],
+  "characters": [
+   [
+    561,
+    470,
+    633,
+    829
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_long_tate_71.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    6,
+    0,
+    576,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    276,
+    1060,
+    368,
+    1501
+   ]
+  ],
+  "texts": [
+   [
+    436,
+    823,
+    468,
+    989
+   ],
+   [
+    275,
+    746,
+    324,
+    851
+   ],
+   [
+    185,
+    832,
+    210,
+    993
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\tone_long_tate_72.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    -1,
+    577,
+    1534
+   ]
+  ],
+  "characters": [
+   [
+    292,
+    1270,
+    342,
+    1494
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_long_tate_73.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    -1,
+    578,
+    1535
+   ]
+  ],
+  "characters": [
+   [
+    289,
+    1217,
+    370,
+    1535
+   ]
+  ],
+  "texts": [
+   [
+    419,
+    718,
+    446,
+    835
+   ]
+  ]
+ },
+ {
+  "file": "p15_shots\\out\\tone_long_yoko_71.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    1,
+    1536,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    790,
+    356,
+    846,
+    553
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_long_yoko_72.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    1,
+    1535,
+    577
+   ]
+  ],
+  "characters": [
+   [
+    743,
+    254,
+    819,
+    541
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p15_shots\\out\\tone_long_yoko_73.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    2,
+    1535,
+    578
+   ]
+  ],
+  "characters": [
+   [
+    944,
+    332,
+    1001,
+    539
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_room_81.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    17,
+    2,
+    573,
+    362
+   ],
+   [
+    18,
+    376,
+    573,
+    741
+   ],
+   [
+    17,
+    749,
+    572,
+    1111
+   ],
+   [
+    18,
+    1107,
+    573,
+    1524
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_room_82.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    370,
+    4,
+    568,
+    192
+   ],
+   [
+    24,
+    5,
+    354,
+    188
+   ],
+   [
+    367,
+    200,
+    569,
+    415
+   ],
+   [
+    21,
+    193,
+    353,
+    584
+   ],
+   [
+    365,
+    584,
+    568,
+    819
+   ],
+   [
+    373,
+    592,
+    572,
+    1038
+   ],
+   [
+    365,
+    1033,
+    573,
+    1345
+   ],
+   [
+    367,
+    1321,
+    573,
+    1534
+   ],
+   [
+    17,
+    585,
+    354,
+    816
+   ],
+   [
+    16,
+    812,
+    353,
+    1018
+   ],
+   [
+    20,
+    1023,
+    352,
+    1167
+   ],
+   [
+    20,
+    1337,
+    358,
+    1536
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_room_83.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    2,
+    2,
+    577,
+    1538
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_rural_81.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    16,
+    1,
+    571,
+    583
+   ],
+   [
+    18,
+    582,
+    570,
+    1521
+   ]
+  ],
+  "characters": [
+   [
+    16,
+    967,
+    566,
+    1510
+   ],
+   [
+    18,
+    14,
+    568,
+    571
+   ]
+  ],
+  "texts": [
+   [
+    155,
+    1059,
+    194,
+    1149
+   ]
+  ]
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_rural_82.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    2,
+    2,
+    576,
+    1537
+   ]
+  ],
+  "characters": [
+   [
+    20,
+    1085,
+    573,
+    1534
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_rural_83.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    2,
+    578,
+    1537
+   ]
+  ],
+  "characters": [
+   [
+    21,
+    960,
+    446,
+    1535
+   ]
+  ],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_street_81.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    18,
+    1,
+    571,
+    588
+   ],
+   [
+    19,
+    591,
+    572,
+    1044
+   ],
+   [
+    19,
+    1045,
+    571,
+    1523
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_street_82.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    5,
+    0,
+    579,
+    1536
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_tate_none_street_83.png",
+  "w": 576,
+  "h": 1536,
+  "panels": [
+   [
+    3,
+    1,
+    578,
+    1537
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_room_81.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    1,
+    0,
+    1536,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_room_82.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    0,
+    1536,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_room_83.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    0,
+    1535,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_rural_81.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    -1,
+    1535,
+    575
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_rural_82.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    0,
+    1535,
+    575
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_rural_83.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    1,
+    -1,
+    1537,
+    575
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_street_81.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    0,
+    0,
+    1536,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_street_82.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    -1,
+    0,
+    1535,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p16_general\\out\\bg_yoko_none_street_83.png",
+  "w": 1536,
+  "h": 576,
+  "panels": [
+   [
+    1,
+    0,
+    1537,
+    576
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_depth_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -2,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_depth_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_depth_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_depth_ref_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_depth_ref_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1150,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_depth_ref_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_line_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_line_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_line_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_text_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -2,
+    1152,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_text_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_back_text_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -4,
+    1153,
+    892
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_depth_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_depth_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_depth_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    0,
+    1151,
+    896
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_line_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_line_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_line_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_text_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -2,
+    1152,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_text_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_front_text_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -4,
+    1153,
+    892
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_depth_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_depth_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_depth_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_depth_ref_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -3,
+    1152,
+    405
+   ],
+   [
+    3,
+    1,
+    1155,
+    896
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_depth_ref_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    2,
+    319,
+    1154,
+    903
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_depth_ref_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_line_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_line_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_line_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_text_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -2,
+    1152,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_text_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\room_side_text_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -4,
+    1153,
+    892
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_depth_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_depth_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_depth_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_depth_ref_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_depth_ref_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1150,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_depth_ref_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_line_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    3,
+    -1,
+    1152,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_line_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    896
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_line_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_text_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    835,
+    411,
+    975,
+    496
+   ]
+  ]
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_text_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_back_text_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_depth_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1150,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_depth_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_depth_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    0,
+    1153,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_line_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_line_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_line_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_text_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    835,
+    411,
+    975,
+    496
+   ]
+  ]
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_text_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_front_text_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_depth_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_depth_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -1,
+    1153,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_depth_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_depth_ref_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    0,
+    1151,
+    896
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_depth_ref_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_depth_ref_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_line_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    -1,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_line_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -1,
+    1153,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_line_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    1,
+    -1,
+    1152,
+    894
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    312,
+    64,
+    342,
+    160
+   ]
+  ]
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_text_91.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": [
+   [
+    835,
+    411,
+    975,
+    496
+   ]
+  ]
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_text_92.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    -1,
+    -1,
+    1151,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ },
+ {
+  "file": "p18_bg_consistency\\out\\street_side_text_93.png",
+  "w": 1152,
+  "h": 896,
+  "panels": [
+   [
+    0,
+    0,
+    1152,
+    895
+   ]
+  ],
+  "characters": [],
+  "texts": []
+ }
+]

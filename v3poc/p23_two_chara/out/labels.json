@@ -1,0 +1,254 @@
+{
+ "color_one_71.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "髪の長さと上着が入れ替わる"
+ },
+ "color_one_72.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": true,
+  "page": false,
+  "note": "左端に見切れた3人目。赤と青の位置が逆"
+ },
+ "color_one_73.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": true,
+  "page": false,
+  "note": "2人とも黒い上着"
+ },
+ "color_one_74.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "目の色が入れ替わる。2人とも黒い上着"
+ },
+ "color_one_75.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": true,
+  "page": false,
+  "note": "2人とも黒い上着"
+ },
+ "color_one_76.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": true,
+  "page": false,
+  "note": "2人とも黒い上着"
+ },
+ "color_area_71.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "color_area_72.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "color_area_73.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "color_area_74.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "color_area_75.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": "2人の大きさが揃わない"
+ },
+ "color_area_76.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "ab_one_71.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "女性に眼帯と緑の上着、男性に黒いパーカー"
+ },
+ "ab_one_72.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": "後ろに別の人物"
+ },
+ "ab_one_73.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "女性の目に眼帯、緑の上着"
+ },
+ "ab_one_74.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "ab_one_75.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "女性に眼帯。男性が三つ編みの女性になる"
+ },
+ "ab_one_76.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "服が入れ替わる"
+ },
+ "ab_area_71.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページになり、男性が別人（眼帯なしの黒髪）"
+ },
+ "ab_area_72.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページになる"
+ },
+ "ab_area_73.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページになり、男性の代わりに長い髪の女性"
+ },
+ "ab_area_74.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "ab_area_75.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": "男性に眼鏡"
+ },
+ "ab_area_76.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": "フキダシあり"
+ },
+ "sim_one_71.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "ポニーテールが眼鏡なしの方へ"
+ },
+ "sim_one_72.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "2人とも眼鏡"
+ },
+ "sim_one_73.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "眼鏡とポニーテールが別の人に分かれる"
+ },
+ "sim_one_74.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "2人とも眼鏡"
+ },
+ "sim_one_75.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": ""
+ },
+ "sim_one_76.png": {
+  "people": 2,
+  "mixed": true,
+  "swap": false,
+  "page": false,
+  "note": "眼鏡とポニーテールが別の人に分かれる"
+ },
+ "sim_area_71.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページ"
+ },
+ "sim_area_72.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページ"
+ },
+ "sim_area_73.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページ"
+ },
+ "sim_area_74.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": "フキダシあり"
+ },
+ "sim_area_75.png": {
+  "people": 3,
+  "mixed": false,
+  "swap": false,
+  "page": true,
+  "note": "コマ割りのページ"
+ },
+ "sim_area_76.png": {
+  "people": 2,
+  "mixed": false,
+  "swap": false,
+  "page": false,
+  "note": "フキダシあり"
+ }
+}

@@ -1,0 +1,857 @@
+{
+ "plot": "school",
+ "run": 2,
+ "model": "sonnet",
+ "sec": 100.3,
+ "cost_usd": 0.18049679999999999,
+ "name": {
+  "pages": [
+   {
+    "page": 1,
+    "spread": false,
+    "rows": [
+     [
+      1
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      4
+     ]
+    ],
+    "panels": [
+     {
+      "n": 1,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "見下ろし",
+      "people": [
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "左"
+       },
+       {
+        "name": "担任",
+        "face": "小",
+        "facing": "正面"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "朝の教室を斜め上から見た全体図。窓際の席で高木が頬杖をつき、その隣の席だけが空いている。教壇には担任。",
+      "balloons": [
+       {
+        "speaker": "担任",
+        "kind": "台詞",
+        "text": "はいー、席についてくださいねー。今日は転校生がいますよー"
+       }
+      ],
+      "sfx": [
+       "ガヤガヤ"
+      ]
+     },
+     {
+      "n": 2,
+      "size": "小",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "高木",
+        "face": "中",
+        "facing": "左"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "高木が頬杖をついたまま、隣の空席を横目で見る。興味はなさそうな顔。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "心の声",
+        "text": "…隣、ずっと空いてたな"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 3,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "教室の引き戸に細い手がかかり、開こうとしている。",
+      "balloons": [
+       {
+        "speaker": "担任",
+        "kind": "台詞",
+        "text": "はいー、入っていいですよー"
+       }
+      ],
+      "sfx": [
+       "ガラッ"
+      ]
+     },
+     {
+      "n": 4,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "膝上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "中",
+        "facing": "正面"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "起",
+      "hook": true,
+      "content": "戸口に立つ水瀬。教室を見渡し、窓際の高木を見つけて一瞬はっとし、うれしそうに目を細める。周りに光の効果線。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "心の声",
+        "text": "…いた"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 2,
+    "spread": false,
+    "rows": [
+     [
+      5
+     ],
+     [
+      6,
+      7
+     ],
+     [
+      8,
+      9
+     ]
+    ],
+    "panels": [
+     {
+      "n": 5,
+      "size": "中",
+      "shape": "四角",
+      "shot": "全身",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "小",
+        "facing": "正面"
+       },
+       {
+        "name": "担任",
+        "face": "小",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "黒板の前で水瀬が丁寧にお辞儀をして自己紹介。横で担任がのんびり席を指さす。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "水瀬です。よろしくお願いします"
+       },
+       {
+        "speaker": "担任",
+        "kind": "台詞",
+        "text": "じゃあ席はー、高木くんの隣ねー"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 6,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "高木",
+        "face": "大",
+        "facing": "正面"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "名前を呼ばれて高木が少し目を見開く。すぐに目をそらして平静を装う。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "…別に、いいけど"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 7,
+      "size": "中",
+      "shape": "四角",
+      "shot": "膝上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "中",
+        "facing": "左"
+       },
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "水瀬が通路を歩いて高木の席の横に来て、笑顔で会釈する。手前に高木の肩がわずかに見える。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "よろしくお願いしますね"
+       }
+      ],
+      "sfx": [
+       "コツ、コツ"
+      ]
+     },
+     {
+      "n": 8,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "見下ろし",
+      "people": [],
+      "background": "なし",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "水瀬の机の上。筆箱とノートだけで、教科書がない。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "心の声",
+        "text": "あっ、教科書…"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 9,
+      "size": "中",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "中",
+        "facing": "左"
+       },
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "水瀬が照れ笑いで両手を合わせて頼む。高木は面倒そうに視線だけ向ける。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "すみません、教科書を忘れてしまって。見せてもらってもいいですよね？"
+       },
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "…別に"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 3,
+    "spread": false,
+    "rows": [
+     [
+      10
+     ],
+     [
+      11,
+      12
+     ],
+     [
+      13
+     ]
+    ],
+    "panels": [
+     {
+      "n": 10,
+      "size": "小",
+      "shape": "四角",
+      "shot": "遠景",
+      "angle": "目の高さ",
+      "people": [],
+      "background": "描き込む",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "校舎の外観。時間が進んで一時間目の授業が始まる。",
+      "balloons": [],
+      "sfx": [
+       "キーンコーンカーンコーン"
+      ]
+     },
+     {
+      "n": 11,
+      "size": "中",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "見下ろし",
+      "people": [],
+      "background": "簡略",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "高木の手が自分の机を水瀬の机に寄せる。二つの机がくっつく。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "…ほら、見ろよ"
+       }
+      ],
+      "sfx": [
+       "ガタッ"
+      ]
+     },
+     {
+      "n": 12,
+      "size": "中",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "真横",
+      "people": [
+       {
+        "name": "高木",
+        "face": "中",
+        "facing": "左"
+       },
+       {
+        "name": "水瀬",
+        "face": "中",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "横から見た二人。水瀬が笑顔で礼を言い、高木はそっぽを向く。間に一冊の教科書。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "ありがとうございます！助かります"
+       },
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "別に"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 13,
+      "size": "大",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "大",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 2,
+      "role": "承",
+      "hook": true,
+      "content": "水瀬が教科書の表紙の「高木」という名前を見つめ、やわらかく、なつかしそうに微笑む。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "心の声",
+        "text": "…やっぱり、高木くんだ"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 4,
+    "spread": false,
+    "rows": [
+     [
+      14
+     ],
+     [
+      15,
+      16
+     ],
+     [
+      17,
+      18
+     ]
+    ],
+    "panels": [
+     {
+      "n": 14,
+      "size": "中",
+      "shape": "四角",
+      "shot": "膝上",
+      "angle": "見上げ",
+      "people": [
+       {
+        "name": "担任",
+        "face": "中",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "黒板の前で担任がチョークを持ち、のんびり指名する。",
+      "balloons": [
+       {
+        "speaker": "担任",
+        "kind": "台詞",
+        "text": "じゃあ次の問題ー、高木くん、どうぞー"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 15,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "高木",
+        "face": "大",
+        "facing": "正面"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "高木が焦った顔。ぼんやりしていて問題を聞いていなかった。汗が一粒。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "心の声",
+        "text": "…聞いてなかった"
+       }
+      ],
+      "sfx": [
+       "ギクッ"
+      ]
+     },
+     {
+      "n": 16,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "見下ろし",
+      "people": [],
+      "background": "簡略",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "二人の間の教科書。水瀬が答えの箇所を指さしつつ、小さな折りたたんだ紙片をさりげなくページの間にすべり込ませる。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "（三番、ですよね）"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 17,
+      "size": "中",
+      "shape": "四角",
+      "shot": "膝上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "高木",
+        "face": "中",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "高木が立ち上がり、ぶっきらぼうに答える。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "…三番、だろ"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 18,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "担任",
+        "face": "小",
+        "facing": "右"
+       },
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "右"
+       },
+       {
+        "name": "水瀬",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 2,
+      "role": "承",
+      "hook": false,
+      "content": "教室全体。担任が満足げにうなずき、水瀬がくすっと笑い、高木は照れて目をそらす。",
+      "balloons": [
+       {
+        "speaker": "担任",
+        "kind": "台詞",
+        "text": "正解ー。息ぴったりだなー"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 5,
+    "spread": false,
+    "rows": [
+     [
+      19
+     ],
+     [
+      20,
+      21
+     ],
+     [
+      22
+     ]
+    ],
+    "panels": [
+     {
+      "n": 19,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "見下ろし",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "小",
+        "facing": "左"
+       },
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "右"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 3,
+      "role": "転",
+      "hook": false,
+      "content": "夕日の差す放課後の教室。鞄を持った水瀬が戸口で手を振り、高木は席で片づけをしている。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "今日はありがとうございました。また明日！"
+       },
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "…おう"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 20,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [],
+      "background": "簡略",
+      "scene": 3,
+      "role": "転",
+      "hook": false,
+      "content": "高木が教科書を鞄に入れようとすると、ページの間から折りたたんだ紙がすべり落ちる。",
+      "balloons": [],
+      "sfx": [
+       "ひらり"
+      ]
+     },
+     {
+      "n": 21,
+      "size": "中",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "真上",
+      "people": [],
+      "background": "なし",
+      "scene": 3,
+      "role": "転",
+      "hook": false,
+      "content": "床に落ちた小さな紙片を高木の手が拾い上げ、開こうとする。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "心の声",
+        "text": "…なんだこれ"
+       }
+      ],
+      "sfx": [
+       "カサ"
+      ]
+     },
+     {
+      "n": 22,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [],
+      "background": "効果線やトーンだけ",
+      "scene": 3,
+      "role": "転",
+      "hook": true,
+      "content": "開いたメモの大写し。丸い字で書かれた文面を、高木の指がおさえている。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "ナレーション",
+        "text": "高木くんへ。むかし、ひまわり公園でいっしょに遊んだの、おぼえてますか？　水瀬"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 6,
+    "spread": false,
+    "rows": [
+     [
+      23
+     ],
+     [
+      24,
+      25
+     ],
+     [
+      26
+     ]
+    ],
+    "panels": [
+     {
+      "n": 23,
+      "size": "大",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "高木",
+        "face": "大",
+        "facing": "正面"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 3,
+      "role": "転",
+      "hook": false,
+      "content": "高木が目を見開いて固まる。集中線が入る。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "心の声",
+        "text": "ひまわり公園…あの、泣いてた子か"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 24,
+      "size": "小",
+      "shape": "枠なし",
+      "shot": "引き",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "幼い高木",
+        "face": "小",
+        "facing": "右"
+       },
+       {
+        "name": "幼い水瀬",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 4,
+      "role": "転",
+      "hook": false,
+      "content": "回想。ひまわりが咲く公園で、泣く幼い水瀬に、幼い高木がぶっきらぼうに手を差し出す。",
+      "balloons": [
+       {
+        "speaker": "幼い高木",
+        "kind": "台詞",
+        "text": "べつに。泣くなよ"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 25,
+      "size": "中",
+      "shape": "斜め",
+      "shot": "全身",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 3,
+      "role": "結",
+      "hook": false,
+      "content": "高木が鞄をつかんで廊下を全力で走る。流線が入る。",
+      "balloons": [
+       {
+        "speaker": "高木",
+        "kind": "叫び",
+        "text": "水瀬！"
+       }
+      ],
+      "sfx": [
+       "ダダダッ"
+      ]
+     },
+     {
+      "n": 26,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "引き",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "水瀬",
+        "face": "中",
+        "facing": "右"
+       },
+       {
+        "name": "高木",
+        "face": "小",
+        "facing": "後ろ"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 3,
+      "role": "結",
+      "hook": false,
+      "content": "夕日の校門前。息を切らした高木の背中と、振り返って笑う水瀬。二人の影が長くのびる。",
+      "balloons": [
+       {
+        "speaker": "水瀬",
+        "kind": "台詞",
+        "text": "思い出してくれたんですよね"
+       },
+       {
+        "speaker": "高木",
+        "kind": "台詞",
+        "text": "…別に。たまたまだろ"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   }
+  ]
+ },
+ "raw": null
+}

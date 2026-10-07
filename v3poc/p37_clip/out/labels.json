@@ -1,0 +1,202 @@
+{
+ "full_body_1001.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1002.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1003.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1004.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1005.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1006.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1007.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "full_body_1008.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+ },
+ "from_side_1001.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1002.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1003.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1004.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1005.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1006.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1007.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_side_1008.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1001.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1002.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1003.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1004.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1005.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": "脚は机に隠れている（画面の端では切れていない）"
+ },
+ "from_behind_1006.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1007.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "from_behind_1008.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": ""
+ },
+ "two_people_1001.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1002.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1003.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1004.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1005.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1006.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1007.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "two_people_1008.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+ },
+ "very_wide_1001.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ },
+ "very_wide_1002.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ },
+ "very_wide_1003.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ },
+ "very_wide_1004.png": {
+  "cut_bottom": true,
+  "cut_top": false,
+  "note": "奥に1人、手前に座った1人。手前の人が下の端で切れている"
+ },
+ "very_wide_1005.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ },
+ "very_wide_1006.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ },
+ "very_wide_1007.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ },
+ "very_wide_1008.png": {
+  "cut_bottom": false,
+  "cut_top": false,
+  "note": ""
+ }
+}

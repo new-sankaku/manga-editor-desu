@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -14 166 242" width="166" height="242" font-family="sans-serif">
+<text x="0" y="-5" font-size="7">s1_talk_A_7</text>
+<rect x="0" y="0" width="150.0" height="220.0" fill="none" stroke="#bbb" stroke-dasharray="2 2"/>
+<rect x="90.0" y="0.0" width="60.0" height="55.0" fill="#fff" fill-opacity=".7" stroke="#222" stroke-width="1"/>
+<text x="120.0" y="31.5" font-size="11" text-anchor="middle">1</text>
+<rect x="0.0" y="0.0" width="88.0" height="55.0" fill="#fff" fill-opacity=".7" stroke="#222" stroke-width="1"/>
+<text x="44.0" y="31.5" font-size="11" text-anchor="middle">2</text>
+<rect x="76.0" y="60.0" width="74.0" height="40.0" fill="#fff" fill-opacity=".7" stroke="#222" stroke-width="1"/>
+<text x="113.0" y="84.0" font-size="11" text-anchor="middle">3</text>
+<rect x="0.0" y="60.0" width="74.0" height="40.0" fill="#fff" fill-opacity=".7" stroke="#222" stroke-width="1"/>
+<text x="37.0" y="84.0" font-size="11" text-anchor="middle">4</text>
+<rect x="0.0" y="105.0" width="150.0" height="72.0" fill="#fff" fill-opacity=".7" stroke="#222" stroke-width="1"/>
+<text x="75.0" y="145.0" font-size="11" text-anchor="middle">5</text>
+<rect x="0.0" y="182.0" width="150.0" height="38.0" fill="#fff" fill-opacity=".7" stroke="#222" stroke-width="1"/>
+<text x="75.0" y="205.0" font-size="11" text-anchor="middle">6</text>
+</svg>

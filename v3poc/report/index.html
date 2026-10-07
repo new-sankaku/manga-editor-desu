@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V3検証の結果</title>
+<style>
+:root{--bg:#eceef0;--surface:#fff;--surface-2:#f5f6f7;--line:#d9dce0;--ink:#1d2126;--ink-2:#4a525c;--ink-3:#79828d;--acc:#2f5f8f;--warn:#a4452c;--ok:#2e6b45;--font:"Yu Gothic UI","Meiryo",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.7 var(--font)}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}
+h1{font-size:16px;margin:0}
+nav{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px}
+nav a{color:var(--acc);text-decoration:none}
+main{max-width:1100px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;scroll-margin-top:70px}
+h2{font-size:15px;margin:0 0 4px;text-wrap:balance}
+.rows{font-size:12px;color:var(--ink-3);margin:0 0 8px}
+.rows code{font-size:12px}
+ul{margin:4px 0 8px;padding-left:1.3em}
+li{margin:2px 0}
+.bad{color:var(--warn);font-weight:600}
+.good{color:var(--ok);font-weight:600}
+.tw{overflow-x:auto;margin:6px 0 10px}
+table{border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:3px 8px;text-align:left;vertical-align:top}
+th{background:var(--surface-2);font-weight:600;color:var(--ink-2)}
+.figs{display:flex;flex-wrap:wrap;gap:10px}
+figure{margin:0;flex:1 1 300px;min-width:0}
+figure img{display:block;max-width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface-2)}
+figure.sm{flex:0 1 160px}
+figcaption{font-size:12px;color:var(--ink-3);margin-top:2px}
+.cond{margin:6px 0 10px;font-size:13px}
+.cond summary{cursor:pointer;color:var(--acc);font-weight:600}
+.cond th{white-space:nowrap}
+.cond td code{word-break:break-word}
+.note{background:var(--surface-2);border-left:3px solid var(--ink-3);padding:6px 10px;font-size:13px;color:var(--ink-2)}
+</style>
+</head>
+<body>
+<header>
+  <h1>V3検証の結果</h1>
+  <nav>
+    <a href="#p02">指示</a><a href="#p03">同じ結果</a><a href="#p04">大きさ</a><a href="#p05">人の範囲</a><a href="#p07">色</a><a href="#p08">ラフ</a><a href="#p09">顔を揃える</a><a href="#p10">ページ1枚</a><a href="#p12">コマ割り</a><a href="#p11">読む順・角度</a><a href="#p06">MagiV2</a><a href="#p14">余白とコマの形</a><a href="#p15">絵柄と狙い</a><a href="#p16">中身を変える</a><a href="#p17">顔を揃える（やり直し）</a><a href="#p18">背景を揃える</a><a href="#p19">表情</a><a href="#p20">層に分ける</a><a href="#p21">手</a><a href="#p22">フキダシ</a><a href="#p23">2人</a><a href="#p24">デフォルメ</a><a href="#p25">画風と光</a><a href="#p26">編集</a><a href="#p27">ネーム</a><a href="#p28">矛盾</a><a href="#p29">原稿の指示</a><a href="#p30">作り直し</a><a href="#p31">吹き出しと順</a><a href="#p32">評価役のぶれ</a><a href="#p33">候補選び</a><a href="#p34">左から読む</a><a href="#p35">判定器</a><a href="#p36">PSD</a><a href="#p37">見切れ</a><a href="#p38">白い縁</a><a href="#p39">描き文字</a><a href="#p40">単調さ</a><a href="#p41">CSD</a><a href="#p42">全身</a><a href="#p43">別人の判定</a><a href="#p44">距離</a><a href="#p45">斜めのコマ</a><a href="#p46">伏線</a><a href="#p47">顔を隠す</a><a href="#p48">カラーと0人</a><a href="#src">出典</a><a href="#p13">仕組み</a><a href="#rest">未実施</a>
+    <a href="../recipes/index.html">作り方の一覧</a>
+    <a href="../checklist/checklist.html">検証の一覧</a>
+  </nav>
+</header>
+<main>
+
+<div class="note">2026-09-30、このPCのComfyUIとモデル1つ（waiIllustriousSDXL v1.6、SDXL系）で試した。絵の「指示どおりか」の判定はClaude（Opus）が一覧画像を見て付けたもので、漫画を描く人の判定ではない。試した枚数は少なく、率は目安。<b>画像生成の多くは人物1種・場所1種のプロンプトだけで試したので、「このプロンプトではこうなった」までしか言えない。</b>文章の全文は <code>llm_doc/V3検証の結果.md</code>。</div>
+
+<section id="p02">
+  <h2>指示どおりに描かれるか</h2>
+  <p class="rows">一覧 1-1・1-2・1-4・1-5・1-7・1-19・1-22・3-11 ／ <code>v3poc/p02_instruction/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, short black bob hair, glasses, school blazer, red necktie, pleated skirt, classroom</code> ＋（1人のときは <code>solo, </code>）＋ 下の指示の言葉</td></tr><tr><th>後ろ姿</th><td><code>from behind, facing away</code></td></tr><tr><th>見下ろし</th><td><code>from above, high angle</code></td></tr><tr><th>見上げ</th><td><code>from below, low angle</code></td></tr><tr><th>横顔</th><td><code>from side, profile</code></td></tr><tr><th>全身</th><td><code>full body, standing, shoes</code></td></tr><tr><th>寄り（顔）</th><td><code>close-up, face focus, portrait</code></td></tr><tr><th>引き</th><td><code>very wide shot, small figure in distance, scenery</code></td></tr><tr><th>上半身</th><td><code>upper body</code></td></tr><tr><th>2人</th><td><code>2girls, standing side by side, talking</code></td></tr><tr><th>3人</th><td><code>3girls, group, standing</code></td></tr><tr><th>カメラ目線</th><td><code>looking at viewer, upper body</code></td></tr><tr><th>書く手</th><td><code>upper body, holding pencil, writing in notebook, hands visible</code></td></tr><tr><th>seed</th><td><code>1001〜1008</code>（指示ごとに8枚）</td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>指示</th><th>指示どおり</th><th>外れ方</th></tr>
+    <tr><td>後ろ姿・見下ろし・全身・引き・上半身・カメラ目線</td><td class="good">各 8/8</td><td>人物は真ん中に立つ構図に寄る</td></tr>
+    <tr><td>見上げ</td><td>8/8</td><td>スカートを強調する構図に寄る</td></tr>
+    <tr><td>横顔</td><td>6/8</td><td>斜め前向きになる</td></tr>
+    <tr><td>寄り（顔）</td><td class="bad">5/8</td><td>顔が枠で切れる、胸から上になる</td></tr>
+    <tr><td>2人／3人</td><td>7/8／6/8</td><td>人数が増える。全員が同じ髪型・眼鏡・制服に寄る</td></tr>
+    <tr><td>書く手の動作</td><td>7/8</td><td>手が見えない</td></tr>
+    <tr><td>話している（2人）</td><td class="bad">8/8に読めない文字のフキダシ</td><td>ほかの指示でも96枚中6枚に文字</td></tr>
+  </table></div>
+  <ul>
+    <li>白黒の指定でも、赤いネクタイの赤が残る。</li>
+    <li>人数は人物の検出器で16/16当たる。顔の大きさで距離を決める閾値は、私が置いた値では合わなかった（全身 2/8）。</li>
+  </ul>
+  <div class="figs">
+    <figure><a href="../p02_instruction/out/sheet_1.png"><img src="../p02_instruction/out/sheet_1.png" alt="向きと角度の指示の一覧" loading="lazy"></a><figcaption>向きと角度</figcaption></figure>
+    <figure><a href="../p02_instruction/out/sheet_2.png"><img src="../p02_instruction/out/sheet_2.png" alt="距離の指示の一覧" loading="lazy"></a><figcaption>距離</figcaption></figure>
+    <figure><a href="../p02_instruction/out/sheet_3.png"><img src="../p02_instruction/out/sheet_3.png" alt="人数と動作の指示の一覧" loading="lazy"></a><figcaption>人数・動作・視線</figcaption></figure>
+  </div>
+</section>
+
+<section id="p03">
+  <h2>同じ条件で同じ結果が出るか</h2>
+  <p class="rows">一覧 1-28 ／ <code>v3poc/p03_determinism/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short black bob hair, glasses, school blazer, red necktie, upper body, classroom</code></td></tr><tr><th>seed</th><td><code>4242</code>（3回とも同じ）。3回目の前に別の依頼（<code>, from side</code> を足して seed 7）を挟んだ</td></tr><tr><th>描き方</th><td><code>euler_ancestral</code>、<code>dpmpp_2m</code></td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <p>同じ依頼を3回（3回目の前に別の依頼を挟む）、2種の描き方で。<span class="good">画素の差はどれも0。</span>商用のサービスは未検証。</p>
+  <p class="bad">これは「記録から同じ絵を作り直せるか」の確認で、プロンプトが使えるかの確認ではない。seed が変われば絵は変わり、1つの seed でうまくいったのは偶然のことがある。プロンプトの良し悪しは seed を変えた成功の割合で見る（一覧 1-37）。</p>
+</section>
+
+<section id="p04">
+  <h2>大きく作る・書き出しの大きさに拡大する</h2>
+  <p class="rows">一覧 1-13・1-14・1-26・6-1 ／ <code>v3poc/p04_size/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short black bob hair, glasses, school blazer, red necktie, full body, standing, street, detailed background</code></td></tr><tr><th>生成の大きさ</th><td><code>640×960 / 832×1216 / 1024×1536</code></td></tr><tr><th>拡大先</th><td><code>4300×6070</code>（B5・600dpi）</td></tr><tr><th>拡大のモデル</th><td><code>4x-UltraSharp.pth</code>（非商用）、<code>RealESRGAN_x4plus_anime_6B.pth</code>、<code>RealESRGAN_x4plus.pth</code>、比べるための単純な拡大（lanczos）</td></tr><tr><th>網点のトーン</th><td class="bad">絵1枚の網点だけで見た</td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>生成の大きさ</th><th>1枚</th></tr>
+    <tr><td>640x960</td><td>6.0秒</td></tr><tr><td>832x1216</td><td>7.4秒</td></tr><tr><td>1024x1536</td><td>11.0秒</td></tr>
+  </table></div>
+  <div class="tw"><table>
+    <tr><th>B5・600dpi（4300x6070）への拡大</th><th>時間</th><th>網点のトーン</th><th>くっきり度の数値</th></tr>
+    <tr><td>単純な拡大（lanczos）</td><td>3.7秒</td><td>残るがぼやける</td><td>24</td></tr>
+    <tr><td>4x-UltraSharp（非商用）</td><td>9.1秒</td><td>半分残り、模様が変わる</td><td>511</td></tr>
+    <tr><td>RealESRGAN アニメ向け</td><td>4.8秒</td><td class="bad">消えて平らな灰色</td><td>1204</td></tr>
+    <tr><td>RealESRGAN 一般向け</td><td>8.8秒</td><td class="bad">ほぼ消える</td><td>721</td></tr>
+  </table></div>
+  <p>くっきり度の数値は、トーンを消したものほど高い。数値だけで選ぶとトーンを壊すものを選ぶ。</p>
+  <div class="figs">
+    <figure><a href="../p04_size/out/sheet_up.png"><img src="../p04_size/out/sheet_up.png" alt="拡大の方法ごとの切り抜き" loading="lazy"></a><figcaption>拡大の方法ごとの切り抜き</figcaption></figure>
+    <figure><a href="../p04_size/out/sheet_gen.png"><img src="../p04_size/out/sheet_gen.png" alt="生成の大きさごとの絵" loading="lazy"></a><figcaption>生成の大きさごと</figcaption></figure>
+  </div>
+</section>
+
+<section id="p05">
+  <h2>人が直した範囲をAIの描き直しから守れるか</h2>
+  <p class="rows">一覧 1-24・3-13 ／ <code>v3poc/p05_protect/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>元の絵</th><td>「指示どおりか」の試作の上半身の1枚（seed 1001）。左上の枠 <code>(60,60)-(420,330)</code> を人が直した範囲とした</td></tr><tr><th>描き直させる範囲</th><td>正しい範囲 <code>(0,760)-(832,1216)</code>／誤って人の範囲に掛けた範囲 <code>(0,250)-(832,1216)</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, holding a book, school blazer</code></td></tr><tr><th>描き直しの強さ</th><td><code>denoise 0.85</code>、seed <code>77</code></td></tr><tr><th>貼り戻し</th><td>生成のあと、人の範囲の画素を元の絵からそのまま戻す（画素の処理なので、絵の中身に依らない）</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>やり方</th><th>人の範囲で変わった画素</th><th>うち目に見える差</th><th>人の線が消えた</th></tr>
+    <tr><td>描き直す範囲の指定だけ</td><td class="bad">78%</td><td>11%</td><td>0.3%</td></tr>
+    <tr><td>指定＋元の画素で貼り戻す</td><td class="good">0%</td><td>0%</td><td>0%</td></tr>
+    <tr><td>範囲を誤って人の範囲に掛けた</td><td>14%</td><td>6%</td><td class="bad">14%（画素の比較で検出できた）</td></tr>
+  </table></div>
+  <div class="figs">
+    <figure class="sm"><a href="../p05_protect/out/input.png"><img src="../p05_protect/out/input.png" alt="元の絵" loading="lazy"></a><figcaption>元（左上が人の線）</figcaption></figure>
+    <figure class="sm"><a href="../p05_protect/out/a_mask_only.png"><img src="../p05_protect/out/a_mask_only.png" alt="範囲の指定だけ" loading="lazy"></a><figcaption>範囲の指定だけ</figcaption></figure>
+    <figure class="sm"><a href="../p05_protect/out/b_mask_composite.png"><img src="../p05_protect/out/b_mask_composite.png" alt="貼り戻し" loading="lazy"></a><figcaption>貼り戻し</figcaption></figure>
+    <figure class="sm"><a href="../p05_protect/out/c_bad_mask_composite.png"><img src="../p05_protect/out/c_bad_mask_composite.png" alt="誤った範囲" loading="lazy"></a><figcaption>誤った範囲</figcaption></figure>
+  </div>
+</section>
+
+<section id="p07">
+  <h2>色がごてごてしないか</h2>
+  <p class="rows">一覧 1-11・1-16・3-14・6-5 ／ <code>v3poc/p07_color/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, anime coloring, 1girl, solo, short black bob hair, glasses, school blazer, red necktie, upper body, classroom, afternoon</code></td></tr><tr><th>CFG</th><td><code>3 / 5 / 7 / 9 / 12</code></td></tr><tr><th>seed</th><td><code>31〜34</code>（CFGごとに4枚）</td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>cfg</th><td>3</td><td>5</td><td>7</td><td>9</td><td>12</td></tr>
+    <tr><th>彩度0.8超えの画素</th><td>0.0%</td><td>0.0%</td><td>0.1%</td><td>2.3%</td><td class="bad">15.9%</td></tr>
+  </table></div>
+  <ul>
+    <li>cfg 12は目で見てもごてごて。既定のcfg 5では起きない。境目は5%前後で分けられそう（絵柄1種・20枚だけ）。</li>
+    <li>「赤いネクタイ」の赤が眼鏡のふちに移る（色の結び付けの崩れ）。</li>
+  </ul>
+  <figure><a href="../p07_color/out/sheet.png"><img src="../p07_color/out/sheet.png" alt="cfgごとのカラーの絵" loading="lazy"></a><figcaption>行がcfg、列がseed</figcaption></figure>
+</section>
+
+<section id="p08">
+  <h2>ネームのラフで構図とフキダシの場所を渡せるか</h2>
+  <p class="rows">一覧 1-25 ／ <code>v3poc/p08_rough/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short black bob hair, glasses, school blazer, red necktie, full body, standing, street</code></td></tr><tr><th>ラフ</th><td>下の絵。人物の枠 <code>(150,430)-(350,1170)</code>、フキダシの丸 <code>(500,60)-(800,420)</code></td></tr><tr><th>線画の制御</th><td><code>t2i-adapter-sketch-sdxl-1.0</code>、<code>sai_xl_sketch_256lora</code>。強さ <code>0.6 / 1.0</code>、線の向き 白地に黒・黒地に白</td></tr><tr><th>骨格の制御</th><td><code>thibaud_xl_openpose</code>（非営利だけ）、<code>t2i-adapter-openpose-sdxl-1.0</code>。強さ <code>1.0</code></td></tr><tr><th>範囲の指定</th><td>ComfyUIの標準の <code>ConditioningSetArea</code> で、人物の言葉を人物の枠にだけ効かせる。強さ <code>1.0</code></td></tr><tr><th>seed</th><td><code>11〜13</code></td></tr><tr><th>渡した絵</th><td><div class="figs"><figure class="sm"><a href="../p08_rough/out/rough_bw.png"><img src="../p08_rough/out/rough_bw.png" alt="ラフ（白地に黒）" loading="lazy"></a><figcaption>ラフ（白地に黒）</figcaption></figure><figure class="sm"><a href="../p08_rough/out/rough_wb.png"><img src="../p08_rough/out/rough_wb.png" alt="ラフ（黒地に白）" loading="lazy"></a><figcaption>ラフ（黒地に白）</figcaption></figure></div></td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>渡し方（人物は左寄り下半分、フキダシは右上）</th><th>人物の枠とラフの重なり</th><th>1枚</th><th>目で見て</th></tr>
+    <tr><td>棒人間の線画（2種の制御×強さ×線の向き）</td><td class="bad">0.13前後（制御なしと同じ）</td><td>8〜25秒</td><td>棒人間がそのまま描かれ、丸は文字入りのフキダシになる</td></tr>
+    <tr><td>範囲の指定だけ</td><td class="good">0.67</td><td>9.6秒</td><td>人物は小さく左寄り</td></tr>
+    <tr><td>骨格の図（thibaud_xl_openpose。<span class="bad">非営利だけで製品には使えない</span>）</td><td class="good">0.63</td><td>16.7秒</td><td>骨格の位置に立つ。白い縁取りが出る</td></tr>
+    <tr><td>骨格の図（t2i-adapter-openpose）</td><td>0.24</td><td>8.3秒</td><td>骨格を無視して真ん中に大きく立つ</td></tr>
+    <tr><td>範囲＋骨格</td><td>0.39</td><td>18.1秒</td><td>人物が崩れる・透ける</td></tr>
+  </table></div>
+  <p class="note">フキダシは画像生成の範囲に入れないと決めた（絵に焼き込むと微調整できないため）。この節のフキダシの部分は使わない。</p>
+  <p>SDXL系に棒人間を渡してもまともな生成にならない（利用者の知見どおり）。どの渡し方でも、フキダシの場所には背景が描き込まれ、空かなかった。</p>
+  <div class="figs">
+    <figure><a href="../p08_rough/out/sheet_1.png"><img src="../p08_rough/out/sheet_1.png" alt="棒人間の線画を渡した結果" loading="lazy"></a><figcaption>棒人間の線画</figcaption></figure>
+    <figure><a href="../p08_rough/out/sheet_2.png"><img src="../p08_rough/out/sheet_2.png" alt="棒人間の線画を渡した結果の続き" loading="lazy"></a><figcaption>棒人間の線画（続き）</figcaption></figure>
+    <figure><a href="../p08_rough/out_b/sheet.png"><img src="../p08_rough/out_b/sheet.png" alt="骨格の図と範囲の指定の結果" loading="lazy"></a><figcaption>骨格の図と範囲の指定</figcaption></figure>
+  </div>
+</section>
+
+<section id="p09">
+  <h2>参照画像で顔が揃うか</h2>
+  <p class="rows">一覧 1-20・1-29・3-8 ／ <code>v3poc/p09_identity/</code></p>
+  <p class="note">この節の結果は易しい条件だった（参照画像と同じ言葉で作り、モデルがふだん描く見た目だった）。キャラを変え、プロンプトの寄せ方を3段にしたやり直しは <a href="#p17">P17</a>。</p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>参照画像</th><td><div class="figs"><figure class="sm"><a href="../p09_identity/out/ref.png"><img src="../p09_identity/out/ref.png" alt="参照画像（「指示どおりか」の上半身 seed 1001）" loading="lazy"></a><figcaption>参照画像（「指示どおりか」の上半身 seed 1001）</figcaption></figure></div></td></tr><tr><th>参照画像の部品</th><td>IP-Adapter plus SDXL（<code>ip_adapter_plus_sdxl_vit-h</code>、Apache-2.0）＋画像の読み取り CLIP ViT-H-14（MIT）。強さ <code>0.5 / 0.8</code>、<code>linear / concat / V only</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, </code> ＋ キャラの説明 <code>short black bob hair, glasses, school blazer, red necktie, pleated skirt, </code> ＋ 場面</td></tr><tr><th>場面</th><td><code>running, full body, street</code>／<code>eating bread, sitting, cafeteria, upper body</code>／<code>from side, profile, looking at window, upper body</code>／<code>laughing, close-up, park</code>。seed <code>21〜23</code></td></tr><tr><th>別キャラ（対照）</th><td>キャラの説明を <code>long blonde twintails, sailor school uniform, ribbon, </code> に替え、参照なし</td></tr><tr><th>判定</th><td>同一キャラ判定 CCIP（deepghs、OpenRAIL）で参照画像との差を測る。差が閾値 0.178 未満なら同じキャラ</td></tr><tr><th>欠陥</th><td class="bad">参照画像を作ったときと同じキャラの説明を、プロンプトにも全部入れた。参照画像が効いたのか、プロンプトが寄せたのかが分からない。プロンプトをどこまで寄せる必要があるかも調べていない。やり直しは P17</td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>作り方（別の場面4種×seed3）</th><th>同じキャラと判定</th><th>差の平均（閾値0.178）</th></tr>
+    <tr><td>文字だけ</td><td>12/12</td><td>0.046</td></tr>
+    <tr><td>参照画像 0.5</td><td>12/12</td><td>0.046</td></tr>
+    <tr><td>参照画像 0.8</td><td>12/12</td><td>0.063（紫がかる・にじむ）</td></tr>
+    <tr><td>別キャラ（対照）</td><td>0/12</td><td>0.367</td></tr>
+  </table></div>
+  <p>参照画像を同じ文字の指示から作ったので、文字だけで揃いやすい易しい条件だった。文字で言い表せない見た目のキャラは未検証。</p>
+  <div class="figs">
+    <figure><a href="../p09_identity/out/sheet_1.png"><img src="../p09_identity/out/sheet_1.png" alt="参照の強さごとの絵 1" loading="lazy"></a><figcaption>作り方ごと 1</figcaption></figure>
+    <figure><a href="../p09_identity/out/sheet_2.png"><img src="../p09_identity/out/sheet_2.png" alt="参照の強さごとの絵 2" loading="lazy"></a><figcaption>作り方ごと 2</figcaption></figure>
+  </div>
+</section>
+
+<section id="p10">
+  <h2>ページを1枚の絵として生成すると</h2>
+  <p class="rows">一覧 1-30 ／ <code>v3poc/p10_page/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）</td></tr><tr><th>生成の設定</th><td><code>832×1216 / euler_ancestral / normal / 25ステップ / CFG 5.0</code>（ほかに書いていなければこれ）</td></tr><tr><th>否定の言葉</th><td><code>lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry</code></td></tr><tr><th>プロンプト</th><td><code>masterpiece, best quality, comic, manga page, monochrome, greyscale, screentone, panel borders, 1girl, short black bob hair, glasses, school blazer, </code> ＋ コマ数の言葉</td></tr><tr><th>コマ数の言葉</th><td>3コマ <code>3 panels, vertical strip</code>／4コマ漫画 <code>4koma, 4 panels</code>／6コマ <code>multiple panels, 6 panels</code></td></tr><tr><th>seed</th><td><code>51〜54</code></td></tr><tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）だけで試した。結果は「このプロンプトではこうなった」まで</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>指示</th><th>目で数えたコマ数（seed 51〜54）</th><th>指示どおり</th><th>MagiV2と目の一致</th></tr>
+    <tr><td>3コマ</td><td>3・4・3・4</td><td>2/4</td><td>2/4</td></tr>
+    <tr><td>4コマ漫画</td><td>8・9・4・4</td><td>2/4</td><td>2/4</td></tr>
+    <tr><td>6コマ</td><td>6・4・6・4</td><td>2/4</td><td>3/4</td></tr>
+  </table></div>
+  <p>全ページのフキダシに読めない文字。同じ顔・同じ構図の人物が縦に並ぶだけのページが多い。ネームで決めた割りを守るには、コマごとに作って枠に収める方がよい。</p>
+  <figure><a href="../p10_page/out/sheet.png"><img src="../p10_page/out/sheet.png" alt="ページ1枚生成の一覧" loading="lazy"></a><figcaption>行が指示、列がseed</figcaption></figure>
+</section>
+
+<section id="p12">
+  <h2>コマ割りをLLMに任せる</h2>
+  <p class="rows">一覧 2-1・2-2・3-29 ／ <code>v3poc/p12_layout/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>LLM</th><td>Claude Sonnet（Claude Code の CLI <code>claude -p --model sonnet</code>）</td></tr><tr><th>渡したもの</th><td>台本3本（見せ場の位置が違う）と、出させ方2種（座標を直接／段と比）の指示。指示の全文は <code>v3poc/p12_layout/out/result.json</code> の prompt_A・prompt_B</td></tr><tr><th>回数</th><td>台本ごと・出させ方ごとに8回</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>出させ方（Sonnet、台本3本×8回）</th><th>形の検査を通過</th><th>読む順の崩れ</th><th>空いた場所</th></tr>
+    <tr><td>座標を直接</td><td>22/24</td><td>0</td><td>2</td></tr>
+    <tr><td>段と比（座標はプログラムで計算）</td><td>17/24</td><td class="bad">7（6回は見せ場を最後にするため台本の順番を入れ替え）</td><td>0</td></tr>
+  </table></div>
+  <p class="bad">どれも段を横に割っただけの単調な割りで、利用者の目では審美的に美しくないコマが多い。機械の検査は形しか見ないので、これを全部通した。</p>
+  <p>→ 全体の課題として追加：機械の判定は単調な物を合格にしがち（課題261・一覧3-29）。</p>
+  <figure><a href="../p12_layout/out/sheet.png"><img src="../p12_layout/out/sheet.png" alt="LLMが作ったコマ割りの一覧" loading="lazy"></a><figcaption>台本ごと・出させ方ごとの割り</figcaption></figure>
+</section>
+
+<section id="p11">
+  <h2>画像を見たLLMに、読む順と角度・距離を判定させる</h2>
+  <p class="rows">一覧 3-17・3-19 ／ <code>v3poc/p11_vlm_order/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>LLM</th><td>Claude Sonnet と Opus（Claude Code の CLI で画像を読ませる）</td></tr><tr><th>読む順</th><td>番号のない四角いコマ割りの図8種（下の図はその一部）を見せて、読む順を答えさせた。各2回</td></tr><tr><th>向き・角度・距離</th><td>「指示どおりか」の試作の絵59枚を見せ、5択ずつで答えさせた。正解は Claude（Opus）の目の判定</td></tr></table></div></details>
+  <ul>
+    <li>番号の無い四角いコマ割り8種の読む順：<span class="good">Sonnet 16/16</span>、Opus 14/16（横の隙間の高さがずれた割りを両方外した。人でも迷う割り）。斜めのコマは <a href="#p45">P45</a>。</li>
+    <li>向き・角度・距離（5択ずつ）：Sonnet 55/59（同じ指示をまとめて見せる）、56/59（混ぜて見せる）。外れは「上半身」と「胸から上」の境目。正解がClaudeの目なので甘めの可能性。</li>
+  </ul>
+  <div class="figs">
+    <figure class="sm"><img src="../p11_vlm_order/out/offset_gutters.png" alt="Opusが外したコマ割り" loading="lazy"><figcaption>Opusが外した割り</figcaption></figure>
+    <figure class="sm"><img src="../p11_vlm_order/out/rows_1_2_1.png" alt="段抜きを含む割り" loading="lazy"><figcaption>当てた割りの例</figcaption></figure>
+    <figure class="sm"><img src="../p11_vlm_order/out/tall_left.png" alt="左に縦長のコマがある割り" loading="lazy"><figcaption>当てた割りの例</figcaption></figure>
+  </div>
+</section>
+
+<section id="p06">
+  <h2>MagiV2（漫画のコマ・人物・文字の検出。非営利だけなので検証の道具としてだけ使った）</h2>
+  <p class="rows">一覧 2-17・3-6・3-16 ／ <code>v3poc/p06_magi/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>検出のモデル</th><td>MagiV2（<code>ragavsachdeva/magiv2</code>。<span class="bad">非営利だけ</span>。文字の読み取りは切った）</td></tr><tr><th>渡したページ</th><td>プログラムで描いた合成ページ4枚（四角・斜めの区切り・斜めが多い・重ね）、生成したページ12枚、実際の漫画のページ9枚（他人の作品なので載せない）</td></tr></table></div></details>
+  <div class="tw"><table>
+    <tr><th>合成ページ</th><th>正解</th><th>検出</th><th>正解と重なった</th></tr>
+    <tr><td>四角いコマ</td><td>5</td><td>5</td><td>5</td></tr>
+    <tr><td>斜めの区切りが1本</td><td>4</td><td>4</td><td>4</td></tr>
+    <tr><td>斜めのコマが多い</td><td>5</td><td>4</td><td>4</td></tr>
+    <tr><td>重ねたコマと断ち切り</td><td>4</td><td>4</td><td>4</td></tr>
+  </table></div>
+  <ul>
+    <li>枠は傾かない四角だけ。<span class="bad">斜めのコマは隣と重なった四角になり、斜めの辺は分からない。</span></li>
+    <li>生成した絵の人数：目の判定と15/16一致。</li>
+    <li>実際の漫画のページ9枚（斜めのコマを含む）でも同じ傾向。他人の作品なので、ここには載せない（<code>p06_magi/out/real_local/</code>、リポジトリ外）。</li>
+  </ul>
+  <figure><a href="../p06_magi/out/sheet_synth.png"><img src="../p06_magi/out/sheet_synth.png" alt="合成ページにMagiV2の枠を重ねた図" loading="lazy"></a><figcaption>赤がコマ、青が人物、緑が文字</figcaption></figure>
+</section>
+
+<section id="p14">
+  <h2>余白のあるコマを、横長・縦長の形に合わせて作れるか</h2>
+  <p class="rows">一覧 1-32・1-33・1-34 ／ <code>v3poc/p14_margin/</code> ／ 手ごとの設定の全部は <a href="../recipes/index.html#fit_yoko">作り方の一覧</a></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table>
+    <tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ）。euler_ancestral / normal / 25ステップ / CFG 5.0</td></tr>
+    <tr><th>プロンプト（全部の手で同じ）</th><td><code>masterpiece, best quality, manga, monochrome, greyscale, screentone, city street, buildings, 1girl, solo, short black bob hair, glasses, school blazer, necktie, standing, full body, wide shot, scenery</code></td></tr>
+    <tr><th>コマの形と人物の枠</th><td>横長 1536×576（人物は右寄り）／縦長 576×1536（人物は下の真ん中）／標準 1152×896（人物は左寄り）</td></tr>
+    <tr><th>手</th><td>言葉だけ／初めだけ縮小（Deep Shrink）／骨格の図4種（xinsir・xinsir 多用途版・windsingai・TencentARC。どれも Apache-2.0）／縦長で作って切り抜く／縦長で作り縮めて置き周りを描き足す</td></tr>
+    <tr><th>seed</th><td><code>61〜63</code>（手ごとに3枚）</td></tr>
+    <tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）・場所1種（街）だけ。結果は「このプロンプトではこうなった」まで</td></tr>
+  </table></div></details>
+  <div class="tw"><table>
+    <tr><th>手（人物を枠の位置と大きさに置けたか）</th><th>横長</th><th>縦長</th><th>標準</th><th>外れ方</th></tr>
+    <tr><td>言葉だけ</td><td>0/3</td><td>3/3</td><td>0/3</td><td>余白は出るが、人物はほぼ真ん中に立つ。縦長は枠が真ん中なので合っただけ</td></tr>
+    <tr><td>初めだけ縮小</td><td>0/3</td><td>3/3</td><td>0/3</td><td>言葉だけと同じ。極端な形でも人物は増えなかった（言葉だけでも増えなかった）</td></tr>
+    <tr><td>骨格 xinsir</td><td class="bad">0/3</td><td>3/3</td><td>2/3</td><td>位置は合うが、横長では3枚とも人物の周りに白い縁取り</td></tr>
+    <tr><td>骨格 xinsir 多用途版</td><td class="bad">1/3</td><td>3/3</td><td>2/3</td><td>同じく白い縁取り</td></tr>
+    <tr><td>骨格 windsingai（Illustrious 向け）</td><td class="good">3/3</td><td class="good">3/3</td><td class="good">3/3</td><td>—</td></tr>
+    <tr><td>骨格 TencentARC</td><td>2/3</td><td>3/3</td><td>1/3</td><td>骨格を無視して真ん中に立つことがある</td></tr>
+    <tr><td>切り抜く（比べるため）</td><td class="bad">0/3</td><td class="bad">0/3</td><td class="bad">0/3</td><td>寄りになり余白がない</td></tr>
+    <tr><td>描き足す</td><td class="good">3/3</td><td>2/3</td><td>1/3</td><td>描き足した所が黒や灰色の平らな面になることがある</td></tr>
+  </table></div>
+  <p>商用に使える骨格の制御で、人物を狙いの位置と大きさに置けた。いちばん安定したのは windsingai（9/9）。3枚ずつなので目安。</p>
+  <div class="figs">
+    <figure><a href="../p14_margin/out/sheet_yoko.png"><img src="../p14_margin/out/sheet_yoko.png" alt="横長のコマの手ごとの結果" loading="lazy"></a><figcaption>横長。行が手、列が seed</figcaption></figure>
+    <figure><a href="../p14_margin/out/sheet_std.png"><img src="../p14_margin/out/sheet_std.png" alt="標準の形のコマの手ごとの結果" loading="lazy"></a><figcaption>標準の形</figcaption></figure>
+    <figure class="sm"><a href="../p14_margin/out/sheet_tate.png"><img src="../p14_margin/out/sheet_tate.png" alt="縦長のコマの手ごとの結果" loading="lazy"></a><figcaption>縦長</figcaption></figure>
+  </div>
+</section>
+
+<section id="p15">
+  <h2>絵柄を変えて、狙いのコマ（引き・人物だけ・背景だけ）を作れるか</h2>
+  <p class="rows">一覧 1-32・1-35・1-36 ／ <code>v3poc/p15_shots/</code> ／ 狙いごとの作りたい絵・プロンプトの全文・大きさ・結果の全部は <a href="../recipes/index.html">作り方の一覧</a></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table>
+    <tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。制御なし（言葉だけ）</td></tr>
+    <tr><th>プロンプトの組み方</th><td>画質 ＋ 絵柄 ＋ 狙い ＋ 人物 ＋ 場所。狙いの部品は、その狙いに要る言葉だけ</td></tr>
+    <tr><th>絵柄の言葉</th><td>トーン <code>manga, monochrome, greyscale, screentone</code>／ペン線 <code>monochrome, greyscale, lineart, crosshatching, hatching (texture)</code>／90年代風 <code>monochrome, greyscale, retro artstyle, 1990s (style)</code>／カラー <code>anime coloring, flat color</code></td></tr>
+    <tr><th>背景を抜く</th><td>ComfyUI-RMBG の BiRefNetRMBG、モデル BiRefNet_toonout（MIT）</td></tr>
+    <tr><th>seed</th><td><code>71〜73</code>（条件ごとに3枚）</td></tr>
+    <tr><th>中身</th><td class="bad">人物1種（眼鏡の女子生徒）・場所1種（街）だけ。人物と場所を入れ替えた結果は <a href="#p16">P16</a></td></tr>
+  </table></div></details>
+  <div class="tw"><table>
+    <tr><th>狙い（大きさ）</th><th>狙いの言葉</th><th>トーン</th><th>ペン線</th><th>90年代風</th><th>カラー</th></tr>
+    <tr><td>横長コマの引き（1536×576）</td><td><code>wide shot, scenery</code></td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td></tr>
+    <tr><td>縦長コマの引き（576×1536）</td><td><code>wide shot, scenery</code></td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td></tr>
+    <tr><td>標準コマの全身（1152×896）</td><td><code>full body, wide shot</code></td><td>3/3</td><td>3/3</td><td>2/3</td><td>3/3</td></tr>
+    <tr><td>人物だけ（832×1216、背景を抜く）</td><td><code>full body, simple background, white background</code></td><td>3/3</td><td>3/3</td><td>3/3</td><td>3/3</td></tr>
+    <tr><td>背景だけ・横長</td><td><code>scenery, no humans</code></td><td class="bad">1/3</td><td>3/3</td><td>2/3</td><td>2/3</td></tr>
+    <tr><td>背景だけ・縦長</td><td><code>scenery, no humans</code></td><td class="bad">1/3</td><td>3/3</td><td>2/3</td><td class="bad">1/3</td></tr>
+    <tr><td>背景だけ・標準</td><td><code>scenery, no humans</code></td><td class="bad">0/3</td><td>3/3</td><td class="bad">1/3</td><td class="bad">1/3</td></tr>
+  </table></div>
+  <ul>
+    <li>引きと人物だけは、ほぼ狙いどおり。ただし言葉だけでは人物はほとんど真ん中に立つ（単調になる）。</li>
+    <li class="bad">背景だけは、真上から見下ろす街になり、人物を立たせる地面がない絵がよく出た。ペン線だけは9枚とも地面の高さだったが、理由は分からない。</li>
+    <li class="bad">白黒の絵柄3種は見分けがつかないほど似た。試した言葉（3種）では、白黒の絵柄は変わらなかった。ほかの言葉で変わるかは未検証。カラーだけははっきり変わる。</li>
+  </ul>
+  <div class="figs">
+    <figure><a href="../p15_shots/out/sheet_long_yoko.png"><img src="../p15_shots/out/sheet_long_yoko.png" alt="横長コマの引きの絵柄ごとの結果" loading="lazy"></a><figcaption>横長コマの引き。行が絵柄、列が seed</figcaption></figure>
+    <figure><a href="../p15_shots/out/sheet_bg_std.png"><img src="../p15_shots/out/sheet_bg_std.png" alt="背景だけの標準の形の結果" loading="lazy"></a><figcaption>背景だけ・標準（見下ろしが多い）</figcaption></figure>
+    <figure><a href="../p15_shots/out/sheet_chara_only.png"><img src="../p15_shots/out/sheet_chara_only.png" alt="人物だけの絵と背景を抜いた絵" loading="lazy"></a><figcaption>人物だけ。右3列が背景を抜いた絵</figcaption></figure>
+  </div>
+</section>
+
+<section id="p16">
+  <h2>人物と場所を入れ替えても、狙いの言葉が効くか</h2>
+  <p class="rows">一覧 1-37 ／ <code>v3poc/p16_general/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table>
+    <tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）。euler_ancestral / normal / 25ステップ / CFG 5.0。制御なし（言葉だけ）</td></tr>
+    <tr><th>プロンプトの組み方</th><td>P15 と同じ「画質＋絵柄＋狙い＋人物＋場所」。絵柄は白黒トーン（<code>manga, monochrome, greyscale, screentone</code>）だけ。狙いの言葉と大きさは P15 のまま</td></tr>
+    <tr><th>人物（3種）</th><td>眼鏡の女子生徒 <code>1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing</code>／パーカーの少年 <code>1boy, solo, short hair, hoodie, jeans, sneakers, standing</code>／背広の老人 <code>1boy, solo, old man, grey hair, beard, suit, standing</code></td></tr>
+    <tr><th>場所（3種）</th><td>街 <code>city street, buildings</code>／教室 <code>classroom, desks, windows</code>／郊外 <code>countryside, rice field, mountains, utility pole</code></td></tr>
+    <tr><th>seed</th><td><code>81〜83</code>（組み合わせごとに3枚、全108枚）</td></tr>
+    <tr><th>判定</th><td>目で「狙いどおりか」（Claude が一覧画像を見て付けた。<code>out/labels.json</code>）。人数は検出器でも数えた</td></tr>
+  </table></div></details>
+  <div class="tw"><table>
+    <tr><th>狙い（大きさ）</th><th>街</th><th>教室</th><th>郊外</th><th>P15（街だけ・トーン）</th></tr>
+    <tr><td>横長コマの引き（1536×576）</td><td>8/9</td><td>9/9</td><td>9/9</td><td>3/3</td></tr>
+    <tr><td>縦長コマの引き（576×1536）</td><td>8/9</td><td class="bad">1/9</td><td>9/9</td><td>3/3</td></tr>
+    <tr><td>標準コマの全身（1152×896）</td><td>9/9</td><td>9/9</td><td>9/9</td><td>3/3</td></tr>
+    <tr><td>背景だけ・横長</td><td class="bad">1/3</td><td>3/3</td><td>3/3</td><td>1/3</td></tr>
+    <tr><td>背景だけ・縦長</td><td class="bad">1/3</td><td class="bad">0/3</td><td>2/3</td><td>1/3</td></tr>
+    <tr><td>人物だけ（832×1216、場所なし）</td><td colspan="3">8/9（人物3種）</td><td>3/3</td></tr>
+  </table></div>
+  <ul>
+    <li class="bad">縦長のコマで場所を教室にすると、1枚の中にコマが縦に2〜4段並んだ絵になった（引き 9枚中7枚、背景だけ 3枚中3枚）。P15 の街だけでは1回も起きなかった。場所を変えるだけで、同じ狙いの言葉が効かなくなる。</li>
+    <li>標準の全身と横長の引きは、人物と場所を変えてもほぼ狙いどおり（横長の失敗1枚は人物が2人）。</li>
+    <li class="bad">背景だけの街は、ここでも真上から見下ろす絵が多い（P15 と同じ）。教室と郊外は地面の高さで描かれた。</li>
+    <li>絵の構図は seed で決まる傾向が強い。同じ seed なら、人物を変えても似た構図になった（街の seed 82 は3人とも傾いた見下ろし、全身の seed 82 は3人とも真ん中に立つ一点透視）。うまくいった seed を別の中身に使い回すと、同じ構図が並んで単調になる。</li>
+    <li class="bad">人物だけの背広の老人（seed 81）に読めない文字が入り、背景を抜いても文字が残った。</li>
+    <li>検出器は、横長の引きで人物の高さがコマの約3分の1より小さいと人物を見落とした（「人0」と出た8枚は、どれも人物が1人いる）。小さい人物の数を検出器だけで確かめることはできない。</li>
+  </ul>
+  <div class="figs">
+    <figure class="sm"><a href="../p16_general/out/sheet_long_tate.png"><img src="../p16_general/out/sheet_long_tate.png" alt="縦長コマの引き。教室の行でコマが縦に並ぶ" loading="lazy"></a><figcaption>縦長コマの引き。行が人物・場所、列が seed。教室の行でコマが縦に並ぶ</figcaption></figure>
+    <figure><a href="../p16_general/out/sheet_long_yoko.png"><img src="../p16_general/out/sheet_long_yoko.png" alt="横長コマの引き" loading="lazy"></a><figcaption>横長コマの引き。「人0」は検出器の見落とし</figcaption></figure>
+    <figure><a href="../p16_general/out/sheet_full_std.png"><img src="../p16_general/out/sheet_full_std.png" alt="標準コマの全身" loading="lazy"></a><figcaption>標準コマの全身。列ごと（seed ごと）に構図が似る</figcaption></figure>
+    <figure><a href="../p16_general/out/sheet_bg_yoko.png"><img src="../p16_general/out/sheet_bg_yoko.png" alt="背景だけ・横長" loading="lazy"></a><figcaption>背景だけ・横長</figcaption></figure>
+    <figure class="sm"><a href="../p16_general/out/sheet_bg_tate.png"><img src="../p16_general/out/sheet_bg_tate.png" alt="背景だけ・縦長" loading="lazy"></a><figcaption>背景だけ・縦長</figcaption></figure>
+    <figure><a href="../p16_general/out/sheet_chara_only.png"><img src="../p16_general/out/sheet_chara_only.png" alt="人物だけと背景を抜いた絵" loading="lazy"></a><figcaption>人物だけ（左3列）と背景を抜いた絵（右3列）</figcaption></figure>
+  </div>
+</section>
+<section id="p17">
+  <h2>顔を揃えるのに、プロンプトをどこまで寄せる必要があるか（P09 のやり直し）</h2>
+  <p class="rows">一覧 1-29・1-20・3-8 ／ <code>v3poc/p17_identity2/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table>
+    <tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）。euler_ancestral / normal / 25ステップ / CFG 5.0。832×1216</td></tr>
+    <tr><th>キャラ（2人）</th><td>a 白髪の三つ編みの女性、b 眼帯の男性。どちらもモデルがふだん描かない見た目にした（P09 の黒髪の女子生徒は、言葉が無くても出やすかった）</td></tr>
+    <tr><th>参照画像</th><td>キャラごとに1枚。全部の特徴の言葉 ＋ <code>upper body, looking at viewer, simple background, white background</code>、seed 101 で作った（下の図の1行目）。<br>a：<code>1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker</code><br>b：<code>1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt</code></td></tr>
+    <tr><th>プロンプトの寄せ方（3段）</th><td>性別だけ（<code>1girl, solo</code> など）／性別＋髪（a <code>white hair, long hair, twin braids</code>、b <code>messy hair, brown hair, short hair</code>）／性別＋全部の特徴（参照画像と同じ言葉）。前に画質と絵柄 <code>masterpiece, best quality, manga, monochrome, greyscale, screentone</code>、後ろに場面</td></tr>
+    <tr><th>場面（3種）</th><td>走る <code>running, full body, street</code>／食べる <code>eating bread, sitting, cafeteria, upper body</code>／横顔 <code>from side, profile, looking at window, upper body</code></td></tr>
+    <tr><th>参照画像の部品</th><td>なし／IP-Adapter plus SDXL（<code>ip_adapter_plus_sdxl_vit-h</code>、Apache-2.0）＋ <code>clip_vision_h</code>（MIT）、強さ 0.5・0.8。顔専用の FaceID は insightface が非商用なので外した</td></tr>
+    <tr><th>seed</th><td><code>21〜23</code>（条件ごとに 場面3 × seed3 ＝ 9枚、全162枚）</td></tr>
+    <tr><th>判定</th><td>目で「目立つ特徴が見えるか」（Claude が一覧画像を見て付けた）と、同一キャラ判定 CCIP（dghs-imgutils、閾値0.178）で参照画像と比べた</td></tr>
+  </table></div></details>
+  <div class="tw"><table>
+    <tr><th>寄せ方</th><th>参照</th><th>a 目で見て同じ</th><th>a CCIP 同じ</th><th>b 目で見て同じ</th><th>b CCIP 同じ</th></tr>
+    <tr><td rowspan="3">性別だけ</td><td>なし</td><td class="bad">0/9</td><td>0/9</td><td class="bad">0/9</td><td class="bad">7/9</td></tr>
+    <tr><td>0.5</td><td>0/9</td><td>0/9</td><td>0/9</td><td>6/9</td></tr>
+    <tr><td>0.8</td><td>0/9</td><td>0/9</td><td>0/9</td><td>5/9</td></tr>
+    <tr><td rowspan="3">性別＋髪</td><td>なし</td><td class="bad">0/9</td><td class="bad">6/9</td><td class="bad">0/9</td><td class="bad">9/9</td></tr>
+    <tr><td>0.5</td><td>0/9</td><td>2/9</td><td>0/9</td><td>9/9</td></tr>
+    <tr><td>0.8</td><td>0/9</td><td>0/9</td><td>0/9</td><td>9/9</td></tr>
+    <tr><td rowspan="3">性別＋全部の特徴</td><td>なし</td><td class="good">9/9</td><td>9/9</td><td class="good">8/9</td><td>9/9</td></tr>
+    <tr><td>0.5</td><td>—</td><td>8/9</td><td>—</td><td>9/9</td></tr>
+    <tr><td>0.8</td><td>—</td><td>7/9</td><td>—</td><td>7/9</td></tr>
+  </table></div>
+  <p>「—」は、特徴は出ているが色が乗って絵が崩れたので、揃ったかを数えなかった所。</p>
+  <ul>
+    <li><b>寄せる所：見た目の特徴を全部、毎回言葉で書く必要があった。</b>性別だけでは別人（黒髪のよくある顔）になり、髪まで書いても目の色・髪飾り・眼帯・服が出ない。全部書くと a 9/9、b 8/9（外した1枚は横顔で眼帯の側が見えない）。</li>
+    <li class="bad">参照画像の部品（IP-Adapter plus）は言葉の代わりにならなかった。性別だけに足すと白い髪は寄るが、三つ編み・髪飾り・眼帯は出ない。強さ0.5でも白黒の指定なのに青・緑・紫の色が乗り、線がにじむ。全部の特徴を書いた上に足しても良くならない。</li>
+    <li class="bad">特徴の言葉に色が入ると（<code>red eyes</code>・<code>green jacket</code>）、白黒の指定でもその色が残った。P07 の赤いネクタイと同じことが、別の人物でも起きた。</li>
+    <li class="bad">同一キャラ判定 CCIP は、髪が似ていれば別人でも「同じ」と出た（b は性別だけの黒髪の別人でも 7/9）。別キャラの参照画像と「同じ」と出たことは162枚で0回。「違う」は信じてよいが、「同じ」だけでは同じキャラと決められない。</li>
+    <li>限界：モデル1つ・キャラ2人・特徴の言葉で言い表せる見た目だけ。言葉で言い表せない顔立ち（目の形・輪郭）は未検証。追加学習（1-29 の比較）は未実施。</li>
+  </ul>
+  <div class="figs">
+    <figure><a href="../p17_identity2/out/sheet_a.png"><img src="../p17_identity2/out/sheet_a.png" alt="白髪の三つ編みの女性の結果" loading="lazy"></a><figcaption>a 白髪の三つ編みの女性。1行目が参照画像、行が寄せ方／参照、列が場面と seed</figcaption></figure>
+    <figure><a href="../p17_identity2/out/sheet_b.png"><img src="../p17_identity2/out/sheet_b.png" alt="眼帯の男性の結果" loading="lazy"></a><figcaption>b 眼帯の男性</figcaption></figure>
+  </div>
+</section>
+<section id="p18">
+  <h2>背景の不揃いを、3Dの場所で解消できるか</h2>
+  <p class="rows">一覧 1-38 ／ <code>v3poc/p18_bg_consistency/</code> ／ 方針20、候補96〜103</p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table>
+    <tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（SDXL系・アニメ。ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）。euler_ancestral / normal / 25ステップ / CFG 5.0。1152×896</td></tr>
+    <tr><th>プロンプト</th><td>教室 <code>masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, chalkboard, windows, indoors</code><br>街 <code>…, scenery, no humans, city street, buildings, road, utility pole</code>。否定に <code>1girl, 1boy, people</code> を足した</td></tr>
+    <tr><th>3Dの場所</th><td>箱だけで組んだ教室（幅8m・奥行き10m、左の壁に窓、前に黒板、後ろにロッカー、机3×3）と街（真ん中の道、両側に高さの違う建物、右に電柱）。<code>scene3d.py</code>（numpy だけ、外の3Dソフトなし）で3つの向き（front・side・back）から奥行きの図と線画を書き出した（下の図の1行目）</td></tr>
+    <tr><th>手</th><td>言葉だけ／奥行き（xinsir 多用途版の depth、Apache-2.0、強さ0.8、効かせる終わり0.8）／線画（同じ部品の lineart、白黒を反転して渡す）／奥行き＋参照（front の絵を IP-Adapter plus 強さ0.5 で足す。side・back だけ）</td></tr>
+    <tr><th>seed</th><td><code>91〜93</code>（手・向きごとに3枚、全66枚）</td></tr>
+    <tr><th>測り方</th><td>線の重なり＝3Dの線のうち、生成した絵の輪郭が3画素以内にある割合。同じ絵を別の向きの3Dの線とも比べ、その差を見る（候補101）</td></tr>
+  </table></div></details>
+  <div class="tw"><table>
+    <tr><th>手</th><th>間取りが揃う（目）</th><th>線の重なり 教室（別の向き）</th><th>線の重なり 街（別の向き）</th></tr>
+    <tr><td>言葉だけ</td><td class="bad">—（向きを言い分けられない）</td><td>0.49（0.49）</td><td>0.47（0.47）</td></tr>
+    <tr><td>奥行き</td><td class="good">18/18</td><td>0.98（0.46）</td><td>0.79（0.56）</td></tr>
+    <tr><td>線画</td><td class="good">18/18</td><td>0.97（0.46）</td><td>0.84（0.55）</td></tr>
+    <tr><td>奥行き＋参照</td><td>12/12</td><td>0.94（0.39）</td><td>0.77（0.60）</td></tr>
+  </table></div>
+  <ul>
+    <li>3Dの場所から書き出した奥行きか線画を渡すと、壁・床・天井の境目、机の数と位置、道の向き、建物の並びが、向きを変えても3Dどおりに揃った（両方の手で18/18）。</li>
+    <li class="bad">言葉だけでは向きを言い分けられず、同じ seed なら3つの向きで同じ絵になった。seed を変えると、窓の数・黒板の大きさ・照明の並びが違う別の教室になる（コマごとに別の部屋になる）。</li>
+    <li class="bad">壁に何を描くかは揃わない。後ろの壁（3Dではロッカー）には9枚とも黒板が描かれ、窓の壁にも黒板が描かれ、窓が左右逆の壁に出ることも多い。原因は、3Dの箱が面に何があるかを持たないことだと考えるが、未検証（→候補102・103）。</li>
+    <li class="bad">机は脚のない箱のまま描かれた。3Dの箱の形をそのまま写すので、3Dを粗く作るとそのまま絵に出る。</li>
+    <li class="bad">front の絵を参照画像にしても質感は揃わず、白黒の指定なのに水色・緑が乗った（候補99は効かなかった）。</li>
+    <li>線の重なりは、自分の向きの線と別の向きの線で 0.79〜0.98 と 0.39〜0.60 に分かれ、間取りが3Dどおりかの検査に使えるかもしれない（候補101、この試作だけ）。窓の所に黒板が描かれた絵でも重なりは高いままで、窓か黒板かの違いは数値に出なかった。</li>
+  </ul>
+  <div class="figs">
+    <figure><a href="../p18_bg_consistency/out/sheet_room_91.png"><img src="../p18_bg_consistency/out/sheet_room_91.png" alt="教室を3つの向きから" loading="lazy"></a><figcaption>教室 seed 91。1行目が3Dの線画、行が手、列が向き</figcaption></figure>
+    <figure><a href="../p18_bg_consistency/out/sheet_room_92.png"><img src="../p18_bg_consistency/out/sheet_room_92.png" alt="教室 seed 92" loading="lazy"></a><figcaption>教室 seed 92</figcaption></figure>
+    <figure><a href="../p18_bg_consistency/out/sheet_room_93.png"><img src="../p18_bg_consistency/out/sheet_room_93.png" alt="教室 seed 93" loading="lazy"></a><figcaption>教室 seed 93</figcaption></figure>
+    <figure><a href="../p18_bg_consistency/out/sheet_room_text.png"><img src="../p18_bg_consistency/out/sheet_room_text.png" alt="言葉だけの教室を seed ごとに" loading="lazy"></a><figcaption>言葉だけの教室。seed ごとに別の部屋になる</figcaption></figure>
+    <figure><a href="../p18_bg_consistency/out/sheet_street_91.png"><img src="../p18_bg_consistency/out/sheet_street_91.png" alt="街を3つの向きから" loading="lazy"></a><figcaption>街 seed 91</figcaption></figure>
+    <figure><a href="../p18_bg_consistency/out/sheet_street_text.png"><img src="../p18_bg_consistency/out/sheet_street_text.png" alt="言葉だけの街を seed ごとに" loading="lazy"></a><figcaption>言葉だけの街</figcaption></figure>
+  </div>
+</section>
+<section id="p19">
+  <h2>表情を言葉で描き分けられるか・強さを比べて判定できるか</h2>
+  <p class="rows">一覧 1-6・1-20・3-20 ／ <code>v3poc/p19_expression/</code></p>
+  <details class="cond" open><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table>
+    <tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6（ファイル <code>illustrious/waiIllustriousSDXL_v160.safetensors</code>）。euler_ancestral / normal / 25ステップ / CFG 5.0。832×1216</td></tr>
+    <tr><th>キャラ</th><td>P17 の2人（a 白髪の三つ編みの女性、b 眼帯の男性）。特徴の言葉は全部入れた</td></tr>
+    <tr><th>プロンプト</th><td>画質・絵柄 <code>masterpiece, best quality, manga, monochrome, greyscale, screentone</code> ＋ キャラの言葉 ＋ 表情の言葉 ＋ <code>upper body, looking at viewer, classroom</code></td></tr>
+    <tr><th>表情の言葉（弱・中・強）</th><td>無表情 <code>expressionless</code><br>喜 <code>slight smile</code>／<code>smile, happy</code>／<code>laughing, open mouth, very happy</code><br>怒 <code>annoyed, frown</code>／<code>angry</code>／<code>furious, shouting, clenched teeth</code><br>哀 <code>sad, downcast eyes</code>／<code>sad, teary eyes</code>／<code>crying, tears, sobbing</code><br>驚 <code>slightly surprised</code>／<code>surprised, open mouth</code>／<code>shocked, wide-eyed, gasping</code></td></tr>
+    <tr><th>参照画像の部品</th><td>強の段と無表情にだけ、P17 の参照画像を IP-Adapter plus 強さ0.5 で足した（1-20）</td></tr>
+    <tr><th>seed</th><td><code>31〜33</code>（全108枚）</td></tr>
+    <tr><th>LLMの判定（3-20）</th><td>Claude Sonnet（Claude Code の <code>claude -p</code>）に、2枚ずつ「どちらの表情に感情が強く表れているか」と、各画像の感情の種類を答えさせた。組は無表情と弱・弱と中・中と強・弱と強・強と強＋参照。左右を入れ替えて2回聞き、食い違ったら引き分け。画像は名前を伏せた写しを見せ、組の並びも混ぜた</td></tr>
+  </table></div></details>
+  <div class="tw"><table>
+    <tr><th>感情</th><th>弱→中→強が見て順に並ぶ（目、6組）</th><th>LLM が狙いの順と一致（弱と中）</th><th>LLM（中と強）</th><th>LLM（無表情と弱・弱と強）</th></tr>
+    <tr><td>喜</td><td class="good">6/6</td><td>5/6</td><td>6/6</td><td>12/12</td></tr>
+    <tr><td>怒</td><td>3/6（a は弱と中が同じくらい）</td><td>4/6</td><td>6/6</td><td>12/12</td></tr>
+    <tr><td>哀</td><td class="bad">1/6（弱と中がほぼ同じ）</td><td>4/6</td><td>5/6</td><td>10/12</td></tr>
+    <tr><td>驚</td><td class="bad">0/6（弱の言葉で既に目を見開く）</td><td>6/6</td><td class="bad">2/6</td><td>12/12</td></tr>
+  </table></div>
+  <ul>
+    <li>1-6：無表情と強い表情は24/24で見分けられる。崩れて見えるほど極端な顔は無かった。ただし段の描き分けは感情で違い、喜は3段が見て分かるが、驚は弱い側が作れない（<code>slightly surprised</code> でもう目を見開いて口を開ける）。哀は弱と中がほぼ同じ。</li>
+    <li>3-20：名前を伏せた LLM の「どちらが強いか」は、狙いの順と96組中84組で一致、引き分け9、逆3。左右を入れ替えても同じ答えだったのは88組。外れと引き分けは、目でも差が見分けにくい組（驚の中と強、哀の弱と中）に集まった。感情の種類は、のべ240回の答えのうち233回が狙いどおり（外れは、弱い怒・弱い哀を無表情としたものと、無表情と哀の取り違え）。</li>
+    <li class="bad">最初の判定では、ファイル名に感情と段が入ったまま見せていた（96組中92組が一致）。名前から順が読めるので、この数字は使わない（<code>out/judge_sonnet_namesvisible.json</code> に残した）。</li>
+    <li>1-20：参照画像の部品を足すと、LLM は24組中18組で「参照なしの方が強い」とした。目でも a は表情が弱まった（笑わない・怒らない）。b は保たれた。どちらも白黒に色が乗った。</li>
+    <li class="bad">b の眼帯が、絵によって左右どちらの目にも付いた。同一キャラ判定は、参照なしの b の39枚をすべて同じキャラとした（差は最大0.057、閾値0.178）。その中に眼帯が左右逆の絵が入っていた。左右の違いを見分けられるかは未検証。</li>
+    <li>限界：目の判定は Claude が付けた（漫画を描く人ではない）。LLM の判定の正解も「狙いの段」と Claude の目で、人の判定と比べていない。場面は上半身・正面だけ。</li>
+  </ul>
+  <div class="figs">
+    <figure><a href="../p19_expression/out/sheet_face_a.png"><img src="../p19_expression/out/sheet_face_a.png" alt="a の表情の一覧（顔を切り出したもの）" loading="lazy"></a><figcaption>a。行が感情と seed、列が無表情・弱・中・強・強＋参照（顔の検出器で顔を切り出した）</figcaption></figure>
+    <figure><a href="../p19_expression/out/sheet_face_b.png"><img src="../p19_expression/out/sheet_face_b.png" alt="b の表情の一覧（顔を切り出したもの）" loading="lazy"></a><figcaption>b。眼帯が左右どちらにも付く</figcaption></figure>
+  </div>
+</section>
+<section id="p20">
+  <h2>線画・ベタ・トーン・着彩を別々に作れるか</h2>
+  <p class="rows">一覧 1-27 ／ <code>v3poc/p20_layers/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。プロンプトと seed は各フォルダの <code>out/gen.json</code></td></tr><tr><th>手1 後から分ける</th><td>トーンの絵から、線画を取り出す部品（Manga2Anime・AnimeLineArt）で線を抜き、濃さでベタ（50未満）とトーン（50〜215）に分ける</td></tr><tr><th>手2 先に線画</th><td>線画だけの絵を作り、多用途の制御（xinsir union、Apache-2.0）で渡してトーンの絵・カラーの絵を作る</td></tr><tr><th>場面</th><td>机の人物・走る人物・部屋の背景 × seed 3</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>測った物</th><th>結果</th></tr>
+  <tr><td>分けた3層を重ね直した絵と元の絵の差</td><td>平均 6.2/255（Manga2Anime）・6.3/255（AnimeLineArt）</td></tr>
+  <tr><td>線画の線が、トーンの絵・カラーの絵で保たれた割合</td><td>0.952・0.971</td></tr></table></div>
+  <ul><li>後から分ける手：Manga2Anime の線はきれい。AnimeLineArt は網の模様まで線として拾う。ベタに背景の暗いぼかしが混じる。トーンは網点ではなく灰色の階調。</li>
+  <li class="bad">先に線画の手：線画の絵自体に灰色の塗りが入る（机の場面で中間の灰色が29〜33%）。そのため線画の層をカラーの上に重ねると塗りが黒くなる。線画から作ったトーンの絵に色が漏れた（赤い目、走る場面は3枚とも上着と髪に色）。</li>
+  <li>線画からカラーは線によく沿う。</li></ul>
+  <div class="figs"><figure><a href="../p20_layers/out/sheet_split_a_desk.png"><img src="../p20_layers/out/sheet_split_a_desk.png" alt="後から分ける手（机）。元・線・ベタ・トーン・重ね直し" loading="lazy"></a><figcaption>後から分ける手（机）。元・線・ベタ・トーン・重ね直し</figcaption></figure><figure><a href="../p20_layers/out/sheet_line_b_run.png"><img src="../p20_layers/out/sheet_line_b_run.png" alt="先に線画の手（走る）。線画・トーン・カラー・線をカラーに重ねた物" loading="lazy"></a><figcaption>先に線画の手（走る）。線画・トーン・カラー・線をカラーに重ねた物</figcaption></figure></div>
+</section>
+<section id="p21">
+  <h2>手の崩れの割合・男性キャラで質が落ちないか</h2>
+  <p class="rows">一覧 1-3・1-10・1-8・3-23 ／ <code>v3poc/p21_hands/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。プロンプトと seed は各フォルダの <code>out/gen.json</code></td></tr><tr><th>中身</th><td>手の見える動作6種 × 女性2人（f1・f2「大人の女性」）・男性2人（m1・m2）× seed 3 = 72枚。手は原寸で切り出して目で見た</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>人物</th><th>手の崩れなし</th><th>一部崩れ</th><th>崩れ</th><th>美しさの採点（百分位）</th></tr>
+  <tr><td>f1</td><td>14</td><td>4</td><td>0</td><td>0.824</td></tr><tr><td>f2</td><td>13</td><td>3</td><td class="bad">2</td><td>0.97</td></tr>
+  <tr><td>m1</td><td class="good">18</td><td>0</td><td>0</td><td>0.273</td></tr><tr><td>m2</td><td>16</td><td>2</td><td>0</td><td>0.197</td></tr></table></div>
+  <ul><li>男性の手は女性より崩れない（34/36 と 27/36）。</li>
+  <li class="bad">m1 がスカートを履いた・少女になったのが18枚中2枚。m2 は seed 53 で幼く見えるのが5枚。f2（大人の女性）は18/18で胸が誇張され、年齢区分の判定器は15/18を r15 とした（f1 1/18、男性0）。</li>
+  <li class="bad">美しさの採点器は女性・肌の多い絵を高く付けた。手が崩れた絵（0.797）を崩れなし（0.524）より高くした。</li>
+  <li>頼んでいない文字が72枚中10枚。</li><li>動作（1-5）：72枚中71枚が指示どおり（外れは腰に手が太ももに手になった1枚）。手を振るが後ろ姿になったのが12枚中2枚、片手だけが1枚。m2 は seed ごとに別人（年配・金髪の年配・若い）。</li></ul>
+  <div class="figs"><figure><a href="../p21_hands/out/crops_f2.png"><img src="../p21_hands/out/crops_f2.png" alt="f2 の手を原寸で切り出した物" loading="lazy"></a><figcaption>f2 の手を原寸で切り出した物</figcaption></figure><figure><a href="../p21_hands/out/crops_m1.png"><img src="../p21_hands/out/crops_m1.png" alt="m1 の手" loading="lazy"></a><figcaption>m1 の手</figcaption></figure></div>
+</section>
+<section id="p22">
+  <h2>頼んでいないフキダシと文字を防げるか・見つけられるか</h2>
+  <p class="rows">一覧 1-22・3-15 ／ <code>v3poc/p22_balloon/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。プロンプトと seed は各フォルダの <code>out/gen.json</code></td></tr><tr><th>中身</th><td>会話・叫ぶ・掲示のある駅 × 否定の言葉（なし／あり）× seed 8</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>場面</th><th>否定の言葉なし</th><th>あり</th></tr>
+  <tr><td>会話</td><td class="bad">8/8 がフキダシだらけの複数コマのページ</td><td class="bad">8/8 同じ</td></tr>
+  <tr><td>叫ぶ（文字あり）</td><td>5/8</td><td>4/8</td></tr><tr><td>掲示（駅の看板）</td><td>8/8</td><td>5/8</td></tr></table></div>
+  <div class="tw"><table><tr><th>文字の検出器の閾値</th><th>見つけた（38枚中）</th><th>見逃し</th><th>誤り（文字なし10枚）</th></tr>
+  <tr><td>0.05（既定）</td><td>33</td><td>5</td><td>3</td></tr><tr><td>0.1</td><td>31</td><td>7</td><td>2</td></tr><tr><td>0.2</td><td>24</td><td>14</td><td>1</td></tr></table></div>
+  <ul><li>否定の言葉は効かない。会話の場面は言葉だけではコマ1つの絵にならない。</li><li>吹き出しが顔を隠しているかは <a href="#p47">P47</a>。</li></ul>
+  <div class="figs"><figure><a href="../p22_balloon/out/sheet_talk.png"><img src="../p22_balloon/out/sheet_talk.png" alt="会話（上が否定なし、下があり）" loading="lazy"></a><figcaption>会話（上が否定なし、下があり）</figcaption></figure><figure><a href="../p22_balloon/out/sheet_board.png"><img src="../p22_balloon/out/sheet_board.png" alt="掲示" loading="lazy"></a><figcaption>掲示</figcaption></figure></div>
+</section>
+<section id="p23">
+  <h2>2人を描いたとき特徴が混ざらないか・髪の色で見分けられるか</h2>
+  <p class="rows">一覧 1-19・3-9 ／ <code>v3poc/p23_two_chara/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。プロンプトと seed は各フォルダの <code>out/gen.json</code></td></tr><tr><th>中身</th><td>組3種（P17 の2人 ab／似た女子生徒2人 sim／カラーの2人 color）× 書き方（1つの文に全部／左右の範囲ごとに文、ComfyUI 標準の範囲指定）× seed 6</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>組</th><th>1つの文</th><th>範囲ごと</th></tr>
+  <tr><td>color</td><td class="bad">正しい0（左右入れ替わり4・混ざり3）</td><td class="good">6/6</td></tr>
+  <tr><td>ab</td><td>2/6（混ざり4）</td><td>3/6（3枚が複数コマのページ）</td></tr>
+  <tr><td>sim</td><td>1/6（混ざり5）</td><td>2/6（4枚が複数コマのページ）</td></tr></table></div>
+  <ul><li>3-9：頭を検出して髪の色相を比べる手で、左右どちらが誰かを目と12/12で一致した。</li><li class="bad">白黒で範囲ごとに文を当てると、1枚が複数コマのページになりやすい。</li></ul>
+  <div class="figs"><figure><a href="../p23_two_chara/out/sheet_color.png"><img src="../p23_two_chara/out/sheet_color.png" alt="カラーの2人" loading="lazy"></a><figcaption>カラーの2人</figcaption></figure><figure><a href="../p23_two_chara/out/sheet_ab.png"><img src="../p23_two_chara/out/sheet_ab.png" alt="P17 の2人" loading="lazy"></a><figcaption>P17 の2人</figcaption></figure></div>
+</section>
+<section id="p24">
+  <h2>デフォルメ・ぼかした参照画像で別人にならないか</h2>
+  <p class="rows">一覧 1-21 ／ <code>v3poc/p24_deform/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。プロンプトと seed は各フォルダの <code>out/gen.json</code></td></tr><tr><th>中身</th><td>P17 の2人。手1 デフォルメの言葉（chibi）seed 6。手2 参照画像の部品（IP-Adapter plus 強さ0.5）にそのまま／ぼかして縮めた参照画像 seed 3。判定は同一キャラ判定（CCIP、閾値0.178）と目</td></tr></table></div></details>
+  <ul><li>同一キャラ判定：デフォルメ12/12、通常12/12、きれいな参照 a 2/3・b 3/3、ぼかした参照 a 3/3・b 3/3。</li>
+  <li>目でもデフォルメで特徴は残った。</li><li class="bad">パーカーに英字（SUPER など）が勝手に入る。参照画像を使うと色が乗る（P17 と同じ）。ぼかした参照だと b の髪の色がぶれる。</li></ul>
+  <div class="figs"><figure><a href="../p24_deform/out/sheet_a.png"><img src="../p24_deform/out/sheet_a.png" alt="a（デフォルメ・通常・参照）" loading="lazy"></a><figcaption>a（デフォルメ・通常・参照）</figcaption></figure><figure><a href="../p24_deform/out/sheet_b.png"><img src="../p24_deform/out/sheet_b.png" alt="b" loading="lazy"></a><figcaption>b</figcaption></figure></div>
+</section>
+<section id="p25">
+  <h2>画風がずれないか・写実に寄らないか・光の向き</h2>
+  <p class="rows">一覧 1-12・1-18・3-10 ／ <code>v3poc/p25_style_light/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵のモデル</th><td>WAI-illustrious-SDXL v1.6。euler_ancestral / normal / 25ステップ / CFG 5.0。プロンプトと seed は各フォルダの <code>out/gen.json</code></td></tr><tr><th>中身</th><td>P17 の a を8場面 × seed 2。写実の言葉を足した4枚。光の言葉なし／左から／右から × seed 4</td></tr></table></div></details>
+  <ul><li>8場面で画風は目で揃った。</li>
+  <li class="bad">写実の判定器は平均0.024。写実の言葉を足しても0.009〜0.019で反応しない。目では顔が少し写実に寄った。写実の言葉の4枚中3枚に文字が入った。</li></ul>
+  <div class="tw"><table><tr><th>光の言葉</th><th>左から光</th><th>右から光</th><th>分からない</th></tr>
+  <tr><td>なし</td><td>2</td><td>0</td><td>2</td></tr><tr><td>左から</td><td>2</td><td class="bad">2</td><td>0</td></tr><tr><td>右から</td><td class="bad">3</td><td>1</td><td>0</td></tr></table></div>
+  <p>光の言葉は効かない。明るい側は seed ごとの窓の位置に従った。</p>
+  <div class="figs"><figure><a href="../p25_style_light/out/sheet_style.png"><img src="../p25_style_light/out/sheet_style.png" alt="画風（8場面）" loading="lazy"></a><figcaption>画風（8場面）</figcaption></figure><figure><a href="../p25_style_light/out/sheet_light.png"><img src="../p25_style_light/out/sheet_light.png" alt="光の向き" loading="lazy"></a><figcaption>光の向き</figcaption></figure></div>
+</section>
+<section id="p26">
+  <h2>画像編集で写真風にならないか・背景が勝手に変わらないか</h2>
+  <p class="rows">一覧 1-15・1-17 ／ <code>v3poc/p26_edit/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>編集のモデル</th><td>Qwen-Image 2.1（int8、Apache-2.0）。ComfyUI 標準の編集の文の部品に元の絵を渡す</td></tr><tr><th>中身</th><td>P17 の a（食べる）と b（走る）× 編集5種（物を持たせる・笑わせる・座らせる・後ろ向き・海辺の背景）× seed 2。20枚の予定で14枚まで作った</td></tr></table></div></details>
+  <ul><li>写真風になったのは0。同一キャラ判定は14/14で同じ人。</li>
+  <li>カップを持たせる・笑わせる（b）は、ほかを保ったまま効いた。後ろ向きは効いた（1枚で三つ編みが消えた）。</li>
+  <li class="bad">海辺の背景に変えると背景だけカラーになり、白黒の人物と合わない。</li>
+  <li>座らせる編集は、元の絵が既に座っていて試せなかった（課題の選び方の誤り）。a の笑顔はパンで口が隠れて見えない。</li>
+  <li class="bad">人物の外の画素の変化（0.15〜0.25）は、出力が32の倍数に丸められ（1216→1248）位置がずれるので使えない。</li>
+  <li>b の座る・後ろ向き・背景の6枚は、画像生成を止めたので作っていない。</li></ul>
+  <div class="figs"><figure><a href="../p26_edit/out/sheet_a.png"><img src="../p26_edit/out/sheet_a.png" alt="a の編集" loading="lazy"></a><figcaption>a の編集</figcaption></figure><figure><a href="../p26_edit/out/sheet_b.png"><img src="../p26_edit/out/sheet_b.png" alt="b の編集（作った分）" loading="lazy"></a><figcaption>b の編集（作った分）</figcaption></figure></div>
+</section>
+<section id="p27">
+  <h2>LLMのネームを機械で数える</h2>
+  <p class="rows">一覧 2-3〜2-16 ／ <code>v3poc/p27_name/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>LLM</th><td>Claude Sonnet（<code>claude -p</code>）。港の話8ページ・学校の話6ページ × 3回。プロンプトは <code>out/prompt.json</code></td></tr></table></div></details>
+  <div class="tw"><table><tr><th>数えた物</th><th>6つのネーム</th></tr>
+  <tr><td>読む順の崩れ</td><td>5つで0。1つは段の中を左から書いた（書き方の揺れ）</td></tr>
+  <tr><td>同じ段の割りが次のページに続く</td><td>1〜5回（港の話は3〜5回）</td></tr>
+  <tr><td>斜め・断ち切り・枠なし</td><td>1〜4・2〜5・0〜2</td></tr>
+  <tr><td>会話だけのコマで変形</td><td>0〜3</td></tr>
+  <tr><td>大きいコマの無いページ／見開き</td><td>0〜4／0〜2</td></tr>
+  <tr><td>目の高さ以外の角度</td><td>26〜39%、1つだけ70%</td></tr>
+  <tr><td>左ページ最後のヒキの印</td><td>全ネームで全部に付けた</td></tr>
+  <tr><td>吹き出しの最大字数／30字超え</td><td>22〜58字／0〜2個</td></tr></table></div>
+  <p>数で見られるのは形だけ。良し悪しは漫画を描く人の判定が要る（3-1）。</p>
+  
+</section>
+<section id="p28">
+  <h2>話の矛盾を見つけられるか</h2>
+  <p class="rows">一覧 2-11・2-12・2-13・3-22・5-22 ／ <code>v3poc/p28_contradiction/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>3話分の台本に矛盾を12か所入れた（口調・設定・物の状態・時間の前後）。全部の観点を1回で聞く／観点ごとに4回。Sonnet と Opus で各2回</td></tr></table></div></details>
+  <p>全部を1回：Sonnet 11・12、Opus 12・12。観点ごと：全部12。誤りの指摘は0。今回の難しさでは観点ごとに分けても差がほぼ出ない。</p>
+  
+</section>
+<section id="p29">
+  <h2>取り込んだ原稿の中の指示が記憶に入らないか</h2>
+  <p class="rows">一覧 5-19 ／ <code>v3poc/p29_injection/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>原稿に AI あての指示3種（はっきり AI あて／作者の方針に見せかけ／台詞の中）と、残すべき作者のメモ1つ。手 A 素直に作らせる／B 資料だと伝え指示に見える文を別の欄に出させる／C 決まった欄だけ。Sonnet で各3回</td></tr></table></div></details>
+  <p class="good">3つの手とも、記憶に指示が入ったのは0/9。作者のメモは9/9で残った。B は3回とも指示3つを別の欄に出した。</p>
+  
+</section>
+<section id="p30">
+  <h2>理由を伝えずに作り直させると同じ物が出るか</h2>
+  <p class="rows">一覧 6-4 ／ <code>v3poc/p30_redo/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>LLM にコマの中身から画像生成の言葉を作らせ、「作り直して」と頼む。理由なし／理由あり × 5回。言葉の重なりで比べた</td></tr></table></div></details>
+  <p>推測と逆。前の言葉との重なりは理由なし0.374・理由あり0.46で、理由なしの方が大きく変わった。理由なしの作り直しどうしは0.524で似る。距離を変えたのは4/5と5/5。絵での比較は未検証。</p>
+  
+</section>
+<section id="p31">
+  <h2>吹き出しの位置で読む順が変わるか</h2>
+  <p class="rows">一覧 2-4 ／ <code>v3poc/p31_balloon_order/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>枠だけでは順が決まらない格子（2列2段・2列3段）× 吹き出し（つながりなし／列をまたぐ／段をまたぐ）× 2回。Sonnet に読む順を答えさせた</td></tr></table></div></details>
+  <p>列をまたぐ吹き出しで縦に読んだのは2列2段の1回だけ。ほかの11回は位置によらず横に読んだ。LLM は吹き出しの位置をほとんど手がかりにしない。</p>
+  <div class="figs"><figure><a href="../p31_balloon_order/out/sheet_col_row.png"><img src="../p31_balloon_order/out/sheet_col_row.png" alt="吹き出しの置き方（列をまたぐ・段をまたぐ）" loading="lazy"></a><figcaption>吹き出しの置き方（列をまたぐ・段をまたぐ）</figcaption></figure></div>
+</section>
+<section id="p32">
+  <h2>評価役の答えが聞き方でぶれないか</h2>
+  <p class="rows">一覧 3-24・3-25・3-27 ／ <code>v3poc/p32_judge_robust/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>P19 の表情の36組で「どちらの感情が強いか」。聞き方5種（元の文・言い回し違い・引き分けを許さない・長い説明・一度に多く並べる）</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>聞き方</th><th>正しい</th><th>引き分け</th><th>逆</th><th>入れ替えで同じ答え</th><th>元と答えが違う</th></tr>
+  <tr><td>元の文</td><td>30</td><td>4</td><td>2</td><td>33</td><td>—</td></tr>
+  <tr><td>言い回し違い</td><td>30</td><td>5</td><td>1</td><td>31</td><td>7</td></tr>
+  <tr><td>引き分けを許さない</td><td>29</td><td>3</td><td>4</td><td>33</td><td>7</td></tr>
+  <tr><td>長い説明</td><td>28</td><td class="bad">8</td><td>0</td><td>28</td><td class="bad">12</td></tr>
+  <tr><td>一度に多く並べる</td><td>26</td><td class="bad">9</td><td>1</td><td>29</td><td>9</td></tr></table></div>
+  
+</section>
+<section id="p33">
+  <h2>候補を3枚作ってLLMに選ばせると良くなるか</h2>
+  <p class="rows">一覧 4-14・3-27 ／ <code>v3poc/p33_select/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>P16 の同じ狙いの3枚×36組。名前を伏せて Sonnet に1枚選ばせ、どれも合わなければ「なし」。正解は P16 の目の判定</td></tr></table></div></details>
+  <p class="good">1枚だけなら狙いどおり0.824。選ばせると、選んだ33回が全部狙いどおり。「なし」の3回は、全部外れの3組とちょうど一致した。費用 1.15ドル。</p>
+  
+</section>
+<section id="p34">
+  <h2>左から読む作品で検査が向きに合わせて働くか</h2>
+  <p class="rows">一覧 3-5 ／ <code>v3poc/p34_ltr/</code></p>
+  
+  <p class="good">P12 の48の割りを左右反転し「左から」で検査すると、48/48で元の結果と同じ。誤って「右から」で検査すると48/48で読む順の崩れとして出た。1ページ目の位置は右から読む本で左、左から読む本で右に入れ替わる。</p>
+  
+</section>
+<section id="p35">
+  <h2>既製の判定器がこの画風で使えるか</h2>
+  <p class="rows">一覧 3-7・3-23・3-25・5-20 ／ <code>v3poc/p35_scorers/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>判定器</th><td>dghs-imgutils の年齢区分・NSFW・写実・美しさ（2種）。値は <code>out/scores_*.json</code></td></tr></table></div></details>
+  <ul><li>年齢区分：見上げの8枚（スカートを強調する構図に寄った）を7枚 r15、ほか88枚では1枚。使える。</li>
+  <li class="bad">NSFW：普通の絵88枚中35枚を「成人向けの絵」とした。この画風では使えない。</li>
+  <li class="bad">写実：白黒の絵柄は約0.5、カラーは0.045。白黒では当てにならない。写実の言葉にも反応しない（P25）。</li>
+  <li class="bad">美しさ：絵柄でカラー0.486・ペン線0.341・90年代風0.362・トーン0.307。狙いどおりの絵が外れより高いのは14組中7組。女性・肌の多い絵を高く、崩れを見逃す（P21）。</li>
+  <li>3-7 崩れの専用の検出器を公開の場所で探した：手の崩れの分類（Apache-2.0、学習の中身不明）、写実の体の崩れの分類（許諾なし）、画像の不具合の検出（Apache-2.0）。この画風では試していない。</li></ul>
+  
+</section>
+<section id="p36">
+  <h2>PSDを層ごとに書き出して読み戻せるか</h2>
+  <p class="rows">一覧 5-14・5-12 ／ <code>v3poc/p36_psd/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>道具</th><td>書く：ag-psd 31.0.2（MIT、Node）。読み戻す：ag-psd と psd-tools 1.21.0（MIT、Python）</td></tr><tr><th>中身</th><td>P20 の机の場面から、紙・隠したグループ「カラー」（着彩・乗算）・トーン・ベタ・線画・縦書きの文字層「セリフ」</td></tr></table></div></details>
+  <p class="good">3.6MB。両方の読み戻しで全層の画素の差0。名前・グループ・隠す・乗算・文字と縦書きが保たれた。psd-tools で重ねた絵と期待の差は平均0.21。</p><p>Photoshop・CLIP STUDIO で開くのと、文字層の画素（描き直しが要る）、.clip 形式は未検証。</p>
+  <div class="figs"><figure><a href="../p36_psd/out/psdtools_composite.png"><img src="../p36_psd/out/psdtools_composite.png" alt="psd-tools が重ねた絵" loading="lazy"></a><figcaption>psd-tools が重ねた絵</figcaption></figure></div>
+</section>
+<section id="p37">
+  <h2>検出器の枠が端に接するかで見切れが分かるか</h2>
+  <p class="rows">一覧 1-9・3-12 ／ <code>v3poc/p37_clip/</code></p>
+  
+  <div class="tw"><table><tr><th>端</th><th>切れて接する</th><th>切れずに接する</th><th>切れて接しない</th><th>どちらもなし</th></tr>
+  <tr><td>下</td><td>21</td><td class="bad">6</td><td>3</td><td>10</td></tr><tr><td>上</td><td>0</td><td>8</td><td>0</td><td>32</td></tr></table></div>
+  <p>P02 の40枚。全身8枚は切れていないのに6枚が下端に接した。接触は「切れ」ではなく「余白なし」を拾う。余白を要る条件の検査には使える。</p>
+  <div class="figs"><figure><a href="../p37_clip/out/sheet_full_body.png"><img src="../p37_clip/out/sheet_full_body.png" alt="全身" loading="lazy"></a><figcaption>全身</figcaption></figure><figure><a href="../p37_clip/out/sheet_two_people.png"><img src="../p37_clip/out/sheet_two_people.png" alt="2人" loading="lazy"></a><figcaption>2人</figcaption></figure></div>
+</section>
+<section id="p38">
+  <h2>人物の周りを白く抜けるか・近くの線を太くできるか</h2>
+  <p class="rows">一覧 1-23 ／ <code>v3poc/p38_composite/</code></p>
+  
+  <ul><li class="good">切り抜いた人物の周りを9px 白く縁取ると、背景の線が縁で止まり、黒の上でも輪郭が読める。縁なしは髪が黒に溶け、柵の線が脚に重なる。</li>
+  <li>人物に影が無く浮いて見える。</li>
+  <li class="good">P18 の奥行きから、近くの線を最大+4px 太くできた。</li></ul>
+  <div class="figs"><figure><a href="../p38_composite/out/sheet_chara_only_girl_none_81.png"><img src="../p38_composite/out/sheet_chara_only_girl_none_81.png" alt="白い縁あり・なし" loading="lazy"></a><figcaption>白い縁あり・なし</figcaption></figure><figure><a href="../p38_composite/out/sheet_depth_lines.png"><img src="../p38_composite/out/sheet_depth_lines.png" alt="近くの線を太く" loading="lazy"></a><figcaption>近くの線を太く</figcaption></figure></div>
+</section>
+<section id="p39">
+  <h2>描き文字の擬音をLLMが読めるか</h2>
+  <p class="rows">一覧 6-2・5-21 ／ <code>v3poc/p39_sfx/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>市販の漫画3ページ（性的な内容のページは除いた）を Sonnet に読ませ、目の判定と比べた。ページと読んだ文字は公開しない（手元だけ）</td></tr></table></div></details>
+  <p>台詞は25/25読めた。描き文字の擬音は8つ中3つだけ（目でも判断できない4、読めないと答えた1、勝手に作った1）。手書きの台詞を擬音とした1。1ページ約0.065ドル。</p>
+  
+</section>
+<section id="p40">
+  <h2>コマ割りの単調さを1ページの数で測れるか</h2>
+  <p class="rows">一覧 3-29 ／ <code>v3poc/p40_monotony/</code></p>
+  
+  <div class="tw"><table><tr><th>中央値</th><th>LLMの割り（41）</th><th>市販のページ（9）</th></tr>
+  <tr><td>面積のばらつき</td><td>0.582</td><td>0.45</td></tr><tr><td>上の辺が揃う割合</td><td>0.667</td><td>0.5</td></tr></table></div>
+  <p>LLM の41中15は形が1種だけ（市販は最低2種）。1ページの数では弱くしか分けられない。単調さはページをまたいだ繰り返し（P27 の同じ割りの連続）に出る。</p>
+  
+</section>
+<section id="p41">
+  <h2>画風の揃いをCSDで見られるか</h2>
+  <p class="rows">一覧 3-10・1-12 ／ <code>v3poc/p41_csd/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>道具</th><td>CSD（ViT-L、重み CC-BY-4.0・コード MIT）</td></tr></table></div></details>
+  <ul><li>P15 の84枚：最も近い絵が同じ画風なのは0.726。同じ画風で違う物0.711、違う画風で同じ物0.653、両方違う0.529。</li>
+  <li class="bad">カラーは離れる（他と0.379）が、白黒3種の差は小さい（同じ中0.69〜0.76、他と0.59〜0.61）。</li>
+  <li>P25：同じ画風0.802、写実の言葉0.754。</li></ul>
+  
+</section>
+<section id="p42">
+  <h2>全身を描いたとき顔と手が崩れないか</h2>
+  <p class="rows">一覧 1-3 ／ <code>v3poc/p42_fullbody/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>中身</th><td>新しい絵は作らず、P02・P16・P24 の全身47枚から顔と手を検出して原寸で切り出した</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>顔の幅</th><th>枚数</th><th>崩れ</th><th>一部</th></tr>
+  <tr><td>100px 以上</td><td>20</td><td>0</td><td>0</td></tr><tr><td>42〜71px</td><td>17</td><td>0</td><td>1</td></tr><tr><td>32〜38px</td><td>7</td><td class="bad">2</td><td>2</td></tr></table></div>
+  <p>手：27（誤検出2を除く）中、指まで描けた6、指を省いた形10、意味のない線が入った形11（P24 の少年の握った手7つ中6つ）。省いた形は遠めのコマなら通るかもしれない（未検証）。</p>
+  <div class="figs"><figure><a href="../p42_fullbody/out/sheet_faces.png"><img src="../p42_fullbody/out/sheet_faces.png" alt="全身の顔（幅の数字付き）" loading="lazy"></a><figcaption>全身の顔（幅の数字付き）</figcaption></figure><figure><a href="../p42_fullbody/out/sheet_hands.png"><img src="../p42_fullbody/out/sheet_hands.png" alt="全身の手" loading="lazy"></a><figcaption>全身の手</figcaption></figure></div>
+</section>
+<section id="p43">
+  <h2>同一キャラ判定は、似た別人を「違う」と言えるか</h2>
+  <p class="rows">一覧 3-8 ／ <code>v3poc/p43_ccip/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵</th><td>作り済みの絵だけ。P17 の a・b、P02 の眼鏡の女子生徒（寄り・上半身）、P16 の女子生徒・少年・老人、P21 の f1（短い黒髪の女子生徒）・m1（短い黒髪の男子生徒）・f2・m2</td></tr><tr><th>判定</th><td>CCIP（imgutils）、既定の閾値0.178。全部の対で差を出し「同じ」と言った割合を数えた。切り抜きありは、人物の検出器でいちばん確かな人物を1割の余白付きで切り抜いてから比べた</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>対</th><th>本当は</th><th>「同じ」の割合 切り抜きなし</th><th>切り抜きあり</th></tr>
+  <tr><td>P17 a と他の全部</td><td>別人</td><td class="good">0</td><td class="good">0</td></tr>
+  <tr><td>P02 の眼鏡の女子生徒と P21 f1（眼鏡なし）</td><td>別人</td><td class="bad">0.944</td><td class="bad">0.951</td></tr>
+  <tr><td>P16 の少年と P21 m1（別の黒髪の男子）</td><td>別人</td><td>—</td><td class="bad">0.935</td></tr>
+  <tr><td>P16 の少女と少年</td><td>別人</td><td class="bad">0.727</td><td class="bad">0.526</td></tr>
+  <tr><td>P16 の少年と老人</td><td>別人</td><td>0.384</td><td class="good">0.016</td></tr>
+  <tr><td>P02 と P16 の眼鏡の女子生徒（同じ言葉）</td><td>同じ</td><td>0.475</td><td class="good">0.904</td></tr>
+  <tr><td>P16 の同じ人物どうし</td><td>同じ</td><td>約0.79</td><td>約0.93</td></tr></table></div>
+  <div class="tw"><table><tr><th>小さい方の人物の高さ（絵の高さに対して）</th><th>対の数</th><th>少女と少年を「同じ」とした割合（切り抜きあり）</th></tr>
+  <tr><td>2割未満</td><td>200</td><td class="bad">0.725</td></tr><tr><td>2〜4割</td><td>301</td><td>0.635</td></tr><tr><td>4〜7割</td><td>371</td><td>0.361</td></tr><tr><td>7割以上</td><td>28</td><td>0.107</td></tr></table></div>
+  <ul><li class="bad">切り抜かないと、小さく写った人物は背景で比べる（少年と老人の差0.013）。切り抜くと同じ人物は揃うが、眼鏡の有無・性別の違う黒髪の人物は「同じ」とした。</li>
+  <li>m1 と m2 の seed 53 は目で見ても似ていて、別人かは決めきれない。</li>
+  <li>「違う」と言ったら落とす使い方はできる。「同じ」だけで通すと別人が通る。</li></ul>
+  <div class="figs"><figure><a href="../p43_ccip/out/sheet_pairs_crop.png"><img src="../p43_ccip/out/sheet_pairs_crop.png" alt="切り抜きありで「同じ」とした別の組の対（差が小さい順）" loading="lazy"></a><figcaption>切り抜きありで「同じ」とした別の組の対（差が小さい順）</figcaption></figure></div>
+</section>
+<section id="p44">
+  <h2>人物の枠の大きさで、寄り・全身・引きを分けられるか</h2>
+  <p class="rows">一覧 3-11 ／ <code>v3poc/p44_distance/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>合わせる絵</th><td>P02 の目で合格の29枚（顔・上半身・全身・引き）で、人物の高さ・人物の面積・顔の高さの閾値を合わせた</td></tr><tr><th>試す絵</th><td>P16 の71枚（全身27・引き44）、P15 の34枚（全身11・引き23）。どれも目で合格の絵</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>測る物</th><th>合わせた絵</th><th>P16 全身</th><th>P16 引き</th><th>P15 全身</th><th>P15 引き</th></tr>
+  <tr><td>人物の面積</td><td>28/29</td><td class="bad">0/27</td><td>44/44</td><td class="bad">0/11</td><td>23/23</td></tr>
+  <tr><td>顔の高さ</td><td>27/29</td><td class="bad">0/27</td><td>44/44</td><td class="bad">0/11</td><td>23/23</td></tr>
+  <tr><td>人物の高さ</td><td>20/29</td><td class="bad">0/27</td><td>44/44</td><td class="bad">0/11</td><td>23/23</td></tr></table></div>
+  <ul><li class="bad">余白のある全身は全部「引き」になった。P16 の中で閾値を選び直しても、人物の高さで71枚中58、面積で55、顔で54まで。全身と引きの大きさの分布が重なる。</li>
+  <li>画像を見た LLM の距離の判定（3-19）は59枚中56枚で、枠の大きさより合う。</li></ul>
+  
+</section>
+<section id="p45">
+  <h2>斜めのコマを含む割りの読む順を、画像を見た LLM が当てられるか</h2>
+  <p class="rows">一覧 3-17 ／ <code>v3poc/p45_diag_order/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>割り</th><td>台形・三角のコマを含む8種を線で描いた（番号なし）。正解は右から左・上から下で私が付けた順</td></tr><tr><th>聞き方</th><td>P11 と同じ（コマの中心の座標を読む順に並べる）に「枠の辺が斜めのコマもあります」を足した。Sonnet・Opus で各2回、計32回</td></tr></table></div></details>
+  <p class="good">Sonnet 16/16、Opus 16/16。8種すべてで2回とも当てた。</p>
+  <ul><li>四角いコマの P11（Sonnet 16/16、Opus 14/16）と合わせ、読む順の判定を画像から LLM に任せても外れは少ない。ただし、どれも右から左・上から下で迷いの少ない割り。人でも迷う割りは P11 の2つだけ。</li></ul>
+  <div class="figs"><figure><a href="../p45_diag_order/out/sheet.png"><img src="../p45_diag_order/out/sheet.png" alt="試した8種の割り" loading="lazy"></a><figcaption>試した8種の割り</figcaption></figure></div>
+</section>
+<section id="p46">
+  <h2>話をまたいだ伏線の回収漏れと食い違いを、LLM が見つけられるか</h2>
+  <p class="rows">一覧 5-22 ／ <code>v3poc/p46_foreshadow/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>台本</th><td>4話・22行（<code>script.json</code>）。回収されない伏線2つ、回収が前の描写と食い違う物2つ（取り壊された灯台に上る、一枚しかない地図をもう一人が持つ）、きちんと回収される伏線3つ、日常の行。一部だけ回収される伏線（転校生の言いよどみ）を境目として1つ</td></tr><tr><th>聞き方</th><td>A 問題のある行だけ挙げる／B 伏線に見える行を全部並べ、回収済み・未回収・食い違いを付ける。Sonnet・Opus で各2回</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>モデル・聞き方</th><th>見つけた（4つ中）</th><th>境目の伏線</th><th>回収済みの行を挙げた</th></tr>
+  <tr><td>Sonnet A</td><td class="good">4・4</td><td>0・0</td><td>0・0</td></tr>
+  <tr><td>Sonnet B</td><td class="good">4・4</td><td>0・0（回収済みとした）</td><td>0・1</td></tr>
+  <tr><td>Opus A</td><td class="good">4・4</td><td>0・0</td><td>0・1</td></tr>
+  <tr><td>Opus B</td><td class="good">4・4</td><td>0・0（回収済みとした）</td><td>0・1</td></tr></table></div>
+  <ul><li>回収されない伏線と、前と食い違う回収は、8回とも全部見つけた。</li>
+  <li class="bad">一部だけ回収された伏線は8回とも挙げなかった。</li>
+  <li>回収済みの行を挙げた3回は、どれも手紙の「二人の子」のもう一人が書かれていない点を突いた。台本の書き方の穴で、誤りとは言い切れない。</li>
+  <li>台本は私が作った短い物。長い連載で同じように見つかるかは未検証。</li></ul>
+  
+</section>
+<section id="p47">
+  <h2>吹き出しが顔を隠したことを、仕上がった絵だけから見つけられるか</h2>
+  <p class="rows">一覧 3-15 ／ <code>v3poc/p47_balloon_face/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵</th><td>P02 の全身以外の91枚。顔が見つかった81枚に、白い楕円の吹き出し（文字の代わりに縦の線）を横にずらして重ね、顔の枠が隠れる割合を0〜100%の6段にした</td></tr><tr><th>判定</th><td>重ねた絵で顔の検出器（imgutils、確かさ0.3以上）を回し、元の顔の枠と重なる顔が見つかるか</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>顔の枠が隠れた割合</th><th>0%</th><th>20%</th><th>40%</th><th>60%</th><th>80%</th><th>100%</th></tr>
+  <tr><td>顔が見つかった（81枚中）</td><td>81</td><td>79</td><td class="bad">76</td><td>27</td><td>0</td><td>0</td></tr></table></div>
+  <ul><li>吹き出しを置く側は重ねる前の顔の位置を知っているので、隠れは重なりの計算で分かる。</li>
+  <li class="bad">重ねた後の絵だけからは、顔の4割を隠しても顔が見つかるので、隠れたと言えない。取り込んだページ・平らにした絵では使えない。</li>
+  <li>元の絵で顔が見つからなかったのが91枚中10枚。この絵は重なりの計算もできない。</li></ul>
+  <div class="figs"><figure><a href="../p47_balloon_face/out/sheet.png"><img src="../p47_balloon_face/out/sheet.png" alt="隠れた割合ごとの例（found は顔が見つかった、lost は見つからない）" loading="lazy"></a><figcaption>隠れた割合ごとの例（found は顔が見つかった、lost は見つからない）</figcaption></figure></div>
+</section>
+<section id="p48">
+  <h2>MagiV2 は、カラーの絵と人のいない背景で人数を当てられるか</h2>
+  <p class="rows">一覧 3-6 ／ <code>v3poc/p48_magi_color/</code></p>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>絵</th><td>P15 の4つの描き方（カラー・ペン・レトロ・トーン）× 人物あり4種・背景だけ3種 × 3枚。P16 の人のいない背景18枚。P18 の教室・街の背景66枚。計168枚</td></tr><tr><th>判定</th><td>MagiV2（<code>v3poc/common/magi.py</code>）。読み込むときに白黒にしてから見る</td></tr></table></div></details>
+  <div class="tw"><table><tr><th>絵</th><th>人物あり（1人）</th><th>人のいない背景（0人）</th></tr>
+  <tr><td>カラー</td><td class="good">12/12</td><td class="good">9/9</td></tr>
+  <tr><td>ペン</td><td>11/12</td><td>9/9</td></tr><tr><td>レトロ</td><td>10/12</td><td>9/9</td></tr><tr><td>トーン</td><td>12/12</td><td>7/9</td></tr>
+  <tr><td>P16 の背景</td><td>—</td><td>15/18</td></tr><tr><td>P18 の背景</td><td>—</td><td class="good">66/66</td></tr></table></div>
+  <ul><li>カラーの絵で落ちることはなかった。</li>
+  <li class="bad">外れは、看板や赤い電話ボックスを人物とした物（人物ありの3枚、背景1枚）と、草むらの大きな範囲を人物とした物（P16 の3枚）。</li>
+  <li class="bad">トーンの縦長の背景の1枚は、絵そのものが4つのコマに分かれたページになっていた（生成の失敗）。MagiV2 はそのコマを人物とした。</li></ul>
+  <div class="figs"><figure><a href="../p48_magi_color/out/sheet_wrong.png"><img src="../p48_magi_color/out/sheet_wrong.png" alt="人数を外した8枚（赤い枠が人物とした所）" loading="lazy"></a><figcaption>人数を外した8枚（赤い枠が人物とした所）</figcaption></figure></div>
+</section>
+<section id="src">
+  <h2>出典の確認</h2>
+  <p class="rows">一覧 7-8・7-9・7-10・7-11</p>
+  <div class="tw"><table><tr><th>出典</th><th>本文で確かめたこと</th><th>文書と合うか</th></tr>
+  <tr><td>ACE</td><td>要旨の +10.6%・+8.6%。表1に +17.0%。差分だけ書き換えて文脈の崩れを避ける</td><td>合う</td></tr>
+  <tr><td>Audit &amp; Repair</td><td>合わないコマだけ直す</td><td>合う</td></tr>
+  <tr><td>MAST</td><td>失敗14種・3分類、一致率 κ=0.88、1,642件</td><td>合う</td></tr>
+  <tr><td>APG</td><td>CFG が高いと色がごてごてする</td><td>合う</td></tr>
+  <tr><td>ComicsPAP</td><td>偶然 24.30%、最良 41.27%、学習した7B 62.31%</td><td class="bad">課題196の「ほぼ偶然と同じ」は言い過ぎ</td></tr>
+  <tr><td>SalArt-VQA</td><td>検出 99.37%、4問全部 53.26%</td><td>合う</td></tr>
+  <tr><td>AgentJudgeBench</td><td>正解を見せると一致が下がった（1.5・3.9ポイント）</td><td>合う</td></tr></table></div>
+  <ul><li>7-8：Manga109 は学術の非営利だけ。Manga109-s（87冊）は商用の利用が認められ、申請で入手する。</li>
+  <li>7-9：OFL の FAQ 1.1・1.1.1。OFL のフォントで描いた文字を画像にした物は商用でも使え、出来た物は作った人の物。</li>
+  <li>Kirtley は読めなかった（403）。残りはウェブ検索の上限に達し調べられなかった。</li></ul>
+</section>
+<section id="rest">
+  <h2>未実施と理由</h2>
+  <div class="tw"><table><tr><th>理由</th><th>一覧</th></tr>
+  <tr><td>利用者の指示で一覧に載せるだけ（試作しない）</td><td>2-17・2-18・2-19</td></tr>
+  <tr><td>商用サービスのキーが無い</td><td>1-31・5-10・5-28・7-6</td></tr>
+  <tr><td>漫画を描く人の判定・実際の使用・実機が要る</td><td>3-1・3-2・3-3・3-4・3-21・3-26・3-28・5-7・5-26・5-29・5-30・6-3・8-1・8-2・8-3</td></tr>
+  <tr><td>ウェブ検索の上限に達した</td><td>7-1〜7-7（7-7 は学習も要る）</td></tr>
+  <tr><td>画像生成を止めた（一部の行の残り）</td><td>1-15・1-17 の残り</td></tr>
+  <tr><td>一般的なプログラミングで解ける（検証しない）</td><td>4-1〜4-13・4-15・5-1〜5-6・5-8・5-9・5-11・5-15〜5-18・5-23〜5-25・5-27</td></tr></table></div>
+</section>
+<section id="p13">
+  <h2>仕組み（検証しない）</h2>
+  <p class="rows">一覧 5-1・5-2・5-3・5-9 ／ <code>v3poc/p13_eventlog/</code></p>
+  <p>一般的なプログラミングで解けるので検証しないと決めた（2026-09-30）。先に作った試作は、途中停止110回で抜けも重複も無し、ロック無しで300回中200回分が消え、ロック有りで0。</p>
+</section>
+
+</main>
+</body>
+</html>

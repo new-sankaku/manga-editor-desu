@@ -1,0 +1,86 @@
+{
+ "p15": {
+  "n": 84,
+  "nn_same_style_by_style_vec": 0.726,
+  "nn_same_style_by_content_vec": 0.726,
+  "nn_same_target_by_style_vec": 0.643,
+  "nn_same_target_by_content_vec": 0.643,
+  "style_vec": {
+   "same_style_diff_target": 0.711,
+   "diff_style_same_target": 0.653,
+   "diff_both": 0.529,
+   "same_style_min": 0.262,
+   "diff_style_max": 0.958
+  },
+  "content_vec": {
+   "same_style_diff_target": 0.808,
+   "diff_style_same_target": 0.769,
+   "diff_both": 0.686,
+   "same_style_min": 0.491,
+   "diff_style_max": 0.972
+  },
+  "per_style": {
+   "color": {
+    "within": 0.719,
+    "to_others": 0.379
+   },
+   "pen": {
+    "within": 0.762,
+    "to_others": 0.59
+   },
+   "retro": {
+    "within": 0.694,
+    "to_others": 0.607
+   },
+   "tone": {
+    "within": 0.737,
+    "to_others": 0.612
+   }
+  }
+ },
+ "p16": {
+  "n": 108,
+  "style_sim_mean": 0.681,
+  "style_sim_p05": 0.494,
+  "note": "P16 は1つの絵柄（トーン）で人物・場所・狙いを変えた絵",
+  "nearest_p15_style": {
+   "color": 0,
+   "pen": 7,
+   "retro": 0,
+   "tone": 101
+  }
+ },
+ "p25": {
+  "light": {
+   "n": 12,
+   "within_mean": 0.945,
+   "nearest_p15_style": {
+    "color": 0,
+    "pen": 0,
+    "retro": 0,
+    "tone": 12
+   }
+  },
+  "real": {
+   "n": 4,
+   "within_mean": 0.768,
+   "nearest_p15_style": {
+    "color": 0,
+    "pen": 0,
+    "retro": 0,
+    "tone": 4
+   }
+  },
+  "style": {
+   "n": 16,
+   "within_mean": 0.802,
+   "nearest_p15_style": {
+    "color": 0,
+    "pen": 0,
+    "retro": 0,
+    "tone": 16
+   }
+  },
+  "style_to_real_mean": 0.754
+ }
+}

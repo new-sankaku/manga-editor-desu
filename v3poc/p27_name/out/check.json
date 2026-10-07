@@ -1,0 +1,976 @@
+{
+ "harbor_sonnet_1": {
+  "pages": 8,
+  "panels": 35,
+  "panels_per_page": [
+   5,
+   5,
+   5,
+   5,
+   5,
+   2,
+   2,
+   6
+  ],
+  "order_breaks": 0,
+  "row_patterns": [
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    2,
+    2,
+    1
+   ]
+  ],
+  "same_pattern_next_page": 5,
+  "same_shot_angle_next": 1,
+  "size": {
+   "大": 7,
+   "中": 12,
+   "小": 16
+  },
+  "pages_without_big": 1,
+  "shape": {
+   "断ち切り": 5,
+   "四角": 27,
+   "斜め": 3
+  },
+  "talk_panels": 11,
+  "talk_panels_not_square": 1,
+  "shot": {
+   "遠景": 2,
+   "部分": 10,
+   "引き": 9,
+   "胸から上": 4,
+   "顔": 6,
+   "膝上": 1,
+   "全身": 3
+  },
+  "angle": {
+   "見下ろし": 3,
+   "目の高さ": 23,
+   "真横": 4,
+   "背後": 2,
+   "見上げ": 2,
+   "真上": 1
+  },
+  "unusual_angle_ratio": 0.34,
+  "scene_start_shots": [
+   "遠景",
+   "全身"
+  ],
+  "scene_start_wide": 1,
+  "background": {
+   "描き込む": 10,
+   "簡略": 7,
+   "なし": 8,
+   "効果線やトーンだけ": 10
+  },
+  "role": {
+   "起": 10,
+   "承": 10,
+   "転": 12,
+   "結": 3
+  },
+  "role_by_page": [
+   "起起起起起",
+   "起起起起起",
+   "承承承承承",
+   "承承承承承",
+   "転転転転転",
+   "転転",
+   "転転",
+   "転転転結結結"
+  ],
+  "hook_on_left_pages": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "hook_on_right_pages": [
+   false,
+   false,
+   false,
+   false
+  ],
+  "spreads": 2,
+  "first_appearance": {
+   "カヤ": {
+    "panel": 2,
+    "shot": "部分",
+    "face": "見えない"
+   },
+   "追手A": {
+    "panel": 4,
+    "shot": "引き",
+    "face": "小"
+   },
+   "追手B": {
+    "panel": 4,
+    "shot": "引き",
+    "face": "小"
+   }
+  },
+  "people_per_panel_max": 3,
+  "balloons": 20,
+  "balloon_len_mean": 8.6,
+  "balloon_len_max": 24,
+  "balloons_over_30": 0,
+  "balloons_per_panel_max": 1,
+  "chars_per_page": [
+   15,
+   31,
+   50,
+   25,
+   21,
+   5,
+   0,
+   25
+  ],
+  "sfx": 20
+ },
+ "harbor_sonnet_2": {
+  "pages": 8,
+  "panels": 36,
+  "panels_per_page": [
+   5,
+   5,
+   5,
+   4,
+   3,
+   5,
+   5,
+   4
+  ],
+  "order_breaks": 0,
+  "row_patterns": [
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    2,
+    1,
+    1
+   ],
+   [
+    1,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    1
+   ]
+  ],
+  "same_pattern_next_page": 3,
+  "same_shot_angle_next": 0,
+  "size": {
+   "大": 5,
+   "小": 10,
+   "中": 21
+  },
+  "pages_without_big": 3,
+  "shape": {
+   "断ち切り": 3,
+   "四角": 27,
+   "斜め": 4,
+   "枠なし": 2
+  },
+  "talk_panels": 14,
+  "talk_panels_not_square": 0,
+  "shot": {
+   "遠景": 3,
+   "部分": 10,
+   "胸から上": 3,
+   "引き": 6,
+   "顔": 7,
+   "全身": 6,
+   "膝上": 1
+  },
+  "angle": {
+   "見下ろし": 6,
+   "目の高さ": 22,
+   "真横": 3,
+   "背後": 2,
+   "見上げ": 2,
+   "真上": 1
+  },
+  "unusual_angle_ratio": 0.39,
+  "scene_start_shots": [
+   "遠景",
+   "部分",
+   "遠景",
+   "引き",
+   "全身",
+   "顔"
+  ],
+  "scene_start_wide": 3,
+  "background": {
+   "描き込む": 11,
+   "簡略": 14,
+   "効果線やトーンだけ": 6,
+   "なし": 5
+  },
+  "role": {
+   "起": 8,
+   "承": 8,
+   "転": 16,
+   "結": 4
+  },
+  "role_by_page": [
+   "起起起起起",
+   "起起起承承",
+   "承承承承承",
+   "承転転転",
+   "転転転",
+   "転転転転転",
+   "転転転転転",
+   "結結結結"
+  ],
+  "hook_on_left_pages": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "hook_on_right_pages": [
+   true,
+   true,
+   false,
+   false
+  ],
+  "spreads": 2,
+  "first_appearance": {
+   "カヤ": {
+    "panel": 1,
+    "shot": "遠景",
+    "face": "小"
+   },
+   "追手A": {
+    "panel": 4,
+    "shot": "引き",
+    "face": "小"
+   },
+   "追手B": {
+    "panel": 4,
+    "shot": "引き",
+    "face": "小"
+   },
+   "ミオ": {
+    "panel": 34,
+    "shot": "全身",
+    "face": "小"
+   }
+  },
+  "people_per_panel_max": 3,
+  "balloons": 26,
+  "balloon_len_mean": 9.2,
+  "balloon_len_max": 25,
+  "balloons_over_30": 0,
+  "balloons_per_panel_max": 2,
+  "chars_per_page": [
+   52,
+   34,
+   53,
+   0,
+   18,
+   39,
+   14,
+   28
+  ],
+  "sfx": 18
+ },
+ "harbor_sonnet_3": {
+  "pages": 8,
+  "panels": 33,
+  "panels_per_page": [
+   4,
+   4,
+   4,
+   4,
+   5,
+   4,
+   4,
+   4
+  ],
+  "order_breaks": 0,
+  "row_patterns": [
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    2,
+    1,
+    2
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    2,
+    1,
+    1
+   ],
+   [
+    2,
+    1,
+    1
+   ]
+  ],
+  "same_pattern_next_page": 4,
+  "same_shot_angle_next": 1,
+  "size": {
+   "大": 4,
+   "小": 17,
+   "中": 12
+  },
+  "pages_without_big": 4,
+  "shape": {
+   "断ち切り": 4,
+   "四角": 26,
+   "斜め": 2,
+   "枠なし": 1
+  },
+  "talk_panels": 7,
+  "talk_panels_not_square": 0,
+  "shot": {
+   "遠景": 4,
+   "部分": 7,
+   "胸から上": 4,
+   "引き": 4,
+   "全身": 6,
+   "顔": 6,
+   "膝上": 2
+  },
+  "angle": {
+   "見下ろし": 6,
+   "目の高さ": 10,
+   "真横": 6,
+   "背後": 5,
+   "見上げ": 6
+  },
+  "unusual_angle_ratio": 0.7,
+  "scene_start_shots": [
+   "遠景",
+   "遠景",
+   "胸から上",
+   "引き",
+   "遠景"
+  ],
+  "scene_start_wide": 4,
+  "background": {
+   "描き込む": 15,
+   "なし": 3,
+   "効果線やトーンだけ": 10,
+   "簡略": 5
+  },
+  "role": {
+   "起": 8,
+   "承": 8,
+   "転": 13,
+   "結": 4
+  },
+  "role_by_page": [
+   "起起起起",
+   "起起起起",
+   "承承承承",
+   "承承承承",
+   "転転転転転",
+   "転転転転",
+   "転転転転",
+   "結結結結"
+  ],
+  "hook_on_left_pages": [
+   true,
+   true,
+   true,
+   true
+  ],
+  "hook_on_right_pages": [
+   false,
+   false,
+   false,
+   false
+  ],
+  "spreads": 0,
+  "first_appearance": {
+   "カヤ": {
+    "panel": 1,
+    "shot": "遠景",
+    "face": "小"
+   },
+   "追手A": {
+    "panel": 4,
+    "shot": "引き",
+    "face": "小"
+   },
+   "追手B": {
+    "panel": 4,
+    "shot": "引き",
+    "face": "小"
+   },
+   "ミオ": {
+    "panel": 32,
+    "shot": "引き",
+    "face": "小"
+   }
+  },
+  "people_per_panel_max": 3,
+  "balloons": 21,
+  "balloon_len_mean": 9.3,
+  "balloon_len_max": 22,
+  "balloons_over_30": 0,
+  "balloons_per_panel_max": 2,
+  "chars_per_page": [
+   23,
+   27,
+   41,
+   19,
+   18,
+   29,
+   9,
+   29
+  ],
+  "sfx": 23
+ },
+ "school_sonnet_1": {
+  "pages": 6,
+  "panels": 27,
+  "panels_per_page": [
+   4,
+   5,
+   5,
+   4,
+   5,
+   4
+  ],
+  "order_breaks": 21,
+  "row_patterns": [
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    1
+   ]
+  ],
+  "same_pattern_next_page": 1,
+  "same_shot_angle_next": 2,
+  "size": {
+   "大": 6,
+   "中": 11,
+   "小": 10
+  },
+  "pages_without_big": 0,
+  "shape": {
+   "断ち切り": 3,
+   "四角": 22,
+   "斜め": 1,
+   "枠なし": 1
+  },
+  "talk_panels": 17,
+  "talk_panels_not_square": 2,
+  "shot": {
+   "遠景": 3,
+   "膝上": 3,
+   "部分": 5,
+   "全身": 1,
+   "顔": 6,
+   "胸から上": 6,
+   "引き": 3
+  },
+  "angle": {
+   "見上げ": 1,
+   "目の高さ": 20,
+   "真横": 1,
+   "見下ろし": 4,
+   "真上": 1
+  },
+  "unusual_angle_ratio": 0.26,
+  "scene_start_shots": [
+   "遠景",
+   "引き",
+   "遠景",
+   "引き",
+   "顔"
+  ],
+  "scene_start_wide": 4,
+  "background": {
+   "描き込む": 5,
+   "簡略": 13,
+   "効果線やトーンだけ": 5,
+   "なし": 4
+  },
+  "role": {
+   "起": 9,
+   "承": 8,
+   "転": 6,
+   "結": 4
+  },
+  "role_by_page": [
+   "起起起起",
+   "起起起起起",
+   "承承承承承",
+   "承承承転",
+   "転転転転転",
+   "結結結結"
+  ],
+  "hook_on_left_pages": [
+   true,
+   true,
+   true
+  ],
+  "hook_on_right_pages": [
+   false,
+   false,
+   false
+  ],
+  "spreads": 0,
+  "first_appearance": {
+   "高木": {
+    "panel": 2,
+    "shot": "膝上",
+    "face": "中"
+   },
+   "担任": {
+    "panel": 3,
+    "shot": "膝上",
+    "face": "中"
+   },
+   "水瀬": {
+    "panel": 4,
+    "shot": "部分",
+    "face": "見えない"
+   },
+   "高木(幼)": {
+    "panel": 21,
+    "shot": "引き",
+    "face": "小"
+   },
+   "水瀬(幼)": {
+    "panel": 21,
+    "shot": "引き",
+    "face": "小"
+   }
+  },
+  "people_per_panel_max": 3,
+  "balloons": 24,
+  "balloon_len_mean": 15.3,
+  "balloon_len_max": 58,
+  "balloons_over_30": 1,
+  "balloons_per_panel_max": 2,
+  "chars_per_page": [
+   35,
+   78,
+   76,
+   11,
+   93,
+   75
+  ],
+  "sfx": 7
+ },
+ "school_sonnet_2": {
+  "pages": 6,
+  "panels": 26,
+  "panels_per_page": [
+   4,
+   5,
+   4,
+   5,
+   4,
+   4
+  ],
+  "order_breaks": 0,
+  "row_patterns": [
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    2
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ]
+  ],
+  "same_pattern_next_page": 1,
+  "same_shot_angle_next": 0,
+  "size": {
+   "中": 12,
+   "小": 9,
+   "大": 5
+  },
+  "pages_without_big": 2,
+  "shape": {
+   "四角": 21,
+   "断ち切り": 3,
+   "枠なし": 1,
+   "斜め": 1
+  },
+  "talk_panels": 16,
+  "talk_panels_not_square": 3,
+  "shot": {
+   "引き": 5,
+   "胸から上": 3,
+   "部分": 7,
+   "膝上": 4,
+   "全身": 2,
+   "顔": 4,
+   "遠景": 1
+  },
+  "angle": {
+   "見下ろし": 5,
+   "目の高さ": 18,
+   "真横": 1,
+   "見上げ": 1,
+   "真上": 1
+  },
+  "unusual_angle_ratio": 0.31,
+  "scene_start_shots": [
+   "引き",
+   "遠景",
+   "引き",
+   "引き",
+   "全身"
+  ],
+  "scene_start_wide": 4,
+  "background": {
+   "描き込む": 5,
+   "簡略": 11,
+   "効果線やトーンだけ": 8,
+   "なし": 2
+  },
+  "role": {
+   "起": 9,
+   "承": 9,
+   "転": 6,
+   "結": 2
+  },
+  "role_by_page": [
+   "起起起起",
+   "起起起起起",
+   "承承承承",
+   "承承承承承",
+   "転転転転",
+   "転転結結"
+  ],
+  "hook_on_left_pages": [
+   true,
+   true,
+   true
+  ],
+  "hook_on_right_pages": [
+   false,
+   false,
+   false
+  ],
+  "spreads": 0,
+  "first_appearance": {
+   "高木": {
+    "panel": 1,
+    "shot": "引き",
+    "face": "小"
+   },
+   "担任": {
+    "panel": 1,
+    "shot": "引き",
+    "face": "小"
+   },
+   "水瀬": {
+    "panel": 4,
+    "shot": "膝上",
+    "face": "中"
+   },
+   "幼い高木": {
+    "panel": 24,
+    "shot": "引き",
+    "face": "小"
+   },
+   "幼い水瀬": {
+    "panel": 24,
+    "shot": "引き",
+    "face": "小"
+   }
+  },
+  "people_per_panel_max": 3,
+  "balloons": 29,
+  "balloon_len_mean": 12.2,
+  "balloon_len_max": 38,
+  "balloons_over_30": 2,
+  "balloons_per_panel_max": 2,
+  "chars_per_page": [
+   55,
+   92,
+   36,
+   53,
+   67,
+   50
+  ],
+  "sfx": 9
+ },
+ "school_sonnet_3": {
+  "pages": 6,
+  "panels": 23,
+  "panels_per_page": [
+   4,
+   4,
+   4,
+   4,
+   4,
+   3
+  ],
+  "order_breaks": 0,
+  "row_patterns": [
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    2,
+    1,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    2,
+    1
+   ],
+   [
+    1,
+    1,
+    1
+   ]
+  ],
+  "same_pattern_next_page": 2,
+  "same_shot_angle_next": 2,
+  "size": {
+   "中": 10,
+   "小": 10,
+   "大": 3
+  },
+  "pages_without_big": 3,
+  "shape": {
+   "断ち切り": 2,
+   "四角": 18,
+   "斜め": 1,
+   "枠なし": 2
+  },
+  "talk_panels": 12,
+  "talk_panels_not_square": 2,
+  "shot": {
+   "遠景": 2,
+   "膝上": 2,
+   "胸から上": 6,
+   "全身": 2,
+   "顔": 5,
+   "引き": 2,
+   "部分": 4
+  },
+  "angle": {
+   "見下ろし": 5,
+   "目の高さ": 15,
+   "見上げ": 1,
+   "真上": 2
+  },
+  "unusual_angle_ratio": 0.35,
+  "scene_start_shots": [
+   "遠景",
+   "引き",
+   "引き",
+   "全身",
+   "胸から上"
+  ],
+  "scene_start_wide": 3,
+  "background": {
+   "描き込む": 5,
+   "簡略": 6,
+   "効果線やトーンだけ": 5,
+   "なし": 7
+  },
+  "role": {
+   "起": 5,
+   "承": 9,
+   "転": 6,
+   "結": 3
+  },
+  "role_by_page": [
+   "起起起起",
+   "起承承承",
+   "承承承承",
+   "承承転転",
+   "転転転転",
+   "結結結"
+  ],
+  "hook_on_left_pages": [
+   true,
+   true,
+   true
+  ],
+  "hook_on_right_pages": [
+   false,
+   false,
+   false
+  ],
+  "spreads": 0,
+  "first_appearance": {
+   "高木": {
+    "panel": 2,
+    "shot": "膝上",
+    "face": "中"
+   },
+   "担任": {
+    "panel": 3,
+    "shot": "膝上",
+    "face": "中"
+   },
+   "水瀬": {
+    "panel": 3,
+    "shot": "膝上",
+    "face": "小"
+   }
+  },
+  "people_per_panel_max": 2,
+  "balloons": 21,
+  "balloon_len_mean": 14.8,
+  "balloon_len_max": 45,
+  "balloons_over_30": 1,
+  "balloons_per_panel_max": 2,
+  "chars_per_page": [
+   85,
+   46,
+   67,
+   13,
+   62,
+   38
+  ],
+  "sfx": 9
+ }
+}

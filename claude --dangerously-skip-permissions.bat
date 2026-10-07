@@ -1,1 +1,1 @@
-claude --dangerously-skip-permissions --chrome
+claude --rc --dangerously-skip-permissions --chrome

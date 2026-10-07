@@ -1,0 +1,557 @@
+{
+ "prompt": "次の3枚は、どれも漫画の1コマ用に、同じ狙いで作った絵です。\n狙い：{target}。人物：{chara}。場所：{place}。1枚の絵が1つのコマです（絵の中にさらにコマが並んでいるものは狙いに合いません）。\n\n{files}\n\n狙いにいちばん合う1枚を選んでください。どれも狙いに合わなければ「なし」と答えてください。\n「なし」を選ぶと作り直しになり時間がかかります。合わない絵を選ぶと、そのまま次の工程に進みます。\n\n出力はJSONだけにしてください。形式：{{\"pick\":\"ファイル名 か なし\",\"why\":\"理由\"}}",
+ "summary": {
+  "groups": 36,
+  "single_ok_rate": 0.824,
+  "picked": 33,
+  "picked_ok": 33,
+  "none": 3,
+  "none_when_all_bad": 3,
+  "all_bad_groups": 3,
+  "none_when_some_ok": 0,
+  "best_possible": 33,
+  "cost_usd": 1.154
+ },
+ "rows": [
+  {
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "files": [
+    "long_yoko_girl_street_81.png",
+    "long_yoko_girl_street_82.png",
+    "long_yoko_girl_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_girl_street_81.png",
+   "why": "3枚のうち、眼鏡をかけた女子生徒だとはっきり分かるのはこの1枚だけです。街の通りが左奥まで広く見え、人物の周りに場所がある引きの絵になっています。絵は1枚で、コマは並んでいません。足元が少し切れていますが、狙いには合っています。1枚目は人物が小さすぎて眼鏡が確認できません。2枚目は眼鏡が見えず、人物も小さいので選びませんでした。",
+   "cost_usd": 0.0157176,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "files": [
+    "long_yoko_girl_room_81.png",
+    "long_yoko_girl_room_82.png",
+    "long_yoko_girl_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_girl_room_83.png",
+   "why": "3枚とも1コマの絵で、眼鏡の女子生徒が教室に立つ横長の引きの絵です。その中でこの1枚は、全身が正面から見え、眼鏡もはっきり見えます。左右に机が並び、窓と黒板も入っていて、人物の周りに教室が広く見えます。1枚目は人物が小さく、顔がつぶれ気味です。3枚目は人物が机や奥の物に隠れかけていて、全身が見えません。",
+   "cost_usd": 0.0149586,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "files": [
+    "long_yoko_girl_rural_81.png",
+    "long_yoko_girl_rural_82.png",
+    "long_yoko_girl_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_girl_rural_83.png",
+   "why": "眼鏡がはっきり見える女子生徒が中央に立ち、周りに田んぼ・山・家並みが広く写る、1枚で1コマの横長の引きの絵だから。c120c9ab82は人物が小さく眼鏡が確認できず、df7b3de9cfは人物が右端に寄って小さく、眼鏡も見えにくい。",
+   "cost_usd": 0.014634600000000001,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "files": [
+    "long_yoko_boy_street_81.png",
+    "long_yoko_boy_street_82.png",
+    "long_yoko_boy_street_83.png"
+   ],
+   "ok_count": 2,
+   "pick": "long_yoko_boy_street_83.png",
+   "why": "パーカーの少年が1人だけ、街の通りの中に小さく立っていて、周りに道と建物が広く見える。絵は1コマで、引きの構図になっている。img_5629ed6e70.pngは少年が右端に小さくいるだけで、傾いた見下ろしの構図が建物ばかりになり、人物が主役に見えない。img_de093552d1.pngは少年が2人写っていて、人物の指定に合わない。",
+   "cost_usd": 0.0297244,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "files": [
+    "long_yoko_boy_room_81.png",
+    "long_yoko_boy_room_82.png",
+    "long_yoko_boy_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_boy_room_81.png",
+   "why": "3枚とも1コマの横長の絵で、絵の中にコマは並んでいません。この1枚は、パーカーの少年が黒板の前に立ち、周りに机と窓が広がる教室がひと目で分かります。少年の顔と服もはっきり見えます。img_86d8daf684.pngは少年の周りに白い光のふちが出ていて、絵から浮いて見えます。img_be3d5767dc.pngは少年が小さく、パーカーの形がつぶれています。",
+   "cost_usd": 0.014997,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "files": [
+    "long_yoko_boy_rural_81.png",
+    "long_yoko_boy_rural_82.png",
+    "long_yoko_boy_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_boy_rural_83.png",
+   "why": "3枚とも1枚で1コマの横長の絵で、田んぼと山、パーカーの少年が入っています。この1枚は少年の顔と服がはっきり見え、周りに田んぼ・山・家並みが広く見えて、引きの絵になっています。残りの2枚は少年の顔が影や髪で隠れ、後ろ向きに近い、または端に寄っています。",
+   "cost_usd": 0.014620000000000001,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "files": [
+    "long_yoko_old_street_81.png",
+    "long_yoko_old_street_82.png",
+    "long_yoko_old_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_old_street_83.png",
+   "why": "背広の老人が通りの中に小さく立ち、周りに街並みが広く見える横長の引きの絵で、1枚が1コマになっているため。2枚目は老人が端に小さく寄りすぎていて、3枚目は魚眼のように大きく歪んでいる。",
+   "cost_usd": 0.0143064,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "files": [
+    "long_yoko_old_room_81.png",
+    "long_yoko_old_room_82.png",
+    "long_yoko_old_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_old_room_83.png",
+   "why": "背広の老人が教室の中央に立ち、机や窓が周りに広く写っている引きの絵で、1枚が1コマになっている。人物もはっきり見える。img_5cefad0b74.png は老人の顔が崩れていて小さい。img_85f909ea86.png は老人が黒い影のようで、背広と老人だと分かりにくい。",
+   "cost_usd": 0.029364800000000003,
+   "pick_ok": true
+  },
+  {
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "files": [
+    "long_yoko_old_rural_81.png",
+    "long_yoko_old_rural_82.png",
+    "long_yoko_old_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_yoko_old_rural_83.png",
+   "why": "3枚とも1枚で1コマの横長の絵で、田んぼと山が広く見えます。その中でこの絵は、背広と蝶ネクタイ風の襟元の老人が正面に大きめに立っていて、人物が一番はっきり分かります。周りには田んぼ・山・家並みが広がっていて、引きの絵として狙いに合います。他の2枚は、人物が小さくて顔が不自然な絵と、後ろ向きで老人と分かりにくい絵です。",
+   "cost_usd": 0.0161592,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "files": [
+    "long_tate_girl_street_81.png",
+    "long_tate_girl_street_82.png",
+    "long_tate_girl_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_tate_girl_street_81.png",
+   "why": "3枚とも縦長で、街の路地に小さく立つ女子生徒を引きで描いています。この1枚は全身が収まり、顔に眼鏡が見えます。周りの街並みも広く見えます。1枚目は人物の足が下で切れています。3枚目は眼鏡がはっきり見えません。",
+   "cost_usd": 0.0301816,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "files": [
+    "long_tate_girl_room_81.png",
+    "long_tate_girl_room_82.png",
+    "long_tate_girl_room_83.png"
+   ],
+   "ok_count": 0,
+   "pick": "なし",
+   "why": "3枚とも、1枚の絵が1つのコマという条件に合いません。5043cabbc0は同じ構図が3段に並んでいます。5ad9a614acは上下2コマに分かれています。37e4e35772は、眼鏡の女子生徒が小さく入った大きな建物の絵で、場所が教室に見えず、眼鏡も確認できません。",
+   "cost_usd": 0.029191999999999996,
+   "pick_ok": null
+  },
+  {
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "files": [
+    "long_tate_girl_rural_81.png",
+    "long_tate_girl_rural_82.png",
+    "long_tate_girl_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_tate_girl_rural_81.png",
+   "why": "眼鏡の女子生徒が全身で写り、周りに田んぼ・大きな山・民家・電柱が広く見えるので、郊外の引きの絵という狙いに合います。1枚が1コマで、コマ割りも入っていません。1枚目は人物が小さく、足元が草で隠れています。3枚目も合いますが、山が遠く小さいので、田んぼと山の印象は2枚目のほうが強いです。",
+   "cost_usd": 0.0316912,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "files": [
+    "long_tate_boy_street_81.png",
+    "long_tate_boy_street_82.png",
+    "long_tate_boy_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_tate_boy_street_81.png",
+   "why": "3枚とも1コマの縦長の絵で、パーカーの少年が街の路地に立っています。その中で、これが少年をいちばん小さく、足元から周りの建物まで含めて描いています。少年の周りに場所が広く見えるので、引きの絵という狙いに最も合います。img_440c44b16e.png は看板が目立ち、少年が画面の隅に寄って見えます。img_56ffa2a957.png は少年が大きめで、引きの度合いが弱いです。",
+   "cost_usd": 0.015038200000000002,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "files": [
+    "long_tate_boy_room_81.png",
+    "long_tate_boy_room_82.png",
+    "long_tate_boy_room_83.png"
+   ],
+   "ok_count": 1,
+   "pick": "long_tate_boy_room_82.png",
+   "why": "1枚がそのまま縦長の1コマで、絵の中にコマは並んでいません。パーカーの少年が教室の奥に小さく立ち、手前まで机が並んでいるので、人物の周りに教室が広く見える引きの絵になっています。img_6445ec5577.png は絵の中に3つのコマが縦に並んでいるので狙いに合いません。img_8bde28329c.png は少年が大きく写り、教室の広さが十分に見えないので引きの絵とは言えません。",
+   "cost_usd": 0.0150474,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "files": [
+    "long_tate_boy_rural_81.png",
+    "long_tate_boy_rural_82.png",
+    "long_tate_boy_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_tate_boy_rural_83.png",
+   "why": "3枚とも1コマの縦長の絵で、パーカーの少年、田んぼ、山がそろっています。この1枚は少年の全身が見え、周りに田んぼと山と電柱が広く見えて、引きの絵になっています。手前の草が占める割合も小さいです。1枚目は手前の草が画面の下3分の1ほどを占め、少年が小さくなります。3枚目は右端の電柱が画面に大きく入り込んでいます。",
+   "cost_usd": 0.0330576,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "files": [
+    "long_tate_old_street_81.png",
+    "long_tate_old_street_82.png",
+    "long_tate_old_street_83.png"
+   ],
+   "ok_count": 2,
+   "pick": "long_tate_old_street_82.png",
+   "why": "背広の老人が1人だけ、白髪でしわのある顔ではっきり写っています。看板・電線・高層ビルが並ぶ街の路地が縦に長く広がり、人物の周りに場所が広く見える引きの絵です。1枚が1コマになっています。1枚目は人物が2人いて、老人1人という指定に合いません。2枚目も1人ですが、人物が小さく、老人らしさが3枚目より読み取りにくいです。",
+   "cost_usd": 0.0166374,
+   "pick_ok": true
+  },
+  {
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "files": [
+    "long_tate_old_room_81.png",
+    "long_tate_old_room_82.png",
+    "long_tate_old_room_83.png"
+   ],
+   "ok_count": 0,
+   "pick": "なし",
+   "why": "3枚とも、縦に同じような絵が2〜7個並んでいて、1枚が1コマになっていない。img_967b8d98fbは同じ教室の絵が3段、img_c111a096e0は同じ絵が上下2段、img_e491060cdeは7段に並んでいる。どれも狙いにある「絵の中にコマが並んでいるものは合わない」に当たる。",
+   "cost_usd": 0.06087700000000001,
+   "pick_ok": null
+  },
+  {
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "files": [
+    "long_tate_old_rural_81.png",
+    "long_tate_old_rural_82.png",
+    "long_tate_old_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "long_tate_old_rural_82.png",
+   "why": "1枚が1コマの縦長の絵で、田んぼと山（雪をかぶった山）が奥まで広く見えます。背広の人物は下の方に小さく立っていて、周りの場所がよく見えます。後ろ姿で白髪の頭なので、老人と読めます。他の2枚は顔が崩れていて（1枚目は猿のような顔、3枚目はマスクのような顔）、そのまま使うと不自然です。",
+   "cost_usd": 0.0173608,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "files": [
+    "full_std_girl_street_81.png",
+    "full_std_girl_street_82.png",
+    "full_std_girl_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_girl_street_83.png",
+   "why": "眼鏡の女子生徒の全身（靴まで）が街の通りの中に収まり、周りに余白があります。眼鏡もはっきり見えます。絵の中にコマ枠はなく、1枚が1コマとして使えます。img_a667452662.png は絵の中に黒い枠線があり、コマの中にコマを入れることになるので外しました。img_1bf71e128c.png も条件は満たしますが、人物が小さく眼鏡が見えにくいので選びませんでした。",
+   "cost_usd": 0.036820399999999996,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "files": [
+    "full_std_girl_room_81.png",
+    "full_std_girl_room_82.png",
+    "full_std_girl_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_girl_room_83.png",
+   "why": "眼鏡の女子生徒が頭から足先まで全身で写り、周りに教室の余白があります。絵の中に枠線やコマ割りがなく、1枚が1コマになっています。3枚目は全身ですが、絵の中に黒いコマ枠が描き込まれていて、標準のコマに入れると枠が二重になります。2枚目は人物が机に囲まれて、余白が少なく見えます。",
+   "cost_usd": 0.0171522,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "files": [
+    "full_std_girl_rural_81.png",
+    "full_std_girl_rural_82.png",
+    "full_std_girl_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_girl_rural_82.png",
+   "why": "眼鏡の女子生徒が全身で写っていて、周りに余白がある。背景は田んぼと山と電柱で、郊外の場面になっている。1枚が1つのコマになっていて、中にコマは並んでいない。他の2枚は絵が端まで広がっていて、人物の周りに光のにじみもあるので、標準の形のコマに入れる絵としては1枚目がいちばん合う。",
+   "cost_usd": 0.016045200000000003,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "files": [
+    "full_std_boy_street_81.png",
+    "full_std_boy_street_82.png",
+    "full_std_boy_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_boy_street_83.png",
+   "why": "3枚とも、パーカーの少年が街に立つ全身の絵で、絵の中にコマが並んではいません。その中で3枚目は、少年が大きく見えて足元まで入っています。絵に黒い枠線もありません。1枚目は絵の外周に黒い枠線があり、コマに入れると枠が二重になります。2枚目は少年が小さく、パーカーの表情や服の描き込みが弱いです。",
+   "cost_usd": 0.019649,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "files": [
+    "full_std_boy_room_81.png",
+    "full_std_boy_room_82.png",
+    "full_std_boy_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_boy_room_81.png",
+   "why": "少年の頭から靴までが全部入っていて、上にも下にも余白があります。パーカーと教室の机や窓もはっきり見えます。絵の中にコマ割りはありません。img_94e76a1916.png は絵の外周に黒いコマ枠が描き込まれているので、別のコマに入れると二重の枠になります。img_5b645693e7.png も全身が入っていますが、人物が小さく、教室が主役に見えます。",
+   "cost_usd": 0.0191782,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "files": [
+    "full_std_boy_rural_81.png",
+    "full_std_boy_rural_82.png",
+    "full_std_boy_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_boy_rural_82.png",
+   "why": "少年の全身がはっきり見えて、パーカーと田んぼ、山、電柱の郊外の景色がそろっています。絵全体が外枠で囲まれた1つのコマになっていて、コマの中にコマは並んでいません。1枚目と3枚目は少年の周りに白い光のふちがあり、3枚目は後ろ向きです。",
+   "cost_usd": 0.0331732,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "files": [
+    "full_std_old_street_81.png",
+    "full_std_old_street_82.png",
+    "full_std_old_street_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_old_street_82.png",
+   "why": "3枚とも街の通りに背広の老人が全身で立つ1コマの絵です。ただし、絵の周りに余白が見えるのは2枚目だけです。2枚目は外枠の線の内側に絵が収まり、周囲に白い余白があります。老人の顔と背広もはっきり見え、人物の大きさも十分です。1枚目は絵が縁まで広がっていて余白がなく、人物も小さすぎます。3枚目も絵が縁まで広がっていて余白がありません。",
+   "cost_usd": 0.0162258,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "files": [
+    "full_std_old_room_81.png",
+    "full_std_old_room_82.png",
+    "full_std_old_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_old_room_82.png",
+   "why": "背広の老人が頭から靴まで全身で正面に立つ教室の絵です。絵の周りに白い余白と枠線があり、1枚で1コマの標準的な形になっています。他の2枚は余白がなく絵が端まで広がっています。img_e97e81c3ce.png は老人が机の上に立っていて不自然です。",
+   "cost_usd": 0.0161016,
+   "pick_ok": true
+  },
+  {
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "files": [
+    "full_std_old_rural_81.png",
+    "full_std_old_rural_82.png",
+    "full_std_old_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "full_std_old_rural_83.png",
+   "why": "背広の老人が正面を向いて全身で立っています。周りに田んぼと山があり、余白も十分あります。枠線がなく、1枚がそのまま1コマとして使えます。img_219e48ef16.png は絵の中に黒い枠線が描かれているので外しました。img_8aab7c117d.png は老人が後ろ向きで、足が草に隠れていて全身が見えないので外しました。",
+   "cost_usd": 0.0173134,
+   "pick_ok": true
+  },
+  {
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "files": [
+    "bg_yoko_none_street_81.png",
+    "bg_yoko_none_street_82.png",
+    "bg_yoko_none_street_83.png"
+   ],
+   "ok_count": 1,
+   "pick": "bg_yoko_none_street_83.png",
+   "why": "人物のいない街の通りを地面の高さから見た1枚の絵で、手前に歩道と車道が広がっており、人物を後から立たせやすい。1枚目は見下ろす角度が強く、地面が細い道路に限られる。3枚目は俯瞰で歪んでおり、立たせる地面が見当たらない。",
+   "cost_usd": 0.059675,
+   "pick_ok": true
+  },
+  {
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "files": [
+    "bg_yoko_none_room_81.png",
+    "bg_yoko_none_room_82.png",
+    "bg_yoko_none_room_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "bg_yoko_none_room_83.png",
+   "why": "3枚とも人物のいない教室で、1枚が1コマです。この1枚は中央に机の間の通路が開けていて、人物を後から立たせる床が広く見えます。黒板と窓もはっきり見えて、構図が安定しています。",
+   "cost_usd": 0.0599992,
+   "pick_ok": true
+  },
+  {
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "files": [
+    "bg_yoko_none_rural_81.png",
+    "bg_yoko_none_rural_82.png",
+    "bg_yoko_none_rural_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "bg_yoko_none_rural_81.png",
+   "why": "3枚とも人物なしの横長1コマで、田んぼと山の郊外という狙いには合っています。その中でこの絵は、画面の手前から中ほどまで田んぼの畦(あぜ)がはっきり見える広い地面があり、人物を後から立たせやすいです。奥には山と家並みも見えます。他の2枚は手前の草が画面の下を厚くふさいでいます。1枚目は電線と電柱も画面の上にたくさん入っていて、人物を置く場所が取りにくいです。",
+   "cost_usd": 0.061480599999999996,
+   "pick_ok": true
+  },
+  {
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "files": [
+    "bg_tate_none_street_81.png",
+    "bg_tate_none_street_82.png",
+    "bg_tate_none_street_83.png"
+   ],
+   "ok_count": 1,
+   "pick": "bg_tate_none_street_82.png",
+   "why": "1枚の絵が1つのコマになっていて、人物もいません。細い路地の石畳が手前から奥へ続いているので、人物を後から立たせる地面があります。img_06375aac1a.pngは同じ街並みが3コマに縦に並んでいるので、狙いに合いません。img_e2227c4408.pngは高所から見下ろした街で、人物を立たせる地面がほとんど見えません。",
+   "cost_usd": 0.059951000000000004,
+   "pick_ok": true
+  },
+  {
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "files": [
+    "bg_tate_none_room_81.png",
+    "bg_tate_none_room_82.png",
+    "bg_tate_none_room_83.png"
+   ],
+   "ok_count": 0,
+   "pick": "なし",
+   "why": "3枚とも1枚の中に同じ教室の絵が何コマも縦や格子状に並んでいて、1枚=1コマという狙いに合いません。1枚目は3段、2枚目は4段、3枚目は2列×8段のコマ割りになっています。",
+   "cost_usd": 0.0593916,
+   "pick_ok": null
+  },
+  {
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "files": [
+    "bg_tate_none_rural_81.png",
+    "bg_tate_none_rural_82.png",
+    "bg_tate_none_rural_83.png"
+   ],
+   "ok_count": 2,
+   "pick": "bg_tate_none_rural_82.png",
+   "why": "1枚が1コマで、人物はいません。田んぼと雪をかぶった山があり、郊外だと分かります。下には草の地面が広く取れているので、人物を後から立たせられます。img_bcf22d0f9a.png は絵の中にコマが2つ並んでいるので外しました。img_cdfe8a7eaa.png は下半分が草でごちゃごちゃしていて、人物を置く地面としては使いにくいです。",
+   "cost_usd": 0.0621722,
+   "pick_ok": true
+  },
+  {
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "files": [
+    "chara_only_girl_none_81.png",
+    "chara_only_girl_none_82.png",
+    "chara_only_girl_none_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "chara_only_girl_none_83.png",
+   "why": "眼鏡の女子生徒が1人だけ、白い背景に描かれた1コマの絵です。眼鏡に手をかけたポーズで眼鏡がよく分かり、人物は中央にあります。床の影のような背景要素もありません。2枚目は足元に大きな影があり、3枚目は人物が右に寄っています。",
+   "cost_usd": 0.0624624,
+   "pick_ok": true
+  },
+  {
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "files": [
+    "chara_only_boy_none_81.png",
+    "chara_only_boy_none_82.png",
+    "chara_only_boy_none_83.png"
+   ],
+   "ok_count": 3,
+   "pick": "chara_only_boy_none_83.png",
+   "why": "パーカーの少年が1人だけ描かれていて、背景も余計な線もなく、狙いに合っています。img_77f1c70016.png は縦線が2本入っていて背景ありの絵になっています。img_eb1abc0f97.png は人物だけですが、足元に影があり、背景の白にも細かい汚れがあるため、この1枚のほうが狙いに近いです。",
+   "cost_usd": 0.061862,
+   "pick_ok": true
+  },
+  {
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "files": [
+    "chara_only_old_none_81.png",
+    "chara_only_old_none_82.png",
+    "chara_only_old_none_83.png"
+   ],
+   "ok_count": 2,
+   "pick": "chara_only_old_none_82.png",
+   "why": "背広の老人が1人だけ描かれていて、背景も床の影もなく、文字も入っていません。img_a46375339a.png は足元に床の線と影があります。img_b1c425b2c9.png は絵の中に文字が入っているので、狙いに合いません。",
+   "cost_usd": 0.0619008,
+   "pick_ok": true
+  }
+ ]
+}

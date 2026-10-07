@@ -1,0 +1,1792 @@
+{
+ "style": "tone",
+ "charas": {
+  "girl": {
+   "name": "眼鏡の女子生徒",
+   "words": "1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing"
+  },
+  "boy": {
+   "name": "パーカーの少年",
+   "words": "1boy, solo, short hair, hoodie, jeans, sneakers, standing"
+  },
+  "old": {
+   "name": "背広の老人",
+   "words": "1boy, solo, old man, grey hair, beard, suit, standing"
+  }
+ },
+ "places": {
+  "street": {
+   "name": "街",
+   "words": "city street, buildings"
+  },
+  "room": {
+   "name": "屋内（教室）",
+   "words": "classroom, desks, windows"
+  },
+  "rural": {
+   "name": "郊外（田んぼと山）",
+   "words": "countryside, rice field, mountains, utility pole"
+  }
+ },
+ "steps": 25,
+ "cfg": 5.0,
+ "sampler": "euler_ancestral",
+ "scheduler": "normal",
+ "runs": [
+  {
+   "file": "long_yoko_girl_street_81.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "seed": 81,
+   "sec": 7.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_street_82.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "seed": 82,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_street_83.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "seed": 83,
+   "sec": 6.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_room_81.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "seed": 81,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_room_82.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "seed": 82,
+   "sec": 6.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_room_83.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "seed": 83,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_rural_81.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 81,
+   "sec": 7.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_rural_82.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 82,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_girl_rural_83.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 83,
+   "sec": 6.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_street_81.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "seed": 81,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_street_82.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "seed": 82,
+   "sec": 7.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_street_83.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "seed": 83,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_room_81.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "seed": 81,
+   "sec": 7.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_room_82.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "seed": 82,
+   "sec": 6.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_room_83.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "seed": 83,
+   "sec": 6.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_rural_81.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 81,
+   "sec": 7.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_rural_82.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 82,
+   "sec": 7.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_boy_rural_83.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 83,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_street_81.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "seed": 81,
+   "sec": 7.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_street_82.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "seed": 82,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_street_83.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "seed": 83,
+   "sec": 7.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_room_81.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "seed": 81,
+   "sec": 6.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_room_82.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "seed": 82,
+   "sec": 7.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_room_83.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "seed": 83,
+   "sec": 15.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_rural_81.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "seed": 81,
+   "sec": 16.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_rural_82.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "seed": 82,
+   "sec": 17.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_yoko_old_rural_83.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "seed": 83,
+   "sec": 15.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_street_81.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "seed": 81,
+   "sec": 14.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_street_82.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "seed": 82,
+   "sec": 14.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_street_83.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "seed": 83,
+   "sec": 14.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_room_81.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "seed": 81,
+   "sec": 16.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_room_82.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "seed": 82,
+   "sec": 17.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_room_83.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "seed": 83,
+   "sec": 15.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_rural_81.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 81,
+   "sec": 26.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_rural_82.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 82,
+   "sec": 24.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_girl_rural_83.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 83,
+   "sec": 23.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_street_81.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "seed": 81,
+   "sec": 24.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_street_82.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "seed": 82,
+   "sec": 24.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_street_83.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "seed": 83,
+   "sec": 23.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_room_81.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "seed": 81,
+   "sec": 24.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_room_82.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "seed": 82,
+   "sec": 22.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_room_83.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "seed": 83,
+   "sec": 21.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_rural_81.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 81,
+   "sec": 22.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_rural_82.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 82,
+   "sec": 30.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_boy_rural_83.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 83,
+   "sec": 35.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_street_81.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "seed": 81,
+   "sec": 35.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_street_82.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "seed": 82,
+   "sec": 25.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_street_83.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "seed": 83,
+   "sec": 24.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_room_81.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "seed": 81,
+   "sec": 24.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_room_82.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "seed": 82,
+   "sec": 24.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_room_83.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "seed": 83,
+   "sec": 25.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_rural_81.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "seed": 81,
+   "sec": 15.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_rural_82.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "seed": 82,
+   "sec": 16.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "long_tate_old_rural_83.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "seed": 83,
+   "sec": 15.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_street_81.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "seed": 81,
+   "sec": 27.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_street_82.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "seed": 82,
+   "sec": 48.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_street_83.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "seed": 83,
+   "sec": 45.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_room_81.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "seed": 81,
+   "sec": 26.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_room_82.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "seed": 82,
+   "sec": 50.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_room_83.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "seed": 83,
+   "sec": 49.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_rural_81.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 81,
+   "sec": 56.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_rural_82.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 82,
+   "sec": 31.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_girl_rural_83.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 83,
+   "sec": 43.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_street_81.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "seed": 81,
+   "sec": 46.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_street_82.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "seed": 82,
+   "sec": 50.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_street_83.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "seed": 83,
+   "sec": 31.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_room_81.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "seed": 81,
+   "sec": 39.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_room_82.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "seed": 82,
+   "sec": 46.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_room_83.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "seed": 83,
+   "sec": 33.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_rural_81.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 81,
+   "sec": 42.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_rural_82.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 82,
+   "sec": 41.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_boy_rural_83.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 83,
+   "sec": 51.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, short hair, hoodie, jeans, sneakers, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_street_81.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "seed": 81,
+   "sec": 35.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_street_82.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "seed": 82,
+   "sec": 50.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_street_83.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "seed": 83,
+   "sec": 57.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_room_81.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "seed": 81,
+   "sec": 60.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_room_82.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "seed": 82,
+   "sec": 32.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_room_83.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "seed": 83,
+   "sec": 38.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_rural_81.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "seed": 81,
+   "sec": 31.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_rural_82.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "seed": 82,
+   "sec": 23.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "full_std_old_rural_83.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "seed": 83,
+   "sec": 31.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1boy, solo, old man, grey hair, beard, suit, standing, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_street_81.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "seed": 81,
+   "sec": 30.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_street_82.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "seed": 82,
+   "sec": 37.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_street_83.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "seed": 83,
+   "sec": 22.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_room_81.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "seed": 81,
+   "sec": 30.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_room_82.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "seed": 82,
+   "sec": 30.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_room_83.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "seed": 83,
+   "sec": 38.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_rural_81.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "seed": 81,
+   "sec": 29.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_rural_82.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "seed": 82,
+   "sec": 37.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_yoko_none_rural_83.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "seed": 83,
+   "sec": 37.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_street_81.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "seed": 81,
+   "sec": 29.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_street_82.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "seed": 82,
+   "sec": 37.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_street_83.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "seed": 83,
+   "sec": 37.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_room_81.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "seed": 81,
+   "sec": 44.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_room_82.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "seed": 82,
+   "sec": 29.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_room_83.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "seed": 83,
+   "sec": 37.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, windows",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_rural_81.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "seed": 81,
+   "sec": 37.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_rural_82.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "seed": 82,
+   "sec": 44.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "bg_tate_none_rural_83.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "seed": 83,
+   "sec": 29.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, countryside, rice field, mountains, utility pole",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "post": null
+  },
+  {
+   "file": "chara_only_girl_none_81.png",
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "seed": 81,
+   "sec": 42.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_girl_none_81_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_girl_none_82.png",
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "seed": 82,
+   "sec": 41.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_girl_none_82_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_girl_none_83.png",
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "seed": 83,
+   "sec": 33.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_girl_none_83_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_boy_none_81.png",
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "seed": 81,
+   "sec": 41.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1boy, solo, short hair, hoodie, jeans, sneakers, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_boy_none_81_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_boy_none_82.png",
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "seed": 82,
+   "sec": 41.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1boy, solo, short hair, hoodie, jeans, sneakers, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_boy_none_82_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_boy_none_83.png",
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "seed": 83,
+   "sec": 52.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1boy, solo, short hair, hoodie, jeans, sneakers, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_boy_none_83_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_old_none_81.png",
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "seed": 81,
+   "sec": 26.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1boy, solo, old man, grey hair, beard, suit, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_old_none_81_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_old_none_82.png",
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "seed": 82,
+   "sec": 36.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1boy, solo, old man, grey hair, beard, suit, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_old_none_82_cut.png"
+   }
+  },
+  {
+   "file": "chara_only_old_none_83.png",
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "seed": 83,
+   "sec": 34.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1boy, solo, old man, grey hair, beard, suit, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "post": {
+    "model": "BiRefNet_toonout",
+    "file": "chara_only_old_none_83_cut.png"
+   }
+  }
+ ]
+}

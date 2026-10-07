@@ -1,0 +1,16 @@
+{
+ "pages_scored": 3,
+ "serif_total": 25,
+ "serif_correct": 25,
+ "sfx_present": 8,
+ "sfx_correct": 3,
+ "sfx_unsure_by_eye": 4,
+ "sfx_unreadable_declared": 1,
+ "sfx_invented": 1,
+ "serif_misfiled_as_sfx": 1,
+ "pages_read_not_scored": 3,
+ "why_not_scored": "性的な場面を含むページは目で確かめていない",
+ "model": "sonnet",
+ "cost_usd_per_page": 0.065,
+ "note": "他人の作品のため、文字の中身と画像は out_local（リポジトリ・公開物に入れない）。ここには数だけ"
+}

@@ -1,0 +1,27 @@
+{
+ "note": "目の判定（Claude が一覧画像を見て付けた）。ここに無い絵はねらいどおり（ok）",
+ "ng": {
+  "long_yoko_boy_street_81.png": "人物が2人",
+  "long_tate_boy_room_81.png": "1枚の中にコマが縦に3段並んだ",
+  "long_tate_girl_room_81.png": "1枚の中にコマが縦に3段並んだ",
+  "long_tate_girl_room_82.png": "机と窓が格子のように何段も繰り返す",
+  "long_tate_girl_room_83.png": "1枚の中にコマが縦に2段並んだ",
+  "long_tate_old_room_81.png": "1枚の中にコマが縦に3段並んだ",
+  "long_tate_old_room_82.png": "1枚の中にコマが縦に4段並び、人物も4人",
+  "long_tate_old_room_83.png": "1枚の中にコマが縦に2段並んだ",
+  "long_tate_old_street_81.png": "人物が2人",
+  "bg_yoko_none_street_81.png": "真上から見下ろして地面が無い",
+  "bg_yoko_none_street_82.png": "真上から見下ろして地面が無い",
+  "bg_tate_none_room_81.png": "1枚の中にコマが縦に4段並んだ",
+  "bg_tate_none_room_82.png": "コマが格子のように並んだ",
+  "bg_tate_none_room_83.png": "1枚の中にコマが縦に3段並んだ",
+  "bg_tate_none_rural_81.png": "1枚の中にコマが縦に2段並んだ",
+  "bg_tate_none_street_81.png": "1枚の中にコマが縦に3段並んだ",
+  "bg_tate_none_street_83.png": "真上から見下ろして地面が無い",
+  "chara_only_old_none_81.png": "読めない文字が入り、背景を抜いても文字が残った"
+ },
+ "part": {
+  "long_tate_boy_room_83.png": "人物が大きく、引きとしては寄り気味"
+ },
+ "detector_miss": "横長の引きで人物の高さがコマの約3分の1より小さいと、検出器が人物を見落とす（人0 と出た8枚はどれも人物が1人いる）"
+}

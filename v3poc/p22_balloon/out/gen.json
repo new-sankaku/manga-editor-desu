@@ -1,0 +1,443 @@
+{
+ "scenes": {
+  "talk": "2girls, conversation, talking, open mouth, upper body, classroom",
+  "shout": "1boy, solo, shouting, angry, upper body, street",
+  "board": "1girl, solo, standing, full body, train station, signboard"
+ },
+ "neg_add": "speech bubble, text, english text, japanese text, letters, watermark, sign text",
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "talk_base_61.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 61,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.7
+  },
+  {
+   "file": "talk_base_62.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 62,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "talk_base_63.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 63,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.6
+  },
+  {
+   "file": "talk_base_64.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 64,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "talk_base_65.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 65,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.6
+  },
+  {
+   "file": "talk_base_66.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 66,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "talk_base_67.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 67,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.7
+  },
+  {
+   "file": "talk_base_68.png",
+   "scene": "talk",
+   "neg_mode": "base",
+   "seed": 68,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "talk_neg_61.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 61,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.8
+  },
+  {
+   "file": "talk_neg_62.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 62,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  },
+  {
+   "file": "talk_neg_63.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 63,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.6
+  },
+  {
+   "file": "talk_neg_64.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 64,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  },
+  {
+   "file": "talk_neg_65.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 65,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.6
+  },
+  {
+   "file": "talk_neg_66.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 66,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.7
+  },
+  {
+   "file": "talk_neg_67.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 67,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.8
+  },
+  {
+   "file": "talk_neg_68.png",
+   "scene": "talk",
+   "neg_mode": "neg",
+   "seed": 68,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, conversation, talking, open mouth, upper body, classroom",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_base_61.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 61,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 8.1
+  },
+  {
+   "file": "shout_base_62.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 62,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_base_63.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 63,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.8
+  },
+  {
+   "file": "shout_base_64.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 64,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_base_65.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 65,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.6
+  },
+  {
+   "file": "shout_base_66.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 66,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_base_67.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 67,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.6
+  },
+  {
+   "file": "shout_base_68.png",
+   "scene": "shout",
+   "neg_mode": "base",
+   "seed": 68,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_neg_61.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 61,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.8
+  },
+  {
+   "file": "shout_neg_62.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 62,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_neg_63.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 63,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.8
+  },
+  {
+   "file": "shout_neg_64.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 64,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_neg_65.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 65,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.6
+  },
+  {
+   "file": "shout_neg_66.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 66,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  },
+  {
+   "file": "shout_neg_67.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 67,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.7
+  },
+  {
+   "file": "shout_neg_68.png",
+   "scene": "shout",
+   "neg_mode": "neg",
+   "seed": 68,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, shouting, angry, upper body, street",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.7
+  },
+  {
+   "file": "board_base_61.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 61,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 8.0
+  },
+  {
+   "file": "board_base_62.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 62,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 8.2
+  },
+  {
+   "file": "board_base_63.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 63,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.7
+  },
+  {
+   "file": "board_base_64.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 64,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "board_base_65.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 65,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.5
+  },
+  {
+   "file": "board_base_66.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 66,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "board_base_67.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 67,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.6
+  },
+  {
+   "file": "board_base_68.png",
+   "scene": "board",
+   "neg_mode": "base",
+   "seed": 68,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "sec": 7.2
+  },
+  {
+   "file": "board_neg_61.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 61,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.7
+  },
+  {
+   "file": "board_neg_62.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 62,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.3
+  },
+  {
+   "file": "board_neg_63.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 63,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.7
+  },
+  {
+   "file": "board_neg_64.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 64,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.3
+  },
+  {
+   "file": "board_neg_65.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 65,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.6
+  },
+  {
+   "file": "board_neg_66.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 66,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.3
+  },
+  {
+   "file": "board_neg_67.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 67,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.6
+  },
+  {
+   "file": "board_neg_68.png",
+   "scene": "board",
+   "neg_mode": "neg",
+   "seed": 68,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, standing, full body, train station, signboard",
+   "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, speech bubble, text, english text, japanese text, letters, watermark, sign text",
+   "sec": 7.2
+  }
+ ]
+}

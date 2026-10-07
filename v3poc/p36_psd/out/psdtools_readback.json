@@ -1,0 +1,54 @@
+{
+ "layers": [
+  {
+   "name": "紙",
+   "kind": "pixel",
+   "visible": true,
+   "blend": "BlendMode.NORMAL",
+   "pixel_diff": 0
+  },
+  {
+   "name": "カラー",
+   "kind": "group",
+   "visible": false,
+   "blend": "BlendMode.PASS_THROUGH"
+  },
+  {
+   "name": "着彩",
+   "kind": "pixel",
+   "visible": true,
+   "blend": "BlendMode.MULTIPLY",
+   "pixel_diff": 0
+  },
+  {
+   "name": "トーン",
+   "kind": "pixel",
+   "visible": true,
+   "blend": "BlendMode.NORMAL",
+   "pixel_diff": 0
+  },
+  {
+   "name": "ベタ",
+   "kind": "pixel",
+   "visible": true,
+   "blend": "BlendMode.NORMAL",
+   "pixel_diff": 0
+  },
+  {
+   "name": "線画",
+   "kind": "pixel",
+   "visible": true,
+   "blend": "BlendMode.NORMAL",
+   "pixel_diff": 0
+  },
+  {
+   "name": "セリフ",
+   "kind": "type",
+   "visible": true,
+   "blend": "BlendMode.NORMAL",
+   "text": "きょうは\r早いね"
+  }
+ ],
+ "composite_mean_abs_diff": 0.21,
+ "composite_max_diff": 1
+}

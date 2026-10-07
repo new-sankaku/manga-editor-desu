@@ -1,0 +1,217 @@
+{
+ "split": [
+  {
+   "file": "a_desk_tone_41.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 7.5,
+   "line": 0.074,
+   "beta": 0.403,
+   "tone": 0.243
+  },
+  {
+   "file": "a_desk_tone_41.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 7.8,
+   "line": 0.028,
+   "beta": 0.424,
+   "tone": 0.266
+  },
+  {
+   "file": "a_desk_tone_42.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 6.1,
+   "line": 0.08,
+   "beta": 0.312,
+   "tone": 0.234
+  },
+  {
+   "file": "a_desk_tone_42.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 6.4,
+   "line": 0.016,
+   "beta": 0.348,
+   "tone": 0.262
+  },
+  {
+   "file": "a_desk_tone_43.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 4.3,
+   "line": 0.071,
+   "beta": 0.385,
+   "tone": 0.269
+  },
+  {
+   "file": "a_desk_tone_43.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 4.8,
+   "line": 0.021,
+   "beta": 0.417,
+   "tone": 0.289
+  },
+  {
+   "file": "b_run_tone_41.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 5.4,
+   "line": 0.108,
+   "beta": 0.092,
+   "tone": 0.274
+  },
+  {
+   "file": "b_run_tone_41.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 5.5,
+   "line": 0.035,
+   "beta": 0.121,
+   "tone": 0.318
+  },
+  {
+   "file": "b_run_tone_42.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 9.7,
+   "line": 0.108,
+   "beta": 0.11,
+   "tone": 0.306
+  },
+  {
+   "file": "b_run_tone_42.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 9.9,
+   "line": 0.052,
+   "beta": 0.138,
+   "tone": 0.334
+  },
+  {
+   "file": "b_run_tone_43.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 10.2,
+   "line": 0.122,
+   "beta": 0.071,
+   "tone": 0.313
+  },
+  {
+   "file": "b_run_tone_43.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 10.3,
+   "line": 0.055,
+   "beta": 0.097,
+   "tone": 0.354
+  },
+  {
+   "file": "bg_room_tone_41.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 6.1,
+   "line": 0.088,
+   "beta": 0.088,
+   "tone": 0.402
+  },
+  {
+   "file": "bg_room_tone_41.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 5.7,
+   "line": 0.038,
+   "beta": 0.092,
+   "tone": 0.447
+  },
+  {
+   "file": "bg_room_tone_42.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 1.9,
+   "line": 0.096,
+   "beta": 0.058,
+   "tone": 0.528
+  },
+  {
+   "file": "bg_room_tone_42.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 1.5,
+   "line": 0.06,
+   "beta": 0.06,
+   "tone": 0.562
+  },
+  {
+   "file": "bg_room_tone_43.png",
+   "extractor": "m2a",
+   "recompose_mean_abs_error": 4.7,
+   "line": 0.08,
+   "beta": 0.092,
+   "tone": 0.386
+  },
+  {
+   "file": "bg_room_tone_43.png",
+   "extractor": "ani",
+   "recompose_mean_abs_error": 4.6,
+   "line": 0.063,
+   "beta": 0.091,
+   "tone": 0.403
+  }
+ ],
+ "line": [
+  {
+   "file": "a_desk_line_41.png",
+   "line_dark_ratio": 0.337,
+   "line_mid_grey_ratio": 0.292,
+   "line2tone_line_kept": 0.992,
+   "line2color_line_kept": 0.997
+  },
+  {
+   "file": "a_desk_line_42.png",
+   "line_dark_ratio": 0.068,
+   "line_mid_grey_ratio": 0.297,
+   "line2tone_line_kept": 0.98,
+   "line2color_line_kept": 0.988
+  },
+  {
+   "file": "a_desk_line_43.png",
+   "line_dark_ratio": 0.081,
+   "line_mid_grey_ratio": 0.327,
+   "line2tone_line_kept": 0.966,
+   "line2color_line_kept": 0.977
+  },
+  {
+   "file": "b_run_line_41.png",
+   "line_dark_ratio": 0.037,
+   "line_mid_grey_ratio": 0.089,
+   "line2tone_line_kept": 0.97,
+   "line2color_line_kept": 0.973
+  },
+  {
+   "file": "b_run_line_42.png",
+   "line_dark_ratio": 0.039,
+   "line_mid_grey_ratio": 0.101,
+   "line2tone_line_kept": 0.979,
+   "line2color_line_kept": 0.977
+  },
+  {
+   "file": "b_run_line_43.png",
+   "line_dark_ratio": 0.038,
+   "line_mid_grey_ratio": 0.139,
+   "line2tone_line_kept": 0.984,
+   "line2color_line_kept": 0.985
+  },
+  {
+   "file": "bg_room_line_41.png",
+   "line_dark_ratio": 0.05,
+   "line_mid_grey_ratio": 0.048,
+   "line2tone_line_kept": 0.921,
+   "line2color_line_kept": 0.927
+  },
+  {
+   "file": "bg_room_line_42.png",
+   "line_dark_ratio": 0.111,
+   "line_mid_grey_ratio": 0.804,
+   "line2tone_line_kept": 0.855,
+   "line2color_line_kept": 0.948
+  },
+  {
+   "file": "bg_room_line_43.png",
+   "line_dark_ratio": 0.136,
+   "line_mid_grey_ratio": 0.117,
+   "line2tone_line_kept": 0.922,
+   "line2color_line_kept": 0.969
+  }
+ ],
+ "mean_error_m2a": 6.2,
+ "mean_error_ani": 6.3,
+ "mean_kept_line2tone": 0.952,
+ "mean_kept_line2color": 0.971
+}

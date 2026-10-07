@@ -1,0 +1,205 @@
+{
+ "threshold": 0.17847511429108218,
+ "rows": [
+  {
+   "file": "a_back_1.png",
+   "edit": "back",
+   "real": 0.013,
+   "saturation": 0.107,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.099,
+   "same_person": true,
+   "changed_outside_person": 0.204,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_back_2.png",
+   "edit": "back",
+   "real": 0.019,
+   "saturation": 0.075,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.086,
+   "same_person": true,
+   "changed_outside_person": 0.249,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_bg_1.png",
+   "edit": "bg",
+   "real": 0.033,
+   "saturation": 0.267,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.002,
+   "same_person": true,
+   "changed_outside_person": 0.811,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_bg_2.png",
+   "edit": "bg",
+   "real": 0.04,
+   "saturation": 0.182,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.002,
+   "same_person": true,
+   "changed_outside_person": 0.783,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_cup_1.png",
+   "edit": "cup",
+   "real": 0.035,
+   "saturation": 0.131,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.001,
+   "same_person": true,
+   "changed_outside_person": 0.213,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_cup_2.png",
+   "edit": "cup",
+   "real": 0.056,
+   "saturation": 0.064,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.001,
+   "same_person": true,
+   "changed_outside_person": 0.224,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_sit_1.png",
+   "edit": "sit",
+   "real": 0.03,
+   "saturation": 0.118,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.0,
+   "same_person": true,
+   "changed_outside_person": 0.238,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_sit_2.png",
+   "edit": "sit",
+   "real": 0.067,
+   "saturation": 0.066,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.0,
+   "same_person": true,
+   "changed_outside_person": 0.229,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_smile_1.png",
+   "edit": "smile",
+   "real": 0.038,
+   "saturation": 0.135,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.001,
+   "same_person": true,
+   "changed_outside_person": 0.221,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "a_smile_2.png",
+   "edit": "smile",
+   "real": 0.053,
+   "saturation": 0.062,
+   "source_saturation": 0.11,
+   "ccip_diff": 0.001,
+   "same_person": true,
+   "changed_outside_person": 0.219,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "b_cup_1.png",
+   "edit": "cup",
+   "real": 0.027,
+   "saturation": 0.075,
+   "source_saturation": 0.054,
+   "ccip_diff": 0.001,
+   "same_person": true,
+   "changed_outside_person": 0.175,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "b_cup_2.png",
+   "edit": "cup",
+   "real": 0.032,
+   "saturation": 0.063,
+   "source_saturation": 0.054,
+   "ccip_diff": 0.0,
+   "same_person": true,
+   "changed_outside_person": 0.153,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "b_smile_1.png",
+   "edit": "smile",
+   "real": 0.03,
+   "saturation": 0.077,
+   "source_saturation": 0.054,
+   "ccip_diff": 0.002,
+   "same_person": true,
+   "changed_outside_person": 0.173,
+   "size": [
+    832,
+    1248
+   ]
+  },
+  {
+   "file": "b_smile_2.png",
+   "edit": "smile",
+   "real": 0.027,
+   "saturation": 0.063,
+   "source_saturation": 0.054,
+   "ccip_diff": 0.003,
+   "same_person": true,
+   "changed_outside_person": 0.15,
+   "size": [
+    832,
+    1248
+   ]
+  }
+ ],
+ "n": 14,
+ "same_person": 14,
+ "max_real": 0.067,
+ "max_saturation": 0.267
+}

@@ -1,0 +1,26 @@
+{
+ "a_mask_only": {
+  "max_diff": 247,
+  "changed_px_ratio_gt8": 0.11127,
+  "changed_px_ratio_gt0": 0.7843,
+  "ink_px": 5497,
+  "ink_lost_ratio": 0.00273,
+  "sec": 9.0
+ },
+ "b_mask_composite": {
+  "max_diff": 0,
+  "changed_px_ratio_gt8": 0.0,
+  "changed_px_ratio_gt0": 0.0,
+  "ink_px": 5497,
+  "ink_lost_ratio": 0.0,
+  "sec": 0.6
+ },
+ "c_bad_mask_composite": {
+  "max_diff": 255,
+  "changed_px_ratio_gt8": 0.0621,
+  "changed_px_ratio_gt0": 0.13904,
+  "ink_px": 5497,
+  "ink_lost_ratio": 0.14299,
+  "sec": 7.8
+ }
+}

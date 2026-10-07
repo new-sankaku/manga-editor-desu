@@ -1,0 +1,435 @@
+{
+ "scenes": {
+  "a_desk": "1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+  "b_run": "1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+  "bg_room": "scenery, no humans, classroom, desk, window, blackboard"
+ },
+ "tone": "manga, monochrome, greyscale, screentone",
+ "line": "lineart, monochrome, greyscale, sketch, white background",
+ "line_neg": "screentone, shading, grey, halftone, color",
+ "color": "anime coloring, flat color",
+ "union": "xinsir\\union-sdxl-1.0-promax.safetensors",
+ "cn_type": "canny/lineart/anime_lineart/mlsd",
+ "cn_strength": 0.9,
+ "pre": {
+  "m2a": "Manga2Anime_LineArt_Preprocessor",
+  "ani": "AnimeLineArtPreprocessor"
+ },
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "a_desk_tone_41.png",
+   "scene": "a_desk",
+   "mode": "tone",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 55.7
+  },
+  {
+   "file": "a_desk_line_41.png",
+   "scene": "a_desk",
+   "mode": "line",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 7.3
+  },
+  {
+   "file": "a_desk_tone_42.png",
+   "scene": "a_desk",
+   "mode": "tone",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 8.0
+  },
+  {
+   "file": "a_desk_line_42.png",
+   "scene": "a_desk",
+   "mode": "line",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "a_desk_tone_43.png",
+   "scene": "a_desk",
+   "mode": "tone",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 7.5
+  },
+  {
+   "file": "a_desk_line_43.png",
+   "scene": "a_desk",
+   "mode": "line",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 7.3
+  },
+  {
+   "file": "b_run_tone_41.png",
+   "scene": "b_run",
+   "mode": "tone",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 7.4
+  },
+  {
+   "file": "b_run_line_41.png",
+   "scene": "b_run",
+   "mode": "line",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 7.3
+  },
+  {
+   "file": "b_run_tone_42.png",
+   "scene": "b_run",
+   "mode": "tone",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 7.6
+  },
+  {
+   "file": "b_run_line_42.png",
+   "scene": "b_run",
+   "mode": "line",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 7.3
+  },
+  {
+   "file": "b_run_tone_43.png",
+   "scene": "b_run",
+   "mode": "tone",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 7.7
+  },
+  {
+   "file": "b_run_line_43.png",
+   "scene": "b_run",
+   "mode": "line",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 7.6
+  },
+  {
+   "file": "bg_room_tone_41.png",
+   "scene": "bg_room",
+   "mode": "tone",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 7.8
+  },
+  {
+   "file": "bg_room_line_41.png",
+   "scene": "bg_room",
+   "mode": "line",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 7.2
+  },
+  {
+   "file": "bg_room_tone_42.png",
+   "scene": "bg_room",
+   "mode": "tone",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 7.7
+  },
+  {
+   "file": "bg_room_line_42.png",
+   "scene": "bg_room",
+   "mode": "line",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 7.7
+  },
+  {
+   "file": "bg_room_tone_43.png",
+   "scene": "bg_room",
+   "mode": "tone",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 9.1
+  },
+  {
+   "file": "bg_room_line_43.png",
+   "scene": "bg_room",
+   "mode": "line",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, lineart, monochrome, greyscale, sketch, white background, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 7.7
+  },
+  {
+   "file": "a_desk_tone_41_xm2a.png",
+   "scene": "a_desk",
+   "mode": "extract_m2a",
+   "seed": 41,
+   "sec": 19.1
+  },
+  {
+   "file": "a_desk_tone_41_xani.png",
+   "scene": "a_desk",
+   "mode": "extract_ani",
+   "seed": 41,
+   "sec": 18.3
+  },
+  {
+   "file": "a_desk_line2tone_41.png",
+   "scene": "a_desk",
+   "mode": "line2tone",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 43.6
+  },
+  {
+   "file": "a_desk_line2color_41.png",
+   "scene": "a_desk",
+   "mode": "line2color",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 10.9
+  },
+  {
+   "file": "a_desk_tone_42_xm2a.png",
+   "scene": "a_desk",
+   "mode": "extract_m2a",
+   "seed": 42,
+   "sec": 3.1
+  },
+  {
+   "file": "a_desk_tone_42_xani.png",
+   "scene": "a_desk",
+   "mode": "extract_ani",
+   "seed": 42,
+   "sec": 1.1
+  },
+  {
+   "file": "a_desk_line2tone_42.png",
+   "scene": "a_desk",
+   "mode": "line2tone",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 41.8
+  },
+  {
+   "file": "a_desk_line2color_42.png",
+   "scene": "a_desk",
+   "mode": "line2color",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 12.3
+  },
+  {
+   "file": "a_desk_tone_43_xm2a.png",
+   "scene": "a_desk",
+   "mode": "extract_m2a",
+   "seed": 43,
+   "sec": 3.3
+  },
+  {
+   "file": "a_desk_tone_43_xani.png",
+   "scene": "a_desk",
+   "mode": "extract_ani",
+   "seed": 43,
+   "sec": 1.6
+  },
+  {
+   "file": "a_desk_line2tone_43.png",
+   "scene": "a_desk",
+   "mode": "line2tone",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 62.8
+  },
+  {
+   "file": "a_desk_line2color_43.png",
+   "scene": "a_desk",
+   "mode": "line2color",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 10.4
+  },
+  {
+   "file": "b_run_tone_41_xm2a.png",
+   "scene": "b_run",
+   "mode": "extract_m2a",
+   "seed": 41,
+   "sec": 2.7
+  },
+  {
+   "file": "b_run_tone_41_xani.png",
+   "scene": "b_run",
+   "mode": "extract_ani",
+   "seed": 41,
+   "sec": 1.1
+  },
+  {
+   "file": "b_run_line2tone_41.png",
+   "scene": "b_run",
+   "mode": "line2tone",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 42.8
+  },
+  {
+   "file": "b_run_line2color_41.png",
+   "scene": "b_run",
+   "mode": "line2color",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 10.7
+  },
+  {
+   "file": "b_run_tone_42_xm2a.png",
+   "scene": "b_run",
+   "mode": "extract_m2a",
+   "seed": 42,
+   "sec": 3.2
+  },
+  {
+   "file": "b_run_tone_42_xani.png",
+   "scene": "b_run",
+   "mode": "extract_ani",
+   "seed": 42,
+   "sec": 1.7
+  },
+  {
+   "file": "b_run_line2tone_42.png",
+   "scene": "b_run",
+   "mode": "line2tone",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 48.9
+  },
+  {
+   "file": "b_run_line2color_42.png",
+   "scene": "b_run",
+   "mode": "line2color",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 10.5
+  },
+  {
+   "file": "b_run_tone_43_xm2a.png",
+   "scene": "b_run",
+   "mode": "extract_m2a",
+   "seed": 43,
+   "sec": 2.7
+  },
+  {
+   "file": "b_run_tone_43_xani.png",
+   "scene": "b_run",
+   "mode": "extract_ani",
+   "seed": 43,
+   "sec": 1.1
+  },
+  {
+   "file": "b_run_line2tone_43.png",
+   "scene": "b_run",
+   "mode": "line2tone",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 28.8
+  },
+  {
+   "file": "b_run_line2color_43.png",
+   "scene": "b_run",
+   "mode": "line2color",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, running, full body, street",
+   "sec": 12.3
+  },
+  {
+   "file": "bg_room_tone_41_xm2a.png",
+   "scene": "bg_room",
+   "mode": "extract_m2a",
+   "seed": 41,
+   "sec": 3.7
+  },
+  {
+   "file": "bg_room_tone_41_xani.png",
+   "scene": "bg_room",
+   "mode": "extract_ani",
+   "seed": 41,
+   "sec": 1.8
+  },
+  {
+   "file": "bg_room_line2tone_41.png",
+   "scene": "bg_room",
+   "mode": "line2tone",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 59.2
+  },
+  {
+   "file": "bg_room_line2color_41.png",
+   "scene": "bg_room",
+   "mode": "line2color",
+   "seed": 41,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 12.6
+  },
+  {
+   "file": "bg_room_tone_42_xm2a.png",
+   "scene": "bg_room",
+   "mode": "extract_m2a",
+   "seed": 42,
+   "sec": 4.2
+  },
+  {
+   "file": "bg_room_tone_42_xani.png",
+   "scene": "bg_room",
+   "mode": "extract_ani",
+   "seed": 42,
+   "sec": 1.8
+  },
+  {
+   "file": "bg_room_line2tone_42.png",
+   "scene": "bg_room",
+   "mode": "line2tone",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 58.0
+  },
+  {
+   "file": "bg_room_line2color_42.png",
+   "scene": "bg_room",
+   "mode": "line2color",
+   "seed": 42,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 10.9
+  },
+  {
+   "file": "bg_room_tone_43_xm2a.png",
+   "scene": "bg_room",
+   "mode": "extract_m2a",
+   "seed": 43,
+   "sec": 2.7
+  },
+  {
+   "file": "bg_room_tone_43_xani.png",
+   "scene": "bg_room",
+   "mode": "extract_ani",
+   "seed": 43,
+   "sec": 1.2
+  },
+  {
+   "file": "bg_room_line2tone_43.png",
+   "scene": "bg_room",
+   "mode": "line2tone",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 60.6
+  },
+  {
+   "file": "bg_room_line2color_43.png",
+   "scene": "bg_room",
+   "mode": "line2color",
+   "seed": 43,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, classroom, desk, window, blackboard",
+   "sec": 12.6
+  }
+ ]
+}

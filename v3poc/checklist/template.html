@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V3検証の一覧</title>
+<style>
+:root{--bg:#eceef0;--surface:#fff;--surface-2:#f5f6f7;--line:#d9dce0;--ink:#1d2126;--ink-2:#4a525c;--ink-3:#79828d;--acc:#2f5f8f;--warn:#a4452c;--ok:#2e6b45;--font:"Yu Gothic UI","Meiryo",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 var(--font)}
+header{position:sticky;top:0;z-index:5;background:var(--surface);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+h1{font-size:16px;margin:0 8px 0 0;white-space:nowrap}
+input[type=search]{flex:1 1 200px;min-width:0;font:inherit;padding:5px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:var(--surface);padding:4px 10px;cursor:pointer;color:var(--ink-2)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.btn{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.cnt{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+main{max-width:1100px;margin:0 auto;padding:12px 16px 80px;display:flex;flex-direction:column;gap:18px}
+.gen{display:flex;flex-direction:column;gap:4px}
+.gen label{font-size:12px;color:var(--ink-3)}
+section h2{font-size:15px;margin:6px 0 8px;padding-bottom:4px;border-bottom:2px solid var(--ink)}
+section h3{font-size:13px;color:var(--ink-2);margin:12px 0 6px}
+.row{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;grid-template-columns:52px 1fr;gap:4px 12px;margin-bottom:6px}
+.row.has{border-left:4px solid var(--acc)}
+.id{font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink-2)}
+.txt{min-width:0}
+.imp{color:var(--warn);font-weight:700}
+.ex{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12px;color:var(--ink-3);margin-top:2px}
+.ex b{font-weight:600;color:var(--ink-2)}
+.res{grid-column:2;font-size:13px;background:var(--surface-2);border-radius:6px;padding:6px 10px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.st{font-size:11px;font-weight:700;padding:1px 7px;border-radius:9px;background:var(--ink-3);color:#fff;white-space:nowrap}
+.st.s済{background:var(--ok)}.st.s一部{background:var(--acc)}.st.s検証しない{background:#8a8f96}.st.s未実施{background:#b9bec4;color:var(--ink)}
+.res a{color:var(--acc)}
+textarea{grid-column:2;font:inherit;font-size:13px;width:100%;min-height:34px;resize:vertical;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface-2)}
+textarea:focus{outline:2px solid var(--acc);background:#fff}
+.gen textarea{min-height:60px}
+.hide{display:none}
+@media (max-width:520px){.row{grid-template-columns:1fr}.res,textarea{grid-column:1}}
+</style>
+</head>
+<body>
+<header>
+  <h1>V3検証の一覧</h1>
+  <input type="search" id="q" placeholder="番号・言葉で絞る">
+  <div class="seg" id="flt">
+    <button type="button" data-f="all" aria-pressed="true">全部</button>
+    <button type="button" data-f="imp" aria-pressed="false">重要</button>
+    <button type="button" data-f="memo" aria-pressed="false">メモあり</button>
+    <button type="button" data-f="res" aria-pressed="false">結果あり</button>
+  </div>
+  <span class="cnt" id="cnt"></span>
+  <button type="button" class="btn pri" id="exp">書き出し</button>
+  <button type="button" class="btn" id="imp">読み込み</button>
+  <input type="file" id="file" accept=".json" class="hide">
+</header>
+<main id="main"></main>
+<script>
+const DATA = /*DATA*/null;
+const KEY = 'v3-verify-memo';
+let memo = {};
+try { memo = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { memo = {}; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(memo)); } catch (e) {} };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/`(.+?)`/g, '<code>$1</code>').replace(/【重要】/g, '<span class="imp">【重要】</span>');
+let filter = 'all';
+
+function render() {
+  const m = document.getElementById('main');
+  let h = `<div class="gen"><label for="m-general">全体へのメモ</label><textarea id="m-general" data-id="general">${esc(memo.general || '')}</textarea></div>`;
+  for (const s of DATA.secs) {
+    h += `<section data-sec><h2>${s.no}. ${esc(s.title)}</h2>`;
+    let sub = null;
+    for (const r of s.rows) {
+      if (r.sub !== sub) { sub = r.sub; if (sub) h += `<h3>${esc(sub)}</h3>`; }
+      const res = DATA.results[r.id];
+      const ex = r.extra.filter(([k, v]) => v && v !== '—').map(([k, v]) => `<span><b>${esc(k)}</b> ${md(v)}</span>`).join('');
+      h += `<div class="row${memo[r.id] ? ' has' : ''}" data-id="${r.id}" data-imp="${r.text.includes('【重要】') ? 1 : 0}" data-res="${res ? 1 : 0}" data-s="${esc((r.id + ' ' + r.text + ' ' + r.extra.map((x) => x[1]).join(' ')).toLowerCase())}">
+        <div class="id">${r.id}</div><div class="txt">${md(r.text)}${ex ? `<div class="ex">${ex}</div>` : ''}</div>
+        ${res ? `<div class="res"><span class="st s${esc(res.state)}">${esc(res.state)}</span><span>${md(res.text)}</span>${res.link ? `<a href="${esc(res.link)}">記録</a>` : ''}</div>` : ''}
+        <textarea rows="1" data-id="${r.id}" aria-label="${r.id}のメモ" placeholder="メモ">${esc(memo[r.id] || '')}</textarea></div>`;
+    }
+    h += '</section>';
+  }
+  m.innerHTML = h;
+  apply();
+}
+
+function apply() {
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  let n = 0;
+  document.querySelectorAll('.row').forEach((el) => {
+    const id = el.dataset.id;
+    const ok = (!q || el.dataset.s.includes(q)) &&
+      (filter === 'all' || (filter === 'imp' && el.dataset.imp === '1') || (filter === 'memo' && memo[id]) || (filter === 'res' && el.dataset.res === '1'));
+    el.classList.toggle('hide', !ok);
+    if (ok) n++;
+  });
+  document.querySelectorAll('section[data-sec]').forEach((s) => s.classList.toggle('hide', !s.querySelector('.row:not(.hide)')));
+  document.querySelectorAll('section h3').forEach((h3) => {
+    let e = h3.nextElementSibling, any = false;
+    while (e && e.classList.contains('row')) { if (!e.classList.contains('hide')) any = true; e = e.nextElementSibling; }
+    h3.classList.toggle('hide', !any);
+  });
+  const nm = Object.keys(memo).filter((k) => memo[k]).length;
+  document.getElementById('cnt').textContent = `${n}行を表示・メモ${nm}件`;
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target.matches('textarea[data-id]')) {
+    const id = e.target.dataset.id, v = e.target.value;
+    if (v.trim()) memo[id] = v; else delete memo[id];
+    save();
+    const row = e.target.closest('.row');
+    if (row) row.classList.toggle('has', !!memo[id]);
+    const nm = Object.keys(memo).filter((k) => memo[k]).length;
+    document.getElementById('cnt').textContent = document.getElementById('cnt').textContent.replace(/メモ\d+件/, `メモ${nm}件`);
+  }
+  if (e.target.id === 'q') apply();
+});
+document.getElementById('flt').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  filter = b.dataset.f;
+  document.querySelectorAll('#flt button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+  apply();
+});
+document.getElementById('exp').addEventListener('click', () => {
+  const rows = [];
+  for (const s of DATA.secs) for (const r of s.rows) if (memo[r.id]) rows.push({ id: r.id, section: `${s.no}. ${s.title}`, item: r.text, memo: memo[r.id] });
+  const out = { kind: 'V3検証の一覧のメモ', exported_at: new Date().toISOString(), general: memo.general || '', memos: rows };
+  const d = new Date(), p = (x) => String(x).padStart(2, '0');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: 'application/json' }));
+  a.download = `V3検証メモ_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+});
+document.getElementById('imp').addEventListener('click', () => document.getElementById('file').click());
+document.getElementById('file').addEventListener('change', async (e) => {
+  const f = e.target.files[0]; if (!f) return;
+  const j = JSON.parse(await f.text());
+  if (j.general) memo.general = j.general;
+  for (const r of j.memos || []) memo[r.id] = r.memo;
+  save(); render(); e.target.value = '';
+});
+render();
+</script>
+</body>
+</html>

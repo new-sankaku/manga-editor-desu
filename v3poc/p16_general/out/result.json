@@ -1,0 +1,976 @@
+{
+ "rows": [
+  {
+   "file": "long_yoko_girl_street_81.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.639
+  },
+  {
+   "file": "long_yoko_girl_street_82.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_girl_street_83.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.401
+  },
+  {
+   "file": "long_yoko_girl_room_81.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_girl_room_82.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.46
+  },
+  {
+   "file": "long_yoko_girl_room_83.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.738
+  },
+  {
+   "file": "long_yoko_girl_rural_81.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_girl_rural_82.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.413
+  },
+  {
+   "file": "long_yoko_girl_rural_83.png",
+   "target": "long_yoko",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.609
+  },
+  {
+   "file": "long_yoko_boy_street_81.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "seed": 81,
+   "persons": 2,
+   "h_ratio": 0.49
+  },
+  {
+   "file": "long_yoko_boy_street_82.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.403
+  },
+  {
+   "file": "long_yoko_boy_street_83.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.366
+  },
+  {
+   "file": "long_yoko_boy_room_81.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_boy_room_82.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.425
+  },
+  {
+   "file": "long_yoko_boy_room_83.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.87
+  },
+  {
+   "file": "long_yoko_boy_rural_81.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.681
+  },
+  {
+   "file": "long_yoko_boy_rural_82.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.564
+  },
+  {
+   "file": "long_yoko_boy_rural_83.png",
+   "target": "long_yoko",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.753
+  },
+  {
+   "file": "long_yoko_old_street_81.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.396
+  },
+  {
+   "file": "long_yoko_old_street_82.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.366
+  },
+  {
+   "file": "long_yoko_old_street_83.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "street",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_old_room_81.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_old_room_82.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_old_room_83.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.609
+  },
+  {
+   "file": "long_yoko_old_rural_81.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.443
+  },
+  {
+   "file": "long_yoko_old_rural_82.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "long_yoko_old_rural_83.png",
+   "target": "long_yoko",
+   "chara": "old",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.394
+  },
+  {
+   "file": "long_tate_girl_street_81.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.198
+  },
+  {
+   "file": "long_tate_girl_street_82.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.176
+  },
+  {
+   "file": "long_tate_girl_street_83.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.185
+  },
+  {
+   "file": "long_tate_girl_room_81.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "seed": 81,
+   "persons": 3,
+   "h_ratio": 0.218
+  },
+  {
+   "file": "long_tate_girl_room_82.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.12
+  },
+  {
+   "file": "long_tate_girl_room_83.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.233
+  },
+  {
+   "file": "long_tate_girl_rural_81.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.271
+  },
+  {
+   "file": "long_tate_girl_rural_82.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.296
+  },
+  {
+   "file": "long_tate_girl_rural_83.png",
+   "target": "long_tate",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.305
+  },
+  {
+   "file": "long_tate_boy_street_81.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.206
+  },
+  {
+   "file": "long_tate_boy_street_82.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.267
+  },
+  {
+   "file": "long_tate_boy_street_83.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.269
+  },
+  {
+   "file": "long_tate_boy_room_81.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "seed": 81,
+   "persons": 3,
+   "h_ratio": 0.199
+  },
+  {
+   "file": "long_tate_boy_room_82.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.169
+  },
+  {
+   "file": "long_tate_boy_room_83.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.417
+  },
+  {
+   "file": "long_tate_boy_rural_81.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.294
+  },
+  {
+   "file": "long_tate_boy_rural_82.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.333
+  },
+  {
+   "file": "long_tate_boy_rural_83.png",
+   "target": "long_tate",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.337
+  },
+  {
+   "file": "long_tate_old_street_81.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "seed": 81,
+   "persons": 2,
+   "h_ratio": 0.178
+  },
+  {
+   "file": "long_tate_old_street_82.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.174
+  },
+  {
+   "file": "long_tate_old_street_83.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.184
+  },
+  {
+   "file": "long_tate_old_room_81.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "seed": 81,
+   "persons": 2,
+   "h_ratio": 0.22
+  },
+  {
+   "file": "long_tate_old_room_82.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "seed": 82,
+   "persons": 4,
+   "h_ratio": 0.161
+  },
+  {
+   "file": "long_tate_old_room_83.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "room",
+   "seed": 83,
+   "persons": 2,
+   "h_ratio": 0.325
+  },
+  {
+   "file": "long_tate_old_rural_81.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.237
+  },
+  {
+   "file": "long_tate_old_rural_82.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.276
+  },
+  {
+   "file": "long_tate_old_rural_83.png",
+   "target": "long_tate",
+   "chara": "old",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.29
+  },
+  {
+   "file": "full_std_girl_street_81.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.415
+  },
+  {
+   "file": "full_std_girl_street_82.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.5
+  },
+  {
+   "file": "full_std_girl_street_83.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.481
+  },
+  {
+   "file": "full_std_girl_room_81.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.628
+  },
+  {
+   "file": "full_std_girl_room_82.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.692
+  },
+  {
+   "file": "full_std_girl_room_83.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.578
+  },
+  {
+   "file": "full_std_girl_rural_81.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.568
+  },
+  {
+   "file": "full_std_girl_rural_82.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.509
+  },
+  {
+   "file": "full_std_girl_rural_83.png",
+   "target": "full_std",
+   "chara": "girl",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.571
+  },
+  {
+   "file": "full_std_boy_street_81.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.504
+  },
+  {
+   "file": "full_std_boy_street_82.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.676
+  },
+  {
+   "file": "full_std_boy_street_83.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.696
+  },
+  {
+   "file": "full_std_boy_room_81.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.836
+  },
+  {
+   "file": "full_std_boy_room_82.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.708
+  },
+  {
+   "file": "full_std_boy_room_83.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.576
+  },
+  {
+   "file": "full_std_boy_rural_81.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.467
+  },
+  {
+   "file": "full_std_boy_rural_82.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.616
+  },
+  {
+   "file": "full_std_boy_rural_83.png",
+   "target": "full_std",
+   "chara": "boy",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.651
+  },
+  {
+   "file": "full_std_old_street_81.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.314
+  },
+  {
+   "file": "full_std_old_street_82.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.506
+  },
+  {
+   "file": "full_std_old_street_83.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "street",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.464
+  },
+  {
+   "file": "full_std_old_room_81.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.775
+  },
+  {
+   "file": "full_std_old_room_82.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.483
+  },
+  {
+   "file": "full_std_old_room_83.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "room",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.608
+  },
+  {
+   "file": "full_std_old_rural_81.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.529
+  },
+  {
+   "file": "full_std_old_rural_82.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.473
+  },
+  {
+   "file": "full_std_old_rural_83.png",
+   "target": "full_std",
+   "chara": "old",
+   "place": "rural",
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.364
+  },
+  {
+   "file": "bg_yoko_none_street_81.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_street_82.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_street_83.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "street",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_room_81.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_room_82.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_room_83.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "room",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_rural_81.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_rural_82.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_yoko_none_rural_83.png",
+   "target": "bg_yoko",
+   "chara": null,
+   "place": "rural",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_street_81.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_street_82.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_street_83.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "street",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_room_81.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_room_82.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_room_83.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "room",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_rural_81.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "seed": 81,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_rural_82.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "seed": 82,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "bg_tate_none_rural_83.png",
+   "target": "bg_tate",
+   "chara": null,
+   "place": "rural",
+   "seed": 83,
+   "persons": 0,
+   "h_ratio": null
+  },
+  {
+   "file": "chara_only_girl_none_81.png",
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.987
+  },
+  {
+   "file": "chara_only_girl_none_82.png",
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.993
+  },
+  {
+   "file": "chara_only_girl_none_83.png",
+   "target": "chara_only",
+   "chara": "girl",
+   "place": null,
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.975
+  },
+  {
+   "file": "chara_only_boy_none_81.png",
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.96
+  },
+  {
+   "file": "chara_only_boy_none_82.png",
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.996
+  },
+  {
+   "file": "chara_only_boy_none_83.png",
+   "target": "chara_only",
+   "chara": "boy",
+   "place": null,
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.97
+  },
+  {
+   "file": "chara_only_old_none_81.png",
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "seed": 81,
+   "persons": 1,
+   "h_ratio": 0.966
+  },
+  {
+   "file": "chara_only_old_none_82.png",
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "seed": 82,
+   "persons": 1,
+   "h_ratio": 0.98
+  },
+  {
+   "file": "chara_only_old_none_83.png",
+   "target": "chara_only",
+   "chara": "old",
+   "place": null,
+   "seed": 83,
+   "persons": 1,
+   "h_ratio": 0.978
+  }
+ ]
+}

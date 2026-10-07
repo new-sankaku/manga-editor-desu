@@ -1,0 +1,1854 @@
+{
+ "styles": {
+  "tone": {
+   "name": "白黒・トーン",
+   "words": "manga, monochrome, greyscale, screentone"
+  },
+  "pen": {
+   "name": "白黒・ペン線の描き込み",
+   "words": "monochrome, greyscale, lineart, crosshatching, hatching (texture)"
+  },
+  "retro": {
+   "name": "白黒・90年代風",
+   "words": "monochrome, greyscale, retro artstyle, 1990s (style)"
+  },
+  "color": {
+   "name": "カラー・Web向け",
+   "words": "anime coloring, flat color"
+  }
+ },
+ "targets": {
+  "long_yoko": {
+   "name": "横長コマの引き",
+   "size": [
+    1536,
+    576
+   ],
+   "add": "wide shot, scenery",
+   "add_negative": "",
+   "human": true,
+   "place": true,
+   "cut": false
+  },
+  "long_tate": {
+   "name": "縦長コマの引き",
+   "size": [
+    576,
+    1536
+   ],
+   "add": "wide shot, scenery",
+   "add_negative": "",
+   "human": true,
+   "place": true,
+   "cut": false
+  },
+  "full_std": {
+   "name": "標準コマの全身と余白",
+   "size": [
+    1152,
+    896
+   ],
+   "add": "full body, wide shot",
+   "add_negative": "",
+   "human": true,
+   "place": true,
+   "cut": false
+  },
+  "chara_only": {
+   "name": "人物だけ（背景なし）",
+   "size": [
+    832,
+    1216
+   ],
+   "add": "full body, simple background, white background",
+   "add_negative": "scenery, building, detailed background",
+   "human": true,
+   "place": false,
+   "cut": true
+  },
+  "bg_yoko": {
+   "name": "背景だけ・横長",
+   "size": [
+    1536,
+    576
+   ],
+   "add": "scenery, no humans",
+   "add_negative": "1girl, 1boy, people",
+   "human": false,
+   "place": true,
+   "cut": false
+  },
+  "bg_tate": {
+   "name": "背景だけ・縦長",
+   "size": [
+    576,
+    1536
+   ],
+   "add": "scenery, no humans",
+   "add_negative": "1girl, 1boy, people",
+   "human": false,
+   "place": true,
+   "cut": false
+  },
+  "bg_std": {
+   "name": "背景だけ・標準",
+   "size": [
+    1152,
+    896
+   ],
+   "add": "scenery, no humans",
+   "add_negative": "1girl, 1boy, people",
+   "human": false,
+   "place": true,
+   "cut": false
+  }
+ },
+ "parts": {
+  "quality": "masterpiece, best quality",
+  "chara": "1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+  "place": "city street, buildings",
+  "negative_base": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry"
+ },
+ "runs": [
+  {
+   "file": "tone_long_yoko_71.png",
+   "style": "tone",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 7.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_long_yoko_72.png",
+   "style": "tone",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 6.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_long_yoko_73.png",
+   "style": "tone",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 6.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_long_tate_71.png",
+   "style": "tone",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 6.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_long_tate_72.png",
+   "style": "tone",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 7.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_long_tate_73.png",
+   "style": "tone",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_full_std_71.png",
+   "style": "tone",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 14.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_full_std_72.png",
+   "style": "tone",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 13.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_full_std_73.png",
+   "style": "tone",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 32.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_chara_only_71.png",
+   "style": "tone",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 31.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "tone_chara_only_71_cut.png"
+   }
+  },
+  {
+   "file": "tone_chara_only_72.png",
+   "style": "tone",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 38.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "tone_chara_only_72_cut.png"
+   }
+  },
+  {
+   "file": "tone_chara_only_73.png",
+   "style": "tone",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 22.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "tone_chara_only_73_cut.png"
+   }
+  },
+  {
+   "file": "tone_bg_yoko_71.png",
+   "style": "tone",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 15.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_yoko_72.png",
+   "style": "tone",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 15.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_yoko_73.png",
+   "style": "tone",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 14.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_tate_71.png",
+   "style": "tone",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 13.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_tate_72.png",
+   "style": "tone",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 24.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_tate_73.png",
+   "style": "tone",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 25.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_std_71.png",
+   "style": "tone",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 23.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_std_72.png",
+   "style": "tone",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 15.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "tone_bg_std_73.png",
+   "style": "tone",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 15.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_long_yoko_71.png",
+   "style": "pen",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 15.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_long_yoko_72.png",
+   "style": "pen",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 13.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_long_yoko_73.png",
+   "style": "pen",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 12.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_long_tate_71.png",
+   "style": "pen",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 20.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_long_tate_72.png",
+   "style": "pen",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 20.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_long_tate_73.png",
+   "style": "pen",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 20.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_full_std_71.png",
+   "style": "pen",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 15.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_full_std_72.png",
+   "style": "pen",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 15.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_full_std_73.png",
+   "style": "pen",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 15.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_chara_only_71.png",
+   "style": "pen",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 17.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "pen_chara_only_71_cut.png"
+   }
+  },
+  {
+   "file": "pen_chara_only_72.png",
+   "style": "pen",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 16.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "pen_chara_only_72_cut.png"
+   }
+  },
+  {
+   "file": "pen_chara_only_73.png",
+   "style": "pen",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 24.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "pen_chara_only_73_cut.png"
+   }
+  },
+  {
+   "file": "pen_bg_yoko_71.png",
+   "style": "pen",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 20.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_yoko_72.png",
+   "style": "pen",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 20.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_yoko_73.png",
+   "style": "pen",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 14.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_tate_71.png",
+   "style": "pen",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 14.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_tate_72.png",
+   "style": "pen",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 14.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_tate_73.png",
+   "style": "pen",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 13.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_std_71.png",
+   "style": "pen",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 14.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_std_72.png",
+   "style": "pen",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 22.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "pen_bg_std_73.png",
+   "style": "pen",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 26.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, lineart, crosshatching, hatching (texture), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_long_yoko_71.png",
+   "style": "retro",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 21.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_long_yoko_72.png",
+   "style": "retro",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 14.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_long_yoko_73.png",
+   "style": "retro",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 15.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_long_tate_71.png",
+   "style": "retro",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 14.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_long_tate_72.png",
+   "style": "retro",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 13.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_long_tate_73.png",
+   "style": "retro",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 13.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_full_std_71.png",
+   "style": "retro",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 22.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_full_std_72.png",
+   "style": "retro",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 21.9,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_full_std_73.png",
+   "style": "retro",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 21.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_chara_only_71.png",
+   "style": "retro",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 18.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "retro_chara_only_71_cut.png"
+   }
+  },
+  {
+   "file": "retro_chara_only_72.png",
+   "style": "retro",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 18.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "retro_chara_only_72_cut.png"
+   }
+  },
+  {
+   "file": "retro_chara_only_73.png",
+   "style": "retro",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 18.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "retro_chara_only_73_cut.png"
+   }
+  },
+  {
+   "file": "retro_bg_yoko_71.png",
+   "style": "retro",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 14.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_yoko_72.png",
+   "style": "retro",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 14.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_yoko_73.png",
+   "style": "retro",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 25.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_tate_71.png",
+   "style": "retro",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 24.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_tate_72.png",
+   "style": "retro",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 24.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_tate_73.png",
+   "style": "retro",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 15.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_std_71.png",
+   "style": "retro",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 15.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_std_72.png",
+   "style": "retro",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 17.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "retro_bg_std_73.png",
+   "style": "retro",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 15.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, monochrome, greyscale, retro artstyle, 1990s (style), scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_long_yoko_71.png",
+   "style": "color",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 13.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_long_yoko_72.png",
+   "style": "color",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 22.0,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_long_yoko_73.png",
+   "style": "color",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 22.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_long_tate_71.png",
+   "style": "color",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 22.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_long_tate_72.png",
+   "style": "color",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 15.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_long_tate_73.png",
+   "style": "color",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 14.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, wide shot, scenery, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_full_std_71.png",
+   "style": "color",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 16.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_full_std_72.png",
+   "style": "color",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 15.3,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_full_std_73.png",
+   "style": "color",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 14.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, full body, wide shot, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_chara_only_71.png",
+   "style": "color",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 26.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "color_chara_only_71_cut.png"
+   }
+  },
+  {
+   "file": "color_chara_only_72.png",
+   "style": "color",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 27.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "color_chara_only_72_cut.png"
+   }
+  },
+  {
+   "file": "color_chara_only_73.png",
+   "style": "color",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 26.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    832,
+    1216
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, full body, simple background, white background, 1girl, solo, short black hair, bob cut, glasses, school uniform, blazer, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, scenery, building, detailed background",
+   "control": null,
+   "post": {
+    "node": "BiRefNetRMBG（ComfyUI-RMBG）",
+    "model": "BiRefNet_toonout",
+    "background": "Alpha",
+    "file": "color_chara_only_73_cut.png"
+   }
+  },
+  {
+   "file": "color_bg_yoko_71.png",
+   "style": "color",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 15.4,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_yoko_72.png",
+   "style": "color",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 14.6,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_yoko_73.png",
+   "style": "color",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 16.1,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1536,
+    576
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_tate_71.png",
+   "style": "color",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 6.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_tate_72.png",
+   "style": "color",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 7.5,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_tate_73.png",
+   "style": "color",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 7.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    576,
+    1536
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_std_71.png",
+   "style": "color",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 9.2,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_std_72.png",
+   "style": "color",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 8.7,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  },
+  {
+   "file": "color_bg_std_73.png",
+   "style": "color",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 8.8,
+   "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+   "size": [
+    1152,
+    896
+   ],
+   "steps": 25,
+   "cfg": 5.0,
+   "sampler": "euler_ancestral",
+   "scheduler": "normal",
+   "positive": "masterpiece, best quality, anime coloring, flat color, scenery, no humans, city street, buildings",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+   "control": null,
+   "post": null
+  }
+ ]
+}

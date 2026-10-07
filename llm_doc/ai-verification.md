@@ -570,6 +570,31 @@ LoadImage の値に `%image_char%` のようなプレースホルダを書いて
 
 ---
 
+### 3.x Upscalerのモデル選択は「仕組みはあるが繋がっていない」（2026-08-31 確認）
+
+実機に4本入っているが、ComfyUIのワークフローが使っているのは1本だけ。
+
+```
+4x-UltraSharp.pth              未使用
+RealESRGAN_x4plus.pth          未使用
+RealESRGAN_x4plus_anime_6B.pth Upscaler.json が使用中（焼き込み）
+SwinIR_4x.pth                  未使用
+```
+
+**選択肢を作る仕組みは既にある。** `comfyuiFetchUpscaler()`
+（`comfyui-management.js:510`）が `/object_info` の `UpscaleModelLoader.model_name` を読み、
+`updateUpscalerDropdown()` でドロップダウンを埋めている。
+
+**しかしそのドロップダウン（`text2img_hr_upscaler`）を読んでいるのは
+`sdwebui-settings.js:151` だけ**で、SD WebUI の hires-fix 用。
+ComfyUI側は `ComfyUI_Upscaler` の `model_name` に焼き込まれたままで、
+生成時に差し替える経路が無い。
+
+**ワークフローを4本並べるのは誤り。** 中身は `model_name` 一行しか違わない。
+既存のドロップダウンをComfyUI側へ繋ぎ替えるのが正しい。
+選択肢は `/object_info` から取るので、後からモデルを足しても自動で選べる。
+
+
 ## 4. ブラウザの実測（`file://` で実行）
 
 | 項目 | 結果 |

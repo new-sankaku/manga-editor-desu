@@ -1,0 +1,530 @@
+{
+ "model": "sonnet",
+ "cost_usd": 0.773,
+ "summary_hit_of_eye_ok": {
+  "from_behind": "7/8",
+  "from_above": "8/8",
+  "from_below": "8/8",
+  "from_side": "6/6",
+  "close_up": "4/5",
+  "upper_body": "7/8",
+  "full_body": "8/8",
+  "very_wide": "7/8"
+ },
+ "total": "55/59",
+ "rows": [
+  {
+   "file": "from_behind_1001.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_behind_1002.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "見上げ",
+   "hit": false
+  },
+  {
+   "file": "from_behind_1003.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_behind_1004.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_behind_1005.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_behind_1006.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_behind_1007.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_behind_1008.png",
+   "instr": "from_behind",
+   "eye_ok": true,
+   "want": "後ろ",
+   "got": "後ろ",
+   "hit": true
+  },
+  {
+   "file": "from_above_1001.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1002.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1003.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1004.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1005.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1006.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1007.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_above_1008.png",
+   "instr": "from_above",
+   "eye_ok": true,
+   "want": "見下ろし",
+   "got": "見下ろし",
+   "hit": true
+  },
+  {
+   "file": "from_below_1001.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1002.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1003.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1004.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1005.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1006.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1007.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_below_1008.png",
+   "instr": "from_below",
+   "eye_ok": true,
+   "want": "見上げ",
+   "got": "見上げ",
+   "hit": true
+  },
+  {
+   "file": "from_side_1001.png",
+   "instr": "from_side",
+   "eye_ok": true,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1002.png",
+   "instr": "from_side",
+   "eye_ok": true,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1003.png",
+   "instr": "from_side",
+   "eye_ok": true,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1004.png",
+   "instr": "from_side",
+   "eye_ok": true,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1005.png",
+   "instr": "from_side",
+   "eye_ok": true,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1006.png",
+   "instr": "from_side",
+   "eye_ok": true,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1007.png",
+   "instr": "from_side",
+   "eye_ok": false,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "from_side_1008.png",
+   "instr": "from_side",
+   "eye_ok": false,
+   "want": "横",
+   "got": "横",
+   "hit": true
+  },
+  {
+   "file": "close_up_1001.png",
+   "instr": "close_up",
+   "eye_ok": true,
+   "want": "顔",
+   "got": "顔",
+   "hit": true
+  },
+  {
+   "file": "close_up_1002.png",
+   "instr": "close_up",
+   "eye_ok": true,
+   "want": "顔",
+   "got": "顔",
+   "hit": true
+  },
+  {
+   "file": "close_up_1003.png",
+   "instr": "close_up",
+   "eye_ok": true,
+   "want": "顔",
+   "got": "顔",
+   "hit": true
+  },
+  {
+   "file": "close_up_1004.png",
+   "instr": "close_up",
+   "eye_ok": false,
+   "want": "顔",
+   "got": "胸から上",
+   "hit": false
+  },
+  {
+   "file": "close_up_1005.png",
+   "instr": "close_up",
+   "eye_ok": true,
+   "want": "顔",
+   "got": "上半身",
+   "hit": false
+  },
+  {
+   "file": "close_up_1006.png",
+   "instr": "close_up",
+   "eye_ok": true,
+   "want": "顔",
+   "got": "顔",
+   "hit": true
+  },
+  {
+   "file": "close_up_1007.png",
+   "instr": "close_up",
+   "eye_ok": false,
+   "want": "顔",
+   "got": "上半身",
+   "hit": false
+  },
+  {
+   "file": "close_up_1008.png",
+   "instr": "close_up",
+   "eye_ok": false,
+   "want": "顔",
+   "got": "胸から上",
+   "hit": false
+  },
+  {
+   "file": "upper_body_1001.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "upper_body_1002.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "upper_body_1003.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "upper_body_1004.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "upper_body_1005.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "胸から上",
+   "hit": false
+  },
+  {
+   "file": "upper_body_1006.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "upper_body_1007.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "upper_body_1008.png",
+   "instr": "upper_body",
+   "eye_ok": true,
+   "want": "上半身",
+   "got": "上半身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1001.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1002.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1003.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1004.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1005.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1006.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1007.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "full_body_1008.png",
+   "instr": "full_body",
+   "eye_ok": true,
+   "want": "全身",
+   "got": "全身",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1001.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1002.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1003.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1004.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1005.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1006.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  },
+  {
+   "file": "very_wide_1007.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "全身",
+   "hit": false
+  },
+  {
+   "file": "very_wide_1008.png",
+   "instr": "very_wide",
+   "eye_ok": true,
+   "want": "引き",
+   "got": "引き",
+   "hit": true
+  }
+ ],
+ "prompt": "次の画像ファイルを順に読んでください。どれも漫画の1コマ用の絵です。\n{files}\n\n各画像について、2つを判定してください。\n・向きと角度：「正面」「横」「後ろ」「見下ろし」「見上げ」から1つ。人物の向きと、カメラの高さのうち、絵の印象を強く決めている方を選んでください\n・距離：「顔」「胸から上」「上半身」「全身」「引き」から1つ。「引き」は人物が画面の中で小さく、場所が主になっているもの\n\n出力はJSONだけにしてください。形式：{{\"items\":[{{\"file\":\"ファイル名\",\"angle\":\"...\",\"distance\":\"...\"}}]}}"
+}

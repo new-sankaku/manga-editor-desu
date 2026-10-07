@@ -1,0 +1,646 @@
+{
+ "shapes": {
+  "yoko": {
+   "size": [
+    1536,
+    576
+   ],
+   "fig": [
+    1014,
+    127,
+    1229,
+    541
+   ]
+  },
+  "tate": {
+   "size": [
+    576,
+    1536
+   ],
+   "fig": [
+    173,
+    952,
+    403,
+    1444
+   ]
+  },
+  "std": {
+   "size": [
+    1152,
+    896
+   ],
+   "fig": [
+    207,
+    340,
+    415,
+    842
+   ]
+  }
+ },
+ "runs": [
+  {
+   "file": "yoko_text_61.png",
+   "shape": "yoko",
+   "mode": "text",
+   "seed": 61,
+   "sec": 8.4
+  },
+  {
+   "file": "yoko_shrink_61.png",
+   "shape": "yoko",
+   "mode": "shrink",
+   "seed": 61,
+   "sec": 14.4
+  },
+  {
+   "file": "yoko_pose_xinsir_61.png",
+   "shape": "yoko",
+   "mode": "pose_xinsir",
+   "seed": 61,
+   "sec": 31.8
+  },
+  {
+   "file": "yoko_pose_union_61.png",
+   "shape": "yoko",
+   "mode": "pose_union",
+   "seed": 61,
+   "sec": 28.0
+  },
+  {
+   "file": "yoko_pose_windsing_61.png",
+   "shape": "yoko",
+   "mode": "pose_windsing",
+   "seed": 61,
+   "sec": 38.0
+  },
+  {
+   "file": "yoko_pose_t2i_61.png",
+   "shape": "yoko",
+   "mode": "pose_t2i",
+   "seed": 61,
+   "sec": 22.2
+  },
+  {
+   "file": "yoko_crop_61.png",
+   "shape": "yoko",
+   "mode": "crop",
+   "seed": 61,
+   "sec": 0
+  },
+  {
+   "file": "yoko_outpaint_61.png",
+   "shape": "yoko",
+   "mode": "outpaint",
+   "seed": 61,
+   "sec": 35.6
+  },
+  {
+   "file": "yoko_text_62.png",
+   "shape": "yoko",
+   "mode": "text",
+   "seed": 62,
+   "sec": 14.1
+  },
+  {
+   "file": "yoko_shrink_62.png",
+   "shape": "yoko",
+   "mode": "shrink",
+   "seed": 62,
+   "sec": 14.0
+  },
+  {
+   "file": "yoko_pose_xinsir_62.png",
+   "shape": "yoko",
+   "mode": "pose_xinsir",
+   "seed": 62,
+   "sec": 23.9
+  },
+  {
+   "file": "yoko_pose_union_62.png",
+   "shape": "yoko",
+   "mode": "pose_union",
+   "seed": 62,
+   "sec": 25.8
+  },
+  {
+   "file": "yoko_pose_windsing_62.png",
+   "shape": "yoko",
+   "mode": "pose_windsing",
+   "seed": 62,
+   "sec": 23.2
+  },
+  {
+   "file": "yoko_pose_t2i_62.png",
+   "shape": "yoko",
+   "mode": "pose_t2i",
+   "seed": 62,
+   "sec": 15.6
+  },
+  {
+   "file": "yoko_crop_62.png",
+   "shape": "yoko",
+   "mode": "crop",
+   "seed": 62,
+   "sec": 0
+  },
+  {
+   "file": "yoko_outpaint_62.png",
+   "shape": "yoko",
+   "mode": "outpaint",
+   "seed": 62,
+   "sec": 30.7
+  },
+  {
+   "file": "yoko_text_63.png",
+   "shape": "yoko",
+   "mode": "text",
+   "seed": 63,
+   "sec": 13.3
+  },
+  {
+   "file": "yoko_shrink_63.png",
+   "shape": "yoko",
+   "mode": "shrink",
+   "seed": 63,
+   "sec": 12.8
+  },
+  {
+   "file": "yoko_pose_xinsir_63.png",
+   "shape": "yoko",
+   "mode": "pose_xinsir",
+   "seed": 63,
+   "sec": 19.9
+  },
+  {
+   "file": "yoko_pose_union_63.png",
+   "shape": "yoko",
+   "mode": "pose_union",
+   "seed": 63,
+   "sec": 20.8
+  },
+  {
+   "file": "yoko_pose_windsing_63.png",
+   "shape": "yoko",
+   "mode": "pose_windsing",
+   "seed": 63,
+   "sec": 20.7
+  },
+  {
+   "file": "yoko_pose_t2i_63.png",
+   "shape": "yoko",
+   "mode": "pose_t2i",
+   "seed": 63,
+   "sec": 14.7
+  },
+  {
+   "file": "yoko_crop_63.png",
+   "shape": "yoko",
+   "mode": "crop",
+   "seed": 63,
+   "sec": 0
+  },
+  {
+   "file": "yoko_outpaint_63.png",
+   "shape": "yoko",
+   "mode": "outpaint",
+   "seed": 63,
+   "sec": 29.7
+  },
+  {
+   "file": "tate_text_61.png",
+   "shape": "tate",
+   "mode": "text",
+   "seed": 61,
+   "sec": 14.1
+  },
+  {
+   "file": "tate_shrink_61.png",
+   "shape": "tate",
+   "mode": "shrink",
+   "seed": 61,
+   "sec": 16.5
+  },
+  {
+   "file": "tate_pose_xinsir_61.png",
+   "shape": "tate",
+   "mode": "pose_xinsir",
+   "seed": 61,
+   "sec": 24.2
+  },
+  {
+   "file": "tate_pose_union_61.png",
+   "shape": "tate",
+   "mode": "pose_union",
+   "seed": 61,
+   "sec": 24.6
+  },
+  {
+   "file": "tate_pose_windsing_61.png",
+   "shape": "tate",
+   "mode": "pose_windsing",
+   "seed": 61,
+   "sec": 20.5
+  },
+  {
+   "file": "tate_pose_t2i_61.png",
+   "shape": "tate",
+   "mode": "pose_t2i",
+   "seed": 61,
+   "sec": 14.8
+  },
+  {
+   "file": "tate_crop_61.png",
+   "shape": "tate",
+   "mode": "crop",
+   "seed": 61,
+   "sec": 0
+  },
+  {
+   "file": "tate_outpaint_61.png",
+   "shape": "tate",
+   "mode": "outpaint",
+   "seed": 61,
+   "sec": 28.4
+  },
+  {
+   "file": "tate_text_62.png",
+   "shape": "tate",
+   "mode": "text",
+   "seed": 62,
+   "sec": 13.5
+  },
+  {
+   "file": "tate_shrink_62.png",
+   "shape": "tate",
+   "mode": "shrink",
+   "seed": 62,
+   "sec": 13.3
+  },
+  {
+   "file": "tate_pose_xinsir_62.png",
+   "shape": "tate",
+   "mode": "pose_xinsir",
+   "seed": 62,
+   "sec": 21.4
+  },
+  {
+   "file": "tate_pose_union_62.png",
+   "shape": "tate",
+   "mode": "pose_union",
+   "seed": 62,
+   "sec": 25.6
+  },
+  {
+   "file": "tate_pose_windsing_62.png",
+   "shape": "tate",
+   "mode": "pose_windsing",
+   "seed": 62,
+   "sec": 23.4
+  },
+  {
+   "file": "tate_pose_t2i_62.png",
+   "shape": "tate",
+   "mode": "pose_t2i",
+   "seed": 62,
+   "sec": 15.1
+  },
+  {
+   "file": "tate_crop_62.png",
+   "shape": "tate",
+   "mode": "crop",
+   "seed": 62,
+   "sec": 0
+  },
+  {
+   "file": "tate_outpaint_62.png",
+   "shape": "tate",
+   "mode": "outpaint",
+   "seed": 62,
+   "sec": 28.8
+  },
+  {
+   "file": "tate_text_63.png",
+   "shape": "tate",
+   "mode": "text",
+   "seed": 63,
+   "sec": 13.7
+  },
+  {
+   "file": "tate_shrink_63.png",
+   "shape": "tate",
+   "mode": "shrink",
+   "seed": 63,
+   "sec": 13.2
+  },
+  {
+   "file": "tate_pose_xinsir_63.png",
+   "shape": "tate",
+   "mode": "pose_xinsir",
+   "seed": 63,
+   "sec": 20.7
+  },
+  {
+   "file": "tate_pose_union_63.png",
+   "shape": "tate",
+   "mode": "pose_union",
+   "seed": 63,
+   "sec": 21.9
+  },
+  {
+   "file": "tate_pose_windsing_63.png",
+   "shape": "tate",
+   "mode": "pose_windsing",
+   "seed": 63,
+   "sec": 21.7
+  },
+  {
+   "file": "tate_pose_t2i_63.png",
+   "shape": "tate",
+   "mode": "pose_t2i",
+   "seed": 63,
+   "sec": 16.0
+  },
+  {
+   "file": "tate_crop_63.png",
+   "shape": "tate",
+   "mode": "crop",
+   "seed": 63,
+   "sec": 0
+  },
+  {
+   "file": "tate_outpaint_63.png",
+   "shape": "tate",
+   "mode": "outpaint",
+   "seed": 63,
+   "sec": 36.6
+  },
+  {
+   "file": "std_text_61.png",
+   "shape": "std",
+   "mode": "text",
+   "seed": 61,
+   "sec": 17.6
+  },
+  {
+   "file": "std_shrink_61.png",
+   "shape": "std",
+   "mode": "shrink",
+   "seed": 61,
+   "sec": 14.2
+  },
+  {
+   "file": "std_pose_xinsir_61.png",
+   "shape": "std",
+   "mode": "pose_xinsir",
+   "seed": 61,
+   "sec": 24.5
+  },
+  {
+   "file": "std_pose_union_61.png",
+   "shape": "std",
+   "mode": "pose_union",
+   "seed": 61,
+   "sec": 24.1
+  },
+  {
+   "file": "std_pose_windsing_61.png",
+   "shape": "std",
+   "mode": "pose_windsing",
+   "seed": 61,
+   "sec": 24.4
+  },
+  {
+   "file": "std_pose_t2i_61.png",
+   "shape": "std",
+   "mode": "pose_t2i",
+   "seed": 61,
+   "sec": 16.1
+  },
+  {
+   "file": "std_crop_61.png",
+   "shape": "std",
+   "mode": "crop",
+   "seed": 61,
+   "sec": 0
+  },
+  {
+   "file": "std_outpaint_61.png",
+   "shape": "std",
+   "mode": "outpaint",
+   "seed": 61,
+   "sec": 31.3
+  },
+  {
+   "file": "std_text_62.png",
+   "shape": "std",
+   "mode": "text",
+   "seed": 62,
+   "sec": 15.6
+  },
+  {
+   "file": "std_shrink_62.png",
+   "shape": "std",
+   "mode": "shrink",
+   "seed": 62,
+   "sec": 14.9
+  },
+  {
+   "file": "std_pose_xinsir_62.png",
+   "shape": "std",
+   "mode": "pose_xinsir",
+   "seed": 62,
+   "sec": 21.5
+  },
+  {
+   "file": "std_pose_union_62.png",
+   "shape": "std",
+   "mode": "pose_union",
+   "seed": 62,
+   "sec": 22.3
+  },
+  {
+   "file": "std_pose_windsing_62.png",
+   "shape": "std",
+   "mode": "pose_windsing",
+   "seed": 62,
+   "sec": 22.7
+  },
+  {
+   "file": "std_pose_t2i_62.png",
+   "shape": "std",
+   "mode": "pose_t2i",
+   "seed": 62,
+   "sec": 15.9
+  },
+  {
+   "file": "std_crop_62.png",
+   "shape": "std",
+   "mode": "crop",
+   "seed": 62,
+   "sec": 0
+  },
+  {
+   "file": "std_outpaint_62.png",
+   "shape": "std",
+   "mode": "outpaint",
+   "seed": 62,
+   "sec": 29.6
+  },
+  {
+   "file": "std_text_63.png",
+   "shape": "std",
+   "mode": "text",
+   "seed": 63,
+   "sec": 15.2
+  },
+  {
+   "file": "std_shrink_63.png",
+   "shape": "std",
+   "mode": "shrink",
+   "seed": 63,
+   "sec": 14.5
+  },
+  {
+   "file": "std_pose_xinsir_63.png",
+   "shape": "std",
+   "mode": "pose_xinsir",
+   "seed": 63,
+   "sec": 22.6
+  },
+  {
+   "file": "std_pose_union_63.png",
+   "shape": "std",
+   "mode": "pose_union",
+   "seed": 63,
+   "sec": 27.3
+  },
+  {
+   "file": "std_pose_windsing_63.png",
+   "shape": "std",
+   "mode": "pose_windsing",
+   "seed": 63,
+   "sec": 26.2
+  },
+  {
+   "file": "std_pose_t2i_63.png",
+   "shape": "std",
+   "mode": "pose_t2i",
+   "seed": 63,
+   "sec": 19.9
+  },
+  {
+   "file": "std_crop_63.png",
+   "shape": "std",
+   "mode": "crop",
+   "seed": 63,
+   "sec": 0
+  },
+  {
+   "file": "std_outpaint_63.png",
+   "shape": "std",
+   "mode": "outpaint",
+   "seed": 63,
+   "sec": 29.9
+  }
+ ],
+ "modes": {
+  "text": {
+   "name": "コマの形のまま・言葉だけ",
+   "control": null
+  },
+  "shrink": {
+   "name": "コマの形のまま・初めだけ縮小（Deep Shrink）",
+   "control": {
+    "node": "PatchModelAddDownscale",
+    "block_number": 3,
+    "downscale_factor": 1.5,
+    "start_percent": 0.0,
+    "end_percent": 0.35,
+    "downscale_after_skip": true,
+    "downscale_method": "bicubic",
+    "upscale_method": "bicubic"
+   }
+  },
+  "crop": {
+   "name": "縦長で作って切り抜く（比べるため）",
+   "control": {
+    "base_size": [
+     832,
+     1216
+    ],
+    "base_positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, city street, buildings, 1girl, solo, short black bob hair, glasses, school blazer, necktie, standing, full body",
+    "crop": "人物を真ん中に、幅か高さをいっぱいに"
+   }
+  },
+  "outpaint": {
+   "name": "縦長で作り、縮めて置き、周りを描き足す",
+   "control": {
+    "base_size": [
+     832,
+     1216
+    ],
+    "base_positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, city street, buildings, 1girl, solo, short black bob hair, glasses, school blazer, necktie, standing, full body",
+    "place": "元の絵の高さを人物の枠の1.25倍にし、下端に揃えて置く",
+    "node": "VAEEncodeForInpaint",
+    "grow_mask_by": 24,
+    "denoise": 1.0,
+    "mask": "out/aux/mask_<形>_<seed>.png（白が描き足す所）"
+   }
+  },
+  "pose_xinsir": {
+   "name": "骨格の図で位置と大きさを渡す",
+   "control": {
+    "node": "ControlNetApplyAdvanced",
+    "model": "xinsir\\openpose-sdxl-1.0.safetensors",
+    "union_type": null,
+    "strength": 1.0,
+    "start_percent": 0.0,
+    "end_percent": 1.0,
+    "image": "out/aux/pose_<形>.png"
+   }
+  },
+  "pose_union": {
+   "name": "骨格の図で位置と大きさを渡す",
+   "control": {
+    "node": "ControlNetApplyAdvanced",
+    "model": "xinsir\\union-sdxl-1.0-promax.safetensors",
+    "union_type": "openpose",
+    "strength": 1.0,
+    "start_percent": 0.0,
+    "end_percent": 1.0,
+    "image": "out/aux/pose_<形>.png"
+   }
+  },
+  "pose_windsing": {
+   "name": "骨格の図で位置と大きさを渡す",
+   "control": {
+    "node": "ControlNetApplyAdvanced",
+    "model": "windsingai\\illustrious-xl-openpose-s6000.safetensors",
+    "union_type": null,
+    "strength": 1.0,
+    "start_percent": 0.0,
+    "end_percent": 1.0,
+    "image": "out/aux/pose_<形>.png"
+   }
+  },
+  "pose_t2i": {
+   "name": "骨格の図で位置と大きさを渡す",
+   "control": {
+    "node": "ControlNetApplyAdvanced",
+    "model": "t2i-adapter-openpose-sdxl-1.0\\diffusion_pytorch_model.safetensors",
+    "union_type": null,
+    "strength": 1.0,
+    "start_percent": 0.0,
+    "end_percent": 1.0,
+    "image": "out/aux/pose_<形>.png"
+   }
+  }
+ },
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "steps": 25,
+ "cfg": 5.0,
+ "sampler": "euler_ancestral",
+ "scheduler": "normal",
+ "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+ "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, city street, buildings, 1girl, solo, short black bob hair, glasses, school blazer, necktie, standing, full body, wide shot, scenery"
+}

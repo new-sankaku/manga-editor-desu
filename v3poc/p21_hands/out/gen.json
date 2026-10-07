@@ -1,0 +1,609 @@
+{
+ "charas": {
+  "f1": {
+   "name": "女性・短い黒髪の女子生徒",
+   "words": "1girl, solo, short hair, black hair, school uniform"
+  },
+  "f2": {
+   "name": "女性・長い髪の大人の女性",
+   "words": "1girl, solo, mature female, long hair, blouse"
+  },
+  "m1": {
+   "name": "男性・短い黒髪の男子生徒",
+   "words": "1boy, solo, short hair, black hair, school uniform"
+  },
+  "m2": {
+   "name": "男性・背広の中年の男性",
+   "words": "1boy, solo, middle-aged man, short hair, suit"
+  }
+ },
+ "actions": {
+  "cup": "holding cup, drinking",
+  "wave": "waving, raised hand",
+  "point": "pointing at viewer",
+  "write": "writing, holding pen, notebook",
+  "hips": "hands on hips",
+  "phone": "holding phone, looking at phone"
+ },
+ "scene": "cowboy shot, indoors",
+ "neg": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "f1_cup_51.png",
+   "chara": "f1",
+   "action": "cup",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, holding cup, drinking, cowboy shot, indoors",
+   "sec": 10.3
+  },
+  {
+   "file": "f1_cup_52.png",
+   "chara": "f1",
+   "action": "cup",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, holding cup, drinking, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f1_cup_53.png",
+   "chara": "f1",
+   "action": "cup",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, holding cup, drinking, cowboy shot, indoors",
+   "sec": 8.8
+  },
+  {
+   "file": "f1_wave_51.png",
+   "chara": "f1",
+   "action": "wave",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, waving, raised hand, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f1_wave_52.png",
+   "chara": "f1",
+   "action": "wave",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, waving, raised hand, cowboy shot, indoors",
+   "sec": 9.3
+  },
+  {
+   "file": "f1_wave_53.png",
+   "chara": "f1",
+   "action": "wave",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, waving, raised hand, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f1_point_51.png",
+   "chara": "f1",
+   "action": "point",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, pointing at viewer, cowboy shot, indoors",
+   "sec": 9.3
+  },
+  {
+   "file": "f1_point_52.png",
+   "chara": "f1",
+   "action": "point",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, pointing at viewer, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f1_point_53.png",
+   "chara": "f1",
+   "action": "point",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, pointing at viewer, cowboy shot, indoors",
+   "sec": 8.9
+  },
+  {
+   "file": "f1_write_51.png",
+   "chara": "f1",
+   "action": "write",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f1_write_52.png",
+   "chara": "f1",
+   "action": "write",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 9.4
+  },
+  {
+   "file": "f1_write_53.png",
+   "chara": "f1",
+   "action": "write",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f1_hips_51.png",
+   "chara": "f1",
+   "action": "hips",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, hands on hips, cowboy shot, indoors",
+   "sec": 9.4
+  },
+  {
+   "file": "f1_hips_52.png",
+   "chara": "f1",
+   "action": "hips",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, hands on hips, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f1_hips_53.png",
+   "chara": "f1",
+   "action": "hips",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, hands on hips, cowboy shot, indoors",
+   "sec": 9.1
+  },
+  {
+   "file": "f1_phone_51.png",
+   "chara": "f1",
+   "action": "phone",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 8.8
+  },
+  {
+   "file": "f1_phone_52.png",
+   "chara": "f1",
+   "action": "phone",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 9.3
+  },
+  {
+   "file": "f1_phone_53.png",
+   "chara": "f1",
+   "action": "phone",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, short hair, black hair, school uniform, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f2_cup_51.png",
+   "chara": "f2",
+   "action": "cup",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, holding cup, drinking, cowboy shot, indoors",
+   "sec": 9.3
+  },
+  {
+   "file": "f2_cup_52.png",
+   "chara": "f2",
+   "action": "cup",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, holding cup, drinking, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f2_cup_53.png",
+   "chara": "f2",
+   "action": "cup",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, holding cup, drinking, cowboy shot, indoors",
+   "sec": 9.0
+  },
+  {
+   "file": "f2_wave_51.png",
+   "chara": "f2",
+   "action": "wave",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, waving, raised hand, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f2_wave_52.png",
+   "chara": "f2",
+   "action": "wave",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, waving, raised hand, cowboy shot, indoors",
+   "sec": 9.1
+  },
+  {
+   "file": "f2_wave_53.png",
+   "chara": "f2",
+   "action": "wave",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, waving, raised hand, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f2_point_51.png",
+   "chara": "f2",
+   "action": "point",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, pointing at viewer, cowboy shot, indoors",
+   "sec": 9.7
+  },
+  {
+   "file": "f2_point_52.png",
+   "chara": "f2",
+   "action": "point",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, pointing at viewer, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f2_point_53.png",
+   "chara": "f2",
+   "action": "point",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, pointing at viewer, cowboy shot, indoors",
+   "sec": 9.0
+  },
+  {
+   "file": "f2_write_51.png",
+   "chara": "f2",
+   "action": "write",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f2_write_52.png",
+   "chara": "f2",
+   "action": "write",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 9.2
+  },
+  {
+   "file": "f2_write_53.png",
+   "chara": "f2",
+   "action": "write",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 8.2
+  },
+  {
+   "file": "f2_hips_51.png",
+   "chara": "f2",
+   "action": "hips",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, hands on hips, cowboy shot, indoors",
+   "sec": 9.8
+  },
+  {
+   "file": "f2_hips_52.png",
+   "chara": "f2",
+   "action": "hips",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, hands on hips, cowboy shot, indoors",
+   "sec": 8.7
+  },
+  {
+   "file": "f2_hips_53.png",
+   "chara": "f2",
+   "action": "hips",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, hands on hips, cowboy shot, indoors",
+   "sec": 9.2
+  },
+  {
+   "file": "f2_phone_51.png",
+   "chara": "f2",
+   "action": "phone",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 8.3
+  },
+  {
+   "file": "f2_phone_52.png",
+   "chara": "f2",
+   "action": "phone",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.5
+  },
+  {
+   "file": "f2_phone_53.png",
+   "chara": "f2",
+   "action": "phone",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, mature female, long hair, blouse, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m1_cup_51.png",
+   "chara": "m1",
+   "action": "cup",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, holding cup, drinking, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m1_cup_52.png",
+   "chara": "m1",
+   "action": "cup",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, holding cup, drinking, cowboy shot, indoors",
+   "sec": 7.3
+  },
+  {
+   "file": "m1_cup_53.png",
+   "chara": "m1",
+   "action": "cup",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, holding cup, drinking, cowboy shot, indoors",
+   "sec": 7.5
+  },
+  {
+   "file": "m1_wave_51.png",
+   "chara": "m1",
+   "action": "wave",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, waving, raised hand, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m1_wave_52.png",
+   "chara": "m1",
+   "action": "wave",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, waving, raised hand, cowboy shot, indoors",
+   "sec": 7.5
+  },
+  {
+   "file": "m1_wave_53.png",
+   "chara": "m1",
+   "action": "wave",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, waving, raised hand, cowboy shot, indoors",
+   "sec": 7.3
+  },
+  {
+   "file": "m1_point_51.png",
+   "chara": "m1",
+   "action": "point",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, pointing at viewer, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m1_point_52.png",
+   "chara": "m1",
+   "action": "point",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, pointing at viewer, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m1_point_53.png",
+   "chara": "m1",
+   "action": "point",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, pointing at viewer, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m1_write_51.png",
+   "chara": "m1",
+   "action": "write",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m1_write_52.png",
+   "chara": "m1",
+   "action": "write",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m1_write_53.png",
+   "chara": "m1",
+   "action": "write",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m1_hips_51.png",
+   "chara": "m1",
+   "action": "hips",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, hands on hips, cowboy shot, indoors",
+   "sec": 7.8
+  },
+  {
+   "file": "m1_hips_52.png",
+   "chara": "m1",
+   "action": "hips",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, hands on hips, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m1_hips_53.png",
+   "chara": "m1",
+   "action": "hips",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, hands on hips, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m1_phone_51.png",
+   "chara": "m1",
+   "action": "phone",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m1_phone_52.png",
+   "chara": "m1",
+   "action": "phone",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m1_phone_53.png",
+   "chara": "m1",
+   "action": "phone",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, short hair, black hair, school uniform, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.3
+  },
+  {
+   "file": "m2_cup_51.png",
+   "chara": "m2",
+   "action": "cup",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, holding cup, drinking, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m2_cup_52.png",
+   "chara": "m2",
+   "action": "cup",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, holding cup, drinking, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m2_cup_53.png",
+   "chara": "m2",
+   "action": "cup",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, holding cup, drinking, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m2_wave_51.png",
+   "chara": "m2",
+   "action": "wave",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, waving, raised hand, cowboy shot, indoors",
+   "sec": 7.3
+  },
+  {
+   "file": "m2_wave_52.png",
+   "chara": "m2",
+   "action": "wave",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, waving, raised hand, cowboy shot, indoors",
+   "sec": 7.8
+  },
+  {
+   "file": "m2_wave_53.png",
+   "chara": "m2",
+   "action": "wave",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, waving, raised hand, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m2_point_51.png",
+   "chara": "m2",
+   "action": "point",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, pointing at viewer, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m2_point_52.png",
+   "chara": "m2",
+   "action": "point",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, pointing at viewer, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m2_point_53.png",
+   "chara": "m2",
+   "action": "point",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, pointing at viewer, cowboy shot, indoors",
+   "sec": 7.6
+  },
+  {
+   "file": "m2_write_51.png",
+   "chara": "m2",
+   "action": "write",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 7.3
+  },
+  {
+   "file": "m2_write_52.png",
+   "chara": "m2",
+   "action": "write",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 7.8
+  },
+  {
+   "file": "m2_write_53.png",
+   "chara": "m2",
+   "action": "write",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, writing, holding pen, notebook, cowboy shot, indoors",
+   "sec": 7.2
+  },
+  {
+   "file": "m2_hips_51.png",
+   "chara": "m2",
+   "action": "hips",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, hands on hips, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m2_hips_52.png",
+   "chara": "m2",
+   "action": "hips",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, hands on hips, cowboy shot, indoors",
+   "sec": 7.3
+  },
+  {
+   "file": "m2_hips_53.png",
+   "chara": "m2",
+   "action": "hips",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, hands on hips, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m2_phone_51.png",
+   "chara": "m2",
+   "action": "phone",
+   "seed": 51,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.8
+  },
+  {
+   "file": "m2_phone_52.png",
+   "chara": "m2",
+   "action": "phone",
+   "seed": 52,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.7
+  },
+  {
+   "file": "m2_phone_53.png",
+   "chara": "m2",
+   "action": "phone",
+   "seed": 53,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, middle-aged man, short hair, suit, holding phone, looking at phone, cowboy shot, indoors",
+   "sec": 7.7
+  }
+ ]
+}

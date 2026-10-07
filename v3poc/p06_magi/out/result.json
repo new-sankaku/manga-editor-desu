@@ -1,0 +1,255 @@
+{
+ "synth": [
+  {
+   "page": "rect",
+   "truth": 5,
+   "detected": 5,
+   "matched_iou50": 5
+  },
+  {
+   "page": "diag_row",
+   "truth": 4,
+   "detected": 4,
+   "matched_iou50": 4
+  },
+  {
+   "page": "diag_many",
+   "truth": 5,
+   "detected": 4,
+   "matched_iou50": 4
+  },
+  {
+   "page": "overlap_bleed",
+   "truth": 4,
+   "detected": 4,
+   "matched_iou50": 4
+  }
+ ],
+ "p02_people": {
+  "rows": [
+   {
+    "file": "two_people_1001.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "two_people_1002.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "two_people_1003.png",
+    "want": 2,
+    "magi_chars": 3,
+    "eye_ok": false
+   },
+   {
+    "file": "two_people_1004.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "two_people_1005.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "two_people_1006.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "two_people_1007.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "two_people_1008.png",
+    "want": 2,
+    "magi_chars": 2,
+    "eye_ok": true
+   },
+   {
+    "file": "three_people_1001.png",
+    "want": 3,
+    "magi_chars": 3,
+    "eye_ok": true
+   },
+   {
+    "file": "three_people_1002.png",
+    "want": 3,
+    "magi_chars": 3,
+    "eye_ok": true
+   },
+   {
+    "file": "three_people_1003.png",
+    "want": 3,
+    "magi_chars": 3,
+    "eye_ok": true
+   },
+   {
+    "file": "three_people_1004.png",
+    "want": 3,
+    "magi_chars": 3,
+    "eye_ok": true
+   },
+   {
+    "file": "three_people_1005.png",
+    "want": 3,
+    "magi_chars": 4,
+    "eye_ok": false
+   },
+   {
+    "file": "three_people_1006.png",
+    "want": 3,
+    "magi_chars": 4,
+    "eye_ok": false
+   },
+   {
+    "file": "three_people_1007.png",
+    "want": 3,
+    "magi_chars": 4,
+    "eye_ok": true
+   },
+   {
+    "file": "three_people_1008.png",
+    "want": 3,
+    "magi_chars": 3,
+    "eye_ok": true
+   }
+  ],
+  "magi_equals_want": 12,
+  "agree_with_eye": 15,
+  "n": 16
+ },
+ "p10": [
+  {
+   "file": "3panels_51.png",
+   "magi_panels": 4,
+   "eye_panels": 3
+  },
+  {
+   "file": "3panels_52.png",
+   "magi_panels": 4,
+   "eye_panels": 4
+  },
+  {
+   "file": "3panels_53.png",
+   "magi_panels": 4,
+   "eye_panels": 3
+  },
+  {
+   "file": "3panels_54.png",
+   "magi_panels": 4,
+   "eye_panels": 4
+  },
+  {
+   "file": "4panels_51.png",
+   "magi_panels": 9,
+   "eye_panels": 8
+  },
+  {
+   "file": "4panels_52.png",
+   "magi_panels": 8,
+   "eye_panels": 9
+  },
+  {
+   "file": "4panels_53.png",
+   "magi_panels": 4,
+   "eye_panels": 4
+  },
+  {
+   "file": "4panels_54.png",
+   "magi_panels": 4,
+   "eye_panels": 4
+  },
+  {
+   "file": "6panels_51.png",
+   "magi_panels": 6,
+   "eye_panels": 6
+  },
+  {
+   "file": "6panels_52.png",
+   "magi_panels": 4,
+   "eye_panels": 4
+  },
+  {
+   "file": "6panels_53.png",
+   "magi_panels": 5,
+   "eye_panels": 6
+  },
+  {
+   "file": "6panels_54.png",
+   "magi_panels": 4,
+   "eye_panels": 4
+  }
+ ],
+ "real": [
+  {
+   "file": "006.png",
+   "panels": 4,
+   "chars": 4,
+   "texts": 4
+  },
+  {
+   "file": "013.png",
+   "panels": 5,
+   "chars": 6,
+   "texts": 9
+  },
+  {
+   "file": "014.png",
+   "panels": 3,
+   "chars": 2,
+   "texts": 10
+  },
+  {
+   "file": "017.png",
+   "panels": 7,
+   "chars": 8,
+   "texts": 12
+  },
+  {
+   "file": "018.png",
+   "panels": 4,
+   "chars": 6,
+   "texts": 15
+  },
+  {
+   "file": "026.png",
+   "panels": 1,
+   "chars": 1,
+   "texts": 8
+  },
+  {
+   "file": "041.png",
+   "panels": 7,
+   "chars": 9,
+   "texts": 5
+  },
+  {
+   "file": "043.png",
+   "panels": 6,
+   "chars": 11,
+   "texts": 1
+  },
+  {
+   "file": "045.png",
+   "panels": 7,
+   "chars": 7,
+   "texts": 7
+  },
+  {
+   "file": "006.png",
+   "panels": 4,
+   "chars": 4,
+   "texts": 4
+  }
+ ]
+}

@@ -1,0 +1,2693 @@
+{
+ "bg_tate_none_room_81.png": {
+  "rating": {
+   "safe": 0.893,
+   "r18": 0.061,
+   "r15": 0.046
+  },
+  "nsfw": {
+   "drawings": 0.206,
+   "hentai": 0.1,
+   "neutral": 0.689,
+   "porn": 0.004,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.92,
+   "real": 0.08
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.065
+  },
+  "aesthetic": 0.057
+ },
+ "bg_tate_none_room_82.png": {
+  "rating": {
+   "safe": 0.882,
+   "r18": 0.063,
+   "r15": 0.056
+  },
+  "nsfw": {
+   "drawings": 0.142,
+   "hentai": 0.513,
+   "neutral": 0.315,
+   "porn": 0.027,
+   "sexy": 0.002
+  },
+  "real": {
+   "anime": 0.914,
+   "real": 0.086
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.058
+  },
+  "aesthetic": 0.063
+ },
+ "bg_tate_none_room_83.png": {
+  "rating": {
+   "safe": 0.91,
+   "r18": 0.052,
+   "r15": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.163,
+   "hentai": 0.025,
+   "neutral": 0.804,
+   "porn": 0.006,
+   "sexy": 0.002
+  },
+  "real": {
+   "anime": 0.916,
+   "real": 0.084
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.06
+  },
+  "aesthetic": 0.052
+ },
+ "bg_tate_none_rural_81.png": {
+  "rating": {
+   "safe": 0.914,
+   "r18": 0.048,
+   "r15": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.102,
+   "hentai": 0.02,
+   "neutral": 0.877,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.984,
+   "anime": 0.016
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.099
+  },
+  "aesthetic": 0.077
+ },
+ "bg_tate_none_rural_82.png": {
+  "rating": {
+   "safe": 0.919,
+   "r18": 0.044,
+   "r15": 0.038
+  },
+  "nsfw": {
+   "drawings": 0.027,
+   "hentai": 0.009,
+   "neutral": 0.962,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.934,
+   "real": 0.066
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.233
+  },
+  "aesthetic": 0.12
+ },
+ "bg_tate_none_rural_83.png": {
+  "rating": {
+   "safe": 0.882,
+   "r18": 0.069,
+   "r15": 0.049
+  },
+  "nsfw": {
+   "drawings": 0.018,
+   "hentai": 0.003,
+   "neutral": 0.974,
+   "porn": 0.003,
+   "sexy": 0.003
+  },
+  "real": {
+   "real": 0.852,
+   "anime": 0.148
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.138
+  },
+  "aesthetic": 0.079
+ },
+ "bg_tate_none_street_81.png": {
+  "rating": {
+   "safe": 0.868,
+   "r15": 0.077,
+   "r18": 0.055
+  },
+  "nsfw": {
+   "drawings": 0.369,
+   "hentai": 0.048,
+   "neutral": 0.58,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.735,
+   "anime": 0.265
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.071
+  },
+  "aesthetic": 0.065
+ },
+ "bg_tate_none_street_82.png": {
+  "rating": {
+   "safe": 0.852,
+   "r15": 0.093,
+   "r18": 0.055
+  },
+  "nsfw": {
+   "drawings": 0.297,
+   "hentai": 0.01,
+   "neutral": 0.69,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.611,
+   "anime": 0.389
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.202
+  },
+  "aesthetic": 0.081
+ },
+ "bg_tate_none_street_83.png": {
+  "rating": {
+   "safe": 0.884,
+   "r18": 0.065,
+   "r15": 0.05
+  },
+  "nsfw": {
+   "drawings": 0.423,
+   "hentai": 0.233,
+   "neutral": 0.337,
+   "porn": 0.006,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.841,
+   "real": 0.159
+  },
+  "dbaesthetic": {
+   "label": "good",
+   "percentile": 0.509
+  },
+  "aesthetic": 0.063
+ },
+ "bg_yoko_none_room_81.png": {
+  "rating": {
+   "safe": 0.76,
+   "r15": 0.145,
+   "r18": 0.096
+  },
+  "nsfw": {
+   "drawings": 0.077,
+   "hentai": 0.887,
+   "neutral": 0.019,
+   "porn": 0.017,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.923,
+   "real": 0.077
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.128
+  },
+  "aesthetic": 0.061
+ },
+ "bg_yoko_none_room_82.png": {
+  "rating": {
+   "safe": 0.842,
+   "r15": 0.083,
+   "r18": 0.075
+  },
+  "nsfw": {
+   "drawings": 0.152,
+   "hentai": 0.754,
+   "neutral": 0.066,
+   "porn": 0.026,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.718,
+   "anime": 0.282
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.206
+  },
+  "aesthetic": 0.056
+ },
+ "bg_yoko_none_room_83.png": {
+  "rating": {
+   "safe": 0.89,
+   "r18": 0.06,
+   "r15": 0.05
+  },
+  "nsfw": {
+   "drawings": 0.085,
+   "hentai": 0.83,
+   "neutral": 0.054,
+   "porn": 0.03,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.85,
+   "real": 0.15
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.205
+  },
+  "aesthetic": 0.049
+ },
+ "bg_yoko_none_rural_81.png": {
+  "rating": {
+   "safe": 0.914,
+   "r18": 0.044,
+   "r15": 0.042
+  },
+  "nsfw": {
+   "drawings": 0.229,
+   "hentai": 0.054,
+   "neutral": 0.706,
+   "porn": 0.008,
+   "sexy": 0.003
+  },
+  "real": {
+   "real": 0.739,
+   "anime": 0.261
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.196
+  },
+  "aesthetic": 0.05
+ },
+ "bg_yoko_none_rural_82.png": {
+  "rating": {
+   "safe": 0.908,
+   "r18": 0.062,
+   "r15": 0.03
+  },
+  "nsfw": {
+   "drawings": 0.303,
+   "hentai": 0.143,
+   "neutral": 0.546,
+   "porn": 0.006,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.966,
+   "anime": 0.034
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.223
+  },
+  "aesthetic": 0.068
+ },
+ "bg_yoko_none_rural_83.png": {
+  "rating": {
+   "safe": 0.884,
+   "r18": 0.072,
+   "r15": 0.044
+  },
+  "nsfw": {
+   "drawings": 0.088,
+   "hentai": 0.01,
+   "neutral": 0.901,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.981,
+   "anime": 0.019
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.244
+  },
+  "aesthetic": 0.054
+ },
+ "bg_yoko_none_street_81.png": {
+  "rating": {
+   "safe": 0.858,
+   "r18": 0.075,
+   "r15": 0.068
+  },
+  "nsfw": {
+   "drawings": 0.029,
+   "hentai": 0.003,
+   "neutral": 0.965,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.892,
+   "anime": 0.108
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.232
+  },
+  "aesthetic": 0.06
+ },
+ "bg_yoko_none_street_82.png": {
+  "rating": {
+   "safe": 0.876,
+   "r18": 0.088,
+   "r15": 0.036
+  },
+  "nsfw": {
+   "drawings": 0.037,
+   "hentai": 0.002,
+   "neutral": 0.958,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.95,
+   "anime": 0.05
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.445
+  },
+  "aesthetic": 0.068
+ },
+ "bg_yoko_none_street_83.png": {
+  "rating": {
+   "safe": 0.866,
+   "r15": 0.071,
+   "r18": 0.063
+  },
+  "nsfw": {
+   "drawings": 0.52,
+   "hentai": 0.021,
+   "neutral": 0.457,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.801,
+   "anime": 0.199
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.132
+  },
+  "aesthetic": 0.092
+ },
+ "chara_only_boy_none_81.png": {
+  "rating": {
+   "safe": 0.835,
+   "r15": 0.082,
+   "r18": 0.082
+  },
+  "nsfw": {
+   "drawings": 0.721,
+   "hentai": 0.114,
+   "neutral": 0.159,
+   "porn": 0.004,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.994,
+   "real": 0.006
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.449
+  },
+  "aesthetic": 0.236
+ },
+ "chara_only_boy_none_81_cut.png": {
+  "rating": {
+   "safe": 0.875,
+   "r18": 0.069,
+   "r15": 0.056
+  },
+  "nsfw": {
+   "drawings": 0.819,
+   "hentai": 0.092,
+   "neutral": 0.086,
+   "porn": 0.003,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.995,
+   "real": 0.005
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.472
+  },
+  "aesthetic": 0.217
+ },
+ "chara_only_boy_none_82.png": {
+  "rating": {
+   "safe": 0.917,
+   "r18": 0.05,
+   "r15": 0.033
+  },
+  "nsfw": {
+   "drawings": 0.808,
+   "hentai": 0.186,
+   "neutral": 0.003,
+   "porn": 0.002,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.991,
+   "real": 0.009
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.275
+  },
+  "aesthetic": 0.225
+ },
+ "chara_only_boy_none_82_cut.png": {
+  "rating": {
+   "safe": 0.92,
+   "r18": 0.049,
+   "r15": 0.031
+  },
+  "nsfw": {
+   "drawings": 0.813,
+   "hentai": 0.179,
+   "neutral": 0.006,
+   "porn": 0.002,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.995,
+   "real": 0.005
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.266
+  },
+  "aesthetic": 0.227
+ },
+ "chara_only_boy_none_83.png": {
+  "rating": {
+   "safe": 0.939,
+   "r18": 0.04,
+   "r15": 0.021
+  },
+  "nsfw": {
+   "drawings": 0.891,
+   "hentai": 0.106,
+   "neutral": 0.002,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.994,
+   "real": 0.006
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.485
+  },
+  "aesthetic": 0.204
+ },
+ "chara_only_boy_none_83_cut.png": {
+  "rating": {
+   "safe": 0.938,
+   "r18": 0.04,
+   "r15": 0.021
+  },
+  "nsfw": {
+   "drawings": 0.902,
+   "hentai": 0.096,
+   "neutral": 0.002,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.994,
+   "real": 0.006
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.483
+  },
+  "aesthetic": 0.205
+ },
+ "chara_only_girl_none_81.png": {
+  "rating": {
+   "safe": 0.89,
+   "r18": 0.059,
+   "r15": 0.052
+  },
+  "nsfw": {
+   "drawings": 0.911,
+   "hentai": 0.07,
+   "neutral": 0.019,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.995,
+   "real": 0.005
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.447
+  },
+  "aesthetic": 0.229
+ },
+ "chara_only_girl_none_81_cut.png": {
+  "rating": {
+   "safe": 0.89,
+   "r18": 0.058,
+   "r15": 0.052
+  },
+  "nsfw": {
+   "drawings": 0.914,
+   "hentai": 0.07,
+   "neutral": 0.015,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.995,
+   "real": 0.005
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.442
+  },
+  "aesthetic": 0.23
+ },
+ "chara_only_girl_none_82.png": {
+  "rating": {
+   "safe": 0.849,
+   "r15": 0.089,
+   "r18": 0.062
+  },
+  "nsfw": {
+   "drawings": 0.906,
+   "hentai": 0.034,
+   "neutral": 0.059,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.991,
+   "real": 0.009
+  },
+  "dbaesthetic": {
+   "label": "good",
+   "percentile": 0.553
+  },
+  "aesthetic": 0.214
+ },
+ "chara_only_girl_none_82_cut.png": {
+  "rating": {
+   "safe": 0.84,
+   "r15": 0.094,
+   "r18": 0.065
+  },
+  "nsfw": {
+   "drawings": 0.946,
+   "hentai": 0.035,
+   "neutral": 0.018,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.991,
+   "real": 0.009
+  },
+  "dbaesthetic": {
+   "label": "good",
+   "percentile": 0.555
+  },
+  "aesthetic": 0.216
+ },
+ "chara_only_girl_none_83.png": {
+  "rating": {
+   "safe": 0.894,
+   "r18": 0.058,
+   "r15": 0.048
+  },
+  "nsfw": {
+   "drawings": 0.974,
+   "hentai": 0.021,
+   "neutral": 0.005,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.996,
+   "real": 0.004
+  },
+  "dbaesthetic": {
+   "label": "good",
+   "percentile": 0.639
+  },
+  "aesthetic": 0.212
+ },
+ "chara_only_girl_none_83_cut.png": {
+  "rating": {
+   "safe": 0.894,
+   "r18": 0.058,
+   "r15": 0.048
+  },
+  "nsfw": {
+   "drawings": 0.972,
+   "hentai": 0.023,
+   "neutral": 0.004,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.996,
+   "real": 0.004
+  },
+  "dbaesthetic": {
+   "label": "good",
+   "percentile": 0.637
+  },
+  "aesthetic": 0.211
+ },
+ "chara_only_old_none_81.png": {
+  "rating": {
+   "safe": 0.93,
+   "r18": 0.038,
+   "r15": 0.031
+  },
+  "nsfw": {
+   "drawings": 0.964,
+   "hentai": 0.014,
+   "neutral": 0.021,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.991,
+   "real": 0.009
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.129
+  },
+  "aesthetic": 0.199
+ },
+ "chara_only_old_none_81_cut.png": {
+  "rating": {
+   "safe": 0.932,
+   "r18": 0.037,
+   "r15": 0.031
+  },
+  "nsfw": {
+   "drawings": 0.952,
+   "hentai": 0.019,
+   "neutral": 0.027,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.994,
+   "real": 0.006
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.133
+  },
+  "aesthetic": 0.202
+ },
+ "chara_only_old_none_82.png": {
+  "rating": {
+   "safe": 0.913,
+   "r18": 0.047,
+   "r15": 0.04
+  },
+  "nsfw": {
+   "drawings": 0.997,
+   "hentai": 0.002,
+   "neutral": 0.001,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.995,
+   "real": 0.005
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.16
+  },
+  "aesthetic": 0.305
+ },
+ "chara_only_old_none_82_cut.png": {
+  "rating": {
+   "safe": 0.911,
+   "r18": 0.048,
+   "r15": 0.041
+  },
+  "nsfw": {
+   "drawings": 0.996,
+   "hentai": 0.003,
+   "neutral": 0.001,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.996,
+   "real": 0.004
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.166
+  },
+  "aesthetic": 0.304
+ },
+ "chara_only_old_none_83.png": {
+  "rating": {
+   "safe": 0.905,
+   "r18": 0.052,
+   "r15": 0.043
+  },
+  "nsfw": {
+   "drawings": 0.985,
+   "hentai": 0.009,
+   "neutral": 0.006,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.995,
+   "real": 0.005
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.161
+  },
+  "aesthetic": 0.288
+ },
+ "chara_only_old_none_83_cut.png": {
+  "rating": {
+   "safe": 0.9,
+   "r18": 0.054,
+   "r15": 0.046
+  },
+  "nsfw": {
+   "drawings": 0.975,
+   "hentai": 0.012,
+   "neutral": 0.012,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.996,
+   "real": 0.004
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.153
+  },
+  "aesthetic": 0.309
+ },
+ "full_std_boy_room_81.png": {
+  "rating": {
+   "safe": 0.881,
+   "r18": 0.067,
+   "r15": 0.052
+  },
+  "nsfw": {
+   "drawings": 0.217,
+   "hentai": 0.69,
+   "neutral": 0.073,
+   "porn": 0.019,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.762,
+   "real": 0.238
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.151
+  },
+  "aesthetic": 0.084
+ },
+ "full_std_boy_room_82.png": {
+  "rating": {
+   "safe": 0.912,
+   "r15": 0.045,
+   "r18": 0.043
+  },
+  "nsfw": {
+   "drawings": 0.228,
+   "hentai": 0.303,
+   "neutral": 0.454,
+   "porn": 0.013,
+   "sexy": 0.002
+  },
+  "real": {
+   "anime": 0.937,
+   "real": 0.063
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.147
+  },
+  "aesthetic": 0.086
+ },
+ "full_std_boy_room_83.png": {
+  "rating": {
+   "safe": 0.755,
+   "r15": 0.16,
+   "r18": 0.085
+  },
+  "nsfw": {
+   "drawings": 0.488,
+   "hentai": 0.07,
+   "neutral": 0.436,
+   "porn": 0.005,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.906,
+   "real": 0.094
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.221
+  },
+  "aesthetic": 0.064
+ },
+ "full_std_boy_rural_81.png": {
+  "rating": {
+   "safe": 0.867,
+   "r18": 0.073,
+   "r15": 0.059
+  },
+  "nsfw": {
+   "drawings": 0.257,
+   "hentai": 0.012,
+   "neutral": 0.728,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.963,
+   "anime": 0.037
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.205
+  },
+  "aesthetic": 0.069
+ },
+ "full_std_boy_rural_82.png": {
+  "rating": {
+   "safe": 0.827,
+   "r15": 0.096,
+   "r18": 0.077
+  },
+  "nsfw": {
+   "drawings": 0.099,
+   "hentai": 0.852,
+   "neutral": 0.036,
+   "porn": 0.013,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.892,
+   "real": 0.108
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.207
+  },
+  "aesthetic": 0.092
+ },
+ "full_std_boy_rural_83.png": {
+  "rating": {
+   "safe": 0.762,
+   "r15": 0.154,
+   "r18": 0.084
+  },
+  "nsfw": {
+   "drawings": 0.277,
+   "hentai": 0.479,
+   "neutral": 0.225,
+   "porn": 0.015,
+   "sexy": 0.003
+  },
+  "real": {
+   "real": 0.557,
+   "anime": 0.443
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.208
+  },
+  "aesthetic": 0.084
+ },
+ "full_std_boy_street_81.png": {
+  "rating": {
+   "safe": 0.938,
+   "r18": 0.036,
+   "r15": 0.026
+  },
+  "nsfw": {
+   "drawings": 0.791,
+   "hentai": 0.002,
+   "neutral": 0.207,
+   "porn": 0.0,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.917,
+   "real": 0.083
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.218
+  },
+  "aesthetic": 0.351
+ },
+ "full_std_boy_street_82.png": {
+  "rating": {
+   "safe": 0.892,
+   "r18": 0.056,
+   "r15": 0.052
+  },
+  "nsfw": {
+   "drawings": 0.913,
+   "hentai": 0.017,
+   "neutral": 0.07,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.919,
+   "real": 0.081
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.272
+  },
+  "aesthetic": 0.173
+ },
+ "full_std_boy_street_83.png": {
+  "rating": {
+   "safe": 0.915,
+   "r15": 0.045,
+   "r18": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.909,
+   "hentai": 0.0,
+   "neutral": 0.09,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.888,
+   "real": 0.112
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.302
+  },
+  "aesthetic": 0.2
+ },
+ "full_std_girl_room_81.png": {
+  "rating": {
+   "safe": 0.861,
+   "r18": 0.072,
+   "r15": 0.066
+  },
+  "nsfw": {
+   "drawings": 0.619,
+   "hentai": 0.264,
+   "neutral": 0.109,
+   "porn": 0.008,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.954,
+   "real": 0.046
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.297
+  },
+  "aesthetic": 0.07
+ },
+ "full_std_girl_room_82.png": {
+  "rating": {
+   "safe": 0.919,
+   "r15": 0.043,
+   "r18": 0.038
+  },
+  "nsfw": {
+   "drawings": 0.343,
+   "hentai": 0.6,
+   "neutral": 0.042,
+   "porn": 0.014,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.932,
+   "real": 0.068
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.326
+  },
+  "aesthetic": 0.072
+ },
+ "full_std_girl_room_83.png": {
+  "rating": {
+   "safe": 0.902,
+   "r18": 0.051,
+   "r15": 0.047
+  },
+  "nsfw": {
+   "drawings": 0.165,
+   "hentai": 0.708,
+   "neutral": 0.085,
+   "porn": 0.039,
+   "sexy": 0.002
+  },
+  "real": {
+   "anime": 0.666,
+   "real": 0.334
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.381
+  },
+  "aesthetic": 0.066
+ },
+ "full_std_girl_rural_81.png": {
+  "rating": {
+   "safe": 0.879,
+   "r15": 0.064,
+   "r18": 0.058
+  },
+  "nsfw": {
+   "drawings": 0.279,
+   "hentai": 0.041,
+   "neutral": 0.676,
+   "porn": 0.003,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.965,
+   "anime": 0.035
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.315
+  },
+  "aesthetic": 0.062
+ },
+ "full_std_girl_rural_82.png": {
+  "rating": {
+   "safe": 0.9,
+   "r15": 0.059,
+   "r18": 0.041
+  },
+  "nsfw": {
+   "drawings": 0.156,
+   "hentai": 0.709,
+   "neutral": 0.121,
+   "porn": 0.013,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.654,
+   "anime": 0.346
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.194
+  },
+  "aesthetic": 0.083
+ },
+ "full_std_girl_rural_83.png": {
+  "rating": {
+   "safe": 0.766,
+   "r15": 0.149,
+   "r18": 0.085
+  },
+  "nsfw": {
+   "drawings": 0.17,
+   "hentai": 0.106,
+   "neutral": 0.71,
+   "porn": 0.01,
+   "sexy": 0.004
+  },
+  "real": {
+   "real": 0.96,
+   "anime": 0.04
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.265
+  },
+  "aesthetic": 0.074
+ },
+ "full_std_girl_street_81.png": {
+  "rating": {
+   "safe": 0.904,
+   "r18": 0.05,
+   "r15": 0.046
+  },
+  "nsfw": {
+   "drawings": 0.481,
+   "hentai": 0.003,
+   "neutral": 0.514,
+   "porn": 0.0,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.977,
+   "anime": 0.023
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.303
+  },
+  "aesthetic": 0.123
+ },
+ "full_std_girl_street_82.png": {
+  "rating": {
+   "safe": 0.913,
+   "r18": 0.045,
+   "r15": 0.043
+  },
+  "nsfw": {
+   "drawings": 0.902,
+   "hentai": 0.015,
+   "neutral": 0.082,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.909,
+   "real": 0.091
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.294
+  },
+  "aesthetic": 0.127
+ },
+ "full_std_girl_street_83.png": {
+  "rating": {
+   "safe": 0.927,
+   "r18": 0.039,
+   "r15": 0.035
+  },
+  "nsfw": {
+   "drawings": 0.881,
+   "hentai": 0.002,
+   "neutral": 0.116,
+   "porn": 0.0,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.936,
+   "anime": 0.064
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.373
+  },
+  "aesthetic": 0.157
+ },
+ "full_std_old_room_81.png": {
+  "rating": {
+   "safe": 0.858,
+   "r15": 0.074,
+   "r18": 0.067
+  },
+  "nsfw": {
+   "drawings": 0.31,
+   "hentai": 0.282,
+   "neutral": 0.387,
+   "porn": 0.018,
+   "sexy": 0.003
+  },
+  "real": {
+   "anime": 0.962,
+   "real": 0.038
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.234
+  },
+  "aesthetic": 0.077
+ },
+ "full_std_old_room_82.png": {
+  "rating": {
+   "safe": 0.915,
+   "r18": 0.048,
+   "r15": 0.038
+  },
+  "nsfw": {
+   "drawings": 0.743,
+   "hentai": 0.157,
+   "neutral": 0.094,
+   "porn": 0.004,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.837,
+   "real": 0.163
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.211
+  },
+  "aesthetic": 0.065
+ },
+ "full_std_old_room_83.png": {
+  "rating": {
+   "safe": 0.84,
+   "r18": 0.082,
+   "r15": 0.079
+  },
+  "nsfw": {
+   "drawings": 0.492,
+   "hentai": 0.014,
+   "neutral": 0.493,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.951,
+   "real": 0.049
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.381
+  },
+  "aesthetic": 0.068
+ },
+ "full_std_old_rural_81.png": {
+  "rating": {
+   "safe": 0.882,
+   "r15": 0.059,
+   "r18": 0.058
+  },
+  "nsfw": {
+   "drawings": 0.275,
+   "hentai": 0.026,
+   "neutral": 0.695,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.955,
+   "anime": 0.045
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.175
+  },
+  "aesthetic": 0.052
+ },
+ "full_std_old_rural_82.png": {
+  "rating": {
+   "safe": 0.909,
+   "r18": 0.045,
+   "r15": 0.045
+  },
+  "nsfw": {
+   "drawings": 0.531,
+   "hentai": 0.019,
+   "neutral": 0.449,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.623,
+   "anime": 0.377
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.252
+  },
+  "aesthetic": 0.114
+ },
+ "full_std_old_rural_83.png": {
+  "rating": {
+   "safe": 0.938,
+   "r18": 0.033,
+   "r15": 0.029
+  },
+  "nsfw": {
+   "drawings": 0.297,
+   "hentai": 0.041,
+   "neutral": 0.659,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.947,
+   "anime": 0.053
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.243
+  },
+  "aesthetic": 0.079
+ },
+ "full_std_old_street_81.png": {
+  "rating": {
+   "safe": 0.91,
+   "r15": 0.046,
+   "r18": 0.044
+  },
+  "nsfw": {
+   "drawings": 0.276,
+   "hentai": 0.002,
+   "neutral": 0.721,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.937,
+   "anime": 0.063
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.214
+  },
+  "aesthetic": 0.206
+ },
+ "full_std_old_street_82.png": {
+  "rating": {
+   "safe": 0.9,
+   "r15": 0.052,
+   "r18": 0.048
+  },
+  "nsfw": {
+   "drawings": 0.956,
+   "hentai": 0.002,
+   "neutral": 0.042,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.909,
+   "real": 0.091
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.243
+  },
+  "aesthetic": 0.157
+ },
+ "full_std_old_street_83.png": {
+  "rating": {
+   "safe": 0.929,
+   "r18": 0.04,
+   "r15": 0.031
+  },
+  "nsfw": {
+   "drawings": 0.415,
+   "hentai": 0.008,
+   "neutral": 0.575,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.885,
+   "anime": 0.115
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.236
+  },
+  "aesthetic": 0.108
+ },
+ "long_tate_boy_room_81.png": {
+  "rating": {
+   "safe": 0.9,
+   "r18": 0.054,
+   "r15": 0.047
+  },
+  "nsfw": {
+   "drawings": 0.228,
+   "hentai": 0.651,
+   "neutral": 0.098,
+   "porn": 0.021,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.877,
+   "real": 0.123
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.069
+  },
+  "aesthetic": 0.068
+ },
+ "long_tate_boy_room_82.png": {
+  "rating": {
+   "safe": 0.875,
+   "r18": 0.063,
+   "r15": 0.062
+  },
+  "nsfw": {
+   "drawings": 0.273,
+   "hentai": 0.178,
+   "neutral": 0.543,
+   "porn": 0.005,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.814,
+   "anime": 0.186
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.08
+  },
+  "aesthetic": 0.069
+ },
+ "long_tate_boy_room_83.png": {
+  "rating": {
+   "safe": 0.917,
+   "r18": 0.046,
+   "r15": 0.037
+  },
+  "nsfw": {
+   "drawings": 0.223,
+   "hentai": 0.116,
+   "neutral": 0.644,
+   "porn": 0.011,
+   "sexy": 0.005
+  },
+  "real": {
+   "anime": 0.852,
+   "real": 0.148
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.288
+  },
+  "aesthetic": 0.095
+ },
+ "long_tate_boy_rural_81.png": {
+  "rating": {
+   "safe": 0.927,
+   "r18": 0.044,
+   "r15": 0.029
+  },
+  "nsfw": {
+   "drawings": 0.487,
+   "hentai": 0.015,
+   "neutral": 0.489,
+   "porn": 0.002,
+   "sexy": 0.008
+  },
+  "real": {
+   "real": 0.976,
+   "anime": 0.024
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.148
+  },
+  "aesthetic": 0.079
+ },
+ "long_tate_boy_rural_82.png": {
+  "rating": {
+   "safe": 0.936,
+   "r18": 0.038,
+   "r15": 0.026
+  },
+  "nsfw": {
+   "drawings": 0.235,
+   "hentai": 0.153,
+   "neutral": 0.605,
+   "porn": 0.005,
+   "sexy": 0.002
+  },
+  "real": {
+   "anime": 0.84,
+   "real": 0.16
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.095
+  },
+  "aesthetic": 0.174
+ },
+ "long_tate_boy_rural_83.png": {
+  "rating": {
+   "safe": 0.916,
+   "r18": 0.047,
+   "r15": 0.037
+  },
+  "nsfw": {
+   "drawings": 0.809,
+   "hentai": 0.007,
+   "neutral": 0.182,
+   "porn": 0.0,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.924,
+   "real": 0.076
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.164
+  },
+  "aesthetic": 0.106
+ },
+ "long_tate_boy_street_81.png": {
+  "rating": {
+   "safe": 0.884,
+   "r18": 0.061,
+   "r15": 0.055
+  },
+  "nsfw": {
+   "drawings": 0.348,
+   "hentai": 0.099,
+   "neutral": 0.55,
+   "porn": 0.002,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.889,
+   "anime": 0.111
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.313
+  },
+  "aesthetic": 0.102
+ },
+ "long_tate_boy_street_82.png": {
+  "rating": {
+   "safe": 0.879,
+   "r15": 0.069,
+   "r18": 0.052
+  },
+  "nsfw": {
+   "drawings": 0.667,
+   "hentai": 0.182,
+   "neutral": 0.147,
+   "porn": 0.003,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.733,
+   "real": 0.267
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.247
+  },
+  "aesthetic": 0.118
+ },
+ "long_tate_boy_street_83.png": {
+  "rating": {
+   "safe": 0.87,
+   "r18": 0.067,
+   "r15": 0.063
+  },
+  "nsfw": {
+   "drawings": 0.606,
+   "hentai": 0.173,
+   "neutral": 0.219,
+   "porn": 0.002,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.941,
+   "anime": 0.059
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.241
+  },
+  "aesthetic": 0.157
+ },
+ "long_tate_girl_room_81.png": {
+  "rating": {
+   "safe": 0.93,
+   "r18": 0.04,
+   "r15": 0.031
+  },
+  "nsfw": {
+   "drawings": 0.028,
+   "hentai": 0.936,
+   "neutral": 0.006,
+   "porn": 0.03,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.924,
+   "real": 0.076
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.131
+  },
+  "aesthetic": 0.086
+ },
+ "long_tate_girl_room_82.png": {
+  "rating": {
+   "safe": 0.839,
+   "r18": 0.1,
+   "r15": 0.061
+  },
+  "nsfw": {
+   "drawings": 0.241,
+   "hentai": 0.093,
+   "neutral": 0.658,
+   "porn": 0.006,
+   "sexy": 0.002
+  },
+  "real": {
+   "real": 0.974,
+   "anime": 0.026
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.05
+  },
+  "aesthetic": 0.06
+ },
+ "long_tate_girl_room_83.png": {
+  "rating": {
+   "safe": 0.908,
+   "r18": 0.048,
+   "r15": 0.044
+  },
+  "nsfw": {
+   "drawings": 0.043,
+   "hentai": 0.899,
+   "neutral": 0.039,
+   "porn": 0.018,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.931,
+   "real": 0.069
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.239
+  },
+  "aesthetic": 0.09
+ },
+ "long_tate_girl_rural_81.png": {
+  "rating": {
+   "safe": 0.905,
+   "r18": 0.056,
+   "r15": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.267,
+   "hentai": 0.016,
+   "neutral": 0.715,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.97,
+   "anime": 0.03
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.078
+  },
+  "aesthetic": 0.072
+ },
+ "long_tate_girl_rural_82.png": {
+  "rating": {
+   "safe": 0.929,
+   "r18": 0.045,
+   "r15": 0.026
+  },
+  "nsfw": {
+   "drawings": 0.074,
+   "hentai": 0.006,
+   "neutral": 0.92,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.783,
+   "anime": 0.217
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.188
+  },
+  "aesthetic": 0.094
+ },
+ "long_tate_girl_rural_83.png": {
+  "rating": {
+   "safe": 0.91,
+   "r18": 0.051,
+   "r15": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.71,
+   "hentai": 0.007,
+   "neutral": 0.281,
+   "porn": 0.001,
+   "sexy": 0.002
+  },
+  "real": {
+   "real": 0.957,
+   "anime": 0.043
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.22
+  },
+  "aesthetic": 0.102
+ },
+ "long_tate_girl_street_81.png": {
+  "rating": {
+   "safe": 0.832,
+   "r15": 0.094,
+   "r18": 0.073
+  },
+  "nsfw": {
+   "drawings": 0.198,
+   "hentai": 0.187,
+   "neutral": 0.609,
+   "porn": 0.005,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.629,
+   "real": 0.371
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.335
+  },
+  "aesthetic": 0.125
+ },
+ "long_tate_girl_street_82.png": {
+  "rating": {
+   "safe": 0.824,
+   "r15": 0.104,
+   "r18": 0.072
+  },
+  "nsfw": {
+   "drawings": 0.493,
+   "hentai": 0.056,
+   "neutral": 0.447,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.862,
+   "real": 0.138
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.311
+  },
+  "aesthetic": 0.146
+ },
+ "long_tate_girl_street_83.png": {
+  "rating": {
+   "safe": 0.848,
+   "r18": 0.08,
+   "r15": 0.072
+  },
+  "nsfw": {
+   "drawings": 0.813,
+   "hentai": 0.036,
+   "neutral": 0.15,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.848,
+   "anime": 0.152
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.178
+  },
+  "aesthetic": 0.12
+ },
+ "long_tate_old_room_81.png": {
+  "rating": {
+   "safe": 0.899,
+   "r18": 0.057,
+   "r15": 0.043
+  },
+  "nsfw": {
+   "drawings": 0.542,
+   "hentai": 0.332,
+   "neutral": 0.119,
+   "porn": 0.006,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.624,
+   "real": 0.376
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.077
+  },
+  "aesthetic": 0.055
+ },
+ "long_tate_old_room_82.png": {
+  "rating": {
+   "safe": 0.854,
+   "r18": 0.091,
+   "r15": 0.055
+  },
+  "nsfw": {
+   "drawings": 0.463,
+   "hentai": 0.186,
+   "neutral": 0.343,
+   "porn": 0.007,
+   "sexy": 0.002
+  },
+  "real": {
+   "real": 0.961,
+   "anime": 0.039
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.069
+  },
+  "aesthetic": 0.061
+ },
+ "long_tate_old_room_83.png": {
+  "rating": {
+   "safe": 0.914,
+   "r18": 0.047,
+   "r15": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.085,
+   "hentai": 0.892,
+   "neutral": 0.004,
+   "porn": 0.019,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.975,
+   "real": 0.025
+  },
+  "dbaesthetic": {
+   "label": "worst",
+   "percentile": 0.083
+  },
+  "aesthetic": 0.082
+ },
+ "long_tate_old_rural_81.png": {
+  "rating": {
+   "safe": 0.927,
+   "r18": 0.044,
+   "r15": 0.029
+  },
+  "nsfw": {
+   "drawings": 0.309,
+   "hentai": 0.008,
+   "neutral": 0.68,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.982,
+   "anime": 0.018
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.209
+  },
+  "aesthetic": 0.063
+ },
+ "long_tate_old_rural_82.png": {
+  "rating": {
+   "safe": 0.922,
+   "r18": 0.048,
+   "r15": 0.03
+  },
+  "nsfw": {
+   "drawings": 0.216,
+   "hentai": 0.048,
+   "neutral": 0.732,
+   "porn": 0.003,
+   "sexy": 0.002
+  },
+  "real": {
+   "anime": 0.576,
+   "real": 0.424
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.194
+  },
+  "aesthetic": 0.084
+ },
+ "long_tate_old_rural_83.png": {
+  "rating": {
+   "safe": 0.923,
+   "r18": 0.048,
+   "r15": 0.029
+  },
+  "nsfw": {
+   "drawings": 0.126,
+   "hentai": 0.003,
+   "neutral": 0.871,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.934,
+   "anime": 0.066
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.299
+  },
+  "aesthetic": 0.11
+ },
+ "long_tate_old_street_81.png": {
+  "rating": {
+   "safe": 0.896,
+   "r18": 0.054,
+   "r15": 0.05
+  },
+  "nsfw": {
+   "drawings": 0.598,
+   "hentai": 0.004,
+   "neutral": 0.398,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.927,
+   "anime": 0.073
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.34
+  },
+  "aesthetic": 0.088
+ },
+ "long_tate_old_street_82.png": {
+  "rating": {
+   "safe": 0.819,
+   "r15": 0.111,
+   "r18": 0.07
+  },
+  "nsfw": {
+   "drawings": 0.408,
+   "hentai": 0.059,
+   "neutral": 0.53,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.777,
+   "anime": 0.223
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.286
+  },
+  "aesthetic": 0.169
+ },
+ "long_tate_old_street_83.png": {
+  "rating": {
+   "safe": 0.854,
+   "r18": 0.082,
+   "r15": 0.064
+  },
+  "nsfw": {
+   "drawings": 0.868,
+   "hentai": 0.071,
+   "neutral": 0.06,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.961,
+   "anime": 0.039
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.158
+  },
+  "aesthetic": 0.107
+ },
+ "long_yoko_boy_room_81.png": {
+  "rating": {
+   "safe": 0.86,
+   "r18": 0.073,
+   "r15": 0.067
+  },
+  "nsfw": {
+   "drawings": 0.055,
+   "hentai": 0.905,
+   "neutral": 0.022,
+   "porn": 0.018,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.904,
+   "real": 0.096
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.343
+  },
+  "aesthetic": 0.059
+ },
+ "long_yoko_boy_room_82.png": {
+  "rating": {
+   "safe": 0.858,
+   "r18": 0.074,
+   "r15": 0.068
+  },
+  "nsfw": {
+   "drawings": 0.123,
+   "hentai": 0.818,
+   "neutral": 0.033,
+   "porn": 0.024,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.755,
+   "real": 0.245
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.218
+  },
+  "aesthetic": 0.058
+ },
+ "long_yoko_boy_room_83.png": {
+  "rating": {
+   "safe": 0.858,
+   "r15": 0.073,
+   "r18": 0.07
+  },
+  "nsfw": {
+   "drawings": 0.419,
+   "hentai": 0.544,
+   "neutral": 0.019,
+   "porn": 0.017,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.918,
+   "real": 0.082
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.174
+  },
+  "aesthetic": 0.059
+ },
+ "long_yoko_boy_rural_81.png": {
+  "rating": {
+   "safe": 0.899,
+   "r18": 0.064,
+   "r15": 0.037
+  },
+  "nsfw": {
+   "drawings": 0.737,
+   "hentai": 0.175,
+   "neutral": 0.085,
+   "porn": 0.003,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.971,
+   "real": 0.029
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.222
+  },
+  "aesthetic": 0.09
+ },
+ "long_yoko_boy_rural_82.png": {
+  "rating": {
+   "safe": 0.883,
+   "r18": 0.069,
+   "r15": 0.048
+  },
+  "nsfw": {
+   "drawings": 0.083,
+   "hentai": 0.004,
+   "neutral": 0.913,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.97,
+   "anime": 0.03
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.181
+  },
+  "aesthetic": 0.069
+ },
+ "long_yoko_boy_rural_83.png": {
+  "rating": {
+   "safe": 0.894,
+   "r18": 0.06,
+   "r15": 0.046
+  },
+  "nsfw": {
+   "drawings": 0.135,
+   "hentai": 0.038,
+   "neutral": 0.825,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.982,
+   "anime": 0.018
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.181
+  },
+  "aesthetic": 0.084
+ },
+ "long_yoko_boy_street_81.png": {
+  "rating": {
+   "safe": 0.878,
+   "r15": 0.067,
+   "r18": 0.055
+  },
+  "nsfw": {
+   "drawings": 0.847,
+   "hentai": 0.069,
+   "neutral": 0.081,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.761,
+   "anime": 0.239
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.425
+  },
+  "aesthetic": 0.128
+ },
+ "long_yoko_boy_street_82.png": {
+  "rating": {
+   "safe": 0.897,
+   "r18": 0.052,
+   "r15": 0.051
+  },
+  "nsfw": {
+   "drawings": 0.113,
+   "hentai": 0.005,
+   "neutral": 0.879,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.963,
+   "anime": 0.037
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.488
+  },
+  "aesthetic": 0.082
+ },
+ "long_yoko_boy_street_83.png": {
+  "rating": {
+   "safe": 0.924,
+   "r18": 0.042,
+   "r15": 0.034
+  },
+  "nsfw": {
+   "drawings": 0.602,
+   "hentai": 0.001,
+   "neutral": 0.396,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.966,
+   "anime": 0.034
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.399
+  },
+  "aesthetic": 0.152
+ },
+ "long_yoko_girl_room_81.png": {
+  "rating": {
+   "safe": 0.886,
+   "r18": 0.067,
+   "r15": 0.048
+  },
+  "nsfw": {
+   "drawings": 0.076,
+   "hentai": 0.891,
+   "neutral": 0.009,
+   "porn": 0.022,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.904,
+   "real": 0.096
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.26
+  },
+  "aesthetic": 0.055
+ },
+ "long_yoko_girl_room_82.png": {
+  "rating": {
+   "safe": 0.827,
+   "r15": 0.091,
+   "r18": 0.082
+  },
+  "nsfw": {
+   "drawings": 0.227,
+   "hentai": 0.711,
+   "neutral": 0.046,
+   "porn": 0.015,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.934,
+   "anime": 0.066
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.355
+  },
+  "aesthetic": 0.065
+ },
+ "long_yoko_girl_room_83.png": {
+  "rating": {
+   "safe": 0.87,
+   "r18": 0.07,
+   "r15": 0.06
+  },
+  "nsfw": {
+   "drawings": 0.32,
+   "hentai": 0.642,
+   "neutral": 0.019,
+   "porn": 0.018,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.84,
+   "anime": 0.16
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.325
+  },
+  "aesthetic": 0.067
+ },
+ "long_yoko_girl_rural_81.png": {
+  "rating": {
+   "safe": 0.878,
+   "r15": 0.063,
+   "r18": 0.059
+  },
+  "nsfw": {
+   "drawings": 0.735,
+   "hentai": 0.159,
+   "neutral": 0.104,
+   "porn": 0.002,
+   "sexy": 0.0
+  },
+  "real": {
+   "anime": 0.981,
+   "real": 0.019
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.216
+  },
+  "aesthetic": 0.055
+ },
+ "long_yoko_girl_rural_82.png": {
+  "rating": {
+   "safe": 0.877,
+   "r18": 0.088,
+   "r15": 0.036
+  },
+  "nsfw": {
+   "drawings": 0.091,
+   "hentai": 0.025,
+   "neutral": 0.881,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.949,
+   "anime": 0.051
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.281
+  },
+  "aesthetic": 0.061
+ },
+ "long_yoko_girl_rural_83.png": {
+  "rating": {
+   "safe": 0.84,
+   "r18": 0.102,
+   "r15": 0.058
+  },
+  "nsfw": {
+   "drawings": 0.25,
+   "hentai": 0.015,
+   "neutral": 0.733,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.968,
+   "anime": 0.032
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.246
+  },
+  "aesthetic": 0.055
+ },
+ "long_yoko_girl_street_81.png": {
+  "rating": {
+   "safe": 0.914,
+   "r15": 0.044,
+   "r18": 0.042
+  },
+  "nsfw": {
+   "drawings": 0.375,
+   "hentai": 0.105,
+   "neutral": 0.491,
+   "porn": 0.019,
+   "sexy": 0.01
+  },
+  "real": {
+   "anime": 0.909,
+   "real": 0.091
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.33
+  },
+  "aesthetic": 0.086
+ },
+ "long_yoko_girl_street_82.png": {
+  "rating": {
+   "safe": 0.861,
+   "r15": 0.077,
+   "r18": 0.062
+  },
+  "nsfw": {
+   "drawings": 0.214,
+   "hentai": 0.001,
+   "neutral": 0.785,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.892,
+   "anime": 0.108
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.378
+  },
+  "aesthetic": 0.076
+ },
+ "long_yoko_girl_street_83.png": {
+  "rating": {
+   "safe": 0.922,
+   "r18": 0.041,
+   "r15": 0.037
+  },
+  "nsfw": {
+   "drawings": 0.777,
+   "hentai": 0.002,
+   "neutral": 0.22,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.959,
+   "anime": 0.041
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.404
+  },
+  "aesthetic": 0.087
+ },
+ "long_yoko_old_room_81.png": {
+  "rating": {
+   "safe": 0.834,
+   "r18": 0.092,
+   "r15": 0.074
+  },
+  "nsfw": {
+   "drawings": 0.18,
+   "hentai": 0.549,
+   "neutral": 0.234,
+   "porn": 0.031,
+   "sexy": 0.005
+  },
+  "real": {
+   "anime": 0.96,
+   "real": 0.04
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.175
+  },
+  "aesthetic": 0.066
+ },
+ "long_yoko_old_room_82.png": {
+  "rating": {
+   "safe": 0.865,
+   "r18": 0.074,
+   "r15": 0.061
+  },
+  "nsfw": {
+   "drawings": 0.331,
+   "hentai": 0.503,
+   "neutral": 0.152,
+   "porn": 0.013,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.975,
+   "anime": 0.025
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.273
+  },
+  "aesthetic": 0.055
+ },
+ "long_yoko_old_room_83.png": {
+  "rating": {
+   "safe": 0.916,
+   "r18": 0.046,
+   "r15": 0.039
+  },
+  "nsfw": {
+   "drawings": 0.276,
+   "hentai": 0.561,
+   "neutral": 0.141,
+   "porn": 0.02,
+   "sexy": 0.002
+  },
+  "real": {
+   "real": 0.955,
+   "anime": 0.045
+  },
+  "dbaesthetic": {
+   "label": "low",
+   "percentile": 0.168
+  },
+  "aesthetic": 0.065
+ },
+ "long_yoko_old_rural_81.png": {
+  "rating": {
+   "safe": 0.937,
+   "r18": 0.037,
+   "r15": 0.025
+  },
+  "nsfw": {
+   "drawings": 0.131,
+   "hentai": 0.015,
+   "neutral": 0.851,
+   "porn": 0.002,
+   "sexy": 0.001
+  },
+  "real": {
+   "anime": 0.58,
+   "real": 0.42
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.319
+  },
+  "aesthetic": 0.057
+ },
+ "long_yoko_old_rural_82.png": {
+  "rating": {
+   "safe": 0.84,
+   "r15": 0.082,
+   "r18": 0.079
+  },
+  "nsfw": {
+   "drawings": 0.057,
+   "hentai": 0.005,
+   "neutral": 0.937,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.915,
+   "anime": 0.085
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.32
+  },
+  "aesthetic": 0.07
+ },
+ "long_yoko_old_rural_83.png": {
+  "rating": {
+   "safe": 0.913,
+   "r18": 0.05,
+   "r15": 0.038
+  },
+  "nsfw": {
+   "drawings": 0.134,
+   "hentai": 0.021,
+   "neutral": 0.836,
+   "porn": 0.004,
+   "sexy": 0.005
+  },
+  "real": {
+   "real": 0.963,
+   "anime": 0.037
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.356
+  },
+  "aesthetic": 0.054
+ },
+ "long_yoko_old_street_81.png": {
+  "rating": {
+   "safe": 0.902,
+   "r15": 0.054,
+   "r18": 0.043
+  },
+  "nsfw": {
+   "drawings": 0.129,
+   "hentai": 0.002,
+   "neutral": 0.868,
+   "porn": 0.001,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.892,
+   "anime": 0.108
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.366
+  },
+  "aesthetic": 0.069
+ },
+ "long_yoko_old_street_82.png": {
+  "rating": {
+   "safe": 0.88,
+   "r18": 0.061,
+   "r15": 0.059
+  },
+  "nsfw": {
+   "drawings": 0.23,
+   "hentai": 0.004,
+   "neutral": 0.764,
+   "porn": 0.001,
+   "sexy": 0.001
+  },
+  "real": {
+   "real": 0.972,
+   "anime": 0.028
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.376
+  },
+  "aesthetic": 0.062
+ },
+ "long_yoko_old_street_83.png": {
+  "rating": {
+   "safe": 0.926,
+   "r18": 0.039,
+   "r15": 0.035
+  },
+  "nsfw": {
+   "drawings": 0.92,
+   "hentai": 0.005,
+   "neutral": 0.075,
+   "porn": 0.0,
+   "sexy": 0.0
+  },
+  "real": {
+   "real": 0.929,
+   "anime": 0.071
+  },
+  "dbaesthetic": {
+   "label": "normal",
+   "percentile": 0.417
+  },
+  "aesthetic": 0.087
+ }
+}

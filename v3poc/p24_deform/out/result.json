@@ -1,0 +1,371 @@
+{
+ "threshold": 0.17847511429108218,
+ "summary": {
+  "a/deform": {
+   "n": 6,
+   "same": 6,
+   "diff_mean": 0.113
+  },
+  "a/normal": {
+   "n": 6,
+   "same": 6,
+   "diff_mean": 0.106
+  },
+  "a/refclean": {
+   "n": 3,
+   "same": 2,
+   "diff_mean": 0.121
+  },
+  "a/refblur": {
+   "n": 3,
+   "same": 3,
+   "diff_mean": 0.097
+  },
+  "b/deform": {
+   "n": 6,
+   "same": 6,
+   "diff_mean": 0.063
+  },
+  "b/normal": {
+   "n": 6,
+   "same": 6,
+   "diff_mean": 0.053
+  },
+  "b/refclean": {
+   "n": 3,
+   "same": 3,
+   "diff_mean": 0.076
+  },
+  "b/refblur": {
+   "n": 3,
+   "same": 3,
+   "diff_mean": 0.068
+  }
+ },
+ "rows": [
+  {
+   "file": "a_deform_81.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 81,
+   "diff": 0.14,
+   "same": true,
+   "diff_other": 0.387
+  },
+  {
+   "file": "a_deform_82.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 82,
+   "diff": 0.127,
+   "same": true,
+   "diff_other": 0.456
+  },
+  {
+   "file": "a_deform_83.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 83,
+   "diff": 0.143,
+   "same": true,
+   "diff_other": 0.408
+  },
+  {
+   "file": "a_deform_84.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 84,
+   "diff": 0.096,
+   "same": true,
+   "diff_other": 0.409
+  },
+  {
+   "file": "a_deform_85.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 85,
+   "diff": 0.092,
+   "same": true,
+   "diff_other": 0.472
+  },
+  {
+   "file": "a_deform_86.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 86,
+   "diff": 0.078,
+   "same": true,
+   "diff_other": 0.546
+  },
+  {
+   "file": "a_normal_81.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 81,
+   "diff": 0.112,
+   "same": true,
+   "diff_other": 0.426
+  },
+  {
+   "file": "a_normal_82.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 82,
+   "diff": 0.113,
+   "same": true,
+   "diff_other": 0.411
+  },
+  {
+   "file": "a_normal_83.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 83,
+   "diff": 0.098,
+   "same": true,
+   "diff_other": 0.425
+  },
+  {
+   "file": "a_normal_84.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 84,
+   "diff": 0.084,
+   "same": true,
+   "diff_other": 0.45
+  },
+  {
+   "file": "a_normal_85.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 85,
+   "diff": 0.073,
+   "same": true,
+   "diff_other": 0.479
+  },
+  {
+   "file": "a_normal_86.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 86,
+   "diff": 0.155,
+   "same": true,
+   "diff_other": 0.407
+  },
+  {
+   "file": "a_refblur_81.png",
+   "chara": "a",
+   "mode": "refblur",
+   "seed": 81,
+   "diff": 0.074,
+   "same": true,
+   "diff_other": 0.434
+  },
+  {
+   "file": "a_refblur_82.png",
+   "chara": "a",
+   "mode": "refblur",
+   "seed": 82,
+   "diff": 0.101,
+   "same": true,
+   "diff_other": 0.417
+  },
+  {
+   "file": "a_refblur_83.png",
+   "chara": "a",
+   "mode": "refblur",
+   "seed": 83,
+   "diff": 0.116,
+   "same": true,
+   "diff_other": 0.423
+  },
+  {
+   "file": "a_refclean_81.png",
+   "chara": "a",
+   "mode": "refclean",
+   "seed": 81,
+   "diff": 0.107,
+   "same": true,
+   "diff_other": 0.434
+  },
+  {
+   "file": "a_refclean_82.png",
+   "chara": "a",
+   "mode": "refclean",
+   "seed": 82,
+   "diff": 0.077,
+   "same": true,
+   "diff_other": 0.441
+  },
+  {
+   "file": "a_refclean_83.png",
+   "chara": "a",
+   "mode": "refclean",
+   "seed": 83,
+   "diff": 0.179,
+   "same": false,
+   "diff_other": 0.365
+  },
+  {
+   "file": "b_deform_81.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 81,
+   "diff": 0.06,
+   "same": true,
+   "diff_other": 0.467
+  },
+  {
+   "file": "b_deform_82.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 82,
+   "diff": 0.063,
+   "same": true,
+   "diff_other": 0.485
+  },
+  {
+   "file": "b_deform_83.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 83,
+   "diff": 0.056,
+   "same": true,
+   "diff_other": 0.485
+  },
+  {
+   "file": "b_deform_84.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 84,
+   "diff": 0.048,
+   "same": true,
+   "diff_other": 0.457
+  },
+  {
+   "file": "b_deform_85.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 85,
+   "diff": 0.056,
+   "same": true,
+   "diff_other": 0.499
+  },
+  {
+   "file": "b_deform_86.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 86,
+   "diff": 0.094,
+   "same": true,
+   "diff_other": 0.51
+  },
+  {
+   "file": "b_normal_81.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 81,
+   "diff": 0.07,
+   "same": true,
+   "diff_other": 0.474
+  },
+  {
+   "file": "b_normal_82.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 82,
+   "diff": 0.046,
+   "same": true,
+   "diff_other": 0.461
+  },
+  {
+   "file": "b_normal_83.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 83,
+   "diff": 0.057,
+   "same": true,
+   "diff_other": 0.479
+  },
+  {
+   "file": "b_normal_84.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 84,
+   "diff": 0.041,
+   "same": true,
+   "diff_other": 0.467
+  },
+  {
+   "file": "b_normal_85.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 85,
+   "diff": 0.045,
+   "same": true,
+   "diff_other": 0.449
+  },
+  {
+   "file": "b_normal_86.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 86,
+   "diff": 0.057,
+   "same": true,
+   "diff_other": 0.472
+  },
+  {
+   "file": "b_refblur_81.png",
+   "chara": "b",
+   "mode": "refblur",
+   "seed": 81,
+   "diff": 0.07,
+   "same": true,
+   "diff_other": 0.474
+  },
+  {
+   "file": "b_refblur_82.png",
+   "chara": "b",
+   "mode": "refblur",
+   "seed": 82,
+   "diff": 0.075,
+   "same": true,
+   "diff_other": 0.434
+  },
+  {
+   "file": "b_refblur_83.png",
+   "chara": "b",
+   "mode": "refblur",
+   "seed": 83,
+   "diff": 0.059,
+   "same": true,
+   "diff_other": 0.493
+  },
+  {
+   "file": "b_refclean_81.png",
+   "chara": "b",
+   "mode": "refclean",
+   "seed": 81,
+   "diff": 0.102,
+   "same": true,
+   "diff_other": 0.532
+  },
+  {
+   "file": "b_refclean_82.png",
+   "chara": "b",
+   "mode": "refclean",
+   "seed": 82,
+   "diff": 0.047,
+   "same": true,
+   "diff_other": 0.52
+  },
+  {
+   "file": "b_refclean_83.png",
+   "chara": "b",
+   "mode": "refclean",
+   "seed": 83,
+   "diff": 0.079,
+   "same": true,
+   "diff_other": 0.527
+  }
+ ]
+}

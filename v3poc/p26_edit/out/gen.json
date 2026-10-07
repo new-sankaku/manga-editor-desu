@@ -1,0 +1,152 @@
+{
+ "src": {
+  "a": "a_full_none_eat_21.png",
+  "b": "b_full_none_run_21.png"
+ },
+ "edits": {
+  "smile": "Make the character smile. Keep everything else unchanged.",
+  "cup": "Put a coffee cup in the character's hand. Keep everything else unchanged.",
+  "sit": "Make the character sit on a chair. Keep the same character, clothes and drawing style.",
+  "back": "Show the same character from behind. Keep the same clothes and drawing style.",
+  "bg": "Change the background to a beach. Keep the character unchanged."
+ },
+ "model": {
+  "unet": "qwen_image_2.1_int8_convrot.safetensors",
+  "clip": "qwen3vl_8b_int8_convrot.safetensors",
+  "vae": "qwen_image_2.1_vae_bf16.safetensors",
+  "steps": 25,
+  "cfg": 1.0,
+  "sampler": "euler",
+  "scheduler": "simple",
+  "resolution": 1024
+ },
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "a_smile_1.png",
+   "chara": "a",
+   "edit": "smile",
+   "seed": 1,
+   "prompt": "Make the character smile. Keep everything else unchanged.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 73.8
+  },
+  {
+   "file": "a_smile_2.png",
+   "chara": "a",
+   "edit": "smile",
+   "seed": 2,
+   "prompt": "Make the character smile. Keep everything else unchanged.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 16.9
+  },
+  {
+   "file": "a_cup_1.png",
+   "chara": "a",
+   "edit": "cup",
+   "seed": 1,
+   "prompt": "Put a coffee cup in the character's hand. Keep everything else unchanged.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 21.7
+  },
+  {
+   "file": "a_cup_2.png",
+   "chara": "a",
+   "edit": "cup",
+   "seed": 2,
+   "prompt": "Put a coffee cup in the character's hand. Keep everything else unchanged.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 17.0
+  },
+  {
+   "file": "a_sit_1.png",
+   "chara": "a",
+   "edit": "sit",
+   "seed": 1,
+   "prompt": "Make the character sit on a chair. Keep the same character, clothes and drawing style.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 21.6
+  },
+  {
+   "file": "a_sit_2.png",
+   "chara": "a",
+   "edit": "sit",
+   "seed": 2,
+   "prompt": "Make the character sit on a chair. Keep the same character, clothes and drawing style.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 15.7
+  },
+  {
+   "file": "a_back_1.png",
+   "chara": "a",
+   "edit": "back",
+   "seed": 1,
+   "prompt": "Show the same character from behind. Keep the same clothes and drawing style.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 25.4
+  },
+  {
+   "file": "a_back_2.png",
+   "chara": "a",
+   "edit": "back",
+   "seed": 2,
+   "prompt": "Show the same character from behind. Keep the same clothes and drawing style.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 18.2
+  },
+  {
+   "file": "a_bg_1.png",
+   "chara": "a",
+   "edit": "bg",
+   "seed": 1,
+   "prompt": "Change the background to a beach. Keep the character unchanged.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 21.4
+  },
+  {
+   "file": "a_bg_2.png",
+   "chara": "a",
+   "edit": "bg",
+   "seed": 2,
+   "prompt": "Change the background to a beach. Keep the character unchanged.",
+   "src": "a_full_none_eat_21.png",
+   "sec": 16.0
+  },
+  {
+   "file": "b_smile_1.png",
+   "chara": "b",
+   "edit": "smile",
+   "seed": 1,
+   "prompt": "Make the character smile. Keep everything else unchanged.",
+   "src": "b_full_none_run_21.png",
+   "sec": 21.9
+  },
+  {
+   "file": "b_smile_2.png",
+   "chara": "b",
+   "edit": "smile",
+   "seed": 2,
+   "prompt": "Make the character smile. Keep everything else unchanged.",
+   "src": "b_full_none_run_21.png",
+   "sec": 18.7
+  },
+  {
+   "file": "b_cup_1.png",
+   "chara": "b",
+   "edit": "cup",
+   "seed": 1,
+   "prompt": "Put a coffee cup in the character's hand. Keep everything else unchanged.",
+   "src": "b_full_none_run_21.png",
+   "sec": 42.3
+  },
+  {
+   "file": "b_cup_2.png",
+   "chara": "b",
+   "edit": "cup",
+   "seed": 2,
+   "prompt": "Put a coffee cup in the character's hand. Keep everything else unchanged.",
+   "src": "b_full_none_run_21.png",
+   "sec": 17.8
+  }
+ ]
+}

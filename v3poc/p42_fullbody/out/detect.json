@@ -1,0 +1,513 @@
+{
+ "p02_instruction/full_body_1001.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   121
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1002.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   115
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1003.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   126
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1004.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   122
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1005.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   129
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1006.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   125
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1007.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   104
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p02_instruction/full_body_1008.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   123
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p16_general/full_std_boy_room_81.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   71
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_room_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   51
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_room_83.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   54
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_rural_81.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   35
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_rural_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   60
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_rural_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   53
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_street_81.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   35
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_street_82.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   49
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_boy_street_83.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   59
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_room_81.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   52
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_room_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   59
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_room_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   49
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_rural_81.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   45
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_rural_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   42
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_rural_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   50
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_street_81.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   36
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_street_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   35
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_girl_street_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   44
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_room_81.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   57
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_room_82.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   43
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_room_83.png": {
+  "faces": 0,
+  "hands": 0,
+  "face_px": [],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_rural_81.png": {
+  "faces": 0,
+  "hands": 0,
+  "face_px": [],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_rural_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   47
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_rural_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   32
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_street_81.png": {
+  "faces": 0,
+  "hands": 0,
+  "face_px": [],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_street_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   32
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p16_general/full_std_old_street_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   38
+  ],
+  "size": [
+   1152,
+   896
+  ]
+ },
+ "p24_deform/a_normal_81.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   131
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/a_normal_82.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   127
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/a_normal_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   125
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/a_normal_84.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   128
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/a_normal_85.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   126
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/a_normal_86.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   123
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/b_normal_81.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   110
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/b_normal_82.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   103
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/b_normal_83.png": {
+  "faces": 1,
+  "hands": 0,
+  "face_px": [
+   111
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/b_normal_84.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   154
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/b_normal_85.png": {
+  "faces": 1,
+  "hands": 2,
+  "face_px": [
+   112
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ },
+ "p24_deform/b_normal_86.png": {
+  "faces": 1,
+  "hands": 1,
+  "face_px": [
+   103
+  ],
+  "size": [
+   832,
+   1216
+  ]
+ }
+}

@@ -1,0 +1,74 @@
+[
+ {
+  "file": "3panels_51.png",
+  "req": "3panels",
+  "seed": 51,
+  "sec": 26.1
+ },
+ {
+  "file": "3panels_52.png",
+  "req": "3panels",
+  "seed": 52,
+  "sec": 7.2
+ },
+ {
+  "file": "3panels_53.png",
+  "req": "3panels",
+  "seed": 53,
+  "sec": 7.3
+ },
+ {
+  "file": "3panels_54.png",
+  "req": "3panels",
+  "seed": 54,
+  "sec": 7.2
+ },
+ {
+  "file": "4panels_51.png",
+  "req": "4panels",
+  "seed": 51,
+  "sec": 7.4
+ },
+ {
+  "file": "4panels_52.png",
+  "req": "4panels",
+  "seed": 52,
+  "sec": 7.2
+ },
+ {
+  "file": "4panels_53.png",
+  "req": "4panels",
+  "seed": 53,
+  "sec": 7.3
+ },
+ {
+  "file": "4panels_54.png",
+  "req": "4panels",
+  "seed": 54,
+  "sec": 7.2
+ },
+ {
+  "file": "6panels_51.png",
+  "req": "6panels",
+  "seed": 51,
+  "sec": 7.5
+ },
+ {
+  "file": "6panels_52.png",
+  "req": "6panels",
+  "seed": 52,
+  "sec": 7.2
+ },
+ {
+  "file": "6panels_53.png",
+  "req": "6panels",
+  "seed": 53,
+  "sec": 7.4
+ },
+ {
+  "file": "6panels_54.png",
+  "req": "6panels",
+  "seed": 54,
+  "sec": 7.1
+ }
+]

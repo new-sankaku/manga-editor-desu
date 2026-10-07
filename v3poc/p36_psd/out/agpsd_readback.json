@@ -1,0 +1,63 @@
+{
+ "bytes": 3635026,
+ "width": 832,
+ "height": 1216,
+ "layers": [
+  {
+   "name": "紙",
+   "depth": 0,
+   "hidden": false,
+   "blendMode": "normal",
+   "group": false,
+   "pixel_diff": 0
+  },
+  {
+   "name": "カラー",
+   "depth": 0,
+   "hidden": true,
+   "blendMode": "pass through",
+   "group": true
+  },
+  {
+   "name": "着彩",
+   "depth": 1,
+   "hidden": false,
+   "blendMode": "multiply",
+   "group": false,
+   "pixel_diff": 0
+  },
+  {
+   "name": "トーン",
+   "depth": 0,
+   "hidden": false,
+   "blendMode": "normal",
+   "group": false,
+   "pixel_diff": 0
+  },
+  {
+   "name": "ベタ",
+   "depth": 0,
+   "hidden": false,
+   "blendMode": "normal",
+   "group": false,
+   "pixel_diff": 0
+  },
+  {
+   "name": "線画",
+   "depth": 0,
+   "hidden": false,
+   "blendMode": "normal",
+   "group": false,
+   "pixel_diff": 0
+  },
+  {
+   "name": "セリフ",
+   "depth": 0,
+   "hidden": false,
+   "blendMode": "normal",
+   "group": false,
+   "text": "きょうは\n早いね",
+   "orientation": "vertical"
+  }
+ ]
+}

@@ -1,0 +1,154 @@
+{
+ "summary": {
+  "area/None/None": {
+   "fig_iou_mean": 0.67,
+   "balloon_dark_mean": 0.476,
+   "face_in_balloon": 0,
+   "n": 3,
+   "sec_mean": 9.6
+  },
+  "area_pose_thibaud/None/None": {
+   "fig_iou_mean": 0.39,
+   "balloon_dark_mean": 0.544,
+   "face_in_balloon": 0,
+   "n": 3,
+   "sec_mean": 18.1
+  },
+  "pose_t2i/None/None": {
+   "fig_iou_mean": 0.24,
+   "balloon_dark_mean": 0.308,
+   "face_in_balloon": 0,
+   "n": 3,
+   "sec_mean": 8.3
+  },
+  "pose_thibaud/None/None": {
+   "fig_iou_mean": 0.63,
+   "balloon_dark_mean": 0.462,
+   "face_in_balloon": 0,
+   "n": 3,
+   "sec_mean": 16.7
+  }
+ },
+ "rows": [
+  {
+   "file": "pose_thibaud_11.png",
+   "cn": "pose_thibaud",
+   "seed": 11,
+   "sec": 29.8,
+   "fig_iou": 0.66,
+   "persons": 1,
+   "balloon_dark_ratio": 0.259,
+   "face_in_balloon": false
+  },
+  {
+   "file": "pose_thibaud_12.png",
+   "cn": "pose_thibaud",
+   "seed": 12,
+   "sec": 10.1,
+   "fig_iou": 0.61,
+   "persons": 1,
+   "balloon_dark_ratio": 0.426,
+   "face_in_balloon": false
+  },
+  {
+   "file": "pose_thibaud_13.png",
+   "cn": "pose_thibaud",
+   "seed": 13,
+   "sec": 10.2,
+   "fig_iou": 0.63,
+   "persons": 2,
+   "balloon_dark_ratio": 0.702,
+   "face_in_balloon": false
+  },
+  {
+   "file": "pose_t2i_11.png",
+   "cn": "pose_t2i",
+   "seed": 11,
+   "sec": 10.1,
+   "fig_iou": 0.17,
+   "persons": 1,
+   "balloon_dark_ratio": 0.135,
+   "face_in_balloon": false
+  },
+  {
+   "file": "pose_t2i_12.png",
+   "cn": "pose_t2i",
+   "seed": 12,
+   "sec": 7.2,
+   "fig_iou": 0.08,
+   "persons": 1,
+   "balloon_dark_ratio": 0.219,
+   "face_in_balloon": false
+  },
+  {
+   "file": "pose_t2i_13.png",
+   "cn": "pose_t2i",
+   "seed": 13,
+   "sec": 7.6,
+   "fig_iou": 0.47,
+   "persons": 1,
+   "balloon_dark_ratio": 0.57,
+   "face_in_balloon": false
+  },
+  {
+   "file": "area_11.png",
+   "cn": "area",
+   "seed": 11,
+   "sec": 10.0,
+   "fig_iou": 0.68,
+   "persons": 1,
+   "balloon_dark_ratio": 0.584,
+   "face_in_balloon": false
+  },
+  {
+   "file": "area_12.png",
+   "cn": "area",
+   "seed": 12,
+   "sec": 9.3,
+   "fig_iou": 0.6,
+   "persons": 1,
+   "balloon_dark_ratio": 0.351,
+   "face_in_balloon": false
+  },
+  {
+   "file": "area_13.png",
+   "cn": "area",
+   "seed": 13,
+   "sec": 9.6,
+   "fig_iou": 0.72,
+   "persons": 1,
+   "balloon_dark_ratio": 0.493,
+   "face_in_balloon": false
+  },
+  {
+   "file": "area_pose_thibaud_11.png",
+   "cn": "area_pose_thibaud",
+   "seed": 11,
+   "sec": 21.9,
+   "fig_iou": 0.63,
+   "persons": 1,
+   "balloon_dark_ratio": 0.372,
+   "face_in_balloon": false
+  },
+  {
+   "file": "area_pose_thibaud_12.png",
+   "cn": "area_pose_thibaud",
+   "seed": 12,
+   "sec": 16.2,
+   "fig_iou": 0.35,
+   "persons": 1,
+   "balloon_dark_ratio": 0.515,
+   "face_in_balloon": false
+  },
+  {
+   "file": "area_pose_thibaud_13.png",
+   "cn": "area_pose_thibaud",
+   "seed": 13,
+   "sec": 16.3,
+   "fig_iou": 0.2,
+   "persons": 1,
+   "balloon_dark_ratio": 0.745,
+   "face_in_balloon": false
+  }
+ ]
+}

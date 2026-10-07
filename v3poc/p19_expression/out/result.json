@@ -1,0 +1,982 @@
+{
+ "summary": {
+  "a/none/無表情と強": 0.038,
+  "a/ref/無表情と強": 0.096,
+  "b/none/無表情と強": 0.033,
+  "b/ref/無表情と強": 0.108
+ },
+ "rows": [
+  {
+   "file": "a_neutral_0_31.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.052
+  },
+  {
+   "file": "a_neutral_0_32.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.043
+  },
+  {
+   "file": "a_neutral_0_33.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.032
+  },
+  {
+   "file": "a_neutral_0_ipa_31.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.139
+  },
+  {
+   "file": "a_neutral_0_ipa_32.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.111
+  },
+  {
+   "file": "a_neutral_0_ipa_33.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.07
+  },
+  {
+   "file": "a_joy_1_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.05
+  },
+  {
+   "file": "a_joy_1_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.03
+  },
+  {
+   "file": "a_joy_1_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.027
+  },
+  {
+   "file": "a_joy_2_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.054
+  },
+  {
+   "file": "a_joy_2_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.022
+  },
+  {
+   "file": "a_joy_2_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.047
+  },
+  {
+   "file": "a_joy_3_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.035
+  },
+  {
+   "file": "a_joy_3_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.064
+  },
+  {
+   "file": "a_joy_3_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.035
+  },
+  {
+   "file": "a_joy_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.103
+  },
+  {
+   "file": "a_joy_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.086
+  },
+  {
+   "file": "a_joy_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.103
+  },
+  {
+   "file": "a_anger_1_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.077
+  },
+  {
+   "file": "a_anger_1_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.029
+  },
+  {
+   "file": "a_anger_1_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.031
+  },
+  {
+   "file": "a_anger_2_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.028
+  },
+  {
+   "file": "a_anger_2_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.051
+  },
+  {
+   "file": "a_anger_2_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.034
+  },
+  {
+   "file": "a_anger_3_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.041
+  },
+  {
+   "file": "a_anger_3_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.038
+  },
+  {
+   "file": "a_anger_3_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.025
+  },
+  {
+   "file": "a_anger_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.058
+  },
+  {
+   "file": "a_anger_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.093
+  },
+  {
+   "file": "a_anger_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.122
+  },
+  {
+   "file": "a_sad_1_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.06
+  },
+  {
+   "file": "a_sad_1_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.032
+  },
+  {
+   "file": "a_sad_1_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.036
+  },
+  {
+   "file": "a_sad_2_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.044
+  },
+  {
+   "file": "a_sad_2_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.023
+  },
+  {
+   "file": "a_sad_2_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.035
+  },
+  {
+   "file": "a_sad_3_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.041
+  },
+  {
+   "file": "a_sad_3_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.022
+  },
+  {
+   "file": "a_sad_3_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.038
+  },
+  {
+   "file": "a_sad_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.092
+  },
+  {
+   "file": "a_sad_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.099
+  },
+  {
+   "file": "a_sad_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.081
+  },
+  {
+   "file": "a_surprise_1_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.038
+  },
+  {
+   "file": "a_surprise_1_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.04
+  },
+  {
+   "file": "a_surprise_1_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.035
+  },
+  {
+   "file": "a_surprise_2_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.059
+  },
+  {
+   "file": "a_surprise_2_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.047
+  },
+  {
+   "file": "a_surprise_2_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.042
+  },
+  {
+   "file": "a_surprise_3_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.038
+  },
+  {
+   "file": "a_surprise_3_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.037
+  },
+  {
+   "file": "a_surprise_3_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.034
+  },
+  {
+   "file": "a_surprise_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.059
+  },
+  {
+   "file": "a_surprise_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.114
+  },
+  {
+   "file": "a_surprise_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.112
+  },
+  {
+   "file": "b_neutral_0_31.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.033
+  },
+  {
+   "file": "b_neutral_0_32.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.02
+  },
+  {
+   "file": "b_neutral_0_33.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.022
+  },
+  {
+   "file": "b_neutral_0_ipa_31.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.118
+  },
+  {
+   "file": "b_neutral_0_ipa_32.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.094
+  },
+  {
+   "file": "b_neutral_0_ipa_33.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.108
+  },
+  {
+   "file": "b_joy_1_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.034
+  },
+  {
+   "file": "b_joy_1_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.017
+  },
+  {
+   "file": "b_joy_1_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.019
+  },
+  {
+   "file": "b_joy_2_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.046
+  },
+  {
+   "file": "b_joy_2_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.023
+  },
+  {
+   "file": "b_joy_2_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.023
+  },
+  {
+   "file": "b_joy_3_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.057
+  },
+  {
+   "file": "b_joy_3_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.033
+  },
+  {
+   "file": "b_joy_3_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.037
+  },
+  {
+   "file": "b_joy_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.129
+  },
+  {
+   "file": "b_joy_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.106
+  },
+  {
+   "file": "b_joy_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.11
+  },
+  {
+   "file": "b_anger_1_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.036
+  },
+  {
+   "file": "b_anger_1_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.016
+  },
+  {
+   "file": "b_anger_1_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.023
+  },
+  {
+   "file": "b_anger_2_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.026
+  },
+  {
+   "file": "b_anger_2_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.024
+  },
+  {
+   "file": "b_anger_2_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.033
+  },
+  {
+   "file": "b_anger_3_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.057
+  },
+  {
+   "file": "b_anger_3_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.021
+  },
+  {
+   "file": "b_anger_3_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.04
+  },
+  {
+   "file": "b_anger_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.114
+  },
+  {
+   "file": "b_anger_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.116
+  },
+  {
+   "file": "b_anger_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.121
+  },
+  {
+   "file": "b_sad_1_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.046
+  },
+  {
+   "file": "b_sad_1_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.026
+  },
+  {
+   "file": "b_sad_1_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.022
+  },
+  {
+   "file": "b_sad_2_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.031
+  },
+  {
+   "file": "b_sad_2_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.022
+  },
+  {
+   "file": "b_sad_2_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.03
+  },
+  {
+   "file": "b_sad_3_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.048
+  },
+  {
+   "file": "b_sad_3_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.023
+  },
+  {
+   "file": "b_sad_3_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.021
+  },
+  {
+   "file": "b_sad_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.09
+  },
+  {
+   "file": "b_sad_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.101
+  },
+  {
+   "file": "b_sad_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.082
+  },
+  {
+   "file": "b_surprise_1_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 1,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.048
+  },
+  {
+   "file": "b_surprise_1_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 1,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.022
+  },
+  {
+   "file": "b_surprise_1_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 1,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.031
+  },
+  {
+   "file": "b_surprise_2_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 2,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.054
+  },
+  {
+   "file": "b_surprise_2_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 2,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.027
+  },
+  {
+   "file": "b_surprise_2_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 2,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.017
+  },
+  {
+   "file": "b_surprise_3_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": false,
+   "seed": 31,
+   "ccip_diff": 0.03
+  },
+  {
+   "file": "b_surprise_3_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": false,
+   "seed": 32,
+   "ccip_diff": 0.027
+  },
+  {
+   "file": "b_surprise_3_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": false,
+   "seed": 33,
+   "ccip_diff": 0.025
+  },
+  {
+   "file": "b_surprise_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": true,
+   "seed": 31,
+   "ccip_diff": 0.096
+  },
+  {
+   "file": "b_surprise_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": true,
+   "seed": 32,
+   "ccip_diff": 0.126
+  },
+  {
+   "file": "b_surprise_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "ref": true,
+   "seed": 33,
+   "ccip_diff": 0.114
+  }
+ ]
+}

@@ -1,0 +1,412 @@
+{
+ "by_group": {
+  "p15_color|0人": "9/9",
+  "p15_color|1人": "12/12",
+  "p15_pen|0人": "9/9",
+  "p15_pen|1人": "11/12",
+  "p15_retro|0人": "9/9",
+  "p15_retro|1人": "10/12",
+  "p15_tone|0人": "7/9",
+  "p15_tone|1人": "12/12",
+  "p16|0人": "15/18",
+  "p18|0人": "66/66"
+ },
+ "by_kind": {
+  "p15_color|bg_std": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_color|bg_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_color|bg_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_color|chara_only": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_color|full_std": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_color|long_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_color|long_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_pen|bg_std": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_pen|bg_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_pen|bg_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_pen|chara_only": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_pen|full_std": {
+   "ok": 2,
+   "n": 3,
+   "counts": [
+    1,
+    2,
+    1
+   ]
+  },
+  "p15_pen|long_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_pen|long_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_retro|bg_std": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_retro|bg_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_retro|bg_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_retro|chara_only": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_retro|full_std": {
+   "ok": 2,
+   "n": 3,
+   "counts": [
+    3,
+    1,
+    1
+   ]
+  },
+  "p15_retro|long_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_retro|long_yoko": {
+   "ok": 2,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    3
+   ]
+  },
+  "p15_tone|bg_std": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_tone|bg_tate": {
+   "ok": 1,
+   "n": 3,
+   "counts": [
+    0,
+    1,
+    2
+   ]
+  },
+  "p15_tone|bg_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    0,
+    0,
+    0
+   ]
+  },
+  "p15_tone|chara_only": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_tone|full_std": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_tone|long_tate": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p15_tone|long_yoko": {
+   "ok": 3,
+   "n": 3,
+   "counts": [
+    1,
+    1,
+    1
+   ]
+  },
+  "p16|bg_none": {
+   "ok": 15,
+   "n": 18,
+   "counts": [
+    0,
+    0,
+    0,
+    2,
+    1,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "p18|room_bg": {
+   "ok": 33,
+   "n": 33,
+   "counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "p18|street_bg": {
+   "ok": 33,
+   "n": 33,
+   "counts": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  }
+ },
+ "wrong": [
+  {
+   "file": "pen_full_std_72.png",
+   "want": 1,
+   "got": 2
+  },
+  {
+   "file": "retro_full_std_71.png",
+   "want": 1,
+   "got": 3
+  },
+  {
+   "file": "retro_long_yoko_73.png",
+   "want": 1,
+   "got": 3
+  },
+  {
+   "file": "tone_bg_tate_72.png",
+   "want": 0,
+   "got": 1
+  },
+  {
+   "file": "tone_bg_tate_73.png",
+   "want": 0,
+   "got": 2
+  },
+  {
+   "file": "bg_tate_none_rural_81.png",
+   "want": 0,
+   "got": 2
+  },
+  {
+   "file": "bg_tate_none_rural_82.png",
+   "want": 0,
+   "got": 1
+  },
+  {
+   "file": "bg_tate_none_rural_83.png",
+   "want": 0,
+   "got": 1
+  }
+ ]
+}

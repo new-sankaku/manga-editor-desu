@@ -1,0 +1,62 @@
+{
+ "pixel_judge": {
+  "color_one_71.png": "ok",
+  "color_one_72.png": "mixed",
+  "color_one_73.png": "swap",
+  "color_one_74.png": "ok",
+  "color_one_75.png": "swap",
+  "color_one_76.png": "swap",
+  "color_area_71.png": "ok",
+  "color_area_72.png": "ok",
+  "color_area_73.png": "ok",
+  "color_area_74.png": "ok",
+  "color_area_75.png": "ok",
+  "color_area_76.png": "ok"
+ },
+ "ab_one": {
+  "two_people": 6,
+  "mixed": 4,
+  "swap": 0,
+  "page": 0,
+  "ok": 2
+ },
+ "ab_area": {
+  "two_people": 3,
+  "mixed": 0,
+  "swap": 0,
+  "page": 3,
+  "ok": 3
+ },
+ "sim_one": {
+  "two_people": 6,
+  "mixed": 5,
+  "swap": 0,
+  "page": 0,
+  "ok": 1
+ },
+ "sim_area": {
+  "two_people": 2,
+  "mixed": 0,
+  "swap": 0,
+  "page": 4,
+  "ok": 2
+ },
+ "color_one": {
+  "two_people": 5,
+  "mixed": 3,
+  "swap": 4,
+  "page": 0,
+  "ok": 0
+ },
+ "color_area": {
+  "two_people": 6,
+  "mixed": 0,
+  "swap": 0,
+  "page": 0,
+  "ok": 6
+ },
+ "pixel_vs_eye_hair_side": {
+  "agree": 12,
+  "n": 12
+ }
+}

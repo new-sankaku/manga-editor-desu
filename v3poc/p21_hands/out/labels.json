@@ -1,0 +1,650 @@
+{
+ "f1_cup_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_cup_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_cup_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_hips_51.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_hips_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_hips_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_phone_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_phone_52.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "検出の1つは手ではなく服"
+ },
+ "f1_phone_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_point_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_point_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_point_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_wave_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_wave_52.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_wave_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_write_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_write_52.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f1_write_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "f2_cup_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_cup_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_cup_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_hips_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_hips_52.png": {
+  "hand": "ng",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": "腰に当てた手が小さく指が潰れている"
+ },
+ "f2_hips_53.png": {
+  "hand": "ng",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": "腰に当てた手が小さく指が潰れている"
+ },
+ "f2_phone_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_phone_52.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_phone_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_point_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_point_52.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": "下ろした手が細く形が崩れている"
+ },
+ "f2_point_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_wave_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_wave_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_wave_53.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_write_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_write_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "f2_write_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": true,
+  "note": ""
+ },
+ "m1_cup_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_cup_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_cup_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_hips_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_hips_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_hips_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_phone_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_phone_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_phone_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_point_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ng",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "男子生徒なのにスカートをはいている"
+ },
+ "m1_point_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ng",
+  "unwanted_text": true,
+  "chest_exaggerated": false,
+  "note": "女子生徒になっている（スカートとリボン）"
+ },
+ "m1_point_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_wave_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_wave_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_wave_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_write_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_write_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m1_write_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_cup_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_cup_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_cup_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "part",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "中年のはずが若く見える"
+ },
+ "m2_hips_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_hips_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_hips_53.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "part",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "中年のはずが若く見える"
+ },
+ "m2_phone_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": true,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_phone_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_phone_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "part",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "中年のはずが若く見える"
+ },
+ "m2_point_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_point_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_point_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "part",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "中年のはずが若く見える"
+ },
+ "m2_wave_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_wave_52.png": {
+  "hand": "part",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_wave_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "part",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": "中年のはずが若く見える"
+ },
+ "m2_write_51.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_write_52.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ },
+ "m2_write_53.png": {
+  "hand": "ok",
+  "body": "ok",
+  "face": "ok",
+  "identity": "ok",
+  "unwanted_text": false,
+  "chest_exaggerated": false,
+  "note": ""
+ }
+}

@@ -1,0 +1,92 @@
+{
+ "f1": {
+  "hand": {
+   "ok": 14,
+   "part": 4,
+   "ng": 0
+  },
+  "body": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  },
+  "face": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  }
+ },
+ "f2": {
+  "hand": {
+   "ok": 13,
+   "part": 3,
+   "ng": 2
+  },
+  "body": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  },
+  "face": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  }
+ },
+ "m1": {
+  "hand": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  },
+  "body": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  },
+  "face": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  }
+ },
+ "m2": {
+  "hand": {
+   "ok": 16,
+   "part": 2,
+   "ng": 0
+  },
+  "body": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  },
+  "face": {
+   "ok": 18,
+   "part": 0,
+   "ng": 0
+  }
+ },
+ "female": {
+  "hand": 27,
+  "body": 36,
+  "face": 36,
+  "n": 36
+ },
+ "male": {
+  "hand": 34,
+  "body": 36,
+  "face": 36,
+  "n": 36
+ },
+ "aesthetic_hand_ok": 0.524,
+ "aesthetic_hand_part_or_ng": 0.797,
+ "aesthetic_by_chara": {
+  "f1": 0.824,
+  "f2": 0.97,
+  "m1": 0.273,
+  "m2": 0.197
+ },
+ "aesthetic_ok_above_ng_pairs": "1/122",
+ "hands_detected_mean": 3.39
+}

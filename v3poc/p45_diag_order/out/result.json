@@ -1,0 +1,508 @@
+{
+ "summary_ok_of_2": {
+  "sonnet": {
+   "slant_rows": 2,
+   "diag_band": 2,
+   "zigzag": 2,
+   "triangle_split": 2,
+   "slant_three": 2,
+   "tall_slant_right": 2,
+   "tall_slant_left": 2,
+   "dynamic": 2
+  },
+  "opus": {
+   "slant_rows": 2,
+   "diag_band": 2,
+   "zigzag": 2,
+   "triangle_split": 2,
+   "slant_three": 2,
+   "tall_slant_right": 2,
+   "tall_slant_left": 2,
+   "dynamic": 2
+  }
+ },
+ "total_ok_of_16": {
+  "sonnet": 16,
+  "opus": 16
+ },
+ "cost_usd": 1.873,
+ "results": [
+  {
+   "layout": "slant_rows",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.0533484,
+   "raw": "{\"order\":[[109,35],[40,38],[110,99],[40,106],[109,177],[40,177]]}\n\n再起動: 要らない（ファイルは変更していない）"
+  },
+  {
+   "layout": "slant_rows",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.0530784,
+   "raw": "{\"order\":[[109,35],[40,39],[109,99],[40,106],[109,176],[40,180]]}"
+  },
+  {
+   "layout": "slant_rows",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.108194,
+   "raw": "{\"order\":[[109,34],[40,38],[109,101],[40,107],[109,178],[40,181]]}"
+  },
+  {
+   "layout": "slant_rows",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.1210838,
+   "raw": "{\"order\":[[109,33],[40,37],[109,101],[40,107],[109,177],[40,182]]}"
+  },
+  {
+   "layout": "diag_band",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.0454642,
+   "raw": "{\"order\":[[75,38],[116,94],[43,110],[75,182]]}"
+  },
+  {
+   "layout": "diag_band",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.044974200000000006,
+   "raw": "{\"order\":[[75,28],[104,97],[40,112],[75,189]]}\n\n再起動: 要らない（ファイルは変更していない）"
+  },
+  {
+   "layout": "diag_band",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.1020912,
+   "raw": "{\"order\":[[75,32],[109,100],[40,113],[75,185]]}"
+  },
+  {
+   "layout": "diag_band",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.0302018,
+   "raw": "{\"order\":[[75,32],[101,102],[46,112],[75,188]]}"
+  },
+  {
+   "layout": "zigzag",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.045834200000000005,
+   "raw": "{\"order\":[[118,49],[40,48],[75,115],[107,179],[37,184]]}"
+  },
+  {
+   "layout": "zigzag",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.0458242,
+   "raw": "{\"order\":[[118,49],[40,47],[75,115],[110,176],[40,179]]}\n\n再起動: 要らない（fileは変更していない）"
+  },
+  {
+   "layout": "zigzag",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.1022952,
+   "raw": "{\"order\":[[110,49],[40,49],[75,116],[106,179],[41,179]]}"
+  },
+  {
+   "layout": "zigzag",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.0190544,
+   "raw": "{\"order\":[[110,49],[40,49],[75,116],[109,179],[41,179]]}"
+  },
+  {
+   "layout": "triangle_split",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.0461724,
+   "raw": "{\"order\":[[110,39],[40,39],[97,107],[53,135],[75,193]]}"
+  },
+  {
+   "layout": "triangle_split",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.014195800000000001,
+   "raw": "{\"order\":[[110,40],[40,40],[97,107],[53,135],[75,193]]}"
+  },
+  {
+   "layout": "triangle_split",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.10461379999999999,
+   "raw": "{\"order\":[[110,40],[40,40],[97,107],[53,135],[75,193]]}"
+  },
+  {
+   "layout": "triangle_split",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.10622979999999999,
+   "raw": "{\"order\":[[112,39],[41,39],[99,105],[54,132],[77,189]]}"
+  },
+  {
+   "layout": "slant_three",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.045534200000000004,
+   "raw": "{\"order\":[[122,49],[74,49],[29,49],[107,152],[41,152]]}"
+  },
+  {
+   "layout": "slant_three",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.045674200000000005,
+   "raw": "{\"order\":[[121,49],[74,49],[29,49],[112,152],[40,152]]}"
+  },
+  {
+   "layout": "slant_three",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.10370320000000001,
+   "raw": "{\"order\":[[121,47],[75,47],[29,47],[109,148],[40,148]]}"
+  },
+  {
+   "layout": "slant_three",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "ok": true,
+   "cost_usd": 0.031273800000000004,
+   "raw": "{\"order\":[[121,48],[75,48],[29,48],[109,152],[40,152]]}"
+  },
+  {
+   "layout": "tall_slant_right",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.04513879999999999,
+   "raw": "{\"order\":[[112,77],[47,42],[45,110],[74,181]]}"
+  },
+  {
+   "layout": "tall_slant_right",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.012337,
+   "raw": "{\"order\":[[115,77],[46,42],[43,110],[75,181]]}"
+  },
+  {
+   "layout": "tall_slant_right",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.10025500000000001,
+   "raw": "{\"order\":[[115,78],[47,43],[44,113],[75,183]]}"
+  },
+  {
+   "layout": "tall_slant_right",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.0284608,
+   "raw": "{\"order\":[[116,78],[47,43],[44,113],[75,183]]}"
+  },
+  {
+   "layout": "tall_slant_left",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.044538799999999996,
+   "raw": "{\"order\":[[101,38],[104,108],[37,77],[75,181]]}"
+  },
+  {
+   "layout": "tall_slant_left",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.04438879999999999,
+   "raw": "{\"order\":[[102,38],[105,108],[38,77],[75,181]]}"
+  },
+  {
+   "layout": "tall_slant_left",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.101813,
+   "raw": "{\"order\":[[100,40],[104,108],[37,77],[75,180]]}"
+  },
+  {
+   "layout": "tall_slant_left",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3
+   ],
+   "ok": true,
+   "cost_usd": 0.029360800000000003,
+   "raw": "{\"order\":[[100,40],[104,105],[37,75],[75,176]]}"
+  },
+  {
+   "layout": "dynamic",
+   "model": "sonnet",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.0451342,
+   "raw": "{\"order\":[[107,33],[43,35],[75,105],[122,181],[78,181],[29,184]]}"
+  },
+  {
+   "layout": "dynamic",
+   "model": "sonnet",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.0131152,
+   "raw": "{\"order\":[[107,34],[44,35],[75,105],[121,178],[77,181],[28,184]]}"
+  },
+  {
+   "layout": "dynamic",
+   "model": "opus",
+   "run": 0,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.1016452,
+   "raw": "{\"order\":[[110,32],[41,37],[75,106],[123,178],[78,182],[29,185]]}"
+  },
+  {
+   "layout": "dynamic",
+   "model": "opus",
+   "run": 1,
+   "answer_idx": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "ok": true,
+   "cost_usd": 0.037529400000000004,
+   "raw": "{\"order\":[[110,33],[42,37],[75,107],[123,180],[78,183],[29,186]]}"
+  }
+ ],
+ "prompt": "画像ファイル {path} を読んでください。日本の漫画の1ページのコマ割りです。コマには番号が振られていません。枠の辺が斜めのコマもあります。\nこのページは右から左、上から下へ読みます。\n各コマを、ページの中の位置で呼んでください。呼び方は、コマの中心の座標（左上を原点、右と下が増える向き、横150・縦220の目盛り）です。\n読む順に、コマの中心の座標を並べてください。\n出力はJSONだけにしてください。形式：{{\"order\":[[x,y],[x,y]]}}"
+}

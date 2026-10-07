@@ -1,0 +1,356 @@
+{
+ "pairs": {
+  "ab": {
+   "name": "P17の2人（白髪の三つ編みの女性・眼帯の男性）",
+   "style": "manga, monochrome, greyscale, screentone",
+   "scene": "1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt"
+  },
+  "sim": {
+   "name": "似た女子生徒2人（眼鏡とポニーテール／眼鏡なしの長い髪とリボン）",
+   "style": "manga, monochrome, greyscale, screentone",
+   "scene": "2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "girl, black hair, ponytail, glasses",
+   "right": "girl, black hair, long hair, hair ribbon"
+  },
+  "color": {
+   "name": "カラーの2人（赤い短髪／青い長髪）",
+   "style": "anime coloring, flat color",
+   "scene": "2girls, standing side by side, upper body, classroom",
+   "left": "girl, red hair, short hair, blue eyes, white shirt",
+   "right": "girl, blue hair, long hair, yellow eyes, black jacket"
+  }
+ },
+ "size": [
+  1216,
+  832
+ ],
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "ab_one_71.png",
+   "pair": "ab",
+   "mode": "one",
+   "seed": 71,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 8.3
+  },
+  {
+   "file": "ab_one_72.png",
+   "pair": "ab",
+   "mode": "one",
+   "seed": 72,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 7.2
+  },
+  {
+   "file": "ab_one_73.png",
+   "pair": "ab",
+   "mode": "one",
+   "seed": 73,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 7.7
+  },
+  {
+   "file": "ab_one_74.png",
+   "pair": "ab",
+   "mode": "one",
+   "seed": 74,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 7.2
+  },
+  {
+   "file": "ab_one_75.png",
+   "pair": "ab",
+   "mode": "one",
+   "seed": 75,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 7.6
+  },
+  {
+   "file": "ab_one_76.png",
+   "pair": "ab",
+   "mode": "one",
+   "seed": 76,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 7.2
+  },
+  {
+   "file": "ab_area_71.png",
+   "pair": "ab",
+   "mode": "area",
+   "seed": 71,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 14.3
+  },
+  {
+   "file": "ab_area_72.png",
+   "pair": "ab",
+   "mode": "area",
+   "seed": 72,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 13.8
+  },
+  {
+   "file": "ab_area_73.png",
+   "pair": "ab",
+   "mode": "area",
+   "seed": 73,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 13.7
+  },
+  {
+   "file": "ab_area_74.png",
+   "pair": "ab",
+   "mode": "area",
+   "seed": 74,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 13.7
+  },
+  {
+   "file": "ab_area_75.png",
+   "pair": "ab",
+   "mode": "area",
+   "seed": 75,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 13.7
+  },
+  {
+   "file": "ab_area_76.png",
+   "pair": "ab",
+   "mode": "area",
+   "seed": 76,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, 1boy, 2people, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, boy, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt",
+   "sec": 13.7
+  },
+  {
+   "file": "sim_one_71.png",
+   "pair": "sim",
+   "mode": "one",
+   "seed": 71,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform, girl, black hair, ponytail, glasses, girl, black hair, long hair, hair ribbon",
+   "sec": 7.7
+  },
+  {
+   "file": "sim_one_72.png",
+   "pair": "sim",
+   "mode": "one",
+   "seed": 72,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform, girl, black hair, ponytail, glasses, girl, black hair, long hair, hair ribbon",
+   "sec": 7.7
+  },
+  {
+   "file": "sim_one_73.png",
+   "pair": "sim",
+   "mode": "one",
+   "seed": 73,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform, girl, black hair, ponytail, glasses, girl, black hair, long hair, hair ribbon",
+   "sec": 7.2
+  },
+  {
+   "file": "sim_one_74.png",
+   "pair": "sim",
+   "mode": "one",
+   "seed": 74,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform, girl, black hair, ponytail, glasses, girl, black hair, long hair, hair ribbon",
+   "sec": 7.7
+  },
+  {
+   "file": "sim_one_75.png",
+   "pair": "sim",
+   "mode": "one",
+   "seed": 75,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform, girl, black hair, ponytail, glasses, girl, black hair, long hair, hair ribbon",
+   "sec": 7.2
+  },
+  {
+   "file": "sim_one_76.png",
+   "pair": "sim",
+   "mode": "one",
+   "seed": 76,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform, girl, black hair, ponytail, glasses, girl, black hair, long hair, hair ribbon",
+   "sec": 7.7
+  },
+  {
+   "file": "sim_area_71.png",
+   "pair": "sim",
+   "mode": "area",
+   "seed": 71,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, ponytail, glasses",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, long hair, hair ribbon",
+   "sec": 14.1
+  },
+  {
+   "file": "sim_area_72.png",
+   "pair": "sim",
+   "mode": "area",
+   "seed": 72,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, ponytail, glasses",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, long hair, hair ribbon",
+   "sec": 13.7
+  },
+  {
+   "file": "sim_area_73.png",
+   "pair": "sim",
+   "mode": "area",
+   "seed": 73,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, ponytail, glasses",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, long hair, hair ribbon",
+   "sec": 13.8
+  },
+  {
+   "file": "sim_area_74.png",
+   "pair": "sim",
+   "mode": "area",
+   "seed": 74,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, ponytail, glasses",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, long hair, hair ribbon",
+   "sec": 13.7
+  },
+  {
+   "file": "sim_area_75.png",
+   "pair": "sim",
+   "mode": "area",
+   "seed": 75,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, ponytail, glasses",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, long hair, hair ribbon",
+   "sec": 13.6
+  },
+  {
+   "file": "sim_area_76.png",
+   "pair": "sim",
+   "mode": "area",
+   "seed": 76,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 2girls, standing side by side, upper body, classroom, school uniform",
+   "left": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, ponytail, glasses",
+   "right": "masterpiece, best quality, manga, monochrome, greyscale, screentone, girl, black hair, long hair, hair ribbon",
+   "sec": 13.7
+  },
+  {
+   "file": "color_one_71.png",
+   "pair": "color",
+   "mode": "one",
+   "seed": 71,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom, girl, red hair, short hair, blue eyes, white shirt, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 7.7
+  },
+  {
+   "file": "color_one_72.png",
+   "pair": "color",
+   "mode": "one",
+   "seed": 72,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom, girl, red hair, short hair, blue eyes, white shirt, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 7.6
+  },
+  {
+   "file": "color_one_73.png",
+   "pair": "color",
+   "mode": "one",
+   "seed": 73,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom, girl, red hair, short hair, blue eyes, white shirt, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 7.2
+  },
+  {
+   "file": "color_one_74.png",
+   "pair": "color",
+   "mode": "one",
+   "seed": 74,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom, girl, red hair, short hair, blue eyes, white shirt, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 7.6
+  },
+  {
+   "file": "color_one_75.png",
+   "pair": "color",
+   "mode": "one",
+   "seed": 75,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom, girl, red hair, short hair, blue eyes, white shirt, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 7.2
+  },
+  {
+   "file": "color_one_76.png",
+   "pair": "color",
+   "mode": "one",
+   "seed": 76,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom, girl, red hair, short hair, blue eyes, white shirt, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 7.6
+  },
+  {
+   "file": "color_area_71.png",
+   "pair": "color",
+   "mode": "area",
+   "seed": 71,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, anime coloring, flat color, girl, red hair, short hair, blue eyes, white shirt",
+   "right": "masterpiece, best quality, anime coloring, flat color, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 14.2
+  },
+  {
+   "file": "color_area_72.png",
+   "pair": "color",
+   "mode": "area",
+   "seed": 72,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, anime coloring, flat color, girl, red hair, short hair, blue eyes, white shirt",
+   "right": "masterpiece, best quality, anime coloring, flat color, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 13.6
+  },
+  {
+   "file": "color_area_73.png",
+   "pair": "color",
+   "mode": "area",
+   "seed": 73,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, anime coloring, flat color, girl, red hair, short hair, blue eyes, white shirt",
+   "right": "masterpiece, best quality, anime coloring, flat color, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 13.6
+  },
+  {
+   "file": "color_area_74.png",
+   "pair": "color",
+   "mode": "area",
+   "seed": 74,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, anime coloring, flat color, girl, red hair, short hair, blue eyes, white shirt",
+   "right": "masterpiece, best quality, anime coloring, flat color, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 13.6
+  },
+  {
+   "file": "color_area_75.png",
+   "pair": "color",
+   "mode": "area",
+   "seed": 75,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, anime coloring, flat color, girl, red hair, short hair, blue eyes, white shirt",
+   "right": "masterpiece, best quality, anime coloring, flat color, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 14.5
+  },
+  {
+   "file": "color_area_76.png",
+   "pair": "color",
+   "mode": "area",
+   "seed": 76,
+   "prompt": "masterpiece, best quality, anime coloring, flat color, 2girls, standing side by side, upper body, classroom",
+   "left": "masterpiece, best quality, anime coloring, flat color, girl, red hair, short hair, blue eyes, white shirt",
+   "right": "masterpiece, best quality, anime coloring, flat color, girl, blue hair, long hair, yellow eyes, black jacket",
+   "sec": 14.6
+  }
+ ]
+}

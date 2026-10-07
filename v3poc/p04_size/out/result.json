@@ -1,0 +1,96 @@
+{
+ "gen": [
+  {
+   "size": "640x960",
+   "mpx": 0.61,
+   "seed": 41,
+   "sec": 6.21
+  },
+  {
+   "size": "640x960",
+   "mpx": 0.61,
+   "seed": 42,
+   "sec": 5.67
+  },
+  {
+   "size": "640x960",
+   "mpx": 0.61,
+   "seed": 43,
+   "sec": 6.25
+  },
+  {
+   "size": "832x1216",
+   "mpx": 1.01,
+   "seed": 41,
+   "sec": 7.54
+  },
+  {
+   "size": "832x1216",
+   "mpx": 1.01,
+   "seed": 42,
+   "sec": 7.24
+  },
+  {
+   "size": "832x1216",
+   "mpx": 1.01,
+   "seed": 43,
+   "sec": 7.38
+  },
+  {
+   "size": "1024x1536",
+   "mpx": 1.57,
+   "seed": 41,
+   "sec": 11.39
+  },
+  {
+   "size": "1024x1536",
+   "mpx": 1.57,
+   "seed": 42,
+   "sec": 10.93
+  },
+  {
+   "size": "1024x1536",
+   "mpx": 1.57,
+   "seed": 43,
+   "sec": 10.69
+  }
+ ],
+ "upscale": [
+  {
+   "model": "lanczos",
+   "sec": 3.7,
+   "size": [
+    4300,
+    6070
+   ],
+   "crop_sharpness": 23.9
+  },
+  {
+   "model": "4x-UltraSharp",
+   "sec": 9.1,
+   "size": [
+    4300,
+    6070
+   ],
+   "crop_sharpness": 511.2
+  },
+  {
+   "model": "RealESRGAN_x4plus_anime_6B",
+   "sec": 4.8,
+   "size": [
+    4300,
+    6070
+   ],
+   "crop_sharpness": 1203.6
+  },
+  {
+   "model": "RealESRGAN_x4plus",
+   "sec": 8.8,
+   "size": [
+    4300,
+    6070
+   ],
+   "crop_sharpness": 721.3
+  }
+ ]
+}

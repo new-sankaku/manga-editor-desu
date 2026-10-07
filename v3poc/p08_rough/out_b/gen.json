@@ -1,0 +1,88 @@
+{
+ "FIG": [
+  150,
+  430,
+  350,
+  1170
+ ],
+ "BAL": [
+  500,
+  60,
+  800,
+  420
+ ],
+ "runs": [
+  {
+   "file": "pose_thibaud_11.png",
+   "cn": "pose_thibaud",
+   "seed": 11,
+   "sec": 29.8
+  },
+  {
+   "file": "pose_thibaud_12.png",
+   "cn": "pose_thibaud",
+   "seed": 12,
+   "sec": 10.1
+  },
+  {
+   "file": "pose_thibaud_13.png",
+   "cn": "pose_thibaud",
+   "seed": 13,
+   "sec": 10.2
+  },
+  {
+   "file": "pose_t2i_11.png",
+   "cn": "pose_t2i",
+   "seed": 11,
+   "sec": 10.1
+  },
+  {
+   "file": "pose_t2i_12.png",
+   "cn": "pose_t2i",
+   "seed": 12,
+   "sec": 7.2
+  },
+  {
+   "file": "pose_t2i_13.png",
+   "cn": "pose_t2i",
+   "seed": 13,
+   "sec": 7.6
+  },
+  {
+   "file": "area_11.png",
+   "cn": "area",
+   "seed": 11,
+   "sec": 10.0
+  },
+  {
+   "file": "area_12.png",
+   "cn": "area",
+   "seed": 12,
+   "sec": 9.3
+  },
+  {
+   "file": "area_13.png",
+   "cn": "area",
+   "seed": 13,
+   "sec": 9.6
+  },
+  {
+   "file": "area_pose_thibaud_11.png",
+   "cn": "area_pose_thibaud",
+   "seed": 11,
+   "sec": 21.9
+  },
+  {
+   "file": "area_pose_thibaud_12.png",
+   "cn": "area_pose_thibaud",
+   "seed": 12,
+   "sec": 16.2
+  },
+  {
+   "file": "area_pose_thibaud_13.png",
+   "cn": "area_pose_thibaud",
+   "seed": 13,
+   "sec": 16.3
+  }
+ ]
+}

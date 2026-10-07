@@ -1,0 +1,159 @@
+{
+ "resume": {
+  "trials": 20,
+  "steps": 30,
+  "total_kills": 110,
+  "all_ok": true,
+  "detail": [
+   {
+    "job": "job0",
+    "kills": 5,
+    "ok": true
+   },
+   {
+    "job": "job1",
+    "kills": 8,
+    "ok": true
+   },
+   {
+    "job": "job2",
+    "kills": 6,
+    "ok": true
+   },
+   {
+    "job": "job3",
+    "kills": 6,
+    "ok": true
+   },
+   {
+    "job": "job4",
+    "kills": 8,
+    "ok": true
+   },
+   {
+    "job": "job5",
+    "kills": 4,
+    "ok": true
+   },
+   {
+    "job": "job6",
+    "kills": 6,
+    "ok": true
+   },
+   {
+    "job": "job7",
+    "kills": 7,
+    "ok": true
+   },
+   {
+    "job": "job8",
+    "kills": 4,
+    "ok": true
+   },
+   {
+    "job": "job9",
+    "kills": 6,
+    "ok": true
+   },
+   {
+    "job": "job10",
+    "kills": 3,
+    "ok": true
+   },
+   {
+    "job": "job11",
+    "kills": 5,
+    "ok": true
+   },
+   {
+    "job": "job12",
+    "kills": 5,
+    "ok": true
+   },
+   {
+    "job": "job13",
+    "kills": 3,
+    "ok": true
+   },
+   {
+    "job": "job14",
+    "kills": 7,
+    "ok": true
+   },
+   {
+    "job": "job15",
+    "kills": 3,
+    "ok": true
+   },
+   {
+    "job": "job16",
+    "kills": 3,
+    "ok": true
+   },
+   {
+    "job": "job17",
+    "kills": 7,
+    "ok": true
+   },
+   {
+    "job": "job18",
+    "kills": 10,
+    "ok": true
+   },
+   {
+    "job": "job19",
+    "kills": 4,
+    "ok": true
+   }
+  ]
+ },
+ "lock": {
+  "race_without_lock": {
+   "writes": 300,
+   "counter": 100,
+   "lost": 200,
+   "waits": 0
+  },
+  "race_with_lock": {
+   "writes": 300,
+   "counter": 300,
+   "lost": 0,
+   "waits": 4
+  },
+  "expiry": {
+   "blocked_while_valid": true,
+   "taken_after_expiry": true,
+   "stale_write_refused": true,
+   "new_holder_can_write": true
+  },
+  "takeover": {
+   "human_took": true,
+   "ai_write_refused": true,
+   "recorded": true
+  }
+ },
+ "undo": {
+  "overlapped": {
+   "result": "conflict",
+   "value_kept": true
+  },
+  "alone": {
+   "result": "undone"
+  }
+ },
+ "save_conflict": {
+  "A": [
+   2,
+   false
+  ],
+  "B": [
+   3,
+   true
+  ],
+  "B_became_branch": true,
+  "both_kept": true
+ },
+ "events": 916,
+ "sec": 53.8,
+ "sqlite": "3.39.4"
+}

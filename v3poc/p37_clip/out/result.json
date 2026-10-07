@@ -1,0 +1,330 @@
+{
+ "summary": {
+  "B": {
+   "cut_and_touch": 21,
+   "not_cut_but_touch": 6,
+   "cut_but_no_touch": 3,
+   "not_cut_no_touch": 10
+  },
+  "T": {
+   "cut_and_touch": 0,
+   "not_cut_but_touch": 8,
+   "cut_but_no_touch": 0,
+   "not_cut_no_touch": 32
+  }
+ },
+ "by_instruction": {
+  "full_body": {
+   "n": 8,
+   "cut_bottom": 0,
+   "touch_B": 6,
+   "touch_T": 2
+  },
+  "from_side": {
+   "n": 8,
+   "cut_bottom": 8,
+   "touch_B": 7,
+   "touch_T": 2
+  },
+  "from_behind": {
+   "n": 8,
+   "cut_bottom": 7,
+   "touch_B": 7,
+   "touch_T": 4
+  },
+  "two_people": {
+   "n": 8,
+   "cut_bottom": 8,
+   "touch_B": 6,
+   "touch_T": 0
+  },
+  "very_wide": {
+   "n": 8,
+   "cut_bottom": 1,
+   "touch_B": 1,
+   "touch_T": 0
+  }
+ },
+ "rows": [
+  {
+   "file": "full_body_1001.png",
+   "touch": "TB",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1002.png",
+   "touch": "B",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1003.png",
+   "touch": "B",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1004.png",
+   "touch": "B",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1005.png",
+   "touch": "TB",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1006.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1007.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "full_body_1008.png",
+   "touch": "B",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "足まで入っている。足・頭と端の間の余白は少ないものがある"
+  },
+  {
+   "file": "from_side_1001.png",
+   "touch": "T",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1002.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1003.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1004.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1005.png",
+   "touch": "TB",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1006.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1007.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_side_1008.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1001.png",
+   "touch": "TB",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1002.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1003.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1004.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1005.png",
+   "touch": "T",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": "脚は机に隠れている（画面の端では切れていない）"
+  },
+  {
+   "file": "from_behind_1006.png",
+   "touch": "TB",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1007.png",
+   "touch": "TB",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "from_behind_1008.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "two_people_1001.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1002.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1003.png",
+   "touch": "",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1004.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1005.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1006.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1007.png",
+   "touch": "",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "two_people_1008.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "指示は全身でないので、太ももで切れるのは狙いの外れではない"
+  },
+  {
+   "file": "very_wide_1001.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "very_wide_1002.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "very_wide_1003.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "very_wide_1004.png",
+   "touch": "B",
+   "cut_bottom": true,
+   "cut_top": false,
+   "note": "奥に1人、手前に座った1人。手前の人が下の端で切れている"
+  },
+  {
+   "file": "very_wide_1005.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "very_wide_1006.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "very_wide_1007.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  },
+  {
+   "file": "very_wide_1008.png",
+   "touch": "",
+   "cut_bottom": false,
+   "cut_top": false,
+   "note": ""
+  }
+ ]
+}

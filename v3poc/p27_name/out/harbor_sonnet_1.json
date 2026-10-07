@@ -1,0 +1,1072 @@
+{
+ "plot": "harbor",
+ "run": 1,
+ "model": "sonnet",
+ "sec": 159.6,
+ "cost_usd": 0.2338908,
+ "name": {
+  "pages": [
+   {
+    "page": 1,
+    "spread": false,
+    "rows": [
+     [
+      1
+     ],
+     [
+      2,
+      3
+     ],
+     [
+      4,
+      5
+     ]
+    ],
+    "panels": [
+     {
+      "n": 1,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "遠景",
+      "angle": "見下ろし",
+      "people": [],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "深夜の港を斜め上から見る。コンテナが積み重なった岸壁の奥に、灯りをともした貨物船が泊まっている。手前の通路を小さな人影が一つ走っている。",
+      "balloons": [
+       {
+        "speaker": "",
+        "kind": "ナレーション",
+        "text": "深夜、港。"
+       }
+      ],
+      "sfx": [
+       "ボォォ…"
+      ]
+     },
+     {
+      "n": 2,
+      "size": "中",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "左"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "濡れた岸壁の水たまりを踏んで走る足元。左へ向かって水しぶきが上がる。",
+      "balloons": [],
+      "sfx": [
+       "バシャッ"
+      ]
+     },
+     {
+      "n": 3,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "左"
+       }
+      ],
+      "background": "なし",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "布でくるんだ小さな荷物を、カヤが脇にしっかり抱えている。荷物の裏側には紐で送り状が結んである（文字は見えない）。",
+      "balloons": [],
+      "sfx": []
+     },
+     {
+      "n": 4,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "真横",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "小",
+        "facing": "左"
+       },
+       {
+        "name": "追手A",
+        "face": "小",
+        "facing": "左"
+       },
+       {
+        "name": "追手B",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "コンテナが並ぶ長い通路。カヤが左へ走り、少し後ろに二人の男の影が追っている。街灯が地面に長い影を落とす。",
+      "balloons": [],
+      "sfx": [
+       "タタタッ"
+      ]
+     },
+     {
+      "n": 5,
+      "size": "中",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "中",
+        "facing": "右"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "起",
+      "hook": true,
+      "content": "カヤが走りながら振り返る。右の端から懐中電灯の強い光が差し込み、顔に当たって目を細める。",
+      "balloons": [
+       {
+        "speaker": "追手A",
+        "kind": "叫び",
+        "text": "いたぞ！ 逃がすな！"
+       }
+      ],
+      "sfx": [
+       "カッ"
+      ]
+     }
+    ]
+   },
+   {
+    "page": 2,
+    "spread": false,
+    "rows": [
+     [
+      6
+     ],
+     [
+      7,
+      8
+     ],
+     [
+      9,
+      10
+     ]
+    ],
+    "panels": [
+     {
+      "n": 6,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手A",
+        "face": "中",
+        "facing": "左"
+       },
+       {
+        "name": "追手B",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "コンテナの間を走る二人の追手。大柄なAが前に出て、細身のBが半歩遅れてついてくる。Aは腕を振って怒鳴っている。",
+      "balloons": [
+       {
+        "speaker": "追手A",
+        "kind": "叫び",
+        "text": "待ちやがれ、女ァ！"
+       }
+      ],
+      "sfx": [
+       "ダダダッ"
+      ]
+     },
+     {
+      "n": 7,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手B",
+        "face": "大",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "Bの横顔。息も乱さず、冷めた目で前を見ている。",
+      "balloons": [
+       {
+        "speaker": "追手B",
+        "kind": "台詞",
+        "text": "無駄ですよ。この先は行き止まりです。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 8,
+      "size": "小",
+      "shape": "斜め",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "左"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "カヤの手がコンテナの角の柱をつかみ、体を振って曲がる。",
+      "balloons": [],
+      "sfx": [
+       "ザッ"
+      ]
+     },
+     {
+      "n": 9,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "背後",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "後ろ"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "カヤの背中越しに、コンテナの壁が両側から迫る暗い細道。奥へ行くほど狭く暗くなる。",
+      "balloons": [],
+      "sfx": []
+     },
+     {
+      "n": 10,
+      "size": "小",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "中",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "起",
+      "hook": false,
+      "content": "カヤが前を見据える。汗が一筋流れているが、表情は冷静なまま。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "台詞",
+        "text": "こっち。"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 3,
+    "spread": false,
+    "rows": [
+     [
+      11
+     ],
+     [
+      12,
+      13
+     ],
+     [
+      14,
+      15
+     ]
+    ],
+    "panels": [
+     {
+      "n": 11,
+      "size": "大",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "見上げ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "小",
+        "facing": "後ろ"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "細道の突き当たり。何段も積まれた高いコンテナの壁が目の前にそびえ、カヤが足を止めて小さく立ち尽くす。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "台詞",
+        "text": "……行き止まり。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 12,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "真横",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "大",
+        "facing": "右"
+       }
+      ],
+      "background": "なし",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "カヤが後ろへ振り向く横顔。息が上がり、目だけが鋭い。",
+      "balloons": [],
+      "sfx": []
+     },
+     {
+      "n": 13,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手A",
+        "face": "中",
+        "facing": "左"
+       },
+       {
+        "name": "追手B",
+        "face": "中",
+        "facing": "左"
+       },
+       {
+        "name": "カヤ",
+        "face": "小",
+        "facing": "右"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "細道の入口に、街灯を背にした二人の追手が黒い影になって立ちふさがる。奥の左にカヤが小さく見える。",
+      "balloons": [
+       {
+        "speaker": "追手A",
+        "kind": "台詞",
+        "text": "ここまでだな。荷物を置きな。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 14,
+      "size": "小",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手B",
+        "face": "大",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "Bが薄く笑い、片手を差し出す。",
+      "balloons": [
+       {
+        "speaker": "追手B",
+        "kind": "台詞",
+        "text": "荷物だけいただければ、あなたには何もしませんよ。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 15,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "大",
+        "facing": "正面"
+       }
+      ],
+      "background": "なし",
+      "scene": 1,
+      "role": "承",
+      "hook": true,
+      "content": "カヤの目のアップ。荷物を抱く腕に力がこもり、下では指が荷物の布の端にかかっている。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "台詞",
+        "text": "黙って。"
+       }
+      ],
+      "sfx": [
+       "ギュッ"
+      ]
+     }
+    ]
+   },
+   {
+    "page": 4,
+    "spread": false,
+    "rows": [
+     [
+      16
+     ],
+     [
+      17,
+      18
+     ],
+     [
+      19,
+      20
+     ]
+    ],
+    "panels": [
+     {
+      "n": 16,
+      "size": "大",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "正面"
+       }
+      ],
+      "background": "なし",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "布がはらりとほどけ、カヤの両手の上に古い目覚まし時計のような装置が現れる。二つのベルと小さな撞木、文字盤、ねじ式のつまみが付いている。",
+      "balloons": [],
+      "sfx": [
+       "スルッ"
+      ]
+     },
+     {
+      "n": 17,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手A",
+        "face": "大",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "Aが眉をひそめて装置をのぞき込む。",
+      "balloons": [
+       {
+        "speaker": "追手A",
+        "kind": "台詞",
+        "text": "あぁ？ 時計だと？"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 18,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "正面"
+       }
+      ],
+      "background": "なし",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "カヤの親指が、装置の背にあるつまみをぐっと回す。",
+      "balloons": [],
+      "sfx": [
+       "カチ、カチ"
+      ]
+     },
+     {
+      "n": 19,
+      "size": "中",
+      "shape": "斜め",
+      "shot": "膝上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手B",
+        "face": "中",
+        "facing": "左"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "Bが上着の内側へ手を入れかけて止まり、目を細める。",
+      "balloons": [
+       {
+        "speaker": "追手B",
+        "kind": "台詞",
+        "text": "……何をしているのです。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 20,
+      "size": "中",
+      "shape": "四角",
+      "shot": "全身",
+      "angle": "見上げ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "中",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "承",
+      "hook": false,
+      "content": "カヤが低い位置から見上げた構図で、装置を頭の高さに掲げる。街灯の逆光で、目だけが二人を見据えている。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "台詞",
+        "text": "行くよ。"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 5,
+    "spread": false,
+    "rows": [
+     [
+      21
+     ],
+     [
+      22,
+      23
+     ],
+     [
+      24,
+      25
+     ]
+    ],
+    "panels": [
+     {
+      "n": 21,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "装置が激しく鳴り出す。二つのベルが左右に跳ね、撞木が打ちつけられ、画面全体に振動の線と音の波が広がる。",
+      "balloons": [],
+      "sfx": [
+       "ジリリリリリリリッ！！"
+      ]
+     },
+     {
+      "n": 22,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手A",
+        "face": "大",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "Aが目を見開き、思わず身をのけぞらせる。",
+      "balloons": [
+       {
+        "speaker": "追手A",
+        "kind": "叫び",
+        "text": "なっ、爆弾か！？"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 23,
+      "size": "小",
+      "shape": "四角",
+      "shot": "胸から上",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手B",
+        "face": "中",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "Bが腕で頭をかばいながら身を沈める。",
+      "balloons": [
+       {
+        "speaker": "追手B",
+        "kind": "台詞",
+        "text": "……伏せなさい。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 24,
+      "size": "中",
+      "shape": "斜め",
+      "shot": "全身",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "中",
+        "facing": "正面"
+       },
+       {
+        "name": "追手A",
+        "face": "小",
+        "facing": "左"
+       },
+       {
+        "name": "追手B",
+        "face": "小",
+        "facing": "右"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "頭を抱えてしゃがむAとBの間を、鳴り続ける装置を胸に抱えたカヤが正面へ向かって駆け抜ける。",
+      "balloons": [],
+      "sfx": [
+       "ジリリリリ"
+      ]
+     },
+     {
+      "n": 25,
+      "size": "中",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "背後",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "後ろ"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "転",
+      "hook": true,
+      "content": "岸壁の先に貨物船。渡り板が引き上げられ、船と岸の間にもう水面の隙間が開き始めている。カヤが小さな背中を見せて左へ走る。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "心の声",
+        "text": "間に合え。"
+       }
+      ],
+      "sfx": [
+       "ボォォォォォ！"
+      ]
+     }
+    ]
+   },
+   {
+    "page": 6,
+    "spread": true,
+    "rows": [
+     [
+      26
+     ],
+     [
+      27
+     ]
+    ],
+    "panels": [
+     {
+      "n": 26,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "引き",
+      "angle": "真横",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "見開きの右半分。岸壁の縁を蹴ったカヤが左へ跳ぶ。装置はまだ鳴っている。下には黒い水面。左の端では、動き出した船の船体が見開きの中央へ向かって流れていく。",
+      "balloons": [],
+      "sfx": [
+       "ダンッ",
+       "ジリリリ…"
+      ]
+     },
+     {
+      "n": 27,
+      "size": "小",
+      "shape": "四角",
+      "shot": "引き",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "追手A",
+        "face": "小",
+        "facing": "左"
+       },
+       {
+        "name": "追手B",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "簡略",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "岸壁の縁まで追ってきたAとBが、離れていく船を見て立ちすくむ。Aは拳を振り上げている。",
+      "balloons": [
+       {
+        "speaker": "追手A",
+        "kind": "叫び",
+        "text": "待てぇぇ！"
+       }
+      ],
+      "sfx": []
+     }
+    ]
+   },
+   {
+    "page": 7,
+    "spread": true,
+    "rows": [
+     [
+      28
+     ],
+     [
+      29
+     ]
+    ],
+    "panels": [
+     {
+      "n": 28,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "引き",
+      "angle": "真横",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 1,
+      "role": "転",
+      "hook": false,
+      "content": "見開きの左半分。カヤが水面の上、空中に伸びきっている。前には船の高い船体と手すり、船の灯りが水面に揺れる。左手を手すりへ伸ばし、右腕は装置を抱えている。",
+      "balloons": [],
+      "sfx": [
+       "ヒュゥゥ"
+      ]
+     },
+     {
+      "n": 29,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "左"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 1,
+      "role": "転",
+      "hook": true,
+      "content": "鉄の手すりに、カヤの指が一本ずつ食い込む。指が滑りそうになる。",
+      "balloons": [],
+      "sfx": [
+       "ガシッ！"
+      ]
+     }
+    ]
+   },
+   {
+    "page": 8,
+    "spread": false,
+    "rows": [
+     [
+      30
+     ],
+     [
+      31,
+      32
+     ],
+     [
+      33,
+      34
+     ],
+     [
+      35
+     ]
+    ],
+    "panels": [
+     {
+      "n": 30,
+      "size": "中",
+      "shape": "四角",
+      "shot": "全身",
+      "angle": "見下ろし",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "小",
+        "facing": "左"
+       }
+      ],
+      "background": "簡略",
+      "scene": 2,
+      "role": "転",
+      "hook": false,
+      "content": "甲板に転がり込んだカヤが、積まれたコンテナの陰で片膝をつく。親指で装置のスイッチを押し、鳴り止ませる。",
+      "balloons": [],
+      "sfx": [
+       "ドサッ",
+       "カチッ"
+      ]
+     },
+     {
+      "n": 31,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "正面"
+       }
+      ],
+      "background": "なし",
+      "scene": 2,
+      "role": "転",
+      "hook": false,
+      "content": "カヤの手が荷物を裏返し、紐で結んであった送り状をつまみ上げる。",
+      "balloons": [],
+      "sfx": [
+       "カサ"
+      ]
+     },
+     {
+      "n": 32,
+      "size": "中",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "真上",
+      "people": [],
+      "background": "なし",
+      "scene": 2,
+      "role": "転",
+      "hook": false,
+      "content": "送り状のアップ。手書きの文字で宛先が書かれている。",
+      "balloons": [
+       {
+        "speaker": "送り状",
+        "kind": "ナレーション",
+        "text": "送り先：ミナ様"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 33,
+      "size": "小",
+      "shape": "四角",
+      "shot": "顔",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "大",
+        "facing": "正面"
+       }
+      ],
+      "background": "効果線やトーンだけ",
+      "scene": 2,
+      "role": "結",
+      "hook": false,
+      "content": "カヤの目が大きく見開かれる。冷静だった顔が初めて揺れる。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "心の声",
+        "text": "……ミナ。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 34,
+      "size": "小",
+      "shape": "四角",
+      "shot": "部分",
+      "angle": "目の高さ",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "正面"
+       }
+      ],
+      "background": "なし",
+      "scene": 2,
+      "role": "結",
+      "hook": false,
+      "content": "静かになった目覚まし時計を持つカヤの両手。親指が文字盤の縁をそっとなでている。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "心の声",
+        "text": "何年、会ってない。"
+       }
+      ],
+      "sfx": []
+     },
+     {
+      "n": 35,
+      "size": "大",
+      "shape": "断ち切り",
+      "shot": "遠景",
+      "angle": "見下ろし",
+      "people": [
+       {
+        "name": "カヤ",
+        "face": "見えない",
+        "facing": "後ろ"
+       }
+      ],
+      "background": "描き込む",
+      "scene": 2,
+      "role": "結",
+      "hook": false,
+      "content": "夜明け前の海へ出ていく貨物船を上から見る。船尾の手すりにカヤが小さく立ち、遠ざかる港の灯りを背にして前を向いている。岸壁には追手二人の小さな影。",
+      "balloons": [
+       {
+        "speaker": "カヤ",
+        "kind": "台詞",
+        "text": "行くよ。"
+       }
+      ],
+      "sfx": [
+       "ボォォ…"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "raw": null
+}

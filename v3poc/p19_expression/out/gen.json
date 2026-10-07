@@ -1,0 +1,1158 @@
+{
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "size": [
+  832,
+  1216
+ ],
+ "steps": 25,
+ "cfg": 5.0,
+ "sampler": "euler_ancestral",
+ "scheduler": "normal",
+ "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry",
+ "scene": "upper body, looking at viewer, classroom",
+ "neutral": "expressionless",
+ "emotions": {
+  "joy": {
+   "name": "喜",
+   "levels": [
+    "slight smile",
+    "smile, happy",
+    "laughing, open mouth, very happy"
+   ]
+  },
+  "anger": {
+   "name": "怒",
+   "levels": [
+    "annoyed, frown",
+    "angry",
+    "furious, shouting, clenched teeth"
+   ]
+  },
+  "sad": {
+   "name": "哀",
+   "levels": [
+    "sad, downcast eyes",
+    "sad, teary eyes",
+    "crying, tears, sobbing"
+   ]
+  },
+  "surprise": {
+   "name": "驚",
+   "levels": [
+    "slightly surprised",
+    "surprised, open mouth",
+    "shocked, wide-eyed, gasping"
+   ]
+  }
+ },
+ "charas": {
+  "a": {
+   "name": "白髪の三つ編みの女性",
+   "sex": "1girl, solo",
+   "hair": "white hair, long hair, twin braids",
+   "full": "white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker"
+  },
+  "b": {
+   "name": "眼帯の男性",
+   "sex": "1boy, solo",
+   "hair": "messy hair, brown hair, short hair",
+   "full": "messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt"
+  }
+ },
+ "ipadapter": {
+  "model": "ip_adapter_plus_sdxl_vit-h\\ip_adapter.bin",
+  "clip_vision": "clip_vision_h.safetensors",
+  "weight_type": "linear",
+  "combine_embeds": "concat",
+  "start_at": 0.0,
+  "end_at": 1.0,
+  "embeds_scaling": "V only",
+  "weight": 0.5
+ },
+ "refs": {
+  "a": "../p17_identity2/out/ref_a.png",
+  "b": "../p17_identity2/out/ref_b.png"
+ },
+ "runs": [
+  {
+   "file": "a_neutral_0_31.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_neutral_0_32.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_neutral_0_33.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_neutral_0_ipa_31.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_neutral_0_ipa_32.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_neutral_0_ipa_33.png",
+   "chara": "a",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_1_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 1,
+   "words": "slight smile",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, slight smile, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_1_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 1,
+   "words": "slight smile",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, slight smile, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_1_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 1,
+   "words": "slight smile",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, slight smile, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_2_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 2,
+   "words": "smile, happy",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, smile, happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_2_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 2,
+   "words": "smile, happy",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, smile, happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_2_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 2,
+   "words": "smile, happy",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, smile, happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_3_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_3_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_3_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_joy_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_1_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 1,
+   "words": "annoyed, frown",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, annoyed, frown, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_1_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 1,
+   "words": "annoyed, frown",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, annoyed, frown, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_1_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 1,
+   "words": "annoyed, frown",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, annoyed, frown, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_2_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 2,
+   "words": "angry",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, angry, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_2_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 2,
+   "words": "angry",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, angry, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_2_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 2,
+   "words": "angry",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, angry, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_3_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_3_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_3_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_anger_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_1_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 1,
+   "words": "sad, downcast eyes",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sad, downcast eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_1_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 1,
+   "words": "sad, downcast eyes",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sad, downcast eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_1_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 1,
+   "words": "sad, downcast eyes",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sad, downcast eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_2_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 2,
+   "words": "sad, teary eyes",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sad, teary eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_2_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 2,
+   "words": "sad, teary eyes",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sad, teary eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_2_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 2,
+   "words": "sad, teary eyes",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sad, teary eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_3_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_3_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_3_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_sad_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_1_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 1,
+   "words": "slightly surprised",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, slightly surprised, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_1_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 1,
+   "words": "slightly surprised",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, slightly surprised, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_1_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 1,
+   "words": "slightly surprised",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, slightly surprised, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_2_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 2,
+   "words": "surprised, open mouth",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, surprised, open mouth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_2_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 2,
+   "words": "surprised, open mouth",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, surprised, open mouth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_2_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 2,
+   "words": "surprised, open mouth",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, surprised, open mouth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_3_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_3_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_3_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_3_ipa_31.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_3_ipa_32.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "a_surprise_3_ipa_33.png",
+   "chara": "a",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_neutral_0_31.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_neutral_0_32.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_neutral_0_33.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_neutral_0_ipa_31.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_neutral_0_ipa_32.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_neutral_0_ipa_33.png",
+   "chara": "b",
+   "emotion": "neutral",
+   "level": 0,
+   "words": "expressionless",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, expressionless, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_1_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 1,
+   "words": "slight smile",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, slight smile, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_1_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 1,
+   "words": "slight smile",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, slight smile, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_1_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 1,
+   "words": "slight smile",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, slight smile, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_2_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 2,
+   "words": "smile, happy",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, smile, happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_2_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 2,
+   "words": "smile, happy",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, smile, happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_2_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 2,
+   "words": "smile, happy",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, smile, happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_3_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_3_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_3_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_joy_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "joy",
+   "level": 3,
+   "words": "laughing, open mouth, very happy",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, laughing, open mouth, very happy, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_1_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 1,
+   "words": "annoyed, frown",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, annoyed, frown, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_1_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 1,
+   "words": "annoyed, frown",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, annoyed, frown, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_1_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 1,
+   "words": "annoyed, frown",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, annoyed, frown, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_2_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 2,
+   "words": "angry",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, angry, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_2_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 2,
+   "words": "angry",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, angry, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_2_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 2,
+   "words": "angry",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, angry, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_3_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_3_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_3_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_anger_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "anger",
+   "level": 3,
+   "words": "furious, shouting, clenched teeth",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, furious, shouting, clenched teeth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_1_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 1,
+   "words": "sad, downcast eyes",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, sad, downcast eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_1_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 1,
+   "words": "sad, downcast eyes",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, sad, downcast eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_1_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 1,
+   "words": "sad, downcast eyes",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, sad, downcast eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_2_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 2,
+   "words": "sad, teary eyes",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, sad, teary eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_2_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 2,
+   "words": "sad, teary eyes",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, sad, teary eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_2_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 2,
+   "words": "sad, teary eyes",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, sad, teary eyes, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_3_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_3_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_3_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_sad_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "sad",
+   "level": 3,
+   "words": "crying, tears, sobbing",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, crying, tears, sobbing, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_1_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 1,
+   "words": "slightly surprised",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, slightly surprised, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_1_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 1,
+   "words": "slightly surprised",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, slightly surprised, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_1_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 1,
+   "words": "slightly surprised",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, slightly surprised, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_2_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 2,
+   "words": "surprised, open mouth",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, surprised, open mouth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_2_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 2,
+   "words": "surprised, open mouth",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, surprised, open mouth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_2_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 2,
+   "words": "surprised, open mouth",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, surprised, open mouth, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_3_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": false,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_3_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": false,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_3_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": false,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_3_ipa_31.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": true,
+   "seed": 31,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_3_ipa_32.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": true,
+   "seed": 32,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  },
+  {
+   "file": "b_surprise_3_ipa_33.png",
+   "chara": "b",
+   "emotion": "surprise",
+   "level": 3,
+   "words": "shocked, wide-eyed, gasping",
+   "ref": true,
+   "seed": 33,
+   "positive": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, shocked, wide-eyed, gasping, upper body, looking at viewer, classroom"
+  }
+ ]
+}

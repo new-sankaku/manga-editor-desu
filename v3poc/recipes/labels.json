@@ -1,0 +1,689 @@
+{
+ "p14": {
+  "yoko_text_61.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "yoko_text_62.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "yoko_text_63.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "yoko_shrink_61.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "yoko_shrink_62.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "yoko_shrink_63.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "yoko_pose_xinsir_61.png": {
+   "v": "part",
+   "note": "位置は合う・白い縁取り"
+  },
+  "yoko_pose_xinsir_62.png": {
+   "v": "part",
+   "note": "位置は合う・白い縁取り"
+  },
+  "yoko_pose_xinsir_63.png": {
+   "v": "part",
+   "note": "位置は合う・白い縁取り"
+  },
+  "yoko_pose_union_61.png": {
+   "v": "part",
+   "note": "位置は合う・白い縁取り"
+  },
+  "yoko_pose_union_62.png": {
+   "v": "part",
+   "note": "位置は合う・白い縁取り"
+  },
+  "yoko_pose_union_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_pose_windsing_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_pose_windsing_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_pose_windsing_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_pose_t2i_61.png": {
+   "v": "ok",
+   "note": "やや大きい"
+  },
+  "yoko_pose_t2i_62.png": {
+   "v": "part",
+   "note": "中寄り・小さい"
+  },
+  "yoko_pose_t2i_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_crop_61.png": {
+   "v": "ng",
+   "note": "寄りで余白なし"
+  },
+  "yoko_crop_62.png": {
+   "v": "ng",
+   "note": "寄りで余白なし"
+  },
+  "yoko_crop_63.png": {
+   "v": "ng",
+   "note": "寄りで余白なし"
+  },
+  "yoko_outpaint_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_outpaint_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "yoko_outpaint_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_text_61.png": {
+   "v": "ok",
+   "note": "枠が真ん中なので合う"
+  },
+  "tate_text_62.png": {
+   "v": "ok",
+   "note": "枠が真ん中なので合う"
+  },
+  "tate_text_63.png": {
+   "v": "ok",
+   "note": "枠が真ん中なので合う"
+  },
+  "tate_shrink_61.png": {
+   "v": "ok",
+   "note": "枠が真ん中なので合う"
+  },
+  "tate_shrink_62.png": {
+   "v": "ok",
+   "note": "枠が真ん中なので合う"
+  },
+  "tate_shrink_63.png": {
+   "v": "ok",
+   "note": "枠が真ん中なので合う"
+  },
+  "tate_pose_xinsir_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_xinsir_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_xinsir_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_union_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_union_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_union_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_windsing_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_windsing_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_windsing_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_t2i_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_t2i_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_pose_t2i_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_crop_61.png": {
+   "v": "ng",
+   "note": "人物がコマいっぱい"
+  },
+  "tate_crop_62.png": {
+   "v": "ng",
+   "note": "人物がコマいっぱい"
+  },
+  "tate_crop_63.png": {
+   "v": "ng",
+   "note": "人物がコマいっぱい"
+  },
+  "tate_outpaint_61.png": {
+   "v": "part",
+   "note": "上が平らな灰色"
+  },
+  "tate_outpaint_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tate_outpaint_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_text_61.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "std_text_62.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "std_text_63.png": {
+   "v": "part",
+   "note": "右に立つ（位置は選べない）"
+  },
+  "std_shrink_61.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "std_shrink_62.png": {
+   "v": "part",
+   "note": "真ん中に立つ（位置は選べない）"
+  },
+  "std_shrink_63.png": {
+   "v": "part",
+   "note": "右寄り（位置は選べない）"
+  },
+  "std_pose_xinsir_61.png": {
+   "v": "part",
+   "note": "薄い縁取り"
+  },
+  "std_pose_xinsir_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_xinsir_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_union_61.png": {
+   "v": "part",
+   "note": "薄い縁取り"
+  },
+  "std_pose_union_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_union_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_windsing_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_windsing_62.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_windsing_63.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_t2i_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_pose_t2i_62.png": {
+   "v": "part",
+   "note": "真ん中に立つ"
+  },
+  "std_pose_t2i_63.png": {
+   "v": "ng",
+   "note": "遠くに小さく真ん中"
+  },
+  "std_crop_61.png": {
+   "v": "ng",
+   "note": "寄りで余白なし"
+  },
+  "std_crop_62.png": {
+   "v": "ng",
+   "note": "寄りで余白なし"
+  },
+  "std_crop_63.png": {
+   "v": "ng",
+   "note": "寄りで余白なし"
+  },
+  "std_outpaint_61.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "std_outpaint_62.png": {
+   "v": "part",
+   "note": "右が黒く平ら"
+  },
+  "std_outpaint_63.png": {
+   "v": "ng",
+   "note": "右半分が黒い面と文字"
+  }
+ },
+ "p15": {
+  "tone_long_yoko_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_long_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_long_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_long_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_long_tate_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_long_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_full_std_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_full_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_full_std_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_chara_only_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_chara_only_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_chara_only_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_chara_only_71_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "tone_chara_only_72_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "tone_chara_only_73_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "pen_long_yoko_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_long_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_long_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_long_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_long_tate_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_long_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_full_std_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_full_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_full_std_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_chara_only_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_chara_only_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_chara_only_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_chara_only_71_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "pen_chara_only_72_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "pen_chara_only_73_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "retro_long_yoko_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_long_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_long_yoko_73.png": {
+   "v": "ng",
+   "note": "人物が2人"
+  },
+  "retro_long_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_long_tate_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_long_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_full_std_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_full_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_full_std_73.png": {
+   "v": "part",
+   "note": "人物が大きめ（高さ8割）"
+  },
+  "retro_chara_only_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_chara_only_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_chara_only_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_chara_only_71_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "retro_chara_only_72_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "retro_chara_only_73_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "color_long_yoko_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_long_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_long_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_long_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_long_tate_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_long_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_full_std_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_full_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_full_std_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_chara_only_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_chara_only_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_chara_only_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_chara_only_71_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "color_chara_only_72_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "color_chara_only_73_cut.png": {
+   "v": "ok",
+   "note": "欠けなし"
+  },
+  "tone_bg_yoko_71.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "tone_bg_yoko_72.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "tone_bg_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_yoko_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_bg_yoko_71.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "retro_bg_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_bg_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_bg_yoko_71.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "color_bg_yoko_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_bg_yoko_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_bg_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_bg_tate_72.png": {
+   "v": "part",
+   "note": "見上げで地面が細い"
+  },
+  "tone_bg_tate_73.png": {
+   "v": "ng",
+   "note": "4つのコマに分かれた"
+  },
+  "pen_bg_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_tate_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_bg_tate_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_bg_tate_72.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "retro_bg_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_bg_tate_71.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "color_bg_tate_72.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "color_bg_tate_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "tone_bg_std_71.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "tone_bg_std_72.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "tone_bg_std_73.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "pen_bg_std_71.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "pen_bg_std_73.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_bg_std_71.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "retro_bg_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "retro_bg_std_73.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  },
+  "color_bg_std_71.png": {
+   "v": "part",
+   "note": "高い所から見下ろす"
+  },
+  "color_bg_std_72.png": {
+   "v": "ok",
+   "note": ""
+  },
+  "color_bg_std_73.png": {
+   "v": "ng",
+   "note": "真上から見下ろす街で、人物を立たせる地面がない"
+  }
+ },
+ "styles_note": "白黒の3種（トーン・ペン線・90年代風）は、見分けがつかないほど似た絵になった。試した言葉（3種）では、白黒の絵柄は変わらなかった。ほかの言葉で変わるかは未検証。カラーだけははっきり変わる。",
+ "target_notes": {
+  "bg_yoko": "背景だけの狙いは、真上から見下ろす街になりやすい（横長 8/12、縦長 7/12、標準 5/12）。ペン線の絵柄だけは9枚とも地面の高さの街になったが、理由は分からない。目の高さを指す言葉を足す手は未検証。 P16 では教室 3/3・郊外 3/3・街 1/3。見下ろしになるのは街で多い。",
+  "bg_tate": "背景だけの狙いは、真上から見下ろす街になりやすい（7/12）。1枚はコマ割りのような4つの絵に分かれた。 P16 では教室 0/3（全部コマが縦に並んだ）、郊外 2/3、街 1/3。",
+  "bg_std": "標準の形がいちばん外れた（5/12）。",
+  "long_yoko": "11/12。人物の位置は、言葉だけでは選べず、ほとんど真ん中に立つ（単調になる）。位置を決めたいときは「コマの形に合わせる」の骨格の手を使う。 P16（人物3種×場所3種）でも 26/27。",
+  "long_tate": "12/12。人物はどれも真ん中の下寄り。 ただし P16 で場所を教室にすると、1枚の中にコマが縦に2〜4段並ぶ絵になり 1/9 しか狙いどおりにならなかった（郊外 9/9、街 8/9）。",
+  "full_std": "11/12（1枚は△）。人物はどれも真ん中に立つ。 P16（人物3種×場所3種）でも 27/27。構図は seed で決まる傾向が強く、同じ seed なら人物を変えても似た構図になる。",
+  "chara_only": "12/12。背景を抜いたあとも、白い靴下や脚が欠けなかった。 P16 では人物3種で 8/9（背広の老人の1枚に読めない文字が入り、抜いても残った）。"
+ },
+ "intro": "どの結果も、人物1種（眼鏡の女子生徒）と場所1種（街）のプロンプトだけで作った。「このプロンプトではこうなった」までしか言えない。人物と場所を入れ替えたときの結果は P16（報告のページ）。縦長の引きは、場所を教室にすると大きく崩れた。"
+}

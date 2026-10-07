@@ -1,0 +1,708 @@
+{
+ "radius": 3,
+ "edge_percentile": 92,
+ "summary": {
+  "room/text": {
+   "n": 9,
+   "line_recall_mean": 0.486,
+   "line_recall_other_mean": 0.485
+  },
+  "room/depth": {
+   "n": 9,
+   "line_recall_mean": 0.978,
+   "line_recall_other_mean": 0.457
+  },
+  "room/line": {
+   "n": 9,
+   "line_recall_mean": 0.974,
+   "line_recall_other_mean": 0.461
+  },
+  "room/depth_ref": {
+   "n": 6,
+   "line_recall_mean": 0.936,
+   "line_recall_other_mean": 0.392
+  },
+  "street/text": {
+   "n": 9,
+   "line_recall_mean": 0.47,
+   "line_recall_other_mean": 0.47
+  },
+  "street/depth": {
+   "n": 9,
+   "line_recall_mean": 0.786,
+   "line_recall_other_mean": 0.561
+  },
+  "street/line": {
+   "n": 9,
+   "line_recall_mean": 0.843,
+   "line_recall_other_mean": 0.552
+  },
+  "street/depth_ref": {
+   "n": 6,
+   "line_recall_mean": 0.768,
+   "line_recall_other_mean": 0.595
+  }
+ },
+ "rows": [
+  {
+   "file": "room_front_text_91.png",
+   "place": "room",
+   "view": "front",
+   "mode": "text",
+   "seed": 91,
+   "sec": 22.8,
+   "line_recall": 0.474,
+   "line_recall_other": 0.468
+  },
+  {
+   "file": "room_front_depth_91.png",
+   "place": "room",
+   "view": "front",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 48.6,
+   "line_recall": 0.986,
+   "line_recall_other": 0.482
+  },
+  {
+   "file": "room_front_line_91.png",
+   "place": "room",
+   "view": "front",
+   "mode": "line",
+   "seed": 91,
+   "sec": 44.7,
+   "line_recall": 0.973,
+   "line_recall_other": 0.431
+  },
+  {
+   "file": "room_side_text_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "text",
+   "seed": 91,
+   "sec": 27.5,
+   "line_recall": 0.479,
+   "line_recall_other": 0.465
+  },
+  {
+   "file": "room_side_depth_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 49.2,
+   "line_recall": 0.975,
+   "line_recall_other": 0.444
+  },
+  {
+   "file": "room_side_line_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "line",
+   "seed": 91,
+   "sec": 50.3,
+   "line_recall": 0.992,
+   "line_recall_other": 0.461
+  },
+  {
+   "file": "room_side_depth_ref_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 50.3,
+   "line_recall": 0.944,
+   "line_recall_other": 0.448
+  },
+  {
+   "file": "room_back_text_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "text",
+   "seed": 91,
+   "sec": 31.9,
+   "line_recall": 0.457,
+   "line_recall_other": 0.476
+  },
+  {
+   "file": "room_back_depth_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 42.7,
+   "line_recall": 0.987,
+   "line_recall_other": 0.399
+  },
+  {
+   "file": "room_back_line_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "line",
+   "seed": 91,
+   "sec": 46.3,
+   "line_recall": 0.982,
+   "line_recall_other": 0.435
+  },
+  {
+   "file": "room_back_depth_ref_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 51.0,
+   "line_recall": 0.982,
+   "line_recall_other": 0.401
+  },
+  {
+   "file": "room_front_text_92.png",
+   "place": "room",
+   "view": "front",
+   "mode": "text",
+   "seed": 92,
+   "sec": 31.7,
+   "line_recall": 0.428,
+   "line_recall_other": 0.471
+  },
+  {
+   "file": "room_front_depth_92.png",
+   "place": "room",
+   "view": "front",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 39.3,
+   "line_recall": 0.987,
+   "line_recall_other": 0.533
+  },
+  {
+   "file": "room_front_line_92.png",
+   "place": "room",
+   "view": "front",
+   "mode": "line",
+   "seed": 92,
+   "sec": 41.7,
+   "line_recall": 0.992,
+   "line_recall_other": 0.544
+  },
+  {
+   "file": "room_side_text_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "text",
+   "seed": 92,
+   "sec": 37.1,
+   "line_recall": 0.477,
+   "line_recall_other": 0.447
+  },
+  {
+   "file": "room_side_depth_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 43.2,
+   "line_recall": 0.968,
+   "line_recall_other": 0.423
+  },
+  {
+   "file": "room_side_line_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "line",
+   "seed": 92,
+   "sec": 41.7,
+   "line_recall": 0.985,
+   "line_recall_other": 0.415
+  },
+  {
+   "file": "room_side_depth_ref_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 49.7,
+   "line_recall": 0.944,
+   "line_recall_other": 0.421
+  },
+  {
+   "file": "room_back_text_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "text",
+   "seed": 92,
+   "sec": 34.1,
+   "line_recall": 0.466,
+   "line_recall_other": 0.452
+  },
+  {
+   "file": "room_back_depth_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 48.2,
+   "line_recall": 0.974,
+   "line_recall_other": 0.48
+  },
+  {
+   "file": "room_back_line_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "line",
+   "seed": 92,
+   "sec": 56.7,
+   "line_recall": 0.955,
+   "line_recall_other": 0.399
+  },
+  {
+   "file": "room_back_depth_ref_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 67.7,
+   "line_recall": 0.985,
+   "line_recall_other": 0.385
+  },
+  {
+   "file": "room_front_text_93.png",
+   "place": "room",
+   "view": "front",
+   "mode": "text",
+   "seed": 93,
+   "sec": 31.6,
+   "line_recall": 0.528,
+   "line_recall_other": 0.531
+  },
+  {
+   "file": "room_front_depth_93.png",
+   "place": "room",
+   "view": "front",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 39.9,
+   "line_recall": 0.963,
+   "line_recall_other": 0.423
+  },
+  {
+   "file": "room_front_line_93.png",
+   "place": "room",
+   "view": "front",
+   "mode": "line",
+   "seed": 93,
+   "sec": 38.0,
+   "line_recall": 0.976,
+   "line_recall_other": 0.55
+  },
+  {
+   "file": "room_side_text_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "text",
+   "seed": 93,
+   "sec": 23.6,
+   "line_recall": 0.512,
+   "line_recall_other": 0.539
+  },
+  {
+   "file": "room_side_depth_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 30.9,
+   "line_recall": 0.971,
+   "line_recall_other": 0.437
+  },
+  {
+   "file": "room_side_line_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "line",
+   "seed": 93,
+   "sec": 31.3,
+   "line_recall": 0.998,
+   "line_recall_other": 0.438
+  },
+  {
+   "file": "room_side_depth_ref_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 37.3,
+   "line_recall": 0.851,
+   "line_recall_other": 0.389
+  },
+  {
+   "file": "room_back_text_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "text",
+   "seed": 93,
+   "sec": 23.0,
+   "line_recall": 0.55,
+   "line_recall_other": 0.52
+  },
+  {
+   "file": "room_back_depth_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 29.6,
+   "line_recall": 0.99,
+   "line_recall_other": 0.492
+  },
+  {
+   "file": "room_back_line_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "line",
+   "seed": 93,
+   "sec": 30.8,
+   "line_recall": 0.909,
+   "line_recall_other": 0.475
+  },
+  {
+   "file": "room_back_depth_ref_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 38.0,
+   "line_recall": 0.909,
+   "line_recall_other": 0.307
+  },
+  {
+   "file": "street_front_text_91.png",
+   "place": "street",
+   "view": "front",
+   "mode": "text",
+   "seed": 91,
+   "sec": 25.8,
+   "line_recall": 0.459,
+   "line_recall_other": 0.363
+  },
+  {
+   "file": "street_front_depth_91.png",
+   "place": "street",
+   "view": "front",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 37.1,
+   "line_recall": 0.746,
+   "line_recall_other": 0.508
+  },
+  {
+   "file": "street_front_line_91.png",
+   "place": "street",
+   "view": "front",
+   "mode": "line",
+   "seed": 91,
+   "sec": 37.8,
+   "line_recall": 0.793,
+   "line_recall_other": 0.492
+  },
+  {
+   "file": "street_side_text_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "text",
+   "seed": 91,
+   "sec": 29.8,
+   "line_recall": 0.391,
+   "line_recall_other": 0.397
+  },
+  {
+   "file": "street_side_depth_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 37.2,
+   "line_recall": 0.74,
+   "line_recall_other": 0.575
+  },
+  {
+   "file": "street_side_line_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "line",
+   "seed": 91,
+   "sec": 37.6,
+   "line_recall": 0.913,
+   "line_recall_other": 0.602
+  },
+  {
+   "file": "street_side_depth_ref_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 44.5,
+   "line_recall": 0.729,
+   "line_recall_other": 0.627
+  },
+  {
+   "file": "street_back_text_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "text",
+   "seed": 91,
+   "sec": 29.8,
+   "line_recall": 0.335,
+   "line_recall_other": 0.425
+  },
+  {
+   "file": "street_back_depth_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 37.4,
+   "line_recall": 0.778,
+   "line_recall_other": 0.544
+  },
+  {
+   "file": "street_back_line_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "line",
+   "seed": 91,
+   "sec": 37.3,
+   "line_recall": 0.883,
+   "line_recall_other": 0.519
+  },
+  {
+   "file": "street_back_depth_ref_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 44.4,
+   "line_recall": 0.73,
+   "line_recall_other": 0.606
+  },
+  {
+   "file": "street_front_text_92.png",
+   "place": "street",
+   "view": "front",
+   "mode": "text",
+   "seed": 92,
+   "sec": 29.9,
+   "line_recall": 0.555,
+   "line_recall_other": 0.517
+  },
+  {
+   "file": "street_front_depth_92.png",
+   "place": "street",
+   "view": "front",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 36.5,
+   "line_recall": 0.8,
+   "line_recall_other": 0.642
+  },
+  {
+   "file": "street_front_line_92.png",
+   "place": "street",
+   "view": "front",
+   "mode": "line",
+   "seed": 92,
+   "sec": 42.5,
+   "line_recall": 0.826,
+   "line_recall_other": 0.662
+  },
+  {
+   "file": "street_side_text_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "text",
+   "seed": 92,
+   "sec": 34.0,
+   "line_recall": 0.522,
+   "line_recall_other": 0.534
+  },
+  {
+   "file": "street_side_depth_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 40.6,
+   "line_recall": 0.791,
+   "line_recall_other": 0.493
+  },
+  {
+   "file": "street_side_line_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "line",
+   "seed": 92,
+   "sec": 41.1,
+   "line_recall": 0.84,
+   "line_recall_other": 0.443
+  },
+  {
+   "file": "street_side_depth_ref_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 52.5,
+   "line_recall": 0.746,
+   "line_recall_other": 0.451
+  },
+  {
+   "file": "street_back_text_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "text",
+   "seed": 92,
+   "sec": 26.7,
+   "line_recall": 0.512,
+   "line_recall_other": 0.539
+  },
+  {
+   "file": "street_back_depth_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 34.7,
+   "line_recall": 0.888,
+   "line_recall_other": 0.667
+  },
+  {
+   "file": "street_back_line_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "line",
+   "seed": 92,
+   "sec": 35.7,
+   "line_recall": 0.846,
+   "line_recall_other": 0.587
+  },
+  {
+   "file": "street_back_depth_ref_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 45.0,
+   "line_recall": 0.76,
+   "line_recall_other": 0.689
+  },
+  {
+   "file": "street_front_text_93.png",
+   "place": "street",
+   "view": "front",
+   "mode": "text",
+   "seed": 93,
+   "sec": 17.8,
+   "line_recall": 0.404,
+   "line_recall_other": 0.525
+  },
+  {
+   "file": "street_front_depth_93.png",
+   "place": "street",
+   "view": "front",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 28.4,
+   "line_recall": 0.768,
+   "line_recall_other": 0.537
+  },
+  {
+   "file": "street_front_line_93.png",
+   "place": "street",
+   "view": "front",
+   "mode": "line",
+   "seed": 93,
+   "sec": 25.2,
+   "line_recall": 0.827,
+   "line_recall_other": 0.596
+  },
+  {
+   "file": "street_side_text_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "text",
+   "seed": 93,
+   "sec": 16.1,
+   "line_recall": 0.547,
+   "line_recall_other": 0.453
+  },
+  {
+   "file": "street_side_depth_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 25.0,
+   "line_recall": 0.846,
+   "line_recall_other": 0.525
+  },
+  {
+   "file": "street_side_line_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "line",
+   "seed": 93,
+   "sec": 23.5,
+   "line_recall": 0.926,
+   "line_recall_other": 0.484
+  },
+  {
+   "file": "street_side_depth_ref_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 37.1,
+   "line_recall": 0.919,
+   "line_recall_other": 0.566
+  },
+  {
+   "file": "street_back_text_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "text",
+   "seed": 93,
+   "sec": 23.5,
+   "line_recall": 0.503,
+   "line_recall_other": 0.476
+  },
+  {
+   "file": "street_back_depth_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 48.9,
+   "line_recall": 0.714,
+   "line_recall_other": 0.557
+  },
+  {
+   "file": "street_back_line_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "line",
+   "seed": 93,
+   "sec": 38.4,
+   "line_recall": 0.736,
+   "line_recall_other": 0.586
+  },
+  {
+   "file": "street_back_depth_ref_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 39.9,
+   "line_recall": 0.722,
+   "line_recall_other": 0.628
+  }
+ ]
+}

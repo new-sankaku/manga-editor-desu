@@ -1,0 +1,50 @@
+{
+ "light_none_95.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_none_96.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_none_97.png": {
+  "light_from": "unclear",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_none_98.png": {
+  "light_from": "unclear",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_left_95.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_left_96.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_left_97.png": {
+  "light_from": "right",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_left_98.png": {
+  "light_from": "right",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_right_95.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_right_96.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_right_97.png": {
+  "light_from": "right",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ },
+ "light_right_98.png": {
+  "light_from": "left",
+  "note": "明るい側は窓の位置で決まり、同じ seed では光の言葉を変えても窓の位置がほぼ同じ"
+ }
+}

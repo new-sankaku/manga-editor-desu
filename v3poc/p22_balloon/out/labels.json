@@ -1,0 +1,242 @@
+{
+ "talk_base_61.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_61.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_62.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_62.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_63.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_63.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_64.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_64.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_65.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_65.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_66.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_66.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_67.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_67.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_base_68.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "talk_neg_68.png": {
+  "balloon": 3,
+  "text": true,
+  "note": "コマ割りされた1ページになり、フキダシが多数（3は「3つ以上」）"
+ },
+ "shout_base_61.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "shout_neg_61.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "shout_base_62.png": {
+  "balloon": 1,
+  "text": true,
+  "note": ""
+ },
+ "shout_neg_62.png": {
+  "balloon": 1,
+  "text": true,
+  "note": ""
+ },
+ "shout_base_63.png": {
+  "balloon": 0,
+  "text": true,
+  "note": ""
+ },
+ "shout_neg_63.png": {
+  "balloon": 0,
+  "text": true,
+  "note": ""
+ },
+ "shout_base_64.png": {
+  "balloon": 1,
+  "text": true,
+  "note": ""
+ },
+ "shout_neg_64.png": {
+  "balloon": 0,
+  "text": true,
+  "note": ""
+ },
+ "shout_base_65.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "shout_neg_65.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "shout_base_66.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "shout_neg_66.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "shout_base_67.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "英字の擬音"
+ },
+ "shout_neg_67.png": {
+  "balloon": 0,
+  "text": false,
+  "note": "上の端の検出は文字ではない"
+ },
+ "shout_base_68.png": {
+  "balloon": 0,
+  "text": true,
+  "note": ""
+ },
+ "shout_neg_68.png": {
+  "balloon": 0,
+  "text": true,
+  "note": ""
+ },
+ "board_base_61.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_61.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示に崩れた文字"
+ },
+ "board_base_62.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_62.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "board_base_63.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_63.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示に崩れた文字"
+ },
+ "board_base_64.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_64.png": {
+  "balloon": 0,
+  "text": false,
+  "note": "電車の窓の並びを文字と検出"
+ },
+ "board_base_65.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_65.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示に崩れた文字"
+ },
+ "board_base_66.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_66.png": {
+  "balloon": 0,
+  "text": false,
+  "note": ""
+ },
+ "board_base_67.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_67.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示に崩れた文字"
+ },
+ "board_base_68.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示・駅名板に崩れた文字"
+ },
+ "board_neg_68.png": {
+  "balloon": 0,
+  "text": true,
+  "note": "掲示に崩れた文字"
+ }
+}

@@ -1,0 +1,626 @@
+{
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "size": [
+  1152,
+  896
+ ],
+ "steps": 25,
+ "cfg": 5.0,
+ "sampler": "euler_ancestral",
+ "scheduler": "normal",
+ "positive": {
+  "room": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, classroom, desks, chalkboard, windows, indoors",
+  "street": "masterpiece, best quality, manga, monochrome, greyscale, screentone, scenery, no humans, city street, buildings, road, utility pole"
+ },
+ "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, 1girl, 1boy, people",
+ "controlnet": {
+  "model": "xinsir\\union-sdxl-1.0-promax.safetensors",
+  "modes": {
+   "depth": {
+    "type": "depth",
+    "strength": 0.8,
+    "end_percent": 0.8
+   },
+   "line": {
+    "type": "canny/lineart/anime_lineart/mlsd",
+    "strength": 0.8,
+    "end_percent": 0.8
+   }
+  }
+ },
+ "ipadapter": {
+  "model": "ip_adapter_plus_sdxl_vit-h\\ip_adapter.bin",
+  "clip_vision": "clip_vision_h.safetensors",
+  "weight": 0.5
+ },
+ "cams": {
+  "room": {
+   "front": [
+    [
+     0,
+     1.5,
+     0.2
+    ],
+    0,
+    -5
+   ],
+   "side": [
+    [
+     3.3,
+     1.5,
+     3.0
+    ],
+    -60,
+    -5
+   ],
+   "back": [
+    [
+     -1.0,
+     1.5,
+     9.3
+    ],
+    170,
+    -8
+   ]
+  },
+  "street": {
+   "front": [
+    [
+     0,
+     1.5,
+     -2
+    ],
+    0,
+    2
+   ],
+   "side": [
+    [
+     -2.2,
+     1.5,
+     12
+    ],
+    35,
+    5
+   ],
+   "back": [
+    [
+     1.0,
+     1.5,
+     40
+    ],
+    185,
+    0
+   ]
+  }
+ },
+ "runs": [
+  {
+   "file": "room_front_text_91.png",
+   "place": "room",
+   "view": "front",
+   "mode": "text",
+   "seed": 91,
+   "sec": 22.8
+  },
+  {
+   "file": "room_front_depth_91.png",
+   "place": "room",
+   "view": "front",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 48.6
+  },
+  {
+   "file": "room_front_line_91.png",
+   "place": "room",
+   "view": "front",
+   "mode": "line",
+   "seed": 91,
+   "sec": 44.7
+  },
+  {
+   "file": "room_side_text_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "text",
+   "seed": 91,
+   "sec": 27.5
+  },
+  {
+   "file": "room_side_depth_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 49.2
+  },
+  {
+   "file": "room_side_line_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "line",
+   "seed": 91,
+   "sec": 50.3
+  },
+  {
+   "file": "room_side_depth_ref_91.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 50.3
+  },
+  {
+   "file": "room_back_text_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "text",
+   "seed": 91,
+   "sec": 31.9
+  },
+  {
+   "file": "room_back_depth_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 42.7
+  },
+  {
+   "file": "room_back_line_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "line",
+   "seed": 91,
+   "sec": 46.3
+  },
+  {
+   "file": "room_back_depth_ref_91.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 51.0
+  },
+  {
+   "file": "room_front_text_92.png",
+   "place": "room",
+   "view": "front",
+   "mode": "text",
+   "seed": 92,
+   "sec": 31.7
+  },
+  {
+   "file": "room_front_depth_92.png",
+   "place": "room",
+   "view": "front",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 39.3
+  },
+  {
+   "file": "room_front_line_92.png",
+   "place": "room",
+   "view": "front",
+   "mode": "line",
+   "seed": 92,
+   "sec": 41.7
+  },
+  {
+   "file": "room_side_text_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "text",
+   "seed": 92,
+   "sec": 37.1
+  },
+  {
+   "file": "room_side_depth_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 43.2
+  },
+  {
+   "file": "room_side_line_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "line",
+   "seed": 92,
+   "sec": 41.7
+  },
+  {
+   "file": "room_side_depth_ref_92.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 49.7
+  },
+  {
+   "file": "room_back_text_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "text",
+   "seed": 92,
+   "sec": 34.1
+  },
+  {
+   "file": "room_back_depth_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 48.2
+  },
+  {
+   "file": "room_back_line_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "line",
+   "seed": 92,
+   "sec": 56.7
+  },
+  {
+   "file": "room_back_depth_ref_92.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 67.7
+  },
+  {
+   "file": "room_front_text_93.png",
+   "place": "room",
+   "view": "front",
+   "mode": "text",
+   "seed": 93,
+   "sec": 31.6
+  },
+  {
+   "file": "room_front_depth_93.png",
+   "place": "room",
+   "view": "front",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 39.9
+  },
+  {
+   "file": "room_front_line_93.png",
+   "place": "room",
+   "view": "front",
+   "mode": "line",
+   "seed": 93,
+   "sec": 38.0
+  },
+  {
+   "file": "room_side_text_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "text",
+   "seed": 93,
+   "sec": 23.6
+  },
+  {
+   "file": "room_side_depth_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 30.9
+  },
+  {
+   "file": "room_side_line_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "line",
+   "seed": 93,
+   "sec": 31.3
+  },
+  {
+   "file": "room_side_depth_ref_93.png",
+   "place": "room",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 37.3
+  },
+  {
+   "file": "room_back_text_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "text",
+   "seed": 93,
+   "sec": 23.0
+  },
+  {
+   "file": "room_back_depth_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 29.6
+  },
+  {
+   "file": "room_back_line_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "line",
+   "seed": 93,
+   "sec": 30.8
+  },
+  {
+   "file": "room_back_depth_ref_93.png",
+   "place": "room",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 38.0
+  },
+  {
+   "file": "street_front_text_91.png",
+   "place": "street",
+   "view": "front",
+   "mode": "text",
+   "seed": 91,
+   "sec": 25.8
+  },
+  {
+   "file": "street_front_depth_91.png",
+   "place": "street",
+   "view": "front",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 37.1
+  },
+  {
+   "file": "street_front_line_91.png",
+   "place": "street",
+   "view": "front",
+   "mode": "line",
+   "seed": 91,
+   "sec": 37.8
+  },
+  {
+   "file": "street_side_text_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "text",
+   "seed": 91,
+   "sec": 29.8
+  },
+  {
+   "file": "street_side_depth_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 37.2
+  },
+  {
+   "file": "street_side_line_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "line",
+   "seed": 91,
+   "sec": 37.6
+  },
+  {
+   "file": "street_side_depth_ref_91.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 44.5
+  },
+  {
+   "file": "street_back_text_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "text",
+   "seed": 91,
+   "sec": 29.8
+  },
+  {
+   "file": "street_back_depth_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth",
+   "seed": 91,
+   "sec": 37.4
+  },
+  {
+   "file": "street_back_line_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "line",
+   "seed": 91,
+   "sec": 37.3
+  },
+  {
+   "file": "street_back_depth_ref_91.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 91,
+   "sec": 44.4
+  },
+  {
+   "file": "street_front_text_92.png",
+   "place": "street",
+   "view": "front",
+   "mode": "text",
+   "seed": 92,
+   "sec": 29.9
+  },
+  {
+   "file": "street_front_depth_92.png",
+   "place": "street",
+   "view": "front",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 36.5
+  },
+  {
+   "file": "street_front_line_92.png",
+   "place": "street",
+   "view": "front",
+   "mode": "line",
+   "seed": 92,
+   "sec": 42.5
+  },
+  {
+   "file": "street_side_text_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "text",
+   "seed": 92,
+   "sec": 34.0
+  },
+  {
+   "file": "street_side_depth_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 40.6
+  },
+  {
+   "file": "street_side_line_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "line",
+   "seed": 92,
+   "sec": 41.1
+  },
+  {
+   "file": "street_side_depth_ref_92.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 52.5
+  },
+  {
+   "file": "street_back_text_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "text",
+   "seed": 92,
+   "sec": 26.7
+  },
+  {
+   "file": "street_back_depth_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth",
+   "seed": 92,
+   "sec": 34.7
+  },
+  {
+   "file": "street_back_line_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "line",
+   "seed": 92,
+   "sec": 35.7
+  },
+  {
+   "file": "street_back_depth_ref_92.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 92,
+   "sec": 45.0
+  },
+  {
+   "file": "street_front_text_93.png",
+   "place": "street",
+   "view": "front",
+   "mode": "text",
+   "seed": 93,
+   "sec": 17.8
+  },
+  {
+   "file": "street_front_depth_93.png",
+   "place": "street",
+   "view": "front",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 28.4
+  },
+  {
+   "file": "street_front_line_93.png",
+   "place": "street",
+   "view": "front",
+   "mode": "line",
+   "seed": 93,
+   "sec": 25.2
+  },
+  {
+   "file": "street_side_text_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "text",
+   "seed": 93,
+   "sec": 16.1
+  },
+  {
+   "file": "street_side_depth_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 25.0
+  },
+  {
+   "file": "street_side_line_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "line",
+   "seed": 93,
+   "sec": 23.5
+  },
+  {
+   "file": "street_side_depth_ref_93.png",
+   "place": "street",
+   "view": "side",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 37.1
+  },
+  {
+   "file": "street_back_text_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "text",
+   "seed": 93,
+   "sec": 23.5
+  },
+  {
+   "file": "street_back_depth_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth",
+   "seed": 93,
+   "sec": 48.9
+  },
+  {
+   "file": "street_back_line_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "line",
+   "seed": 93,
+   "sec": 38.4
+  },
+  {
+   "file": "street_back_depth_ref_93.png",
+   "place": "street",
+   "view": "back",
+   "mode": "depth_ref",
+   "seed": 93,
+   "sec": 39.9
+  }
+ ]
+}

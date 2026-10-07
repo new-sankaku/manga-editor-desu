@@ -1,0 +1,278 @@
+{
+ "scenes": {
+  "walk": "walking, full body, street",
+  "desk": "sitting at desk, upper body, classroom",
+  "rain": "holding umbrella, rain, full body, street",
+  "eat": "eating bread, sitting, cafeteria, upper body",
+  "phone": "holding phone, upper body, bedroom",
+  "run": "running, full body, park",
+  "train": "sitting, train interior, upper body",
+  "night": "standing, night, city lights, cowboy shot"
+ },
+ "real": "realistic, photorealistic",
+ "light": {
+  "none": "",
+  "left": "sunlight, light from left, shadow",
+  "right": "sunlight, light from right, shadow"
+ },
+ "light_scene": "standing, upper body, classroom, window",
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "style_walk_91.png",
+   "kind": "style",
+   "scene": "walk",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, walking, full body, street",
+   "sec": 10.4
+  },
+  {
+   "file": "style_walk_92.png",
+   "kind": "style",
+   "scene": "walk",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, walking, full body, street",
+   "sec": 8.2
+  },
+  {
+   "file": "style_desk_91.png",
+   "kind": "style",
+   "scene": "desk",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 9.3
+  },
+  {
+   "file": "style_desk_92.png",
+   "kind": "style",
+   "scene": "desk",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 8.7
+  },
+  {
+   "file": "style_rain_91.png",
+   "kind": "style",
+   "scene": "rain",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, holding umbrella, rain, full body, street",
+   "sec": 9.7
+  },
+  {
+   "file": "style_rain_92.png",
+   "kind": "style",
+   "scene": "rain",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, holding umbrella, rain, full body, street",
+   "sec": 8.1
+  },
+  {
+   "file": "style_eat_91.png",
+   "kind": "style",
+   "scene": "eat",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "sec": 9.3
+  },
+  {
+   "file": "style_eat_92.png",
+   "kind": "style",
+   "scene": "eat",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "sec": 8.7
+  },
+  {
+   "file": "style_phone_91.png",
+   "kind": "style",
+   "scene": "phone",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, holding phone, upper body, bedroom",
+   "sec": 9.4
+  },
+  {
+   "file": "style_phone_92.png",
+   "kind": "style",
+   "scene": "phone",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, holding phone, upper body, bedroom",
+   "sec": 8.7
+  },
+  {
+   "file": "style_run_91.png",
+   "kind": "style",
+   "scene": "run",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, running, full body, park",
+   "sec": 9.4
+  },
+  {
+   "file": "style_run_92.png",
+   "kind": "style",
+   "scene": "run",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, running, full body, park",
+   "sec": 8.7
+  },
+  {
+   "file": "style_train_91.png",
+   "kind": "style",
+   "scene": "train",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting, train interior, upper body",
+   "sec": 9.3
+  },
+  {
+   "file": "style_train_92.png",
+   "kind": "style",
+   "scene": "train",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting, train interior, upper body",
+   "sec": 8.2
+  },
+  {
+   "file": "style_night_91.png",
+   "kind": "style",
+   "scene": "night",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, night, city lights, cowboy shot",
+   "sec": 9.4
+  },
+  {
+   "file": "style_night_92.png",
+   "kind": "style",
+   "scene": "night",
+   "seed": 92,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, night, city lights, cowboy shot",
+   "sec": 8.2
+  },
+  {
+   "file": "real_walk_91.png",
+   "kind": "real",
+   "scene": "walk",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, realistic, photorealistic, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, walking, full body, street",
+   "sec": 10.0
+  },
+  {
+   "file": "real_desk_91.png",
+   "kind": "real",
+   "scene": "desk",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, realistic, photorealistic, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, sitting at desk, upper body, classroom",
+   "sec": 10.0
+  },
+  {
+   "file": "real_eat_91.png",
+   "kind": "real",
+   "scene": "eat",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, realistic, photorealistic, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "sec": 10.0
+  },
+  {
+   "file": "real_night_91.png",
+   "kind": "real",
+   "scene": "night",
+   "seed": 91,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, realistic, photorealistic, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, night, city lights, cowboy shot",
+   "sec": 10.2
+  },
+  {
+   "file": "light_none_95.png",
+   "kind": "light",
+   "light": "none",
+   "seed": 95,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window",
+   "sec": 11.1
+  },
+  {
+   "file": "light_none_96.png",
+   "kind": "light",
+   "light": "none",
+   "seed": 96,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window",
+   "sec": 10.7
+  },
+  {
+   "file": "light_none_97.png",
+   "kind": "light",
+   "light": "none",
+   "seed": 97,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window",
+   "sec": 10.5
+  },
+  {
+   "file": "light_none_98.png",
+   "kind": "light",
+   "light": "none",
+   "seed": 98,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window",
+   "sec": 10.4
+  },
+  {
+   "file": "light_left_95.png",
+   "kind": "light",
+   "light": "left",
+   "seed": 95,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from left, shadow",
+   "sec": 8.3
+  },
+  {
+   "file": "light_left_96.png",
+   "kind": "light",
+   "light": "left",
+   "seed": 96,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from left, shadow",
+   "sec": 8.5
+  },
+  {
+   "file": "light_left_97.png",
+   "kind": "light",
+   "light": "left",
+   "seed": 97,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from left, shadow",
+   "sec": 7.7
+  },
+  {
+   "file": "light_left_98.png",
+   "kind": "light",
+   "light": "left",
+   "seed": 98,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from left, shadow",
+   "sec": 7.5
+  },
+  {
+   "file": "light_right_95.png",
+   "kind": "light",
+   "light": "right",
+   "seed": 95,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from right, shadow",
+   "sec": 7.2
+  },
+  {
+   "file": "light_right_96.png",
+   "kind": "light",
+   "light": "right",
+   "seed": 96,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from right, shadow",
+   "sec": 8.1
+  },
+  {
+   "file": "light_right_97.png",
+   "kind": "light",
+   "light": "right",
+   "seed": 97,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from right, shadow",
+   "sec": 7.7
+  },
+  {
+   "file": "light_right_98.png",
+   "kind": "light",
+   "light": "right",
+   "seed": 98,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, standing, upper body, classroom, window, sunlight, light from right, shadow",
+   "sec": 8.3
+  }
+ ]
+}

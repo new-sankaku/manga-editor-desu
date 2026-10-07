@@ -1,0 +1,313 @@
+{
+ "deform": "chibi, super deformed, full body, standing, classroom",
+ "normal": "full body, standing, classroom",
+ "ref_scene": "eating bread, sitting, cafeteria, upper body",
+ "blur": {
+  "scale": 0.25,
+  "radius": 3
+ },
+ "ipa_weight": 0.5,
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "runs": [
+  {
+   "file": "a_deform_81.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, chibi, super deformed, full body, standing, classroom",
+   "sec": 8.2
+  },
+  {
+   "file": "a_deform_82.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, chibi, super deformed, full body, standing, classroom",
+   "sec": 8.5
+  },
+  {
+   "file": "a_deform_83.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.7
+  },
+  {
+   "file": "a_deform_84.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 84,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, chibi, super deformed, full body, standing, classroom",
+   "sec": 8.5
+  },
+  {
+   "file": "a_deform_85.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 85,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, chibi, super deformed, full body, standing, classroom",
+   "sec": 8.2
+  },
+  {
+   "file": "a_deform_86.png",
+   "chara": "a",
+   "mode": "deform",
+   "seed": 86,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, chibi, super deformed, full body, standing, classroom",
+   "sec": 8.9
+  },
+  {
+   "file": "a_normal_81.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, full body, standing, classroom",
+   "sec": 8.2
+  },
+  {
+   "file": "a_normal_82.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, full body, standing, classroom",
+   "sec": 8.5
+  },
+  {
+   "file": "a_normal_83.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, full body, standing, classroom",
+   "sec": 7.7
+  },
+  {
+   "file": "a_normal_84.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 84,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, full body, standing, classroom",
+   "sec": 8.5
+  },
+  {
+   "file": "a_normal_85.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 85,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, full body, standing, classroom",
+   "sec": 7.7
+  },
+  {
+   "file": "a_normal_86.png",
+   "chara": "a",
+   "mode": "normal",
+   "seed": 86,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, full body, standing, classroom",
+   "sec": 8.5
+  },
+  {
+   "file": "a_refclean_81.png",
+   "chara": "a",
+   "mode": "refclean",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_a.png",
+   "sec": 23.1
+  },
+  {
+   "file": "a_refclean_82.png",
+   "chara": "a",
+   "mode": "refclean",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_a.png",
+   "sec": 10.0
+  },
+  {
+   "file": "a_refclean_83.png",
+   "chara": "a",
+   "mode": "refclean",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_a.png",
+   "sec": 10.1
+  },
+  {
+   "file": "a_refblur_81.png",
+   "chara": "a",
+   "mode": "refblur",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_a_blur.png",
+   "sec": 13.2
+  },
+  {
+   "file": "a_refblur_82.png",
+   "chara": "a",
+   "mode": "refblur",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_a_blur.png",
+   "sec": 10.1
+  },
+  {
+   "file": "a_refblur_83.png",
+   "chara": "a",
+   "mode": "refblur",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1girl, solo, white hair, long hair, twin braids, red eyes, freckles, star hair ornament, black hoodie, choker, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_a_blur.png",
+   "sec": 10.0
+  },
+  {
+   "file": "b_deform_81.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "b_deform_82.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "b_deform_83.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "b_deform_84.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 84,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.5
+  },
+  {
+   "file": "b_deform_85.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 85,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "b_deform_86.png",
+   "chara": "b",
+   "mode": "deform",
+   "seed": 86,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, chibi, super deformed, full body, standing, classroom",
+   "sec": 7.3
+  },
+  {
+   "file": "b_normal_81.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, full body, standing, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "b_normal_82.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, full body, standing, classroom",
+   "sec": 7.4
+  },
+  {
+   "file": "b_normal_83.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, full body, standing, classroom",
+   "sec": 6.7
+  },
+  {
+   "file": "b_normal_84.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 84,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, full body, standing, classroom",
+   "sec": 7.3
+  },
+  {
+   "file": "b_normal_85.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 85,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, full body, standing, classroom",
+   "sec": 6.7
+  },
+  {
+   "file": "b_normal_86.png",
+   "chara": "b",
+   "mode": "normal",
+   "seed": 86,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, full body, standing, classroom",
+   "sec": 7.2
+  },
+  {
+   "file": "b_refclean_81.png",
+   "chara": "b",
+   "mode": "refclean",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_b.png",
+   "sec": 14.0
+  },
+  {
+   "file": "b_refclean_82.png",
+   "chara": "b",
+   "mode": "refclean",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_b.png",
+   "sec": 10.1
+  },
+  {
+   "file": "b_refclean_83.png",
+   "chara": "b",
+   "mode": "refclean",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_b.png",
+   "sec": 11.6
+  },
+  {
+   "file": "b_refblur_81.png",
+   "chara": "b",
+   "mode": "refblur",
+   "seed": 81,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_b_blur.png",
+   "sec": 18.8
+  },
+  {
+   "file": "b_refblur_82.png",
+   "chara": "b",
+   "mode": "refblur",
+   "seed": 82,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_b_blur.png",
+   "sec": 13.8
+  },
+  {
+   "file": "b_refblur_83.png",
+   "chara": "b",
+   "mode": "refblur",
+   "seed": 83,
+   "prompt": "masterpiece, best quality, manga, monochrome, greyscale, screentone, 1boy, solo, messy hair, brown hair, short hair, scar on cheek, eyepatch, green jacket, white shirt, eating bread, sitting, cafeteria, upper body",
+   "ref": "v3poc_p24_ref_b_blur.png",
+   "sec": 13.9
+  }
+ ]
+}

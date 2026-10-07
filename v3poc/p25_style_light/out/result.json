@@ -1,0 +1,63 @@
+{
+ "real_score_style_mean": 0.024,
+ "real_score_style_max": 0.056,
+ "real_score_realistic_words": {
+  "real_desk_91.png": 0.019,
+  "real_eat_91.png": 0.011,
+  "real_night_91.png": 0.015,
+  "real_walk_91.png": 0.009
+ },
+ "csd": {
+  "light": {
+   "n": 12,
+   "within_mean": 0.945,
+   "nearest_p15_style": {
+    "color": 0,
+    "pen": 0,
+    "retro": 0,
+    "tone": 12
+   }
+  },
+  "real": {
+   "n": 4,
+   "within_mean": 0.768,
+   "nearest_p15_style": {
+    "color": 0,
+    "pen": 0,
+    "retro": 0,
+    "tone": 4
+   }
+  },
+  "style": {
+   "n": 16,
+   "within_mean": 0.802,
+   "nearest_p15_style": {
+    "color": 0,
+    "pen": 0,
+    "retro": 0,
+    "tone": 16
+   }
+  },
+  "style_to_real_mean": 0.754
+ },
+ "light": {
+  "none": {
+   "left": 2,
+   "right": 0,
+   "none": 0,
+   "unclear": 2
+  },
+  "left": {
+   "left": 2,
+   "right": 2,
+   "none": 0,
+   "unclear": 0
+  },
+  "right": {
+   "left": 3,
+   "right": 1,
+   "none": 0,
+   "unclear": 0
+  }
+ }
+}

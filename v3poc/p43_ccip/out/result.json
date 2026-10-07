@@ -1,0 +1,360 @@
+{
+ "threshold": 0.17847511429108218,
+ "counts": {
+  "p17_a": 9,
+  "p17_b": 9,
+  "p02_girl": 16,
+  "p16_girl": 30,
+  "p16_boy": 30,
+  "p16_old": 30,
+  "p21_f1": 18,
+  "p21_m1": 18,
+  "p21_f2": 18,
+  "p21_m2": 18
+ },
+ "same_rate": {
+  "p17_a|p17_a": {
+   "same": 1.0,
+   "median_diff": 0.046
+  },
+  "p17_a|p17_b": {
+   "same": 0.0,
+   "median_diff": 0.473
+  },
+  "p17_a|p02_girl": {
+   "same": 0.0,
+   "median_diff": 0.414
+  },
+  "p17_a|p16_girl": {
+   "same": 0.0,
+   "median_diff": 0.402
+  },
+  "p17_a|p16_boy": {
+   "same": 0.0,
+   "median_diff": 0.422
+  },
+  "p17_a|p16_old": {
+   "same": 0.015,
+   "median_diff": 0.349
+  },
+  "p17_a|p21_f1": {
+   "same": 0.0,
+   "median_diff": 0.432
+  },
+  "p17_a|p21_m1": {
+   "same": 0.0,
+   "median_diff": 0.44
+  },
+  "p17_a|p21_f2": {
+   "same": 0.0,
+   "median_diff": 0.442
+  },
+  "p17_a|p21_m2": {
+   "same": 0.0,
+   "median_diff": 0.449
+  },
+  "p17_b|p17_b": {
+   "same": 1.0,
+   "median_diff": 0.043
+  },
+  "p17_b|p02_girl": {
+   "same": 0.0,
+   "median_diff": 0.385
+  },
+  "p17_b|p16_girl": {
+   "same": 0.026,
+   "median_diff": 0.275
+  },
+  "p17_b|p16_boy": {
+   "same": 0.078,
+   "median_diff": 0.256
+  },
+  "p17_b|p16_old": {
+   "same": 0.081,
+   "median_diff": 0.249
+  },
+  "p17_b|p21_f1": {
+   "same": 0.0,
+   "median_diff": 0.377
+  },
+  "p17_b|p21_m1": {
+   "same": 0.679,
+   "median_diff": 0.145
+  },
+  "p17_b|p21_f2": {
+   "same": 0.0,
+   "median_diff": 0.374
+  },
+  "p17_b|p21_m2": {
+   "same": 0.235,
+   "median_diff": 0.279
+  },
+  "p02_girl|p02_girl": {
+   "same": 1.0,
+   "median_diff": 0.042
+  },
+  "p02_girl|p16_girl": {
+   "same": 0.475,
+   "median_diff": 0.185
+  },
+  "p02_girl|p16_boy": {
+   "same": 0.196,
+   "median_diff": 0.221
+  },
+  "p02_girl|p16_old": {
+   "same": 0.0,
+   "median_diff": 0.327
+  },
+  "p02_girl|p21_f1": {
+   "same": 0.944,
+   "median_diff": 0.114
+  },
+  "p02_girl|p21_m1": {
+   "same": 0.021,
+   "median_diff": 0.298
+  },
+  "p02_girl|p21_f2": {
+   "same": 0.372,
+   "median_diff": 0.187
+  },
+  "p02_girl|p21_m2": {
+   "same": 0.0,
+   "median_diff": 0.309
+  },
+  "p16_girl|p16_girl": {
+   "same": 0.791,
+   "median_diff": 0.126
+  },
+  "p16_girl|p16_boy": {
+   "same": 0.727,
+   "median_diff": 0.139
+  },
+  "p16_girl|p16_old": {
+   "same": 0.396,
+   "median_diff": 0.208
+  },
+  "p16_girl|p21_f1": {
+   "same": 0.448,
+   "median_diff": 0.194
+  },
+  "p16_girl|p21_m1": {
+   "same": 0.206,
+   "median_diff": 0.221
+  },
+  "p16_girl|p21_f2": {
+   "same": 0.196,
+   "median_diff": 0.204
+  },
+  "p16_girl|p21_m2": {
+   "same": 0.1,
+   "median_diff": 0.244
+  },
+  "p16_boy|p16_boy": {
+   "same": 0.789,
+   "median_diff": 0.131
+  },
+  "p16_boy|p16_old": {
+   "same": 0.384,
+   "median_diff": 0.207
+  },
+  "p16_boy|p21_f1": {
+   "same": 0.357,
+   "median_diff": 0.197
+  },
+  "p16_boy|p21_m1": {
+   "same": 0.446,
+   "median_diff": 0.188
+  },
+  "p16_boy|p21_f2": {
+   "same": 0.196,
+   "median_diff": 0.214
+  },
+  "p16_boy|p21_m2": {
+   "same": 0.204,
+   "median_diff": 0.232
+  },
+  "p16_old|p16_old": {
+   "same": 0.733,
+   "median_diff": 0.126
+  },
+  "p16_old|p21_f1": {
+   "same": 0.0,
+   "median_diff": 0.349
+  },
+  "p16_old|p21_m1": {
+   "same": 0.052,
+   "median_diff": 0.251
+  },
+  "p16_old|p21_f2": {
+   "same": 0.0,
+   "median_diff": 0.301
+  },
+  "p16_old|p21_m2": {
+   "same": 0.27,
+   "median_diff": 0.22
+  },
+  "p21_f1|p21_f1": {
+   "same": 0.993,
+   "median_diff": 0.065
+  },
+  "p21_f1|p21_m1": {
+   "same": 0.154,
+   "median_diff": 0.245
+  },
+  "p21_f1|p21_f2": {
+   "same": 0.361,
+   "median_diff": 0.193
+  },
+  "p21_f1|p21_m2": {
+   "same": 0.0,
+   "median_diff": 0.333
+  },
+  "p21_m1|p21_m1": {
+   "same": 1.0,
+   "median_diff": 0.047
+  },
+  "p21_m1|p21_f2": {
+   "same": 0.006,
+   "median_diff": 0.286
+  },
+  "p21_m1|p21_m2": {
+   "same": 0.33,
+   "median_diff": 0.212
+  },
+  "p21_f2|p21_f2": {
+   "same": 1.0,
+   "median_diff": 0.049
+  },
+  "p21_f2|p21_m2": {
+   "same": 0.151,
+   "median_diff": 0.267
+  },
+  "p21_m2|p21_m2": {
+   "same": 0.719,
+   "median_diff": 0.152
+  }
+ },
+ "cross_same_pairs": 3927,
+ "cross_same_examples": [
+  {
+   "diff": 0.013,
+   "a": "p16_boy/long_yoko_boy_street_82.png",
+   "b": "p16_old/long_yoko_old_street_82.png"
+  },
+  {
+   "diff": 0.014,
+   "a": "p16_girl/long_yoko_girl_rural_81.png",
+   "b": "p16_old/long_yoko_old_rural_81.png"
+  },
+  {
+   "diff": 0.019,
+   "a": "p02_girl/upper_body_1002.png",
+   "b": "p16_girl/chara_only_girl_none_82.png"
+  },
+  {
+   "diff": 0.022,
+   "a": "p16_boy/long_yoko_boy_room_82.png",
+   "b": "p16_old/long_yoko_old_room_83.png"
+  },
+  {
+   "diff": 0.022,
+   "a": "p16_girl/long_tate_girl_rural_82.png",
+   "b": "p16_boy/long_tate_boy_rural_82.png"
+  },
+  {
+   "diff": 0.023,
+   "a": "p16_girl/long_yoko_girl_street_83.png",
+   "b": "p16_boy/long_yoko_boy_street_83.png"
+  },
+  {
+   "diff": 0.023,
+   "a": "p21_m1/m1_write_53.png",
+   "b": "p21_m2/m2_cup_53.png"
+  },
+  {
+   "diff": 0.026,
+   "a": "p02_girl/upper_body_1007.png",
+   "b": "p16_girl/chara_only_girl_none_82.png"
+  },
+  {
+   "diff": 0.028,
+   "a": "p02_girl/upper_body_1001.png",
+   "b": "p16_girl/chara_only_girl_none_82.png"
+  },
+  {
+   "diff": 0.028,
+   "a": "p16_boy/long_yoko_boy_street_82.png",
+   "b": "p16_old/long_yoko_old_street_81.png"
+  },
+  {
+   "diff": 0.029,
+   "a": "p02_girl/upper_body_1003.png",
+   "b": "p16_girl/chara_only_girl_none_82.png"
+  },
+  {
+   "diff": 0.03,
+   "a": "p16_girl/long_yoko_girl_rural_82.png",
+   "b": "p16_boy/long_yoko_boy_rural_81.png"
+  },
+  {
+   "diff": 0.03,
+   "a": "p16_girl/long_yoko_girl_room_83.png",
+   "b": "p16_boy/long_yoko_boy_room_83.png"
+  },
+  {
+   "diff": 0.03,
+   "a": "p16_girl/full_std_girl_street_82.png",
+   "b": "p16_boy/full_std_boy_street_81.png"
+  },
+  {
+   "diff": 0.03,
+   "a": "p02_girl/upper_body_1006.png",
+   "b": "p16_girl/chara_only_girl_none_82.png"
+  },
+  {
+   "diff": 0.031,
+   "a": "p16_girl/long_yoko_girl_street_81.png",
+   "b": "p16_boy/long_yoko_boy_rural_81.png"
+  },
+  {
+   "diff": 0.031,
+   "a": "p21_m1/m1_cup_53.png",
+   "b": "p21_m2/m2_cup_53.png"
+  },
+  {
+   "diff": 0.032,
+   "a": "p21_m1/m1_point_53.png",
+   "b": "p21_m2/m2_phone_53.png"
+  },
+  {
+   "diff": 0.033,
+   "a": "p16_boy/long_yoko_boy_room_81.png",
+   "b": "p16_old/long_yoko_old_room_81.png"
+  },
+  {
+   "diff": 0.033,
+   "a": "p02_girl/upper_body_1001.png",
+   "b": "p16_girl/chara_only_girl_none_81.png"
+  },
+  {
+   "diff": 0.033,
+   "a": "p16_boy/long_tate_boy_street_83.png",
+   "b": "p16_old/long_tate_old_street_82.png"
+  },
+  {
+   "diff": 0.034,
+   "a": "p21_m1/m1_point_51.png",
+   "b": "p21_m2/m2_phone_53.png"
+  },
+  {
+   "diff": 0.034,
+   "a": "p02_girl/close_up_1007.png",
+   "b": "p16_girl/chara_only_girl_none_82.png"
+  },
+  {
+   "diff": 0.034,
+   "a": "p02_girl/upper_body_1002.png",
+   "b": "p16_girl/chara_only_girl_none_81.png"
+  }
+ ]
+}

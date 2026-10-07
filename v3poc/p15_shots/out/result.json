@@ -1,0 +1,1294 @@
+{
+ "summary": {
+  "long_yoko/tone": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.378,
+    0.549,
+    0.411
+   ],
+   "sec": 6.7
+  },
+  "long_yoko/pen": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.377,
+    0.566,
+    0.286
+   ],
+   "sec": 13.7
+  },
+  "long_yoko/retro": {
+   "persons": [
+    1,
+    1,
+    2
+   ],
+   "h_ratio": [
+    0.467,
+    0.359,
+    0.571
+   ],
+   "sec": 17.2
+  },
+  "long_yoko/color": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.51,
+    0.502,
+    0.347
+   ],
+   "sec": 19.4
+  },
+  "long_tate/tone": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.324,
+    0.174,
+    0.23
+   ],
+   "sec": 6.7
+  },
+  "long_tate/pen": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.315,
+    0.292,
+    0.326
+   ],
+   "sec": 20.7
+  },
+  "long_tate/retro": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.316,
+    0.285,
+    0.248
+   ],
+   "sec": 13.8
+  },
+  "long_tate/color": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.329,
+    0.285,
+    0.242
+   ],
+   "sec": 17.5
+  },
+  "full_std/tone": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.523,
+    0.42,
+    0.425
+   ],
+   "sec": 20.3
+  },
+  "full_std/pen": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.508,
+    0.431,
+    0.555
+   ],
+   "sec": 15.1
+  },
+  "full_std/retro": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.575,
+    0.499,
+    0.838
+   ],
+   "sec": 21.9
+  },
+  "full_std/color": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.577,
+    0.465,
+    0.5
+   ],
+   "sec": 15.5
+  },
+  "chara_only/tone": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.928,
+    0.998,
+    0.997
+   ],
+   "sec": 31.0
+  },
+  "chara_only/pen": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.998,
+    0.998,
+    0.993
+   ],
+   "sec": 19.4
+  },
+  "chara_only/retro": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.997,
+    0.999,
+    0.996
+   ],
+   "sec": 18.4
+  },
+  "chara_only/color": {
+   "persons": [
+    1,
+    1,
+    1
+   ],
+   "h_ratio": [
+    0.919,
+    0.997,
+    0.987
+   ],
+   "sec": 26.5
+  },
+  "bg_yoko/tone": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 14.9
+  },
+  "bg_yoko/pen": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 18.6
+  },
+  "bg_yoko/retro": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 18.0
+  },
+  "bg_yoko/color": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 15.4
+  },
+  "bg_tate/tone": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 21.3
+  },
+  "bg_tate/pen": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 14.2
+  },
+  "bg_tate/retro": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 21.2
+  },
+  "bg_tate/color": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 7.3
+  },
+  "bg_std/tone": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 18.0
+  },
+  "bg_std/pen": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 20.8
+  },
+  "bg_std/retro": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 16.2
+  },
+  "bg_std/color": {
+   "persons": [
+    0,
+    0,
+    0
+   ],
+   "h_ratio": [
+    null,
+    null,
+    null
+   ],
+   "sec": 8.9
+  }
+ },
+ "rows": [
+  {
+   "file": "tone_long_yoko_71.png",
+   "style": "tone",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 7.4,
+   "persons": 1,
+   "h_ratio": 0.378,
+   "area_ratio": 0.029,
+   "touch": ""
+  },
+  {
+   "file": "tone_long_yoko_72.png",
+   "style": "tone",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 6.2,
+   "persons": 1,
+   "h_ratio": 0.549,
+   "area_ratio": 0.063,
+   "touch": ""
+  },
+  {
+   "file": "tone_long_yoko_73.png",
+   "style": "tone",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 6.6,
+   "persons": 1,
+   "h_ratio": 0.411,
+   "area_ratio": 0.038,
+   "touch": ""
+  },
+  {
+   "file": "tone_long_tate_71.png",
+   "style": "tone",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 6.3,
+   "persons": 1,
+   "h_ratio": 0.324,
+   "area_ratio": 0.075,
+   "touch": ""
+  },
+  {
+   "file": "tone_long_tate_72.png",
+   "style": "tone",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 7.0,
+   "persons": 1,
+   "h_ratio": 0.174,
+   "area_ratio": 0.024,
+   "touch": ""
+  },
+  {
+   "file": "tone_long_tate_73.png",
+   "style": "tone",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 6.7,
+   "persons": 1,
+   "h_ratio": 0.23,
+   "area_ratio": 0.052,
+   "touch": "B"
+  },
+  {
+   "file": "tone_full_std_71.png",
+   "style": "tone",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 14.4,
+   "persons": 1,
+   "h_ratio": 0.523,
+   "area_ratio": 0.094,
+   "touch": ""
+  },
+  {
+   "file": "tone_full_std_72.png",
+   "style": "tone",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 13.8,
+   "persons": 1,
+   "h_ratio": 0.42,
+   "area_ratio": 0.054,
+   "touch": ""
+  },
+  {
+   "file": "tone_full_std_73.png",
+   "style": "tone",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 32.8,
+   "persons": 1,
+   "h_ratio": 0.425,
+   "area_ratio": 0.052,
+   "touch": ""
+  },
+  {
+   "file": "tone_chara_only_71.png",
+   "style": "tone",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 31.5,
+   "persons": 1,
+   "h_ratio": 0.928,
+   "area_ratio": 0.349,
+   "touch": ""
+  },
+  {
+   "file": "tone_chara_only_72.png",
+   "style": "tone",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 38.8,
+   "persons": 1,
+   "h_ratio": 0.998,
+   "area_ratio": 0.422,
+   "touch": "TB"
+  },
+  {
+   "file": "tone_chara_only_73.png",
+   "style": "tone",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 22.7,
+   "persons": 1,
+   "h_ratio": 0.997,
+   "area_ratio": 0.432,
+   "touch": "B"
+  },
+  {
+   "file": "tone_bg_yoko_71.png",
+   "style": "tone",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 15.1,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_yoko_72.png",
+   "style": "tone",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 15.5,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_yoko_73.png",
+   "style": "tone",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 14.0,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_tate_71.png",
+   "style": "tone",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 13.9,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_tate_72.png",
+   "style": "tone",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 24.2,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_tate_73.png",
+   "style": "tone",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 25.8,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_std_71.png",
+   "style": "tone",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 23.7,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_std_72.png",
+   "style": "tone",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 15.0,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "tone_bg_std_73.png",
+   "style": "tone",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 15.3,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_long_yoko_71.png",
+   "style": "pen",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 15.0,
+   "persons": 1,
+   "h_ratio": 0.377,
+   "area_ratio": 0.031,
+   "touch": ""
+  },
+  {
+   "file": "pen_long_yoko_72.png",
+   "style": "pen",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 13.3,
+   "persons": 1,
+   "h_ratio": 0.566,
+   "area_ratio": 0.067,
+   "touch": ""
+  },
+  {
+   "file": "pen_long_yoko_73.png",
+   "style": "pen",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 12.8,
+   "persons": 1,
+   "h_ratio": 0.286,
+   "area_ratio": 0.024,
+   "touch": ""
+  },
+  {
+   "file": "pen_long_tate_71.png",
+   "style": "pen",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 20.4,
+   "persons": 1,
+   "h_ratio": 0.315,
+   "area_ratio": 0.074,
+   "touch": ""
+  },
+  {
+   "file": "pen_long_tate_72.png",
+   "style": "pen",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 20.9,
+   "persons": 1,
+   "h_ratio": 0.292,
+   "area_ratio": 0.065,
+   "touch": ""
+  },
+  {
+   "file": "pen_long_tate_73.png",
+   "style": "pen",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 20.7,
+   "persons": 1,
+   "h_ratio": 0.326,
+   "area_ratio": 0.079,
+   "touch": ""
+  },
+  {
+   "file": "pen_full_std_71.png",
+   "style": "pen",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 15.2,
+   "persons": 1,
+   "h_ratio": 0.508,
+   "area_ratio": 0.082,
+   "touch": ""
+  },
+  {
+   "file": "pen_full_std_72.png",
+   "style": "pen",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 15.1,
+   "persons": 1,
+   "h_ratio": 0.431,
+   "area_ratio": 0.061,
+   "touch": ""
+  },
+  {
+   "file": "pen_full_std_73.png",
+   "style": "pen",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 15.1,
+   "persons": 1,
+   "h_ratio": 0.555,
+   "area_ratio": 0.095,
+   "touch": ""
+  },
+  {
+   "file": "pen_chara_only_71.png",
+   "style": "pen",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 17.1,
+   "persons": 1,
+   "h_ratio": 0.998,
+   "area_ratio": 0.405,
+   "touch": "TB"
+  },
+  {
+   "file": "pen_chara_only_72.png",
+   "style": "pen",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 16.5,
+   "persons": 1,
+   "h_ratio": 0.998,
+   "area_ratio": 0.434,
+   "touch": "TB"
+  },
+  {
+   "file": "pen_chara_only_73.png",
+   "style": "pen",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 24.5,
+   "persons": 1,
+   "h_ratio": 0.993,
+   "area_ratio": 0.427,
+   "touch": "B"
+  },
+  {
+   "file": "pen_bg_yoko_71.png",
+   "style": "pen",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 20.9,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_yoko_72.png",
+   "style": "pen",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 20.5,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_yoko_73.png",
+   "style": "pen",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 14.3,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_tate_71.png",
+   "style": "pen",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 14.4,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_tate_72.png",
+   "style": "pen",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 14.5,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_tate_73.png",
+   "style": "pen",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 13.6,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_std_71.png",
+   "style": "pen",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 14.2,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_std_72.png",
+   "style": "pen",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 22.0,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "pen_bg_std_73.png",
+   "style": "pen",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 26.1,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_long_yoko_71.png",
+   "style": "retro",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 21.8,
+   "persons": 1,
+   "h_ratio": 0.467,
+   "area_ratio": 0.046,
+   "touch": ""
+  },
+  {
+   "file": "retro_long_yoko_72.png",
+   "style": "retro",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 14.6,
+   "persons": 1,
+   "h_ratio": 0.359,
+   "area_ratio": 0.031,
+   "touch": ""
+  },
+  {
+   "file": "retro_long_yoko_73.png",
+   "style": "retro",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 15.1,
+   "persons": 2,
+   "h_ratio": 0.571,
+   "area_ratio": 0.067,
+   "touch": "B"
+  },
+  {
+   "file": "retro_long_tate_71.png",
+   "style": "retro",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 14.3,
+   "persons": 1,
+   "h_ratio": 0.316,
+   "area_ratio": 0.075,
+   "touch": ""
+  },
+  {
+   "file": "retro_long_tate_72.png",
+   "style": "retro",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 13.8,
+   "persons": 1,
+   "h_ratio": 0.285,
+   "area_ratio": 0.064,
+   "touch": ""
+  },
+  {
+   "file": "retro_long_tate_73.png",
+   "style": "retro",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 13.3,
+   "persons": 1,
+   "h_ratio": 0.248,
+   "area_ratio": 0.043,
+   "touch": "B"
+  },
+  {
+   "file": "retro_full_std_71.png",
+   "style": "retro",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 22.1,
+   "persons": 1,
+   "h_ratio": 0.575,
+   "area_ratio": 0.098,
+   "touch": ""
+  },
+  {
+   "file": "retro_full_std_72.png",
+   "style": "retro",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 21.9,
+   "persons": 1,
+   "h_ratio": 0.499,
+   "area_ratio": 0.082,
+   "touch": ""
+  },
+  {
+   "file": "retro_full_std_73.png",
+   "style": "retro",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 21.7,
+   "persons": 1,
+   "h_ratio": 0.838,
+   "area_ratio": 0.197,
+   "touch": ""
+  },
+  {
+   "file": "retro_chara_only_71.png",
+   "style": "retro",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 18.8,
+   "persons": 1,
+   "h_ratio": 0.997,
+   "area_ratio": 0.435,
+   "touch": "B"
+  },
+  {
+   "file": "retro_chara_only_72.png",
+   "style": "retro",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 18.2,
+   "persons": 1,
+   "h_ratio": 0.999,
+   "area_ratio": 0.41,
+   "touch": "TB"
+  },
+  {
+   "file": "retro_chara_only_73.png",
+   "style": "retro",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 18.2,
+   "persons": 1,
+   "h_ratio": 0.996,
+   "area_ratio": 0.444,
+   "touch": "B"
+  },
+  {
+   "file": "retro_bg_yoko_71.png",
+   "style": "retro",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 14.6,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_yoko_72.png",
+   "style": "retro",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 14.3,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_yoko_73.png",
+   "style": "retro",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 25.1,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_tate_71.png",
+   "style": "retro",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 24.1,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_tate_72.png",
+   "style": "retro",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 24.0,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_tate_73.png",
+   "style": "retro",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 15.6,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_std_71.png",
+   "style": "retro",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 15.7,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_std_72.png",
+   "style": "retro",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 17.3,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "retro_bg_std_73.png",
+   "style": "retro",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 15.6,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_long_yoko_71.png",
+   "style": "color",
+   "target": "long_yoko",
+   "seed": 71,
+   "sec": 13.8,
+   "persons": 1,
+   "h_ratio": 0.51,
+   "area_ratio": 0.047,
+   "touch": ""
+  },
+  {
+   "file": "color_long_yoko_72.png",
+   "style": "color",
+   "target": "long_yoko",
+   "seed": 72,
+   "sec": 22.0,
+   "persons": 1,
+   "h_ratio": 0.502,
+   "area_ratio": 0.058,
+   "touch": ""
+  },
+  {
+   "file": "color_long_yoko_73.png",
+   "style": "color",
+   "target": "long_yoko",
+   "seed": 73,
+   "sec": 22.3,
+   "persons": 1,
+   "h_ratio": 0.347,
+   "area_ratio": 0.029,
+   "touch": ""
+  },
+  {
+   "file": "color_long_tate_71.png",
+   "style": "color",
+   "target": "long_tate",
+   "seed": 71,
+   "sec": 22.7,
+   "persons": 1,
+   "h_ratio": 0.329,
+   "area_ratio": 0.075,
+   "touch": "B"
+  },
+  {
+   "file": "color_long_tate_72.png",
+   "style": "color",
+   "target": "long_tate",
+   "seed": 72,
+   "sec": 15.4,
+   "persons": 1,
+   "h_ratio": 0.285,
+   "area_ratio": 0.053,
+   "touch": ""
+  },
+  {
+   "file": "color_long_tate_73.png",
+   "style": "color",
+   "target": "long_tate",
+   "seed": 73,
+   "sec": 14.5,
+   "persons": 1,
+   "h_ratio": 0.242,
+   "area_ratio": 0.042,
+   "touch": "B"
+  },
+  {
+   "file": "color_full_std_71.png",
+   "style": "color",
+   "target": "full_std",
+   "seed": 71,
+   "sec": 16.8,
+   "persons": 1,
+   "h_ratio": 0.577,
+   "area_ratio": 0.096,
+   "touch": ""
+  },
+  {
+   "file": "color_full_std_72.png",
+   "style": "color",
+   "target": "full_std",
+   "seed": 72,
+   "sec": 15.3,
+   "persons": 1,
+   "h_ratio": 0.465,
+   "area_ratio": 0.066,
+   "touch": ""
+  },
+  {
+   "file": "color_full_std_73.png",
+   "style": "color",
+   "target": "full_std",
+   "seed": 73,
+   "sec": 14.5,
+   "persons": 1,
+   "h_ratio": 0.5,
+   "area_ratio": 0.079,
+   "touch": ""
+  },
+  {
+   "file": "color_chara_only_71.png",
+   "style": "color",
+   "target": "chara_only",
+   "seed": 71,
+   "sec": 26.1,
+   "persons": 1,
+   "h_ratio": 0.919,
+   "area_ratio": 0.357,
+   "touch": ""
+  },
+  {
+   "file": "color_chara_only_72.png",
+   "style": "color",
+   "target": "chara_only",
+   "seed": 72,
+   "sec": 27.1,
+   "persons": 1,
+   "h_ratio": 0.997,
+   "area_ratio": 0.414,
+   "touch": "B"
+  },
+  {
+   "file": "color_chara_only_73.png",
+   "style": "color",
+   "target": "chara_only",
+   "seed": 73,
+   "sec": 26.4,
+   "persons": 1,
+   "h_ratio": 0.987,
+   "area_ratio": 0.407,
+   "touch": "B"
+  },
+  {
+   "file": "color_bg_yoko_71.png",
+   "style": "color",
+   "target": "bg_yoko",
+   "seed": 71,
+   "sec": 15.4,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_yoko_72.png",
+   "style": "color",
+   "target": "bg_yoko",
+   "seed": 72,
+   "sec": 14.6,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_yoko_73.png",
+   "style": "color",
+   "target": "bg_yoko",
+   "seed": 73,
+   "sec": 16.1,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_tate_71.png",
+   "style": "color",
+   "target": "bg_tate",
+   "seed": 71,
+   "sec": 6.7,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_tate_72.png",
+   "style": "color",
+   "target": "bg_tate",
+   "seed": 72,
+   "sec": 7.5,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_tate_73.png",
+   "style": "color",
+   "target": "bg_tate",
+   "seed": 73,
+   "sec": 7.7,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_std_71.png",
+   "style": "color",
+   "target": "bg_std",
+   "seed": 71,
+   "sec": 9.2,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_std_72.png",
+   "style": "color",
+   "target": "bg_std",
+   "seed": 72,
+   "sec": 8.7,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  },
+  {
+   "file": "color_bg_std_73.png",
+   "style": "color",
+   "target": "bg_std",
+   "seed": 73,
+   "sec": 8.8,
+   "persons": 0,
+   "h_ratio": null,
+   "area_ratio": null,
+   "touch": null
+  }
+ ]
+}

@@ -1,0 +1,18 @@
+{
+ "note": "目で見た判定。新しい絵は作っていない（画像生成は止めた）。P02 の全身8枚・P16 の標準の形の全身（狙いどおりの絵）・P24 の通常の全身12枚の計47枚から、顔と手を検出して原寸から切り出した。",
+ "faces": {
+  "detected": 44,
+  "face_100px_or_more": {"count": 20, "broken": 0, "note": "P02 と P24（顔の幅100〜154px）。目・眼鏡・傷・眼帯まで崩れていない"},
+  "face_42_to_71px": {"count": 17, "broken": 0, "partly": 1, "partly_files": ["p16 girl_rural_81（45px、眼鏡の縁が歪む）"]},
+  "face_32_to_38px": {"count": 7, "broken": 2, "partly": 2,
+                      "broken_files": ["p16 girl_street_81（36px、眼鏡の中の目が消える）", "p16 old_rural_83（32px、顔がつぶれる）"],
+                      "partly_files": ["p16 girl_street_82（35px、顔の半分が欠ける）", "p16 old_street_83（38px、しわが線の塊になる）"]}
+ },
+ "hands": {
+  "detected": 29, "false_detection": 2, "false_files": ["p16 boy_room_83（机の線）", "p16 boy_street_82（背景）"],
+  "fingers_clear": 6, "simplified_readable": 10, "odd_lines_or_blob": 11,
+  "odd_note": "P24 の少年（b）の握った手7つのうち6つは、手の中に意味のない「へ」の字の線が入る。P02 の 1006・1008 の3つも同じ。P16 girl_room_81 はぼやけた塊",
+  "missed_note": "47枚の全身で、見つかった手は27。ポケット・袖・体の陰で見えない手が多く、見えているのに見つからない手もある（数は数えていない）"
+ },
+ "conclusion": "全身でも顔の幅が約40px以上なら顔は崩れない（37枚中崩れ0、一部1）。約38px以下では7枚中2枚が崩れ、2枚が一部崩れた。手は指まで描けたのが27中6で、ほかは指を省いた形（10）か、意味のない線が入った形（11）。省いた形は漫画の遠めのコマなら通るが、意味のない線は直しが要る（未検証：読者が気づくか）。"
+}

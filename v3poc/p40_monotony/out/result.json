@@ -1,0 +1,526 @@
+{
+ "llm_passed": 41,
+ "real_pages": 9,
+ "llm": {
+  "n": {
+   "median": 6,
+   "min": 4,
+   "max": 7
+  },
+  "area_cv": {
+   "median": 0.582,
+   "min": 0.205,
+   "max": 0.913
+  },
+  "max_min": {
+   "median": 4.05,
+   "min": 2.0,
+   "max": 8.56
+  },
+  "shapes": {
+   "median": 2,
+   "min": 1,
+   "max": 3
+  },
+  "full_width": {
+   "median": 0.333,
+   "min": 0.0,
+   "max": 0.5
+  },
+  "aligned": {
+   "median": 0.667,
+   "min": 0.5,
+   "max": 1.0
+  }
+ },
+ "real": {
+  "n": {
+   "median": 5,
+   "min": 3,
+   "max": 7
+  },
+  "area_cv": {
+   "median": 0.45,
+   "min": 0.307,
+   "max": 0.79
+  },
+  "max_min": {
+   "median": 3.96,
+   "min": 2.54,
+   "max": 7.62
+  },
+  "shapes": {
+   "median": 2,
+   "min": 2,
+   "max": 3
+  },
+  "full_width": {
+   "median": 0.25,
+   "min": 0.0,
+   "max": 1.0
+  },
+  "aligned": {
+   "median": 0.5,
+   "min": 0.0,
+   "max": 0.857
+  }
+ },
+ "llm_below_real_min_area_cv": 2,
+ "llm_below_real_min_shapes": 15,
+ "real_min_area_cv": 0.307,
+ "real_min_shapes": 2,
+ "rows_llm": [
+  {
+   "id": "s1_talk_A_0",
+   "n": 6,
+   "area_cv": 0.606,
+   "max_min": 3.97,
+   "shapes": 3,
+   "full_width": 0.0,
+   "aligned": 1.0
+  },
+  {
+   "id": "s1_talk_A_1",
+   "n": 6,
+   "area_cv": 0.501,
+   "max_min": 3.5,
+   "shapes": 3,
+   "full_width": 0.0,
+   "aligned": 1.0
+  },
+  {
+   "id": "s1_talk_A_2",
+   "n": 6,
+   "area_cv": 0.486,
+   "max_min": 3.89,
+   "shapes": 3,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_A_3",
+   "n": 6,
+   "area_cv": 0.582,
+   "max_min": 3.8,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_A_4",
+   "n": 6,
+   "area_cv": 0.647,
+   "max_min": 4.85,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_A_5",
+   "n": 6,
+   "area_cv": 0.695,
+   "max_min": 5.06,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_A_6",
+   "n": 6,
+   "area_cv": 0.652,
+   "max_min": 5.33,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_A_7",
+   "n": 6,
+   "area_cv": 0.54,
+   "max_min": 3.65,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_B_0",
+   "n": 6,
+   "area_cv": 0.4,
+   "max_min": 3.04,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_B_1",
+   "n": 6,
+   "area_cv": 0.205,
+   "max_min": 2.0,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_B_2",
+   "n": 6,
+   "area_cv": 0.4,
+   "max_min": 3.04,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_B_3",
+   "n": 6,
+   "area_cv": 0.492,
+   "max_min": 3.04,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_B_5",
+   "n": 6,
+   "area_cv": 0.374,
+   "max_min": 2.7,
+   "shapes": 3,
+   "full_width": 0.0,
+   "aligned": 1.0
+  },
+  {
+   "id": "s1_talk_B_6",
+   "n": 6,
+   "area_cv": 0.4,
+   "max_min": 3.04,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s1_talk_B_7",
+   "n": 6,
+   "area_cv": 0.4,
+   "max_min": 3.04,
+   "shapes": 2,
+   "full_width": 0.333,
+   "aligned": 0.667
+  },
+  {
+   "id": "s2_reveal_A_0",
+   "n": 4,
+   "area_cv": 0.652,
+   "max_min": 5.47,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_1",
+   "n": 4,
+   "area_cv": 0.709,
+   "max_min": 5.57,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_2",
+   "n": 4,
+   "area_cv": 0.641,
+   "max_min": 4.59,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_3",
+   "n": 4,
+   "area_cv": 0.743,
+   "max_min": 5.83,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_4",
+   "n": 4,
+   "area_cv": 0.686,
+   "max_min": 5.24,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_5",
+   "n": 4,
+   "area_cv": 0.743,
+   "max_min": 5.91,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_6",
+   "n": 4,
+   "area_cv": 0.685,
+   "max_min": 4.95,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_A_7",
+   "n": 4,
+   "area_cv": 0.685,
+   "max_min": 4.95,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_0",
+   "n": 4,
+   "area_cv": 0.668,
+   "max_min": 5.07,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_1",
+   "n": 4,
+   "area_cv": 0.594,
+   "max_min": 4.22,
+   "shapes": 2,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_2",
+   "n": 4,
+   "area_cv": 0.594,
+   "max_min": 4.22,
+   "shapes": 2,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_3",
+   "n": 4,
+   "area_cv": 0.668,
+   "max_min": 5.07,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_4",
+   "n": 4,
+   "area_cv": 0.594,
+   "max_min": 4.22,
+   "shapes": 2,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_5",
+   "n": 4,
+   "area_cv": 0.913,
+   "max_min": 8.56,
+   "shapes": 2,
+   "full_width": 0.25,
+   "aligned": 0.75
+  },
+  {
+   "id": "s2_reveal_B_6",
+   "n": 4,
+   "area_cv": 0.668,
+   "max_min": 5.07,
+   "shapes": 1,
+   "full_width": 0.5,
+   "aligned": 0.5
+  },
+  {
+   "id": "s2_reveal_B_7",
+   "n": 4,
+   "area_cv": 0.913,
+   "max_min": 8.56,
+   "shapes": 2,
+   "full_width": 0.25,
+   "aligned": 0.75
+  },
+  {
+   "id": "s3_action_A_0",
+   "n": 7,
+   "area_cv": 0.399,
+   "max_min": 2.79,
+   "shapes": 1,
+   "full_width": 0.429,
+   "aligned": 0.571
+  },
+  {
+   "id": "s3_action_A_1",
+   "n": 7,
+   "area_cv": 0.459,
+   "max_min": 3.23,
+   "shapes": 1,
+   "full_width": 0.429,
+   "aligned": 0.571
+  },
+  {
+   "id": "s3_action_A_2",
+   "n": 7,
+   "area_cv": 0.546,
+   "max_min": 4.1,
+   "shapes": 1,
+   "full_width": 0.429,
+   "aligned": 0.571
+  },
+  {
+   "id": "s3_action_A_3",
+   "n": 7,
+   "area_cv": 0.299,
+   "max_min": 2.21,
+   "shapes": 3,
+   "full_width": 0.143,
+   "aligned": 0.857
+  },
+  {
+   "id": "s3_action_A_4",
+   "n": 7,
+   "area_cv": 0.49,
+   "max_min": 3.48,
+   "shapes": 3,
+   "full_width": 0.0,
+   "aligned": 0.857
+  },
+  {
+   "id": "s3_action_A_5",
+   "n": 7,
+   "area_cv": 0.432,
+   "max_min": 3.07,
+   "shapes": 3,
+   "full_width": 0.143,
+   "aligned": 0.857
+  },
+  {
+   "id": "s3_action_A_6",
+   "n": 7,
+   "area_cv": 0.461,
+   "max_min": 3.22,
+   "shapes": 3,
+   "full_width": 0.0,
+   "aligned": 0.857
+  },
+  {
+   "id": "s3_action_A_7",
+   "n": 7,
+   "area_cv": 0.389,
+   "max_min": 2.78,
+   "shapes": 3,
+   "full_width": 0.143,
+   "aligned": 0.857
+  },
+  {
+   "id": "s3_action_B_1",
+   "n": 7,
+   "area_cv": 0.519,
+   "max_min": 4.05,
+   "shapes": 1,
+   "full_width": 0.429,
+   "aligned": 0.571
+  },
+  {
+   "id": "s3_action_B_4",
+   "n": 7,
+   "area_cv": 0.479,
+   "max_min": 3.57,
+   "shapes": 3,
+   "full_width": 0.143,
+   "aligned": 0.857
+  }
+ ],
+ "rows_real": [
+  {
+   "id": "na_006",
+   "n": 4,
+   "area_cv": 0.79,
+   "max_min": 7.62,
+   "shapes": 2,
+   "full_width": 0.25,
+   "aligned": 0.5
+  },
+  {
+   "id": "na_013",
+   "n": 5,
+   "area_cv": 0.511,
+   "max_min": 4.41,
+   "shapes": 2,
+   "full_width": 0.4,
+   "aligned": 0.4
+  },
+  {
+   "id": "na_014",
+   "n": 3,
+   "area_cv": 0.512,
+   "max_min": 3.33,
+   "shapes": 2,
+   "full_width": 1.0,
+   "aligned": 0.0
+  },
+  {
+   "id": "na_017",
+   "n": 7,
+   "area_cv": 0.42,
+   "max_min": 4.83,
+   "shapes": 2,
+   "full_width": 0.0,
+   "aligned": 0.857
+  },
+  {
+   "id": "na_018",
+   "n": 4,
+   "area_cv": 0.307,
+   "max_min": 2.54,
+   "shapes": 3,
+   "full_width": 0.25,
+   "aligned": 0.5
+  },
+  {
+   "id": "na_041",
+   "n": 7,
+   "area_cv": 0.407,
+   "max_min": 2.87,
+   "shapes": 2,
+   "full_width": 0.0,
+   "aligned": 0.857
+  },
+  {
+   "id": "na_043",
+   "n": 6,
+   "area_cv": 0.45,
+   "max_min": 3.96,
+   "shapes": 2,
+   "full_width": 0.0,
+   "aligned": 0.667
+  },
+  {
+   "id": "na_045",
+   "n": 7,
+   "area_cv": 0.372,
+   "max_min": 2.96,
+   "shapes": 3,
+   "full_width": 0.0,
+   "aligned": 0.857
+  },
+  {
+   "id": "視線_006",
+   "n": 4,
+   "area_cv": 0.79,
+   "max_min": 7.62,
+   "shapes": 2,
+   "full_width": 0.25,
+   "aligned": 0.5
+  }
+ ]
+}

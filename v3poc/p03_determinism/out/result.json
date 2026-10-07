@@ -1,0 +1,26 @@
+{
+ "euler_ancestral": [
+  {
+   "max": 0,
+   "changed_px_ratio": 0.0,
+   "mean": 0.0
+  },
+  {
+   "max": 0,
+   "changed_px_ratio": 0.0,
+   "mean": 0.0
+  }
+ ],
+ "dpmpp_2m": [
+  {
+   "max": 0,
+   "changed_px_ratio": 0.0,
+   "mean": 0.0
+  },
+  {
+   "max": 0,
+   "changed_px_ratio": 0.0,
+   "mean": 0.0
+  }
+ ]
+}

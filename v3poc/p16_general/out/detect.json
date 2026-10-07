@@ -1,0 +1,4225 @@
+[
+ {
+  "file": "bg_tate_none_room_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_room_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_room_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_rural_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_rural_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_rural_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_street_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_street_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_tate_none_street_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_room_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_room_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_room_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_rural_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_rural_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_rural_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_street_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_street_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "bg_yoko_none_street_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "chara_only_boy_none_81.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 388,
+    "y0": 26,
+    "x1": 761,
+    "y1": 1193,
+    "score": 0.856,
+    "h_ratio": 0.96,
+    "area_ratio": 0.43,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 500,
+    "y0": 114,
+    "x1": 603,
+    "y1": 224,
+    "score": 0.861,
+    "h_ratio": 0.09,
+    "area_ratio": 0.011,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 469,
+    "y0": 50,
+    "x1": 635,
+    "y1": 221,
+    "score": 0.912,
+    "h_ratio": 0.141,
+    "area_ratio": 0.028,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_boy_none_81_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 378,
+    "y0": 26,
+    "x1": 764,
+    "y1": 1194,
+    "score": 0.845,
+    "h_ratio": 0.961,
+    "area_ratio": 0.446,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 500,
+    "y0": 114,
+    "x1": 603,
+    "y1": 224,
+    "score": 0.861,
+    "h_ratio": 0.09,
+    "area_ratio": 0.011,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 470,
+    "y0": 51,
+    "x1": 634,
+    "y1": 221,
+    "score": 0.912,
+    "h_ratio": 0.14,
+    "area_ratio": 0.028,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_boy_none_82.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 192,
+    "y0": 1,
+    "x1": 627,
+    "y1": 1212,
+    "score": 0.856,
+    "h_ratio": 0.996,
+    "area_ratio": 0.521,
+    "touch": "T"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 335,
+    "y0": 83,
+    "x1": 454,
+    "y1": 197,
+    "score": 0.873,
+    "h_ratio": 0.094,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 309,
+    "y0": 11,
+    "x1": 480,
+    "y1": 194,
+    "score": 0.916,
+    "h_ratio": 0.15,
+    "area_ratio": 0.031,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_boy_none_82_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 194,
+    "y0": 1,
+    "x1": 625,
+    "y1": 1210,
+    "score": 0.86,
+    "h_ratio": 0.994,
+    "area_ratio": 0.515,
+    "touch": "T"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 336,
+    "y0": 83,
+    "x1": 454,
+    "y1": 197,
+    "score": 0.873,
+    "h_ratio": 0.094,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 309,
+    "y0": 13,
+    "x1": 479,
+    "y1": 193,
+    "score": 0.914,
+    "h_ratio": 0.148,
+    "area_ratio": 0.03,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_boy_none_83.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 209,
+    "y0": 33,
+    "x1": 633,
+    "y1": 1213,
+    "score": 0.851,
+    "h_ratio": 0.97,
+    "area_ratio": 0.495,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 360,
+    "y0": 141,
+    "x1": 472,
+    "y1": 251,
+    "score": 0.859,
+    "h_ratio": 0.09,
+    "area_ratio": 0.012,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 331,
+    "y0": 56,
+    "x1": 506,
+    "y1": 245,
+    "score": 0.911,
+    "h_ratio": 0.155,
+    "area_ratio": 0.033,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_boy_none_83_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 210,
+    "y0": 33,
+    "x1": 632,
+    "y1": 1213,
+    "score": 0.852,
+    "h_ratio": 0.97,
+    "area_ratio": 0.492,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 360,
+    "y0": 141,
+    "x1": 472,
+    "y1": 251,
+    "score": 0.859,
+    "h_ratio": 0.09,
+    "area_ratio": 0.012,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 331,
+    "y0": 56,
+    "x1": 505,
+    "y1": 245,
+    "score": 0.911,
+    "h_ratio": 0.155,
+    "area_ratio": 0.033,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_girl_none_81.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 374,
+    "y0": 15,
+    "x1": 744,
+    "y1": 1215,
+    "score": 0.864,
+    "h_ratio": 0.987,
+    "area_ratio": 0.439,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 492,
+    "y0": 123,
+    "x1": 602,
+    "y1": 246,
+    "score": 0.864,
+    "h_ratio": 0.101,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 467,
+    "y0": 40,
+    "x1": 660,
+    "y1": 246,
+    "score": 0.91,
+    "h_ratio": 0.169,
+    "area_ratio": 0.039,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_girl_none_81_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 374,
+    "y0": 15,
+    "x1": 744,
+    "y1": 1215,
+    "score": 0.865,
+    "h_ratio": 0.987,
+    "area_ratio": 0.439,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 492,
+    "y0": 123,
+    "x1": 602,
+    "y1": 246,
+    "score": 0.864,
+    "h_ratio": 0.101,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 467,
+    "y0": 40,
+    "x1": 660,
+    "y1": 246,
+    "score": 0.911,
+    "h_ratio": 0.169,
+    "area_ratio": 0.039,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_girl_none_82.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 214,
+    "y0": 6,
+    "x1": 569,
+    "y1": 1214,
+    "score": 0.847,
+    "h_ratio": 0.993,
+    "area_ratio": 0.424,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 318,
+    "y0": 111,
+    "x1": 440,
+    "y1": 238,
+    "score": 0.872,
+    "h_ratio": 0.104,
+    "area_ratio": 0.015,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 289,
+    "y0": 31,
+    "x1": 468,
+    "y1": 237,
+    "score": 0.92,
+    "h_ratio": 0.169,
+    "area_ratio": 0.036,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_girl_none_82_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 216,
+    "y0": 6,
+    "x1": 569,
+    "y1": 1216,
+    "score": 0.849,
+    "h_ratio": 0.995,
+    "area_ratio": 0.422,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 318,
+    "y0": 111,
+    "x1": 440,
+    "y1": 238,
+    "score": 0.872,
+    "h_ratio": 0.104,
+    "area_ratio": 0.015,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 290,
+    "y0": 31,
+    "x1": 468,
+    "y1": 237,
+    "score": 0.92,
+    "h_ratio": 0.169,
+    "area_ratio": 0.036,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_girl_none_83.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 225,
+    "y0": 31,
+    "x1": 613,
+    "y1": 1216,
+    "score": 0.853,
+    "h_ratio": 0.975,
+    "area_ratio": 0.454,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 378,
+    "y0": 144,
+    "x1": 494,
+    "y1": 264,
+    "score": 0.868,
+    "h_ratio": 0.099,
+    "area_ratio": 0.014,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 352,
+    "y0": 56,
+    "x1": 536,
+    "y1": 264,
+    "score": 0.917,
+    "h_ratio": 0.171,
+    "area_ratio": 0.038,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_girl_none_83_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 225,
+    "y0": 31,
+    "x1": 612,
+    "y1": 1216,
+    "score": 0.854,
+    "h_ratio": 0.975,
+    "area_ratio": 0.453,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 378,
+    "y0": 144,
+    "x1": 494,
+    "y1": 264,
+    "score": 0.868,
+    "h_ratio": 0.099,
+    "area_ratio": 0.014,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 352,
+    "y0": 56,
+    "x1": 536,
+    "y1": 264,
+    "score": 0.918,
+    "h_ratio": 0.171,
+    "area_ratio": 0.038,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_old_none_81.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 189,
+    "y0": 3,
+    "x1": 654,
+    "y1": 1178,
+    "score": 0.823,
+    "h_ratio": 0.966,
+    "area_ratio": 0.54,
+    "touch": "T"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 349,
+    "y0": 63,
+    "x1": 447,
+    "y1": 195,
+    "score": 0.836,
+    "h_ratio": 0.109,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 346,
+    "y0": 27,
+    "x1": 496,
+    "y1": 191,
+    "score": 0.894,
+    "h_ratio": 0.135,
+    "area_ratio": 0.024,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_old_none_81_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 189,
+    "y0": 3,
+    "x1": 652,
+    "y1": 1180,
+    "score": 0.82,
+    "h_ratio": 0.968,
+    "area_ratio": 0.539,
+    "touch": "T"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 349,
+    "y0": 63,
+    "x1": 447,
+    "y1": 195,
+    "score": 0.836,
+    "h_ratio": 0.109,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 346,
+    "y0": 27,
+    "x1": 495,
+    "y1": 191,
+    "score": 0.895,
+    "h_ratio": 0.135,
+    "area_ratio": 0.024,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_old_none_82.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 215,
+    "y0": 10,
+    "x1": 619,
+    "y1": 1202,
+    "score": 0.874,
+    "h_ratio": 0.98,
+    "area_ratio": 0.476,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 302,
+    "y0": 90,
+    "x1": 400,
+    "y1": 225,
+    "score": 0.818,
+    "h_ratio": 0.111,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 286,
+    "y0": 38,
+    "x1": 457,
+    "y1": 218,
+    "score": 0.895,
+    "h_ratio": 0.148,
+    "area_ratio": 0.03,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_old_none_82_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 214,
+    "y0": 10,
+    "x1": 618,
+    "y1": 1202,
+    "score": 0.867,
+    "h_ratio": 0.98,
+    "area_ratio": 0.476,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 302,
+    "y0": 90,
+    "x1": 400,
+    "y1": 225,
+    "score": 0.82,
+    "h_ratio": 0.111,
+    "area_ratio": 0.013,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 288,
+    "y0": 38,
+    "x1": 456,
+    "y1": 219,
+    "score": 0.894,
+    "h_ratio": 0.149,
+    "area_ratio": 0.03,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_old_none_83.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 198,
+    "y0": 13,
+    "x1": 606,
+    "y1": 1202,
+    "score": 0.863,
+    "h_ratio": 0.978,
+    "area_ratio": 0.479,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 377,
+    "y0": 93,
+    "x1": 483,
+    "y1": 223,
+    "score": 0.844,
+    "h_ratio": 0.107,
+    "area_ratio": 0.014,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 345,
+    "y0": 40,
+    "x1": 489,
+    "y1": 217,
+    "score": 0.903,
+    "h_ratio": 0.146,
+    "area_ratio": 0.025,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "chara_only_old_none_83_cut.png",
+  "w": 832,
+  "h": 1216,
+  "persons": [
+   {
+    "x0": 198,
+    "y0": 13,
+    "x1": 605,
+    "y1": 1210,
+    "score": 0.865,
+    "h_ratio": 0.984,
+    "area_ratio": 0.482,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 377,
+    "y0": 93,
+    "x1": 483,
+    "y1": 222,
+    "score": 0.844,
+    "h_ratio": 0.106,
+    "area_ratio": 0.014,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 345,
+    "y0": 40,
+    "x1": 489,
+    "y1": 217,
+    "score": 0.903,
+    "h_ratio": 0.146,
+    "area_ratio": 0.025,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_room_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 358,
+    "y0": 79,
+    "x1": 640,
+    "y1": 828,
+    "score": 0.821,
+    "h_ratio": 0.836,
+    "area_ratio": 0.205,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 494,
+    "y0": 153,
+    "x1": 565,
+    "y1": 226,
+    "score": 0.78,
+    "h_ratio": 0.081,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 459,
+    "y0": 111,
+    "x1": 571,
+    "y1": 224,
+    "score": 0.906,
+    "h_ratio": 0.126,
+    "area_ratio": 0.012,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_room_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 475,
+    "y0": 235,
+    "x1": 703,
+    "y1": 869,
+    "score": 0.795,
+    "h_ratio": 0.708,
+    "area_ratio": 0.14,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 552,
+    "y0": 289,
+    "x1": 603,
+    "y1": 350,
+    "score": 0.402,
+    "h_ratio": 0.068,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 543,
+    "y0": 255,
+    "x1": 632,
+    "y1": 343,
+    "score": 0.888,
+    "h_ratio": 0.098,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_room_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 509,
+    "y0": 248,
+    "x1": 721,
+    "y1": 764,
+    "score": 0.823,
+    "h_ratio": 0.576,
+    "area_ratio": 0.106,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 604,
+    "y0": 298,
+    "x1": 658,
+    "y1": 347,
+    "score": 0.75,
+    "h_ratio": 0.055,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 592,
+    "y0": 270,
+    "x1": 663,
+    "y1": 345,
+    "score": 0.881,
+    "h_ratio": 0.084,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_rural_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 394,
+    "y0": 110,
+    "x1": 574,
+    "y1": 528,
+    "score": 0.824,
+    "h_ratio": 0.467,
+    "area_ratio": 0.073,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 478,
+    "y0": 151,
+    "x1": 513,
+    "y1": 193,
+    "score": 0.317,
+    "h_ratio": 0.047,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 452,
+    "y0": 129,
+    "x1": 517,
+    "y1": 192,
+    "score": 0.847,
+    "h_ratio": 0.07,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_rural_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 488,
+    "y0": 270,
+    "x1": 695,
+    "y1": 822,
+    "score": 0.817,
+    "h_ratio": 0.616,
+    "area_ratio": 0.111,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 552,
+    "y0": 316,
+    "x1": 612,
+    "y1": 373,
+    "score": 0.761,
+    "h_ratio": 0.064,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 545,
+    "y0": 282,
+    "x1": 632,
+    "y1": 371,
+    "score": 0.896,
+    "h_ratio": 0.099,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_rural_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 491,
+    "y0": 216,
+    "x1": 700,
+    "y1": 799,
+    "score": 0.815,
+    "h_ratio": 0.651,
+    "area_ratio": 0.118,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 559,
+    "y0": 275,
+    "x1": 612,
+    "y1": 329,
+    "score": 0.734,
+    "h_ratio": 0.06,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 551,
+    "y0": 239,
+    "x1": 633,
+    "y1": 327,
+    "score": 0.891,
+    "h_ratio": 0.098,
+    "area_ratio": 0.007,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_street_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 512,
+    "y0": 421,
+    "x1": 689,
+    "y1": 873,
+    "score": 0.809,
+    "h_ratio": 0.504,
+    "area_ratio": 0.078,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 573,
+    "y0": 460,
+    "x1": 608,
+    "y1": 502,
+    "score": 0.693,
+    "h_ratio": 0.047,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 570,
+    "y0": 442,
+    "x1": 628,
+    "y1": 501,
+    "score": 0.847,
+    "h_ratio": 0.066,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_street_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 460,
+    "y0": 259,
+    "x1": 689,
+    "y1": 865,
+    "score": 0.826,
+    "h_ratio": 0.676,
+    "area_ratio": 0.134,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 544,
+    "y0": 313,
+    "x1": 593,
+    "y1": 373,
+    "score": 0.713,
+    "h_ratio": 0.067,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 538,
+    "y0": 281,
+    "x1": 625,
+    "y1": 372,
+    "score": 0.891,
+    "h_ratio": 0.102,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_boy_street_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 485,
+    "y0": 220,
+    "x1": 739,
+    "y1": 844,
+    "score": 0.825,
+    "h_ratio": 0.696,
+    "area_ratio": 0.154,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 559,
+    "y0": 269,
+    "x1": 618,
+    "y1": 329,
+    "score": 0.762,
+    "h_ratio": 0.067,
+    "area_ratio": 0.003,
+    "touch": ""
+   },
+   {
+    "x0": 928,
+    "y0": 85,
+    "x1": 956,
+    "y1": 136,
+    "score": 0.298,
+    "h_ratio": 0.057,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 550,
+    "y0": 241,
+    "x1": 635,
+    "y1": 328,
+    "score": 0.888,
+    "h_ratio": 0.097,
+    "area_ratio": 0.007,
+    "touch": ""
+   },
+   {
+    "x0": 919,
+    "y0": 60,
+    "x1": 966,
+    "y1": 136,
+    "score": 0.779,
+    "h_ratio": 0.085,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_room_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 365,
+    "y0": 206,
+    "x1": 611,
+    "y1": 769,
+    "score": 0.82,
+    "h_ratio": 0.628,
+    "area_ratio": 0.134,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 479,
+    "y0": 266,
+    "x1": 531,
+    "y1": 325,
+    "score": 0.75,
+    "h_ratio": 0.066,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 454,
+    "y0": 226,
+    "x1": 542,
+    "y1": 324,
+    "score": 0.894,
+    "h_ratio": 0.109,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_room_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 473,
+    "y0": 251,
+    "x1": 701,
+    "y1": 871,
+    "score": 0.854,
+    "h_ratio": 0.692,
+    "area_ratio": 0.137,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 558,
+    "y0": 308,
+    "x1": 617,
+    "y1": 367,
+    "score": 0.779,
+    "h_ratio": 0.066,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 544,
+    "y0": 269,
+    "x1": 629,
+    "y1": 365,
+    "score": 0.887,
+    "h_ratio": 0.107,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_room_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 498,
+    "y0": 234,
+    "x1": 678,
+    "y1": 752,
+    "score": 0.822,
+    "h_ratio": 0.578,
+    "area_ratio": 0.09,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 557,
+    "y0": 285,
+    "x1": 606,
+    "y1": 335,
+    "score": 0.752,
+    "h_ratio": 0.056,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 550,
+    "y0": 251,
+    "x1": 631,
+    "y1": 334,
+    "score": 0.878,
+    "h_ratio": 0.093,
+    "area_ratio": 0.007,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_rural_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 400,
+    "y0": 92,
+    "x1": 618,
+    "y1": 601,
+    "score": 0.831,
+    "h_ratio": 0.568,
+    "area_ratio": 0.108,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 495,
+    "y0": 143,
+    "x1": 540,
+    "y1": 192,
+    "score": 0.751,
+    "h_ratio": 0.055,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 468,
+    "y0": 111,
+    "x1": 548,
+    "y1": 193,
+    "score": 0.883,
+    "h_ratio": 0.092,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_rural_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 475,
+    "y0": 375,
+    "x1": 656,
+    "y1": 831,
+    "score": 0.808,
+    "h_ratio": 0.509,
+    "area_ratio": 0.08,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 558,
+    "y0": 419,
+    "x1": 600,
+    "y1": 465,
+    "score": 0.714,
+    "h_ratio": 0.051,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 530,
+    "y0": 393,
+    "x1": 603,
+    "y1": 465,
+    "score": 0.846,
+    "h_ratio": 0.08,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_rural_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 498,
+    "y0": 249,
+    "x1": 691,
+    "y1": 761,
+    "score": 0.819,
+    "h_ratio": 0.571,
+    "area_ratio": 0.096,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 559,
+    "y0": 301,
+    "x1": 609,
+    "y1": 348,
+    "score": 0.762,
+    "h_ratio": 0.052,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 552,
+    "y0": 269,
+    "x1": 627,
+    "y1": 347,
+    "score": 0.867,
+    "h_ratio": 0.087,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_street_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 528,
+    "y0": 488,
+    "x1": 663,
+    "y1": 860,
+    "score": 0.764,
+    "h_ratio": 0.415,
+    "area_ratio": 0.049,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 575,
+    "y0": 525,
+    "x1": 611,
+    "y1": 553,
+    "score": 0.714,
+    "h_ratio": 0.031,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 569,
+    "y0": 502,
+    "x1": 618,
+    "y1": 555,
+    "score": 0.855,
+    "h_ratio": 0.059,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_street_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 483,
+    "y0": 374,
+    "x1": 654,
+    "y1": 822,
+    "score": 0.792,
+    "h_ratio": 0.5,
+    "area_ratio": 0.074,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 563,
+    "y0": 422,
+    "x1": 598,
+    "y1": 465,
+    "score": 0.692,
+    "h_ratio": 0.048,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 533,
+    "y0": 396,
+    "x1": 601,
+    "y1": 466,
+    "score": 0.854,
+    "h_ratio": 0.078,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_girl_street_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 500,
+    "y0": 347,
+    "x1": 666,
+    "y1": 778,
+    "score": 0.828,
+    "h_ratio": 0.481,
+    "area_ratio": 0.069,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 560,
+    "y0": 382,
+    "x1": 604,
+    "y1": 427,
+    "score": 0.735,
+    "h_ratio": 0.05,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 551,
+    "y0": 362,
+    "x1": 610,
+    "y1": 426,
+    "score": 0.852,
+    "h_ratio": 0.071,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_room_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 354,
+    "y0": 104,
+    "x1": 603,
+    "y1": 798,
+    "score": 0.799,
+    "h_ratio": 0.775,
+    "area_ratio": 0.167,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 428,
+    "y0": 164,
+    "x1": 485,
+    "y1": 214,
+    "score": 0.712,
+    "h_ratio": 0.056,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 425,
+    "y0": 138,
+    "x1": 509,
+    "y1": 230,
+    "score": 0.881,
+    "h_ratio": 0.103,
+    "area_ratio": 0.007,
+    "touch": ""
+   },
+   {
+    "x0": 0,
+    "y0": 698,
+    "x1": 90,
+    "y1": 882,
+    "score": 0.473,
+    "h_ratio": 0.205,
+    "area_ratio": 0.016,
+    "touch": "L"
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_room_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 478,
+    "y0": 318,
+    "x1": 680,
+    "y1": 751,
+    "score": 0.858,
+    "h_ratio": 0.483,
+    "area_ratio": 0.085,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 553,
+    "y0": 356,
+    "x1": 596,
+    "y1": 408,
+    "score": 0.382,
+    "h_ratio": 0.058,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 545,
+    "y0": 333,
+    "x1": 603,
+    "y1": 406,
+    "score": 0.897,
+    "h_ratio": 0.081,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_room_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 484,
+    "y0": 205,
+    "x1": 712,
+    "y1": 750,
+    "score": 0.83,
+    "h_ratio": 0.608,
+    "area_ratio": 0.12,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 556,
+    "y0": 231,
+    "x1": 623,
+    "y1": 317,
+    "score": 0.873,
+    "h_ratio": 0.096,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_rural_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 349,
+    "y0": 422,
+    "x1": 574,
+    "y1": 896,
+    "score": 0.751,
+    "h_ratio": 0.529,
+    "area_ratio": 0.103,
+    "touch": "B"
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 439,
+    "y0": 439,
+    "x1": 491,
+    "y1": 491,
+    "score": 0.77,
+    "h_ratio": 0.058,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_rural_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 473,
+    "y0": 390,
+    "x1": 661,
+    "y1": 814,
+    "score": 0.838,
+    "h_ratio": 0.473,
+    "area_ratio": 0.077,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 544,
+    "y0": 425,
+    "x1": 591,
+    "y1": 475,
+    "score": 0.576,
+    "h_ratio": 0.056,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 538,
+    "y0": 405,
+    "x1": 596,
+    "y1": 476,
+    "score": 0.843,
+    "h_ratio": 0.079,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_rural_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 498,
+    "y0": 391,
+    "x1": 662,
+    "y1": 717,
+    "score": 0.794,
+    "h_ratio": 0.364,
+    "area_ratio": 0.052,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 567,
+    "y0": 424,
+    "x1": 599,
+    "y1": 452,
+    "score": 0.41,
+    "h_ratio": 0.031,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 562,
+    "y0": 407,
+    "x1": 603,
+    "y1": 455,
+    "score": 0.801,
+    "h_ratio": 0.054,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_street_81.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 527,
+    "y0": 547,
+    "x1": 655,
+    "y1": 828,
+    "score": 0.701,
+    "h_ratio": 0.314,
+    "area_ratio": 0.035,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 579,
+    "y0": 566,
+    "x1": 607,
+    "y1": 601,
+    "score": 0.77,
+    "h_ratio": 0.039,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_street_82.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 469,
+    "y0": 399,
+    "x1": 660,
+    "y1": 852,
+    "score": 0.824,
+    "h_ratio": 0.506,
+    "area_ratio": 0.084,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 547,
+    "y0": 441,
+    "x1": 579,
+    "y1": 484,
+    "score": 0.584,
+    "h_ratio": 0.048,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 538,
+    "y0": 420,
+    "x1": 589,
+    "y1": 485,
+    "score": 0.848,
+    "h_ratio": 0.073,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "full_std_old_street_83.png",
+  "w": 1152,
+  "h": 896,
+  "persons": [
+   {
+    "x0": 499,
+    "y0": 398,
+    "x1": 700,
+    "y1": 814,
+    "score": 0.793,
+    "h_ratio": 0.464,
+    "area_ratio": 0.081,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 579,
+    "y0": 433,
+    "x1": 617,
+    "y1": 474,
+    "score": 0.556,
+    "h_ratio": 0.046,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 573,
+    "y0": 417,
+    "x1": 621,
+    "y1": 476,
+    "score": 0.834,
+    "h_ratio": 0.066,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_room_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 213,
+    "y0": 174,
+    "x1": 313,
+    "y1": 474,
+    "score": 0.782,
+    "h_ratio": 0.195,
+    "area_ratio": 0.034,
+    "touch": ""
+   },
+   {
+    "x0": 211,
+    "y0": 688,
+    "x1": 314,
+    "y1": 994,
+    "score": 0.778,
+    "h_ratio": 0.199,
+    "area_ratio": 0.036,
+    "touch": ""
+   },
+   {
+    "x0": 210,
+    "y0": 1187,
+    "x1": 311,
+    "y1": 1483,
+    "score": 0.738,
+    "h_ratio": 0.193,
+    "area_ratio": 0.034,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 242,
+    "y0": 205,
+    "x1": 270,
+    "y1": 239,
+    "score": 0.533,
+    "h_ratio": 0.022,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 241,
+    "y0": 1222,
+    "x1": 269,
+    "y1": 1257,
+    "score": 0.469,
+    "h_ratio": 0.023,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 239,
+    "y0": 720,
+    "x1": 273,
+    "y1": 760,
+    "score": 0.269,
+    "h_ratio": 0.026,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 239,
+    "y0": 1211,
+    "x1": 278,
+    "y1": 1254,
+    "score": 0.775,
+    "h_ratio": 0.028,
+    "area_ratio": 0.002,
+    "touch": ""
+   },
+   {
+    "x0": 238,
+    "y0": 712,
+    "x1": 278,
+    "y1": 757,
+    "score": 0.759,
+    "h_ratio": 0.029,
+    "area_ratio": 0.002,
+    "touch": ""
+   },
+   {
+    "x0": 239,
+    "y0": 194,
+    "x1": 278,
+    "y1": 237,
+    "score": 0.753,
+    "h_ratio": 0.028,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_room_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 232,
+    "y0": 349,
+    "x1": 331,
+    "y1": 608,
+    "score": 0.798,
+    "h_ratio": 0.169,
+    "area_ratio": 0.029,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 260,
+    "y0": 378,
+    "x1": 290,
+    "y1": 410,
+    "score": 0.394,
+    "h_ratio": 0.021,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 256,
+    "y0": 367,
+    "x1": 293,
+    "y1": 410,
+    "score": 0.752,
+    "h_ratio": 0.028,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_room_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 189,
+    "y0": 397,
+    "x1": 389,
+    "y1": 1038,
+    "score": 0.849,
+    "h_ratio": 0.417,
+    "area_ratio": 0.145,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 256,
+    "y0": 457,
+    "x1": 315,
+    "y1": 522,
+    "score": 0.752,
+    "h_ratio": 0.042,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 242,
+    "y0": 420,
+    "x1": 327,
+    "y1": 519,
+    "score": 0.879,
+    "h_ratio": 0.064,
+    "area_ratio": 0.01,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_rural_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 211,
+    "y0": 568,
+    "x1": 365,
+    "y1": 1019,
+    "score": 0.85,
+    "h_ratio": 0.294,
+    "area_ratio": 0.079,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 267,
+    "y0": 613,
+    "x1": 307,
+    "y1": 658,
+    "score": 0.696,
+    "h_ratio": 0.029,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 256,
+    "y0": 589,
+    "x1": 316,
+    "y1": 654,
+    "score": 0.793,
+    "h_ratio": 0.042,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_rural_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 190,
+    "y0": 795,
+    "x1": 363,
+    "y1": 1306,
+    "score": 0.831,
+    "h_ratio": 0.333,
+    "area_ratio": 0.1,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 234,
+    "y0": 827,
+    "x1": 312,
+    "y1": 907,
+    "score": 0.824,
+    "h_ratio": 0.052,
+    "area_ratio": 0.007,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_rural_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 231,
+    "y0": 696,
+    "x1": 390,
+    "y1": 1213,
+    "score": 0.854,
+    "h_ratio": 0.337,
+    "area_ratio": 0.093,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 280,
+    "y0": 742,
+    "x1": 339,
+    "y1": 804,
+    "score": 0.255,
+    "h_ratio": 0.04,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 265,
+    "y0": 732,
+    "x1": 340,
+    "y1": 807,
+    "score": 0.803,
+    "h_ratio": 0.049,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_street_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 232,
+    "y0": 1167,
+    "x1": 334,
+    "y1": 1484,
+    "score": 0.81,
+    "h_ratio": 0.206,
+    "area_ratio": 0.037,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 269,
+    "y0": 1206,
+    "x1": 296,
+    "y1": 1238,
+    "score": 0.606,
+    "h_ratio": 0.021,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 265,
+    "y0": 1196,
+    "x1": 301,
+    "y1": 1239,
+    "score": 0.778,
+    "h_ratio": 0.028,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_street_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 212,
+    "y0": 1126,
+    "x1": 348,
+    "y1": 1536,
+    "score": 0.829,
+    "h_ratio": 0.267,
+    "area_ratio": 0.063,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 253,
+    "y0": 1169,
+    "x1": 291,
+    "y1": 1214,
+    "score": 0.627,
+    "h_ratio": 0.029,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 250,
+    "y0": 1154,
+    "x1": 302,
+    "y1": 1213,
+    "score": 0.745,
+    "h_ratio": 0.038,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_boy_street_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 261,
+    "y0": 1109,
+    "x1": 383,
+    "y1": 1522,
+    "score": 0.822,
+    "h_ratio": 0.269,
+    "area_ratio": 0.057,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 306,
+    "y0": 1155,
+    "x1": 337,
+    "y1": 1195,
+    "score": 0.697,
+    "h_ratio": 0.026,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 300,
+    "y0": 1139,
+    "x1": 344,
+    "y1": 1195,
+    "score": 0.809,
+    "h_ratio": 0.036,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_room_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 217,
+    "y0": 666,
+    "x1": 306,
+    "y1": 1001,
+    "score": 0.818,
+    "h_ratio": 0.218,
+    "area_ratio": 0.034,
+    "touch": ""
+   },
+   {
+    "x0": 218,
+    "y0": 168,
+    "x1": 305,
+    "y1": 491,
+    "score": 0.814,
+    "h_ratio": 0.21,
+    "area_ratio": 0.032,
+    "touch": ""
+   },
+   {
+    "x0": 218,
+    "y0": 1191,
+    "x1": 305,
+    "y1": 1527,
+    "score": 0.804,
+    "h_ratio": 0.219,
+    "area_ratio": 0.033,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 244,
+    "y0": 203,
+    "x1": 268,
+    "y1": 236,
+    "score": 0.61,
+    "h_ratio": 0.021,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 241,
+    "y0": 696,
+    "x1": 265,
+    "y1": 732,
+    "score": 0.501,
+    "h_ratio": 0.023,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 240,
+    "y0": 1223,
+    "x1": 264,
+    "y1": 1263,
+    "score": 0.407,
+    "h_ratio": 0.026,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 240,
+    "y0": 189,
+    "x1": 285,
+    "y1": 238,
+    "score": 0.782,
+    "h_ratio": 0.032,
+    "area_ratio": 0.002,
+    "touch": ""
+   },
+   {
+    "x0": 237,
+    "y0": 681,
+    "x1": 284,
+    "y1": 732,
+    "score": 0.773,
+    "h_ratio": 0.033,
+    "area_ratio": 0.003,
+    "touch": ""
+   },
+   {
+    "x0": 238,
+    "y0": 1213,
+    "x1": 284,
+    "y1": 1264,
+    "score": 0.689,
+    "h_ratio": 0.033,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_room_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 242,
+    "y0": 837,
+    "x1": 315,
+    "y1": 1022,
+    "score": 0.733,
+    "h_ratio": 0.12,
+    "area_ratio": 0.015,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 268,
+    "y0": 867,
+    "x1": 286,
+    "y1": 889,
+    "score": 0.374,
+    "h_ratio": 0.014,
+    "area_ratio": 0.0,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 263,
+    "y0": 857,
+    "x1": 293,
+    "y1": 891,
+    "score": 0.784,
+    "h_ratio": 0.022,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_room_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 211,
+    "y0": 972,
+    "x1": 380,
+    "y1": 1330,
+    "score": 0.62,
+    "h_ratio": 0.233,
+    "area_ratio": 0.068,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 265,
+    "y0": 1025,
+    "x1": 322,
+    "y1": 1084,
+    "score": 0.732,
+    "h_ratio": 0.038,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 253,
+    "y0": 992,
+    "x1": 333,
+    "y1": 1081,
+    "score": 0.865,
+    "h_ratio": 0.058,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_rural_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 237,
+    "y0": 570,
+    "x1": 355,
+    "y1": 986,
+    "score": 0.81,
+    "h_ratio": 0.271,
+    "area_ratio": 0.055,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 274,
+    "y0": 610,
+    "x1": 310,
+    "y1": 654,
+    "score": 0.665,
+    "h_ratio": 0.029,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 268,
+    "y0": 585,
+    "x1": 330,
+    "y1": 656,
+    "score": 0.827,
+    "h_ratio": 0.046,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_rural_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 193,
+    "y0": 900,
+    "x1": 346,
+    "y1": 1355,
+    "score": 0.773,
+    "h_ratio": 0.296,
+    "area_ratio": 0.079,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 266,
+    "y0": 960,
+    "x1": 305,
+    "y1": 1006,
+    "score": 0.624,
+    "h_ratio": 0.03,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 234,
+    "y0": 922,
+    "x1": 311,
+    "y1": 1007,
+    "score": 0.857,
+    "h_ratio": 0.055,
+    "area_ratio": 0.007,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_rural_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 232,
+    "y0": 704,
+    "x1": 382,
+    "y1": 1172,
+    "score": 0.828,
+    "h_ratio": 0.305,
+    "area_ratio": 0.079,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 287,
+    "y0": 764,
+    "x1": 331,
+    "y1": 816,
+    "score": 0.676,
+    "h_ratio": 0.034,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 271,
+    "y0": 737,
+    "x1": 343,
+    "y1": 815,
+    "score": 0.806,
+    "h_ratio": 0.051,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_street_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 242,
+    "y0": 1230,
+    "x1": 325,
+    "y1": 1534,
+    "score": 0.805,
+    "h_ratio": 0.198,
+    "area_ratio": 0.029,
+    "touch": "B"
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 262,
+    "y0": 1256,
+    "x1": 303,
+    "y1": 1306,
+    "score": 0.737,
+    "h_ratio": 0.033,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_street_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 222,
+    "y0": 1265,
+    "x1": 340,
+    "y1": 1536,
+    "score": 0.678,
+    "h_ratio": 0.176,
+    "area_ratio": 0.036,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 263,
+    "y0": 1320,
+    "x1": 291,
+    "y1": 1360,
+    "score": 0.611,
+    "h_ratio": 0.026,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 259,
+    "y0": 1305,
+    "x1": 307,
+    "y1": 1358,
+    "score": 0.781,
+    "h_ratio": 0.035,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_girl_street_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 279,
+    "y0": 1251,
+    "x1": 361,
+    "y1": 1535,
+    "score": 0.804,
+    "h_ratio": 0.185,
+    "area_ratio": 0.026,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 310,
+    "y0": 1289,
+    "x1": 331,
+    "y1": 1316,
+    "score": 0.475,
+    "h_ratio": 0.018,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 304,
+    "y0": 1278,
+    "x1": 337,
+    "y1": 1319,
+    "score": 0.793,
+    "h_ratio": 0.027,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_room_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 209,
+    "y0": 628,
+    "x1": 320,
+    "y1": 923,
+    "score": 0.637,
+    "h_ratio": 0.192,
+    "area_ratio": 0.037,
+    "touch": ""
+   },
+   {
+    "x0": 212,
+    "y0": 166,
+    "x1": 318,
+    "y1": 504,
+    "score": 0.506,
+    "h_ratio": 0.22,
+    "area_ratio": 0.04,
+    "touch": ""
+   },
+   {
+    "x0": 212,
+    "y0": 1189,
+    "x1": 316,
+    "y1": 1520,
+    "score": 0.471,
+    "h_ratio": 0.215,
+    "area_ratio": 0.039,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 246,
+    "y0": 652,
+    "x1": 284,
+    "y1": 705,
+    "score": 0.757,
+    "h_ratio": 0.035,
+    "area_ratio": 0.002,
+    "touch": ""
+   },
+   {
+    "x0": 254,
+    "y0": 1221,
+    "x1": 277,
+    "y1": 1251,
+    "score": 0.685,
+    "h_ratio": 0.02,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 254,
+    "y0": 197,
+    "x1": 279,
+    "y1": 227,
+    "score": 0.571,
+    "h_ratio": 0.02,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_room_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 230,
+    "y0": 1287,
+    "x1": 317,
+    "y1": 1534,
+    "score": 0.787,
+    "h_ratio": 0.161,
+    "area_ratio": 0.024,
+    "touch": "B"
+   },
+   {
+    "x0": 230,
+    "y0": 786,
+    "x1": 316,
+    "y1": 1024,
+    "score": 0.777,
+    "h_ratio": 0.155,
+    "area_ratio": 0.023,
+    "touch": ""
+   },
+   {
+    "x0": 237,
+    "y0": 370,
+    "x1": 309,
+    "y1": 592,
+    "score": 0.719,
+    "h_ratio": 0.145,
+    "area_ratio": 0.018,
+    "touch": ""
+   },
+   {
+    "x0": 235,
+    "y0": 3,
+    "x1": 311,
+    "y1": 195,
+    "score": 0.621,
+    "h_ratio": 0.125,
+    "area_ratio": 0.016,
+    "touch": "T"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 266,
+    "y0": 817,
+    "x1": 286,
+    "y1": 844,
+    "score": 0.504,
+    "h_ratio": 0.018,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 265,
+    "y0": 1322,
+    "x1": 287,
+    "y1": 1352,
+    "score": 0.271,
+    "h_ratio": 0.02,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 262,
+    "y0": 1314,
+    "x1": 288,
+    "y1": 1354,
+    "score": 0.762,
+    "h_ratio": 0.026,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 262,
+    "y0": 393,
+    "x1": 282,
+    "y1": 421,
+    "score": 0.759,
+    "h_ratio": 0.018,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 262,
+    "y0": 807,
+    "x1": 288,
+    "y1": 845,
+    "score": 0.752,
+    "h_ratio": 0.025,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 262,
+    "y0": 6,
+    "x1": 283,
+    "y1": 36,
+    "score": 0.517,
+    "h_ratio": 0.02,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_room_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 190,
+    "y0": 298,
+    "x1": 385,
+    "y1": 817,
+    "score": 0.813,
+    "h_ratio": 0.338,
+    "area_ratio": 0.114,
+    "touch": ""
+   },
+   {
+    "x0": 179,
+    "y0": 1037,
+    "x1": 386,
+    "y1": 1536,
+    "score": 0.798,
+    "h_ratio": 0.325,
+    "area_ratio": 0.117,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 301,
+    "y0": 1098,
+    "x1": 325,
+    "y1": 1144,
+    "score": 0.256,
+    "h_ratio": 0.03,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 256,
+    "y0": 1073,
+    "x1": 326,
+    "y1": 1155,
+    "score": 0.817,
+    "h_ratio": 0.053,
+    "area_ratio": 0.006,
+    "touch": ""
+   },
+   {
+    "x0": 251,
+    "y0": 341,
+    "x1": 328,
+    "y1": 437,
+    "score": 0.681,
+    "h_ratio": 0.062,
+    "area_ratio": 0.008,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_rural_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 220,
+    "y0": 583,
+    "x1": 359,
+    "y1": 947,
+    "score": 0.794,
+    "h_ratio": 0.237,
+    "area_ratio": 0.057,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 267,
+    "y0": 609,
+    "x1": 309,
+    "y1": 661,
+    "score": 0.767,
+    "h_ratio": 0.034,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_rural_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 202,
+    "y0": 1056,
+    "x1": 353,
+    "y1": 1480,
+    "score": 0.782,
+    "h_ratio": 0.276,
+    "area_ratio": 0.072,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 248,
+    "y0": 1097,
+    "x1": 295,
+    "y1": 1155,
+    "score": 0.786,
+    "h_ratio": 0.038,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_rural_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 207,
+    "y0": 933,
+    "x1": 387,
+    "y1": 1379,
+    "score": 0.614,
+    "h_ratio": 0.29,
+    "area_ratio": 0.091,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 272,
+    "y0": 986,
+    "x1": 320,
+    "y1": 1054,
+    "score": 0.656,
+    "h_ratio": 0.044,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_street_81.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 311,
+    "y0": 1261,
+    "x1": 363,
+    "y1": 1449,
+    "score": 0.534,
+    "h_ratio": 0.122,
+    "area_ratio": 0.011,
+    "touch": ""
+   },
+   {
+    "x0": 239,
+    "y0": 1202,
+    "x1": 322,
+    "y1": 1476,
+    "score": 0.514,
+    "h_ratio": 0.178,
+    "area_ratio": 0.026,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 272,
+    "y0": 1242,
+    "x1": 295,
+    "y1": 1281,
+    "score": 0.433,
+    "h_ratio": 0.025,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_street_82.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 225,
+    "y0": 1268,
+    "x1": 342,
+    "y1": 1536,
+    "score": 0.7,
+    "h_ratio": 0.174,
+    "area_ratio": 0.035,
+    "touch": "B"
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 266,
+    "y0": 1311,
+    "x1": 292,
+    "y1": 1348,
+    "score": 0.699,
+    "h_ratio": 0.024,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_tate_old_street_83.png",
+  "w": 576,
+  "h": 1536,
+  "persons": [
+   {
+    "x0": 244,
+    "y0": 1253,
+    "x1": 361,
+    "y1": 1535,
+    "score": 0.662,
+    "h_ratio": 0.184,
+    "area_ratio": 0.037,
+    "touch": "B"
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 292,
+    "y0": 1288,
+    "x1": 315,
+    "y1": 1322,
+    "score": 0.686,
+    "h_ratio": 0.022,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_room_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 767,
+    "y0": 151,
+    "x1": 1001,
+    "y1": 476,
+    "score": 0.446,
+    "h_ratio": 0.564,
+    "area_ratio": 0.086,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 853,
+    "y0": 178,
+    "x1": 894,
+    "y1": 209,
+    "score": 0.699,
+    "h_ratio": 0.054,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 845,
+    "y0": 162,
+    "x1": 902,
+    "y1": 208,
+    "score": 0.812,
+    "h_ratio": 0.08,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_room_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 668,
+    "y0": 168,
+    "x1": 807,
+    "y1": 413,
+    "score": 0.709,
+    "h_ratio": 0.425,
+    "area_ratio": 0.038,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 731,
+    "y0": 188,
+    "x1": 759,
+    "y1": 207,
+    "score": 0.425,
+    "h_ratio": 0.033,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 723,
+    "y0": 177,
+    "x1": 761,
+    "y1": 208,
+    "score": 0.792,
+    "h_ratio": 0.054,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_room_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 616,
+    "y0": 33,
+    "x1": 849,
+    "y1": 534,
+    "score": 0.739,
+    "h_ratio": 0.87,
+    "area_ratio": 0.132,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 716,
+    "y0": 72,
+    "x1": 771,
+    "y1": 120,
+    "score": 0.618,
+    "h_ratio": 0.083,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 691,
+    "y0": 47,
+    "x1": 773,
+    "y1": 117,
+    "score": 0.87,
+    "h_ratio": 0.122,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_rural_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1124,
+    "y0": 155,
+    "x1": 1321,
+    "y1": 547,
+    "score": 0.741,
+    "h_ratio": 0.681,
+    "area_ratio": 0.087,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 1190,
+    "y0": 188,
+    "x1": 1230,
+    "y1": 222,
+    "score": 0.661,
+    "h_ratio": 0.059,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 1188,
+    "y0": 168,
+    "x1": 1244,
+    "y1": 219,
+    "score": 0.817,
+    "h_ratio": 0.089,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_rural_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 844,
+    "y0": 93,
+    "x1": 1065,
+    "y1": 418,
+    "score": 0.782,
+    "h_ratio": 0.564,
+    "area_ratio": 0.081,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 928,
+    "y0": 126,
+    "x1": 966,
+    "y1": 154,
+    "score": 0.536,
+    "h_ratio": 0.049,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 922,
+    "y0": 105,
+    "x1": 978,
+    "y1": 154,
+    "score": 0.812,
+    "h_ratio": 0.085,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_rural_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 612,
+    "y0": 102,
+    "x1": 860,
+    "y1": 536,
+    "score": 0.768,
+    "h_ratio": 0.753,
+    "area_ratio": 0.122,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 710,
+    "y0": 142,
+    "x1": 763,
+    "y1": 183,
+    "score": 0.7,
+    "h_ratio": 0.071,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 703,
+    "y0": 117,
+    "x1": 772,
+    "y1": 181,
+    "score": 0.85,
+    "h_ratio": 0.111,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_street_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1117,
+    "y0": 269,
+    "x1": 1270,
+    "y1": 546,
+    "score": 0.752,
+    "h_ratio": 0.481,
+    "area_ratio": 0.048,
+    "touch": ""
+   },
+   {
+    "x0": 913,
+    "y0": 260,
+    "x1": 1067,
+    "y1": 542,
+    "score": 0.724,
+    "h_ratio": 0.49,
+    "area_ratio": 0.049,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 1166,
+    "y0": 295,
+    "x1": 1195,
+    "y1": 319,
+    "score": 0.632,
+    "h_ratio": 0.042,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 963,
+    "y0": 284,
+    "x1": 996,
+    "y1": 310,
+    "score": 0.494,
+    "h_ratio": 0.045,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 958,
+    "y0": 272,
+    "x1": 1002,
+    "y1": 310,
+    "score": 0.787,
+    "h_ratio": 0.066,
+    "area_ratio": 0.002,
+    "touch": ""
+   },
+   {
+    "x0": 1163,
+    "y0": 279,
+    "x1": 1205,
+    "y1": 319,
+    "score": 0.78,
+    "h_ratio": 0.069,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_street_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1259,
+    "y0": 111,
+    "x1": 1421,
+    "y1": 343,
+    "score": 0.73,
+    "h_ratio": 0.403,
+    "area_ratio": 0.042,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 1317,
+    "y0": 121,
+    "x1": 1362,
+    "y1": 155,
+    "score": 0.769,
+    "h_ratio": 0.059,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_boy_street_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1046,
+    "y0": 315,
+    "x1": 1171,
+    "y1": 526,
+    "score": 0.701,
+    "h_ratio": 0.366,
+    "area_ratio": 0.03,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 1092,
+    "y0": 327,
+    "x1": 1125,
+    "y1": 356,
+    "score": 0.658,
+    "h_ratio": 0.05,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_room_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 800,
+    "y0": 156,
+    "x1": 977,
+    "y1": 495,
+    "score": 0.375,
+    "h_ratio": 0.589,
+    "area_ratio": 0.068,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 863,
+    "y0": 192,
+    "x1": 903,
+    "y1": 223,
+    "score": 0.676,
+    "h_ratio": 0.054,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 857,
+    "y0": 171,
+    "x1": 915,
+    "y1": 223,
+    "score": 0.786,
+    "h_ratio": 0.09,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_room_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 635,
+    "y0": 191,
+    "x1": 809,
+    "y1": 456,
+    "score": 0.623,
+    "h_ratio": 0.46,
+    "area_ratio": 0.052,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 691,
+    "y0": 234,
+    "x1": 746,
+    "y1": 277,
+    "score": 0.696,
+    "h_ratio": 0.075,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 688,
+    "y0": 203,
+    "x1": 767,
+    "y1": 276,
+    "score": 0.863,
+    "h_ratio": 0.127,
+    "area_ratio": 0.007,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_room_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 641,
+    "y0": 102,
+    "x1": 837,
+    "y1": 527,
+    "score": 0.71,
+    "h_ratio": 0.738,
+    "area_ratio": 0.094,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 718,
+    "y0": 148,
+    "x1": 767,
+    "y1": 186,
+    "score": 0.723,
+    "h_ratio": 0.066,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 707,
+    "y0": 116,
+    "x1": 778,
+    "y1": 186,
+    "score": 0.846,
+    "h_ratio": 0.122,
+    "area_ratio": 0.006,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_rural_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [
+   {
+    "x0": 1205,
+    "y0": 192,
+    "x1": 1243,
+    "y1": 224,
+    "score": 0.591,
+    "h_ratio": 0.056,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 1198,
+    "y0": 170,
+    "x1": 1254,
+    "y1": 224,
+    "score": 0.657,
+    "h_ratio": 0.094,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_rural_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 748,
+    "y0": 281,
+    "x1": 881,
+    "y1": 519,
+    "score": 0.61,
+    "h_ratio": 0.413,
+    "area_ratio": 0.036,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 792,
+    "y0": 292,
+    "x1": 836,
+    "y1": 335,
+    "score": 0.594,
+    "h_ratio": 0.075,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_rural_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 627,
+    "y0": 133,
+    "x1": 849,
+    "y1": 484,
+    "score": 0.536,
+    "h_ratio": 0.609,
+    "area_ratio": 0.088,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 728,
+    "y0": 170,
+    "x1": 770,
+    "y1": 203,
+    "score": 0.684,
+    "h_ratio": 0.057,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 716,
+    "y0": 145,
+    "x1": 778,
+    "y1": 204,
+    "score": 0.802,
+    "h_ratio": 0.102,
+    "area_ratio": 0.004,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_street_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1021,
+    "y0": 206,
+    "x1": 1211,
+    "y1": 574,
+    "score": 0.665,
+    "h_ratio": 0.639,
+    "area_ratio": 0.079,
+    "touch": "B"
+   }
+  ],
+  "faces": [
+   {
+    "x0": 1096,
+    "y0": 248,
+    "x1": 1137,
+    "y1": 287,
+    "score": 0.69,
+    "h_ratio": 0.068,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 1091,
+    "y0": 221,
+    "x1": 1163,
+    "y1": 286,
+    "score": 0.844,
+    "h_ratio": 0.113,
+    "area_ratio": 0.005,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_girl_street_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1042,
+    "y0": 227,
+    "x1": 1179,
+    "y1": 408,
+    "score": 0.474,
+    "h_ratio": 0.314,
+    "area_ratio": 0.028,
+    "touch": ""
+   },
+   {
+    "x0": 1045,
+    "y0": 232,
+    "x1": 1153,
+    "y1": 345,
+    "score": 0.37,
+    "h_ratio": 0.196,
+    "area_ratio": 0.014,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "long_yoko_girl_street_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1051,
+    "y0": 339,
+    "x1": 1173,
+    "y1": 570,
+    "score": 0.682,
+    "h_ratio": 0.401,
+    "area_ratio": 0.032,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 1099,
+    "y0": 360,
+    "x1": 1124,
+    "y1": 382,
+    "score": 0.338,
+    "h_ratio": 0.038,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 1093,
+    "y0": 351,
+    "x1": 1129,
+    "y1": 383,
+    "score": 0.74,
+    "h_ratio": 0.056,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_old_room_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 869,
+    "y0": 188,
+    "x1": 908,
+    "y1": 230,
+    "score": 0.748,
+    "h_ratio": 0.073,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_old_room_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 650,
+    "y0": 254,
+    "x1": 790,
+    "y1": 445,
+    "score": 0.401,
+    "h_ratio": 0.332,
+    "area_ratio": 0.03,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 700,
+    "y0": 264,
+    "x1": 741,
+    "y1": 297,
+    "score": 0.696,
+    "h_ratio": 0.057,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_old_room_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 639,
+    "y0": 140,
+    "x1": 840,
+    "y1": 491,
+    "score": 0.56,
+    "h_ratio": 0.609,
+    "area_ratio": 0.08,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 728,
+    "y0": 172,
+    "x1": 758,
+    "y1": 198,
+    "score": 0.63,
+    "h_ratio": 0.045,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 716,
+    "y0": 150,
+    "x1": 764,
+    "y1": 199,
+    "score": 0.776,
+    "h_ratio": 0.085,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_old_rural_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1141,
+    "y0": 204,
+    "x1": 1307,
+    "y1": 459,
+    "score": 0.734,
+    "h_ratio": 0.443,
+    "area_ratio": 0.048,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "long_yoko_old_rural_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "long_yoko_old_rural_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 676,
+    "y0": 264,
+    "x1": 834,
+    "y1": 491,
+    "score": 0.677,
+    "h_ratio": 0.394,
+    "area_ratio": 0.041,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 738,
+    "y0": 274,
+    "x1": 774,
+    "y1": 304,
+    "score": 0.51,
+    "h_ratio": 0.052,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_old_street_81.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1089,
+    "y0": 347,
+    "x1": 1219,
+    "y1": 575,
+    "score": 0.637,
+    "h_ratio": 0.396,
+    "area_ratio": 0.034,
+    "touch": "B"
+   }
+  ],
+  "faces": [],
+  "heads": [
+   {
+    "x0": 1133,
+    "y0": 362,
+    "x1": 1169,
+    "y1": 397,
+    "score": 0.501,
+    "h_ratio": 0.061,
+    "area_ratio": 0.001,
+    "touch": ""
+   }
+  ]
+ },
+ {
+  "file": "long_yoko_old_street_82.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1073,
+    "y0": 222,
+    "x1": 1192,
+    "y1": 433,
+    "score": 0.658,
+    "h_ratio": 0.366,
+    "area_ratio": 0.028,
+    "touch": ""
+   }
+  ],
+  "faces": [],
+  "heads": []
+ },
+ {
+  "file": "long_yoko_old_street_83.png",
+  "w": 1536,
+  "h": 576,
+  "persons": [
+   {
+    "x0": 1054,
+    "y0": 341,
+    "x1": 1170,
+    "y1": 568,
+    "score": 0.442,
+    "h_ratio": 0.394,
+    "area_ratio": 0.03,
+    "touch": ""
+   }
+  ],
+  "faces": [
+   {
+    "x0": 500,
+    "y0": 344,
+    "x1": 540,
+    "y1": 387,
+    "score": 0.289,
+    "h_ratio": 0.075,
+    "area_ratio": 0.002,
+    "touch": ""
+   }
+  ],
+  "heads": [
+   {
+    "x0": 1098,
+    "y0": 353,
+    "x1": 1123,
+    "y1": 377,
+    "score": 0.706,
+    "h_ratio": 0.042,
+    "area_ratio": 0.001,
+    "touch": ""
+   },
+   {
+    "x0": 470,
+    "y0": 310,
+    "x1": 549,
+    "y1": 388,
+    "score": 0.638,
+    "h_ratio": 0.135,
+    "area_ratio": 0.007,
+    "touch": ""
+   },
+   {
+    "x0": 259,
+    "y0": 364,
+    "x1": 311,
+    "y1": 408,
+    "score": 0.432,
+    "h_ratio": 0.076,
+    "area_ratio": 0.003,
+    "touch": ""
+   }
+  ]
+ }
+]

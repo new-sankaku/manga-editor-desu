@@ -1,0 +1,87 @@
+{
+ "a_back_1.png": {
+  "done": true,
+  "photo": false,
+  "kept": "part",
+  "note": "後ろ姿になった。三つ編みがほどけた"
+ },
+ "a_back_2.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "後ろ姿。三つ編み・髪飾り・パーカーを保つ"
+ },
+ "a_bg_1.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "背景だけ海辺に変わる。背景はカラーになり、白黒の人物と画風が合わない"
+ },
+ "a_bg_2.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "同上"
+ },
+ "a_cup_1.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "パンがカップに置き換わる。ほかは元のまま"
+ },
+ "a_cup_2.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "同上"
+ },
+ "a_sit_1.png": {
+  "done": false,
+  "photo": false,
+  "kept": true,
+  "note": "元の絵が既に座っており、変化なし（課題の選び方の誤り）"
+ },
+ "a_sit_2.png": {
+  "done": false,
+  "photo": false,
+  "kept": true,
+  "note": "同上"
+ },
+ "a_smile_1.png": {
+  "done": "part",
+  "photo": false,
+  "kept": true,
+  "note": "口がパンで隠れて笑顔がほとんど分からない"
+ },
+ "a_smile_2.png": {
+  "done": "part",
+  "photo": false,
+  "kept": true,
+  "note": "同上"
+ },
+ "b_cup_1.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "走りながらカップを持つ。ほかは元のまま"
+ },
+ "b_cup_2.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "同上"
+ },
+ "b_smile_1.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "笑顔になる。ほかは元のまま"
+ },
+ "b_smile_2.png": {
+  "done": true,
+  "photo": false,
+  "kept": true,
+  "note": "同上"
+ },
+ "_note": "出力は32の倍数に丸められ（1216→1248）、元の絵と画素の位置がずれるため、人物の外側の変化の割合（0.15〜0.25）はずれの分を含み、変化の量としては使えない。b の座る・後ろ姿・背景は画像生成を止めたため作っていない"
+}

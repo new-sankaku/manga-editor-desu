@@ -1,0 +1,494 @@
+{
+ "from_behind_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_behind_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_behind_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_behind_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "掲示に文字"
+ },
+ "from_behind_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_behind_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_behind_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_behind_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "黒板に読めない文字"
+ },
+ "from_above_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_above_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_above_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_above_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_above_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_above_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_above_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ2つ"
+ },
+ "from_above_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_below_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "from_side_1007": {
+  "ok": false,
+  "note": "体と顔が斜め前向きで横顔でない",
+  "unwanted_text": ""
+ },
+ "from_side_1008": {
+  "ok": false,
+  "note": "斜め前向きで横顔でない",
+  "unwanted_text": "黒板に読めない文字"
+ },
+ "full_body_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "full_body_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "close_up_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "close_up_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "close_up_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "close_up_1004": {
+  "ok": false,
+  "note": "顔が枠で切れ、目が半分しか入らない",
+  "unwanted_text": ""
+ },
+ "close_up_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "close_up_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "close_up_1007": {
+  "ok": false,
+  "note": "胸から上になり寄りでない",
+  "unwanted_text": ""
+ },
+ "close_up_1008": {
+  "ok": false,
+  "note": "胸から上になり寄りでない",
+  "unwanted_text": ""
+ },
+ "very_wide_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "very_wide_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "upper_body_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "two_people_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1003": {
+  "ok": false,
+  "note": "背景に3人目が入った",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "two_people_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "three_people_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "three_people_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "three_people_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "three_people_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "three_people_1005": {
+  "ok": false,
+  "note": "4人になった",
+  "unwanted_text": ""
+ },
+ "three_people_1006": {
+  "ok": false,
+  "note": "4人になった",
+  "unwanted_text": ""
+ },
+ "three_people_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "読めない文字のフキダシ"
+ },
+ "three_people_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": "掲示に文字"
+ },
+ "looking_at_viewer_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1004": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "looking_at_viewer_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1001": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1002": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1003": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1004": {
+  "ok": false,
+  "note": "鉛筆を持つ手と書く動作が見えない",
+  "unwanted_text": ""
+ },
+ "hand_action_1005": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1006": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1007": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "hand_action_1008": {
+  "ok": true,
+  "note": "",
+  "unwanted_text": ""
+ },
+ "_meta": {
+  "judge": "Claude（Opus）が一覧画像（縮小）を見て判定。漫画を描く人の判定ではない",
+  "date": "2026-09-30",
+  "observations": [
+   "白黒の指定でもネクタイの赤が大半の画像で残る（色の指定が白黒の指定に勝つ）",
+   "「話している」を付けると8枚すべてに読めない文字のフキダシが出る",
+   "複数人では全員が同じ髪型・眼鏡・制服に寄り、見分けが付きにくい（1-19）",
+   "引き・後ろ姿・全身は人物が画面の中央に来る構図にほぼ固定される（1-1の「中央に寄らないか」）",
+   "見上げの指示は、スカートを強調する構図に寄る（規制の判定の材料）",
+   "手の破綻は縮小図では判定できない（1-3・1-10は未判定）"
+  ]
+ }
+}

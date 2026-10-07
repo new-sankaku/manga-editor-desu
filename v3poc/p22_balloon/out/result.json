@@ -1,0 +1,64 @@
+{
+ "board_base": {
+  "n": 8,
+  "with_balloon": 0,
+  "with_text": 8,
+  "detected": 7
+ },
+ "board_neg": {
+  "n": 8,
+  "with_balloon": 0,
+  "with_text": 5,
+  "detected": 5
+ },
+ "shout_base": {
+  "n": 8,
+  "with_balloon": 2,
+  "with_text": 5,
+  "detected": 3
+ },
+ "shout_neg": {
+  "n": 8,
+  "with_balloon": 1,
+  "with_text": 4,
+  "detected": 2
+ },
+ "talk_base": {
+  "n": 8,
+  "with_balloon": 8,
+  "with_text": 8,
+  "detected": 8
+ },
+ "talk_neg": {
+  "n": 8,
+  "with_balloon": 8,
+  "with_text": 8,
+  "detected": 8
+ },
+ "detector_vs_eye": {
+  "0.05": {
+   "text_and_detected": 33,
+   "no_text_but_detected": 3,
+   "text_but_missed": 5,
+   "no_text_not_detected": 7
+  },
+  "0.1": {
+   "text_and_detected": 31,
+   "no_text_but_detected": 2,
+   "text_but_missed": 7,
+   "no_text_not_detected": 8
+  },
+  "0.15": {
+   "text_and_detected": 30,
+   "no_text_but_detected": 1,
+   "text_but_missed": 8,
+   "no_text_not_detected": 9
+  },
+  "0.2": {
+   "text_and_detected": 24,
+   "no_text_but_detected": 1,
+   "text_but_missed": 14,
+   "no_text_not_detected": 9
+  }
+ }
+}
