@@ -1,0 +1,84 @@
+# V3サーバーが使う既製品。アプリ本体（v3server）はこのcomposeに入れず、手元で uv run で動かす。
+# 版は固定する。上げるときは llm_doc/V3サーバーの土台.md の「動かした版」も直す。
+name: v3
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: v3
+      POSTGRES_PASSWORD: v3
+      POSTGRES_DB: v3
+    ports:
+      - "55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U v3 -d v3"]
+      interval: 2s
+      retries: 30
+
+  # 順番待ちと工程の進行役。開発用のサーバー（SQLiteに保存）。
+  temporal:
+    image: temporalio/temporal:1.9.1
+    # イメージの既定の利用者では名前付きボリュームに書けず起動しなかったため（2026-10-07 実測）
+    user: "0:0"
+    # 待ち行列の分割を1つにする。分割が4つ（既定）だと、人の依頼を先にする優先順位が分割をまたいで守られなかった（2026-10-07 実測）
+    command:
+      - server
+      - start-dev
+      - --ip
+      - 0.0.0.0
+      - --db-filename
+      - /data/temporal.db
+      - --dynamic-config-value
+      - matching.numTaskqueueReadPartitions=1
+      - --dynamic-config-value
+      - matching.numTaskqueueWritePartitions=1
+    ports:
+      - "57233:7233"
+      - "58233:8233"
+    volumes:
+      - temporaldata:/data
+
+  # 権限
+  openfga-migrate:
+    image: openfga/openfga:v1.22.0
+    command: ["migrate"]
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://v3:v3@postgres:5432/openfga?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  openfga:
+    image: openfga/openfga:v1.22.0
+    command: ["run"]
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://v3:v3@postgres:5432/openfga?sslmode=disable
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+    ports:
+      - "58080:8080"
+    depends_on:
+      openfga-migrate:
+        condition: service_completed_successfully
+
+  # 呼び出し口のうちLLM・VLMを受け持つ。自動の切り替えは設定で切る（docker/litellm.yaml）。
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.104.1
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?LITELLM_MASTER_KEY を .env に書いてください}
+      # 単価の表を外から取りに行かない。費用はつなぎ先ごとに人が入れる（V3細部の決めごと 4.1）
+      LITELLM_LOCAL_MODEL_COST_MAP: "True"
+    ports:
+      - "54000:4000"
+    volumes:
+      - ./docker/litellm.yaml:/app/config.yaml:ro
+
+volumes:
+  pgdata:
+  temporaldata:

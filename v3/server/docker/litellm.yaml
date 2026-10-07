@@ -1,0 +1,13 @@
+# つなぎ先（文章・VLM）はここに足す。モデル名とキーは利用者の契約で決まるので、ここには置かない。
+# 例の書き方は llm_doc/V3サーバーの土台.md の「LLMのつなぎ先を足す」にある。
+model_list: []
+
+router_settings:
+  # 失敗したときに別のモデルへ自動で回さない（方針7）。
+  num_retries: 0
+  fallbacks: []
+  context_window_fallbacks: []
+  content_policy_fallbacks: []
+
+litellm_settings:
+  drop_params: false

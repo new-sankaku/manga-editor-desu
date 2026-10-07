@@ -1,0 +1,33 @@
+model
+  schema 1.1
+
+# 利用者
+type user
+
+# サーバー全体。つなぎ先と処理ごとの送り先は全作品で共通なので、ここで管理する
+type system
+  relations
+    define admin: [user]
+
+# 作品。役は V3ハーネス設計 4.3 と V3細部の決めごと 16章
+type work
+  relations
+    define author: [user]
+    define editor: [user]
+    define assistant: [user]
+    define client: [user]
+    define translator: [user]
+    define viewer: [user]
+    define can_view: author or editor or assistant or client or translator or viewer
+    define can_comment: author or editor or client
+    define can_approve: author or editor
+    define can_translate: author or translator
+    define can_manage: author
+
+# ページ。アシスタントは割り当てられたページだけ描ける
+type page
+  relations
+    define work: [work]
+    define assigned: [user]
+    define can_view: can_view from work
+    define can_draw: author from work or assigned
