@@ -85,6 +85,32 @@ async def test_コマを分ける_合わせるは1つの操作で_1回で取り�
     assert [x["id"] for x in rows] == [p["id"]] and rows[0]["frame"] == p["frame"]
 
 
+async def test_文字が小さい側にあるコマをナイフで分けると文字は新しいコマへ移る(api, authz):
+    """前は、文字の panel_id を新しいコマへ変える値が、新しいコマの行より先に書き出され、外部キーで 500 になった。"""
+    a = user()
+    ids = await framed_page(api, a, texts=("1",))
+    wid = ids["work"]
+    p = await first_panel(api, wid, a, ids["page1"])
+    (t,) = live((await work_json(api, wid, a))["text_items"], page_id=ids["page1"])
+    assert (await op(api, wid, a, {"type": "update_text_item", "id": t["id"],
+                                   "box_mm": [10, 190, 30, 210]})).status_code == 200
+    assert (await op(api, wid, a, {"type": "set_threshold", "key": "panel_short_side_min_mm", "value": {"value": 10},
+                                   "source": "試験", "status": "unverified"})).status_code == 200
+    new_id = uuid.uuid4().hex
+    r = await op(api, wid, a, {"type": "split_panel", "panel_id": p["id"], "through_mm": [75, 170],
+                               "direction": "horizontal", "new_panel_id": new_id})
+    assert r.status_code == 200, r.text
+    w = await work_json(api, wid, a)
+    (t2,) = live(w["text_items"], page_id=ids["page1"])
+    assert len(live(w["panels"], page_id=ids["page1"])) == 2
+    holder = next(x for x in live(w["panels"], page_id=ids["page1"]) if x["id"] == t2["panel_id"])
+    ys = [q[1] for q in holder["frame"]["polygon_mm"]]
+    assert min(ys) <= 190 and max(ys) >= 210
+    await undo(api, wid, a, r.json()["event_id"])
+    (t3,) = live((await work_json(api, wid, a))["text_items"], page_id=ids["page1"])
+    assert t3["panel_id"] == p["id"]
+
+
 # ---------------------------------------------------------------- トーン・図形・動かさない・仕上げ
 
 

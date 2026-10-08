@@ -125,7 +125,7 @@ class _Plan:
         return (any(touches_human_hand(o, set(v)) for o, v, _ in self.changes)
                 or any(touches_human_hand(o, {"removed"}) or bool(o.human_hand_fields) for o in self.removes))
 
-    def apply(self, ctx, op: OpBase, page_ids: list[str], target, label: str) -> dict[str, Any]:
+    async def apply(self, ctx, op: OpBase, page_ids: list[str], target, label: str) -> dict[str, Any]:
         for o, _, keep_marks in self.changes:
             if not keep_marks:
                 refuse_if_fixed(o)
@@ -136,6 +136,13 @@ class _Plan:
             # 何も変えない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
             hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0], "人の手の印の付いたコマ・文字に当たる")
             return rc.inverse(page_ids, label)
+        # 足す行を先に書き出す。変える値が足す行を指す（文字の panel_id を新しいコマへ移すなど）と、同じ書き出しの中では
+        # 行を入れる前に値を変えることがあり、text_items_panel_id_fkey で止まった（2026-10-08。panels と image_files の
+        # 外部キーが輪になっていて、SQLAlchemy が表の順を決めきれないため）。どの組み立て（分ける・合わせる・割る・型）もここを通る
+        for o in self.creates:
+            rc.created(o)
+        if self.creates:
+            await ctx.session.flush()
         for o, values, keep_marks in self.changes:
             if keep_marks:
                 # 番号のずれは数え直しで、物を動かすのではない。人の手の印も「動かさない」もそのまま
@@ -144,8 +151,6 @@ class _Plan:
                 rc.change(o, values)
         for o in self.removes:
             rc.remove(o)
-        for o in self.creates:
-            rc.created(o)
         return rc.inverse(page_ids, label)
 
 
@@ -216,7 +221,7 @@ class SplitPanel(OpBase):
         for it in items:
             if point_in_polygon(_box_center(it.box_mm), small):
                 plan.change(it, {"panel_id": new.id})
-        return plan.apply(ctx, self, pages, panel, "コマを分ける")
+        return await plan.apply(ctx, self, pages, panel, "コマを分ける")
 
 
 class MergePanels(OpBase):
@@ -260,7 +265,7 @@ class MergePanels(OpBase):
             plan.change(t, {"panel_id": keep.id})
         pages = [a.page_id] + await _shift_orders(plan, ctx.session, ctx.work.id, max(a.order, b.order), -1,
                                                   {a.id, b.id})
-        return plan.apply(ctx, self, pages, keep, "コマを合わせる")
+        return await plan.apply(ctx, self, pages, keep, "コマを合わせる")
 
 
 class RandomSplitPanel(OpBase):
@@ -313,7 +318,7 @@ class RandomSplitPanel(OpBase):
             for it in items:
                 if point_in_polygon(_box_center(it.box_mm), piece):
                     plan.change(it, {"panel_id": new.id})
-        return plan.apply(ctx, self, pages, panel, "ばらばらに割る")
+        return await plan.apply(ctx, self, pages, panel, "ばらばらに割る")
 
 
 class AddShapePanel(OpBase):
@@ -414,5 +419,5 @@ class ApplyPanelTemplate(OpBase):
             plan.creates.append(_new_panel(ctx, self.page_id, self.first_order + i, _frame(poly, f["bleeds"]),
                                            f.get("frame_style"), pid))
         page = await ctx.session.get(Page, self.page_id)
-        return plan.apply(ctx, self, [self.page_id], page, "コマの型を当てる")
+        return await plan.apply(ctx, self, [self.page_id], page, "コマの型を当てる")
 
