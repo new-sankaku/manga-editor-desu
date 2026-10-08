@@ -4,25 +4,26 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=Shippori+Mincho+B1:wght@600;700;800&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.468.0/dist/umd/lucide.min.js"></script>
 <style>
-:root{--ok:#6FCF97;
-  --bg:#3A3D43; --canvas:#33363B; --dot:#454950;
-  --surface:#44484F; --surface-2:#4C5058; --surface-3:#565B64;
-  --line:#5A5F69; --line-2:#6C727D;
-  --ink:#EEF0F3; --ink-2:#CDD1D8; --ink-3:#A3AAB5; --ink-4:#838A96;
-  --ai:#9DB0FF; --ai-ink:#BECAFF; --ai-tint:#414A6E; --ai-line:#5F6CA8;
-  --need:#EBAA55; --need-ink:#F6CB8D; --need-tint:#57482F; --need-line:#8A7040;
-  --bad:#F5887A; --bad-ink:#FFB0A6; --bad-tint:#5C3B38; --bad-line:#96524B;
+:root{--ok:#5F8A55;
+  /* 明るい表示だけ（細部の決めごと 8章、決定 2026-10-08）。砂とベージュの組 */
+  --bg:#DCD5BE; --canvas:#D3CBB1; --dot:#C2B99B;
+  --surface:#E9E3CF; --surface-2:#E2DBC4; --surface-3:#D8D0B7;
+  --line:#C9C0A3; --line-2:#B2A887;
+  --ink:#433F35; --ink-2:#5C564A; --ink-3:#787162; --ink-4:#978F7B;
+  --ai:#4A6386; --ai-ink:#3A4F6C; --ai-tint:#D5D6CB; --ai-line:#A2ADB5;
+  --need:#A86A16; --need-ink:#7A4C0D; --need-tint:#E9D9B5; --need-line:#CBAB70;
+  --bad:#A8432F; --bad-ink:#823120; --bad-tint:#E7D0C0; --bad-line:#C89884;
   --r-sm:6px; --r:8px; --r-lg:12px; --r-xl:16px;
-  --sh-1:0 1px 2px rgba(0,0,0,.18),0 0 0 1px rgba(255,255,255,.04);
-  --sh-2:0 2px 6px rgba(0,0,0,.2),0 10px 28px rgba(0,0,0,.26);
-  --sh-3:0 16px 44px rgba(0,0,0,.42),0 2px 8px rgba(0,0,0,.24);
+  --sh-1:0 1px 2px rgba(67,63,53,.12),0 0 0 1px rgba(67,63,53,.05);
+  --sh-2:0 2px 6px rgba(67,63,53,.12),0 10px 28px rgba(67,63,53,.14);
+  --sh-3:0 16px 44px rgba(67,63,53,.24),0 2px 8px rgba(67,63,53,.14);
   --font:"IBM Plex Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
   --mincho:"Shippori Mincho B1","Yu Mincho","Hiragino Mincho ProN",serif;
-  --on:#23262B; --raise:#636975; --o-ink:#EEF0F3; --glass:rgba(68,72,79,.92);
-  color-scheme:dark;
+  --on:#F4EFE0; --raise:#F4EFE0; --o-ink:#433F35; --glass:rgba(233,227,207,.92);
+  color-scheme:light;
 }
 .page,.cand,.face,.exp .box,.ava,.turn,.lyr .th,.ref:not(.new) .box,.tile>svg:not(.lucide),.strip,.scn-a{
-  --bg:#EEF0F3; --canvas:#E6E8EC; --dot:#CFD4DB; --surface:#FFFFFF; --surface-2:#F7F8FA; --surface-3:#EEF0F3; --line:#E3E6EB; --line-2:#D0D5DC; --ink:#14171C; --ink-2:#474F5D; --ink-3:#7A8291; --ink-4:#A7AEB9; --ai:#3D5AD6; --ai-ink:#2C44AD; --ai-tint:#EEF1FD; --ai-line:#C6CFF5; --need:#C46A00; --need-ink:#8A4A00; --need-tint:#FEF4E4; --need-line:#F0D09C; --bad:#CC3527; --bad-ink:#A22518; --bad-tint:#FDEDEB; --bad-line:#F3C2BC;
+  --bg:#EFEADB; --canvas:#E9E3CF; --dot:#D8D0B7; --surface:#FFFFFF; --surface-2:#F8F5EC; --surface-3:#EFEADB; --line:#E2DBC4; --line-2:#CFC6AA; --ink:#2B2822; --ink-2:#514B3F; --ink-3:#787162; --ink-4:#A69E89; --ai:#4A6386; --ai-ink:#3A4F6C; --ai-tint:#E8EAEC; --ai-line:#BFC8CF; --need:#A86A16; --need-ink:#7A4C0D; --need-tint:#F6EBD3; --need-line:#E0C690; --bad:#A8432F; --bad-ink:#823120; --bad-tint:#F5E3DA; --bad-line:#E2B9A8;
   --on:#fff; --raise:#fff; color:var(--ink);
 }
 *{box-sizing:border-box}
