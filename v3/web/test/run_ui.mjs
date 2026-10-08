@@ -27,6 +27,7 @@ const FAST = [
   { name: "keys_ui（偽のサーバー）", file: "keys_ui.mjs", env: shotsFor("keys") },
   { name: "manuscript_ui（偽のサーバー）", file: "manuscript_ui.mjs", env: { MOCK: "1", ...shotsFor("manuscript_mock") } },
   { name: "screens_ui（録った答え）", file: "screens_ui.mjs", env: { REPLAY: "1", ...shotsFor("screens_replay") } },
+  { name: "harness_layout_ui（図の重なり・偽のサーバー）", file: "harness_layout_ui.mjs", env: { SIZES: "1920x1080", ...shotsFor("harness_layout") } },
 ];
 function fullJobs() {
   const origin = need("V3_ORIGIN");

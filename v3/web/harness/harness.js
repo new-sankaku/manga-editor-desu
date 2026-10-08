@@ -6,7 +6,7 @@ import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, p
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { startKeys, km } from "../common/keys.js";
-import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait, urgentStatus } from "./harness_graph.js";
+import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, RETRY_EDGES, EDGE_TEXT, statusClass, isHumanWait, urgentStatus } from "./harness_graph.js";
 
 const STAGES = ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"];
 const STAGE_JA = { S0: "企画", S1: "構成", S2: "設定資料", S3: "ネーム", S4: "作画", S5: "仕上げ", S6: "総合", S7: "書き出し" };
@@ -72,7 +72,7 @@ async function main() {
   if (S.unitId) S.view = "unit";
   await loadAuth();
   // キー・キーの一覧・絵だけ（図だけを大きく出す。見張る画面として使う）・全画面（common/keys.js）
-  km.bind("harness.fit", () => graph?.cy.fit(undefined, 40));
+  km.bind("harness.fit", () => graph?.fit());
   km.bind("harness.stageView", () => openStageView());
   await startKeys("harness");
   if (mode() === "oidc") {
@@ -89,19 +89,25 @@ async function main() {
     S.workId = works[0].id;
   }
   rememberWork(S.workId);
-  graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap, onStepsChanged: refreshDetail });
+  graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap, onStepsChanged: refreshDetail, detailBox: $("#gen-progress"),
+                                                              onHover: (t) => { $("#graph-note").textContent = t; } });
   // 画面の試験（harness_ui.mjs）が図の中を見る。たたんだノードの data には中の要素（collapsedChildren）が入り、
   // ブラウザの外へ渡せないので、文字・数・真偽の値だけを渡す
   probe.graphNodes = (sel) => graph.cy.nodes(sel).map((n) =>
     Object.fromEntries(Object.entries(n.data()).filter(([, v]) => v === null || typeof v !== "object")));
   probe.toggleStep = (step) => graph.toggleStep(step);  // 同じく、段を押したのと同じ動き
+  probe.graph = () => graph;  // 図の重なりの試験（harness_layout_ui.mjs）が Cytoscape の箱を読む
+  probe.applyEvent = (e) => onEvent(e);  // 同じく、SSE で届いた出来事と同じ道で状態を変える（偽のサーバーは流れを送らない）
   $("#tab-stage").addEventListener("click", () => openStageView());
   $("#tab-unit").addEventListener("click", () => S.unitId && openUnit(S.unitId));
-  $("#fit").addEventListener("click", () => graph.cy.fit(undefined, 40));
+  $("#fit").addEventListener("click", () => graph.fit());
   $("#fold").addEventListener("click", () => graph.setAllCollapsed(true));
   $("#unfold").addEventListener("click", () => graph.setAllCollapsed(false));
   // 絵だけ・Tab でパネルが出入りすると図の箱の大きさが変わる。Cytoscape は箱の大きさを自分では見ないので知らせる
-  window.addEventListener("v3-view", () => requestAnimationFrame(() => { graph.cy.resize(); graph.cy.fit(undefined, 40); }));
+  window.addEventListener("v3-view", () => requestAnimationFrame(() => graph.resized()));
+  // 窓の大きさが変わったら、並べ直さずに全体を見直す（ノードは動かない。倍率と位置だけ）
+  let resizeTimer = null;
+  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => graph.resized(), 120); });
   setInterval(tick, 500);
   await loadWork();
   connect();
@@ -386,6 +392,7 @@ function renderUnitGraph() {
   graph.setStepParts(stepParts(d, u));
   graph.setSteps(states, current, u.status);
   graph.setEdgeCounts(counts);
+  S.edgeCounts = counts;
   // 進み具合は生成の段にいる間だけ出す（終わった後は候補の一覧と判断のパネルで見る）
   const generating = u.step === "generate" && ACTIVE.has(u.status);
   graph.setProgress(generating ? [...S.progress.values()].filter((p) => p.unit_id === d.unit_id && p.attempt === u.attempt) : []);
@@ -428,13 +435,13 @@ function stepParts(d, u) {
     generate: byService(jobsOf(/^(gen|comp)\d/)),
     fix: byService(jobsOf(/^fix\d/)),
     check: [...checks].map(([name, t]) => ({ id: name, status: t.ng ? "failed" : t.none ? "waiting_limit" : "done",
-      label: `${name}\n通る ${t.ok}・落ちる ${t.ng}${t.none ? `・測れない ${t.none}` : ""}` })),
+      label: `${name}\n通る ${t.ok}・落ちる ${t.ng}${t.none ? `\n測れない ${t.none}` : ""}` })),
     evaluate: repeats.map((r) => {
       const rs = ev.rounds.filter((x) => x.repeat === r);
       const ties = rs.filter((x) => x.verdict === "tie").length;
       const top = ev.tops[r];
       return { id: String(r), status: top ? "done" : "stopped",
-               label: `${r + 1}回目 比べた ${rs.length}${ties ? `・同点 ${ties}` : ""}\n1位 ${top ? short(top) : "決まらない"}` };
+               label: `${r + 1}回目 比べた ${rs.length}${ties ? `\n同点 ${ties}` : ""}\n1位 ${top ? short(top) : "決まらない"}` };
     }),
   };
 }
@@ -510,7 +517,7 @@ function sideKey() {
     const u = S.units.get(S.detail.unit_id) || S.detail;
     return JSON.stringify([u.unit_id, u.status, u.step, u.attempt, u.stop_reason, u.cost_used, u.candidates, u.stale,
                            S.detail.cands.map((c) => [c.id, c.status, c.check_verdict, c.picked]),
-                           S.detail.decisions.length, u.limits || S.detail.limits]);
+                           S.detail.decisions.length, u.limits || S.detail.limits, S.edgeCounts]);
   }
   const run = S.stageSel ? S.runs.get(S.stageSel) : runsOfEpisode().at(-1);
   return JSON.stringify(["stage", run && [run.id, run.status, run.stop_reason, run.stage_check], S.reviewItems.length, S.thresholds,
@@ -545,6 +552,12 @@ function unitPanel() {
     h("dt", { text: "費用" }), h("dd", { text: `${u.cost_used} / ${u.budget_cost ?? "—"}` }),
     h("dt", { text: "秒" }), h("dd", { text: `${Math.round(u.seconds_used)} / ${u.budget_seconds ?? "—"}` }),
     h("dt", { text: "候補" }), h("dd", { text: String(u.candidates) })));
+  // 戻った回数（図の戻りの辺のラベルは短いので、全文と回数はここに出す）
+  const back = RETRY_EDGES.map(([a, b]) => [`${a}>${b}`, (S.edgeCounts || {})[`${a}>${b}`] || 0]).filter(([, n]) => n);
+  if (back.length) {
+    out.push(h("section", { cls: "box" }, h("h3", { text: "戻った回数" }),
+      h("dl", { cls: "kv" }, back.flatMap(([k, n]) => [h("dt", { text: `${n}回` }), h("dd", { text: `${STEP_JA[k.split(">")[0]]}→${STEP_JA[k.split(">")[1]]}：${EDGE_TEXT[k]}` })]))));
+  }
 
   const ctl = (body) => post(`${base}/control`, body);
   const btns = [];

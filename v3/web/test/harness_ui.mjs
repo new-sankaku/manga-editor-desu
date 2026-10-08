@@ -62,8 +62,8 @@ try {
 
   // ---------------------------------------------------------------- 1b. 工程の図：ページごとにたたむ・開く
   await page.click("#fold");
-  await untilCount("node.group.collapsed", 2);
-  const folded = await nodes("node.group.collapsed");
+  await untilCount("node.group.folded", 2);
+  const folded = await nodes("node.group.folded");
   check(folded.length === 2 && folded.every((d) => /（[34]）/.test(d.label)), "ページごとにたたむと、ページのまとまり2つが作業の数と内訳のノードになる");
   check((await nodes('node[kind="unit"]')).length === 0, "たたむと作業のノードは見えない");
   await shot("08_stage_folded", "工程の図。S4 の作業をページごとにたたんだところ（p1 4つ・p2 3つ。状態の内訳と、一番急ぐ状態の色）");
@@ -114,7 +114,7 @@ try {
   await page.waitForFunction(() => Date.now() - window.__harness.lastTraversal.at >= 450, null, { timeout: 5000 });
   const trav = await page.evaluate(() => window.__harness.lastTraversal);
   check(trav.from === "review" && trav.to === "context", "却下して再開すると 人の判断→文脈 の戻りの辺を印が動く");
-  await shot("02_unit_retry_marker", "作業の図。却下で 人の判断→文脈 の戻りの辺（破線）を印が動いている途中。辺に「却下（理由つき） ×1」");
+  await shot("02_unit_retry_marker", "作業の図。却下で 人の判断→文脈 の戻りの辺（破線）を印が動いている途中。辺のラベルは「却下」、通った回数は横の欄の「戻った回数」");
   results.latency.resume_click_to_marker_ms = opToScreen;  // 却下で止めた後、再開を押してから戻りの辺を印が動くまで
 
   // ---------------------------------------------------------------- 5. 取り消し中・止めた・古い

@@ -11,8 +11,7 @@
 <!-- 印の絵（キーの一覧・帯のボタン）と図の部品（v3/web/vendor に置いた版。外から取りに行かない） -->
 <script src="../vendor/lucide-0.468.0/lucide.min.js"></script>
 <script src="../vendor/cytoscape-3.34.3/cytoscape.min.js"></script>
-<script src="../vendor/cytoscape-dagre-4.0.1/cytoscape-dagre.min.js"></script>
-<script src="../vendor/cytoscape-expand-collapse-4.1.1/cytoscape-expand-collapse.js"></script>
+<script src="../vendor/elkjs-0.11.1/elk.bundled.js"></script>
 <script type="module" src="../common/nav.js"></script>
 <script type="module" src="./harness.js"></script>
 </head>
@@ -43,6 +42,8 @@
       <div id="graph-overlay" class="graph-overlay"></div>
       <div class="disconnected-veil"><span>切断中：受け取れていません。つなぎ直したら今の状態を取り直します</span></div>
     </div>
+    <p id="graph-note" class="graph-note muted" aria-live="polite"></p>
+    <div id="gen-progress" class="gen-box" hidden></div>
     <div class="timeline-box">
       <div class="graph-head"><span class="label">時間の列</span><span id="timeline-span" class="muted"></span></div>
       <div id="timeline" class="timeline"></div>
