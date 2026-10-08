@@ -1,26 +1,23 @@
 // 原稿の画面を Playwright で通し、画面の写しを残し、動かす速さと保存の時間を測る。
 // 使い方（本物のサーバー。/web を出し、V3_AUTH_MODE=dev_header で動いていること）：
-//   V3_ORIGIN=http://127.0.0.1:8794 SHOTS=v3/web/manuscript/screenshots \
+//   V3_ORIGIN=http://127.0.0.1:8794 \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/manuscript_ui.mjs
 // 偽のサーバー（manuscript_mock_server.mjs。本物ではない）で通すとき：V3_ORIGIN の代わりに MOCK=1。
 // 作品は試験のたびに manuscript_seed.mjs で新しく作る（B5・600dpi・コマ 6・フキダシ 10・トーン 3）。
-import { createRequire } from "node:module";
-import { mkdirSync, statSync } from "node:fs";
+// 画面の写しは SHOTS=<フォルダ> を付けたときだけ撮る（ui_common.mjs）。普段は v3/web/test/run_ui.mjs から流す。
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { seed, httpCall } from "./manuscript_seed.mjs";
 import { MockServer } from "./manuscript_mock_server.mjs";
-
-const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
+import { makeShot, openBrowser, settled, SHOTS } from "./ui_common.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MOCK = process.env.MOCK === "1";
 const ORIGIN = MOCK ? "http://mock.v3.test" : process.env.V3_ORIGIN;
-const SHOTS = process.env.SHOTS;
 const USER = process.env.V3_USER || "ms-author";
-if (!ORIGIN || !SHOTS) throw new Error("V3_ORIGIN（または MOCK=1）と SHOTS を決めてください");
-mkdirSync(SHOTS, { recursive: true });
+// PERF=1 のときだけ、速さを測る分（60回に分けたドラッグ・保存 10 回）を通す。普段は同じ確かめを少ない回数で通す
+const PERF = process.env.PERF === "1";
+if (!ORIGIN) throw new Error("V3_ORIGIN（または MOCK=1）を決めてください");
 const label = MOCK ? "偽のサーバー" : `本物のサーバー（${ORIGIN}）`;
 console.log("相手：", label);
 
@@ -34,7 +31,7 @@ if (MOCK) {
   ]);
 }
 
-const browser = await chromium.launch();
+const browser = await openBrowser();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
@@ -43,17 +40,12 @@ await page.addInitScript((u) => { try { localStorage.setItem("v3.user", u); loca
 if (MOCK) await mock.install(page, ORIGIN);
 
 const results = { server: label };
-const shots = [];
-async function shot(name, opts = {}) {
-  const path = `${SHOTS}/${name}.png`;
-  await page.screenshot({ path, ...opts });
-  const kb = Math.round(statSync(path).size / 1024);
-  if (kb > 1024) throw new Error(`${path} が 1MB を超えた（${kb}KB）`);
-  shots.push(path);
-  console.log("shot", path, `${kb}KB`);
-}
+// 写しを撮る前は ui_common.mjs の shot が描き終わるのを待つ（写しを撮らない普段の試験では待たない）
+const shot = makeShot(page);
 function check(cond, msg) { if (!cond) throw new Error(`確かめ失敗: ${msg}`); console.log("ok", msg); }
 const S = (fn, arg) => page.evaluate(fn, arg);
+// 状態が変わるまで待つ（決まった時間は待たない）。満たさなければ、すぐ後の check で落ちる
+const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 5000 }).catch(() => {});
 const idle = () => page.waitForFunction(() => window.__ms && window.__ms.saver && !window.__ms.saver.pending() && !window.__ms.saver.running && !window.__ms.saver.undoing && !window.__ms.stepping && !window.__ms.reloading);
 
 // ページの mm（基本枠の座標）→ 画面の点
@@ -71,7 +63,7 @@ await page.goto(`${ORIGIN}/web/manuscript/index.html?work=${ids.workId}&page=${P
 try {
   await page.waitForFunction(() => window.__ms && window.__ms.m && window.__ms.view.slots.length === 1);
   await page.waitForFunction(() => window.__ms.view.images.size >= 2, null, { timeout: 15000 });
-  await page.waitForTimeout(300);
+  await settled(page);
   check(await count("panels", P1) === 6 && await count("text_items", P1) === 10 && await count("page_items", P1) === 3, "1ページ目にコマ 6・フキダシ 10・トーン 3");
   check(await page.locator(".tx").count() === 10, "文字を 10 個重ねて出す");
   check(await page.locator(".tx.v").count() === 10, "縦書きで出す");
@@ -85,7 +77,8 @@ try {
   const c0 = await at(P1, (box[0] + box[2]) / 2, (box[1] + box[3]) / 2);
   await page.mouse.move(c0.x, c0.y);
   await page.mouse.down();
-  for (let i = 1; i <= 60; i++) await page.mouse.move(c0.x - i * 2, c0.y + i, { steps: 1 });
+  const moves = PERF ? 60 : 12;
+  for (let i = 1; i <= moves; i++) await page.mouse.move(c0.x - i * 120 / moves, c0.y + i * 60 / moves, { steps: 1 });
   await page.mouse.up();
   const saveStart = Date.now();
   await page.waitForFunction(([id, x]) => window.__ms.m.find("text_items", id).box_mm[0] !== x, [t0, box[0]]);
@@ -103,9 +96,9 @@ try {
   const marks = await S((id) => window.__ms.m.find("text_items", id).human_hand_fields, t0);
   check(marks.includes("box_mm"), "動かした項目に人の手の印が付いた");
 
-  // 保存の時間を 10 回（文字の大きさを変える操作）
+  // 保存の時間を 10 回（文字の大きさを変える操作）。普段は 2 回（下の取り消しの確かめに要る）
   const saves = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < (PERF ? 10 : 2); i++) {
     const ms = await S(async ([id, i]) => {
       const t = performance.now();
       const { change } = await import("/web/manuscript/js/main.js");
@@ -115,7 +108,7 @@ try {
     saves.push(ms);
   }
   saves.sort((a, b) => a - b);
-  results.save = { n: saves.length, p50_ms: Math.round(saves[5]), max_ms: Math.round(saves[9]) };
+  results.save = { n: saves.length, p50_ms: Math.round(saves[Math.floor(saves.length / 2)]), max_ms: Math.round(saves[saves.length - 1]) };
   await idle();
 
   // ---- 取り消し・やり直し（ページごと）
@@ -126,7 +119,7 @@ try {
   check(undone !== before, "Ctrl+Z で文字の大きさが1つ前に戻った");
   await page.keyboard.press("Control+Shift+z");
   await idle();
-  await page.waitForTimeout(200);
+  await until(([id, v]) => window.__ms.m.find("text_items", id).font_size_pt === v, [t0, before]);
   check(await S((id) => window.__ms.m.find("text_items", id).font_size_pt, t0) === before, "Ctrl+Shift+Z でやり直した");
 
   // ---- 拡大・移動（Ctrl+ホイールと、ホイール）
@@ -136,11 +129,11 @@ try {
   await S(() => { window.__ms.view.perf.renders = []; });
   const tz = Date.now();
   for (let i = 0; i < 20; i++) { await page.keyboard.down("Control"); await page.mouse.wheel(0, -60); await page.keyboard.up("Control"); }
-  await page.waitForTimeout(250);
+  await until((z) => window.__ms.view.zoom() > z * 2, z0);
   results.zoom = { wheel_events: 20, wall_ms: Date.now() - tz, redraws_during: await S(() => window.__ms.view.perf.renders.length), from: Math.round(z0 * 100) / 100, to: Math.round(await S(() => window.__ms.view.zoom()) * 100) / 100 };
   check(results.zoom.to > z0 * 2, "Ctrl+ホイールで広がる");
   await page.keyboard.press("0");
-  await page.waitForTimeout(200);
+  await settled(page);
 
   // ---- ナイフ
   await page.keyboard.press("c");
@@ -156,7 +149,6 @@ try {
   await page.waitForFunction((p) => window.__ms.m.panels(p).length === 7, P1);
   check(true, "ナイフでコマを2つに分けた（コマ 7）");
   await page.mouse.move(k.x + 200, k.y + 200);
-  await page.waitForTimeout(150);
   await shot("03_knife_split");
   await page.keyboard.press("Control+z");
   await idle();
@@ -168,13 +160,12 @@ try {
   const t1 = ids.texts[0];
   const b1 = await S((id) => window.__ms.m.find("text_items", id).box_mm, t1);
   await S(([id, b]) => window.__ms.view.focusBox(window.__ms.pageId, b), [t1, b1]);
-  await page.waitForTimeout(200);
+  await settled(page);
   const e1 = await at(P1, (b1[0] + b1[2]) / 2, (b1[1] + b1[3]) / 2);
   await page.mouse.dblclick(e1.x, e1.y);
   await page.waitForSelector(".tx.editing");
   await page.keyboard.press("End");
   await page.keyboard.type("？\n12時だ!?");
-  await page.waitForTimeout(100);
   await shot("04_vertical_text_editing");
   await page.keyboard.press("Escape");
   await idle();
@@ -186,7 +177,7 @@ try {
   // ---- 判断待ち
   if (MOCK) {
     await page.keyboard.press("j");
-    await page.waitForTimeout(200);
+    await until(() => document.querySelectorAll(".held-row").length === 2);
     const hs = await S(() => ({ n: window.__ms.held.length, tab: window.__ms.tab, active: document.activeElement && document.activeElement.tagName }));
     check(await page.locator(".held-row").count() === 2, `判断待ちを 2 件並べる（偽のサーバーが作ったもの）${JSON.stringify(hs)}`);
     await shot("05_held_changes");
@@ -206,11 +197,9 @@ try {
   const sl = await S(() => window.__ms.view.slots.map((s) => ({ id: s.page.id, side: s.side, x: s.x })));
   check(sl[0].id === ids.pages[3] && sl[1].id === ids.pages[2], "右から読む：3ページが右・4ページが左");
   check(sl[1].x === 182, "見開きの組のページは、ノドで付けて並べる");
-  await page.waitForTimeout(200);
   await shot("06_spread");
   await page.keyboard.press("PageUp");
   await page.waitForFunction((p) => window.__ms.view.slots.some((s) => s.page.id === p), P1);
-  await page.waitForTimeout(250);
   await shot("07_spread_page1_2");
 
   // ---- ページの一覧：並べ替え（2ページを1ページの前へ。3・4ページは見開きの組なので離せない）
@@ -225,13 +214,13 @@ try {
   await page.mouse.move(to.x + 4, to.y + to.height / 2, { steps: 12 });
   await page.mouse.up();
   await idle();
-  await page.waitForTimeout(300);
+  await until(([ep, p]) => window.__ms.m.pages(ep)[0].id === p, [ids.episodeId, ids.pages[1]]);
   const order = await S((ep) => window.__ms.m.pages(ep).map((p) => p.id), ids.episodeId);
   check(order[0] === ids.pages[1], "ドラッグで並べ替えると正本の番号が変わる");
   await shot("08_page_list", { clip: { x: 0, y: 900 - 220, width: 1010, height: 220 } });
   await page.keyboard.press("Control+z");
   await idle();
-  await page.waitForTimeout(200);
+  await until(([ep, p]) => window.__ms.m.pages(ep)[1].id === p, [ids.episodeId, ids.pages[1]]);
   check((await S((ep) => window.__ms.m.pages(ep).map((p) => p.id), ids.episodeId))[1] === ids.pages[1], "並べ替えを取り消せる");
   await shot("09_page_list_and_settings");
 
@@ -246,7 +235,7 @@ try {
   const withLoc = page.locator(".issue:has(svg.lucide-crosshair)");
   if (await withLoc.count()) {
     await withLoc.first().click();
-    await page.waitForTimeout(300);
+    await until(() => !!window.__ms.sel);
     check(await S(() => !!window.__ms.sel), "問題を押すとその場所を選ぶ");
   }
   await shot("10_preflight");
@@ -258,11 +247,11 @@ try {
 
   check(errors.length === 0, `画面のエラーなし ${errors.join(" / ")}`);
 } catch (e) {
-  await page.screenshot({ path: `${SHOTS}/zz_failure.png` }).catch(() => {});
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/zz_failure.png` }).catch(() => {});
   console.error(errors.join("\n"));
   await browser.close();
   throw e;
 }
 await browser.close();
 console.log("RESULTS", JSON.stringify(results));
-console.log("SHOTS", shots.join(" "));
+if (SHOTS) console.log("SHOTS", shot.taken.join(" "));

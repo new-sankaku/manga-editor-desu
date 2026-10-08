@@ -6,6 +6,8 @@ on:
     paths: ["v3/**", ".github/workflows/v3-server.yml"]
   pull_request:
     paths: ["v3/**", ".github/workflows/v3-server.yml"]
+  # 重い組（本物の Temporal・書き出しの描画・本物のサーバーの画面）は手で流す（v3/run_tests.sh full と同じ中身）
+  workflow_dispatch:
 
 defaults:
   run:
@@ -51,6 +53,9 @@ jobs:
       - run: cp .env.example .env
       - run: uv sync --frozen
       - run: uv run pytest -q tests/unit
+      - name: 書き出しの Node の部品の試験
+        working-directory: v3/psd_writer
+        run: npm test --silent
 
   integration:
     runs-on: ubuntu-24.04
@@ -82,6 +87,60 @@ jobs:
           V3_TEST_S3_ENDPOINT_URL: http://127.0.0.1:58333
           V3_TEST_S3_ACCESS_KEY_ID: ci-access
           V3_TEST_S3_SECRET_ACCESS_KEY: ci-secret-key
-        run: uv run pytest -q tests/integration
+        # 速い組だけ（full・perf の印は除く）。4本同時（作業者ごとにデータベースと Temporal の名前空間を分ける）
+        run: uv run pytest -q -n 4 --dist load -m "not full and not perf" tests/integration
+      - if: failure()
+        run: docker compose logs --tail 200
+
+  # 画面の試験の速い組（偽のサーバーと録った答え。本物のサーバーは要らない）
+  ui:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Playwright とブラウザ
+        working-directory: v3/web/test
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: 試験（v3/run_tests.sh fast の画面の分）
+        working-directory: v3/web/test
+        env:
+          NODE_PATH: ${{ github.workspace }}/v3/web/test/node_modules
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+        run: node run_ui.mjs fast
+
+  # 手で流したときだけ：v3/run_tests.sh full（fast ＋ full の印 ＋ 本物のサーバーの画面）
+  full:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: 書き出しの Node の部品
+        working-directory: v3/psd_writer
+        run: npm install --no-audit --no-fund
+      - name: Playwright とブラウザ
+        working-directory: v3/web/test
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - run: cp .env.example .env
+      - run: docker compose up -d --wait postgres openfga temporal
+      - run: uv sync --frozen
+      - name: Temporal が応答するまで待つ
+        run: for i in $(seq 60); do nc -z 127.0.0.1 57233 && break; sleep 2; done
+      - name: 試験
+        env:
+          NODE_PATH: ${{ github.workspace }}/v3/web/test/node_modules
+          PLAYWRIGHT_BROWSERS_PATH: /home/runner/.cache/ms-playwright
+        run: ../run_tests.sh full
       - if: failure()
         run: docker compose logs --tail 200

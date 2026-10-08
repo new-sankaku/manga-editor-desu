@@ -488,7 +488,6 @@ def export_env(monkeypatch, tmp_path, image_dir):
     s = get_settings()
     monkeypatch.setattr(s, "export_dir", str(tmp_path / "exports"))
     monkeypatch.setattr(s, "font_dir", FONT_DIR)
-    monkeypatch.setattr(s, "node_executable", "/opt/node22/bin/node")
     monkeypatch.setattr(s, "text_render_script", str(ROOT / "psd_writer" / "render_text.js"))
     monkeypatch.setattr(s, "psd_writer_script", str(ROOT / "psd_writer" / "write_layered_psd.js"))
     return tmp_path
@@ -558,7 +557,7 @@ def edit_psd(data: bytes, tmp: pathlib.Path, change: tuple[str, ...], add_to_gro
                                   "opacity": 1, "blend_mode": "normal", "hidden": False})
     write_layered_psd({"width": psd.width, "height": psd.height, "composite_png": None,
                        "output_path": str(tmp / "edited.psd"), "layers": layers},
-                      "/opt/node22/bin/node", ROOT / "psd_writer" / "write_layered_psd.js", 60)
+                      get_settings().node_executable, ROOT / "psd_writer" / "write_layered_psd.js", 60)
     return (tmp / "edited.psd").read_bytes()
 
 

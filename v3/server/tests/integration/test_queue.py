@@ -123,6 +123,7 @@ async def test_手元と言えないlocalの記録は送ってよい先に載せ
     await until_status(api, wid, a, jid, "done")
 
 
+@pytest.mark.full  # 本物の作業者の同時実行数を、送る時間（0.5秒・1.5秒）を重ねて確かめる
 async def test_1件ずつと同時にN件まで(api, admin, workers, fake_adapter):
     a = user()
     wid = (await new_work(api, a))["work"]
@@ -189,39 +190,58 @@ async def test_休ませた先は待ちに残り戻すと送る(api, admin, work
     await until_status(api, wid, a, jid, "done")
 
 
-async def test_失敗の種類ごとの扱い(api, admin, workers, fake_adapter):
+async def _failure_kinds(api, admin, worker_set, fake_adapter, settle):
+    """settle(wid, a, jid, *状態) は、依頼がその状態で終わるのを待って、依頼を返す。"""
     a = user()
     wid = (await new_work(api, a))["work"]
     sid, p = await make_service(api, admin)
-    await workers.reload()
+    await worker_set.reload()
 
     def count(tag):
         return sum(1 for _, t in fake_adapter["calls"] if t == tag)
 
     # 断られたら送り直さない
     jid = await enqueue(api, wid, a, p, tag="refused", script=["refused"])
-    assert (await until_status(api, wid, a, jid, "stopped"))["failure_kind"] == "refused"
+    assert (await settle(wid, a, jid, "stopped"))["failure_kind"] == "refused"
     assert count("refused") == 1
 
     # 通信の失敗は resend_limit（2）回まで送り直す。3回目で通る
     jid = await enqueue(api, wid, a, p, tag="flaky", script=["transport", "transport", "ok"])
-    await until_status(api, wid, a, jid, "done", timeout=60)
+    await settle(wid, a, jid, "done")
     assert count("flaky") == 3
 
     # 回数を超えたら止める
     jid = await enqueue(api, wid, a, p, tag="down", script=["transport"] * 5)
-    assert (await until_status(api, wid, a, jid, "stopped", timeout=60))["failure_kind"] == "transport"
+    assert (await settle(wid, a, jid, "stopped"))["failure_kind"] == "transport"
     assert count("down") == 3
 
     # 制限に当たったら待って同じ先に送り直す。回数には数えない
     jid = await enqueue(api, wid, a, p, tag="limited", script=["rate_limited"] * 3 + ["ok"])
     await until_status(api, wid, a, jid, "waiting_limit")
-    await until_status(api, wid, a, jid, "done", timeout=60)
+    await settle(wid, a, jid, "done")
     assert count("limited") == 4
 
     # 止まったものの「もう一度」
     r = await api.post(f"/works/{wid}/jobs/{(await job(api, wid, a, jid))['id']}/retry", headers=h(a))
     assert r.status_code == 422
+
+
+async def test_失敗の種類ごとの扱い(api, admin, skipping, fake_adapter):
+    """送り直しの間隔（5秒・10秒）は Temporal が持つ。時間を飛ばせる Temporal で待たずに通す（conftest の skipping）。"""
+    async def settle(wid, a, jid, *statuses):
+        await skipping.finished(jid)
+        j = await job(api, wid, a, jid)
+        assert j["status"] in statuses, j
+        return j
+    await _failure_kinds(api, admin, skipping.workers, fake_adapter, settle)
+
+
+@pytest.mark.full
+async def test_失敗の種類ごとの扱い_本物のTemporal(api, admin, workers, fake_adapter):
+    """上と同じことを本物の Temporal と作業者で通す（送り直しの間隔を実際に待つので 30 秒ほどかかる）。"""
+    async def settle(wid, a, jid, *statuses):
+        return await until_status(api, wid, a, jid, *statuses, timeout=60)
+    await _failure_kinds(api, admin, workers, fake_adapter, settle)
 
 
 async def test_取り消すと止まる(api, admin, workers, fake_adapter):
