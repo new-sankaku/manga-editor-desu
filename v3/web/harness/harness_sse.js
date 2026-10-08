@@ -1,9 +1,9 @@
-// SSE を fetch で読む（EventSource は X-V3-User を付けられない）。切れたら呼び手に知らせ、呼び手が snapshot を取り直して
+// SSE を fetch で読む（EventSource は X-V3-User も X-V3-Request も付けられない）。見出しは呼び手が渡す authFetch が付ける。切れたら呼び手に知らせ、呼び手が snapshot を取り直して
 // last_event_id の続きからつなぎ直す（harness.js の connect）。
 // 形は https://html.spec.whatwg.org/multipage/server-sent-events.html の「event stream の解釈」に合わせる（id・event・data・retry）。
 
-export async function readStream(url, headers, { onEvent, onOpen, signal }) {
-  const r = await fetch(url, { headers: { ...headers, Accept: "text/event-stream" }, signal });
+export async function readStream(authFetch, url, { onEvent, onOpen, signal }) {
+  const r = await authFetch(url, { headers: { Accept: "text/event-stream" }, signal });
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
   onOpen();
   const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();

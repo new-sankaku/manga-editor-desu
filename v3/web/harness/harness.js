@@ -1,8 +1,8 @@
 // V3 の AIハーネスの画面（/web/harness/?work=<作品の id>）。
 // 状態の正本はサーバー（harness_* の表）。この画面は snapshot を取り、その last_event_id の続きを SSE で受けて当てる。
 // 切れたら「切断中」を出し、つなぎ直すときに snapshot を取り直す（取りこぼしも重なりも無い。live_stream.py）。
-// 書き込み（採用・却下・止める・上限）は X-V3-Request を付けて送る（ログインの cookie で書くときに要る見出し）。
-import { currentUser, setUser, blobUrl, ApiError } from "../js/api.js";
+// 口は全部 ../js/api.js の authFetch を通す（名乗りの見出しと X-V3-Request を付ける所は api.js の1か所）。
+import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost } from "../js/api.js";
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait } from "./harness_graph.js";
@@ -37,19 +37,8 @@ function h(tag, props = {}, ...kids) {
 
 // ------------------------------------------------------------------ サーバー
 
-function headers() { return { "X-V3-User": currentUser() }; }
-async function call(method, path, body) {
-  const hs = headers();
-  if (method !== "GET") hs["X-V3-Request"] = "1";
-  if (body !== undefined) hs["Content-Type"] = "application/json";
-  const r = await fetch(path, { method, headers: hs, body: body === undefined ? undefined : JSON.stringify(body) });
-  const text = await r.text();
-  const data = text && (r.headers.get("content-type") || "").includes("json") ? JSON.parse(text) : text;
-  if (!r.ok) throw new ApiError(r.status, data && data.detail !== undefined ? data.detail : data);
-  return data;
-}
-const get = (p) => call("GET", p);
-const post = (p, body) => call("POST", p, body ?? {});
+// ハーネスの書き込みの口は本体を要るので、空でも {} を送る
+const post = (p, body) => apiPost(p, body ?? {});
 
 // ------------------------------------------------------------------ 状態
 
@@ -72,9 +61,15 @@ async function main() {
   S.workId = storedWork();
   S.unitId = params.get("unit");
   if (S.unitId) S.view = "unit";
-  $("#user").value = currentUser();
-  $("#user-form").addEventListener("submit", (e) => { e.preventDefault(); setUser($("#user").value.trim()); location.reload(); });
-  if (!currentUser()) { showEmpty("利用者の名前を入れてください"); return; }
+  await loadAuth();
+  if (mode() === "oidc") {
+    $("#user").value = myName();
+    $("#user").readOnly = true;
+  } else {
+    $("#user").value = currentUser();
+    $("#user-form").addEventListener("submit", (e) => { e.preventDefault(); setUser($("#user").value.trim()); location.reload(); });
+    if (!currentUser()) { showEmpty("利用者の名前を入れてください"); return; }
+  }
   if (!S.workId) {
     const works = await get("/works");
     if (!works.length) { showEmpty("見てよい作品がありません"); return; }
@@ -105,7 +100,7 @@ async function connect() {
     const snap = await get(`/works/${S.workId}/harness/snapshot${S.view === "unit" && S.unitId ? `?unit_id=${S.unitId}` : ""}`);
     applySnapshot(snap);
     S.abort = new AbortController();
-    await readStream(`/works/${S.workId}/harness/stream?after=${S.lastEventId}`, headers(), {
+    await readStream(authFetch, `/works/${S.workId}/harness/stream?after=${S.lastEventId}`, {
       signal: S.abort.signal,
       onOpen: () => { S.retries = 0; setConn("live"); },
       onEvent: onEvent,
@@ -522,7 +517,7 @@ function reviewPanel(u, d, base) {
 
 function candidateCard(c, picked, approve) {
   const img = h("img", { alt: `候補 ${c.k_index + 1}` });
-  if (c.image_id) blobUrl(`/works/${S.workId}/images/${c.image_id}/thumbnail?size=256`).then(({ url }) => { img.src = url; }).catch(() => {});
+  if (c.image_id) showIn(img, `/works/${S.workId}/images/${c.image_id}/thumbnail?size=256`).catch((e) => { img.alt = String(e.message || e); });
   const issues = ((c.check || {}).findings || []).filter((f) => f.ok !== true).map((f) => `${f.ok === false ? "外れ" : "人が見る"}：${f.name}`);
   return h("div", { cls: `cand${c.id === picked ? " picked" : ""} v-${c.check_verdict || "none"}` },
     c.image_id ? img : h("div", { cls: "noimg", text: c.proposal_id ? "ネームの案" : "絵なし" }),

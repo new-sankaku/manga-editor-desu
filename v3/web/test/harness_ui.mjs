@@ -1,6 +1,6 @@
 // AIハーネスの画面を Playwright で通し、7つの状態の画面の写しと、変化が画面に出るまでの遅れを取る。
 // 先に動く見本を起こす（ComfyUI・LLM・検出器は偽物）：
-//   V3_TEST_DATABASE_URL=... uv run python v3/server/tests/integration/harness_screen_demo.py --port 8790
+//   (cd v3/server && uv run python tests/integration/harness_screen_demo.py --port 8790)
 // そのあと：
 //   CTRL=http://127.0.0.1:8791 SHOTS=v3/web/harness/screenshots \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/harness_ui.mjs
