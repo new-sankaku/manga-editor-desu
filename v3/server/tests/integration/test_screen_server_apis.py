@@ -99,6 +99,7 @@ async def test_話ごとの構成と伏線_前の話から人物と生成の中�
 # ---------------------------------------------------------------- 4・11. 書き出しの進み具合と、ページの下見の絵
 
 
+@pytest.mark.full
 async def test_書き出しの進み具合をページごとに残す(api, workers, export_env):  # noqa: F811
     a = user()
     ids, _p, _t = await ready_page(api, a)
@@ -117,6 +118,7 @@ async def test_書き出しの進み具合をページごとに残す(api, worke
     assert out["done_page_ids"] == [ids["page1"]]
 
 
+@pytest.mark.full
 async def test_ページの下見の絵は控え_中身が変わると描き直す(api, export_env):  # noqa: F811
     a = user()
     ids, p, t = await ready_page(api, a)
@@ -247,6 +249,7 @@ async def test_つなぎ先を試す_走り具合_止まったもの_入って�
 # ---------------------------------------------------------------- 8. 組を残す・同じ指示で比べる
 
 
+@pytest.mark.full
 async def test_組を残して当てる_同じ指示で比べる(api, admin, workers, fake_adapter):  # noqa: F811
     a = user()
     wid = (await new_work(api, a))["work"]

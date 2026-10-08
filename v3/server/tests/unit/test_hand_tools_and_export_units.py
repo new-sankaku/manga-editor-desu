@@ -395,3 +395,36 @@ def test_線の控えの絵が無い_古い層は理由を返す():
     assert "古い" in stroke_cache_problem(layer)
     layer.image_stroke_revision = 1
     assert stroke_cache_problem(layer) is None
+
+
+_GS_ICC = pathlib.Path("/usr/share/color/icc/ghostscript")
+
+
+@pytest.mark.skipif(not (_GS_ICC / "default_cmyk.icc").exists(), reason="試験の ICC プロファイル（ghostscript の物）が無い")
+def test_cmyk_conversion_uses_the_profile_and_refuses_without_it(tmp_path):
+    import shutil
+
+    from v3server.name_structure.print_settings import ColorOutput
+    from v3server.print_export.cmyk_conversion import CmykRefused, to_cmyk
+
+    shutil.copy(_GS_ICC / "default_cmyk.icc", tmp_path / "press.icc")
+    shutil.copy(_GS_ICC / "srgb.icc", tmp_path / "rgb.icc")
+    co = ColorOutput(profile="press.icc", intent="relative_colorimetric", black_point_compensation=True)
+    im = Image.new("RGB", (4, 2), (255, 255, 255))
+    im.putpixel((1, 0), (0, 0, 0))
+    out = to_cmyk(im, str(tmp_path), co)
+    from PIL import ImageCms
+
+    attached = ImageCms.getOpenProfile(io.BytesIO(out.info["icc_profile"]))
+    assert out.mode == "CMYK" and attached.profile.xcolor_space.strip() == "CMYK"
+    assert ImageCms.getProfileDescription(attached) == ImageCms.getProfileDescription(str(tmp_path / "press.icc"))
+    assert out.getpixel((0, 0)) == (0, 0, 0, 0)  # 紙の白はインクを載せない
+    assert sum(out.getpixel((1, 0))) > 255 * 2  # 黒は濃く（色の量はプロファイルによる）
+    with pytest.raises(CmykRefused, match="V3_ICC_DIR"):
+        to_cmyk(im, None, co)
+    with pytest.raises(CmykRefused, match="無い"):
+        to_cmyk(im, str(tmp_path), co.model_copy(update={"profile": "other.icc"}))
+    with pytest.raises(CmykRefused, match="CMYK でない"):
+        to_cmyk(im, str(tmp_path), co.model_copy(update={"profile": "rgb.icc"}))
+    with pytest.raises(ValueError):
+        ColorOutput(profile="../press.icc", intent="perceptual", black_point_compensation=False)

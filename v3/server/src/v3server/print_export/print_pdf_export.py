@@ -18,6 +18,7 @@ import pypdf
 from PIL import Image
 
 from v3server.name_structure.reading_direction import PageSpec
+from v3server.print_export.cmyk_conversion import cmyk_tiff_bytes
 
 BilevelCodec = Literal["flate", "ccitt_g4"]
 
@@ -49,8 +50,13 @@ def _encode_page(image: Image.Image, bilevel_codec: BilevelCodec | None, dpi: fl
             raise ValueError(f"2値の符号化が不明です: {bilevel_codec}")
     elif image.mode in ("L", "RGB"):
         image.save(buf, format="PNG", dpi=(dpi, dpi))
+    elif image.mode == "CMYK":
+        # cmyk_conversion.to_cmyk で作った絵（ICC プロファイル付き）。img2pdf が ICCBased の色空間にする
+        if "icc_profile" not in image.info:
+            raise ValueError("CMYK のページに ICC プロファイルが付いていない")
+        return cmyk_tiff_bytes(image, dpi)
     else:
-        raise ValueError(f"画像のモードは 1・L・RGB のどれかにしてください（{image.mode}）")
+        raise ValueError(f"画像のモードは 1・L・RGB・CMYK のどれかにしてください（{image.mode}）")
     return buf.getvalue()
 
 

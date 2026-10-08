@@ -630,6 +630,7 @@ async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, wor
     assert not [x for x in held if x["id"] == text_held[0]["id"] and x["status"] == "open"]
 
 
+@pytest.mark.full
 async def test_文字1つを書き出しと同じ組み方で組み_行の切れ目と字の置き場を返す(api, authz, export_env):
     a = user()
     ids = await framed_page(api, a)

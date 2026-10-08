@@ -112,6 +112,7 @@ async def _file(api, wid, a, run, name):
     return r.content
 
 
+@pytest.mark.full
 @needs_font
 async def test_見開きと2階調とノンブルの書き出し_入稿前の確かめ(api, authz, workers, export_env):
     a = user()
@@ -239,3 +240,53 @@ async def test_見開きと2階調とノンブルの書き出し_入稿前の確
     assert len(color) == 1 and color[0]["severity"] == "error" and color[0]["page_id"] == p4
     assert color[0]["location"]["table"] == "text_items" and "decoration.fill" in color[0]["message"]
     assert "いろなし" in color[0]["message"]
+
+
+CMYK_ICC = pathlib.Path("/usr/share/color/icc/ghostscript/default_cmyk.icc")
+
+
+@pytest.mark.full
+@needs_font
+@pytest.mark.skipif(not CMYK_ICC.exists(), reason="試験の CMYK の ICC プロファイル（ghostscript の物）が無い")
+async def test_カラーのページを_ICC_プロファイルで_CMYK_にして_PDF_に入れる(api, authz, workers, export_env, monkeypatch):
+    import shutil
+
+    from v3server.server_settings import get_settings
+
+    a = user()
+    wid, ids, (p1, p2, p3, p4) = await book(api, a)
+    for p in (p1, p2, p3, p4):
+        assert (await op(api, wid, a, {"type": "update_page", "id": p, "page_kind": "body"})).status_code == 200
+    assert (await op(api, wid, a, {"type": "update_page", "id": p1, "page_kind": "color_page",
+                                   "color_mode": "color"})).status_code == 200
+    co = {"profile": "press.icc", "intent": "relative_colorimetric", "black_point_compensation": True}
+    r = await op(api, wid, a, {"type": "set_work_settings", "preferences": {
+        "frame_style": FRAME_STYLE, "typesetting": TYPESETTING, "print": {**PRINT, "color_output": co},
+        "nombre": NOMBRE}})
+    assert r.status_code == 200, r.text
+    # プロファイルの置き場が無い：入稿前の確かめが知らせ、書き出しは止まる（RGB のまま黙って出さない）
+    monkeypatch.setattr(get_settings(), "icc_dir", None)
+    got = (await api.post(f"/works/{wid}/preflight", headers=h(a), json={})).json()
+    assert [i["kind"] for i in got["issues"] if i["kind"] == "icc_profile"] == ["icc_profile"]
+    bad = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2, p3, p4], "spread_output": "split"})
+    assert bad["status"] == "failed" and "V3_ICC_DIR" in bad["detail"]
+    # 置き場にプロファイルを置くと、カラーのページだけ CMYK になり、PDF ではプロファイル付き（ICCBased・4色）
+    icc_dir = export_env / "icc"
+    icc_dir.mkdir()
+    shutil.copy(CMYK_ICC, icc_dir / "press.icc")
+    monkeypatch.setattr(get_settings(), "icc_dir", str(icc_dir))
+    got = (await api.post(f"/works/{wid}/preflight", headers=h(a), json={})).json()
+    assert not [i for i in got["issues"] if i["kind"] == "icc_profile"]
+    run = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2, p3, p4], "spread_output": "split"})
+    assert run["status"] == "done", run["detail"]
+    (out,) = run["outputs"]
+    assert [(m["page_id"], m["color_space"]) for m in out["pages"]] == \
+        [(p1, "CMYK"), (p2, "1bit"), (p3, "1bit"), (p4, "1bit")]
+    assert out["pages"][0]["icc_profile"] == "press.icc"
+    pdf = pypdf.PdfReader(io.BytesIO(await _file(api, wid, a, run, "BK.pdf")))
+    spaces = []
+    for page in pdf.pages:
+        xo = page["/Resources"]["/XObject"]
+        cs = xo[next(iter(xo))].get_object()["/ColorSpace"]
+        spaces.append((cs[0], cs[1].get_object()["/N"]) if isinstance(cs, list) else cs)
+    assert spaces[0] == ("/ICCBased", 4) and spaces[1] == "/DeviceGray"

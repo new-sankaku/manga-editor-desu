@@ -42,6 +42,7 @@ from v3server.print_export.book_layout import (
     plan_pages,
     print_settings_of,
 )
+from v3server.print_export.cmyk_conversion import CmykRefused, to_cmyk
 from v3server.print_export.color_mode_output import ColorModeError, page_image
 from v3server.print_export.layered_psd_request import build_psd_request, psd_layers_from_nodes, write_layered_psd
 from v3server.print_export.page_render import (
@@ -277,12 +278,22 @@ async def run_export(session: AsyncSession, run: ExportRun,
     outputs: list[dict[str, Any]] = []
     pdf_pages: list[Image.Image] = []
     pdf_dpis: list[int] = []
+    pdf_metas: list[dict[str, Any]] = []
 
     def emit(img: Image.Image, nodes: list[Node] | None, stem: str, dpi: int, color_mode: str,
              page_id: str | None, extra: dict[str, Any]) -> None:
         paper_px = paper_size_px(tuple(run.paper_mm), dpi) if run.paper_mm else None
         flat, offset = _on_paper(img, paper_px)
         meta = {"page_id": page_id, "dpi": dpi, "color_mode": color_mode, **extra}
+        if run.format == "pdf" and color_mode == "color" and ps.color_output is not None:
+            # カラーのページを入稿先のプロファイルで CMYK に（PNG・PSD は RGB のまま。設定は PDF だけに効く）
+            try:
+                flat = to_cmyk(flat, s.icc_dir, ps.color_output)
+            except CmykRefused as e:
+                raise ExportRefused(str(e)) from e
+            meta |= {"color_space": "CMYK", "icc_profile": ps.color_output.profile}
+        else:
+            meta["color_space"] = {"1": "1bit", "L": "Gray"}.get(flat.mode, flat.mode)
         if run.format == "png":
             name = f"{stem}.png"
             flat.save(folder / name, dpi=(dpi, dpi))
@@ -290,6 +301,7 @@ async def run_export(session: AsyncSession, run: ExportRun,
         elif run.format == "pdf":
             pdf_pages.append(flat)
             pdf_dpis.append(dpi)
+            pdf_metas.append(meta)
         elif run.format == "psd":
             if not s.psd_writer_script:
                 raise ExportRefused("V3_PSD_WRITER_SCRIPT が無い。PSD を書けない")
@@ -348,5 +360,5 @@ async def run_export(session: AsyncSession, run: ExportRun,
         name = f"{ps.file_code}.pdf"
         write_print_pdf(pdf_pages, spec, pdf_dpis, ps.bilevel.pdf_codec if ps.bilevel else None, folder / name,
                         tuple(run.paper_mm) if run.paper_mm else None)
-        outputs.append({"page_id": None, "file": name, "bytes": (folder / name).stat().st_size})
+        outputs.append({"page_id": None, "file": name, "bytes": (folder / name).stat().st_size, "pages": pdf_metas})
     return outputs

@@ -73,6 +73,8 @@ class Settings(BaseSettings):
 
     # 書き出しで文字を描くときの書体のフォルダ。文字を描く書き出しは、これが無ければ止まる
     font_dir: str | None = None
+    # カラーのページを CMYK にするときの ICC プロファイルのフォルダ（作品の preferences.print.color_output.profile をここから読む）
+    icc_dir: str | None = None
     # 書き出しで使う Node（文字を描く・PSD を書く）
     node_executable: str
     # PSD を書く台本（v3/psd_writer/write_layered_psd.js）。PSD の書き出しは、これが無ければ止まる

@@ -12,6 +12,7 @@
 - held_change：判断待ち（HeldAiChange）が残っている
 - ai_candidate・job：まだ選んでいない生成の候補・終わっていない生成の依頼がある
 - page_count：話か巻のページ数が、決めた倍数（4・8）になっていない
+- icc_profile：カラーのページを CMYK にする設定（PrintSettings.color_output）の ICC プロファイルが読めない
 
 severity は error（書き出しが止まるか、入稿で戻される）と warning（人が見て決める）。
 文字の組み方は書き出しと同じ page_render.text_jobs と render_text.js（measure）を使う（確かめと書き出しで結果が違わないように）。
@@ -48,9 +49,11 @@ from v3server.print_export.book_layout import (
     plan_pages,
     print_settings_of,
 )
+from v3server.print_export.cmyk_conversion import CmykRefused, profile_path
 from v3server.print_export.export_runner import translate_texts
 from v3server.print_export.page_render import PageContent, RenderRefused, _text_job, text_fill
 from v3server.print_export.text_render import RenderedText, TextRenderError
+from v3server.server_settings import get_settings
 
 Severity = Literal["error", "warning"]
 # 生成の依頼のうち、終わったもの（ほかの状態は、まだ候補が増えうる）
@@ -234,6 +237,12 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
              .order_by(Episode.number, Page.number, Page.id))
         page_ids = list((await session.execute(q)).scalars())
     plans = await plan_pages(session, work, page_ids)
+    if ps.color_output is not None and any(p.color_mode == "color" for p in plans.values()):
+        # カラーのページを CMYK にする設定。プロファイルが読めないと PDF の書き出しが止まる
+        try:
+            profile_path(get_settings().icc_dir, ps.color_output)
+        except CmykRefused as e:
+            issues.append(Issue(None, "icc_profile", "error", str(e)))
 
     # 見開きと、ページ数の倍数（話ごと）
     episodes = {p.episode.id: p.episode for p in plans.values()}
