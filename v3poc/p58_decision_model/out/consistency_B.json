@@ -1,0 +1,59 @@
+{
+ "load": {
+  "seconds": 33.2,
+  "rss_gb_after_load": 5.5,
+  "resident_layers": [
+   24,
+   25,
+   26,
+   27,
+   28,
+   29,
+   30,
+   31
+  ]
+ },
+ "passes": [
+  {
+   "case": "alone",
+   "logits": {
+    "second": {
+     "a": -2.140625,
+     "b": 0.875,
+     "c": -3.3125
+    },
+    "last_wide": {
+     "true": -0.65234375,
+     "false": -3.265625
+    }
+   },
+   "seconds": 114.9,
+   "fetch_seconds_in_pass": 99.9,
+   "tokens": [
+    282
+   ]
+  },
+  {
+   "case": "batched_with_other",
+   "logits": {
+    "second": {
+     "a": -2.15625,
+     "b": 0.84765625,
+     "c": -3.3125
+    },
+    "last_wide": {
+     "true": -0.64453125,
+     "false": -3.265625
+    }
+   },
+   "seconds": 135.4,
+   "fetch_seconds_in_pass": 90.9,
+   "tokens": [
+    174,
+    282
+   ]
+  }
+ ],
+ "rss_peak_gb": 6.95,
+ "bytes_fetched_gb": 30.58
+}

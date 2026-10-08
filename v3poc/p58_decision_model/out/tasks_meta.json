@@ -1,0 +1,18 @@
+{
+ "load": {
+  "seconds": 67.8,
+  "rss_gb_after_load": 4.74,
+  "resident_layers": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5
+  ],
+  "batch": 2
+ },
+ "rss_peak_gb": 7.06,
+ "bytes_fetched_gb": 51.45,
+ "fetch_seconds_total": 502.5
+}

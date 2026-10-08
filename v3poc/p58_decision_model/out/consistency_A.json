@@ -1,0 +1,39 @@
+{
+ "load": {
+  "seconds": 56.4,
+  "rss_gb_after_load": 5.7,
+  "resident_layers": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7
+  ]
+ },
+ "passes": [
+  {
+   "case": "alone",
+   "logits": {
+    "second": {
+     "a": -2.140625,
+     "b": 0.875,
+     "c": -3.3125
+    },
+    "last_wide": {
+     "true": -0.65234375,
+     "false": -3.265625
+    }
+   },
+   "seconds": 116.5,
+   "fetch_seconds_in_pass": 105.4,
+   "tokens": [
+    282
+   ]
+  }
+ ],
+ "rss_peak_gb": 6.91,
+ "bytes_fetched_gb": 17.21
+}
