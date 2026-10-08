@@ -1,6 +1,7 @@
 """ハーネスの作業者（`uv run python -m v3server.harness.harness_worker_main`）。
 
-工程の進行役と作業の流れ（キュー v3-harness）と、上流の変化を見る所（upstream_watch）を1つのプロセスで動かす。
+工程の進行役と作業の流れ（キュー v3-harness）と、上流の変化を見る所（upstream_watch）と、知らせを外へ届ける所
+（harness_notify）を1つのプロセスで動かす。
 生成・検出器・LLM の送信は今の作業者（queue_worker_main）が受ける。ハーネスは順番待ちに頼むだけ。
 """
 
@@ -11,7 +12,7 @@ from datetime import timedelta
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from v3server.harness import queue_calls, upstream_watch
+from v3server.harness import harness_notify, queue_calls, upstream_watch
 from v3server.harness.harness_activities import ACTIVITIES
 from v3server.harness.stage_workflow import HARNESS_QUEUE, StageWorkflow
 from v3server.harness.unit_workflow import WorkUnitWorkflow
@@ -36,6 +37,8 @@ class HarnessWorker:
         self.tasks.append(asyncio.create_task(self.worker.run()))
         if self.watch:
             self.tasks.append(asyncio.create_task(upstream_watch.run_forever(self.client)))
+            # 知らせを外（Webhook）へ届ける。作品の決まりで送り先を入れたときだけ届けが積まれる
+            self.tasks.append(asyncio.create_task(harness_notify.send_pending_forever()))
 
     async def shutdown(self) -> None:
         if self.worker is not None:

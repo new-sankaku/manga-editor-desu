@@ -28,16 +28,29 @@ from temporalio.exceptions import ApplicationError
 from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessStageRun, HarnessStaleMark, HarnessUnit
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel
 from v3server.database_engine import get_sessionmaker
-from v3server.harness import name_draft_steps, panel_drawing_steps
+from v3server.harness import (
+    export_steps,
+    name_draft_steps,
+    overall_review_steps,
+    page_finishing_steps,
+    panel_drawing_steps,
+    plan_interview_steps,
+    settings_sheet_steps,
+    structure_steps,
+)
 from v3server.harness import queue_calls as q
 from v3server.harness.harness_record import finish_step, now, patch_stage, patch_unit, start_step
-from v3server.harness.harness_states import STAGES, UNIT_KIND_OF_STAGE
+from v3server.harness.harness_states import HUMAN_APPROVE_STAGES, STAGES, UNIT_KIND_OF_STAGE
 from v3server.harness.upstream_versions import upstream_of
 from v3server.v3_error_types import V3Error
 
-HEARTBEAT_SECONDS = 2
-STEP_MODULES = {"panel_drawing": panel_drawing_steps, "name_draft": name_draft_steps}
-STEP_FUNCTIONS = ("cut_out", "context", "generate", "check", "evaluate", "finalize", "discard_round")
+# 段の活動の生存の知らせ（秒）。取り消しはこの返事で届く。2秒から1秒にした（test_harness_perf.py で測った）
+HEARTBEAT_SECONDS = 1
+STEP_MODULES = {"plan_interview": plan_interview_steps, "structure": structure_steps,
+                "settings_sheet": settings_sheet_steps, "name_draft": name_draft_steps,
+                "panel_drawing": panel_drawing_steps, "page_finishing": page_finishing_steps,
+                "overall_review": overall_review_steps, "export": export_steps}
+STEP_FUNCTIONS = ("cut_out", "context", "generate", "check", "fix", "evaluate", "finalize", "discard_round")
 
 
 @dataclass
@@ -47,6 +60,8 @@ class StepInput:
     attempt: int
     step_id: str
     args: dict[str, Any] = field(default_factory=dict)
+    # 送り先の順番を待ってよい秒（上限の wait_seconds）。None は前の作りの作業（待ちの上限なし。待ちも時間に数える）
+    wait_seconds: float | None = None
 
 
 @dataclass
@@ -77,6 +92,8 @@ async def run_step(inp: StepInput) -> dict[str, Any]:
             await patch_unit(session, unit.id, {"status": status_now, "current_step": inp.step, "attempt": inp.attempt})
         await session.commit()
     beat = asyncio.create_task(_beat())
+    clock = q.WaitClock(inp.wait_seconds)
+    q.WAIT_CLOCK.set(clock)
     status, detail, out = "failed", None, None
     try:
         out = await fn(unit, {**inp.args, "attempt": inp.attempt})
@@ -95,13 +112,15 @@ async def run_step(inp: StepInput) -> dict[str, Any]:
     finally:
         beat.cancel()
         if inp.step != "discard_round":
-            await asyncio.shield(_finish(inp, status, detail, (out or {}).get("cost", 0)))
+            await asyncio.shield(_finish(inp, status, detail, (out or {}).get("cost", 0), clock))
 
 
-async def _finish(inp: StepInput, status: str, detail: dict[str, Any] | None, cost: float) -> None:
+async def _finish(inp: StepInput, status: str, detail: dict[str, Any] | None, cost: float, clock: "q.WaitClock") -> None:
     async with get_sessionmaker()() as session:
         unit = await session.get(HarnessUnit, inp.unit_id)
-        seconds = await finish_step(session, unit, inp.step_id, status, detail, cost)
+        # 待ちの上限のある作業は、順番待ちの秒を時間に数えない（前の作りの作業は前のまま数える）
+        waited = clock.waited if inp.wait_seconds is not None else 0.0
+        seconds = await finish_step(session, unit, inp.step_id, status, detail, cost, waited)
         await patch_unit(session, unit.id, {"cost_used": float(unit.cost_used or 0) + cost,
                                             "seconds_used": float(unit.seconds_used or 0) + seconds})
         await session.commit()
@@ -136,7 +155,10 @@ async def record_stage(inp: RecordInput) -> dict[str, Any]:
 async def _targets(session, run: HarnessStageRun) -> list[tuple[str, str, str | None]]:
     """（対象の種類, 対象の id, ページの id）の並び。"""
     kind = UNIT_KIND_OF_STAGE.get(run.stage)
-    if kind == "name_draft":
+    if kind in ("plan_interview", "settings_sheet"):
+        # 企画と設定資料は作品に1つ（話ごとの工程の実行から、作品を対象にする）
+        return [("work", run.work_id, None)]
+    if kind in ("structure", "name_draft", "page_finishing", "overall_review", "export"):
         return [("episode", run.episode_id, None)]
     if kind == "panel_drawing":
         rows = (await session.execute(
@@ -161,10 +183,16 @@ async def prepare_stage(stage_run_id: str) -> dict[str, Any]:
             return {"kind": kind, "unit_ids": [u.id for u in existing if u.status not in ("done", "cancelled",
                                                                                            "failed")]}
         ids = []
+        completion = list(run.limits["completion"])
+        if run.stage in HUMAN_APPROVE_STAGES and "human_approve" not in completion:
+            # 人が採るまで終わらない工程（設計 5 の表の「人の確認：必須」）。頼んだ完成条件に無くても足し、出来事に残す
+            completion.append("human_approve")
+            await patch_stage(session, run.id, {}, {"completion_added": "human_approve",
+                                                    "why": f"{run.stage} は人の確認が必須の工程"})
         for target_kind, target_id, page_id in await _targets(session, run):
             unit = HarnessUnit(stage_run_id=run.id, work_id=run.work_id, stage=run.stage, kind=kind,
                                target_kind=target_kind, target_id=target_id, page_id=page_id,
-                               completion=run.limits["completion"], limits=run.limits["unit"], spec=run.spec,
+                               completion=completion, limits=run.limits["unit"], spec=run.spec,
                                requested_by=run.requested_by,
                                upstream_used=await upstream_of(session, kind, run.work_id, target_id),
                                status="queued", attempt=0, cost_used=0, seconds_used=0)
@@ -266,20 +294,28 @@ async def _check_name_stage(session, run: HarnessStageRun) -> dict[str, Any]:
 
 
 async def _check_drawing_stage(session, run: HarnessStageRun) -> dict[str, Any]:
-    pages = (await session.execute(select(Page).where(Page.episode_id == run.episode_id, Page.removed.is_(False))
-                                   .order_by(Page.number))).scalars().all()
-    out = []
-    for p in pages:
-        panels = (await session.execute(select(Panel).where(Panel.page_id == p.id, Panel.removed.is_(False))
-                                        .order_by(Panel.order))).scalars().all()
-        out.append({"page_id": p.id, "number": p.number, "panels": len(panels),
-                    "with_image": sum(1 for x in panels if x.image_id), "missing": [x.id for x in panels if not x.image_id]})
     flagged = (await session.execute(
         select(HarnessCandidate.unit_id).join(HarnessUnit, HarnessUnit.id == HarnessCandidate.unit_id)
         .where(HarnessUnit.stage_run_id == run.id, HarnessCandidate.check_verdict == "flag",
                HarnessCandidate.picked.is_(True)))).scalars().all()
-    return {"pages": out, "flagged_units": sorted(set(flagged)),
-            "note": "ページ全体の絵の検査（コマをまたぐ人物の一致など）は未実装。人が見る"}
+    drift = await panel_drawing_steps.drift_check(session, run)
+    return {"pages": await panel_drawing_steps.page_summary(session, run), "flagged_units": sorted(set(flagged)),
+            **drift,
+            "note": "コマをまたぐ一致は、設定資料の絵と同じ人物か（CCIP）だけを見る。服・背景の一致は人が見る"}
+
+
+async def _stage_results(session, run: HarnessStageRun) -> dict[str, Any]:
+    """S0〜S2・S5〜S7：作業の検査は作業の中で済んでいる。工程としては、採った候補の指摘を並べる。"""
+    rows = (await session.execute(
+        select(HarnessUnit, HarnessCandidate).join(HarnessCandidate, HarnessCandidate.unit_id == HarnessUnit.id)
+        .where(HarnessUnit.stage_run_id == run.id, HarnessCandidate.picked.is_(True)))).all()
+    out = []
+    for u, cand in rows:
+        if u.status != "done":
+            continue
+        flags = [f for f in (cand.check or {}).get("findings", []) if f.get("ok") is False]
+        out.append({"unit_id": u.id, "candidate_id": cand.id, "flags": [f["name"] for f in flags]})
+    return {"picked": out}
 
 
 @activity.defn
@@ -299,7 +335,7 @@ async def stage_check(stage_run_id: str) -> dict[str, Any]:
                 elif run.stage == "S4":
                     result.update(await _check_drawing_stage(session, run))
                 else:
-                    result["note"] = f"{run.stage} は作業を切り出さない工程。人が中身を見て次へ進める"
+                    result.update(await _stage_results(session, run))
             except V3Error as e:
                 raise q.blocked(f"工程の検査ができない: {e}") from e
             await patch_stage(session, run.id, {"stage_check": result})

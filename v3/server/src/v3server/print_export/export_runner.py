@@ -153,6 +153,13 @@ def _render(content: PageContent, dpi: float) -> RenderedPage:
     return render_page(content, dpi, lambda iid: read_image(content.images[iid]), texts, fonts)
 
 
+async def render_page_preview(session: AsyncSession, work: Work, page_id: str, dpi: int) -> Image.Image:
+    """1ページを書き出しと同じ描き方で描いた絵（RGB）。総合の工程（S6）が黒の量・白さを測り、VLM に見せるのに使う。
+    文字があって文字の組み方（V3_TEXT_RENDER_SCRIPT）が無ければ ExportRefused。"""
+    content = await load_page_content(session, work, page_id)
+    return render_page_image(content, dpi).convert("RGB")
+
+
 def render_page_image(content: PageContent, dpi: float) -> Image.Image:
     """ページ1枚を、層を重ねた RGBA の絵にする（確認の画面の下見。http_routes/page_assignment_and_preview_routes.py）。"""
     return _render(content, dpi).composite

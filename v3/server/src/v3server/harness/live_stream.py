@@ -1,15 +1,20 @@
 """画面への生の状態（SSE）と、つなぎ直しのときの今の状態（snapshot）。
 
 - 状態の変化は正本（harness_events）に書いた順に流す。id が SSE の id で、つなぎ直しは Last-Event-ID（か ?after=）
-  から続きを流す。画面は snapshot を取ってから、その last_event_id の続きを受ける（取りこぼしも重なりも無い。
-  同じ出来事を2回当てても結果が変わらない形で送る：どの出来事も「今の値」を全部載せる）
+  から続きを流す。画面は snapshot を取ってから、その last_event_id の続きを受ける（同じ出来事を2回当てても結果が
+  変わらない形で送る：どの出来事も「今の値」を全部載せる）
+  - 確定の遅れた出来事は、後から（id の順を外れて）流す（LATE_COMMIT_SECONDS）。同じ作業の状態の出来事は、作業の行を
+    ロックしてから書く（patch_unit）ので、作業ごとの順は崩れない
+  - snapshot を取った後に確定した、last_event_id より小さい id の出来事は流さない（未対応。今は上流を見る所の古い印が
+    当たり得る。画面がつなぎ直すと snapshot で取り直す）
 - ComfyUI の段数と途中の絵（service_call_progress）は、変わった物だけ event: progress で流す（id は付けない。
   消えても次の値で上書きされる物なので、つなぎ直しでは snapshot の値を使う）
 """
 
 import asyncio
 import json
-from collections.abc import AsyncIterator, Callable, Awaitable
+from collections import deque
+from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -25,6 +30,7 @@ from v3server.canonical_tables.harness_tables import (
     HarnessUnit,
     ServiceCallProgress,
 )
+from v3server.canonical_tables.service_and_job_tables import CallLog, Job, Service
 from v3server.database_engine import get_sessionmaker
 from v3server.harness.harness_record import unit_counters
 
@@ -32,12 +38,20 @@ POLL_SECONDS = 0.2
 KEEPALIVE_SECONDS = 15
 PROGRESS_OVERLAP = timedelta(seconds=2)
 BATCH = 500
+# 出来事の id は書き込んだとき（flush）に決まり、見えるのは確定（commit）したとき。確定が遅れた出来事は、それより大きい
+# id を流した後で見えることがある（上流を見る所は、古い印の出来事を書いてから残りの作業を見て、最後に確定する）。
+# id の境だけで読むと、その出来事を二度と流さない（2026-10-08、画面の試験で古い印が画面に出なかった）。
+# そこで、この秒数の間に流した id を覚えておき、その間の境より上を読み直して、まだ流していない物を流す
+LATE_COMMIT_SECONDS = 10.0
 
 STAGE_FIELDS = ("id", "episode_id", "stage", "status", "requested_by", "limits", "stage_check", "stop_reason",
                 "next_stage_run_id", "created_at", "updated_at")
 STEP_FIELDS = ("id", "unit_id", "step", "attempt", "status", "started_at", "finished_at", "detail", "cost")
 CANDIDATE_FIELDS = ("id", "unit_id", "attempt", "k_index", "job_id", "image_id", "proposal_id", "seed", "status",
-                    "check", "check_verdict", "evaluation", "picked", "dropped_reason", "created_at")
+                    "check", "check_verdict", "evaluation", "picked", "dropped_reason", "content", "made_with",
+                    "fixed_from", "fix_round", "created_at")
+# 作業の図の「生成」を送り先ごとに分けて出すための、依頼の行
+JOB_FIELDS = ("id", "process", "service_id", "status", "failure_kind", "created_at", "updated_at")
 MARK_FIELDS = ("id", "unit_id", "upstream_key", "effect", "reason", "status", "created_at")
 
 
@@ -99,7 +113,18 @@ async def unit_detail(session: AsyncSession, unit_id: str) -> dict[str, Any]:
     # 人の判断（採用・却下・直した絵）は段の行に無い。画面の時間の列と戻りの辺の数に使う
     decisions = (await session.execute(select(HarnessEvent).where(
         HarnessEvent.unit_id == unit_id, HarnessEvent.kind == "review").order_by(HarnessEvent.id))).scalars().all()
+    jobs = (await session.execute(
+        select(Job, Service.name, func.coalesce(func.sum(CallLog.cost), 0))
+        .join(Service, Service.id == Job.service_id).outerjoin(CallLog, CallLog.job_id == Job.id)
+        .where(Job.work_id == u.work_id, Job.request["harness_key"].as_string().like(f"{unit_id}:%"))
+        .group_by(Job.id, Service.name).order_by(Job.created_at))).all()
+    fallbacks = (await session.execute(select(HarnessEvent).where(
+        HarnessEvent.unit_id == unit_id, HarnessEvent.kind == "fix_fallback").order_by(HarnessEvent.id))).scalars().all()
     return {**await unit_counters(session, u), "review": u.review, "result": u.result, "limits": u.limits,
+            "jobs": [{**row_of(j, JOB_FIELDS), "service_name": name, "cost": float(cost),
+                      "harness_key": j.request.get("harness_key"), "progress_key": j.request.get("progress_key")}
+                     for j, name, cost in jobs],
+            "fix_fallbacks": [{"event_id": e.id, "at": e.created_at.isoformat(), **e.payload} for e in fallbacks],
             "decisions": [{"event_id": e.id, "at": e.created_at.isoformat(), "action": e.payload.get("action"),
                            "by": e.payload.get("by"), "reason": e.payload.get("reason"),
                            "attempt": (e.payload.get("review") or {}).get("attempt")} for e in decisions],
@@ -119,14 +144,26 @@ async def stream(work_id: str, after: int, disconnected: Callable[[], Awaitable[
     seen: dict[str, datetime] = {}
     loop = asyncio.get_running_loop()
     quiet_since = loop.time()
+    # (時刻, その時刻までに流した一番大きい id)。先頭は LATE_COMMIT_SECONDS より前の境で、そこより上を読み直す
+    marks: deque[tuple[float, int]] = deque([(loop.time(), after)])
+    streamed: set[int] = set()  # 境より上で、もう流した id
     while not await disconnected():
         sent = False
+        now = loop.time()
+        marks.append((now, after))
+        while len(marks) > 1 and marks[1][0] <= now - LATE_COMMIT_SECONDS:
+            marks.popleft()
+        low = marks[0][1]
+        streamed = {i for i in streamed if i > low}
         async with get_sessionmaker()() as session:
-            rows = (await session.execute(select(HarnessEvent).where(
-                HarnessEvent.work_id == work_id, HarnessEvent.id > after).order_by(HarnessEvent.id).limit(BATCH))
-            ).scalars().all()
+            ids = (await session.execute(select(HarnessEvent.id).where(
+                HarnessEvent.work_id == work_id, HarnessEvent.id > low).order_by(HarnessEvent.id))).scalars().all()
+            fresh = [i for i in ids if i not in streamed][:BATCH]
+            rows = (await session.execute(select(HarnessEvent).where(HarnessEvent.id.in_(fresh))
+                                          .order_by(HarnessEvent.id))).scalars().all() if fresh else []
             for e in rows:
-                after = e.id
+                after = max(after, e.id)
+                streamed.add(e.id)
                 sent = True
                 yield _sse({**e.payload, "kind": e.kind, "unit_id": e.unit_id, "stage_run_id": e.stage_run_id,
                             "at": e.created_at.isoformat()}, e.kind, e.id)

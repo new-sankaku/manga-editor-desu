@@ -2,11 +2,11 @@
 // 状態の正本はサーバー（harness_* の表）。この画面は snapshot を取り、その last_event_id の続きを SSE で受けて当てる。
 // 切れたら「切断中」を出し、つなぎ直すときに snapshot を取り直す（取りこぼしも重なりも無い。live_stream.py）。
 // 口は全部 ../js/api.js の authFetch を通す（名乗りの見出しと X-V3-Request を付ける所は api.js の1か所）。
-import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost } from "../js/api.js";
+import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost, put, op } from "../js/api.js";
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { startKeys, km } from "../common/keys.js";
-import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait } from "./harness_graph.js";
+import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait, urgentStatus } from "./harness_graph.js";
 
 const STAGES = ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"];
 const STAGE_JA = { S0: "企画", S1: "構成", S2: "設定資料", S3: "ネーム", S4: "作画", S5: "仕上げ", S6: "総合", S7: "書き出し" };
@@ -17,7 +17,15 @@ const ACTIVE = new Set(["queued", "running", "waiting_limit", "waiting_budget", 
 const LIMIT_JA = { max_attempts: "回の上限", candidates_per_attempt: "1回の候補の数", budget_cost: "費用の上限",
                    budget_seconds: "秒の上限", error_stop: "続けて失敗したら止める", same_failure_restart: "同じ失敗で文脈から",
                    eval_repeats: "評価を繰り返す数", disagreement_stop: "評価が割れたら止める", review_notice_seconds: "判断待ちの知らせ（秒）",
-                   resend_limit: "送り直しの上限" };
+                   resend_limit: "送り直しの上限", max_fix_rounds: "直させる回数の上限", wait_seconds: "順番待ちの上限（秒）",
+                   redo_on_reject: "却下したらすぐ作り直す" };
+// 作業の種類の名前と、何を対象にするか（作品・話・コマ）
+const KIND_JA = { plan_interview: "企画の聞き取り", structure: "構成", settings_sheet: "設定資料", name_draft: "ネームの作業",
+                  panel_drawing: "コマの作画", page_finishing: "仕上げ", overall_review: "総合", export: "書き出し" };
+const WHOLE = { plan_interview: "作品全体", settings_sheet: "作品全体", structure: "話全体", name_draft: "話全体",
+                page_finishing: "話全体", overall_review: "話全体", export: "話全体" };
+// 作業役が人へ質問を返す種類（サーバーの TAKES_ANSWERS と同じ。ほかの種類はサーバーが answer を断る）
+const ANSWER_KINDS = new Set(["plan_interview"]);
 const CAND_JA = { requested: "頼んだ", generated: "描けた", failed: "失敗", cancelled: "取り消した" };
 const RUNNING = new Set(["running", "retrying", "cancelling"]);
 
@@ -48,7 +56,7 @@ const S = {
   runs: new Map(), units: new Map(), stale: new Map(), progress: new Map(),
   view: "stage", unitId: null, stageSel: null, detail: null, pos: null,
   conn: "connecting", retries: 0, lastEventId: 0, abort: null,
-  reviewItems: [], toast: null,
+  reviewItems: [], toast: null, thresholds: null, notes: [], notify: null,
 };
 // 確かめのための値（Playwright で読む。画面の動きには使わない）
 const probe = window.__harness = { latencies: [], events: 0, lastTraversal: null, conn: "connecting", reconnects: 0 };
@@ -81,10 +89,17 @@ async function main() {
     S.workId = works[0].id;
   }
   rememberWork(S.workId);
-  graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap });
+  graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap, onStepsChanged: refreshDetail });
+  // 画面の試験（harness_ui.mjs）が図の中を見る。たたんだノードの data には中の要素（collapsedChildren）が入り、
+  // ブラウザの外へ渡せないので、文字・数・真偽の値だけを渡す
+  probe.graphNodes = (sel) => graph.cy.nodes(sel).map((n) =>
+    Object.fromEntries(Object.entries(n.data()).filter(([, v]) => v === null || typeof v !== "object")));
+  probe.toggleStep = (step) => graph.toggleStep(step);  // 同じく、段を押したのと同じ動き
   $("#tab-stage").addEventListener("click", () => openStageView());
   $("#tab-unit").addEventListener("click", () => S.unitId && openUnit(S.unitId));
   $("#fit").addEventListener("click", () => graph.cy.fit(undefined, 40));
+  $("#fold").addEventListener("click", () => graph.setAllCollapsed(true));
+  $("#unfold").addEventListener("click", () => graph.setAllCollapsed(false));
   // 絵だけ・Tab でパネルが出入りすると図の箱の大きさが変わる。Cytoscape は箱の大きさを自分では見ないので知らせる
   window.addEventListener("v3-view", () => requestAnimationFrame(() => { graph.cy.resize(); graph.cy.fit(undefined, 40); }));
   setInterval(tick, 500);
@@ -151,7 +166,7 @@ function applySnapshot(snap) {
 // ------------------------------------------------------------------ 出来事を当てる
 
 function onEvent({ id, event, data }) {
-  if (id) S.lastEventId = Number(id);
+  if (id) S.lastEventId = Math.max(S.lastEventId, Number(id));  // 確定の遅れた出来事は小さい id で後から届く
   probe.events += 1;
   const at = Date.parse(event === "progress" ? data.updated_at : data.at);
   const kind = event;
@@ -183,6 +198,7 @@ function onEvent({ id, event, data }) {
     if (kind === "unit_created" && u.page_id && !panelOf(u)) loadWork().then(render);
   }
   scheduleRender(Number.isFinite(at) ? { kind, at } : null);
+  if (kind === "notification") browserNotify(data);
   if (kind !== "progress" && kind !== "step") scheduleReviewItems();
 }
 
@@ -322,17 +338,24 @@ function buildStageGraph() {
 function unitLabel(u) {
   const p = panelOf(u);
   const page = pageOf(u);
-  const where = u.kind === "name_draft" ? "話全体" : `p${page ? page.number : "?"}-${p ? p.order : "?"}`;
+  const where = WHOLE[u.kind] || `p${page ? page.number : "?"}-${p ? p.order : "?"}`;
   const tries = u.max_attempts ? ` ${u.attempt}/${u.max_attempts}` : "";
   const step = u.step && ACTIVE.has(u.status) ? `\n${STEP_JA[u.step] || u.step}` : "";
   return `${where}${tries}\n${STATUS_JA[u.status] || u.status}${u.stale ? "・古い" : ""}${step}`;
+}
+
+// 工程の図で作業を入れるまとまり（ページ。ページを持たない作業は、作品・話の全体として1つにまとめる）
+function unitGroup(u) {
+  if (WHOLE[u.kind]) return { key: "whole", label: WHOLE[u.kind] };
+  const page = pageOf(u);
+  return { key: u.page_id || "none", label: page ? `p${page.number}` : "ページなし" };
 }
 
 function renderStageGraph() {
   for (const s of STAGES) graph.updateStage(stageInfo(s));
   for (const s of STAGES) {
     const units = unitsOfRun(latestRun(s));
-    if (units.length) graph.setUnits(s, units, unitLabel);
+    if (units.length) graph.setUnits(s, units, unitLabel, unitGroup);
   }
   graph.setProgress([...S.progress.values()].filter((p) => p.state === "running" || p.state === "pending"));
 }
@@ -360,11 +383,60 @@ function renderUnitGraph() {
   if (u.status === "done") states.end = { count: 1, status: "done" };
   if (states.generate) states.generate.note = `候補 ${u.candidates}`;
   const current = u.status === "awaiting_review" ? "review" : u.status === "done" ? "end" : (u.step || S.pos);
+  graph.setStepParts(stepParts(d, u));
   graph.setSteps(states, current, u.status);
   graph.setEdgeCounts(counts);
   // 進み具合は生成の段にいる間だけ出す（終わった後は候補の一覧と判断のパネルで見る）
   const generating = u.step === "generate" && ACTIVE.has(u.status);
   graph.setProgress(generating ? [...S.progress.values()].filter((p) => p.unit_id === d.unit_id && p.attempt === u.attempt) : []);
+}
+
+// 段の中の子（今の回の分）。生成・直させるは送り先ごと、検査は項目ごと、評価はくり返しの回ごと
+// 依頼の段は harness_key（<作業>:a<回>:<種類>…）の種類で分ける：gen・comp は生成、fix は直させる
+function stepParts(d, u) {
+  const att = `a${u.attempt}`;
+  const jobsOf = (re) => (d.jobs || []).filter((j) => {
+    const k = (j.harness_key || "").split(":");
+    return k[1] === att && re.test(k[2] || "");
+  });
+  const byService = (jobs) => {
+    const by = new Map();
+    for (const j of jobs) {
+      if (!by.has(j.service_id)) by.set(j.service_id, { name: j.service_name, list: [] });
+      by.get(j.service_id).list.push(j);
+    }
+    return [...by].map(([id, g]) => {
+      const bad = g.list.filter((j) => j.failure_kind).length;
+      return { id, status: urgentStatus(g.list.map((j) => j.status)),
+               label: `${g.name}\n依頼 ${g.list.length}${bad ? `・失敗 ${bad}` : ""}` };
+    });
+  };
+  const checks = new Map();
+  for (const c of d.cands.filter((x) => `a${x.attempt}` === att && x.check)) {
+    for (const f of c.check.findings || []) {
+      if (!checks.has(f.name)) checks.set(f.name, { ok: 0, ng: 0, none: 0 });
+      const t = checks.get(f.name);
+      if (f.ok === true) t.ok += 1; else if (f.ok === false) t.ng += 1; else t.none += 1;
+    }
+  }
+  const evals = [...d.steps.values()].filter((x) => x.step === "evaluate" && `a${x.attempt}` === att && x.detail?.rounds)
+    .sort((a, b) => Date.parse(a.started_at) - Date.parse(b.started_at));
+  const ev = evals.at(-1)?.detail;
+  const short = (cid) => { const c = d.cands.find((x) => x.id === cid); return c ? `#${c.k_index + 1}` : "?"; };
+  const repeats = ev ? [...new Set(ev.rounds.map((r) => r.repeat))] : [];
+  return {
+    generate: byService(jobsOf(/^(gen|comp)\d/)),
+    fix: byService(jobsOf(/^fix\d/)),
+    check: [...checks].map(([name, t]) => ({ id: name, status: t.ng ? "failed" : t.none ? "waiting_limit" : "done",
+      label: `${name}\n通る ${t.ok}・落ちる ${t.ng}${t.none ? `・測れない ${t.none}` : ""}` })),
+    evaluate: repeats.map((r) => {
+      const rs = ev.rounds.filter((x) => x.repeat === r);
+      const ties = rs.filter((x) => x.verdict === "tie").length;
+      const top = ev.tops[r];
+      return { id: String(r), status: top ? "done" : "stopped",
+               label: `${r + 1}回目 比べた ${rs.length}${ties ? `・同点 ${ties}` : ""}\n1位 ${top ? short(top) : "決まらない"}` };
+    }),
+  };
 }
 
 function tick() {
@@ -441,7 +513,8 @@ function sideKey() {
                            S.detail.decisions.length, u.limits || S.detail.limits]);
   }
   const run = S.stageSel ? S.runs.get(S.stageSel) : runsOfEpisode().at(-1);
-  return JSON.stringify(["stage", run && [run.id, run.status, run.stop_reason, run.stage_check], S.reviewItems.length,
+  return JSON.stringify(["stage", run && [run.id, run.status, run.stop_reason, run.stage_check], S.reviewItems.length, S.thresholds,
+                         S.notes.map((n) => n.id), S.notify,
                          S.reviewItems.map((i) => i.kind + (i.unit_id || i.stage_run_id || ""))]);
 }
 
@@ -463,7 +536,7 @@ function unitPanel() {
   const base = `/works/${S.workId}/harness/units/${u.unit_id}`;
   const out = [];
   out.push(h("div", { cls: "side-head" },
-    h("span", { cls: "label", text: u.kind === "name_draft" ? "ネームの作業" : "コマの作画" }),
+    h("span", { cls: "label", text: KIND_JA[u.kind] || u.kind }),
     h("h2", { text: unitLabel(u).split("\n")[0] }), chip(u.status)));
   if (u.stop_reason) out.push(h("p", { cls: `reason ${statusClass(u.status)}`, text: u.stop_reason }));
   out.push(h("dl", { cls: "kv" },
@@ -506,15 +579,22 @@ function reviewPanel(u, d, base) {
   const cands = d.cands.filter((c) => c.attempt === attempt);
   const reason = h("textarea", { rows: 2, placeholder: "却下の理由（次の文脈に入ります）", id: "reject-reason" });
   const edited = h("input", { type: "text", placeholder: "人が直した絵の id", id: "edit-image" });
+  const answer = h("textarea", { rows: 2, placeholder: "候補が返した質問への答え（これまでの答えと一緒に次の文脈に入ります）", id: "answer-text" });
   const since = (u.review || d.review || {}).since;
   return h("section", { cls: "box review-box" },
     h("h3", {}, "人の判断を待っています", since ? h("span", { cls: "since", dataset: { since }, text: ago(since) }) : null),
     h("div", { cls: "cands" }, cands.map((c) => candidateCard(c, picked, () => post(`${base}/review`, { action: "approve", candidate_id: c.id })))),
     h("label", { cls: "label", text: "却下" }), reason,
-    h("div", { cls: "actions" }, act("却下して作り直す", () => {
+    // 却下は止まるだけ（決めごと 5.3）。すぐ作り直すのは上限の redo_on_reject を入れたときだけ
+    h("div", { cls: "actions" }, act((u.limits || d.limits || {}).redo_on_reject ? "却下して作り直す" : "却下して止める", () => {
       if (!reason.value.trim()) throw new Error("理由を入れてください");
       return post(`${base}/review`, { action: "reject", reason: reason.value.trim() });
     }, "danger")),
+    ...(ANSWER_KINDS.has(u.kind) ? [h("label", { cls: "label", text: "質問に答える" }), answer,
+      h("div", { cls: "actions" }, act("答えて作り直す", () => {
+        if (!answer.value.trim()) throw new Error("答えを入れてください");
+        return post(`${base}/review`, { action: "answer", reason: answer.value.trim() });
+      }))] : []),
     h("label", { cls: "label", text: "直した絵から続ける" }), edited,
     h("div", { cls: "actions" }, act("直した絵で生成へ戻す", () => {
       if (!edited.value.trim()) throw new Error("絵の id を入れてください");
@@ -527,22 +607,40 @@ function candidateCard(c, picked, approve) {
   if (c.image_id) showIn(img, `/works/${S.workId}/images/${c.image_id}/thumbnail?size=256`).catch((e) => { img.alt = String(e.message || e); });
   const issues = ((c.check || {}).findings || []).filter((f) => f.ok !== true).map((f) => `${f.ok === false ? "外れ" : "人が見る"}：${f.name}`);
   return h("div", { cls: `cand${c.id === picked ? " picked" : ""} v-${c.check_verdict || "none"}` },
-    c.image_id ? img : h("div", { cls: "noimg", text: c.proposal_id ? "ネームの案" : "絵なし" }),
+    c.image_id ? img : c.content ? contentView(c.content) : h("div", { cls: "noimg", text: c.proposal_id ? "ネームの案" : "絵なし" }),
     h("div", { cls: "cand-meta" },
       h("span", { cls: "label", text: `#${c.k_index + 1} ${{ pass: "通過", flag: "指摘あり", drop: "落ちた" }[c.check_verdict] || "検査前"}${c.id === picked ? "・評価役が選んだ" : ""}` }),
       issues.length ? h("ul", { cls: "issues" }, issues.slice(0, 6).map((t) => h("li", { text: t }))) : null,
       c.evaluation ? h("span", { cls: "muted", text: `票 ${c.evaluation.votes}/${c.evaluation.repeats}` }) : null,
-      c.check_verdict !== "drop" && (c.image_id || c.proposal_id) ? act("これを採用", approve, "primary") : null));
+      c.check_verdict !== "drop" && (c.image_id || c.proposal_id || c.content) ? act("これを採用", approve, "primary") : null));
+}
+
+// 絵の無い候補（企画・構成・設定資料・仕上げ・総合・書き出し）の中身を、種類を問わず短い行で出す
+function contentView(content) {
+  const lines = [];
+  const walk = (v, path) => {
+    if (lines.length >= 12) return;
+    if (v && typeof v === "object") {
+      for (const [k, x] of Object.entries(v)) if (!["cost", "job_ids"].includes(k)) walk(x, path ? `${path}.${k}` : k);
+    } else if (v !== null && v !== "") lines.push(`${path}：${v}`);
+  };
+  walk(content, "");
+  return h("ul", { cls: "noimg content-lines" }, lines.map((t) => h("li", { text: t })));
 }
 
 function limitsForm(u, d, base) {
   const limits = u.limits || d.limits || {};
-  const inputs = Object.entries(limits).filter(([, v]) => typeof v === "number").map(([k, v]) =>
-    h("label", { cls: "lim" }, h("span", { cls: "label key", text: LIMIT_JA[k] || k }), h("input", { type: "number", name: k, value: v, step: "any" })));
+  const inputs = Object.entries(limits).filter(([, v]) => typeof v === "number" || typeof v === "boolean").map(([k, v]) =>
+    h("label", { cls: "lim" }, h("span", { cls: "label key", text: LIMIT_JA[k] || k }),
+      typeof v === "boolean" ? h("input", { type: "checkbox", name: k, checked: v })
+        : h("input", { type: "number", name: k, value: v, step: "any" })));
   const form = h("form", { cls: "box limits", onsubmit: async (e) => {
     e.preventDefault();
     const next = {};
-    for (const i of form.querySelectorAll("input")) if (Number(i.value) !== limits[i.name]) next[i.name] = Number(i.value);
+    for (const i of form.querySelectorAll("input")) {
+      const v = i.type === "checkbox" ? i.checked : Number(i.value);
+      if (v !== limits[i.name]) next[i.name] = v;
+    }
     try { await post(`${base}/limits`, { limits: next }); toast("上限を変えました"); }
     catch (err) { toast(`上限を変えられません：${err.message}`, true); }
   } }, h("h3", { text: "上限（動いている作業にも効く）" }), h("div", { cls: "lim-grid" }, inputs),
@@ -577,7 +675,95 @@ function stagePanel() {
   }
   out.push(h("section", { cls: "box" }, h("h3", { text: `判断待ちの一覧（${S.reviewItems.length}）` }),
     S.reviewItems.length ? h("ul", { cls: "items" }, S.reviewItems.map(itemRow)) : h("p", { cls: "muted", text: "ありません" })));
+  out.push(noteBox());
+  if (S.thresholds) out.push(thresholdBox(S.thresholds));
+  if (S.notify) out.push(notifySettingsBox(S.notify));
   return out;
+}
+
+const LEVEL_JA = { info: "知らせ", warn: "注意", escalated: "急ぎ" };
+
+// アプリの中の知らせ（未読）。出来事から作るのはサーバーの1か所（harness_notify.py）
+function noteBox() {
+  return h("section", { cls: "box notes" }, h("h3", { text: `知らせ（未読 ${S.notes.length}）` }),
+    S.notes.length ? h("ul", { cls: "items" }, S.notes.map((n) => h("li", { cls: `item note lv-${n.level}` },
+      h("span", { cls: "label", text: `${LEVEL_JA[n.level] || n.level} ${ago(n.created_at)}` }),
+      h("span", { text: n.title, onclick: () => n.unit_id && openUnit(n.unit_id) }),
+      n.deliveries.length ? h("span", { cls: "muted", text: n.deliveries.map((d) => `${d.channel}:${d.status}`).join(" ") }) : null,
+      act("既読", () => post(`/works/${S.workId}/harness/notifications/${n.id}/read`).then(refreshReviewItems)))))
+      : h("p", { cls: "muted", text: "ありません" }),
+    "Notification" in window && Notification.permission === "default"
+      ? h("div", { cls: "actions" }, act("ブラウザの知らせを使う", () => Notification.requestPermission())) : null);
+}
+
+function browserNotify(data) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  new Notification(`AIハーネス：${LEVEL_JA[data.level] || data.level}`, { body: data.title, tag: data.id });
+}
+
+// 作品の知らせの決まり。外（Webhook）へは、ここで入れた先にだけ送る（既定は送らない）
+function notifySettingsBox(n) {
+  const cur = n.settings || { kinds: Object.keys(n.kinds), webhooks: [], escalate_after_notices: null, budget_near_ratio: null };
+  const checks = Object.entries(n.kinds).map(([k, ja]) => h("label", { cls: "chk" },
+    h("input", { type: "checkbox", name: k, checked: cur.kinds.includes(k) }), h("span", { text: ja })));
+  const hooks = h("textarea", { rows: 2, placeholder: "Webhook の URL（1行に1つ。後ろに空白で区切って送る種類を書けます）",
+    "aria-label": "Webhook の URL" });
+  hooks.value = cur.webhooks.map((w) => [w.url, ...(w.kinds || [])].join(" ")).join("\n");
+  const esc = h("input", { type: "number", min: 1, step: 1, value: cur.escalate_after_notices ?? "", "aria-label": "急ぎに上げる回数" });
+  const ratio = h("input", { type: "number", min: 0.01, max: 0.99, step: 0.01, value: cur.budget_near_ratio ?? "", "aria-label": "予算の割合" });
+  const save = () => {
+    const kinds = checks.map((c) => c.querySelector("input")).filter((i) => i.checked).map((i) => i.name);
+    const webhooks = hooks.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+      const [url, ...ks] = l.split(/\s+/);
+      return ks.length ? { url, kinds: ks } : { url };
+    });
+    return put(`/works/${S.workId}/harness/notification-settings`, {
+      kinds, webhooks, escalate_after_notices: esc.value === "" ? null : Number(esc.value),
+      budget_near_ratio: ratio.value === "" ? null : Number(ratio.value) }).then(refreshReviewItems);
+  };
+  return h("section", { cls: "box notify-settings" }, h("h3", { text: n.settings ? "知らせの決まり" : "知らせの決まり（未設定：一覧にだけ出す）" }),
+    h("p", { cls: "muted", text: "チェックした種類を上の一覧に出します。Webhook は入れた先にだけ送ります（既定は送りません）。"
+      + "判断待ちの知らせが決めた回数に達すると「急ぎ」に上げ、種類の絞り込みに関係なく全部の送り先へ送ります。"
+      + "予算の割合は空なら出しません。署名の鍵は画面では変えません（今の鍵をそのまま使います）。" }),
+    h("div", { cls: "chks" }, checks), hooks,
+    h("div", { cls: "lim-grid" },
+      h("label", { cls: "lim" }, h("span", { cls: "label key", text: "急ぎに上げる回数" }), esc),
+      h("label", { cls: "lim" }, h("span", { cls: "label key", text: "予算の割合（0〜1）" }), ratio)),
+    h("div", { cls: "actions" }, act("決まりを保存", save, "primary")));
+}
+
+// 閾値は作品ごとに人が置く。案は出典つきで並べるだけで、押すまで入れない（黙って決めない）
+function thresholdBox(rows) {
+  const unset = rows.filter((r) => !r.current || r.current.status === "rejected").length;
+  return h("section", { cls: "box thresholds" },
+    h("h3", { text: `閾値（未設定 ${unset} / ${rows.length}）` }),
+    h("p", { cls: "muted", text: "検査が読む閾値です。作品ごとに置きます。案の値は試作で測った数で、置くと「未検証」になります。"
+      + "この作品の絵で確かめたら「確かめた」を押してください。測っていない鍵は案の値がないので、値と出典を入れて置きます。"
+      + "閾値が無い検査は止まります（その作業は「閾値未設定」で待ちます）。" }),
+    rows.map(thresholdRow));
+}
+
+function thresholdRow(r) {
+  const cur = r.current;
+  const prop = r.proposal;
+  const value = h("input", { type: "number", step: "any", value: cur ? cur.value : prop.value ?? "", "aria-label": `${r.key} の値` });
+  const source = h("input", { type: "text", value: cur ? cur.source : prop.value !== null ? prop.source : "",
+                              placeholder: "出典（何で決めたか）", "aria-label": `${r.key} の出典` });
+  const put = (status) => {
+    if (value.value === "" || Number.isNaN(Number(value.value))) throw new Error("値を入れてください");
+    if (!source.value.trim()) throw new Error("出典を入れてください");
+    return op(S.workId, { type: "set_threshold", key: r.key, value: { value: Number(value.value) }, source: source.value.trim(), status })
+      .then(refreshReviewItems);
+  };
+  const state = cur ? `${cur.value}（${{ unverified: "未検証", verified: "確かめた", rejected: "使わない" }[cur.status] || cur.status}）` : "未設定";
+  return h("div", { cls: `th-row${cur ? "" : " th-unset"}` },
+    h("div", { cls: "kvline" }, h("span", { cls: "label key", text: `${r.stage} ${r.key}` }), h("span", { text: state })),
+    h("p", { cls: "muted", text: `${r.meaning}（${r.when}）` }),
+    h("p", { cls: "muted", text: `案：${prop.value ?? "値なし"} ／ ${prop.source}` }),
+    h("div", { cls: "th-inputs" }, value, source),
+    h("div", { cls: "actions" },
+      act("置く（未検証）", () => put("unverified")),
+      cur && cur.status === "unverified" ? act("確かめた", () => put("verified"), "primary") : null));
 }
 
 function stageCheckView(c) {
@@ -603,6 +789,9 @@ function scheduleReviewItems() { clearTimeout(reviewTimer); reviewTimer = setTim
 async function refreshReviewItems() {
   try {
     S.reviewItems = (await get(`/works/${S.workId}/harness/review-items`)).items;
+    S.thresholds = (await get(`/works/${S.workId}/harness/thresholds`)).thresholds;
+    S.notes = (await get(`/works/${S.workId}/harness/notifications?unread=true&limit=30`)).notifications;
+    S.notify = await get(`/works/${S.workId}/harness/notification-settings`);
     renderSide();
   } catch (e) { console.warn("判断待ちの一覧を取れない", e); }
 }
@@ -651,6 +840,13 @@ function onTap(id, data) {
   if (data.kind === "unit") openUnit(data.unit_id);
   else if (data.kind === "stage") { const r = latestRun(data.stage); if (r) selectStage(r.id); }
   else if (data.kind === "step" && data.step === "review") { $("#side").scrollTop = 0; }
+}
+
+// 段の中を開いた・たたんだ。依頼の行（送り先ごとの子）は SSE で届かないので、作業の中身を取り直してから描く
+async function refreshDetail() {
+  if (S.view !== "unit" || !S.unitId) return;
+  S.detail = normalizeDetail(await get(`/works/${S.workId}/harness/units/${S.unitId}`));
+  renderUnitGraph();
 }
 
 function selectStage(id) {

@@ -16,6 +16,7 @@ from v3server.canonical_tables.harness_tables import (
     HarnessStep,
     HarnessUnit,
 )
+from v3server.harness import harness_notify
 
 UNIT_FIELDS = ("status", "current_step", "attempt", "cost_used", "seconds_used", "stop_reason", "review", "result",
                "live", "limits", "upstream_used", "finished_at")
@@ -45,7 +46,11 @@ async def unit_counters(session: AsyncSession, unit: HarnessUnit) -> dict[str, A
 
 async def add_event(session: AsyncSession, work_id: str, kind: str, payload: dict[str, Any],
                     stage_run_id: str | None = None, unit_id: str | None = None) -> None:
-    session.add(HarnessEvent(work_id=work_id, stage_run_id=stage_run_id, unit_id=unit_id, kind=kind, payload=payload))
+    event = HarnessEvent(work_id=work_id, stage_run_id=stage_run_id, unit_id=unit_id, kind=kind, payload=payload)
+    session.add(event)
+    await session.flush()
+    # 知らせはここ1か所で出来事から作る（決めごと 17章。harness_notify.py）
+    await harness_notify.on_event(session, event)
 
 
 async def patch_unit(session: AsyncSession, unit_id: str, patch: dict[str, Any], event: str = "unit",
@@ -98,16 +103,17 @@ async def start_step(session: AsyncSession, unit: HarnessUnit, step_id: str, ste
 
 
 async def finish_step(session: AsyncSession, unit: HarnessUnit, step_id: str, status: str,
-                      detail: dict[str, Any] | None, cost: float = 0) -> float:
-    """段の1回分を終える。動いた秒を返す。"""
+                      detail: dict[str, Any] | None, cost: float = 0, waited: float = 0.0) -> float:
+    """段の1回分を終える。動いた秒（始まりから終わりまでから、送り先の順番を待った秒を引いた物）を返す。"""
     row = await session.get(HarnessStep, step_id)
     if row is None or row.finished_at is not None:
         return 0.0
     row.finished_at = now()
     row.status, row.detail, row.cost = status, detail, cost
-    seconds = (row.finished_at - row.started_at).total_seconds()
+    seconds = max((row.finished_at - row.started_at).total_seconds() - waited, 0.0)
     await add_event(session, unit.work_id, "step", {"unit_id": unit.id, "step_id": step_id, "step": row.step,
                                                    "attempt": row.attempt, "status": status, "detail": detail,
-                                                   "seconds": seconds, "finished_at": row.finished_at.isoformat()},
+                                                   "seconds": seconds, "waited_seconds": waited,
+                                                   "finished_at": row.finished_at.isoformat()},
                     unit.stage_run_id, unit.id)
     return seconds

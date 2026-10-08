@@ -34,6 +34,29 @@ def left_right_regions(width: int, height: int, left_text: str, right_text: str,
     ]
 
 
+def regional_positive(graph: ComfyNodeGraph, positive, clip, regions: list[RegionPrompt]):
+    """全体の文（positive）に範囲ごとの文を足した ConditioningCombine の出力を返す。clip は CLIP の出力。
+    model_loader_nodes.add_text_and_extras が、処理の引数 regions があるときに呼ぶ（形の指定より前）。"""
+    _check(regions)
+    combined = None
+    for r in regions:
+        enc = graph.add('CLIPTextEncode', text=r.text, clip=clip)
+        area = graph.add('ConditioningSetArea', conditioning=enc[0], width=r.width, height=r.height,
+                         x=r.x, y=r.y, strength=r.strength)
+        combined = area[0] if combined is None else graph.add(
+            'ConditioningCombine', conditioning_1=combined, conditioning_2=area[0])[0]
+    return graph.add('ConditioningCombine', conditioning_1=positive, conditioning_2=combined)[0]
+
+
+def _check(regions: list[RegionPrompt]) -> None:
+    if not regions:
+        raise ValueError('範囲が1つもありません')
+    for r in regions:
+        for name in ('x', 'y', 'width', 'height'):
+            if getattr(r, name) % AREA_STEP:
+                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} 画素刻みではありません')
+
+
 def apply_regional_prompts(graph: ComfyNodeGraph, sampler: Node, clip_source: Node, regions: list[RegionPrompt]) -> Node:
     """範囲ごとの文を足し、全体の文と合わせた ConditioningCombine を返す。
 

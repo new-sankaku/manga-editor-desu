@@ -15,9 +15,11 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from v3server.canonical_tables.harness_tables import EpisodeOutline
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
+from v3server.canonical_tables.text_and_layer_tables import TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
-from v3server.canonical_tables.work_tree_tables import Panel
+from v3server.canonical_tables.work_tree_tables import Page, Panel
 
 # 作画の検査が読む閾値の鍵（drawing_checks.py と同じ物を読む）
 DRAWING_THRESHOLD_PREFIX = "harness.drawing."
@@ -45,7 +47,8 @@ async def characters_by_name(session: AsyncSession, work_id: str) -> dict[str, M
 def material_version(m: MaterialEntry | None) -> str | None:
     if m is None:
         return None
-    return fingerprint({"name": m.name, "traits": m.traits, "clothes": m.clothes, "generation": m.generation})
+    return fingerprint({"name": m.name, "traits": m.traits, "clothes": m.clothes, "generation": m.generation,
+                        "image_ids": m.image_ids})
 
 
 async def drawing_thresholds_version(session: AsyncSession, work_id: str) -> str:
@@ -66,6 +69,12 @@ async def panel_drawing_upstream(session: AsyncSession, work_id: str, panel_id: 
     for name in panel_people_names(panel):
         m = chars.get(name)
         out[f"material:{name}"] = _entry(material_version(m), "recheck", f"設定資料の人物 {name}")
+    location = panel.content.get("location")
+    if location:
+        bg = (await session.execute(select(MaterialEntry).where(
+            MaterialEntry.work_id == work_id, MaterialEntry.kind == "background", MaterialEntry.name == location,
+            MaterialEntry.removed.is_(False), MaterialEntry.proposal_state == "adopted"))).scalar_one_or_none()
+        out[f"material:background:{location}"] = _entry(material_version(bg), "redraw", f"設定資料の場所 {location}")
     out["thresholds:drawing"] = _entry(await drawing_thresholds_version(session, work_id), "recheck", "作画の検査の閾値")
     return out
 
@@ -81,11 +90,55 @@ async def name_draft_upstream(session: AsyncSession, work_id: str) -> dict[str, 
     }
 
 
+async def _plan_entry(session: AsyncSession, work_id: str) -> dict[str, Any]:
+    plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == work_id))).scalar_one_or_none()
+    return _entry(fingerprint({"synopsis": plan.synopsis, "audience": plan.audience, "exclusions": plan.exclusions})
+                  if plan else None, "redraw", "企画")
+
+
+async def _outlines_entry(session: AsyncSession, work_id: str) -> dict[str, Any]:
+    rows = (await session.execute(select(EpisodeOutline).where(
+        EpisodeOutline.work_id == work_id, EpisodeOutline.removed.is_(False)))).scalars().all()
+    return _entry(fingerprint(sorted((o.episode_id, fingerprint(o.outline)) for o in rows)), "redraw", "構成")
+
+
+async def episode_content_version(session: AsyncSession, episode_id: str) -> str:
+    """話のページ・コマ・文字の中身の指紋（仕上げ・総合・書き出しが見る原稿）。"""
+    pages = (await session.execute(select(Page).where(Page.episode_id == episode_id, Page.removed.is_(False))
+                                   .order_by(Page.number))).scalars().all()
+    ids = [p.id for p in pages]
+    panels = (await session.execute(select(Panel).where(Panel.page_id.in_(ids), Panel.removed.is_(False)))
+              ).scalars().all() if ids else []
+    texts = (await session.execute(select(TextItem).where(TextItem.page_id.in_(ids), TextItem.removed.is_(False)))
+             ).scalars().all() if ids else []
+    return fingerprint({"pages": [(p.id, p.number, p.layout) for p in pages],
+                        "panels": sorted((x.id, x.order, x.frame, x.content, x.image_id) for x in panels),
+                        "texts": sorted((t.id, t.text, t.box_mm) for t in texts)})
+
+
 async def upstream_of(session: AsyncSession, kind: str, work_id: str, target_id: str) -> dict[str, dict[str, Any]]:
+    """作業の種類ごとの上流。企画の聞き取り（S0）は上流を持たない（人の要望から始める）。"""
     if kind == "panel_drawing":
         return await panel_drawing_upstream(session, work_id, target_id)
     if kind == "name_draft":
         return await name_draft_upstream(session, work_id)
+    if kind == "plan_interview":
+        return {}
+    chars = await characters_by_name(session, work_id)
+    characters = _entry(fingerprint(sorted((n, material_version(m)) for n, m in chars.items())), "redraw",
+                        "設定資料の人物")
+    if kind == "structure":
+        return {"plan": await _plan_entry(session, work_id), "materials:characters": characters}
+    if kind == "settings_sheet":
+        return {"plan": await _plan_entry(session, work_id), "outlines": await _outlines_entry(session, work_id)}
+    if kind in ("page_finishing", "overall_review", "export"):
+        effect = "redraw" if kind == "export" else "recheck"
+        out = {f"episode:{target_id}": _entry(await episode_content_version(session, target_id), effect, "話の原稿")}
+        if kind == "overall_review":
+            row = (await session.execute(select(EpisodeOutline).where(
+                EpisodeOutline.episode_id == target_id, EpisodeOutline.removed.is_(False)))).scalar_one_or_none()
+            out["outline"] = _entry(fingerprint(row.outline) if row else None, "recheck", "構成")
+        return out
     raise ValueError(f"知らない作業の種類: {kind}")
 
 

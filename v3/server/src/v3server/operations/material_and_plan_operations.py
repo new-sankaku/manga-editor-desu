@@ -9,13 +9,16 @@ AIが人の手の印の付いた項目に当たったときは、断らずに判
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from sqlalchemy import select
 
+from v3server.canonical_tables.harness_tables import EpisodeOutline
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.table_base import new_id
+from v3server.canonical_tables.work_tree_tables import Episode
+from v3server.llm_questions.structure_question import Outline
 from v3server.operations.ai_involvement import require_actor_may, require_ai_may_change_fields
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -39,6 +42,28 @@ class LoraUse(_Strict):
     weight: float
 
 
+class CanonicalBackground(_Strict):
+    """場所の正本の背景の絵と、その絵の向き（ネームのコマの view と同じ言葉）。向きが同じコマはこの絵から切り出す。"""
+
+    image_id: str
+    view: str = Field(min_length=1)
+
+
+class SceneCamera(_Strict):
+    position: tuple[float, float, float]
+    yaw_degrees: float
+    pitch_degrees: float
+    fov_degrees: float = Field(gt=0, lt=180)
+
+
+class Scene3D(_Strict):
+    """場所を箱で組んだ3D（background_scene3d/box_scene_depth_render.py）。boxes は [x0, y0, z0, x1, y1, z1]、
+    cameras は向き（ネームのコマの view と同じ言葉）ごとのカメラ。正本の絵と向きが違うコマはここから奥行き・線画を描く。"""
+
+    boxes: list[tuple[float, float, float, float, float, float]] = Field(min_length=1)
+    cameras: dict[str, SceneCamera]
+
+
 class GenerationSettings(_Strict):
     """人物ごとの生成の設定。絵を作る依頼を組むときに使う（どう使うかは処理の手順が決める）。"""
 
@@ -49,6 +74,9 @@ class GenerationSettings(_Strict):
     # 顔・姿を合わせる参照の絵
     reference_image_ids: list[str] = Field(default_factory=list)
     seed: int | None = None
+    # 場所（kind=background）だけ：正本の背景の絵と、箱の3D
+    canonical: CanonicalBackground | None = None
+    scene3d: Scene3D | None = None
 
 
 class MaterialValues(_Strict):
@@ -64,6 +92,8 @@ class MaterialValues(_Strict):
 async def _check_images(session, work_id: str, values: dict[str, Any]) -> None:
     ids = list(values.get("image_ids", []))
     ids += values.get("generation", {}).get("reference_image_ids", [])
+    if (values.get("generation") or {}).get("canonical"):
+        ids.append(values["generation"]["canonical"]["image_id"])
     for c in values.get("clothes", []):
         ids += c.get("image_ids", [])
     for i in ids:
@@ -200,3 +230,37 @@ class DecideMaterialProposal(OpBase):
         before = entry.proposal_state
         entry.proposal_state = self.state
         return {**self.model_dump(), "state": before}
+
+
+class SetEpisodeOutline(OpBase):
+    """1話の構成（S1 の正本）を書く。無ければ足す。outline の形は llm_questions/structure_question.py の Outline。
+    AIが人の手の印の付いた構成に当たったら判断待ちに置く（人が書いた構成を黙って上書きしない）。"""
+
+    type: Literal["set_episode_outline"] = "set_episode_outline"
+    episode_id: str
+    outline: dict[str, Any]
+
+    ai_may_submit = True
+
+    async def scope(self, session, work):
+        await get_in_work(session, Episode, self.episode_id, work.id)
+        return Scope("can_manage", work_obj(work.id))
+
+    async def apply(self, ctx):
+        try:
+            value = Outline.model_validate(self.outline).model_dump(mode="json")
+        except ValidationError as e:
+            raise Invalid(f"構成の形が合わない: {e.errors()[0]['loc']} {e.errors()[0]['msg']}") from e
+        rc = RowChanges(ctx)
+        row = (await ctx.session.execute(select(EpisodeOutline).where(
+            EpisodeOutline.episode_id == self.episode_id))).scalar_one_or_none()
+        if row is None:
+            require_ai_may_change_fields(ctx.actor, ctx.work, "episode_outlines", {"outline"})
+            rc.created(EpisodeOutline(id=new_id(), work_id=ctx.work.id, episode_id=self.episode_id, outline=value,
+                                      made_by_kind=ctx.actor.kind, made_by_id=ctx.actor.id, removed=False,
+                                      human_hand_fields=["outline"] if ctx.actor.kind == "human" else []))
+        else:
+            if row.removed:
+                rc.set_plain(row, {"removed": False})
+            rc.change(row, {"outline": value})
+        return rc.inverse([], "構成を書いた取り消し")

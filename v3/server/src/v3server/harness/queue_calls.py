@@ -11,6 +11,8 @@ GenerationJob → service_call_activity.call_service）を通す。作品ごと�
 
 import asyncio
 import base64
+import contextvars
+from dataclasses import dataclass
 from typing import Any
 
 from sqlalchemy import func, select
@@ -36,11 +38,24 @@ HARNESS_PROCESSES = {
     "panel_tags": "harness_panel_tags",          # LLM：コマの中身からタグの列（作り直しの問い。redo_instruction_question）
     "detect_person": "harness_detect_person",    # 検出器：人物・顔・頭（/person_face_head）
     "detect_text": "harness_detect_text",        # 検出器：絵の中の文字（/text_regions）
+    "detect_hands": "harness_detect_hands",      # 検出器：手の枠（/hands。崩れの判定器は無いので人が見る）
+    "detect_identity": "harness_detect_identity",  # 検出器：同じ人物か（/identity_ccip。「違う」で落とす専用）
+    "detect_age": "harness_detect_age",          # 検出器：年齢区分の確率（/age_rating。記録だけ）
     "shot_angle": "harness_shot_angle",          # VLM：写す範囲・角度・向き（shot_angle_question）
-    "pick": "harness_pick",                      # VLM の評価役：候補から1枚（judge_procedures/candidate_pick）
+    "pair": "harness_pair",                      # VLM の評価役：2枚を左右を入れ替えて比べる（judge_procedures/pair_comparison）
     "name_draft": "harness_name_draft",          # LLM：ネームの案（name_draft_question）
+    "layout_tiers": "harness_layout_tiers",      # LLM：ページの段の割り（layout_tier_question）
+    "reading_order": "harness_reading_order",    # VLM：コマの読む順（reading_order_question。ネームの下絵を見せる）
     "contradiction": "harness_contradiction",    # LLM：台本の矛盾（contradiction_question）
     "foreshadow": "harness_foreshadow",          # LLM：伏線の回収漏れ（foreshadow_question）
+    "plan_interview": "harness_plan_interview",  # LLM：企画の聞き取り（plan_interview_question）
+    "structure": "harness_structure",            # LLM：1話の構成（structure_question）
+    "structure_views": "harness_structure_views",  # LLM：構成の観点ごとの指摘（structure_question）
+    "imported_text": "harness_imported_text",    # LLM：持ち込んだ文から人物の欄を抜く（imported_text_question）
+    "settings_sheet": "harness_settings_sheet",  # LLM：設定資料の案（settings_sheet_question）
+    "distinguish": "harness_distinguish",        # LLM：見分けにくい人物の組（settings_sheet_question）
+    "page_summary": "harness_page_summary",      # VLM：ページの絵の要約（overall_review_question）
+    "outline_compare": "harness_outline_compare",  # LLM：構成と仕上がりの食い違い（overall_review_question）
 }
 
 TERMINAL_JOB = frozenset({"done", "stopped", "cancelled"})
@@ -129,10 +144,26 @@ def _wait_state(jobs: list[Job]) -> tuple[str, dict[str, Any]]:
     return "running", counts
 
 
+@dataclass
+class WaitClock:
+    """段の中で、送り先の順番を待った秒（依頼がどれも動いていない間）。段の活動（run_step）が1つ置く。"""
+
+    limit: float | None
+    waited: float = 0.0
+
+
+# 今の段の待ちの時計。run_step の外（工程の検査の問い）では None で、待ちを数えない
+WAIT_CLOCK: contextvars.ContextVar[WaitClock | None] = contextvars.ContextVar("harness_wait_clock", default=None)
+
+
 async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
     """依頼が全部終わるまで待つ。取り消されたら依頼を取り消し、止まるまで待ってから取り消しを返す。
-    unit_id が None（工程の検査の問い）なら、待ちの様子は作業の行に書かない。"""
+    unit_id が None（工程の検査の問い）なら、待ちの様子は作業の行に書かない。
+    依頼がどれも動いていない間は順番待ちとして WAIT_CLOCK に足し、待ちの上限を超えたら依頼を取り消して wait_limit で止める。"""
     last_state = None
+    clock = WAIT_CLOCK.get()
+    loop = asyncio.get_running_loop()
+    seen = loop.time()
     try:
         while True:
             activity.heartbeat({"jobs": job_ids})
@@ -140,6 +171,15 @@ async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
                 jobs = [await session.get(Job, j) for j in job_ids]
                 if all(j.status in TERMINAL_JOB for j in jobs):
                     return jobs
+                t = loop.time()
+                if clock is not None and not any(j.status == "running" for j in jobs):
+                    clock.waited += t - seen
+                seen = t
+                if clock is not None and clock.limit is not None and clock.waited > clock.limit:
+                    await asyncio.shield(_cancel_and_wait(job_ids))
+                    raise ApplicationError(
+                        f"送り先の順番待ちが待ちの上限（{clock.limit:g} 秒）を超えた。上限を上げるか、空いてから再開する",
+                        {"waited_seconds": clock.waited}, type="wait_limit", non_retryable=True)
                 state, counts = _wait_state(jobs)
                 if state != last_state and unit_id is not None:
                     unit = await session.get(HarnessUnit, unit_id)

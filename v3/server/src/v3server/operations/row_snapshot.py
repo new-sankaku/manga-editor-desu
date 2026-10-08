@@ -10,6 +10,7 @@
 from typing import Any, Literal
 
 from v3server.canonical_tables.episode_plan_tables import EpisodePlan, Foreshadowing
+from v3server.canonical_tables.harness_tables import EpisodeOutline
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import (
     AnnotationItem,
@@ -31,7 +32,7 @@ from v3server.v3_error_types import Invalid, NotFound
 
 ROW_MODELS = {m.__tablename__: m for m in (Page, Panel, TextItem, PanelLayer, ProtectedRegion, HeldAiChange, PageItem,
                                             AnnotationItem, PenStroke, PanelTemplate, MaterialEntry, WorkPlan,
-                                            TextItemTranslation, ElementGenerationSetting, EpisodePlan,
+                                            TextItemTranslation, ElementGenerationSetting, EpisodeOutline, EpisodePlan,
                                             Foreshadowing)}
 
 
@@ -102,7 +103,7 @@ class RestoreRows(OpBase):
         if set(self.snapshot) == {"annotation_items"}:
             # 赤入れだけなら、赤入れを付けられる人が戻せる
             return Scope("can_comment", work_obj(work.id), locks)
-        if len(self.page_ids) == 1 and not ({"material_entries", "work_plans", "panel_templates", "episode_plans", "foreshadowings"} & set(self.snapshot)):
+        if len(self.page_ids) == 1 and not ({"material_entries", "work_plans", "panel_templates", "episode_outlines", "episode_plans", "foreshadowings"} & set(self.snapshot)):
             return Scope("can_draw", page_obj(self.page_ids[0]), locks, page_tree=self.page_ids[0])
         return Scope("can_manage", work_obj(work.id), locks)
 

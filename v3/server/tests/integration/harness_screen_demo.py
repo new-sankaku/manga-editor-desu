@@ -43,12 +43,12 @@ from temporalio.client import Client  # noqa: E402
 from test_harness import CONTENT, DRAWING, FRAME, THRESHOLDS, limits  # noqa: E402
 from test_image_generation import SD  # noqa: E402
 
+from v3server.admin_command_line import grant_admin  # noqa: E402
 from v3server.database_engine import get_sessionmaker  # noqa: E402
 from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
 from v3server.harness.harness_worker_main import HarnessWorker  # noqa: E402
 from v3server.harness.queue_calls import HARNESS_PROCESSES  # noqa: E402
 from v3server.http_routes.http_app_factory import app  # noqa: E402
-from v3server.admin_command_line import grant_admin  # noqa: E402
 from v3server.openfga_permissions import open_authz  # noqa: E402
 from v3server.server_settings import get_settings  # noqa: E402
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E402
@@ -86,7 +86,8 @@ async def setup(api: httpx.AsyncClient, comfy: FakeComfyServer) -> dict:
                                                               "ai_task": "drawing", "ai_action": "propose"})).raise_for_status()
 
     comfy_sid = await service(kind="image", adapter="comfyui", endpoint=comfy.url, send_mode="parallel", max_concurrency=4)
-    for name in ("text_to_image", "image_to_image"):
+    # 背景の切り出し・3D と、直させる段は inpaint を使う（文脈の段が送り先を確かめる）
+    for name in ("text_to_image", "image_to_image", "inpaint"):
         await route(comfy_sid, name, comfy_graph_settings=SD, comfy_wait_seconds=120)
     # litellm は送った先のその先が見えないので api として登録し、作品の送ってよい先へ載せる（下の ops）
     llm_sid = await service(location="api", kind="text", adapter="litellm", send_mode="parallel", max_concurrency=6)

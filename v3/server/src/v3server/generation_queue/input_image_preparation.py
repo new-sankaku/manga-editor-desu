@@ -6,6 +6,8 @@ request の形（ComfyUI の処理）
   purpose=mask は image_id の代わりに region_px（元の絵の画素の多角形の一覧）を渡してもよい（囲んで頼む。V3細部の決めごと 10.1）。
   そのときは、ここで元の絵（source。1枚だけ）と同じ大きさのマスク（白が囲んだ所）を描く。
   control は形の指定（線画・落書き・骨格・奥行き）の絵。image_id か png_base64 で渡す。
+  source は crop_px（[x0, y0, x1, y1]。元の絵の画素）を添えると、その範囲を切り出した絵を元の絵にする（場所の正本の背景から
+  コマの分を切り出す。ハーネスの作画）。人の手の範囲のある絵は切り出さない（範囲を切り出しに合わせ直す仕組みが無いので断る）
   png_base64（画面で塗ったマスク・描いた形の PNG。元の絵と同じ大きさ。白か不透明の所が囲んだ所）でもよい
 - protected_mask_input: {"node": ノード番号, "input": 入力名}。人の手の範囲のマスクを入れる所
 
@@ -20,8 +22,11 @@ prepared_inputs は依頼する側が書けない（書いてあれば断る）�
 
 import base64
 import binascii
+import io
+from dataclasses import dataclass
 from typing import Any
 
+from PIL import Image
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +35,7 @@ from v3server.canonical_tables.text_and_layer_tables import ProtectedRegion
 from v3server.comfy_graphs.protected_region_mask import protected_mask_png
 from v3server.generation_queue.protected_mask_cache import protected_mask_sha256
 from v3server.hand_tools.vector_strokes import refuse_stale_stroke_cache
-from v3server.image_file_storage import store_image
+from v3server.image_file_storage import read_image, store_image
 from v3server.operations.operation_base import get_in_work
 from v3server.v3_error_types import Invalid
 
@@ -45,6 +50,31 @@ async def protected_regions_for(session: AsyncSession, img: ImageFile) -> list[P
         cur = await session.get(ImageFile, cur.based_on_image_id) if cur.based_on_image_id else None
     q = select(ProtectedRegion).where(ProtectedRegion.image_id.in_(ids), ProtectedRegion.removed.is_(False))
     return list((await session.execute(q.order_by(ProtectedRegion.created_at))).scalars())
+
+
+@dataclass(frozen=True)
+class _Cropped:
+    """切り出した元の絵（id は切り出す前の絵。大きさは切り出した後）。"""
+
+    id: str
+    width: int
+    height: int
+    based_on_image_id: str | None = None
+
+
+async def _crop_source(session: AsyncSession, img: ImageFile, box: Any) -> tuple[_Cropped, Any]:
+    try:
+        x0, y0, x1, y1 = (int(v) for v in box)
+    except (TypeError, ValueError) as e:
+        raise Invalid(f"crop_px は [x0, y0, x1, y1] の整数: {box!r}") from e
+    if not (0 <= x0 < x1 <= img.width and 0 <= y0 < y1 <= img.height):
+        raise Invalid(f"crop_px {box!r} が元の絵（{img.width}x{img.height}）の外に出ている")
+    if await protected_regions_for(session, img):
+        raise Invalid(f"絵 {img.id} には人の手の範囲がある。切り出して元の絵にはしない")
+    with Image.open(io.BytesIO(read_image(img.sha256))) as im:
+        buf = io.BytesIO()
+        im.crop((x0, y0, x1, y1)).save(buf, format="PNG")
+    return _Cropped(img.id, x1 - x0, y1 - y0), store_image(buf.getvalue())
 
 
 def _slot(entry: Any, what: str) -> tuple[str, str]:
@@ -109,6 +139,12 @@ async def _prepare(session: AsyncSession, work_id: str, request: dict[str, Any])
             continue
         img = await get_in_work(session, ImageFile, e.get("image_id", ""), work_id)
         await refuse_stale_stroke_cache(session, img.id)
+        if e["purpose"] == "source" and "crop_px" in e:
+            cropped, stored = await _crop_source(session, img, e["crop_px"])
+            prepared.append({"node": node, "input": inp, "purpose": "source", "image_id": img.id,
+                             "sha256": stored.sha256, "media_type": stored.media_type, "crop_px": list(e["crop_px"])})
+            sources.append(cropped)
+            continue
         prepared.append({"node": node, "input": inp, "purpose": e["purpose"], "image_id": img.id, "sha256": img.sha256,
                          "media_type": img.media_type})
         if e["purpose"] == "source":

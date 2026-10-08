@@ -7,6 +7,7 @@
 """
 
 import asyncio
+import hashlib
 import io
 import json
 import re
@@ -16,7 +17,7 @@ from typing import Any
 
 import uvicorn
 from fastapi import FastAPI, Request, UploadFile, WebSocket, WebSocketDisconnect
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import Response
 from PIL import Image, ImageDraw
 
 from v3server.service_senders.sender_result_types import AdapterResult
@@ -202,30 +203,54 @@ class Script:
         self.persons = 1            # 検出する人数
         self.touch = ""             # 見切れ（T/B/L/R）
         self.texts = 0              # 絵の中の文字の範囲の数
+        self.texts_calls = None     # 文字を返す /text_regions の回数（None なら毎回。直した後は消えた、を作る）
+        self.person_box = (10, 10, 100, 200)
+        self.hands = 1
+        self.same = True            # /identity_ccip の答え（同じ人物か）
+        self.same_calls = None      # 「違う」を返す回数（None なら same のまま。直した後は同じ、を作る）
         self.shot = "胸から上"
         self.angle = "目の高さ"
-        self.pick = "first"         # first / none / alternate（割れる）
+        self.pair = "content"       # content（絵の中身で決まる。入れ替えても同じ答え）/ tie / a（いつも A。入れ替えると食い違う）/ flip（くり返すたびに好みが逆）
         self.tags_broken = False
         self.llm_sleep = 0.0
         self.detector_sleep = 0.0
         self.calls: list[tuple[str, str]] = []
-        self._alt = 0
+        self._pair_calls = 0
         self.name_pages: list[dict[str, Any]] | None = None
+        self.answers: dict[str, Any] = {}   # 工程の問いの答え（kind → JSON にする値）
 
     def kind_of(self, text: str) -> str:
         if '{"tags"' in text:
             return "tags"
         if '"items":[{"image"' in text:
             return "shot_angle"
-        if '"pick"' in text:
-            return "pick"
+        if '{"pairs":[{"id"' in text:
+            return "pair"
         if '"issues":[{"line":"行の番号","why"' in text:
             return "contradiction"
         if '"kind":"未回収' in text:
             return "foreshadow"
+        for kind, mark in STAGE_QUESTION_MARKS:
+            if mark in text:
+                return kind
         if '"pages"' in text:
             return "name_draft"
         return "other"
+
+
+# 工程の問い（S0〜S2・S6）の出力の形の行に入る印。llm_questions の各問いの _FORMAT と合わせる
+STAGE_QUESTION_MARKS = (
+    ("plan_interview", '"questions":[{"ask"'),
+    ("structure_views", '"views":[{"view"'),
+    ("structure", '"pages":[{"page":ページの番号,"summary"'),
+    ("settings_sheet", '"characters":[{"name"'),
+    ("distinguish", '"confusable":[{"a"'),
+    ("page_summary", '"pages":[{"image"'),
+    ("outline_compare", '"gaps":[{"page"'),
+    ("layout_tiers", '"tiers"'),
+    ("reading_order", '"order"'),
+    ("imported_text", '"suspicious"'),
+)
 
 
 def _text_of(messages: list[dict[str, Any]]) -> tuple[str, int]:
@@ -234,6 +259,31 @@ def _text_of(messages: list[dict[str, Any]]) -> tuple[str, int]:
         return parts, 0
     text = "".join(p.get("text", "") for p in parts if p["type"] == "text")
     return text, sum(1 for p in parts if p["type"] == "image_url")
+
+
+def _images_of(messages: list[dict[str, Any]]) -> list[str]:
+    parts = messages[-1]["content"]
+    return [] if isinstance(parts, str) else [p["image_url"]["url"] for p in parts if p["type"] == "image_url"]
+
+
+def _pair_answer(script: Script, text: str, images: list[str]) -> str:
+    """組ごとに A・B・同じ。content は絵の中身の指紋の小さい方を選ぶ（左右を入れ替えても、くり返しても同じ答え）。"""
+    names = text.split("次の名前で呼びます。\n")[1].split("\n\n")[0].splitlines()
+    finger = {n: hashlib.sha256(u.encode()).hexdigest() for n, u in zip(names, images, strict=True)}
+    script._pair_calls += 1
+    flip = script.pair == "flip" and ((script._pair_calls - 1) // 2) % 2 == 1
+    out = []
+    for m in re.finditer(r"組(\d+)：A＝(\S+)　B＝(\S+)", text):
+        i, a, b = int(m.group(1)), m.group(2), m.group(3)
+        if script.pair == "tie":
+            choice = "同じ"
+        elif script.pair == "a":
+            choice = "A"
+        else:
+            a_wins = finger[a] < finger[b]
+            choice = "A" if a_wins != flip else "B"
+        out.append({"id": i, "choice": choice})
+    return json.dumps({"pairs": out}, ensure_ascii=False)
 
 
 def fake_llm(script: Script):
@@ -248,23 +298,17 @@ def fake_llm(script: Script):
         elif kind == "shot_angle":
             answer = json.dumps({"items": [{"image": i + 1, "shot": script.shot, "angle": script.angle,
                                             "facing": None} for i in range(n_images)]}, ensure_ascii=False)
-        elif kind == "pick":
-            names = text.split("次の名前で呼びます。\n")[1].split("\n\n狙い：")[0].splitlines()
-            if script.pick == "none":
-                pick = re.search(r"「(.+?)」と答えてください", text).group(1)
-            elif script.pick == "alternate":
-                # 1回目は1枚目、2回目は「どれも合わない」。同じ問いへの答えが割れる
-                script._alt += 1
-                pick = names[0] if script._alt % 2 else re.search(r"「(.+?)」と答えてください", text).group(1)
-            else:
-                pick = names[0]
-            answer = json.dumps({"pick": pick, "why": "偽の評価役"}, ensure_ascii=False)
+        elif kind == "pair":
+            answer = _pair_answer(script, text, _images_of(request["messages"]))
         elif kind == "contradiction":
             answer = json.dumps({"issues": []})
         elif kind == "foreshadow":
             answer = json.dumps({"issues": []})
         elif kind == "name_draft":
             answer = json.dumps({"pages": script.name_pages}, ensure_ascii=False)
+        elif kind in script.answers:
+            value = script.answers[kind]
+            answer = value if isinstance(value, str) else json.dumps(value, ensure_ascii=False)
         else:
             answer = "{}"
         return AdapterResult(output={"text": answer}, model="fake")
@@ -278,11 +322,33 @@ def fake_detector(script: Script):
         if script.detector_sleep:
             await asyncio.sleep(script.detector_sleep)
         if ep == "/person_face_head":
-            persons = [{"x0": 10, "y0": 10, "x1": 100, "y1": 200, "score": 0.9, "h_ratio": 0.5, "area_ratio": 0.2,
+            x0, y0, x1, y1 = script.person_box
+            persons = [{"x0": x0, "y0": y0, "x1": x1, "y1": y1, "score": 0.9, "h_ratio": 0.5, "area_ratio": 0.2,
                         "touch": script.touch if i == 0 else ""} for i in range(script.persons)]
-            return AdapterResult(output={"persons": persons, "faces": [], "heads": []}, model="fake-detector")
+            faces = [{"x0": x0 + 10, "y0": y0, "x1": x0 + 50, "y1": y0 + 40, "score": 0.9, "h_ratio": 0.2,
+                      "area_ratio": 0.05, "touch": ""} for _ in range(script.persons)]
+            return AdapterResult(output={"persons": persons, "faces": faces, "heads": []}, model="fake-detector")
         if ep == "/text_regions":
-            return AdapterResult(output={"texts": [{"x0": 0, "y0": 0, "x1": 5, "y1": 5, "score": 0.8}
-                                                   for _ in range(script.texts)]}, model="fake-detector")
+            n = script.texts
+            if script.texts_calls is not None:
+                n = n if script.texts_calls > 0 else 0
+                script.texts_calls -= 1
+            return AdapterResult(output={"texts": [{"x0": 0, "y0": 0, "x1": 16, "y1": 16, "score": 0.8}
+                                                   for _ in range(n)]}, model="fake-detector")
+        if ep == "/hands":
+            return AdapterResult(output={"width": 0, "height": 0, "hands": [
+                {"x0": 20, "y0": 60, "x1": 40, "y1": 80, "score": 0.7} for _ in range(script.hands)]},
+                model="fake-detector")
+        if ep == "/identity_ccip":
+            same = script.same
+            if script.same_calls is not None:
+                same = script.same if script.same_calls <= 0 else not script.same
+                script.same_calls -= 1
+            t = float(request.get("form", {}).get("threshold", 0.178))
+            return AdapterResult(output={"difference": t / 2 if same else t * 2, "threshold": t, "same": same},
+                                 model="fake-detector")
+        if ep == "/age_rating":
+            return AdapterResult(output={"rating": {"general": 0.9, "sensitive": 0.08, "questionable": 0.02}},
+                                 model="fake-detector")
         return AdapterResult(output={}, model="fake-detector")
     return call

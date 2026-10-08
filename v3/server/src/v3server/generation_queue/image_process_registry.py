@@ -28,6 +28,7 @@ from v3server.comfy_graphs.inpaint_graph import CropBox, build_inpaint, work_siz
 from v3server.comfy_graphs.instruction_edit_graph import EditSettings, build_instruction_edit
 from v3server.comfy_graphs.model_loader_nodes import DiffusionSettings, Extras
 from v3server.comfy_graphs.outpaint_graph import build_outpaint
+from v3server.comfy_graphs.regional_prompt_nodes import RegionPrompt
 from v3server.comfy_graphs.text_to_image_graph import build_text_to_image_process
 from v3server.generation_queue import image_process_inputs as mk
 from v3server.v3_error_types import Invalid
@@ -66,6 +67,18 @@ CONTROL_UNION_TYPES = {"lineart": "canny/lineart/anime_lineart/mlsd", "scribble"
                        "pose": "openpose", "depth": "depth"}
 
 
+class RegionParam(BaseModel):
+    """範囲ごとの文の1つ（画素。8 画素刻み）。regional_prompt_nodes.RegionPrompt に渡す。"""
+
+    model_config = ConfigDict(extra="forbid")
+    text: str = Field(min_length=1)
+    x: int = Field(ge=0, multiple_of=8)
+    y: int = Field(ge=0, multiple_of=8)
+    width: int = Field(ge=8, multiple_of=8)
+    height: int = Field(ge=8, multiple_of=8)
+    strength: float = Field(ge=0, le=10)
+
+
 class _Controlled(_Prompted):
     """形の指定（線画・落書き・骨格・奥行き）。絵は依頼の input_images に purpose=control で渡す。
     効き方は p08（ラフの線画は効かなかった）・p18（3Dの線画と奥行きは効いた）。強さと終わりの初めの値は p18 の 0.8・0.8
@@ -77,6 +90,9 @@ class _Controlled(_Prompted):
     control_strength: float = _f("形の効き", 0.8, group="形の指定", widget="slider", ge=0, le=2)
     control_end: float = _f("効かせる所（終わり）", 0.8, group="形の指定", widget="slider", ge=0, le=1)
     control_invert: bool = _f("白地に黒い線（反転して渡す）", True, group="形の指定", widget="check")
+    # 人物ごとの置き場を文の範囲で渡す（ハーネスの作画がネームの人物の範囲から作る。画面の入力欄には出さない）。
+    # 骨格の形の指定とは一緒に使わない（どちらか1つ。harness/panel_drawing_steps.py）
+    regions: list[RegionParam] = _f("範囲ごとの文", [], group="範囲", widget="hidden", default_factory=list)
 
 
 class TextToImageParams(_Controlled):
@@ -244,7 +260,9 @@ def _extras(s: DiffusionSettings, p: Any) -> Extras:
                                   else ControlKind.LINE, controlnet_name=s.controlnet_name,
                                   union_type=CONTROL_UNION_TYPES[kind], strength=p.control_strength,
                                   start_percent=0.0, end_percent=p.control_end, invert_image=p.control_invert)
-    return Extras(control=control)
+    regions = tuple(RegionPrompt(r.text, r.x, r.y, r.width, r.height, r.strength)
+                    for r in getattr(p, "regions", []))
+    return Extras(control=control, regions=regions)
 
 
 def _build_t2i(s: DiffusionSettings, p: TextToImageParams, seed: int, info: dict, prefix: str) -> ComfyNodeGraph:

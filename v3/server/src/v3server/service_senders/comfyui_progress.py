@@ -91,7 +91,7 @@ class ProgressListener:
         await write_progress(self.key, state="pending", value=None, max=None)
         try:
             ws = await asyncio.wait_for(websockets.connect(self.url, max_size=None), CONNECT_TIMEOUT)
-        except (OSError, asyncio.TimeoutError, websockets.WebSocketException) as e:
+        except (TimeoutError, OSError, websockets.WebSocketException) as e:
             log.warning("ComfyUI の進み具合につながらない（%s）: %r", self.url, e)
             await write_progress(self.key, state="unavailable")
             return

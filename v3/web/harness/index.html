@@ -12,6 +12,7 @@
 <script src="../vendor/lucide-0.468.0/lucide.min.js"></script>
 <script src="../vendor/cytoscape-3.34.3/cytoscape.min.js"></script>
 <script src="../vendor/cytoscape-dagre-4.0.1/cytoscape-dagre.min.js"></script>
+<script src="../vendor/cytoscape-expand-collapse-4.1.1/cytoscape-expand-collapse.js"></script>
 <script type="module" src="../common/nav.js"></script>
 <script type="module" src="./harness.js"></script>
 </head>
@@ -34,6 +35,8 @@
     <div class="graph-head"><span class="label">図</span><span class="legend">
       <i class="lg st-running"></i>実行中 <i class="lg st-waiting"></i>送り先を待つ <i class="lg st-review"></i>人の判断待ち
       <i class="lg st-blocked"></i>止まった・決めるまで進めない <i class="lg st-paused"></i>止めた <i class="lg stale"></i>上流が変わった</span>
+      <button id="fold" type="button" class="btn small" title="工程の図で、作業をページごとにたたむ（まとまりを押しても開く・たたむ）">ページごとにたたむ</button>
+      <button id="unfold" type="button" class="btn small" title="たたんだまとまりを全部開く">全部開く</button>
       <button id="fit" type="button" class="btn small" data-key="harness.fit" title="全体を見る">全体を見る<kbd></kbd></button></div>
     <div class="graph-wrap">
       <div id="graph" class="graph"></div>

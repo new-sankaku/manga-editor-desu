@@ -139,6 +139,13 @@ class HarnessCandidate(Base):
     evaluation: Mapped[dict[str, Any] | None] = mapped_column()
     picked: Mapped[bool] = mapped_column(Boolean, default=False)
     dropped_reason: Mapped[str | None] = mapped_column(Text)
+    # 文の候補（企画・構成・設定資料・総合）の中身
+    content: Mapped[dict[str, Any] | None] = mapped_column()
+    # 作画の候補の作り方：通った道（下絵・背景・人物の置き方）・使った入力・足りなかった入力・依頼（役目ごと）
+    made_with: Mapped[dict[str, Any] | None] = mapped_column()
+    # 直させた候補の元（直させる段が作った候補だけ）と、何回目の直しか
+    fixed_from: Mapped[str | None] = mapped_column(ForeignKey("harness_candidates.id"))
+    fix_round: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -198,5 +205,76 @@ class ServiceCallProgress(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class EpisodeOutline(Base):
+    """1話の構成（S1 の正本）。outline = {"pages": [{"page", "summary", "role"}], "highlights": [...], "notes"}。"""
+
+    __tablename__ = "episode_outlines"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
+    episode_id: Mapped[str] = mapped_column(ForeignKey("episodes.id"), unique=True)
+    outline: Mapped[dict[str, Any]] = mapped_column()
+    made_by_kind: Mapped[str] = mapped_column(String(8))
+    made_by_id: Mapped[str] = mapped_column(String(128))
+    human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
+    # 取り消しで「足した」を戻したときの印（行は消さない）
+    removed: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class HarnessNotification(Base):
+    """知らせ（決めごと 17章）。アプリの中の一覧の1行。外への送り先へは HarnessNotificationDelivery で届ける。"""
+
+    __tablename__ = "harness_notifications"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(32))
+    # info / warn / escalated（判断待ちが長い・締切を過ぎた）
+    level: Mapped[str] = mapped_column(String(16))
+    title: Mapped[str] = mapped_column(Text)
+    body: Mapped[dict[str, Any]] = mapped_column()
+    stage_run_id: Mapped[str | None] = mapped_column(ForeignKey("harness_stage_runs.id"))
+    unit_id: Mapped[str | None] = mapped_column(ForeignKey("harness_units.id"))
+    event_id: Mapped[int | None] = mapped_column(BigInteger)
+    # 同じ知らせを2回出さない鍵（作業・種類・回など）
+    dedupe_key: Mapped[str | None] = mapped_column(String(160), unique=True)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    read_by: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class HarnessNotificationSetting(Base):
+    """作品ごとの知らせの決まり。行が無い作品は、アプリの中の一覧だけに出す（外へは送らない。決めごと 17章）。"""
+
+    __tablename__ = "harness_notification_settings"
+
+    work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), primary_key=True)
+    kinds: Mapped[list[Any]] = mapped_column()
+    # [{"url", "secret"（無ければ署名しない）, "kinds"（無ければ kinds と同じ）}]
+    webhooks: Mapped[list[Any]] = mapped_column(default=list)
+    escalate_after_notices: Mapped[int | None] = mapped_column(Integer)
+    budget_near_ratio: Mapped[float | None] = mapped_column(Float)
+    updated_by: Mapped[str] = mapped_column(String(128))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class HarnessNotificationDelivery(Base):
+    __tablename__ = "harness_notification_deliveries"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    notification_id: Mapped[str] = mapped_column(ForeignKey("harness_notifications.id"), index=True)
+    channel: Mapped[str] = mapped_column(String(16))
+    target: Mapped[str] = mapped_column(Text)
+    # pending / sent / failed（送り直しの上限を超えた）
+    status: Mapped[str] = mapped_column(String(16))
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    last_error: Mapped[str | None] = mapped_column(Text)
+    next_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 __all__ = ["HarnessStageRun", "HarnessUnit", "HarnessStep", "HarnessCandidate", "HarnessEvent", "HarnessStaleMark",
-           "HarnessWatchCursor", "ServiceCallProgress", "JsonType"]
+           "HarnessWatchCursor", "ServiceCallProgress", "EpisodeOutline", "HarnessNotification",
+           "HarnessNotificationSetting", "HarnessNotificationDelivery", "JsonType"]
