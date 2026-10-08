@@ -1,21 +1,12 @@
 // キー・キーの一覧・キーを変える・絵だけ・全画面の試験（V3細部の決めごと 22章）。Playwright（Chromium）で通す。
-//   SHOTS=v3/web/screenshots NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers \
+//   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers \
 //   node v3/web/test/keys_ui.mjs
 // 相手は偽のサーバー（下の MOCK。page.route で口を横取りして答える。本物ではない）。
 // 画面のファイル（v3/web）はそのまま出す。偽なのは口の答えだけで、キーの受け方・窓・絵だけ・全画面は本物の画面のコード。
 // 偽の口：/auth/mode・/me/settings（利用者ごとの設定。本物と同じく PUT は全部を書き換える）・作品・ページ・コマ・絵・候補・版・確認の記録
-import { createRequire } from "node:module";
-import { mkdirSync, readFileSync, existsSync, statSync } from "node:fs";
-import { extname, join, normalize } from "node:path";
-import { fileURLToPath } from "node:url";
+// 画面の写しは SHOTS=<フォルダ> を付けたときだけ撮る（ui_common.mjs）。普段は v3/web/test/run_ui.mjs から流す
 import zlib from "node:zlib";
-const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
-
-const WEB = fileURLToPath(new URL("..", import.meta.url));
-const SHOTS = process.env.SHOTS;
-if (!SHOTS) throw new Error("SHOTS を決めてください");
-mkdirSync(SHOTS, { recursive: true });
+import { makeShot, openBrowser, serveWeb } from "./ui_common.mjs";
 const ORIGIN = "http://keys.v3.test";
 const USER = "key-author";
 
@@ -108,18 +99,10 @@ function answer(method, path, body, user) {
   }
   return j({ detail: `偽のサーバーに無い口：${method} ${p}` }, 404);
 }
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml" };
 const misses = [];
 async function install(page) {
-  await page.route(`${ORIGIN}/**`, async (route) => {
+  await serveWeb(page, ORIGIN, async (route, u) => {
     const req = route.request();
-    const u = new URL(req.url());
-    if (u.pathname.startsWith("/web/")) {
-      const f = normalize(join(WEB, decodeURIComponent(u.pathname.slice(5)) || "index.html"));
-      const file = f.endsWith("/") ? join(f, "index.html") : f;
-      if (!file.startsWith(WEB) || !existsSync(file)) return route.fulfill({ status: 404, body: "無い" });
-      return route.fulfill({ status: 200, body: readFileSync(file), contentType: TYPES[extname(file)] || "application/octet-stream" });
-    }
     if (u.pathname.endsWith("/harness/stream")) return;   // 流れは開いたまま何も送らない（route を閉じない）
     const r = answer(req.method(), u.pathname + u.search, req.postData() ? JSON.parse(req.postData()) : null, req.headers()["x-v3-user"]);
     if (r.status === 404) misses.push(`${req.method()} ${u.pathname}`);
@@ -130,17 +113,14 @@ async function install(page) {
 // ---------------------------------------------------------------- 試験
 const failures = [];
 function check(ok, what) { if (ok) console.log("ok", what); else { failures.push(what); console.log("NG", what); } }
-async function shot(page, name) {
-  const path = `${SHOTS}/${name}.png`;
-  await page.screenshot({ path });
-  const kb = Math.round(statSync(path).size / 1024);
-  check(kb < 1024, `${name}.png が 1MB 未満（${kb}KB）`);
-}
+let takeShot = null;
+async function shot(_page, name) { await takeShot(name); }
 
-const browser = await chromium.launch();
+const browser = await openBrowser();
 const ctx = await browser.newContext({ viewport: { width: 1360, height: 860 }, locale: "ja-JP" });
 await ctx.addInitScript((u) => { try { localStorage.setItem("v3.user", u); } catch { /* */ } }, USER);
 const page = await ctx.newPage();
+takeShot = makeShot(page, { onSize: (name, kb) => check(kb < 1024, `${name}.png が 1MB 未満（${kb}KB）`) });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message} ${e.stack}`));
 page.on("console", (m) => { if (m.type() === "error") errors.push(`console: ${m.text()}`); });
@@ -350,7 +330,8 @@ await page.waitForSelector("#graph canvas");
 await page.waitForFunction(() => document.querySelector("#fit kbd")?.textContent === "0");
 const h0 = await page.evaluate(() => document.querySelector(".graph-wrap").getBoundingClientRect().height);
 await page.keyboard.press("Shift+F");
-await page.waitForTimeout(200);
+// 図が広がり終わるのを待つ（決まった時間は待たない）。広がらなければ下の確かめで落ちる
+await page.waitForFunction((h) => document.querySelector(".graph-wrap").getBoundingClientRect().height > h, h0, { timeout: 5000 }).catch(() => {});
 const hv = await page.evaluate(() => ({ h: document.querySelector(".graph-wrap").getBoundingClientRect().height, vh: innerHeight,
   hidden: ["#side", ".table-box", "header.top", ".v3-nav"].every((q) => getComputedStyle(document.querySelector(q)).display === "none") }));
 check(hv.hidden && hv.h > h0 && hv.h > hv.vh * 0.8, `工程の画面：Shift+F で図だけになり、図が画面の高さいっぱい（${Math.round(h0)} → ${Math.round(hv.h)}px）`);

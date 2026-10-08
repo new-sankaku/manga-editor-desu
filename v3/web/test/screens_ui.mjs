@@ -1,25 +1,30 @@
 // 作品をまたぐ画面（作品と話・企画・構成・設定資料・書き出し・生成サービス・取り込み・翻訳・確認）を Playwright で通し、画面の写しを残す。
 // 本物のサーバー（/web を出す）に、作品・話・ページ・文字・設定資料・訳文・確認の記録・つなぎ先を足してから見る。
 // 使い方：
-//   V3_WEB=http://127.0.0.1:8771/web/ SHOTS=v3/web/screenshots \
+//   V3_WEB=http://127.0.0.1:8771/web/ \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/screens_ui.mjs
+// 本物のサーバーの代わりに録った答え（recorded/screens_ui.json）で通す：V3_WEB の代わりに REPLAY=1（速い組。recorded_api.mjs）
+// 録り直す：V3_WEB を付け、RECORD=1（口の答えの形が変わったとき）
+// 画面の写しは SHOTS=<フォルダ> を付けたときだけ撮る（ui_common.mjs）
 // 前もって：利用者 scr-admin をサーバーの管理者にしておく（uv run python -m v3server.admin_command_line grant-admin scr-admin）
 //
 // 模擬（本物でない所）は下の MOCK だけ。どれも page.route で差し替え、写しの名前に mock を付ける。
 // - POST /works/{id}/exports と、その進み具合・ファイル：本物は Temporal の作業者で書き出す（この環境では共有の Temporal に流さない）
 // 入稿前の確かめ（POST /works/{id}/preflight）は本物。作品に入稿の設定が無いので、その問題が出る
-import { createRequire } from "node:module";
-import { mkdirSync, readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
+import { ApiRecorder, ApiReplayer } from "./recorded_api.mjs";
+import { makeShot, openBrowser, trackRequests } from "./ui_common.mjs";
 
-const WEB = process.env.V3_WEB;
-const SHOTS = process.env.SHOTS;
-if (!WEB || !SHOTS) throw new Error("V3_WEB・SHOTS を決めてください");
-mkdirSync(SHOTS, { recursive: true });
+const REPLAY = process.env.REPLAY === "1";
+const RECORD = process.env.RECORD === "1";
+const RECORDING = fileURLToPath(new URL("./recorded/screens_ui.json", import.meta.url));
+const WEB = REPLAY ? "http://screens.v3.test/web/" : process.env.V3_WEB;
+if (!WEB) throw new Error("V3_WEB（または REPLAY=1）を決めてください");
+if (REPLAY && RECORD) throw new Error("REPLAY と RECORD は一緒に使えない");
 const BASE = new URL("..", WEB).href.replace(/\/$/, "");
 const FIXTURE = fileURLToPath(new URL("../../server/tests/fixtures/current_app_project_4pages.lz4", import.meta.url));
+console.log("相手：", REPLAY ? "録った答え（recorded/screens_ui.json）" : `本物のサーバー（${BASE}）${RECORD ? "。答えを録る" : ""}`);
 
 const AUTHOR = "scr-author", EDITOR = "scr-editor", TRANSLATOR = "scr-tr", ADMIN = "scr-admin";
 const failures = [];
@@ -119,21 +124,27 @@ async function seedServices() {
 }
 
 // ---------------------------------------------------------------- 模擬（MOCK）
-function mockExport(page, pages) {
+// 付けた横取りを外す関数を返す（録る・返す横取りは外さない）
+async function mockExport(page, pages) {
   let polls = 0;
-  page.route("**/works/*/exports", (r) => r.request().method() === "POST"
-    ? r.fulfill({ status: 201, json: { id: "mockrun", status: "queued", format: "pdf", page_ids: pages, dpi: null, language: null, spread_output: null, outputs: [], note: null } })
-    : r.continue());
-  page.route("**/works/*/exports/mockrun", (r) => { polls += 1; r.fulfill({ json: polls < 2
-    ? { id: "mockrun", status: "running", format: "pdf", page_ids: pages, outputs: [], note: null }
-    : { id: "mockrun", status: "done", format: "pdf", page_ids: pages, outputs: [{ file: "episode1.pdf", bytes: 4_812_345 }], note: null } }); });
-  page.route("**/works/*/exports/mockrun/files/*", (r) => r.fulfill({ body: "%PDF-1.4 mock", contentType: "application/pdf" }));
+  const routes = [
+    ["**/works/*/exports", (r) => r.request().method() === "POST"
+      ? r.fulfill({ status: 201, json: { id: "mockrun", status: "queued", format: "pdf", page_ids: pages, dpi: null, language: null, spread_output: null, outputs: [], note: null } })
+      : r.fallback()],
+    ["**/works/*/exports/mockrun", (r) => { polls += 1; r.fulfill({ json: polls < 2
+      ? { id: "mockrun", status: "running", format: "pdf", page_ids: pages, outputs: [], note: null }
+      : { id: "mockrun", status: "done", format: "pdf", page_ids: pages, outputs: [{ file: "episode1.pdf", bytes: 4_812_345 }], note: null } }); }],
+    ["**/works/*/exports/mockrun/files/*", (r) => r.fulfill({ body: "%PDF-1.4 mock", contentType: "application/pdf" })],
+  ];
+  for (const [url, fn] of routes) await page.route(url, fn);
+  return async () => { for (const [url, fn] of routes) await page.unroute(url, fn); };
 }
 
 // ---------------------------------------------------------------- 画面を通す
-const browser = await chromium.launch();
+const browser = await openBrowser();
 const ctx = await browser.newContext({ viewport: { width: 1360, height: 900 }, acceptDownloads: true, locale: "ja-JP" });
 const page = await ctx.newPage();
+const quiet = trackRequests(page);
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
 page.on("console", (m) => { if (m.type() === "error" && !/the server responded with a status of (403|422)/.test(m.text())) errors.push(`console: ${m.text()}`); });
@@ -142,23 +153,32 @@ page.on("dialog", (d) => d.accept("砂の商人"));
 await page.setContent("<canvas id=c width=256 height=256></canvas>");
 const dataUrl = await page.evaluate(() => { const c = document.getElementById("c").getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0, 0, 256, 256);
   c.fillStyle = "#433F35"; c.beginPath(); c.arc(128, 90, 46, 0, 7); c.fill(); c.fillRect(88, 140, 80, 100); return document.getElementById("c").toDataURL("image/png"); });
-const seeded = await seed(Buffer.from(dataUrl.split(",")[1], "base64"));
-await seedServices();
+// 作品とつなぎ先は口から足す（画面からは足さない）。録った答えで通すときは、録ったときの作品の id を使う
+const replayer = REPLAY ? new ApiReplayer(RECORDING) : null;
+let seeded;
+if (REPLAY) {
+  seeded = replayer.meta;
+  await replayer.install(page, BASE);
+} else {
+  seeded = await seed(Buffer.from(dataUrl.split(",")[1], "base64"));
+  await seedServices();
+}
+const recorder = RECORD ? new ApiRecorder(RECORDING, seeded) : null;
+if (RECORD) await recorder.install(page, BASE);
 console.log("seeded", seeded.wid);
 
 // 利用者は localStorage の v3.user。同じ origin の空のページで入れてから、目当ての画面を開く
 await page.goto(`${BASE}/health`);
 async function open(screen, as, extra = "") {
-  await page.evaluate((u) => localStorage.setItem("v3.user", u), as);
+  // 書き出しの進み具合を読む間を、試験の中だけ 100ms にする（common/poll_interval.js。画面の端に出る）
+  await page.evaluate((u) => { localStorage.setItem("v3.user", u); localStorage.setItem("v3.test.poll_ms", "100"); }, as);
   await page.goto(`${WEB}${screen}?work=${seeded.wid}${extra}`);
-  await page.waitForLoadState("networkidle");
+  await quiet();
 }
-async function shot(name, full = true) {
-  const path = `${SHOTS}/${name}.png`;
-  await page.screenshot({ path, fullPage: full });
-  const kb = Math.round(statSync(path).size / 1024);
-  check(kb < 1024, `${name}.png は 1MB 未満（${kb}KB）`);
-}
+const takeShot = makeShot(page, { onSize: (name, kb) => check(kb < 1024, `${name}.png は 1MB 未満（${kb}KB）`) });
+const shot = (name, full = true) => takeShot(name, { fullPage: full });
+// 状態が変わるまで待つ（決まった時間は待たない）。満たさなければ、すぐ後の check で落ちる
+const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 10000 }).catch(() => {});
 const text = () => page.innerText("#main");
 
 // 作品と話
@@ -176,23 +196,23 @@ await shot("02_plan");
 await open("structure/", AUTHOR, `&episode=${seeded.ep1}`);
 check(await page.locator(".pg[data-page]").count() === 6, "構成：6ページが出る");
 await page.locator(`.pg[data-page="${seeded.pages[2]}"]`).click();
-await page.waitForTimeout(300);
+await page.waitForSelector(`.pg[data-page="${seeded.pages[2]}"][aria-pressed="true"]`);
 await shot("03_structure");
 
 // 設定資料
 await open("materials/", AUTHOR);
 await page.getByText("ナギ").first().click();
-await page.waitForTimeout(800);
+await until(() => document.querySelector("#main").innerText.includes("見た目の指示"));
 check((await text()).includes("見た目の指示"), "設定資料：生成の設定が出る");
 await shot("04_materials");
 
 // 書き出し（入稿前の確かめは本物、書き出しは模擬）
-mockExport(page, seeded.pages);
+const unmockExport = await mockExport(page, seeded.pages);
 await open("export/", AUTHOR, `&episode=${seeded.ep1}`);
 await page.getByRole("button", { name: "全部", exact: true }).click();
 check(await page.locator("#export").isDisabled(), "書き出し：確かめる前は書き出せない");
 await page.locator("#preflight").click();
-await page.waitForTimeout(500);
+await until(() => document.querySelector("#main").innerText.includes("入稿の設定（preferences.print）が無い"));
 check((await text()).includes("入稿の設定（preferences.print）が無い"), "書き出し：確かめた問題が出る（本物の口）");
 check(await page.getByRole("link", { name: "企画で直す" }).count() > 0, "書き出し：設定の問題から企画へ行ける");
 await shot("05_export_preflight");
@@ -202,14 +222,14 @@ const dl = page.waitForEvent("download");
 await page.locator("#run button").first().click();
 check((await dl).suggestedFilename() === "episode1.pdf", "書き出し：ファイルを保存できる");
 await shot("06_export_done_mock");
-await page.unrouteAll({ behavior: "ignoreErrors" });
+await unmockExport();
 
 // 生成サービス（管理者・参加者）
 await open("services/", ADMIN);
 check(await page.locator(".mc[data-process]").count() > 0, "生成サービス：管理者に送り先の表が出る");
 await shot("07_services_admin_routes");
 await page.locator('.tab[data-tab="cons"]').click();
-await page.waitForTimeout(300);
+await page.waitForSelector('.tab[data-tab="cons"][aria-selected="true"]');
 await shot("08_services_admin_connections");
 await open("services/", AUTHOR);
 check(await page.locator("#member-services").count() === 1, "生成サービス：参加者には作品から見える一覧が出る");
@@ -229,22 +249,28 @@ const before = await page.locator(".pair .flag.warn").count();
 const missing = page.locator(".pair", { has: page.locator(".flag.warn") }).first();
 await missing.locator("textarea").fill("Even so, I'll deliver it.");
 await missing.locator("[data-save]").click();
-await page.waitForTimeout(800);
+await until((n) => document.querySelectorAll(".pair .flag.warn").length === n, before - 1);
 check(await page.locator(".pair .flag.warn").count() === before - 1, "翻訳：翻訳者が訳文を足せる（訳なしが 1 つ減る）");
 await shot("11_translation");
 
 // 確認（編集者）
 await open("review/", EDITOR, `&episode=${seeded.ep1}&page=${seeded.pages[0]}`);
 await page.locator('[data-move="needs_changes"]').click();
-await page.waitForTimeout(300);
+await until(() => document.querySelector("#toast").innerText.includes("コメント"));
 check((await page.innerText("#toast")).includes("コメント"), "確認：直しの依頼にはコメントが要る");
 await page.locator('[data-move="approved"]').click();
-await page.waitForTimeout(800);
+await until(() => document.querySelector("#cur-status").innerText === "承認");
 check((await page.innerText("#cur-status")) === "承認", "確認：編集者が承認できる");
 await page.locator(`.pg[data-page="${seeded.pages[2]}"]`).click();
-await page.waitForTimeout(300);
+await page.waitForSelector(`.pg[data-page="${seeded.pages[2]}"][aria-pressed="true"]`);
+await quiet();
 await shot("12_review");
 
+if (recorder) recorder.save();
+if (replayer) {
+  for (const e of replayer.errors) check(false, e);
+  for (const u of replayer.unused()) check(false, `録った答えを画面が使わなかった：${u}`);
+}
 await browser.close();
 for (const e of errors) console.log(e);
 if (errors.length) failures.push(`画面の誤り ${errors.length} 件`);

@@ -2,6 +2,7 @@
 // 先に入稿前の確かめを走らせて問題を出し、そのあと書き出しの進み具合とファイルを出す（V3細部の決めごと 7・13章）。
 // 口：GET /works/{id}、GET /works/{id}/review-records、POST /works/{id}/exports、GET /works/{id}/exports/{run}、
 //     GET /works/{id}/exports/{run}/files/{name}、POST /works/{id}/preflight、操作 update_page（color_mode）
+import { pollMs } from "../common/poll_interval.js";
 import { html, render, nothing, api, icon, toast, fail, op, raw, startShell, emptyNote, screenHref,
          REVIEW, REVIEW_FLAG, COLOR_MODE, episodeName, reviewStates, episodePages, storedEpisode, rememberEpisode,
          episodePicker } from "../common/shell.js";
@@ -14,7 +15,7 @@ const RUN = { queued: "順番待ち", running: "書き出している", done: "�
 const KIND = { settings: "作品の設定", page_kind: "ページの種類", color_mode: "色の種類", dpi: "解像度", image_resolution: "絵の解像度",
                color_image: "色のある絵", spread: "見開き", safe_area: "安全線", text_overflow: "文字があふれる", font: "書体と組版",
                held_change: "判断待ち", ai_candidate: "選んでいない候補", job: "終わっていない生成", page_count: "ページ数" };
-const POLL_MS = 1500;
+const POLL_MS = pollMs(1500);
 const S = { workId: null, work: null, status: null, episodeId: null, picked: new Set(), format: "pdf", spread: "split",
             language: "", dpi: "", preflight: null, checkedKey: null, run: null, why: null, busy: false };
 
