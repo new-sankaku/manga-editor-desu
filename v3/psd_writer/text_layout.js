@@ -211,9 +211,24 @@ function lineLength(cells, spacing) {
   return cells.reduce((a, c) => a + c.adv, 0) + spacing * (cells.length - 1);
 }
 
-// 升を行に分ける（貪欲に詰める）。改行してよい所でだけ切る
-function breakLines(cells, points, limit, spacing, mode) {
+// ぶら下げにできる字（行末の句読点）。typesetting.hanging_punctuation のとき、行の長さを1字だけ越えて行末に残す
+const HANGING = new Set(['、', '。', '，', '．', ',', '.']);
+
+// 行末の字がぶら下がるか：行の長さを越えていて、その字を除けば入る
+function hangs(cs, limit, spacing, hang) {
+  return hang && cs.length > 1 && HANGING.has(cs[cs.length - 1].text) && lineLength(cs, spacing) > limit + 0.5
+    && lineLength(cs.slice(0, -1), spacing) <= limit + 0.5;
+}
+
+// 行の長さ（ぶら下がった字は数えない。箱に入るか・揃えはこの長さで見る）
+function fittedLength(cs, limit, spacing, hang) {
+  return hangs(cs, limit, spacing, hang) ? lineLength(cs.slice(0, -1), spacing) : lineLength(cs, spacing);
+}
+
+// 升を行に分ける（貪欲に詰める）。改行してよい所でだけ切る。hang のときは行末の句読点をぶら下げる
+function breakLines(cells, points, limit, spacing, mode, hang) {
   if (mode === 'none') return [cells];
+  const fits = (cs) => fittedLength(cs, limit, spacing, hang) <= limit + 0.5;
   const split = (list, set, offset) => {
     const segs = [];
     let cur = [];
@@ -230,8 +245,7 @@ function breakLines(cells, points, limit, spacing, mode) {
   const lines = [];
   let cur = [];
   const place = (seg) => {
-    const joined = cur.length ? lineLength(cur.concat(seg), spacing) : lineLength(seg, spacing);
-    if (cur.length && joined > limit) {
+    if (cur.length && !fits(cur.concat(seg))) {
       lines.push(cur);
       cur = [];
     }
@@ -239,7 +253,7 @@ function breakLines(cells, points, limit, spacing, mode) {
   };
   let offset = 0;
   for (const seg of split(cells, points.preferred, 0)) {
-    if (lineLength(seg, spacing) > limit && points.inner !== points.preferred) {
+    if (!fits(seg) && points.inner !== points.preferred) {
       // 文節が1行に入らない：その中を禁則の切れ目で折る
       for (const sub of split(seg, points.inner, offset)) place(sub);
     } else {
@@ -260,6 +274,7 @@ async function layoutText(it, readFile) {
   const spacing = base * (deco.spacing_ratio || 0);
   const gap = base * ts.line_spacing_ratio;
   const limit = it.vertical ? it.box_h_px : it.box_w_px;
+  const hang = Boolean(ts.hanging_punctuation);
   const missing = new Set();
   const lines = [];
   const chars = Array.from(it.text);
@@ -274,13 +289,15 @@ async function layoutText(it, readFile) {
   for (const p of paras) {
     const cells = cellsOf(it, p.text, p.base, readFile, missing);
     const pts = ts.line_break === 'none' ? null : breakPoints(p.text, cells, ts.line_break);
-    for (const cs of breakLines(cells, pts, limit, spacing, ts.line_break)) lines.push(cs);
+    for (const cs of breakLines(cells, pts, limit, spacing, ts.line_break, hang)) lines.push(cs);
   }
   // 行の太さ（縦書きは列の幅）は、その行で一番大きい字。ルビのある行は、ルビの幅（親の字の半分）を足して取る
   const thick = lines.map((cs) => (cs.length ? Math.max(...cs.map((c) => c.size)) : base));
   const rubyExtra = lines.map((cs) => Math.max(0, ...(it.ruby || []).flatMap((r) => cs
     .filter((c) => c.start >= r.start && c.end <= r.end).map((c) => c.size / 2))));
-  const lens = lines.map((cs) => lineLength(cs, spacing));
+  // ぶら下がった字はブロックの外に出す（ブロックの大きさ・はみ出し・揃えに数えない）
+  const lens = lines.map((cs) => fittedLength(cs, limit, spacing, hang));
+  const hanging = lines.map((cs) => hangs(cs, limit, spacing, hang));
   const cross = thick.reduce((a, t, li) => a + t + rubyExtra[li], 0) + gap * (lines.length - 1);
   const along = Math.max(0, ...lens);
   const blockW = it.vertical ? cross : along;
@@ -297,16 +314,72 @@ async function layoutText(it, readFile) {
     const lineX = it.vertical ? blockW - c0 - rubyExtra[li] - t / 2 : 0;
     const lineY = it.vertical ? 0 : c0 + rubyExtra[li];
     lineBoxes.push({ center: it.vertical ? lineX : lineY + t / 2, thick: t });
-    for (const c of cs) {
+    cs.forEach((c, k) => {
       const ox = it.vertical ? lineX : pos;
       const oy = it.vertical ? pos : lineY + baseline;
-      placed.push({ cell: c, ox, oy, line: li });
+      placed.push({ cell: c, ox, oy, line: li, hanging: hanging[li] && k === cs.length - 1 });
       pos += c.adv + spacing;
-    }
+    });
     c0 += t + rubyExtra[li] + gap;
   });
   const overflow = lens.some((l) => l > limit + 0.5) || cross > (it.vertical ? it.box_w_px : it.box_h_px) + 0.5;
   return { placed, lines: lineBoxes, blockW, blockH, overflow, missing: [...missing] };
 }
 
-module.exports = { layoutText, loadHarfbuzz, fontOf, orientation, makeCell, shape };
+// ルビを置く：親の字の右（縦書き）か上（横書き）に、親の半分の大きさで並べる。返すのは置いた升（lay.placed と同じ形に、
+// ルビの番号 ruby を足したもの）。親の字が2行以上に分かれたときは、ルビの字を行ごとの親の字の数の比で分けて、それぞれの行に付ける
+// （1行に寄せると、次の行の親の字にルビが付かない）。ルビの字が親の字より長いときは、親の字の真ん中に合わせて両側へはみ出す
+async function placeRuby(it, lay, readFile) {
+  const out = [];
+  const missing = [];
+  for (const [ri, r] of (it.ruby || []).entries()) {
+    const inRange = lay.placed.filter((p) => p.cell.start >= r.start && p.cell.end <= r.end);
+    if (inRange.length === 0) continue;
+    const groups = [];
+    for (const p of inRange) {
+      if (!groups.length || groups[groups.length - 1][0].line !== p.line) groups.push([]);
+      groups[groups.length - 1].push(p);
+    }
+    const chars = Array.from(r.text);
+    // 行ごとのルビの字の数：親の字の数の比で丸め、余りは最後の行へ。字が足りれば、どの行にも1字は付ける
+    const counts = [];
+    let used = 0;
+    groups.forEach((g, gi) => {
+      const left = groups.length - gi - 1;
+      let n = gi === groups.length - 1 ? chars.length - used
+        : Math.round((chars.length * g.length) / inRange.length);
+      if (chars.length >= groups.length) n = Math.max(1, Math.min(n, chars.length - used - left));
+      counts.push(n);
+      used += n;
+    });
+    let from = 0;
+    for (const [gi, base] of groups.entries()) {
+      const part = chars.slice(from, from + counts[gi]).join('');
+      from += counts[gi];
+      if (!part) continue;
+      const rubySize = base[0].cell.size / 2;
+      const rubyItem = { ...it, text: part, font_size_px: rubySize, spans: [], ruby: [], decoration: {},
+        font_path: base[0].cell.style.font_path,
+        typesetting: { ...it.typesetting, line_break: 'none', align: 'start', hanging_punctuation: false },
+        box_w_px: 1e9, box_h_px: 1e9 };
+      const rl = await layoutText(rubyItem, readFile);
+      missing.push(...rl.missing);
+      const first = base[0];
+      const last = base[base.length - 1];
+      const line = lay.lines[first.line];
+      const span = (it.vertical ? last.oy - first.oy : last.ox - first.ox) + last.cell.adv;
+      const cells = rl.placed;
+      const step = Math.max(rubySize, span / cells.length);
+      const start = (span - step * cells.length) / 2 + (step - rubySize) / 2;
+      cells.forEach((p, i) => {
+        const at = it.vertical
+          ? { ox: line.center + line.thick / 2 + rubySize / 2, oy: first.oy + start + i * step }
+          : { ox: first.ox + start + i * step, oy: line.center - line.thick / 2 - rubySize * 0.15 };
+        out.push({ ...p, ...at, ruby: ri });
+      });
+    }
+  }
+  return { placed: out, missing };
+}
+
+module.exports = { layoutText, placeRuby, loadHarfbuzz, fontOf, orientation, makeCell, shape };

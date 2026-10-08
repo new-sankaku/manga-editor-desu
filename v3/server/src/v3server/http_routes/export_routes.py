@@ -34,21 +34,28 @@ from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.operations.pen_stroke_operations import StoredResult
-from v3server.operations.psd_import_operations import ApplyPsdImport, PsdImportEntry
+from v3server.operations.psd_import_operations import (
+    MODELS,
+    SUFFIX_TABLE,
+    ApplyPsdImport,
+    PsdImportEntry,
+    split_marker,
+)
 from v3server.operations.text_translation_operations import LANGUAGE_PATTERN
 from v3server.print_export.export_runner import PSD_STROKE_NOTE, ExportRefused, translated_texts
 from v3server.print_export.export_workflow import EXPORT_QUEUE, ExportRunWorkflow
 from v3server.print_export.page_render import mm_to_px_matrix
 from v3server.print_export.preflight_checks import issues_json, run_preflight
-from v3server.print_export.psd_import_matching import ExportedLayer, import_actions, match_layers, read_psd
+from v3server.print_export.psd_import_matching import ExportedLayer, Match, import_actions, match_layers, read_psd
 from v3server.print_export.text_render import font_path, measure_texts
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid, NotFound
 
 router = APIRouter()
 
+# done_page_ids：描き終えたページ（進み具合。page_ids の数と比べる）
 RUN_FIELDS = ("id", "work_id", "requested_by", "format", "page_ids", "dpi", "spread_output", "paper_mm", "language",
-              "status", "detail", "outputs", "created_at", "updated_at")
+              "status", "detail", "outputs", "done_page_ids", "created_at", "updated_at")
 
 
 class ExportRequest(BaseModel):
@@ -64,6 +71,8 @@ class ExportRequest(BaseModel):
 class PreflightRequest(BaseModel):
     # 確かめるページ。無ければ作品の抜いていない全ページ
     page_ids: list[str] | None = None
+    # 言語ごとの書き出しの前の確かめ（訳文に差し替えて、はみ出し・書体に無い字・訳文の無い文字を見る）。無ければ元の文字
+    language: str | None = Field(default=None, pattern=LANGUAGE_PATTERN)
 
 
 async def _require_export(session, authz, actor, work_id: str, fmt: str, page_ids: list[str]) -> None:
@@ -76,9 +85,6 @@ async def _require_export(session, authz, actor, work_id: str, fmt: str, page_id
 
 async def _check_language(session, work_id: str, req: ExportRequest) -> None:
     """言語の書き出しは、始める前に訳文の揃いを確かめる（足りなければ、足りない文字を挙げて止める）。"""
-    if req.format == "psd":
-        # 直した PSD を戻すとき、文字の層を元の言語の文字と突き合わせるため（psd_import_matching.py）。未対応
-        raise Invalid("PSD は言語ごとに書き出さない（直した PSD を戻す突き合わせが元の言語の文字で動くため。未対応）")
     work = await session.get(Work, work_id)
     if not (work.preferences or {}).get("language"):
         raise Invalid("作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない")
@@ -142,7 +148,7 @@ async def preflight(work_id: str, req: PreflightRequest, session: SessionDep, au
         raise Invalid("V3_TEXT_RENDER_SCRIPT が無い。文字の組み方を確かめられない")
     issues = await run_preflight(session, work, req.page_ids,
                                  lambda items: measure_texts(items, s.node_executable, s.text_render_script),
-                                 lambda family: font_path(s.font_dir, family))
+                                 lambda family: font_path(s.font_dir, family), req.language)
     return issues_json(issues)
 
 
@@ -166,6 +172,28 @@ async def get_export_file(work_id: str, run_id: str, name: str, session: Session
     return FileResponse(pathlib.Path(get_settings().export_dir) / run.id / name, filename=name)
 
 
+async def spread_page_of(session, work_id: str, m: Match, pages: list[str], left: str, gutter_px: float) -> str:
+    """見開きの PSD の層が、どちらのページの物か。印の行（コマ・層・文字・ページの物）のページ、新しい層は親のコマのページ。
+    どちらとも決まらない層（見開きの絵・紙、コマの外の新しい層）は、層の真ん中がノドのどちら側か。"""
+    marker = m.marker if m.kind != "new" else m.layer.parent_marker
+    if marker is not None:
+        base, suffix = split_marker(marker)
+        if base in pages:
+            return base
+        table = SUFFIX_TABLE.get(suffix) if suffix else (m.exported.table if m.exported is not None else "panels")
+        model = MODELS.get(table)
+        if model is not None and model is not Page:
+            obj = await session.get(model, base)
+            if obj is not None and obj.work_id == work_id and obj.page_id in pages:
+                return obj.page_id
+    if m.layer is not None and m.layer.image is not None:
+        x0, x1 = m.layer.left, m.layer.left + m.layer.image.width
+    else:
+        x0, x1 = m.exported.left, m.exported.left + m.exported.image.width
+    right = next(p for p in pages if p != left)
+    return left if (x0 + x1) / 2 < gutter_px else right
+
+
 @router.post("/works/{work_id}/exports/{run_id}/pages/{page_id}/psd")
 async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[UploadFile, File()],
                      session: SessionDep, authz: AuthzDep, actor: ActorDep):
@@ -174,14 +202,18 @@ async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[Upl
     層の絵の判定の記録は、当てる出来事と同じ確定に入れる（途中で断られても記録だけ残らない）。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     work = await session.get(Work, work_id)
-    await operation_submit_and_undo.check_may_submit(
-        session, authz, actor, work, ApplyPsdImport(export_run_id=run_id, page_id=page_id, entries=[]))
     run = await get_in_work(session, ExportRun, run_id, work_id)
-    if any(page_id in (o.get("page_ids") or []) for o in run.outputs):
-        raise Invalid("見開きを1枚にした PSD は戻せない（戻す口は1ページずつ。未対応）")
-    out = next((o for o in run.outputs if o.get("page_id") == page_id), None)
+    spread_out = next((o for o in run.outputs if page_id in (o.get("page_ids") or [])), None)
+    other_page = next(p for p in spread_out["page_ids"] if p != page_id) if spread_out is not None else None
+    await operation_submit_and_undo.check_may_submit(
+        session, authz, actor, work,
+        ApplyPsdImport(export_run_id=run_id, page_id=page_id, other_page_id=other_page, entries=[]))
+    out = next((o for o in run.outputs if o.get("page_id") == page_id or page_id in (o.get("page_ids") or [])), None)
     if run.format != "psd" or run.status != "done" or out is None:
         raise Invalid("このページを PSD に書き出し終えた記録ではない")
+    spread_pages = out.get("page_ids")
+    if spread_pages is not None and "left_page_id" not in out:
+        raise Invalid("この見開きの PSD は、左のページを記録する前に書き出した物で戻せない（書き出し直す）")
     exported = {la["marker"]: ExportedLayer(la["marker"], la["table"], la["left"], la["top"],
                                             Image.open(io.BytesIO(read_image(la["sha256"]))).convert("RGBA"))
                 for la in out["layers"]}
@@ -189,29 +221,48 @@ async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[Upl
     with staged_file(psd.file) as path:
         read = read_psd(path, max_pixels=settings.image_max_pixels, max_layers=settings.psd_max_layers)
     matches = match_layers(read, exported)
-    inv = np.linalg.inv(mm_to_px_matrix(PageSpec.model_validate(work.page_spec), out["dpi"]))
+    spec = PageSpec.model_validate(work.page_spec)
     ox, oy = out["offset_px"]
 
-    def px_to_mm(x, y):
-        v = inv @ np.array([x - ox, y - oy, 1.0])
-        return float(v[0]), float(v[1])
+    def px_to_mm_of(offset_x_mm: float):
+        inv = np.linalg.inv(mm_to_px_matrix(spec, out["dpi"], offset_x_mm))
 
+        def px_to_mm(x, y):
+            v = inv @ np.array([x - ox, y - oy, 1.0])
+            return float(v[0]), float(v[1])
+
+        return px_to_mm
+
+    if spread_pages is None:
+        groups = {page_id: matches}
+        offsets = {page_id: 0.0}
+    else:
+        left = out["left_page_id"]
+        offsets = {pid: 0.0 if pid == left else spec.trim_width_mm for pid in spread_pages}
+        # ノドの x（PSD の画素）：左のページの仕上がりの右の端
+        fx, _ = spec.frame_origin_in_trim()
+        gutter_px = float((mm_to_px_matrix(spec, out["dpi"]) @ np.array([spec.trim_width_mm - fx, 0.0, 1.0]))[0]) + ox
+        groups = {pid: [] for pid in spread_pages}
+        for m in matches:
+            groups[await spread_page_of(session, work_id, m, spread_pages, left, gutter_px)].append(m)
     entries = []
-    for a in import_actions(matches, px_to_mm):
-        image = None
-        if a.image is not None:
-            buf = io.BytesIO()
-            a.image.save(buf, format="PNG")
-            stored = await take_in_image(session, work_id, buf.getvalue(), "human_upload", commit=False)
-            image = StoredResult(sha256=stored.sha256, media_type=stored.media_type, width=stored.width,
-                                 height=stored.height)
-        entries.append(PsdImportEntry(kind=a.kind, marker=a.marker, table=a.table, image=image, box_mm=a.box_mm,
-                                      parent_marker=a.parent_marker, layer_name=a.layer_name))
+    for pid, ms in groups.items():
+        for a in import_actions(ms, px_to_mm_of(offsets[pid])):
+            image = None
+            if a.image is not None:
+                buf = io.BytesIO()
+                a.image.save(buf, format="PNG")
+                stored = await take_in_image(session, work_id, buf.getvalue(), "human_upload", commit=False)
+                image = StoredResult(sha256=stored.sha256, media_type=stored.media_type, width=stored.width,
+                                     height=stored.height)
+            entries.append(PsdImportEntry(kind=a.kind, marker=a.marker, table=a.table, image=image, box_mm=a.box_mm,
+                                          parent_marker=a.parent_marker, layer_name=a.layer_name,
+                                          page_id=pid if spread_pages is not None else None))
     event = await operation_submit_and_undo.submit(session, authz, actor, work_id,
                                                    ApplyPsdImport(export_run_id=run_id, page_id=page_id,
-                                                                  entries=entries))
+                                                                  other_page_id=other_page, entries=entries))
     held = (await session.execute(select(HeldAiChange).where(
-        HeldAiChange.page_id == page_id, HeldAiChange.status == "open",
+        HeldAiChange.page_id.in_(spread_pages or [page_id]), HeldAiChange.status == "open",
         HeldAiChange.payload["export_run_id"].as_string() == run_id))).scalars().all()
     return {"event_id": event.id,
             "matches": {k: sum(1 for m in matches if m.kind == k)

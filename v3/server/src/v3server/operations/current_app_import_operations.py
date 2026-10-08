@@ -24,6 +24,7 @@ from v3server.canonical_tables.work_tree_tables import Episode, Page
 from v3server.current_app_import.import_plan import ImportPlan
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
+from v3server.operations.pen_stroke_operations import AddPenStrokes, NewPenStroke
 from v3server.operations.text_and_layer_operations import AddPanelLayer, AddTextItem
 from v3server.operations.work_tree_operations import AddPage, AddPanel, UpdatePanel
 from v3server.usage_terms_schema import UsageTerms
@@ -86,6 +87,16 @@ class ImportCurrentAppProject(OpBase):
                                 stack_order=layer.stack_order, visible=layer.visible, opacity=layer.opacity,
                                 placement=layer.placement).apply(ctx)
             created("panel_layers", layer.id)
+        for sl in self.plan.stroke_layers:
+            await AddPanelLayer(id=sl.id, panel_id=sl.panel_id, role="human_hand", image_id=None,
+                                stack_order=sl.stack_order, visible=True, opacity=1.0, placement=None).apply(ctx)
+            created("panel_layers", sl.id)
+            strokes = [st for st in self.plan.strokes if st.layer_id == sl.id]
+            await session.flush()
+            await AddPenStrokes(layer_id=sl.id, strokes=[NewPenStroke(id=st.id, **st.values) for st in strokes]
+                                ).apply(ctx)
+            for st in strokes:
+                created("pen_strokes", st.id)
         for text in self.plan.texts:
             await AddTextItem(id=text.id, panel_id=text.panel_id, **text.values).apply(ctx)
             created("text_items", text.id)

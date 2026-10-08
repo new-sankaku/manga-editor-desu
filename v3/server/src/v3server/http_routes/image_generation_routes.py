@@ -21,11 +21,11 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.service_and_job_tables import Job, ProcessRoute, Service, ServiceProcess
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Panel, Work
-from v3server.comfy_graphs.protected_region_mask import protected_mask_png
 from v3server.generation_queue import job_start_and_control
 from v3server.generation_queue.image_process_preparation import SEED_MAX
 from v3server.generation_queue.image_process_registry import SPECS, describe, resolve_outpaint, spec_for
 from v3server.generation_queue.input_image_preparation import protected_regions_for
+from v3server.generation_queue.protected_mask_cache import protected_mask_sha256
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require, row
 from v3server.http_routes.image_file_routes import IMAGE_FIELDS
 from v3server.http_routes.job_routes import JOB_FIELDS
@@ -282,6 +282,6 @@ async def get_image_protected_mask(work_id: str, image_id: str, session: Session
     await require(authz, actor, "can_view", work_obj(work_id))
     img = await get_in_work(session, ImageFile, image_id, work_id)
     regions = await protected_regions_for(session, img)
-    data = protected_mask_png(img.width, img.height, [r.polygon_px for r in regions if r.polygon_px is not None],
-                              [read_image(r.mask_sha256) for r in regions if r.mask_sha256])
-    return Response(data, media_type="image/png", headers={"X-V3-Region-Count": str(len(regions))})
+    sha = await protected_mask_sha256(session, img.width, img.height, regions)
+    await session.commit()  # マスクの控えだけを残す（正本は変えない）
+    return Response(read_image(sha), media_type="image/png", headers={"X-V3-Region-Count": str(len(regions))})

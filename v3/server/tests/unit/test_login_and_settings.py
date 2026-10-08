@@ -17,7 +17,7 @@ from v3server.server_settings import Settings
 BASE = {"database_url": "postgresql+psycopg://x/y", "temporal_address": "t:1", "openfga_url": "http://f",
         "litellm_url": "http://l", "lock_ttl_seconds": 900, "node_executable": "node", "image_store": "local",
         "image_dir": "/tmp/x", "OPENFGA_PRESHARED_KEY": "k", "request_max_bytes": 1024, "image_max_pixels": 1024,
-        "psd_max_layers": 10}
+        "psd_max_layers": 10, "current_app_import_max_bytes": 1000}
 OIDC = {"auth_mode": "oidc", "oidc_issuer": "https://auth.example/realms/v3",
         "oidc_discovery_url": "http://keycloak:8080/realms/v3/.well-known/openid-configuration",
         "oidc_client_id": "v3-server", "oidc_client_secret": "s", "public_url": "https://manga.example",

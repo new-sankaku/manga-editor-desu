@@ -11,7 +11,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, event, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text, event, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from v3server.canonical_tables.table_base import Base, new_id
@@ -121,10 +121,18 @@ def _keep_box(_mapper, _connection, stroke: PenStroke) -> None:
     stroke.box_x0_mm, stroke.box_y0_mm, stroke.box_x1_mm, stroke.box_y1_mm = stroke_box(stroke.points, stroke.width_mm)
 
 
+def _pen_stroke_box():
+    return func.box(func.point(PenStroke.box_x0_mm, PenStroke.box_y0_mm), func.point(PenStroke.box_x1_mm, PenStroke.box_y1_mm))
+
+
+# 索引は移行 0010 で作った。alembic check がモデルと突き合わせるので、ここにも同じものを書く
+Index("ix_pen_strokes_box", _pen_stroke_box(), postgresql_using="gist")
+Index("ix_pen_strokes_layer_order", PenStroke.layer_id, PenStroke.stack_order)
+
+
 def pen_stroke_box_overlaps(x0: float, y0: float, x1: float, y1: float):
     """外接の箱が (x0, y0)-(x1, y1) に重なる線の条件。索引（migrations 0010）と同じ式で書く。"""
-    box = func.box(func.point(PenStroke.box_x0_mm, PenStroke.box_y0_mm), func.point(PenStroke.box_x1_mm, PenStroke.box_y1_mm))
-    return box.op("&&")(func.box(func.point(x0, y0), func.point(x1, y1)))
+    return _pen_stroke_box().op("&&")(func.box(func.point(x0, y0), func.point(x1, y1)))
 
 
 class PanelTemplate(Base):

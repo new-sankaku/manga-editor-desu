@@ -12,6 +12,7 @@
 - held_change：判断待ち（HeldAiChange）が残っている
 - ai_candidate・job：まだ選んでいない生成の候補・終わっていない生成の依頼がある
 - page_count：話か巻のページ数が、決めた倍数（4・8）になっていない
+- icc_profile：カラーのページを CMYK にする設定（PrintSettings.color_output）の ICC プロファイルが読めない
 
 severity は error（書き出しが止まるか、入稿で戻される）と warning（人が見て決める）。
 文字の組み方は書き出しと同じ page_render.text_jobs と render_text.js（measure）を使う（確かめと書き出しで結果が違わないように）。
@@ -33,6 +34,7 @@ from v3server.canonical_tables.page_item_tables import PageItem
 from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Work
+from v3server.hand_tools.vector_strokes import stroke_cache_problem
 from v3server.image_file_storage import read_image
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_transform import ItemTransform, transform_matrix
@@ -47,8 +49,11 @@ from v3server.print_export.book_layout import (
     plan_pages,
     print_settings_of,
 )
-from v3server.print_export.page_render import PageContent, RenderRefused, _text_job
+from v3server.print_export.cmyk_conversion import CmykRefused, profile_path
+from v3server.print_export.export_runner import translate_texts
+from v3server.print_export.page_render import PageContent, RenderRefused, _text_job, text_fill
 from v3server.print_export.text_render import RenderedText, TextRenderError
+from v3server.server_settings import get_settings
 
 Severity = Literal["error", "warning"]
 # 生成の依頼のうち、終わったもの（ほかの状態は、まだ候補が増えうる）
@@ -135,6 +140,12 @@ def _check_text(session_texts, content: PageContent, plan: PagePlan, spec: PageS
             if over:
                 issues.append(Issue(pid, "safe_area", "warning" if t.item_kind == "drawn_sfx" else "error",
                                     f"文字「{t.text[:12]}」が安全線の外に出ている（{'・'.join(over)}）", loc))
+        try:
+            text_fill(t)
+        except RenderRefused as e:
+            # 解像度が決まっていなくても出す。色を補わないので、この文字は書き出せない
+            issues.append(Issue(pid, "text_color", "error", str(e), loc))
+            continue
         if dpi is None:
             continue
         try:
@@ -169,6 +180,9 @@ async def _check_images(session: AsyncSession, plan: PagePlan, placed: list[tupl
                                 {**loc, "effective_dpi": round(eff, 1)}))
         if plan.color_mode in ("bilevel", "grayscale"):
             f = await session.get(ImageFile, image_id)
+            if f is None:
+                issues.append(Issue(pid, "image_resolution", "error", f"絵 {image_id} が無い", loc))
+                continue
             if has_color(Image.open(io.BytesIO(read_image(f.sha256)))):
                 mode = {"bilevel": "2階調", "grayscale": "グレー"}[plan.color_mode]
                 issues.append(Issue(pid, "color_image", "warning",
@@ -202,9 +216,13 @@ async def _check_ai(session: AsyncSession, pid: str, in_use: set[str]) -> list[I
 
 
 async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] | None,
-                        measure: Callable[[list[dict]], list[RenderedText]], font_path: Callable[[str], str]
-                        ) -> list[Issue]:
+                        measure: Callable[[list[dict]], list[RenderedText]], font_path: Callable[[str], str],
+                        language: str | None = None) -> list[Issue]:
+    """language を渡すと、文字をその言語の訳文に差し替えて確かめる（言語ごとの書き出しと同じ差し替え。
+    訳文が箱からはみ出す・書体に無い字・訳文が無い文字を、どの文字かを付けて出す）。"""
     issues: list[Issue] = []
+    if language is not None and not (work.preferences or {}).get("language"):
+        return [Issue(None, "settings", "error", "作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない")]
     if work.page_spec is None:
         return [Issue(None, "settings", "error", "作品のページの寸法（page_spec）が決まっていない")]
     spec = PageSpec.model_validate(work.page_spec)
@@ -222,6 +240,12 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
              .order_by(Episode.number, Page.number, Page.id))
         page_ids = list((await session.execute(q)).scalars())
     plans = await plan_pages(session, work, page_ids)
+    if ps.color_output is not None and any(p.color_mode == "color" for p in plans.values()):
+        # カラーのページを CMYK にする設定。プロファイルが読めないと PDF の書き出しが止まる
+        try:
+            profile_path(get_settings().icc_dir, ps.color_output)
+        except CmykRefused as e:
+            issues.append(Issue(None, "icc_profile", "error", str(e)))
 
     # 見開きと、ページ数の倍数（話ごと）
     episodes = {p.episode.id: p.episode for p in plans.values()}
@@ -270,9 +294,19 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
         if sp is not None and sp.image_id and sp.first_page_id == pid:
             placed.append(("spreads", sp.id, sp.image_id, sp.image_placement))
         issues += await _check_images(session, plan, placed)
+        for la in layers:
+            problem = stroke_cache_problem(la)
+            if problem:
+                issues.append(Issue(pid, "stroke_cache", "error", problem,
+                                    {"table": "panel_layers", "id": la.id, "panel_id": la.panel_id}))
         content = PageContent(page_id=pid, spec=spec, text_direction=work.text_direction,
                               preferences=work.preferences or {}, panels=panels, layers=layers, texts=texts,
                               page_items=items, images={})
+        if language is not None:
+            texts, missing = await translate_texts(session, work, texts, language)
+            content.texts = texts
+            issues += [Issue(pid, "translation", "error", f"文字「{t.text[:12]}」に {language} の訳文が無い",
+                             {"table": "text_items", "id": t.id, "box_mm": t.box_mm}) for t in missing]
         issues += _check_text(texts, content, plan, spec, ps, measure, font_path)
         issues += await _check_ai(session, pid, {x[2] for x in placed})
     return issues
