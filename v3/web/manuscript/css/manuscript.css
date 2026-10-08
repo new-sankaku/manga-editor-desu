@@ -1,0 +1,81 @@
+/* V3 原稿の画面。色・部品は ../css/app.css（画像生成の画面）の明るい組をそのまま使い、ここでは原稿の画面だけの所を足す。暗い色の組は持たない。 */
+.ms .ws{grid-template-columns:minmax(0,1fr) minmax(300px,30%)}
+.ms-main{min-width:0;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto}
+.ms .canvas{min-height:240px}
+.ms .stage-host{touch-action:none;overscroll-behavior:contain}
+.ms .stage-host.space .upper-canvas,.ms .stage-host[data-tool="hand"] .upper-canvas{cursor:grab!important}
+.ms .stage-host.panning .upper-canvas{cursor:grabbing!important}
+.ms .ftb{flex-wrap:nowrap}
+.ms .zoom{align-items:center}
+.zoom-v{font-size:12px;color:var(--ink-2);min-width:3.6em;text-align:center}
+
+/* ページの絵と文字を重ねる所。拡大・移動の途中はここを CSS で動かす */
+.pv{position:absolute;inset:0;transform-origin:0 0;will-change:transform}
+.tx-layer{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;pointer-events:none;--inv:1}
+.tx{position:absolute;display:flex;align-items:center;justify-content:center;overflow:visible;color:#000}
+.tx-in{font-family:serif;line-height:1.2;color:inherit;white-space:pre-wrap;line-break:strict;overflow-wrap:anywhere;font-feature-settings:normal}
+.tx.v .tx-in{writing-mode:vertical-rl;height:100%;max-width:none}
+.tx:not(.v) .tx-in{width:100%}
+.tx .tcy{text-combine-upright:all}
+.tx ruby rt{font-size:.5em}
+.tx.sfx .tx-in{font-weight:700}
+.tx.over{outline:calc(2px * var(--inv)) dashed var(--bad)}
+.tx.editing{pointer-events:auto;outline:calc(2px * var(--inv)) solid var(--ai);background:rgba(238,241,253,.55);z-index:2}
+.tx.editing .tx-in{outline:none;cursor:text;min-width:1em;min-height:1em}
+.tx-in:empty::before{content:"（文字を入れる）";color:var(--ink-4)}
+.tx.v .tx-in:empty::before{content:"（文字）"}
+.mk{position:absolute;pointer-events:auto;font:600 calc(10px * var(--inv))/1.6 var(--font);padding:0 .5em;border-radius:.5em;white-space:nowrap;transform:translate(-100%,-50%);box-shadow:0 0 0 calc(1px * var(--inv)) rgba(255,255,255,.9)}
+.mk-hand{background:var(--need-tint);color:var(--need-ink);border:calc(1px * var(--inv)) solid var(--need-line)}
+.mk-held{background:var(--need);color:#fff;transform:translate(-100%,60%)}
+
+/* 右の欄 */
+.ms .insp-b{gap:14px}
+.ms .insp-b .kv .v .row .field.num{width:auto;flex:1 1 4.5em;min-width:3.5em}
+.ms .kv .v>.field.num{flex:1 1 auto}
+.swatch{width:2.6em;height:28px;border:1px solid var(--line-2);border-radius:var(--r-sm);padding:2px;background:var(--surface);flex:0 0 auto}
+.field.area{height:auto;min-height:4.5em;padding:8px 10px;resize:vertical;line-height:1.5}
+.field.file{height:auto;padding:6px}
+.disc summary{cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-2);padding:4px 0}
+.disc[open] summary{margin-bottom:8px}
+.list{display:flex;flex-direction:column;gap:6px}
+.held-row{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r);cursor:pointer}
+.held-row.cur{border-color:var(--need);box-shadow:0 0 0 1px var(--need-line)}
+.held-kv .v{font-size:12px;overflow-wrap:anywhere}
+.mono{font-family:ui-monospace,"SFMono-Regular",Menlo,monospace}
+.lrow{display:flex;align-items:center;gap:4px;padding:2px 4px;border-radius:var(--r-sm);min-width:0}
+.lrow.cur{background:var(--ai-tint)}
+.lrow .lname{display:flex;align-items:center;gap:6px;text-align:left;font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lrow .row.grow{flex:0 1 9em}
+.lrow .val{min-width:3em;text-align:right;font-size:11px;color:var(--ink-3)}
+.lrow .ibtn[aria-pressed="true"]{color:var(--ink)}
+.lrow .ibtn:disabled{opacity:.3;pointer-events:none}
+.issue{display:flex;align-items:flex-start;gap:8px;text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:var(--r);font-size:12px;line-height:1.45}
+.issue:hover{background:var(--surface-2);border-color:var(--line-2)}
+.issue .grow{overflow-wrap:anywhere}
+.chip[aria-pressed="false"]{color:var(--ink-4)}
+.btn[aria-pressed="true"]{background:var(--surface-3);border-color:var(--ink-4)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+
+/* 下のページの一覧 */
+.dock{background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.dock-h{display:flex;align-items:center;gap:10px;padding:6px 14px 0;flex-wrap:wrap}
+.pages{display:flex;gap:10px;overflow-x:auto;padding:8px 14px 10px;min-height:0;scrollbar-width:thin}
+.pcard{flex:0 0 auto;display:flex;flex-direction:column;gap:3px;padding:5px;border-radius:var(--r);border:1px solid transparent;cursor:grab;background:var(--surface)}
+.pcard.shown{background:var(--surface-2);border-color:var(--line)}
+.pcard.cur{border-color:var(--ink);background:var(--surface)}
+.pcard.spread.sp-a{margin-right:-6px}
+.pcard.spread{box-shadow:inset 0 -3px 0 var(--ai-line)}
+.pcard.ghost{opacity:.4}
+.pthumb{display:block;height:clamp(64px,10vh,104px);background:#fff;box-shadow:0 0 0 1px var(--line-2);border-radius:3px;padding:4px}
+.pthumb svg{width:100%;height:100%;display:block}
+.pthumb polygon{fill:none;stroke:var(--ink-2);stroke-width:1.2}
+.pthumb ellipse.b{fill:#fff;stroke:var(--ink-3);stroke-width:.8}
+.pmeta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;max-width:min(14em,28vw)}
+.pmeta.meta{font-size:10.5px;gap:2px 6px}
+.pnum{font-weight:700;font-size:12px}
+.pmeta svg.lucide{width:13px;height:13px;color:var(--ai-ink)}
+
+@media (max-width:900px){
+  .ms .ws{grid-template-columns:1fr;grid-template-rows:minmax(360px,1fr) auto}
+  .ms .insp{max-height:50vh;border-left:0;border-top:1px solid var(--line)}
+}
