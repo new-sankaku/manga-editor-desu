@@ -39,6 +39,9 @@ class PlanSpec(BaseModel):
     required_fields: list[Literal["synopsis", "audience", "exclusions", "notes"]] = Field(min_length=1)
 
 
+# 作業役が人へ質問を返す種類。答え（review の answer）を次の回の文脈に入れる
+TAKES_ANSWERS = True
+
 cut_out = c.cut_out_episode
 
 

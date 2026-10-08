@@ -15,6 +15,7 @@ from temporalio.exceptions import WorkflowAlreadyStartedError
 from temporalio.service import RPCError, RPCStatusCode
 
 from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessStageRun, HarnessStaleMark, HarnessUnit
+from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import Episode
 from v3server.harness import live_stream
 from v3server.harness.export_steps import ExportSpec
@@ -36,6 +37,7 @@ from v3server.harness.stage_workflow import (
     stage_workflow_id,
 )
 from v3server.harness.structure_steps import StructureSpec
+from v3server.harness.threshold_proposals import threshold_rows
 from v3server.harness.unit_workflow import Control, LimitChange, Review, WorkUnitWorkflow
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require
 from v3server.operations.operation_base import get_in_work, work_obj
@@ -180,8 +182,11 @@ async def unit_review(work_id: str, unit_id: str, body: ReviewBody, session: Ses
     if actor.kind != "human":
         raise Invalid("判断は人がする")
     handle = await _unit_handle(session, temporal, work_id, unit_id)
+    unit = await session.get(HarnessUnit, unit_id)
+    if body.action == "answer" and not getattr(STEP_MODULES[unit.kind], "TAKES_ANSWERS", False):
+        # 答えを読まない種類に答えると、答えが黙って捨てられる。断る
+        raise Invalid(f"{unit.kind} の作業は質問を返さない（答えを次の文脈に入れない）")
     if body.action == "approve" and body.candidate_id is not None:
-        unit = await session.get(HarnessUnit, unit_id)
         cand = await session.get(HarnessCandidate, body.candidate_id)
         if cand is None or cand.unit_id != unit_id:
             raise Invalid("この作業の候補でない")
@@ -306,3 +311,14 @@ async def list_stage_runs(work_id: str, session: SessionDep, authz: AuthzDep, ac
     runs = (await session.execute(select(HarnessStageRun).where(HarnessStageRun.work_id == work_id)
                                   .order_by(HarnessStageRun.created_at))).scalars().all()
     return {"stage_runs": [live_stream.row_of(r, live_stream.STAGE_FIELDS) for r in runs]}
+
+
+@router.get("/works/{work_id}/harness/thresholds")
+async def harness_thresholds(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """ハーネスが読む閾値の鍵ごとに、作品の今の値と、値の案（出典つき。測っていない鍵は値なし）。置くのは set_threshold
+    の操作で、人が選んだときだけ（案を黙って入れない）。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    rows = (await session.execute(select(Threshold).where(Threshold.work_id == work_id))).scalars().all()
+    current = {t.key: {"value": t.value.get("value"), "source": t.source, "status": t.status, "note": t.note}
+               for t in rows}
+    return {"thresholds": threshold_rows(current)}

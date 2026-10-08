@@ -116,6 +116,9 @@ async def test_足りない入力は候補に書き残す(api, services, harness
     cand = (await _detail(api, w, u["unit_id"]))["candidates"][0]
     missing = "\n".join(cand["made_with"]["missing"])
     assert "アオイ の範囲" in missing and "場所（location）が無い" in missing
+    # 作画は質問を返さない。答えても次の文脈に入らないので断る
+    r = await unit_post(api, w, u["unit_id"], "review", {"action": "answer", "reason": "左利き"})
+    assert r.status_code == 422 and "質問を返さない" in r.json()["detail"]
 
 
 async def test_絵の中の文字で落ちた候補は囲んで直し_直した候補を検査し直して通す(api, services, harness, script):

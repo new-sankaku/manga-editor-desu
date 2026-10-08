@@ -2,7 +2,7 @@
 // 状態の正本はサーバー（harness_* の表）。この画面は snapshot を取り、その last_event_id の続きを SSE で受けて当てる。
 // 切れたら「切断中」を出し、つなぎ直すときに snapshot を取り直す（取りこぼしも重なりも無い。live_stream.py）。
 // 口は全部 ../js/api.js の authFetch を通す（名乗りの見出しと X-V3-Request を付ける所は api.js の1か所）。
-import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost } from "../js/api.js";
+import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost, op } from "../js/api.js";
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait } from "./harness_graph.js";
@@ -17,6 +17,13 @@ const LIMIT_JA = { max_attempts: "回の上限", candidates_per_attempt: "1回�
                    budget_seconds: "秒の上限", error_stop: "続けて失敗したら止める", same_failure_restart: "同じ失敗で文脈から",
                    eval_repeats: "評価を繰り返す数", disagreement_stop: "評価が割れたら止める", review_notice_seconds: "判断待ちの知らせ（秒）",
                    resend_limit: "送り直しの上限" };
+// 作業の種類の名前と、何を対象にするか（作品・話・コマ）
+const KIND_JA = { plan_interview: "企画の聞き取り", structure: "構成", settings_sheet: "設定資料", name_draft: "ネームの作業",
+                  panel_drawing: "コマの作画", page_finishing: "仕上げ", overall_review: "総合", export: "書き出し" };
+const WHOLE = { plan_interview: "作品全体", settings_sheet: "作品全体", structure: "話全体", name_draft: "話全体",
+                page_finishing: "話全体", overall_review: "話全体", export: "話全体" };
+// 作業役が人へ質問を返す種類（サーバーの TAKES_ANSWERS と同じ。ほかの種類はサーバーが answer を断る）
+const ANSWER_KINDS = new Set(["plan_interview"]);
 const CAND_JA = { requested: "頼んだ", generated: "描けた", failed: "失敗", cancelled: "取り消した" };
 const RUNNING = new Set(["running", "retrying", "cancelling"]);
 
@@ -47,7 +54,7 @@ const S = {
   runs: new Map(), units: new Map(), stale: new Map(), progress: new Map(),
   view: "stage", unitId: null, stageSel: null, detail: null, pos: null,
   conn: "connecting", retries: 0, lastEventId: 0, abort: null,
-  reviewItems: [], toast: null,
+  reviewItems: [], toast: null, thresholds: null,
 };
 // 確かめのための値（Playwright で読む。画面の動きには使わない）
 const probe = window.__harness = { latencies: [], events: 0, lastTraversal: null, conn: "connecting", reconnects: 0 };
@@ -315,7 +322,7 @@ function buildStageGraph() {
 function unitLabel(u) {
   const p = panelOf(u);
   const page = pageOf(u);
-  const where = u.kind === "name_draft" ? "話全体" : `p${page ? page.number : "?"}-${p ? p.order : "?"}`;
+  const where = WHOLE[u.kind] || `p${page ? page.number : "?"}-${p ? p.order : "?"}`;
   const tries = u.max_attempts ? ` ${u.attempt}/${u.max_attempts}` : "";
   const step = u.step && ACTIVE.has(u.status) ? `\n${STEP_JA[u.step] || u.step}` : "";
   return `${where}${tries}\n${STATUS_JA[u.status] || u.status}${u.stale ? "・古い" : ""}${step}`;
@@ -434,7 +441,7 @@ function sideKey() {
                            S.detail.decisions.length, u.limits || S.detail.limits]);
   }
   const run = S.stageSel ? S.runs.get(S.stageSel) : runsOfEpisode().at(-1);
-  return JSON.stringify(["stage", run && [run.id, run.status, run.stop_reason, run.stage_check], S.reviewItems.length,
+  return JSON.stringify(["stage", run && [run.id, run.status, run.stop_reason, run.stage_check], S.reviewItems.length, S.thresholds,
                          S.reviewItems.map((i) => i.kind + (i.unit_id || i.stage_run_id || ""))]);
 }
 
@@ -456,7 +463,7 @@ function unitPanel() {
   const base = `/works/${S.workId}/harness/units/${u.unit_id}`;
   const out = [];
   out.push(h("div", { cls: "side-head" },
-    h("span", { cls: "label", text: u.kind === "name_draft" ? "ネームの作業" : "コマの作画" }),
+    h("span", { cls: "label", text: KIND_JA[u.kind] || u.kind }),
     h("h2", { text: unitLabel(u).split("\n")[0] }), chip(u.status)));
   if (u.stop_reason) out.push(h("p", { cls: `reason ${statusClass(u.status)}`, text: u.stop_reason }));
   out.push(h("dl", { cls: "kv" },
@@ -499,6 +506,7 @@ function reviewPanel(u, d, base) {
   const cands = d.cands.filter((c) => c.attempt === attempt);
   const reason = h("textarea", { rows: 2, placeholder: "却下の理由（次の文脈に入ります）", id: "reject-reason" });
   const edited = h("input", { type: "text", placeholder: "人が直した絵の id", id: "edit-image" });
+  const answer = h("textarea", { rows: 2, placeholder: "候補が返した質問への答え（これまでの答えと一緒に次の文脈に入ります）", id: "answer-text" });
   const since = (u.review || d.review || {}).since;
   return h("section", { cls: "box review-box" },
     h("h3", {}, "人の判断を待っています", since ? h("span", { cls: "since", dataset: { since }, text: ago(since) }) : null),
@@ -508,6 +516,11 @@ function reviewPanel(u, d, base) {
       if (!reason.value.trim()) throw new Error("理由を入れてください");
       return post(`${base}/review`, { action: "reject", reason: reason.value.trim() });
     }, "danger")),
+    ...(ANSWER_KINDS.has(u.kind) ? [h("label", { cls: "label", text: "質問に答える" }), answer,
+      h("div", { cls: "actions" }, act("答えて作り直す", () => {
+        if (!answer.value.trim()) throw new Error("答えを入れてください");
+        return post(`${base}/review`, { action: "answer", reason: answer.value.trim() });
+      }))] : []),
     h("label", { cls: "label", text: "直した絵から続ける" }), edited,
     h("div", { cls: "actions" }, act("直した絵で生成へ戻す", () => {
       if (!edited.value.trim()) throw new Error("絵の id を入れてください");
@@ -520,12 +533,25 @@ function candidateCard(c, picked, approve) {
   if (c.image_id) showIn(img, `/works/${S.workId}/images/${c.image_id}/thumbnail?size=256`).catch((e) => { img.alt = String(e.message || e); });
   const issues = ((c.check || {}).findings || []).filter((f) => f.ok !== true).map((f) => `${f.ok === false ? "外れ" : "人が見る"}：${f.name}`);
   return h("div", { cls: `cand${c.id === picked ? " picked" : ""} v-${c.check_verdict || "none"}` },
-    c.image_id ? img : h("div", { cls: "noimg", text: c.proposal_id ? "ネームの案" : "絵なし" }),
+    c.image_id ? img : c.content ? contentView(c.content) : h("div", { cls: "noimg", text: c.proposal_id ? "ネームの案" : "絵なし" }),
     h("div", { cls: "cand-meta" },
       h("span", { cls: "label", text: `#${c.k_index + 1} ${{ pass: "通過", flag: "指摘あり", drop: "落ちた" }[c.check_verdict] || "検査前"}${c.id === picked ? "・評価役が選んだ" : ""}` }),
       issues.length ? h("ul", { cls: "issues" }, issues.slice(0, 6).map((t) => h("li", { text: t }))) : null,
       c.evaluation ? h("span", { cls: "muted", text: `票 ${c.evaluation.votes}/${c.evaluation.repeats}` }) : null,
-      c.check_verdict !== "drop" && (c.image_id || c.proposal_id) ? act("これを採用", approve, "primary") : null));
+      c.check_verdict !== "drop" && (c.image_id || c.proposal_id || c.content) ? act("これを採用", approve, "primary") : null));
+}
+
+// 絵の無い候補（企画・構成・設定資料・仕上げ・総合・書き出し）の中身を、種類を問わず短い行で出す
+function contentView(content) {
+  const lines = [];
+  const walk = (v, path) => {
+    if (lines.length >= 12) return;
+    if (v && typeof v === "object") {
+      for (const [k, x] of Object.entries(v)) if (!["cost", "job_ids"].includes(k)) walk(x, path ? `${path}.${k}` : k);
+    } else if (v !== null && v !== "") lines.push(`${path}：${v}`);
+  };
+  walk(content, "");
+  return h("ul", { cls: "noimg content-lines" }, lines.map((t) => h("li", { text: t })));
 }
 
 function limitsForm(u, d, base) {
@@ -570,7 +596,42 @@ function stagePanel() {
   }
   out.push(h("section", { cls: "box" }, h("h3", { text: `判断待ちの一覧（${S.reviewItems.length}）` }),
     S.reviewItems.length ? h("ul", { cls: "items" }, S.reviewItems.map(itemRow)) : h("p", { cls: "muted", text: "ありません" })));
+  if (S.thresholds) out.push(thresholdBox(S.thresholds));
   return out;
+}
+
+// 閾値は作品ごとに人が置く。案は出典つきで並べるだけで、押すまで入れない（黙って決めない）
+function thresholdBox(rows) {
+  const unset = rows.filter((r) => !r.current || r.current.status === "rejected").length;
+  return h("section", { cls: "box thresholds" },
+    h("h3", { text: `閾値（未設定 ${unset} / ${rows.length}）` }),
+    h("p", { cls: "muted", text: "検査が読む閾値です。作品ごとに置きます。案の値は試作で測った数で、置くと「未検証」になります。"
+      + "この作品の絵で確かめたら「確かめた」を押してください。測っていない鍵は案の値がないので、値と出典を入れて置きます。"
+      + "閾値が無い検査は止まります（その作業は「閾値未設定」で待ちます）。" }),
+    rows.map(thresholdRow));
+}
+
+function thresholdRow(r) {
+  const cur = r.current;
+  const prop = r.proposal;
+  const value = h("input", { type: "number", step: "any", value: cur ? cur.value : prop.value ?? "", "aria-label": `${r.key} の値` });
+  const source = h("input", { type: "text", value: cur ? cur.source : prop.value !== null ? prop.source : "",
+                              placeholder: "出典（何で決めたか）", "aria-label": `${r.key} の出典` });
+  const put = (status) => {
+    if (value.value === "" || Number.isNaN(Number(value.value))) throw new Error("値を入れてください");
+    if (!source.value.trim()) throw new Error("出典を入れてください");
+    return op(S.workId, { type: "set_threshold", key: r.key, value: { value: Number(value.value) }, source: source.value.trim(), status })
+      .then(refreshReviewItems);
+  };
+  const state = cur ? `${cur.value}（${{ unverified: "未検証", verified: "確かめた", rejected: "使わない" }[cur.status] || cur.status}）` : "未設定";
+  return h("div", { cls: `th-row${cur ? "" : " th-unset"}` },
+    h("div", { cls: "kvline" }, h("span", { cls: "label key", text: `${r.stage} ${r.key}` }), h("span", { text: state })),
+    h("p", { cls: "muted", text: `${r.meaning}（${r.when}）` }),
+    h("p", { cls: "muted", text: `案：${prop.value ?? "値なし"} ／ ${prop.source}` }),
+    h("div", { cls: "th-inputs" }, value, source),
+    h("div", { cls: "actions" },
+      act("置く（未検証）", () => put("unverified")),
+      cur && cur.status === "unverified" ? act("確かめた", () => put("verified"), "primary") : null));
 }
 
 function stageCheckView(c) {
@@ -596,6 +657,7 @@ function scheduleReviewItems() { clearTimeout(reviewTimer); reviewTimer = setTim
 async function refreshReviewItems() {
   try {
     S.reviewItems = (await get(`/works/${S.workId}/harness/review-items`)).items;
+    S.thresholds = (await get(`/works/${S.workId}/harness/thresholds`)).thresholds;
     renderSide();
   } catch (e) { console.warn("判断待ちの一覧を取れない", e); }
 }

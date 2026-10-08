@@ -59,7 +59,7 @@ async def test_企画は質問を返し_答えると案を作り_採ると企画
     u = await _unit(api, w, "plan_interview", "awaiting_review")
     cand, _ = await _picked(api, w, u["unit_id"])
     f = {x["name"]: x for x in cand["check"]["findings"]}
-    assert f["作者への質問"]["ok"] is False and "読者は誰か" in f["作者への質問"]["detail"]
+    assert f["作者への質問"]["ok"] is False and cand["content"]["questions"][0]["ask"] == "読者は誰か"
     # 質問だけの候補は採れない
     r = await unit_post(api, w, u["unit_id"], "review", {"action": "approve", "candidate_id": cand["id"]})
     assert r.status_code == 422 and "answer" in r.json()["detail"]
@@ -150,7 +150,7 @@ async def test_総合は閾値が無ければ止まり_置くとページの白�
     w = await make_work(api, panels=0, thresholds=False)
     assert (await op(api, w["wid"], w["a"], {"type": "set_work_settings", "page_spec": PAGE_SPEC,
                                              "first_page_is_left": True})).status_code == 200
-    script.answers["page_summary"] = {"pages": [{"image": 1, "summary": "白いページ"}]}
+    script.answers["page_summary"] = {"pages": [{"image": 1, "summary": "白いページ"}, {"image": 2, "summary": "白いページ"}]}
     await _start(api, w, "S6", {})
     u = await _unit(api, w, "overall_review", "blocked")
     assert "harness.overall.page_white_max" in u["stop_reason"]
@@ -166,4 +166,4 @@ async def test_総合は閾値が無ければ止まり_置くとページの白�
     white = f["ページの白（1ページ）"]
     assert white["ok"] is False and "unverified" in white["detail"]
     assert f["構成との食い違い"]["ok"] is None
-    assert cand["check_verdict"] == "flag" and cand["content"]["summaries"] == [{"page": 1, "summary": "白いページ"}]
+    assert cand["check_verdict"] == "flag" and cand["content"]["summaries"][0] == {"page": 1, "summary": "白いページ"}
