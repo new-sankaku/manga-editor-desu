@@ -71,10 +71,10 @@ table.t td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:to
 .dot.stopped,.dot.key_rejected{background:var(--bad)}
 .dot.unchecked{background:var(--need)}
 .dot.paused{background:var(--ink-4)}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow-wrap:anywhere}
+.mono{font-family:var(--font-mono);font-size:12px;overflow-wrap:anywhere}
 .progress{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden}
-.progress>span{display:block;height:100%;background:var(--ai)}
-img.mini{width:20px;height:20px;object-fit:contain;background:#fff;border-radius:3px}
+.progress>span{display:block;height:100%;background:var(--st-run)}
+img.mini{width:20px;height:20px;object-fit:contain;background:var(--paper);border-radius:3px}
 .col{display:flex;flex-direction:column;gap:16px;min-width:0}
 .seg-r{position:relative;display:inline-flex}
 .seg-r input{position:absolute;opacity:0;pointer-events:none}

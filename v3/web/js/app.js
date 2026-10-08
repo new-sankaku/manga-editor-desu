@@ -13,7 +13,7 @@ const STATUS = { queued: "順番待ち", running: "作っている", waiting_lim
 const ORIGIN = { generated: "AIが作った", human_drawn: "人が描いた", imported: "取り込んだ", human_edited: "人が直した" };
 const POLL_MS = 1500;
 const THUMB = 256;
-const PROT_RGB = [196, 106, 0];
+const PEN_INK = "#000000";   // 色の決め打ちを許す：ペンの線の色は絵の中身（墨）で、画面の色ではない（色の組を替えても変えない）
 
 // 取り消しの記録のうち、囲みの差分が持ってよい大きさ（全部のコマを合わせて）。超えたら古い物から捨てる
 const MASK_HISTORY_BYTES = 256 * 1024 * 1024;
@@ -206,7 +206,7 @@ async function loadProtected(imageId) {
   const headers = await api.imageHeaders(protPath);
   const count = headers.get("X-V3-Region-Count");
   if (count === null) throw new Error("人の手の範囲の数がサーバーから来ませんでした");
-  return { count: Number(count), canvas: Number(count) ? await api.maskOverlay(protPath, PROT_RGB, 1) : null };
+  return { count: Number(count), canvas: Number(count) ? await api.maskOverlay(protPath, stage.col.protectRgb, 1) : null };
 }
 
 function stashMask(panelId) {
@@ -497,7 +497,7 @@ function renderCandidates(currentId) {
       th.prepend(im);
       api.showIn(im, `/works/${S.workId}/images/${img.id}/thumbnail?size=${THUMB}`).catch((e) => fail(e, "候補の小さい絵を読む"));
       if (img.protected_mask_url) {
-        api.maskOverlay(img.protected_mask_url, PROT_RGB, 0.55, THUMB * 2).then((c) => {
+        api.maskOverlay(img.protected_mask_url, stage.col.protectRgb, 0.55, THUMB * 2).then((c) => {
           const copy = h("canvas", { class: "prot" });
           copy.width = c.width; copy.height = c.height;
           copy.getContext("2d").drawImage(c, 0, 0);
@@ -917,12 +917,12 @@ function drawServerStroke(ctx, s, f) {
 function penBegin() {
   if (S.viewing) throw new Error("昔の版を見ている間は描けません");
   if (!syncPenBar()) throw new Error($("#pen-note").textContent);
-  return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: "#000000" };
+  return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: PEN_INK };
 }
 
 function onPenStroke(points, pointerType) {
   const hand = S.hand, f = hand.frame;
-  const stroke = { id: newId(), brush: "pencil", color: "#000000", opacity: 1,
+  const stroke = { id: newId(), brush: "pencil", color: PEN_INK, opacity: 1,
                    width_mm: Number($("#pen-width [aria-pressed=true]").dataset.w), pointer_type: pointerType,
                    points: points.map((p) => [f.ox + p.x * f.sx, f.oy + p.y * f.sy, p.pressure, p.ms]) };
   hand.strokes.push(stroke);

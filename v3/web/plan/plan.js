@@ -139,7 +139,7 @@ const NOMBRE_F = [
   { key: "font_family", label: "書体" },
   { key: "font_size_pt", label: "大きさ", type: "number", hint: "pt" },
   { key: "hidden_font_size_pt", label: "隠しの大きさ", type: "number", hint: "pt" },
-  { key: "color", label: "色", placeholder: "#000000" },
+  { key: "color", label: "色", placeholder: "#000000" },   // 色の決め打ちを許す：入力の形の例として見せる文字
   { key: "start_number", label: "始まりの番号", type: "number", step: 1 },
   { key: "numbering_scope", label: "数える範囲", type: "select", options: { episode: "話ごと", volume: "巻を通す" } },
   { key: "position.vertical", label: "位置（上下）", type: "select", options: { top: "上", bottom: "下" } },

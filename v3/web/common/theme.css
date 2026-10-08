@@ -1,28 +1,67 @@
-/* V3 の画面で共通の色。明るい表示だけ（V3細部の決めごと 8章）。砂とベージュの組。
-   値は画面の試作（v3poc/screen/index.html の :root）と同じにする。試作と本物の画面をそろえるため、変えるときは両方を変える。
-   紙の物（ページ・候補の絵・設定資料の絵）は白いまま見せる：.paper を付けた所（と画像生成の画面の候補 .cand）で紙の組に替える。
-   使い方：<link rel="stylesheet" href="（v3/web からの相対）common/theme.css">。css/app.css は先頭で読み込んでいる。 */
-:root{
-  --bg:#DCD5BE; --canvas:#D3CBB1; --dot:#C2B99B;
-  --surface:#E9E3CF; --surface-2:#E2DBC4; --surface-3:#D8D0B7;
-  --line:#C9C0A3; --line-2:#B2A887;
-  --ink:#433F35; --ink-2:#5C564A; --ink-3:#787162; --ink-4:#978F7B;
-  --ai:#4A6386; --ai-ink:#3A4F6C; --ai-tint:#D5D6CB; --ai-line:#A2ADB5;
-  --need:#A86A16; --need-ink:#7A4C0D; --need-tint:#E9D9B5; --need-line:#CBAB70;
-  --bad:#A8432F; --bad-ink:#823120; --bad-tint:#E7D0C0; --bad-line:#C89884;
-  --ok:#5F8A55;
-  --on:#F4EFE0; --raise:#F4EFE0;
-  /* 影の色（rgba に入れる3つの数） */
-  --shade:67,63,53;
-  --sh-1:0 1px 2px rgba(var(--shade),.12),0 0 0 1px rgba(var(--shade),.05);
-  --sh-2:0 2px 6px rgba(var(--shade),.12),0 10px 28px rgba(var(--shade),.14);
-  --glass:rgba(233,227,207,.92);
-  color-scheme:light;
-}
-/* 紙の物 */
-.paper,.cand{
-  --bg:#EFEADB; --canvas:#E9E3CF; --dot:#D8D0B7; --surface:#FFFFFF; --surface-2:#F8F5EC; --surface-3:#EFEADB;
-  --line:#E2DBC4; --line-2:#CFC6AA; --ink:#2B2822; --ink-2:#514B3F; --ink-3:#787162; --ink-4:#A69E89;
-  --ai-tint:#E8EAEC; --ai-line:#BFC8CF; --need-tint:#F6EBD3; --need-line:#E0C690; --bad-tint:#F5E3DA; --bad-line:#E2B9A8;
-  --on:#fff; --raise:#fff; color:var(--ink);
-}
+/* 色の組の決まり（V3細部の決めごと 8章）。値は持たない。値は common/themes/ の組のファイルが持つ。
+   使う組は、下の @import の1行で決める。今ある組は「砂漠」（themes/desert.css）だけ。組を選ぶ画面は作らない。
+   使い方：<link rel="stylesheet" href="（v3/web からの相対）common/theme.css">。css/app.css は先頭で読み込んでいる。
+   画面の CSS と JS は、下の名前だけを使い、色の値（#… や rgb(数) や white などの名前）を書かない。
+   test/theme_check.mjs が、組のファイルの外に色の値が無いことと、どの組にも下の名前が全部あることを確かめる。
+   紙の物（ページ・候補の絵・設定資料の絵）は .paper を付ける（画像生成の画面の候補 .cand も同じ）。その中では、組のファイルが
+   地・線・文字の名前を紙の値に替える。
+
+   組を足すとき：themes/<名前>.css を作り、下の名前を全部書く（.paper,.cand の中の替え方も）→ 下の @import の1行を替える。
+
+   名前（--名前：意味）
+   地
+   --bg：画面の一番下の地
+   --canvas：絵を置く所の地
+   --dot：絵を置く所の点の模様
+   --surface：カード・パネルの地
+   --surface-2：一段沈めた地（帯・入力の欄）
+   --surface-3：もう一段沈めた地（絵の待ち・空き）
+   --on：濃い地の上に置く文字
+   --raise：選んでいる物の浮かせた地
+   --glass：絵の上に重ねる半分透けた地
+   線
+   --line：区切りの線
+   --line-2：枠の線（入力の欄・ボタン）
+   文字
+   --ink：本文の文字
+   --ink-2：二番目の文字
+   --ink-3：説明の文字
+   --ink-4：控えめな文字・印
+   印の色
+   --ai：AI がしたこと・選んでいる物の印
+   --ai-ink：AI の印の上の文字
+   --ai-tint：AI の印の淡い地
+   --ai-line：AI の印の枠
+   --need：判断待ち・注意
+   --need-ink：判断待ちの文字
+   --need-tint：判断待ちの淡い地
+   --need-line：判断待ちの枠
+   --bad：失敗・消す
+   --bad-ink：失敗の文字
+   --bad-tint：失敗の淡い地
+   --bad-line：失敗の枠
+   --ok：済み・つながっている
+   仕事の状態
+   --st-wait：順番待ち
+   --st-run：動いている
+   --st-done：済み
+   --st-fail：失敗
+   --st-stale：上流が変わって古くなった
+   紙と、絵の上に重ねる印
+   --paper：紙の白（比べる絵の地など）
+   --mask：囲んだ範囲を絵の上に見せる色（canvas。common/theme_colors.js で読む）
+   --protect：人の手の範囲を絵の上に見せる色（canvas。同上）
+   --pointer：絵の上のペンの先の輪（canvas。同上）
+   影
+   --shade：影の色（rgba に入れる3つの数）
+   --sh-1：低い影
+   --sh-2：高い影（浮いている窓）
+   --backdrop：開いた窓の後ろを暗くする色
+   文字の形と角
+   --font：文字の形
+   --font-mono：等幅の文字の形
+   --r-sm：小さい角
+   --r：角
+   --r-lg：大きい角
+*/
+@import url("themes/desert.css");
