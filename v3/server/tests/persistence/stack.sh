@@ -35,6 +35,7 @@ export V3_REQUEST_MAX_BYTES=268435456
 export V3_IMAGE_MAX_PIXELS=89478485
 export V3_PSD_MAX_LAYERS=1000
 export V3_LOCK_TTL_SECONDS=900
+export V3_CURRENT_APP_IMPORT_MAX_BYTES=1073741824
 COMPOSE=(docker compose -f "$HERE/compose.persistence.yaml")
 mkdir -p "$PE_DIR/images" "$PE_DIR/exports" "$PE_DIR/run"
 

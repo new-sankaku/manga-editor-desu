@@ -1,7 +1,8 @@
 """層（コマの絵の層・トーンと図形のページの層）の試験（compose の PostgreSQL・OpenFGA・Temporal を使う）。
 
 順・見せるか・動かさない（固定）・不透明度を変え、1つずつ取り消せること、人の手の印で AI の変更を判断待ちに置くこと、
-書き出しの絵が見せるか・順に従うことを確かめる。速い組（fast）に入る。絵は 4×4 画素、書き出しは 40dpi。
+書き出しの絵が見せるか・順に従うことを確かめる。書き出し（Temporal と描画を通す）だけ full の組、ほかは速い組（fast）。
+絵は 4×4 画素、書き出しは 40dpi。
 """
 
 import io
@@ -178,6 +179,7 @@ def _near(px, rgba) -> bool:
     return all(abs(a - b) <= 8 for a, b in zip(px, rgba[:3], strict=False))
 
 
+@pytest.mark.full
 @needs_font
 async def test_書き出しは層の見せるかと順に従う(api, authz, workers, export_env):  # noqa: F811
     a = user()

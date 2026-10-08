@@ -8,6 +8,8 @@
 
 import asyncio
 
+import pytest
+
 from conftest import h, user, wait_for
 from temporalio import activity
 from temporalio.worker import Worker
@@ -49,6 +51,7 @@ async def _until_end(api, wid, a, rid, timeout=60):
     return await wait_for(end, timeout)
 
 
+@pytest.mark.full
 @needs_font
 async def test_書き出しの途中で作業者が止まっても_やり直して1回だけ終える(api, authz, workers, export_env, monkeypatch):  # noqa: F811
     a = user()
@@ -72,6 +75,7 @@ async def test_書き出しの途中で作業者が止まっても_やり直し�
     assert [o["page_id"] for o in run["outputs"]] == [page]
 
 
+@pytest.mark.full
 @needs_font
 async def test_やり直しを使い切ったら書き出しをfailedにして理由を残す(api, authz, workers, export_env, monkeypatch):  # noqa: F811
     a = user()
