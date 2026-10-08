@@ -16,6 +16,7 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "pypdf>=6.19.0",
     "python-multipart>=0.0.32",
+    "shapely>=2.1",
     "sqlalchemy[asyncio]>=2",
     "temporalio>=1.34.0",
     "uvicorn>=0.54.0",

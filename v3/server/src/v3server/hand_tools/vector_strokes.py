@@ -8,11 +8,16 @@
 - whole：触れた線を丸ごと消す
 - to_crossings：触れた所から、ほかの線と交わる所まで消す（交わりが無ければ線の端まで）
 - touched：触れた所だけ消す（線は分かれる）
-どれも答えは「変わった線の点」で、画素ではない。AIの絵の層を消すのは画素の消しゴム（hand_tools/pen_stroke_raster.py）。
+どれも答えは「変わった線の点」で、画素ではない。
+消しゴムが読むのは、通り道の近くの線だけ（表の外接の箱の GiST 索引。operations/pen_stroke_operations.py）。
+交わりは、ほかの線の区間の箱を R-tree（shapely の STRtree）に入れて、箱が重なる組だけを確かめる。AIの絵の層を消すのは画素の消しゴム（hand_tools/pen_stroke_raster.py）。
 """
 
 import math
 from typing import Literal
+
+import numpy as np
+import shapely
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -27,8 +32,11 @@ COLORLESS_BRUSHES = {"eraser", "mosaic"}
 
 EraseMode = Literal["whole", "to_crossings", "touched"]
 
-# 点：(x_mm, y_mm, 筆圧, 描き始めからの ms)
-StrokePoint = tuple[float, float, float, float]
+# 点：(x_mm, y_mm, 筆圧, 描き始めからの ms)。筆圧は機器が返さないとき null（作った値を入れない）
+StrokePoint = tuple[float, float, float | None, float]
+
+# 描いた機器（PointerEvent.pointerType）。マウスは筆圧を持たない
+PointerType = Literal["pen", "mouse", "touch"]
 
 
 class StrokeValues(BaseModel):
@@ -48,8 +56,11 @@ class StrokeValues(BaseModel):
             raise ValueError(f"{self.brush} は色を{'持たない' if self.brush in COLORLESS_BRUSHES else '持つ'}")
         if self.brush in SEEDED_BRUSHES and self.seed is None:
             raise ValueError(f"{self.brush} は乱れのある筆なので seed が要る")
-        for _, _, p, _ in self.points:
-            if not 0 <= p <= 1:
+        pressures = [p[2] for p in self.points]
+        if any(p is None for p in pressures) and any(p is not None for p in pressures):
+            raise ValueError("1本の線の中で、筆圧のある点と無い点が混ざっている")
+        for p in pressures:
+            if p is not None and not 0 <= p <= 1:
                 raise ValueError(f"筆圧は 0〜1: {p}")
         times = [p[3] for p in self.points]
         if any(b < a for a, b in zip(times, times[1:])):
@@ -81,7 +92,8 @@ def resample(points: list[StrokePoint], step_mm: float) -> list[StrokePoint]:
         n = max(1, math.ceil(math.hypot(b[0] - a[0], b[1] - a[1]) / step_mm))
         for i in range(1, n + 1):
             t = i / n
-            out.append(tuple(a[k] + (b[k] - a[k]) * t for k in range(4)))
+            p = None if a[2] is None else a[2] + (b[2] - a[2]) * t
+            out.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, p, a[3] + (b[3] - a[3]) * t))
     return out
 
 
@@ -102,22 +114,39 @@ def _runs(flags: list[bool], value: bool) -> list[tuple[int, int]]:
     return out
 
 
-def _seg_intersect(p1, p2, q1, q2) -> bool:
-    def orient(a, b, c):
-        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+def _orient(ax, ay, bx, by, cx, cy):
+    return (bx - ax) * (cy - ay) - (by - ay) * (cx - ax)
 
-    d1, d2 = orient(q1, q2, p1), orient(q1, q2, p2)
-    d3, d4 = orient(p1, p2, q1), orient(p1, p2, q2)
-    return (d1 > 0) != (d2 > 0) and (d3 > 0) != (d4 > 0)
+
+def _segments(points) -> np.ndarray:
+    a = np.asarray([(p[0], p[1]) for p in points], dtype=float)
+    return np.hstack([a[:-1], a[1:]]) if len(a) > 1 else np.empty((0, 4))
 
 
 def crossing_indices(points: list[StrokePoint], others: list[list[StrokePoint]]) -> list[int]:
-    """この線の点 i と i+1 の間でほかの線と交わる i の一覧。"""
-    out = []
-    for i, (a, b) in enumerate(zip(points, points[1:])):
-        if any(_seg_intersect(a, b, c, d) for o in others for c, d in zip(o, o[1:])):
-            out.append(i)
-    return out
+    """この線の点 i と i+1 の間でほかの線と交わる i の一覧。
+    ほかの線の区間を外接の箱の R-tree（shapely の STRtree）に入れ、箱が重なる組だけを交わりの式で確かめる。"""
+    mine = _segments(points)
+    theirs = np.vstack([_segments(o) for o in others] or [np.empty((0, 4))])
+    if not len(mine) or not len(theirs):
+        return []
+    def boxes(s):
+        return shapely.box(np.minimum(s[:, 0], s[:, 2]), np.minimum(s[:, 1], s[:, 3]),
+                           np.maximum(s[:, 0], s[:, 2]), np.maximum(s[:, 1], s[:, 3]))
+    i, j = shapely.STRtree(boxes(theirs)).query(boxes(mine))
+    a, b = mine[i], theirs[j]
+    d1 = _orient(b[:, 0], b[:, 1], b[:, 2], b[:, 3], a[:, 0], a[:, 1])
+    d2 = _orient(b[:, 0], b[:, 1], b[:, 2], b[:, 3], a[:, 2], a[:, 3])
+    d3 = _orient(a[:, 0], a[:, 1], a[:, 2], a[:, 3], b[:, 0], b[:, 1])
+    d4 = _orient(a[:, 0], a[:, 1], a[:, 2], a[:, 3], b[:, 2], b[:, 3])
+    hit = ((d1 > 0) != (d2 > 0)) & ((d3 > 0) != (d4 > 0))
+    return sorted({int(k) for k in i[hit]})
+
+
+def stroke_box(points, width_mm: float) -> tuple[float, float, float, float]:
+    """線の外接の箱（太さの半分を足す。基本枠の mm）。消しゴムで近くの線だけを読むのに使う（canonical_tables の PenStroke）。"""
+    xs, ys, r = [p[0] for p in points], [p[1] for p in points], width_mm / 2
+    return min(xs) - r, min(ys) - r, max(xs) + r, max(ys) + r
 
 
 def erase(points: list[StrokePoint], stroke_width_mm: float, eraser_path: list[tuple[float, float]],

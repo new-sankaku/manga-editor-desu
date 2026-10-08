@@ -24,7 +24,7 @@ from v3server.canonical_tables.material_and_setting_tables import ExportRun
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange
 from v3server.canonical_tables.work_tree_tables import Page, Work
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require, row
-from v3server.image_file_storage import read_image
+from v3server.image_file_storage import read_image, staged_file
 from v3server.image_intake import take_in_image
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations import operation_submit_and_undo
@@ -109,17 +109,23 @@ async def get_export_file(work_id: str, run_id: str, name: str, session: Session
 @router.post("/works/{work_id}/exports/{run_id}/pages/{page_id}/psd")
 async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[UploadFile, File()],
                      session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """直した PSD を戻す。結び付けは print_export/psd_import_matching.py、当て方は ApplyPsdImport。"""
-    await require(authz, actor, "can_draw", page_obj(page_id))
-    run = await get_in_work(session, ExportRun, run_id, work_id)
+    """直した PSD を戻す。結び付けは print_export/psd_import_matching.py、当て方は ApplyPsdImport。
+    当てる権限とロックを、ファイルを書く前に確かめる。PSD は一時ファイルに写してから読み、大きさ・層の数・画素数の上限で止める。
+    層の絵の判定の記録は、当てる出来事と同じ確定に入れる（途中で断られても記録だけ残らない）。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
     work = await session.get(Work, work_id)
+    await operation_submit_and_undo.check_may_submit(
+        session, authz, actor, work, ApplyPsdImport(export_run_id=run_id, page_id=page_id, entries=[]))
+    run = await get_in_work(session, ExportRun, run_id, work_id)
     out = next((o for o in run.outputs if o.get("page_id") == page_id), None)
     if run.format != "psd" or run.status != "done" or out is None:
         raise Invalid("このページを PSD に書き出し終えた記録ではない")
     exported = {la["marker"]: ExportedLayer(la["marker"], la["table"], la["left"], la["top"],
                                             Image.open(io.BytesIO(read_image(la["sha256"]))).convert("RGBA"))
                 for la in out["layers"]}
-    read = read_psd(await psd.read())
+    settings = get_settings()
+    with staged_file(psd.file) as path:
+        read = read_psd(path, max_pixels=settings.image_max_pixels, max_layers=settings.psd_max_layers)
     matches = match_layers(read, exported)
     inv = np.linalg.inv(mm_to_px_matrix(PageSpec.model_validate(work.page_spec), run.dpi))
     ox, oy = out["offset_px"]
@@ -134,7 +140,7 @@ async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[Upl
         if a.image is not None:
             buf = io.BytesIO()
             a.image.save(buf, format="PNG")
-            stored = await take_in_image(session, work_id, buf.getvalue(), "human_upload")
+            stored = await take_in_image(session, work_id, buf.getvalue(), "human_upload", commit=False)
             image = StoredResult(sha256=stored.sha256, media_type=stored.media_type, width=stored.width,
                                  height=stored.height)
         entries.append(PsdImportEntry(kind=a.kind, marker=a.marker, table=a.table, image=image, box_mm=a.box_mm,

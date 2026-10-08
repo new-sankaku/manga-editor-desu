@@ -3,6 +3,7 @@
 import * as api from "./api.js";
 import { renderForm } from "./schema_form.js";
 import { Stage } from "./stage.js";
+import { drawStroke } from "./pen_render.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -14,11 +15,26 @@ const POLL_MS = 1500;
 const THUMB = 256;
 const PROT_RGB = [196, 106, 0];
 
+// 取り消しの記録のうち、囲みの差分が持ってよい大きさ（全部のコマを合わせて）。超えたら古い物から捨てる
+const MASK_HISTORY_BYTES = 256 * 1024 * 1024;
+// 候補を読めなかったとき、次に読むまでの最長の間
+const POLL_MAX_MS = 30000;
+// 線を描いてから、線の控え（人の手の層の絵）を上げるまで待つ間。頼む前・コマを替える前には待たずに上げる
+const CACHE_IDLE_MS = 4000;
+
 const S = {
   works: [], workId: null, work: null, pageId: null, panelId: null,
   processes: [], proc: null, form: null, control: null,
-  image: null, frame: null, protectedCount: 0,
-  sets: [], selected: [], undo: [], redo: [], poll: null, viewing: null, tool: "select",
+  image: null, frame: null, protectedCount: 0, layers: [],
+  sets: [], selected: [], poll: null, pollFails: 0, link: null, viewing: null, tool: "select",
+  // コマごとの取り消し・やり直し（Map: コマの id → { undo: [], redo: [] }）。項目は
+  // { kind: "mask", edit }（囲みのタイルの差分）か { kind: "server", ids: Promise<出来事の id[]>, refresh }
+  hist: new Map(), undoing: false,
+  // 画面に出ている囲みがどのコマの物か。コマを替えるときに外へ出して masks に持つ
+  shownPanel: null, shownViewing: false, masks: new Map(), showSeq: 0,
+  // 描いている人の手の層（コマごと1つ）
+  hand: null,
+  sending: false,
 };
 
 let stage;
@@ -36,7 +52,13 @@ function note(text, kind = "", icon = kind === "bad" ? "circle-alert" : kind ===
   return n;
 }
 function icons() { window.lucide.createIcons({ attrs: { class: "lucide" } }); }
-function fail(e) { console.error(e); toast(api.errorText(e), "bad"); }
+// what：何をしようとして失敗したか（「採用」など）。理由と一緒に出す
+function fail(e, what = "") {
+  console.error(e);
+  toast(what ? `${what}できませんでした：${api.errorText(e)}` : api.errorText(e), "bad");
+}
+// 線と層の id は画面で作る（保存を待たずに取り消しの記録に載せるため）。http の画面でも使えるよう getRandomValues で作る
+function newId() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join(""); }
 
 function h(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
@@ -78,7 +100,7 @@ async function selectWork(id) {
   S.workId = id;
   $("#pick-work").value = id;
   writePref("work", id);
-  S.undo = []; S.redo = []; syncUndo();
+  S.hist = new Map(); S.masks = new Map(); S.shownPanel = null; S.hand = null; syncUndo();
   [S.work, S.processes] = await Promise.all([api.get(`/works/${id}`), api.get(`/works/${id}/image-processes`)]);
   const pages = S.work.pages.filter((p) => !p.removed).sort((a, b) => a.number - b.number);
   $("#pick-page").replaceChildren(...pages.map((p) => h("option", { value: p.id, text: `${p.number} ページ` })));
@@ -104,18 +126,29 @@ function livePanels() {
 const panel = () => (S.work ? S.work.panels.find((p) => p.id === S.panelId) : null);
 
 async function selectPanel(id) {
+  // 前のコマの線の控えは、待たずに上げておく（失敗は知らせる）
+  if (S.hand && S.hand.dirty) uploadCache(S.hand).catch((e) => fail(e, "線の控えを上げる"));
   S.panelId = id;
   $("#pick-panel").value = id;
   writePref("panel", id);
   S.selected = []; S.viewing = null;
   $("#viewing").hidden = true;
+  S.pollFails = 0; S.link = null;
+  syncUndo();
+  await refreshPanelRow();
   await refreshPanel();
   renderProcesses();
   await Promise.all([loadCandidates(), loadVersions()]);
 }
 
-async function refreshWork() {
-  S.work = await api.get(`/works/${S.workId}`);
+// 今のコマの行と層だけを読み直す（作品全体は読まない）
+async function refreshPanelRow() {
+  const at = S.panelId;
+  const r = await api.get(`/works/${S.workId}/panels/${at}/layers`);
+  if (at !== S.panelId) return;
+  const i = S.work.panels.findIndex((p) => p.id === at);
+  if (i >= 0) S.work.panels[i] = { ...S.work.panels[i], ...r.panel };
+  S.layers = r.layers;
 }
 
 // ---------------------------------------------------------------- 画面の絵
@@ -125,49 +158,91 @@ function showEmpty(text) {
   e.hidden = false;
 }
 
+// コマの絵を出す。imageId を渡すと、その版を見る（描けない）。
+// 読んでいる間にコマや版を替えたら、古い読み込みの結果は捨てる（showSeq）。
+// 同じコマの絵を出し直すときは、拡大・位置と囲みをそのままにする（消しゴム・採用の後も囲みは消えない）。
 async function refreshPanel(imageId) {
+  const token = ++S.showSeq;
+  const stale = () => token !== S.showSeq;
   const p = panel();
   const shownId = imageId || p.image_id;
-  S.image = null; S.protectedCount = 0;
+  const same = S.shownPanel === p.id && !S.shownViewing && !imageId;
+  if (!same && S.shownPanel && !S.shownViewing) stashMask(S.shownPanel);
   $("#stage-empty").hidden = true;
   if (!shownId) {
+    S.image = null; S.protectedCount = 0;
     await stage.show({ image: null });
+    S.shownPanel = p.id; S.shownViewing = !!imageId;
     showEmpty("このコマにはまだ絵がありません。右の「文から作る」で作れます");
     renderInputNotes();
     return;
   }
-  const { url } = await api.blobUrl(`/works/${S.workId}/images/${shownId}/file`);
-  const image = await api.loadImage(url);
-  const protPath = `/works/${S.workId}/images/${shownId}/protected-mask`;
-  const prot = await api.blobUrl(protPath);
-  S.protectedCount = Number(prot.headers.get("X-V3-Region-Count") || 0);
-  const protectedCanvas = S.protectedCount ? await api.maskOverlay(protPath, PROT_RGB, 1) : null;
-  S.image = { id: shownId, width: image.naturalWidth, height: image.naturalHeight };
-  S.frame = imageId ? null : pxFrame(p.image_placement);
-  const layers = imageId ? [] : await handLayers(p);
-  await stage.show({ image, protectedCanvas, layers, key: shownId });
+  const { image } = await api.image(`/works/${S.workId}/images/${shownId}/file`);
+  if (stale()) return;
+  const { count: protectedCount, canvas: protectedCanvas } = await loadProtected(shownId);
+  if (stale()) return;
+  const frame = imageId ? null : pxFrame(p.image_placement);
+  const size = { w: image.naturalWidth, h: image.naturalHeight };
+  const layers = imageId ? [] : await panelLayers(p, frame, size);
+  if (stale()) return;
+  S.image = { id: shownId, width: size.w, height: size.h };
+  S.protectedCount = protectedCount;
+  S.frame = frame;
+  const r = await stage.show({ image, protectedCanvas, layers, keepView: same, keepMask: same });
+  if (same && !r.maskKept) dropMask(p.id, "絵の大きさが変わったので、塗っていた囲みを消しました");
+  if (!same && !imageId && S.masks.has(p.id)) {
+    const saved = S.masks.get(p.id);
+    S.masks.delete(p.id);
+    if (!stage.putMask(saved)) dropMask(p.id, "絵の大きさが変わったので、このコマで塗っていた囲みを消しました");
+  }
+  S.shownPanel = p.id; S.shownViewing = !!imageId;
   renderInputNotes();
   syncPenBar();
 }
 
-function handLayer(p = panel()) {
-  return S.work.panel_layers.filter((l) => l.panel_id === p.id && l.role === "human_hand" && !l.removed)
-    .sort((a, b) => b.stack_order - a.stack_order)[0];
+// 人の手の範囲（囲めない所）。数はサーバーの見出しから読む
+async function loadProtected(imageId) {
+  const protPath = `/works/${S.workId}/images/${imageId}/protected-mask`;
+  const headers = await api.imageHeaders(protPath);
+  const count = headers.get("X-V3-Region-Count");
+  if (count === null) throw new Error("人の手の範囲の数がサーバーから来ませんでした");
+  return { count: Number(count), canvas: Number(count) ? await api.maskOverlay(protPath, PROT_RGB, 1) : null };
 }
 
-// 人の手の層の控えの絵を、コマの絵の画素の上の位置に出す
-async function handLayers(p) {
+function stashMask(panelId) {
+  const m = stage.takeMask();
+  if (m) S.masks.set(panelId, m); else S.masks.delete(panelId);
+}
+
+// 囲みを捨てたときは、そのコマの囲みの取り消しの記録も捨てる（当てる先が無い）
+function dropMask(panelId, why) {
+  const h = S.hist.get(panelId);
+  if (h) { h.undo = h.undo.filter((x) => x.kind !== "mask"); h.redo = h.redo.filter((x) => x.kind !== "mask"); }
+  toast(why, "need");
+  syncUndo();
+}
+
+const handLayerOf = (layers) => layers.filter((l) => l.role === "human_hand" && !l.removed)
+  .sort((a, b) => b.stack_order - a.stack_order)[0];
+
+// コマの層を、コマの絵の画素の上の位置に出す。描く先の人の手の層は canvas（S.hand）で出し、ほかは絵で出す
+async function panelLayers(p, frame, size) {
   const out = [];
-  if (!S.frame) return out;
-  for (const l of S.work.panel_layers) {
-    if (l.panel_id !== p.id || l.removed || !l.visible || !l.image_id || !l.placement) continue;
+  if (!frame) return out;
+  const target = handLayerOf(S.layers);
+  const hand = await prepareHand(p, frame, size, target);
+  for (const l of [...S.layers].sort((a, b) => a.stack_order - b.stack_order)) {
+    if (l.removed || !l.visible) continue;
+    if (target && l.id === target.id && hand.canvas) { out.push({ canvas: hand.canvas, opacity: l.opacity, x: 0, y: 0, w: size.w, h: size.h }); continue; }
+    if (!l.image_id || !l.placement) continue;
     const f = pxFrame(l.placement);
     if (!f) continue;
-    const { url } = await api.blobUrl(`/works/${S.workId}/images/${l.image_id}/file`);
-    const image = await api.loadImage(url);
-    out.push({ image, opacity: l.opacity, x: (f.ox - S.frame.ox) / S.frame.sx, y: (f.oy - S.frame.oy) / S.frame.sy,
-               w: image.naturalWidth * f.sx / S.frame.sx, h: image.naturalHeight * f.sy / S.frame.sy });
+    const { image } = await api.image(`/works/${S.workId}/images/${l.image_id}/file`);
+    out.push({ image, opacity: l.opacity, x: (f.ox - frame.ox) / frame.sx, y: (f.oy - frame.oy) / frame.sy,
+               w: image.naturalWidth * f.sx / frame.sx, h: image.naturalHeight * f.sy / frame.sy });
   }
+  // 描く先の層がまだ無くても、描いた線を出す canvas は一番上に置く（最初の線で層を作る）
+  if (!target) out.push({ canvas: hand.canvas, opacity: 1, x: 0, y: 0, w: size.w, h: size.h });
   return out;
 }
 
@@ -187,6 +262,7 @@ function syncPenBar() {
   let msg = "";
   if (!S.image) msg = "コマに絵が無いので描けません";
   else if (!S.frame) msg = "コマの絵に置き場が無いか、回転・傾き・反転があるので、ペンの線の位置を決められません";
+  else if (S.hand && S.hand.blocked) msg = S.hand.blocked;
   $("#pen-note").textContent = msg || "人の手の層に描きます。線は人の手の範囲として残ります";
   if (!msg) { stage.penWidthPx = Number($("#pen-width [aria-pressed=true]").dataset.w) / S.frame.sx; stage.syncCursor(); }
   return p && !msg;
@@ -288,7 +364,7 @@ function renderInputNotes() {
 }
 
 async function toPngBase64(file) {
-  const im = await api.loadImage(URL.createObjectURL(file));
+  const im = await api.fileImage(file);
   const c = h("canvas");
   c.width = im.naturalWidth; c.height = im.naturalHeight;
   c.getContext("2d").drawImage(im, 0, 0);
@@ -322,12 +398,20 @@ function showServiceMeta() {
 function countN() { return Number($("#count [aria-pressed=true]").dataset.n); }
 function seedMode() { return $("#seed-mode [aria-pressed=true]").dataset.m; }
 
+// 送っている間は「頼む」を押せなくする（disabled なのでキーボードの Enter でも押せない）。2回押しても1組だけ送る
 async function generate(over = {}) {
+  if (S.sending) return;
+  const btn = $("#generate");
+  S.sending = true; btn.disabled = true; btn.setAttribute("aria-busy", "true");
+  try { await send(over); } finally { S.sending = false; btn.disabled = false; btn.removeAttribute("aria-busy"); }
+}
+
+async function send(over) {
   const spec = over.proc || S.proc;
   const params = over.params || S.form.values();
   const body = { process: spec.name, params, count: over.count || countN(), seed_mode: over.seed_mode || seedMode() };
   if (body.seed_mode === "fixed") body.seed = over.seed ?? Number($("#seed").value);
-  if (spec.source === "required") body.source_image_id = over.source_image_id || S.image?.id;
+  if (over.source_image_id) body.source_image_id = over.source_image_id;
   if (!over.proc && spec.mask !== "none") {
     const m = stage.maskPngBase64();
     if (m) body.mask = { png_base64: m };
@@ -340,30 +424,41 @@ async function generate(over = {}) {
   const svc = over.service_id || $("#service").value;
   if (svc && svc !== spec.route_service_id) body.service_id = svc;
   try {
+    // 描いた線と消した所の保存が済み、線の控えが今の線と合ってから頼む（古い控えはサーバーが断る）
+    await idleSaves();
+    if (S.hand && S.hand.dirty) await uploadCache(S.hand);
+    if (spec.source === "required" && !over.source_image_id) body.source_image_id = S.viewing || panel().image_id;
     const r = await api.post(`/works/${S.workId}/panels/${S.panelId}/generate`, body);
     toast(`${spec.label}を ${r.jobs.length} 件頼みました`);
     showTab("cands");
     await loadCandidates();
-  } catch (e) { fail(e); }
+  } catch (e) { fail(e, spec.label); }
 }
 
 // ---------------------------------------------------------------- 候補
-// 進み具合はポーリングで見る（EventSource は X-V3-User を付けられない）。取れなかった回も、作っている物があれば続ける
+// 進み具合はポーリングで見る（EventSource は X-V3-User を付けられない）。
+// 読めなかったときは知らせを重ねず、1つの状態（renderStatus）に出し、次に読むまでの間を倍にしていく（最長 POLL_MAX_MS）
 async function loadCandidates() {
   clearTimeout(S.poll);
   const at = `${S.workId}/${S.panelId}`;
   try {
     const res = await api.get(`/works/${S.workId}/panels/${S.panelId}/candidates`);
     if (at !== `${S.workId}/${S.panelId}`) return;
+    S.pollFails = 0; S.link = null;
     S.sets = res.sets.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
     renderCandidates(res.panel_image_id);
     renderProgress();
   } catch (e) {
-    fail(e);
+    if (at !== `${S.workId}/${S.panelId}`) return;
+    S.pollFails += 1;
+    S.link = { text: `候補と進み具合を読めません：${api.errorText(e)}` };
   }
-  if (S.sets.some((s) => s.jobs.some((j) => ACTIVE.has(j.status)))) {
-    S.poll = setTimeout(() => loadCandidates(), POLL_MS);
+  if (S.pollFails || S.sets.some((s) => s.jobs.some((j) => ACTIVE.has(j.status)))) {
+    const wait = S.pollFails ? Math.min(POLL_MAX_MS, POLL_MS * 2 ** S.pollFails) : POLL_MS;
+    if (S.link) S.link.at = Date.now() + wait;
+    S.poll = setTimeout(() => loadCandidates(), wait);
   }
+  renderStatus();
 }
 
 function paramText(params) {
@@ -398,9 +493,16 @@ function renderCandidates(currentId) {
       const sel = S.selected.includes(img.id);
       const cur = img.id === currentId;
       const th = h("button", { class: "th", type: "button", title: "選ぶ", onclick: () => toggleSelect(img.id) });
-      api.blobUrl(`/works/${S.workId}/images/${img.id}/thumbnail?size=${THUMB}`).then(({ url }) => th.prepend(h("img", { src: url, alt: "" })));
+      const im = h("img", { alt: "" });
+      th.prepend(im);
+      api.showIn(im, `/works/${S.workId}/images/${img.id}/thumbnail?size=${THUMB}`).catch((e) => fail(e, "候補の小さい絵を読む"));
       if (img.protected_mask_url) {
-        api.maskOverlay(img.protected_mask_url, PROT_RGB, 0.55).then((c) => { c.className = "prot"; th.append(c); }).catch(fail);
+        api.maskOverlay(img.protected_mask_url, PROT_RGB, 0.55, THUMB * 2).then((c) => {
+          const copy = h("canvas", { class: "prot" });
+          copy.width = c.width; copy.height = c.height;
+          copy.getContext("2d").drawImage(c, 0, 0);
+          th.append(copy);
+        }).catch((e) => fail(e, "人の手の範囲を出す"));
       }
       const flags = h("div", { class: "flags" },
         cur ? h("span", { class: "flag on", text: "採用中" }) : null,
@@ -421,7 +523,8 @@ function renderCandidates(currentId) {
     }
     for (const j of set.jobs) {
       if (set.images.some((i) => i.job_id === j.id)) continue;
-      const failText = j.status === "stopped" ? `${STATUS[j.status]}：${j.failure_detail || j.failure_kind || ""}` : STATUS[j.status] || j.status;
+      const why = j.failure_detail || j.failure_kind;
+      const failText = j.status === "stopped" ? (why ? `${STATUS[j.status]}：${why}` : `${STATUS[j.status]}（理由はサーバーに残っていません）`) : STATUS[j.status] || j.status;
       grid.append(h("div", { class: "cand wait" },
         h("div", { class: "th" }, ACTIVE.has(j.status) ? h("i", { "data-lucide": "loader", class: "spin" }) : null),
         h("div", { class: "cand-f" }, h("div", { class: `meta${j.status === "stopped" ? " bad" : ""}`, text: failText }),
@@ -453,7 +556,7 @@ async function cancelSet(set) {
   try {
     for (const j of set.jobs.filter((x) => ACTIVE.has(x.status))) await api.post(`/works/${S.workId}/jobs/${j.id}/cancel`);
     await loadCandidates();
-  } catch (e) { fail(e); }
+  } catch (e) { fail(e, "止めること"); }
 }
 
 function toggleSelect(id) {
@@ -484,6 +587,156 @@ function similar(img, set, strength) {
   generate({ proc: spec, params, source_image_id: img.id, service_id: job ? job.service_id : null });
 }
 
+// ---------------------------------------------------------------- 取り消し（コマごと・囲みとサーバーの操作を1つに）
+function hist(panelId = S.panelId) {
+  if (!S.hist.has(panelId)) S.hist.set(panelId, { undo: [], redo: [] });
+  return S.hist.get(panelId);
+}
+
+function pushUndo(entry, panelId = S.panelId) {
+  const h = hist(panelId);
+  h.undo.push(entry); h.redo = [];
+  if (entry.kind === "server") entry.ids.catch(() => forget(entry));
+  if (entry.kind === "mask") trimMaskHistory();
+  syncUndo();
+}
+
+function forget(entry) {
+  for (const h of S.hist.values()) { h.undo = h.undo.filter((x) => x !== entry); h.redo = h.redo.filter((x) => x !== entry); }
+  syncUndo();
+}
+
+// 囲みの差分が MASK_HISTORY_BYTES を超えたら、古い物から捨てる
+function trimMaskHistory() {
+  const all = [];
+  for (const h of S.hist.values()) for (const list of [h.undo, h.redo]) for (const x of list) if (x.kind === "mask") all.push([list, x]);
+  let total = all.reduce((n, [, x]) => n + x.edit.bytes, 0);
+  for (const [list, x] of all) {
+    if (total <= MASK_HISTORY_BYTES) break;
+    list.splice(list.indexOf(x), 1);
+    total -= x.edit.bytes;
+  }
+}
+
+function syncUndo() {
+  const h = S.panelId ? hist() : { undo: [], redo: [] };
+  $("#undo").setAttribute("aria-disabled", String(!h.undo.length));
+  $("#redo").setAttribute("aria-disabled", String(!h.redo.length));
+}
+
+async function undoRedo(dir) {
+  if (S.undoing) return;
+  if (S.viewing) { toast("昔の版を見ている間は取り消せません。「今の絵に戻る」を押してください", "need"); return; }
+  const h = hist();
+  const [from, to] = dir === "undo" ? [h.undo, h.redo] : [h.redo, h.undo];
+  const entry = from.pop();
+  if (!entry) return;
+  if (entry.kind === "mask") {
+    stage.swapMaskEdit(entry.edit);
+    to.push(entry);
+    syncUndo();
+    return;
+  }
+  S.undoing = true;
+  try {
+    await idleSaves();
+    const ids = await entry.ids;
+    const back = [];
+    for (const id of [...ids].reverse()) back.push((await api.undo(S.workId, id)).event_id);
+    to.push({ ...entry, ids: Promise.resolve(back) });
+  } catch (e) {
+    from.push(entry);
+    fail(e, dir === "undo" ? "取り消すこと" : "やり直すこと");
+    return;
+  } finally { S.undoing = false; syncUndo(); }
+  await refreshAfter(entry.refresh).catch((e) => fail(e, "読み直し"));
+}
+
+// 取り消した操作が変えた物だけを読み直す
+async function refreshAfter(what) {
+  if (what === "hand") { await reloadHand(S.hand); stage.redraw(); return; }
+  if (what === "candidates") { await loadCandidates(); return; }
+  await afterChange();
+}
+
+// ---------------------------------------------------------------- 後ろで保存する（描いた線・消した所）
+// 画面には先に出し、保存は順に1つずつ送る。失敗したら止めて、状態の所に「もう一度送る」「この変更を捨てる」を出す
+const Q = { jobs: [], running: false, failed: null, waiters: [] };
+
+function enqueue(label, run, kind) {
+  return new Promise((resolve, reject) => {
+    Q.jobs.push({ label, run, kind, resolve, reject });
+    pump();
+  });
+}
+
+async function pump() {
+  if (Q.running || Q.failed) return;
+  const job = Q.jobs[0];
+  if (!job) {
+    for (const w of Q.waiters.splice(0)) w.resolve();
+    renderStatus();
+    return;
+  }
+  Q.running = true;
+  renderStatus();
+  try {
+    const v = await job.run();
+    Q.jobs.shift();
+    job.resolve(v);
+  } catch (e) {
+    console.error(e);
+    Q.failed = { job, error: e };
+    for (const w of Q.waiters.splice(0)) w.reject(new Error(`保存できていない変更があります（${job.label}）`));
+  }
+  Q.running = false;
+  renderStatus();
+  pump();
+}
+
+// 保存が全部済むまで待つ。止まっていれば断る
+function idleSaves() {
+  if (Q.failed) return Promise.reject(new Error(`保存できていない変更があります（${Q.failed.job.label}）`));
+  if (!Q.jobs.length) return Promise.resolve();
+  return new Promise((resolve, reject) => Q.waiters.push({ resolve, reject }));
+}
+
+function retrySaves() { Q.failed = null; pump(); }
+
+// 保存できなかった変更と、その後に描いた物を捨てて、サーバーの今の物を出し直す
+async function discardSaves() {
+  const jobs = Q.jobs.splice(0);
+  Q.failed = null;
+  for (const j of jobs) j.reject(new Error("捨てた"));
+  renderStatus();
+  if (S.hand) S.hand.forceReload = true;
+  await refreshPanelRow();
+  await refreshPanel();
+}
+
+function savingCount() { return Q.jobs.length + (S.hand && S.hand.uploading ? 1 : 0); }
+
+// 保存と、サーバーとのつながりの状態を、画面の左下の1か所に出す
+function renderStatus() {
+  const host = $("#stage-msg");
+  if (Q.failed) {
+    const n = note(`保存できませんでした（${Q.failed.job.label}）：${api.errorText(Q.failed.error)}。描いた物は画面にだけあります`, "bad");
+    n.append(h("button", { class: "btn sm", onclick: retrySaves }, "もう一度送る"),
+      h("button", { class: "btn sm", onclick: () => discardSaves().catch((e) => fail(e, "読み直し")) }, "この変更を捨てる"));
+    host.replaceChildren(n);
+    return;
+  }
+  if (S.link) {
+    const sec = Math.max(1, Math.round((S.link.at - Date.now()) / 1000));
+    const n = note(`${S.link.text}。${sec} 秒後にもう一度読みます`, "need", "wifi-off");
+    n.append(h("button", { class: "btn sm", onclick: () => loadCandidates() }, "今すぐ読む"));
+    host.replaceChildren(n);
+    return;
+  }
+  const n = savingCount();
+  host.replaceChildren(n ? note(`保存しています（${n} 件）`, "", "loader") : "");
+}
+
 // ---------------------------------------------------------------- 採用・却下・版
 async function submitOps(...bodies) {
   const ids = [];
@@ -491,14 +744,8 @@ async function submitOps(...bodies) {
   return ids;
 }
 
-function pushUndo(ids) { S.undo.push(ids); S.redo = []; syncUndo(); }
-function syncUndo() {
-  $("#undo").setAttribute("aria-disabled", String(!S.undo.length));
-  $("#redo").setAttribute("aria-disabled", String(!S.redo.length));
-}
-
 async function afterChange() {
-  await refreshWork();
+  await refreshPanelRow();
   await refreshPanel();
   renderProcesses();
   await Promise.all([loadCandidates(), loadVersions()]);
@@ -506,40 +753,34 @@ async function afterChange() {
 
 async function adopt(imageId) {
   try {
-    pushUndo(await submitOps({ type: "adopt_image", panel_id: S.panelId, image_id: imageId }));
+    await idleSaves();
+    const ids = await submitOps({ type: "adopt_image", panel_id: S.panelId, image_id: imageId });
+    pushUndo({ kind: "server", ids: Promise.resolve(ids), refresh: "all" });
     toast("採用しました（取り消せます）");
     await afterChange();
-  } catch (e) { fail(e); }
+  } catch (e) { fail(e, "採用"); }
 }
 
 async function discard(imageId, on) {
   try {
-    pushUndo(await submitOps({ type: "set_image_discarded", image_id: imageId, discarded: on }));
+    const ids = await submitOps({ type: "set_image_discarded", image_id: imageId, discarded: on });
+    pushUndo({ kind: "server", ids: Promise.resolve(ids), refresh: "candidates" });
     await loadCandidates();
-  } catch (e) { fail(e); }
-}
-
-async function undoRedo(from, to) {
-  const group = from.pop();
-  if (!group) return;
-  try {
-    const back = [];
-    for (const id of [...group].reverse()) back.push((await api.undo(S.workId, id)).event_id);
-    to.push(back);
-  } catch (e) { from.push(group); fail(e); }
-  syncUndo();
-  await afterChange().catch(fail);
+  } catch (e) { fail(e, on ? "却下" : "却下をやめること"); }
 }
 
 async function loadVersions() {
+  const at = `${S.workId}/${S.panelId}`;
   const res = await api.get(`/works/${S.workId}/panels/${S.panelId}/versions`);
+  if (at !== `${S.workId}/${S.panelId}`) return;
   const host = $("#versions");
   host.replaceChildren();
   if (!res.versions.length) { host.append(h("div", { class: "meta", text: "まだ絵を置いていません" })); return; }
   const list = res.versions.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   for (const v of list) {
-    const th = h("div", { class: "th" });
-    api.blobUrl(`/works/${S.workId}/images/${v.id}/thumbnail?size=128`).then(({ url }) => th.append(h("img", { src: url, alt: "" })));
+    const im = h("img", { alt: "" });
+    const th = h("div", { class: "th" }, im);
+    api.showIn(im, `/works/${S.workId}/images/${v.id}/thumbnail?size=128`).catch((e) => fail(e, "版の小さい絵を読む"));
     const proc = v.details && v.details.process;
     const label = proc ? (S.processes.find((p) => p.name === proc) || {}).label || proc : ORIGIN[v.origin] || v.origin;
     host.append(h("div", { class: `vrow${v.current ? " cur" : ""}`, "data-version": v.id }, th,
@@ -558,7 +799,7 @@ async function view(v, label) {
   $("#viewing-text").textContent = `${label}（${v.width}×${v.height}）を見ています。描いたり囲んだりはできません`;
   $("#viewing").hidden = false;
   setTool("select");
-  await refreshPanel(v.id).catch(fail);
+  await refreshPanel(v.id).catch((e) => fail(e, "版を出すこと"));
 }
 
 // ---------------------------------------------------------------- 比べる
@@ -581,15 +822,15 @@ async function renderCompare() {
   const mode = $("#compare-mode [aria-pressed=true]").dataset.mode;
   const body = $("#compare-body");
   body.className = `compare-b ${mode}`;
-  const urls = await Promise.all(S.compareIds.map((id) => api.blobUrl(`/works/${S.workId}/images/${id}/file`).then((x) => x.url)));
-  if (mode === "side" || urls.length < 2) {
-    body.replaceChildren(...urls.map((u, i) => h("figure", {}, h("img", { src: u, alt: S.compareNames[i] }),
-      h("figcaption", { text: S.compareNames[i] }))));
+  const paths = S.compareIds.map((id) => `/works/${S.workId}/images/${id}/file`);
+  const imgs = await Promise.all(paths.map((p, i) => api.showIn(h("img", { alt: S.compareNames[i] }), p)));
+  if (mode === "side" || imgs.length < 2) {
+    body.replaceChildren(...imgs.map((im, i) => h("figure", {}, im, h("figcaption", { text: S.compareNames[i] }))));
     return;
   }
-  const a = await api.loadImage(urls[0]);
-  const wrap = h("div", { class: "slider-wrap", style: `--ar:${a.naturalWidth}/${a.naturalHeight}` },
-    h("img", { src: urls[0], alt: S.compareNames[0] }), h("img", { class: "b", src: urls[1], alt: S.compareNames[1] }),
+  const { image: a } = await api.image(paths[0]);
+  imgs[1].className = "b";
+  const wrap = h("div", { class: "slider-wrap", style: `--ar:${a.naturalWidth}/${a.naturalHeight}` }, imgs[0], imgs[1],
     h("div", { class: "bar" }));
   const r = h("input", { type: "range", min: 0, max: 100, value: 50, "aria-label": "境目の位置" });
   r.addEventListener("input", () => wrap.style.setProperty("--cut", `${r.value}%`));
@@ -598,77 +839,180 @@ async function renderCompare() {
     wrap, h("figcaption", { text: `左：${S.compareNames[0]}　右：${S.compareNames[1]}` })));
 }
 
-// ---------------------------------------------------------------- 人の手で描く・消す
-async function ensureHandLayer() {
-  const l = handLayer();
-  if (l) return { layer: l, ids: [] };
-  const p = panel();
-  const top = Math.max(-1, ...S.work.panel_layers.filter((x) => x.panel_id === p.id).map((x) => x.stack_order));
-  const ids = await submitOps({ type: "add_panel_layer", panel_id: p.id, role: "human_hand", stack_order: top + 1 });
-  await refreshWork();
-  return { layer: handLayer(), ids };
-}
+// ---------------------------------------------------------------- 人の手で描く（ペン）
+// S.hand：今のコマの、描く先の人の手の層。canvas はコマの絵と同じ画素の大きさで、層の控えの絵そのもの。
+// 線は描いている間にこの canvas へ描き（stage.js）、離したら保存を後ろで送る。控えの絵（stroke-cache）は、
+// 描き終えて CACHE_IDLE_MS 経ったとき・頼む前・コマを替える前に、この canvas をそのまま上げる（全部の線を描き直さない）。
+// { panelId, layerId, layerNew, canvas, strokes: [サーバーの形の線], dirty, version, blocked, timer, uploading }
 
-// 層の線から控えの絵を作る。この画面が描けるのは鉛筆（pencil）だけ。ほかの筆の線があれば作らずに断る
-function renderStrokeCache(layer) {
-  const strokes = S.work.pen_strokes.filter((s) => s.layer_id === layer.id && !s.removed).sort((a, b) => a.stack_order - b.stack_order);
-  const other = strokes.find((s) => s.brush !== "pencil");
-  if (other) throw new Error(`この画面は鉛筆の線しか描けません。この層には「${other.brush}」の線があるので、控えの絵を作り直せません`);
-  const f = S.frame;
-  const c = h("canvas");
-  c.width = S.image.width; c.height = S.image.height;
-  const x = c.getContext("2d");
-  x.lineCap = "round"; x.lineJoin = "round";
-  for (const s of strokes) {
-    x.globalAlpha = s.opacity;
-    x.strokeStyle = s.color; x.fillStyle = s.color;
-    x.lineWidth = s.width_mm / f.sx;
-    const pts = s.points.map(([mx, my]) => [(mx - f.ox) / f.sx, (my - f.oy) / f.sy]);
-    x.beginPath(); x.moveTo(pts[0][0], pts[0][1]);
-    for (const [px, py] of pts.slice(1)) x.lineTo(px, py);
-    if (pts.length === 1) x.lineTo(pts[0][0] + 0.01, pts[0][1]);
-    x.stroke();
+async function prepareHand(p, frame, size, target) {
+  const old = S.hand;
+  const reuse = old && !old.forceReload && old.panelId === p.id && old.canvas.width === size.w && old.canvas.height === size.h
+    && (target ? old.layerId === target.id : old.layerNew || !old.layerId);
+  if (reuse) return old;
+  const canvas = document.createElement("canvas");
+  canvas.width = size.w; canvas.height = size.h;
+  const hand = { panelId: p.id, layerId: target ? target.id : null, layerNew: false, canvas, strokes: [], dirty: false,
+                 version: 0, blocked: "", frame };
+  S.hand = hand;
+  if (!target) return hand;
+  if (!target.visible) { hand.blocked = "人の手の層を隠しているので描けません"; return hand; }
+  const cacheOk = target.image_id && target.stroke_revision === target.image_stroke_revision && aligned(target, frame);
+  if (cacheOk) {
+    // 控えが今の線と合っていれば、その絵をそのまま使う（線は読まない）
+    const { image } = await api.image(`/works/${S.workId}/images/${target.image_id}/file`);
+    canvas.getContext("2d").drawImage(image, 0, 0);
+    // 線は id だけ読む（控えを上げるときに、画面の線とサーバーの線が同じかを比べるため）
+    const { strokes } = await readStrokes(target.id, false);
+    if (S.hand === hand && !hand.strokes.length) hand.strokes = strokes;
+    return hand;
   }
-  const placement = { crop_px: [0, 0, c.width, c.height],
-                      dest_box_mm: [f.ox, f.oy, f.ox + c.width * f.sx, f.oy + c.height * f.sy] };
-  return new Promise((resolve) => c.toBlob((b) => resolve({ blob: b, placement }), "image/png"));
+  await reloadHand(hand);
+  return hand;
 }
 
-async function onPenStroke(points, done) {
-  try {
-    if (S.viewing) throw new Error("昔の版を見ている間は描けません");
-    if (!syncPenBar()) throw new Error($("#pen-note").textContent);
-    const f = S.frame;
-    const widthMm = Number($("#pen-width [aria-pressed=true]").dataset.w);
-    const { layer: l0, ids } = await ensureHandLayer();
-    ids.push(...await submitOps({ type: "add_pen_strokes", layer_id: l0.id, strokes: [{
-      brush: "pencil", color: "#000000", opacity: 1, width_mm: widthMm,
-      points: points.map((p) => [f.ox + p.x * f.sx, f.oy + p.y * f.sy, p.pressure, p.ms]) }] }));
-    await refreshWork();
-    const layer = S.work.panel_layers.find((x) => x.id === l0.id);
-    const { blob, placement } = await renderStrokeCache(layer);
+// 控えの絵が、コマの絵の画素にぴったり重なる置き場か
+function aligned(layer, frame) {
+  const f = layer.placement && pxFrame(layer.placement);
+  if (!f) return false;
+  const near = (a, b) => Math.abs(a - b) < 0.5;
+  return near((f.ox - frame.ox) / frame.sx, 0) && near((f.oy - frame.oy) / frame.sy, 0)
+    && near(f.sx / frame.sx, 1) && near(f.sy / frame.sy, 1);
+}
+
+// 層の線をサーバーから区切って読み、canvas を描き直す。控えが線と合っていなければ dirty にする
+async function reloadHand(hand) {
+  if (!hand || !hand.layerId || hand.layerNew) return;
+  hand.forceReload = false;
+  const { strokes, revision, cacheRevision } = await readStrokes(hand.layerId, true);
+  hand.strokes = strokes;
+  hand.version += 1;
+  const other = strokes.find((s) => s.brush !== "pencil");
+  hand.blocked = other ? `この画面は鉛筆の線しか描けません。この層には「${other.brush}」の線があるので、描き直せません` : "";
+  const x = hand.canvas.getContext("2d");
+  x.clearRect(0, 0, hand.canvas.width, hand.canvas.height);
+  if (!hand.blocked) for (const s of strokes) drawServerStroke(x, s, hand.frame);
+  hand.dirty = revision !== cacheRevision;
+  if (hand.dirty) scheduleUpload(hand);
+  return revision;
+}
+
+async function readStrokes(layerId, points) {
+  const out = [];
+  let after = -1, revision = null, cacheRevision = null;
+  do {
+    const r = await api.get(`/works/${S.workId}/layers/${layerId}/pen-strokes?after=${after}&limit=2000&points=${points}`);
+    out.push(...r.strokes);
+    revision = r.stroke_revision; cacheRevision = r.image_stroke_revision;
+    after = r.next_after;
+  } while (after !== null);
+  return { strokes: out, revision, cacheRevision };
+}
+
+function drawServerStroke(ctx, s, f) {
+  const pts = s.points.map(([mx, my, pressure]) => ({ x: (mx - f.ox) / f.sx, y: (my - f.oy) / f.sy, pressure }));
+  drawStroke(ctx, pts, s.width_mm / f.sx, s.color, s.opacity);
+}
+
+function penBegin() {
+  if (S.viewing) throw new Error("昔の版を見ている間は描けません");
+  if (!syncPenBar()) throw new Error($("#pen-note").textContent);
+  return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: "#000000" };
+}
+
+function onPenStroke(points, pointerType) {
+  const hand = S.hand, f = hand.frame;
+  const stroke = { id: newId(), brush: "pencil", color: "#000000", opacity: 1,
+                   width_mm: Number($("#pen-width [aria-pressed=true]").dataset.w), pointer_type: pointerType,
+                   points: points.map((p) => [f.ox + p.x * f.sx, f.oy + p.y * f.sy, p.pressure, p.ms]) };
+  hand.strokes.push(stroke);
+  hand.version += 1; hand.dirty = true;
+  clearTimeout(hand.timer);
+  let makeLayer = null;
+  if (!hand.layerId) {
+    hand.layerId = newId(); hand.layerNew = true;
+    const top = Math.max(-1, ...S.layers.map((x) => x.stack_order));
+    makeLayer = { type: "add_panel_layer", id: hand.layerId, panel_id: hand.panelId, role: "human_hand", stack_order: top + 1 };
+  }
+  const workId = S.workId;
+  const ids = enqueue("ペンの線", async () => {
+    const out = [];
+    if (makeLayer) {
+      out.push((await api.op(workId, makeLayer)).event_id);
+      hand.layerNew = false;
+      S.layers.push({ ...makeLayer, image_id: null, visible: true, opacity: 1, placement: null, removed: false,
+                      stroke_revision: 0, image_stroke_revision: 0 });
+    }
+    out.push((await api.op(workId, { type: "add_pen_strokes", layer_id: hand.layerId, strokes: [stroke] })).event_id);
+    return out;
+  }, "pen");
+  // 層を作った線は、層ごと1回で取り消せる
+  pushUndo({ kind: "server", ids, refresh: "hand" }, hand.panelId);
+  ids.then(() => scheduleUpload(hand), () => {});
+}
+
+function scheduleUpload(hand) {
+  clearTimeout(hand.timer);
+  hand.timer = setTimeout(() => uploadCache(hand).catch((e) => fail(e, "線の控えを上げる")), CACHE_IDLE_MS);
+}
+
+// 控えの絵を上げる。サーバーの線（id だけ読む）が画面の線と同じなら、canvas をそのまま上げる。
+// 違えば（ほかの人が描いた・取り消した）線を読み直して描き直してから上げる
+async function uploadCache(hand) {
+  clearTimeout(hand.timer);
+  if (!hand.dirty || !hand.layerId) return;
+  if (hand.uploading) return hand.uploading;
+  hand.uploading = (async () => {
+    renderStatus();
+    await idleSaves();
+    let { strokes, revision: rev } = await readStrokes(hand.layerId, false);
+    const here = new Set(hand.strokes.map((s) => s.id));
+    if (strokes.length !== here.size || strokes.some((s) => !here.has(s.id))) {
+      rev = await reloadHand(hand);
+      clearTimeout(hand.timer);
+    }
+    // 鉛筆でない線がある層は描き直せないので、控えも上げない（サーバーの控えのままにする）
+    if (hand.blocked) return;
+    const version = hand.version;
+    const blob = await new Promise((resolve) => hand.canvas.toBlob(resolve, "image/png"));
+    if (version !== hand.version) { scheduleUpload(hand); return; }
+    const f = hand.frame, c = hand.canvas;
     const form = new FormData();
     form.append("image", blob, "strokes.png");
-    form.append("stroke_revision", String(layer.stroke_revision));
-    form.append("placement", JSON.stringify(placement));
-    ids.push((await api.postForm(`/works/${S.workId}/layers/${layer.id}/stroke-cache`, form)).event_id);
-    pushUndo(ids);
-    await refreshWork();
-    await refreshPanel();
-    await loadVersions();
-  } catch (e) { fail(e); } finally { done(); }
+    form.append("stroke_revision", String(rev));
+    form.append("placement", JSON.stringify({ crop_px: [0, 0, c.width, c.height],
+                                              dest_box_mm: [f.ox, f.oy, f.ox + c.width * f.sx, f.oy + c.height * f.sy] }));
+    const r = await api.postForm(`/works/${S.workId}/layers/${hand.layerId}/stroke-cache`, form);
+    if (version === hand.version) hand.dirty = false;
+    const l = S.layers.find((x) => x.id === hand.layerId);
+    if (l) Object.assign(l, { image_id: r.image_id, stroke_revision: rev, image_stroke_revision: rev });
+  })().finally(() => { hand.uploading = null; renderStatus(); });
+  return hand.uploading;
 }
 
-async function onErase(points, widthPx, done) {
-  try {
-    if (S.viewing) throw new Error("昔の版を見ている間は消せません");
-    if (!S.image) throw new Error("消す絵がありません");
+// ---------------------------------------------------------------- 人の手で消す（画素の消しゴム）
+function eraseBegin() {
+  if (S.viewing) throw new Error("昔の版を見ている間は消せません");
+  if (!S.image) throw new Error("消す絵がありません");
+  return true;
+}
+
+// 消した所は stage.js が絵の写しから先に消して見せている。サーバーの答え（新しい版）が来たら、その絵に替える
+function onErase(points, widthPx) {
+  const panelId = S.panelId, workId = S.workId;
+  const ids = enqueue("消しゴム", async () => {
     const form = new FormData();
     form.append("strokes", JSON.stringify([{ points: points.map((p) => [p.x, p.y]), width_px: widthPx }]));
-    const r = await api.postForm(`/works/${S.workId}/panels/${S.panelId}/erase-pixels`, form);
-    pushUndo([r.event_id]);
-    await afterChange();
-  } catch (e) { fail(e); } finally { done(); }
+    const r = await api.postForm(`/works/${workId}/panels/${panelId}/erase-pixels`, form);
+    const p = S.work.panels.find((x) => x.id === panelId);
+    if (p) p.image_id = r.image_id;
+    // まだ送っていない消しゴムがあれば、最後の答えが来てから替える（先に替えると、その消した所が見えなくなる）
+    if (S.panelId === panelId && !S.viewing && !Q.jobs.slice(1).some((j) => j.kind === "erase")) {
+      refreshPanel().then(() => loadVersions()).catch((e) => fail(e, "消した後の絵を読むこと"));
+    }
+    return [r.event_id];
+  }, "erase");
+  pushUndo({ kind: "server", ids, refresh: "all" }, panelId);
 }
 
 // ---------------------------------------------------------------- タブ・保存しておく選び
@@ -697,10 +1041,11 @@ function bindUi() {
   bs.addEventListener("input", () => { $("#brush-size-v").textContent = bs.value; stage.setBrushPx(Number(bs.value)); });
   const es = $("#erase-size");
   es.addEventListener("input", () => { $("#erase-size-v").textContent = es.value; stage.erasePx = Number(es.value); stage.syncCursor(); });
-  $("#mask-undo").addEventListener("click", () => stage.undoMask());
-  $("#mask-invert").addEventListener("click", () => stage.invertMask());
-  $("#mask-fill").addEventListener("click", () => stage.fillMask());
-  $("#mask-clear").addEventListener("click", () => stage.clearMask());
+  // 囲みの「反転・全部・消す」は昔の版を見ている間は使えない（塗る筆と同じ。maskBegin）
+  const maskOp = (fn) => () => { if (maskBegin()) fn(); };
+  $("#mask-invert").addEventListener("click", maskOp(() => stage.invertMask()));
+  $("#mask-fill").addEventListener("click", maskOp(() => stage.fillMask()));
+  $("#mask-clear").addEventListener("click", maskOp(() => stage.clearMask()));
   $("#mask-show").addEventListener("click", (e) => {
     const b = e.currentTarget;
     const on = b.getAttribute("aria-pressed") !== "true";
@@ -710,8 +1055,8 @@ function bindUi() {
   $("#zoom-in").addEventListener("click", () => stage.zoomBy(1.25));
   $("#zoom-out").addEventListener("click", () => stage.zoomBy(0.8));
   $("#zoom-fit").addEventListener("click", () => stage.fit());
-  $("#undo").addEventListener("click", () => undoRedo(S.undo, S.redo));
-  $("#redo").addEventListener("click", () => undoRedo(S.redo, S.undo));
+  $("#undo").addEventListener("click", () => undoRedo("undo"));
+  $("#redo").addEventListener("click", () => undoRedo("redo"));
   for (const b of $$(".itab")) b.addEventListener("click", () => showTab(b.dataset.tab));
   for (const b of $$("#count button")) b.addEventListener("click", () => pressed($("#count"), b));
   for (const b of $$("#seed-mode button")) b.addEventListener("click", () => { pressed($("#seed-mode"), b); $("#seed").hidden = b.dataset.m !== "fixed"; });
@@ -720,16 +1065,54 @@ function bindUi() {
   $("#viewing-back").addEventListener("click", () => { S.viewing = null; $("#viewing").hidden = true; refreshPanel().catch(fail); });
   for (const b of $$("#compare-mode button")) b.addEventListener("click", () => { pressed($("#compare-mode"), b); renderCompare().catch(fail); });
   $("#compare-close").addEventListener("click", () => { $("#compare").hidden = true; });
-  window.addEventListener("keydown", (e) => {
-    if (e.target.closest("input,textarea,select")) return;
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
-      e.preventDefault();
-      if (e.shiftKey) undoRedo(S.redo, S.undo); else undoRedo(S.undo, S.redo);
-      return;
-    }
-    const key = { v: "select", m: "mask", o: "extend", p: "pen", e: "erase" }[e.key.toLowerCase()];
-    if (key && !e.ctrlKey && !e.metaKey && !e.altKey) setTool(key);
+  $("#keys-open").addEventListener("click", () => $("#keys").showModal());
+  $("#keys-close").addEventListener("click", () => $("#keys").close());
+  window.addEventListener("keydown", onKey);
+  window.addEventListener("online", () => { if (S.link) loadCandidates(); if (Q.failed) retrySaves(); });
+  window.addEventListener("offline", () => { S.link = { text: "ネットにつながっていません", at: Date.now() + POLL_MAX_MS }; renderStatus(); });
+  // 保存していない線・消した所があるときは、閉じる前に聞く
+  window.addEventListener("beforeunload", (e) => {
+    if (Q.jobs.length || (S.hand && (S.hand.dirty || S.hand.uploading))) e.preventDefault();
   });
+}
+
+// ---------------------------------------------------------------- キー（llm_doc/V3細部の決めごと.md 22.2）
+// キーはここ1か所で受け、画面のボタンを押したのと同じにする（ボタンの押せない状態もそのまま効く）
+const KEYS = { v: "[data-tool=select]", h: "[data-tool=select]", l: "[data-tool=mask]", b: "[data-tool=pen]",
+               e: "[data-tool=erase]", "+": "#zoom-in", "=": "#zoom-in", "-": "#zoom-out", "?": "#keys-open" };
+
+function press(sel) {
+  const b = $(sel);
+  if (!b || b.disabled || b.getAttribute("aria-disabled") === "true" || b.closest("[hidden]")) return false;
+  b.click();
+  return true;
+}
+
+function onKey(e) {
+  const k = e.key.toLowerCase();
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && k === "enter") { e.preventDefault(); press("#generate"); return; }
+  if (e.key === "Escape") {
+    if (e.target.closest("input,textarea,select")) { e.target.blur(); return; }
+    if (stage.polygonKey("Escape")) return;
+    if (!$("#compare").hidden) press("#compare-close");
+    return;
+  }
+  if (e.target.closest("input,textarea,select")) return;
+  if (mod && (k === "z" || k === "y")) {
+    e.preventDefault();
+    press(k === "y" || e.shiftKey ? "#redo" : "#undo");
+    return;
+  }
+  if (mod || e.altKey) return;
+  if (e.key === "Enter" && stage.polygonKey("Enter")) { e.preventDefault(); return; }
+  const sel = KEYS[e.key] || KEYS[k];
+  if (sel && press(sel)) e.preventDefault();
+}
+
+function maskBegin() {
+  if (S.viewing) { toast("昔の版を見ている間は囲めません。「今の絵に戻る」を押してください", "need"); return false; }
+  return true;
 }
 
 async function start() {
@@ -738,8 +1121,10 @@ async function start() {
 }
 
 stage = new Stage($("#stage"), {
-  onExtend: onExtendFromStage, onPenStroke, onErase,
-  onMaskChange: () => {},
+  onExtend: onExtendFromStage, penBegin, onPenStroke, eraseBegin, onErase,
+  maskBegin,
+  onMaskEdit: (edit) => pushUndo({ kind: "mask", edit }),
+  onRefuse: (msg) => toast(msg, "need"),
 });
 // 開発者ツールと画面の試験（test/image_generation_ui.mjs）から絵の画素の位置を調べるため
 window.v3Stage = stage;

@@ -28,6 +28,7 @@ from v3server.http_routes import (
     settings_and_search_routes,
     work_routes,
 )
+from v3server.http_routes.request_size_limit import RequestSizeLimit
 from v3server.openfga_permissions import open_authz
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import (
@@ -40,6 +41,7 @@ from v3server.v3_error_types import (
     NotFound,
     NotUndoable,
     QueueNotRunning,
+    UndoConflictError,
     V3Error,
 )
 
@@ -53,14 +55,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="V3 サーバー", lifespan=lifespan)
+app.add_middleware(RequestSizeLimit)
 
 _STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid: 422, HumanHandProtected: 409,
-           AiInvolvementRefused: 409, FixedByPerson: 409, QueueNotRunning: 503}
+           AiInvolvementRefused: 409, FixedByPerson: 409, QueueNotRunning: 503, UndoConflictError: 409}
 
 
 @app.exception_handler(V3Error)
 async def v3_error(request: Request, exc: V3Error):
-    return JSONResponse(status_code=_STATUS.get(type(exc), 400), content={"code": exc.code, "detail": str(exc)})
+    return JSONResponse(status_code=_STATUS.get(type(exc), 400),
+                        content={"code": exc.code, "detail": str(exc), **(exc.extra or {})})
 
 
 for _routes in (work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,

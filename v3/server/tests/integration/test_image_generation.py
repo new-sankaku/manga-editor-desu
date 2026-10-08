@@ -79,7 +79,7 @@ async def setup(api, admin, workers, fake_comfy):  # noqa: F811
     comfy = fake_comfy(EchoComfy())
     r = await api.post("/services", headers=h(admin), json={
         "name": f"comfy-{uuid.uuid4().hex[:6]}", "kind": "image", "location": "local", "adapter": "comfyui",
-        "endpoint": "http://comfy", "send_mode": "parallel", "max_concurrency": 4})
+        "endpoint": "http://127.0.0.1:8188", "send_mode": "parallel", "max_concurrency": 4})
     sid = r.json()["id"]
     for name in ("text_to_image", "image_to_image", "variation", "inpaint", "outpaint"):
         r = await api.put(f"/services/{sid}/processes/{name}", headers=h(admin), json={

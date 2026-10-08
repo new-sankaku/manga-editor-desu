@@ -7,9 +7,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from v3server.canonical_tables.event_and_lock_tables import Event
+from v3server.canonical_tables.event_and_lock_tables import Event, UndoConflict
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
-from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate, PenStroke
+from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate
 from v3server.canonical_tables.service_and_job_tables import WorkDestination
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
@@ -103,9 +103,10 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
                 "adjustments", "fixed", "stroke_revision", "image_stroke_revision", "human_hand_fields", "removed")
             for la in await all_of(PanelLayer)
         ],
-        # 10.4 で足した表は、列をそのまま返す
+        # 10.4 で足した表は、列をそのまま返す。ペンの線は返さない（1冊分の点は大きすぎる）。
+        # 線は層ごとに GET /works/{id}/layers/{layer_id}/pen-strokes で区切って取る（pen_stroke_routes.py）
         **{name: [all_columns(x) for x in await all_of(model)]
-           for name, model in (("page_items", PageItem), ("pen_strokes", PenStroke),
+           for name, model in (("page_items", PageItem),
                                ("annotation_items", AnnotationItem), ("panel_templates", PanelTemplate),
                                ("material_entries", MaterialEntry), ("work_plans", WorkPlan))},
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],
@@ -168,3 +169,12 @@ async def list_events(work_id: str, session: SessionDep, authz: AuthzDep, actor:
             "created_at") | {"undoable": e.inverse is not None, "held_changes": e.held_changes or []}
         for e in events
     ]
+
+
+@router.get("/works/{work_id}/undo-conflicts")
+async def list_undo_conflicts(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """後の変更を上書きするので止めた取り消しの記録（operations/field_change_record.py）。古い順。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    rows = (await session.execute(select(UndoConflict).where(UndoConflict.work_id == work_id)
+                                  .order_by(UndoConflict.created_at))).scalars().all()
+    return [row(c, "id", "event_id", "actor_kind", "actor_id", "conflicts", "created_at") for c in rows]

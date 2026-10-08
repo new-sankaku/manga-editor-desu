@@ -12,6 +12,11 @@ from conftest import h, new_work, user, wait_for
 from PIL import Image
 from test_queue import ADMIN, admin, enqueue, until_status  # noqa: F401  (admin は fixture)
 
+from sqlalchemy import select
+
+from v3server.canonical_tables.service_and_job_tables import CallLog
+from v3server.database_engine import get_sessionmaker
+from v3server.generation_queue import service_call_activity
 from v3server.server_settings import get_settings
 from v3server.service_senders import comfyui_sender
 
@@ -68,10 +73,10 @@ def fake_comfy(monkeypatch, tmp_path):
     return install
 
 
-async def make_comfy_service(api, admin_user):
+async def make_comfy_service(api, admin_user, resend_limit: int = 0):
     name, process = f"comfy-{uuid.uuid4().hex[:6]}", f"draw-{uuid.uuid4().hex[:6]}"
     r = await api.post("/services", headers=h(admin_user), json={
-        "name": name, "kind": "image", "location": "local", "adapter": "comfyui", "endpoint": "http://comfy",
+        "name": name, "kind": "image", "location": "local", "adapter": "comfyui", "endpoint": "http://127.0.0.1:8188",
         "send_mode": "serial"})
     assert r.status_code == 201, r.text
     sid = r.json()["id"]
@@ -80,7 +85,7 @@ async def make_comfy_service(api, admin_user):
     assert r.status_code == 200, r.text
     assert r.json()["comfy_wait_seconds"] == 30
     r = await api.put(f"/routes/{process}", headers=h(admin_user),
-                      json={"service_id": sid, "resend_limit": 0, "regenerate_limit": 0, "ai_task": "drawing",
+                      json={"service_id": sid, "resend_limit": resend_limit, "regenerate_limit": 0, "ai_task": "drawing",
                             "ai_action": "propose"})
     assert r.status_code == 200, r.text
     await_reload = process
@@ -156,3 +161,94 @@ async def test_取り消すと送り先の実行中の物も止める(api, admin
     async def interrupted():
         return fake.interrupted
     await wait_for(interrupted, timeout=40)  # 取り消しは活動の生存の知らせ（5秒ごと）で届く
+
+
+# ---------------------------------------------------------------- 作業者が途中で落ちたとき（点検5 4-2）
+
+
+class TwoImageComfy(SlowFakeComfy):
+    """2枚の絵を返す。/prompt（送った回数）を数える。"""
+
+    def __call__(self, req: httpx.Request) -> httpx.Response:
+        path = req.url.path
+        if path.startswith("/history/"):
+            self.calls.append((req.method, path))
+            return httpx.Response(200, json={PID: {"status": {"status_str": "success", "messages": []}, "outputs": {
+                "9": {"images": [{"filename": f"{n}.png", "subfolder": "", "type": "output"} for n in "ab"]}}}})
+        if path == "/view":
+            buf = io.BytesIO()
+            Image.new("L", (32, 48), 60 if req.url.params["filename"] == "a.png" else 200).save(buf, format="PNG")
+            return httpx.Response(200, content=buf.getvalue())
+        return super().__call__(req)
+
+    def sends(self) -> int:
+        return sum(1 for m, p in self.calls if p == "/prompt")
+
+
+class Crash(Exception):
+    """作業者が落ちた代わり。活動が受け止めない例外なので、Temporal が活動をやり直す。"""
+
+
+def crash_once(monkeypatch, name: str, on_call: int = 1):
+    """service_call_activity の name を、on_call 回目の呼び出しで落ちるようにする。"""
+    real = getattr(service_call_activity, name)
+    seen = {"n": 0}
+
+    async def wrapped(*args, **kwargs):
+        seen["n"] += 1
+        if seen["n"] == on_call:
+            if name == "submit":
+                await real(*args, **kwargs)  # 1枚目を登録した後（確定の前）に落ちる
+            raise Crash(name)
+        return await real(*args, **kwargs)
+    monkeypatch.setattr(service_call_activity, name, wrapped)
+    return seen
+
+
+async def run_two_images(api, admin, workers, fake_comfy):
+    fake = fake_comfy(TwoImageComfy(finish_after=1))
+    a = user()
+    ids = await new_work(api, a)
+    wid = ids["work"]
+    _, process = await make_comfy_service(api, admin, resend_limit=2)
+    await workers.reload()
+    jid = await enqueue(api, wid, a, process, register={"role": "panel_art", "page_id": ids["page1"]})
+    j = await until_status(api, wid, a, jid, "done", "stopped", timeout=60)
+    assert j["status"] == "done", j
+    imgs = (await api.get(f"/works/{wid}/images", headers=h(a))).json()
+    events = [e for e in (await api.get(f"/works/{wid}/events", headers=h(a))).json() if e["op_type"] == "register_image"]
+    async with get_sessionmaker()() as session:
+        logs = (await session.execute(select(CallLog).where(CallLog.job_id == jid)
+                                      .order_by(CallLog.created_at))).scalars().all()
+    return fake, j, imgs, events, logs
+
+
+async def test_答えを受け取った後に落ちても送り直さず二重に登録しない(api, admin, workers, fake_comfy, monkeypatch):
+    seen = crash_once(monkeypatch, "_finish")
+    fake, j, imgs, events, logs = await run_two_images(api, admin, workers, fake_comfy)
+    assert seen["n"] == 2
+    assert fake.sends() == 1
+    assert len(imgs) == 2 and len(events) == 2
+    assert sorted(r["image_id"] for r in j["result"]["registered"]) == sorted(i["id"] for i in imgs)
+    [log] = logs
+    assert (log.outcome, log.attempt) == ("ok", 1) and log.idempotency_key.startswith(j["id"] + ":")
+
+
+async def test_登録の途中で落ちても残らず_次の回で1回だけ登録する(api, admin, workers, fake_comfy, monkeypatch):
+    seen = crash_once(monkeypatch, "submit", on_call=2)
+    fake, _j, imgs, events, logs = await run_two_images(api, admin, workers, fake_comfy)
+    assert seen["n"] == 4  # 1回目：1枚目・2枚目（ここで落ちる）。2回目：2枚
+    assert fake.sends() == 1
+    assert len(imgs) == 2 and len(events) == 2
+    assert [x.outcome for x in logs] == ["ok"]
+
+
+async def test_送った後_答えを残す前に落ちたら送ったか分からない記録を残して送り直す(api, admin, workers, fake_comfy,
+                                                                monkeypatch):
+    seen = crash_once(monkeypatch, "take_in_image")
+    fake, _j, imgs, events, logs = await run_two_images(api, admin, workers, fake_comfy)
+    assert seen["n"] == 3
+    # 答えを残していないので、時間切れと同じく送り直す（V3細部の決めごと 4.5）
+    assert fake.sends() == 2
+    assert len(imgs) == 2 and len(events) == 2
+    assert [(x.outcome, x.attempt) for x in logs] == [("unknown", 1), ("ok", 2)]

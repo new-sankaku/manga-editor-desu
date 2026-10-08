@@ -7,7 +7,8 @@
   2つが違えば控えは古い。古い控えは、AIへ渡すマスクにも書き出しにも使わない（止める）
 
 操作（どれも1回で取り消せ、変えた線に人の手の印が付く）：
-- AddPenStrokes：線を足す
+- AddPenStrokes：線を足す。線の id は画面が決めてよい（画面は保存を待たずに線を見せ、後で取り消すときにその id を使う）。
+  描いた機器（pointer_type）を残す。マウスの線は筆圧を持たない（null）
 - UpdatePenStrokes：選んだ線（1本でも何本でも）を動かす・太さ・色・不透明度・筆を変える
 - RemovePenStrokes：選んだ線を消す
 - ErasePenStrokes：線の消しゴム（whole・to_crossings・touched。hand_tools/vector_strokes.py）
@@ -17,16 +18,16 @@
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
-from sqlalchemy import select
+from pydantic import BaseModel, Field, model_validator
+from sqlalchemy import func, select
 
 from v3server.canonical_tables.image_file_tables import ImageFile
-from v3server.canonical_tables.page_item_tables import PenStroke
+from v3server.canonical_tables.page_item_tables import PenStroke, pen_stroke_box_overlaps
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, ProtectedRegion
 from v3server.canonical_tables.work_tree_tables import Panel
 from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke
-from v3server.hand_tools.vector_strokes import EraseMode, StrokeValues, erase, moved
+from v3server.hand_tools.vector_strokes import EraseMode, PointerType, StrokeValues, erase, moved, stroke_box
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -61,15 +62,11 @@ async def _strokes(session, work_id: str, ids: list[str]) -> list[PenStroke]:
     return out
 
 
-async def live_strokes(session, layer_id: str) -> list[PenStroke]:
-    q = select(PenStroke).where(PenStroke.layer_id == layer_id, PenStroke.removed.is_(False))
-    return list((await session.execute(q.order_by(PenStroke.stack_order))).scalars())
-
-
-def _stroke_row(ctx, layer: PanelLayer, values: dict[str, Any], order: int) -> PenStroke:
-    return PenStroke(id=new_id(), work_id=ctx.work.id, page_id=layer.page_id, panel_id=layer.panel_id,
+def _stroke_row(ctx, layer: PanelLayer, values: dict[str, Any], order: int, pointer_type: str | None,
+                stroke_id: str | None = None) -> PenStroke:
+    return PenStroke(id=stroke_id or new_id(), work_id=ctx.work.id, page_id=layer.page_id, panel_id=layer.panel_id,
                      layer_id=layer.id, stack_order=order, created_by=ctx.actor.id, fixed=False, removed=False,
-                     human_hand_fields=sorted(values), **values)
+                     pointer_type=pointer_type, human_hand_fields=sorted(values), **values)
 
 
 def _values(v: StrokeValues) -> dict[str, Any]:
@@ -78,21 +75,40 @@ def _values(v: StrokeValues) -> dict[str, Any]:
     return d
 
 
+class NewPenStroke(StrokeValues):
+    """足す線。id は画面が決めてよい（無ければここで作る）。"""
+
+    id: str | None = Field(default=None, pattern=r"^[0-9a-f]{32}$")
+    pointer_type: PointerType | None = None
+
+    @model_validator(mode="after")
+    def _mouse_has_no_pressure(self):
+        if self.pointer_type == "mouse" and any(p[2] is not None for p in self.points):
+            raise ValueError("マウスの線は筆圧を持たない（筆圧は null で送る）")
+        return self
+
+
 class AddPenStrokes(OpBase):
     type: Literal["add_pen_strokes"] = "add_pen_strokes"
     layer_id: str
-    strokes: list[StrokeValues] = Field(min_length=1)
+    strokes: list[NewPenStroke] = Field(min_length=1)
 
     async def scope(self, session, work):
         return _layer_scope(await _hand_layer(session, work.id, self.layer_id))
 
     async def apply(self, ctx):
         layer = await _hand_layer(ctx.session, ctx.work.id, self.layer_id)
-        live = await live_strokes(ctx.session, layer.id)
-        top = max((s.stack_order for s in live), default=-1)
+        top = await _top_order(ctx.session, layer.id)
+        given = [v.id for v in self.strokes if v.id]
+        if len(set(given)) != len(given):
+            raise Invalid("線の id が重なっている")
+        for i in given:
+            if await ctx.session.get(PenStroke, i) is not None:
+                raise Invalid(f"線 {i} はもうある")
         rc = RowChanges(ctx)
         for i, v in enumerate(self.strokes):
-            rc.created(_stroke_row(ctx, layer, _values(v), top + 1 + i))
+            values = {k: x for k, x in _values(v).items() if k not in ("id", "pointer_type")}
+            rc.created(_stroke_row(ctx, layer, values, top + 1 + i, v.pointer_type, v.id))
         rc.bump_strokes(layer)
         return rc.inverse([layer.page_id], "ペンの線を足した取り消し")
 
@@ -167,12 +183,20 @@ class ErasePenStrokes(OpBase):
 
     async def apply(self, ctx):
         layer = await _hand_layer(ctx.session, ctx.work.id, self.layer_id)
-        live = await live_strokes(ctx.session, layer.id)
+        r = self.width_mm / 2
+        xs, ys = [p[0] for p in self.path_mm], [p[1] for p in self.path_mm]
+        # 読むのは、外接の箱が消しゴムの通り道の箱に重なる線だけ（索引で引く）
+        near = await _strokes_in_box(ctx.session, layer.id, min(xs) - r, min(ys) - r, max(xs) + r, max(ys) + r)
+        top = await _top_order(ctx.session, layer.id)
         rc = RowChanges(ctx)
-        top = max((s.stack_order for s in live), default=-1)
         touched = 0
-        for s in live:
-            others = [o.points for o in live if o.id != s.id and o.brush not in ("eraser", "mosaic")]
+        for s in near:
+            others: list = []
+            if self.mode == "to_crossings":
+                # 交わりを探すのは、この線の箱に重なる線だけ
+                box = stroke_box(s.points, s.width_mm)
+                others = [o.points for o in await _strokes_in_box(ctx.session, layer.id, *box)
+                          if o.id != s.id and o.brush not in ("eraser", "mosaic")]
             pieces = erase([tuple(p) for p in s.points], s.width_mm, self.path_mm, self.width_mm, self.mode, others)
             if pieces is None:
                 continue
@@ -185,11 +209,23 @@ class ErasePenStrokes(OpBase):
             base = {k: getattr(s, k) for k in ("brush", "width_mm", "color", "opacity", "seed", "brush_options")}
             for piece in pieces[1:]:
                 top += 1
-                rc.created(_stroke_row(ctx, layer, base | {"points": [list(p) for p in piece]}, top))
+                rc.created(_stroke_row(ctx, layer, base | {"points": [list(p) for p in piece]}, top, s.pointer_type))
         if not touched:
             raise Invalid("消しゴムがどの線にも触れていない")
         rc.bump_strokes(layer)
         return rc.inverse([layer.page_id], "線の消しゴムの取り消し")
+
+
+async def _strokes_in_box(session, layer_id: str, x0: float, y0: float, x1: float, y1: float) -> list[PenStroke]:
+    q = select(PenStroke).where(PenStroke.layer_id == layer_id, PenStroke.removed.is_(False),
+                                pen_stroke_box_overlaps(x0, y0, x1, y1))
+    return list((await session.execute(q.order_by(PenStroke.stack_order))).scalars())
+
+
+async def _top_order(session, layer_id: str) -> int:
+    q = select(func.max(PenStroke.stack_order)).where(PenStroke.layer_id == layer_id, PenStroke.removed.is_(False))
+    top = (await session.execute(q)).scalar()
+    return -1 if top is None else top
 
 
 class StoredResult(BaseModel):
@@ -260,7 +296,7 @@ class ErasePixels(OpBase):
             target = await get_in_work(ctx.session, PanelLayer, self.layer_id, ctx.work.id)
             if target.panel_id != panel.id:
                 raise Invalid("層がそのコマの物ではない")
-            if target.role == "human_hand" and await live_strokes(ctx.session, target.id):
+            if target.role == "human_hand" and await _top_order(ctx.session, target.id) >= 0:
                 raise Invalid("ペンの線を持つ層は、線の消しゴム（erase_pen_strokes）で消す")
             role = target.role
         else:

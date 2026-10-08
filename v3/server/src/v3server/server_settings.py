@@ -13,6 +13,17 @@ class Settings(BaseSettings):
     temporal_address: str
     openfga_url: str
     litellm_url: str
+    # OpenFGA の事前共有鍵。compose と同じ .env の OPENFGA_PRESHARED_KEY を読む（compose.yaml の openfga）
+    openfga_preshared_key: str = Field(
+        validation_alias=AliasChoices("V3_OPENFGA_PRESHARED_KEY", "OPENFGA_PRESHARED_KEY")
+    )
+    # 1回の要求の本体の上限（バイト）。絵・PSD のアップロードも含む。超えたら 413（http_routes/request_size_limit.py）
+    request_max_bytes: int = Field(gt=0)
+    # 外から入る絵（アップロード・生成した絵・PSD の層）の画素数の上限（幅×高さ）。Pillow の Image.MAX_IMAGE_PIXELS 以下にする
+    # （image_intake.check_pixel_count）
+    image_max_pixels: int = Field(gt=0)
+    # 戻す PSD の層の数の上限（グループも数える。print_export/psd_import_matching.read_psd）
+    psd_max_layers: int = Field(gt=0)
     # compose と同じ .env の LITELLM_MASTER_KEY を読む。LLMを呼ぶときに無ければその場で止める
     litellm_master_key: str | None = Field(
         default=None, validation_alias=AliasChoices("V3_LITELLM_MASTER_KEY", "LITELLM_MASTER_KEY")

@@ -81,7 +81,9 @@ def fake_adapter(monkeypatch):
         finally:
             state["running"] -= 1
 
+    # 手元の先（make_service の location="local"）は、手元と言える送り手（comfyui・127.0.0.1）で登録するので、同じ偽にする
     monkeypatch.setitem(ADAPTERS, "litellm", fake)
+    monkeypatch.setitem(ADAPTERS, "comfyui", fake)
     return state
 
 

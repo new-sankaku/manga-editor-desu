@@ -20,7 +20,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.service_and_job_tables import Job, ProcessRoute, Service, ServiceProcess
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Panel, Work
-from v3server.allowed_destinations import is_allowed
+from v3server.allowed_destinations import effective_location, is_allowed
 from v3server.generation_queue import job_start_and_control
 from v3server.comfy_graphs.protected_region_mask import protected_mask_png
 from v3server.generation_queue.image_process_preparation import SEED_MAX
@@ -76,7 +76,7 @@ async def list_image_processes(work_id: str, session: SessionDep, authz: AuthzDe
             if sp.process != spec.name:
                 continue
             svc = services[sp.service_id]
-            choices.append({"service_id": svc.id, "name": svc.name, "location": svc.location, "state": svc.state,
+            choices.append({"service_id": svc.id, "name": svc.name, "location": effective_location(svc), "state": svc.state,
                             "paused": svc.paused, "allowed": await is_allowed(session, work_id, svc),
                             "settings": settings_summary(sp.comfy_graph_settings)})
         out.append({**describe(spec), "route_service_id": route.service_id if route else None, "services": choices})

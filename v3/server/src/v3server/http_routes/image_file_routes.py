@@ -23,9 +23,9 @@ from v3server.http_routes.http_dependencies import (
     row,
 )
 from v3server.image_file_storage import read_image
-from v3server.image_intake import take_in_image
+from v3server.image_intake import take_in_upload
 from v3server.operations import operation_submit_and_undo
-from v3server.operations.image_file_operations import ImageRole, RegisterImage
+from v3server.operations.image_file_operations import ImageRole, RegisterImage, register_image_scope
 from v3server.operations.image_provenance import episode_image_provenance, lineage
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.operations.work_tree_operations import UpdatePanel
@@ -53,7 +53,10 @@ async def _upload(session, authz, actor, work_id: str, image: UploadFile, role: 
                   source_note, based_on_image_id, usage_terms) -> tuple[RegisterImage, str]:
     await require(authz, actor, "can_view", work_obj(work_id))
     terms = _usage_terms(usage_terms)
-    stored = await take_in_image(session, work_id, await image.read(), "human_upload")
+    # 登録できる人かを、ファイルを書く・判定の記録を確定する前に確かめる（点検5 3-2）
+    scope, _ = await register_image_scope(session, work_id, page_id, panel_id)
+    await operation_submit_and_undo.check_scope(session, authz, actor, scope)
+    stored = await take_in_upload(session, work_id, image.file)
     op = RegisterImage(role=role, origin=origin, page_id=page_id, panel_id=panel_id, source_note=source_note,
                        based_on_image_id=based_on_image_id, usage_terms=terms, sha256=stored.sha256,
                        media_type=stored.media_type, width=stored.width, height=stored.height, dpi=stored.dpi,
@@ -88,6 +91,7 @@ async def replace_panel_image(work_id: str, panel_id: str, session: SessionDep, 
                               role: Annotated[ImageRole, Form()] = "panel_art"):
     """コマの絵を、置いた・持ち込んだ・手を入れた絵に替える。今の絵は消さず、新しい版の元（based_on_image_id）として残る。
     登録と選ぶのは2つの出来事。選ぶ方を取り消すと、前の絵に戻る。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
     panel = await get_in_work(session, Panel, panel_id, work_id)
     previous = panel.image_id
     op, reg_event = await _upload(session, authz, actor, work_id, image, role, origin, None, panel_id, source_note,

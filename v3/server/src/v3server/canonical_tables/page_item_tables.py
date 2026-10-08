@@ -2,7 +2,7 @@
 
 - PageItem：トーン・集中線・スピード線（item_kind=tone）と、図形・絵記号（item_kind=shape）
 - AnnotationItem：赤入れ（ページかコマの範囲に付ける指摘。人もAIも付ける。開いている・済んだ、の状態を持つ）
-- PenStroke：ペンの線（人の手の層ごと。点・筆圧・時刻・筆・太さ・色・種）。線が正本で、層の絵は線から作った控え
+- PenStroke：ペンの線（人の手の層ごと。点・筆圧・時刻・筆・太さ・色・種・描いた機器）。線が正本で、層の絵は線から作った控え
 - PanelTemplate：コマの型（作品ごとに人が保存した枠の並び）
 
 どれも人が直せる。人が変えた項目には人の手の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。
@@ -11,7 +11,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, event, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from v3server.canonical_tables.table_base import Base, new_id
@@ -86,7 +86,7 @@ class PenStroke(Base):
     layer_id: Mapped[str] = mapped_column(ForeignKey("panel_layers.id"), index=True)
     # 筆（hand_tools/vector_strokes.py の Brush）
     brush: Mapped[str] = mapped_column(String(24))
-    # [[x_mm, y_mm, 筆圧 0〜1, 描き始めからの ms], ...]（描いた順）
+    # [[x_mm, y_mm, 筆圧 0〜1（機器が返さなければ null）, 描き始めからの ms], ...]（描いた順）
     points: Mapped[list[Any]] = mapped_column()
     width_mm: Mapped[float] = mapped_column(Float)
     color: Mapped[str | None] = mapped_column(String(7))
@@ -95,12 +95,36 @@ class PenStroke(Base):
     seed: Mapped[int | None] = mapped_column(Integer)
     # 筆ごとの値（モザイクの大きさ・模様の間隔など。今のアプリの筆の設定）
     brush_options: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    # 描いた機器（pen・mouse・touch。PointerEvent.pointerType）。記録の無い線は null
+    pointer_type: Mapped[str | None] = mapped_column(String(8))
+    # 外接の箱（点に太さの半分を足した mm）。点と太さから下の _keep_box が決める（手で入れない）。
+    # 消しゴムが通り道の近くの線だけを読むための索引（GiST。migrations 0010）に使う
+    box_x0_mm: Mapped[float] = mapped_column(Float)
+    box_y0_mm: Mapped[float] = mapped_column(Float)
+    box_x1_mm: Mapped[float] = mapped_column(Float)
+    box_y1_mm: Mapped[float] = mapped_column(Float)
     # 層の中で重ねる順（小さいほど下）
     stack_order: Mapped[int] = mapped_column(Integer)
     created_by: Mapped[str] = mapped_column(String(128))
     fixed: Mapped[bool] = mapped_column(Boolean, default=False)
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     removed: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+@event.listens_for(PenStroke, "before_insert")
+@event.listens_for(PenStroke, "before_update")
+def _keep_box(_mapper, _connection, stroke: PenStroke) -> None:
+    """点か太さが変わるたびに外接の箱を決め直す。足す・変える・線の消しゴム・取り消し（row_snapshot.py）のどれを通っても、
+    ここ1か所で合わせる。"""
+    from v3server.hand_tools.vector_strokes import stroke_box
+
+    stroke.box_x0_mm, stroke.box_y0_mm, stroke.box_x1_mm, stroke.box_y1_mm = stroke_box(stroke.points, stroke.width_mm)
+
+
+def pen_stroke_box_overlaps(x0: float, y0: float, x1: float, y1: float):
+    """外接の箱が (x0, y0)-(x1, y1) に重なる線の条件。索引（migrations 0010）と同じ式で書く。"""
+    box = func.box(func.point(PenStroke.box_x0_mm, PenStroke.box_y0_mm), func.point(PenStroke.box_x1_mm, PenStroke.box_y1_mm))
+    return box.op("&&")(func.box(func.point(x0, y0), func.point(x1, y1)))
 
 
 class PanelTemplate(Base):

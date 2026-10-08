@@ -490,6 +490,65 @@ async def test_入口を通らない絵と_入口で止めた絵は登録しな�
     assert sorted(statuses) == ["blocked", "not_judged"]
 
 
+async def _screenings(wid):
+    async with get_sessionmaker()() as session:
+        return (await session.execute(select(ImageIntakeScreening).where(
+            ImageIntakeScreening.work_id == wid))).scalars().all()
+
+
+def _stored_files(image_dir):
+    return sorted(p.name for p in image_dir.rglob("*") if p.is_file())
+
+
+async def test_見るだけの人は絵を上げられず_ファイルも記録も残らない(api, authz, image_dir):
+    a, viewer = user(), user()
+    ids = await new_work(api, a)
+    wid = ids["work"]
+    assert (await op(api, wid, a, {"type": "set_member", "user": viewer, "role": "viewer",
+                                    "granted": True})).status_code == 200
+    for form in ({"page_id": ids["page1"]}, {}):
+        r = await upload(api, wid, viewer, **form)
+        assert r.status_code == 403, r.text
+    pid = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_panel", "id": pid, "page_id": ids["page1"], "order": 1})).status_code == 200
+    r = await api.post(f"/works/{wid}/panels/{pid}/image", headers=h(viewer),
+                       files={"image": ("a.png", png_bytes(), "image/png")}, data={"origin": "human_drawn"})
+    assert r.status_code == 403, r.text
+    assert _stored_files(image_dir) == []
+    assert await _screenings(wid) == []
+
+
+async def test_大きすぎるファイルは読まずに断る(api, authz, image_dir, monkeypatch):
+    a = user()
+    wid = (await new_work(api, a))["work"]
+    data = png_bytes(256, 256)
+    monkeypatch.setattr(get_settings(), "request_max_bytes", len(data) // 2)
+    r = await upload(api, wid, a, data=data)
+    assert r.status_code == 413, r.text
+    assert r.json()["code"] == "too_large"
+    assert _stored_files(image_dir) == []
+    assert await _screenings(wid) == []
+
+
+async def test_展開すると膨らむ絵は画素数の上限で断る(api, authz, image_dir, monkeypatch):
+    a = user()
+    wid = (await new_work(api, a))["work"]
+    # 1万×1万の白黒（展開すると1億画素）。ファイルは小さい
+    buf = io.BytesIO()
+    Image.new("1", (10_000, 10_000), 0).save(buf, format="PNG")
+    bomb = buf.getvalue()
+    assert len(bomb) < get_settings().request_max_bytes
+    r = await upload(api, wid, a, data=bomb)
+    assert r.status_code == 422, r.text
+    assert "画素が多すぎる" in r.json()["detail"]
+    # 設定の上限（Pillow の上限より小さい値）でも止める
+    monkeypatch.setattr(get_settings(), "image_max_pixels", 64 * 32 - 1)
+    r = await upload(api, wid, a)
+    assert r.status_code == 422 and "V3_IMAGE_MAX_PIXELS" in r.json()["detail"]
+    assert [p for p in _stored_files(image_dir)] == []
+    assert await _screenings(wid) == []
+
+
 async def test_人の手の範囲は人だけが決められる(api, authz, image_dir):
     a = user()
     ids = await new_work(api, a)
@@ -534,7 +593,7 @@ class UploadingFakeComfy(SlowFakeComfy):
 async def make_redraw_service(api, admin_user, action="propose"):
     name, process = f"comfy-{uuid.uuid4().hex[:6]}", f"redraw-{uuid.uuid4().hex[:6]}"
     sid = (await api.post("/services", headers=h(admin_user), json={
-        "name": name, "kind": "image", "location": "local", "adapter": "comfyui", "endpoint": "http://comfy",
+        "name": name, "kind": "image", "location": "local", "adapter": "comfyui", "endpoint": "http://127.0.0.1:8188",
         "send_mode": "serial"})).json()["id"]
     workflow = {"3": {"class_type": "LoadImage", "inputs": {"image": "x"}},
                 "4": {"class_type": "LoadImage", "inputs": {"image": "x"}},

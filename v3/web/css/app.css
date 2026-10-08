@@ -185,3 +185,12 @@ details.more>.kv{margin-top:10px}
 .slider-fig{margin:0;height:100%;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;flex:1 1 auto}
 .cand-f .meta.bad{color:var(--bad-ink)}
 .ibtn[aria-pressed="false"]{color:var(--ink-4)}
+.btn kbd{font:11px var(--font);opacity:.7;margin-left:6px}
+.btn[aria-busy="true"]{cursor:progress}
+.stage-msg .note{flex-wrap:wrap}
+.keys{border:1px solid var(--line);border-radius:8px;padding:0;background:var(--surface);color:inherit;max-width:min(560px,calc(100vw - 32px))}
+.keys::backdrop{background:rgba(0,0,0,.3)}
+.keys-t{border-collapse:collapse;margin:8px 12px;width:calc(100% - 24px)}
+.keys-t th{text-align:left;white-space:nowrap;padding:4px 12px 4px 0;font-weight:normal;vertical-align:top}
+.keys-t td{padding:4px 0}
+.keys .meta{margin:4px 12px 12px}

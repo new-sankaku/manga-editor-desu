@@ -6,6 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 
+from v3server.allowed_destinations import is_local
 from v3server.canonical_tables.service_and_job_tables import Service, WorkDestination
 from v3server.canonical_tables.threshold_and_finding_tables import (
     FindingReaction,
@@ -114,8 +115,8 @@ class AllowDestination(OpBase):
         service = await ctx.session.get(Service, self.service_id)
         if service is None:
             raise NotFound(f"services:{self.service_id}")
-        if service.location != "api":
-            raise Invalid("手元のつなぎ先は常に送ってよい。足す・外すのはAPIだけ")
+        if is_local(service):
+            raise Invalid("手元のつなぎ先は常に送ってよい。足す・外すのは、手元と言えない先だけ（allowed_destinations.py）")
         row = await ctx.session.get(WorkDestination, (ctx.work.id, self.service_id))
         if self.allowed and row is None:
             ctx.session.add(WorkDestination(work_id=ctx.work.id, service_id=self.service_id))

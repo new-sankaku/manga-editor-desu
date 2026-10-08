@@ -11,15 +11,18 @@ PNG に書き込むので、そのまま置くと、絵を落とした人・書�
 絵の details に残る。画素は変えない（読み直して同じ画素で書き直す）。"""
 
 import io
+import pathlib
+import warnings
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import Literal
+from typing import BinaryIO, Literal
 
 from PIL import Image, PngImagePlugin
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.image_file_tables import ImageIntakeScreening
-from v3server.image_file_storage import StoredImage, inspect_image, store_image
+from v3server.image_file_storage import StoredImage, staged_file, store_image_file
+from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid
 
 IntakeEntry = Literal["human_upload", "generated"]
@@ -32,6 +35,7 @@ class JudgeVerdict:
 
 
 # (手段の名前, 判定する関数)。関数は (絵の中身, 作品の id, 入口) を受け取る
+# （判定の手段を足すと、絵を1回メモリに読む。手段が決まったら、ファイルの住所で渡す形を考える）
 IntakeJudge = Callable[[bytes, str, IntakeEntry], Awaitable[JudgeVerdict]]
 INTAKE_JUDGES: list[tuple[str, IntakeJudge]] = []
 
@@ -56,13 +60,55 @@ def strip_png_text(data: bytes) -> bytes:
         return buf.getvalue()
 
 
-async def take_in_image(session: AsyncSession, work_id: str, data: bytes, entry: IntakeEntry) -> StoredImage:
-    """絵を確かめて置き場に置き、判定を記録する。止めたときは記録を確定してから Invalid にする。"""
-    inspect_image(data)
-    if entry == "generated":
-        data = strip_png_text(data)
-    stored = store_image(data)
+def check_pixel_count(path: pathlib.Path) -> None:
+    """画素数の上限（V3_IMAGE_MAX_PIXELS）を、画素を展開する前に確かめる（展開すると膨らむ絵で、メモリを食い潰さないため）。
+
+    Pillow は Image.MAX_IMAGE_PIXELS を超えると警告、その2倍で止める（DecompressionBombWarning・DecompressionBombError）。
+    ここでは警告も止めとして扱う。上限が Pillow の値より大きい設定は、後で絵を開く所（縮小画像・書き出し）で警告が出るので断る。"""
+    limit = get_settings().image_max_pixels
+    if Image.MAX_IMAGE_PIXELS is not None and limit > Image.MAX_IMAGE_PIXELS:
+        raise RuntimeError(f"V3_IMAGE_MAX_PIXELS（{limit}）が Pillow の上限 Image.MAX_IMAGE_PIXELS"
+                           f"（{Image.MAX_IMAGE_PIXELS}）より大きい")
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(path) as im:
+                width, height = im.size
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning) as e:
+        raise Invalid(f"絵の画素が多すぎる: {e}") from e
+    except Exception as e:
+        raise Invalid(f"絵として読めない: {e}") from e
+    if width * height > limit:
+        raise Invalid(f"絵の画素が多すぎる: {width}×{height}（上限 {limit} 画素。V3_IMAGE_MAX_PIXELS）")
+
+
+async def take_in_image(session: AsyncSession, work_id: str, data: bytes, entry: IntakeEntry, *,
+                        commit: bool = True) -> StoredImage:
+    """手元にある中身（生成した絵・PSD から取った層など）を入口に通す。"""
+    with staged_file(data) as path:
+        check_pixel_count(path)
+        if entry == "generated":
+            stripped = strip_png_text(data)
+            if stripped is not data:
+                path.write_bytes(stripped)
+        return await _take_in_staged(session, work_id, path, entry, commit)
+
+
+async def take_in_upload(session: AsyncSession, work_id: str, upload: BinaryIO, *, commit: bool = True) -> StoredImage:
+    """人が上げたファイルを、丸ごとメモリに読まずに一時ファイルへ写してから入口に通す。
+    権限は呼ぶ側が先に確かめる（ファイルを書く前に。点検5 3-2）。"""
+    with staged_file(upload) as path:
+        check_pixel_count(path)
+        return await _take_in_staged(session, work_id, path, "human_upload", commit)
+
+
+async def _take_in_staged(session: AsyncSession, work_id: str, path: pathlib.Path, entry: IntakeEntry,
+                          commit: bool) -> StoredImage:
+    """絵を確かめて置き場に置き、判定を記録する。止めたときは記録を足して（commit なら確定して）から Invalid にする。
+    commit=False のときは確定を呼ぶ側に任せる（生成の答えを残すのと同じ確定に入れるため）。"""
     rows = []
+    data = path.read_bytes() if INTAKE_JUDGES else None
+    stored = store_image_file(path)
     if not INTAKE_JUDGES:
         rows.append(ImageIntakeScreening(work_id=work_id, sha256=stored.sha256, entry=entry, status="not_judged",
                                          judge=None, detail=NOT_JUDGED_DETAIL))
@@ -72,7 +118,8 @@ async def take_in_image(session: AsyncSession, work_id: str, data: bytes, entry:
                                          status="blocked" if verdict.blocked else "passed", judge=name,
                                          detail=verdict.detail))
     session.add_all(rows)
-    await session.commit()
+    if commit:
+        await session.commit()
     blocked = [r for r in rows if r.status == "blocked"]
     if blocked:
         raise Invalid(f"入口の判定で止めた（{blocked[0].judge}）: {blocked[0].detail}")

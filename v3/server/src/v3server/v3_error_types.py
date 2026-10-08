@@ -3,6 +3,8 @@
 
 class V3Error(Exception):
     code = "error"
+    # API の返事に detail と一緒に入れる値（無ければ入れない）
+    extra: dict | None = None
 
 
 class NotFound(V3Error):
@@ -23,6 +25,17 @@ class Invalid(V3Error):
 
 class NotUndoable(V3Error):
     code = "not_undoable"
+
+
+class UndoConflictError(V3Error):
+    """取り消しが、後の出来事が変えた項目を上書きする（点検1 8-1）。取り消しは当てず、記録を残す（undo_conflicts）。"""
+
+    code = "undo_conflict"
+
+    def __init__(self, message: str, conflicts: list[dict], record_id: str | None = None):
+        super().__init__(message)
+        self.conflicts = conflicts
+        self.extra = {"conflicts": conflicts, "undo_conflict_id": record_id}
 
 
 class HumanHandProtected(V3Error):
