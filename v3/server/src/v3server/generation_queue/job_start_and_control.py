@@ -14,6 +14,7 @@ from v3server.generation_queue.queue_names_and_priority import (
     job_priority,
 )
 from v3server.generation_queue.input_image_preparation import prepare_input_images
+from v3server.generation_queue.known_processes import check_process_task
 from v3server.openfga_permissions import Authz
 from v3server.operations.ai_involvement import require_ai_may
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
@@ -50,6 +51,7 @@ async def enqueue(
         raise Invalid(f"{process} の送り先が決まっていない")
     if route.ai_task is None or route.ai_action is None:
         raise Invalid(f"{process} が何の作業の処理か（ai_task・ai_action）が決まっていない")
+    check_process_task(process, route.ai_task, route.ai_action)
     # 頼んだのが人でもAIでも、処理をするのはAI。作業のAIの関与で許されていなければ受けない
     require_ai_may(await session.get(Work, work_id), route.ai_task, route.ai_action)
     request = await prepare_input_images(session, work_id, request)

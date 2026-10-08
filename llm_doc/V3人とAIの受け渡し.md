@@ -162,56 +162,91 @@
 
 ## 6. V3細部の決めごと 10.1・10.4 との対応
 
-10.4 の各行と 10.1 の道具を、サーバーのデータと操作で受けられるか。「未対応」はサーバーにまだ無いもの。画面は無い（どの行も画面は未対応）。
+10.4 の各行と 10.1 の道具を、サーバーのどのデータと操作で受けるか。画面は作っていない。
+「画面だけ」の物のほかに、サーバーで足りない物は無い（2026-10-08）。この表と同じ対応を `v3/server/src/v3server/feature_coverage.py` に持ち、`tests/unit/test_feature_coverage.py` がこの文書の 10.1・10.4 の行を全部読んで、どの行も載っていて、載せた操作と口があるかを確かめる。
+
+どの操作も操作の窓口（`POST /works/{id}/ops`）を通り、権限・ロック・人の手の印・1回で取り消す・AIの関与が同じにかかる。新しく足した操作では、AIの変更が人の手の印の付いた項目に当たると、断らずにその項目を判断待ちに置く（前からある操作は断る。8章）。人が「動かさない」を掛けた物は、人もAIも変えられない（409）。
 
 ### 6.1 10.1 の道具
 
 | 道具 | サーバーのデータと操作 |
 |---|---|
-| 選ぶ | 画面だけ（サーバーの操作は無い）。ロックは口 `POST /works/{id}/locks` |
-| 囲んで頼む | 依頼の `input_images`（source）と、範囲のマスク（purpose=mask）。人の手の範囲は自動で守る。囲んだ範囲を描き直しのマスクにする部分は、依頼する側がマスクの絵を登録して渡す形。範囲（多角形）を受けてマスクを作る口は未対応 |
-| 赤入れ | 未対応（V3ハーネス設計 9.4 の赤入れのデータ・操作が無い） |
-| ペン・消しゴム | 人が描いた結果を、人の手の層の絵（`role=human_hand`、`origin=human_drawn`）として登録し、`add_panel_layer(role=human_hand)` で重ねる。AIはこの層を作れず変えられない。線そのもの（ストローク）のデータと、消しゴムがAIの絵の層に効く分は未対応 |
-| 文字（写植・描き文字） | `text_items`（caption・balloon・drawn_sfx）と `add_text_item`・`update_text_item`。書体の種類・文字の飾りは未対応（大きさ・縦横だけ） |
-| コマ枠（動かす・分ける・合わせる） | `update_panel.frame`・`add_panel`・`set_removed(panel)`。分ける・合わせるは、画面が新しい枠を計算して、この操作を組み合わせて送る形。分ける・合わせるを1つの操作（1回で取り消せる）にするのは未対応。コマの間は作品の `page_spec.gutter_*` |
-| ナイフ | コマ枠と同じ（1つの操作は未対応）。「絵は大きい側に残る」は `image_id` を大きい側に残す形で送る |
-| フキダシ（動かす・大きさ・しっぽ・形・セリフ） | `update_text_item` の `box_mm`・`tail_target_mm`・`text`。フキダシの形（型・自分で描いた形）は未対応 |
-| トーン | 絵として登録し `add_panel_layer(role=tone)`。網点・線数・濃さ・角度・貼る所の指定のデータは未対応（書き出しの網点化は `print_export/binarize_and_halftone.py` に別にある） |
-| 図形（絵記号） | 未対応 |
+| 選ぶ | 画面だけ。ロックは口 `POST /works/{id}/locks` |
+| 囲んで頼む | 依頼の `input_images` に purpose=mask と `region_px`（元の絵の画素の多角形）を渡すと、サーバーが元の絵と同じ大きさのマスクを描く（`generation_queue/input_image_preparation.py`）。人の手の範囲は今までどおり自動で守る |
+| 赤入れ | `annotation_items`。`add_annotation`・`update_annotation`（文・範囲・作業・済み）・`set_removed(annotation)`。AIが付けるのは、その作業の検査の関与で許されているときだけ。赤入れから依頼を作る口 `POST /works/{id}/annotations/{id}/job`（依頼に赤入れの文と範囲を添え、`record_annotation_job` で赤入れに残す）。権限は赤入れを付けられる人（can_comment） |
+| ペン | 線（`pen_strokes`）が正本。1本ずつの物で、点（x・y・筆圧・時刻）の並び・筆（今のアプリの12種）・太さ・色・不透明度・乱れの種（seed）を持つ。`add_pen_strokes`・`update_pen_strokes`（何本でもまとめて動かす・太さ・色・不透明度・筆を変える）・`remove_pen_strokes`。人だけが出せる。層の絵は線から作った控えで、画面が描いて口 `POST /works/{id}/layers/{id}/stroke-cache`（`set_stroke_cache`）で上げる。層は線の版（`stroke_revision`）と、控えを作った版（`image_stroke_revision`）を持ち、違えば古い控えとして、AIへ渡す依頼と書き出しを止める |
+| 消しゴム | 線の消しゴム `erase_pen_strokes`：線ごと（whole）・交わりまで（to_crossings）・触れた所だけ（touched。線が分かれる）。答えは線のデータ。線を持たない絵（AIの絵の層・コマの1枚の絵）は画素の消しゴム `POST /works/{id}/panels/{id}/erase-pixels`（`erase_pixels`）で、新しい版（human_edited）と、消した所の人の手の範囲（マスク）を作る |
+| 文字（写植・描き文字） | `text_items` に書体（`font_family`）・飾り（`decoration`：塗り・縁・光彩・影・残像・帯・字間）・ルビ（`ruby`）・置き方（`transform`）・不透明度・仕上げを足した。描き文字はフキダシの形を持たない |
+| コマ枠 | 枠を動かす：`update_panel.frame`。分ける `split_panel`・合わせる `merge_panels` は1つの操作で、1回で取り消せる（10.1 の決まり：細すぎる分け方は閾値 `panel_short_side_min_mm` で断る。絵は大きい側に残る。隣り合わない2つは合わせない）。枠の線と塗り：`update_panel.frame_style`（無ければ作品の `preferences.frame_style`） |
+| ナイフ | `split_panel`（横・縦・斜め。斜めは角度。間の幅は `gap_mm`、無ければ作品のコマの間） |
+| フキダシ | `update_text_item` の `box_mm`・`tail_target_mm`・`text`・`balloon_shape`（型の名前と、箱に合わせた外形・線・塗り。自分で描いた形も外形で持つ） |
+| トーン | `page_items`（`item_kind=tone`）。網点・線・砂目・グラデ・雪・集中線・スピード線、線数・濃さ・角度・本数・中心、貼る所（コマ・囲む・塗る＝マスクの絵）。`add_page_item`・`update_page_item` |
+| 図形 | `page_items`（`item_kind=shape`）。四角・楕円・多角形・線・絵記号（名前と外形）、線・塗り・影 |
 | 手のひら | 画面だけ |
-| 読む順・表示するもの・取り消す・やり直す・拡大縮小（帯の右） | 読む順：`update_panel.order`・`update_text_item.order`。取り消す・やり直す：口 `POST /works/{id}/events/{event}/undo`（取り消しの取り消しでやり直し）。表示するもの・拡大縮小は画面だけ |
+| 読む順・表示するもの・取り消す・やり直す・拡大縮小 | 読む順：`update_panel.order`・`update_text_item.order`。取り消す・やり直す：口 `POST /works/{id}/events/{event}/undo`（取り消しの取り消しでやり直し）。表示するもの・拡大縮小は画面だけ |
 
 ### 6.2 10.4 の各行
 
 | 今のアプリ | サーバーのデータと操作 |
 |---|---|
-| コマの型・図形のコマ・コマの間・枠の線と塗り・ばらばらに割る | 枠の形：`Panel.frame`（多角形）。コマの間：`page_spec`。段と比からの割り：`panel-layout-proposals`。コマの型（型の一覧）・図形のコマ・枠の線と塗り・ばらばらに割るは未対応 |
+| コマの型・図形のコマ・コマの間・枠の線と塗り・ばらばらに割る | コマの型：`panel_templates`（`save_panel_template`・`apply_panel_template`）。図形のコマ：`add_shape_panel`。コマの間：`page_spec.gutter_*`。枠の線と塗り：`frame_style`。ばらばらに割る：`random_split_panel`（種を残すので同じ割りを作り直せる） |
 | ナイフ | 6.1 のナイフ |
-| フキダシの型・自分で描くフキダシ | 未対応（`text_items` は箱と種類だけ） |
-| 文字・文字の飾り・書体を足す | `text_items`。飾り・書体は未対応 |
-| ペンの種類・消しゴム | 6.1 のペン・消しゴム（ストロークは未対応） |
-| トーン・集中線・スピード線 | 絵の層（`role=tone`・`effect`）としてだけ。指定のデータは未対応 |
-| 絵記号 | 未対応 |
-| 位置・角度・拡大・傾き・反転・不透明度 | 絵：`image_placement`・層の `placement`（位置・大きさ・回転）と層の `opacity`。傾き（せん断）・反転は未対応。文字の位置と大きさは `box_mm`、文字の角度は未対応 |
-| 白黒化・明るさ・ぼかし・重ね方・まとめて戻す | 未対応（白黒化は書き出しの `print_export` に別にある。重ね方（合成の方法）も未対応） |
-| 層の一覧（見せる・動かさない・順番） | `panel_layers` の `visible`・`stack_order`。「動かさない」は人の手の印（AIに対して）とロック（人どうし）で受ける。人が自分で掛ける「動かさない」印は未対応 |
-| 絵を作る・絵から作り直す・囲んで直す・角度を変える・拡大・背景を抜く・絵から指示を読む | 作る・作り直す・囲んで直す：依頼（`input_images`・人の手の範囲のマスク）。拡大：`comfy_graphs/upscale_graph.py` を手順にして依頼。角度を変える・背景を抜く・絵から指示を読むは未対応（手順と処理が無い） |
-| 手順・モデル・シード・参照 | 手順：`service_processes.comfy_workflow`。モデル：`service_processes.model`。シード：依頼の `overrides`、記録は `call_logs.seed`。参照：`input_images` の purpose=reference。人物ごとの設定は未対応 |
-| 設定資料（人物・小物・背景・その他） | 絵だけ（`role=character_sheet`・`reference`）。設定資料のデータ（名前・特徴・服など）は未対応 |
-| あらすじ・読者・人物を抜き出す・入れないもの | 未対応 |
+| フキダシの型・自分で描くフキダシ | 6.1 のフキダシ（`balloon_shape`） |
+| 文字・文字の飾り・書体を足す | 6.1 の文字。書体はサーバーの書体の置き場（`V3_FONT_DIR`）のファイルの名前で選ぶ。文字の種類ごとの標準の書体は作品の `preferences.fonts_by_kind` |
+| ペンの種類・消しゴム | 6.1 のペン・消しゴム |
+| トーン・集中線・スピード線 | 6.1 のトーン |
+| 絵記号 | 6.1 の図形 |
+| 位置・角度・拡大・傾き・反転・不透明度 | 絵・文字・トーン・図形で同じ形（`name_structure/item_transform.py` の ItemTransform：回転・傾き・左右と上下の反転）。絵は `image_placement`・層の `placement`、文字は `transform`、トーン・図形は `transform`。不透明度はどれも `opacity` |
+| 白黒化・明るさ・ぼかし・重ね方・まとめて戻す | 仕上げ（`adjustments`：白黒化・明るさ・ぼかし・重ね方）を、コマ・層・文字・トーン・図形が同じ形で持つ。元の絵は変えない。まとめて戻す：`reset_adjustments`（1つの物か、ページの全部。1回で取り消せる） |
+| 層の一覧（見せる・動かさない・順番） | `visible`・`stack_order`。動かさない：`set_fixed`（コマ・文字・層・トーン・図形。人だけが掛け外しできる） |
+| 絵を作る・絵から作り直す・囲んで直す・角度を変える・拡大・背景を抜く・絵から指示を読む | 依頼（`POST /works/{id}/jobs`）。角度を変える（change_angle）・背景を抜く（remove_background）・絵から指示を読む（read_prompt）は、何の作業の処理か（ai_task・ai_action）をサーバーが決めていて、送り先を決めるときと頼むときに確かめる（`generation_queue/known_processes.py`）。絵から指示を読む口 `POST /works/{id}/images/{id}/read-prompt`（答えは依頼の `result.read`） |
+| 手順・モデル・シード・参照 | 手順・モデル：`service_processes`。シード：依頼の `overrides`、記録は `call_logs.seed`。参照：`input_images` の purpose=reference。人物ごとの生成の設定：設定資料の `generation`（指示文・否定の指示文・LoRA・参照の絵・シード） |
+| 設定資料（人物・小物・背景・その他） | `material_entries`（名前・特徴・服・絵・生成の設定・メモ）。`add_material_entry`・`update_material_entry`・`set_removed(material_entry)`。AIが足すと案（proposed）で、人が `decide_material_proposal` で採る |
+| あらすじ・読者・人物を抜き出す・入れないもの | `work_plans`（`set_work_plan`）。人物を抜き出す：口 `POST /works/{id}/plan/extract-characters`（extract_characters。答えの人物はAIの案として設定資料に入る） |
 | ページを足す・画像から足す・取り込む | ページを足す：`add_page`。画像から足す・取り込む：絵の口と `name-imports`。絵からコマを見つける解析は外（manga-analyzer） |
-| 画像の書き出し・コピー・解像度・紙の大きさ | 書き出しの部品（`print_export/`）はあるが、口と操作は未対応。紙の大きさ：`works.trim_size`・`page_spec` |
+| 画像の書き出し・コピー・解像度・紙の大きさ | 口 `POST /works/{id}/exports`（形：png・pdf・psd、ページ、解像度、紙の大きさ）。書き出しは書き出しの待ち行列（Temporal の v3-export）で行い、`GET /works/{id}/exports/{id}` で状態、`.../files/{name}` でファイル。紙の大きさを渡すと、ページを紙の真ん中に置く。コピーは画面だけ。直した PSD を戻す口 `POST /works/{id}/exports/{id}/pages/{page}/psd`（`apply_psd_import`） |
 | マス目・基本枠・印の表示 | 基本枠：`page_spec`。表示は画面だけ |
-| 言語・自動保存・設定 | 未対応（自動保存は、操作ごとに正本に入るので要らない、と考えられるが未検証） |
-| 探す・置き換え | 未対応（文字は `text_items` にあるので探せる形にはなっている） |
+| 言語・自動保存・設定 | 利用者ごと：口 `GET/PUT /me/settings`（その人だけの物なので操作の窓口の外）。作品ごと：`set_work_settings.preferences`（言語・文字の種類ごとの書体・コマ枠の標準・自動保存の間隔） |
+| 探す・置き換え | 探す：口 `GET /works/{id}/search`（文字・話す人・設定資料・企画・赤入れ）。置き換え：`replace_text`（当たった全部を1回で変え、1回で取り消せる。ルビの付いた文字で字数が変わる所は止める） |
 | 統計の一覧 | 入れない（8章） |
 
 ---
 
 ## 7. 確かめたこと
 
-`cd v3/server && uv run pytest -q tests/unit` → 184 件通過（この作業で 18 件追加）。
-`uv run pytest -q tests/integration --ignore=tests/integration/test_comfyui_real.py --ignore=tests/integration/test_detector_real.py` → 40 件通過（この作業で 11 件追加。既存の 3 件を関与と利用の条件に合わせて直した）。
+`cd v3/server && uv run pytest -q tests/unit` → 197 件通過。
+`uv run pytest -q tests/integration --ignore=tests/integration/test_comfyui_real.py --ignore=tests/integration/test_detector_real.py` → 47 件通過（合わせて 244 件）。
+移行 `0006_human_tools_and_finishing.py`：`alembic downgrade base` → `upgrade head` → `downgrade 0005` → `upgrade head` が通り、`alembic check` が「No new upgrade operations detected」。
+`v3/psd_writer` の `npm test` → 2 件通過。
+前からある `tests/integration/test_queue.py::test_人の依頼をAIの依頼より先に送る` が、全部を通した1回で落ちた（1つだけで3回・全部を通した次の回では通る。順番に頼るぶれ。原因は調べていない）。
+
+### 7.1 6章の道具と機能（2026-10-08 に足した物）
+
+`tests/unit/test_feature_coverage.py`
+- every_10_1_tool_is_mapped / every_10_4_row_is_mapped（V3細部の決めごと 10.1・10.4 の行を文書から読み、`feature_coverage.py` に全部あり、載せた操作と口が本当にある。文書から消えた行が一覧に残っていない）
+
+`tests/unit/test_hand_tools_and_export_units.py`
+- 線の消しゴムの3つの消し方（線ごと・交わりまで・触れた所だけ）
+- 線の値の決まり / 画素の消しゴムがマスクを作る
+- ページを描く層の順（紙・コマ・トーンと図形・枠・手描き・フキダシ・写植・描き文字）と層の名前の [id] / 足りない値で止める
+- 文字を絵にする（IPA の書体）と書体の探し方 / 紙の上の PDF
+- 層の名前から [id] を読む（NUL と「 #1」を除く）
+- PSD の書き出し→読み戻しの突き合わせ（変わった・新しい・無くなった）
+- 決まった処理の作業が動かない / 絵から指示を読む・人物を抜き出す問いと答えの読み方
+
+`tests/unit/test_print_export.py`：PSD は Node（`v3/psd_writer`）で書き、層を読み戻して確かめるように直した。
+
+`tests/integration/test_human_tools_and_finishing.py`
+- コマを分ける_合わせるは1つの操作で_1回で取り消せる
+- トーンと図形_動かさない_まとめて戻す_AIが人の所に当たると判断待ち
+- 文字の書体_飾り_ルビ_角度_フキダシの形
+- ペンの線は1本ずつの物で_選んで変え_線の消しゴムで分かれ_控えの古さが分かる
+- 画素の消しゴムは新しい版と人の手の範囲を作る
+- 赤入れ_企画_設定資料_探す_置き換え_利用者の設定
+- 書き出し_PNG_PDF_PSDと_直したPSDの戻し（書き出しは Temporal の待ち行列を本物で通す。戻しは1回で取り消せる）
+
+### 7.2 前の作業（移行 0005）
+
 `alembic upgrade head` → `downgrade 0004` → `upgrade head` が通る（移行 `0005_human_ai_interchange.py`）。
 
 `tests/unit/test_human_ai_handover_units.py`
@@ -260,6 +295,13 @@
 - 作っていない：LLMにネームを作らせる依頼の結果を `ai_proposal_flow` に流す処理（作業者が LLM の答えを案にする所）。今は流す先だけある。
 - 作っていない：ページ丸ごとの絵をコマごとに切り分ける。
 - 作っていない：AIの関与を話・ページごとに変える。
-- 作っていない：6章で「未対応」とした道具と機能（赤入れ・フキダシの形・書体と飾り・図形・トーンの指定・ストローク・傾きと反転・白黒化などの仕上げ・角度を変える・背景を抜く・絵から指示を読む・設定資料のデータ・企画の画面のデータ・書き出しの口・探す・置き換え・設定）。
-- 作っていない：分ける・合わせる・ナイフを1回の操作（1回で取り消せる）にすること。
-- 画面は作っていない。
+- 画面は作っていない（6章の道具はサーバーのデータと操作だけ。ペンの控えの絵を描くのも画面の役目なので、画面が無い今は試験の中で作った絵を上げている）。
+- 揃っていない：新しく足した操作（トーン・図形・ペン・赤入れ・設定資料・まとめて戻すなど）は、AIの変更が人の手の印の付いた項目に当たると判断待ちに置く。前からある操作（`update_panel`・`update_text_item`・`update_panel_layer` など）は断る。どちらに揃えるかは決めていない。
+- 未検証：ag-psd が書く線の形（vectorMask・vectorStroke）は ag-psd で読み戻せることだけ確かめた。Photoshop・Krita・CLIP STUDIO で線として表示されるかは未検証。今の書き出しは線を画素の層にする（画面にその旨を出す）。
+- 未検証：直した PSD を戻すとき、画素が全部同じかで「変わっていない」を決めている。保存のときに画素を少し変える道具では、変えていない層も「変わった」になるおそれがある。
+- 未検証：文字を絵にするときの行の間（`LINE_GAP_RATIO = 0.2`）。縦書きの約物の向きと縦中横はしていない。
+- 未検証：絵から指示を読む（read_prompt）を VLM に頼む方が、今のアプリのタグの推定より合うか。
+- 未検証：角度を変える・背景を抜くの、つなぎ先の本物の手順（グラフ）。サーバーは処理の名前と作業を決めて送るだけ。
+- 決めたこと：PSD で差し替えた絵は、重ね方のほかの仕上げを外し、枠の外にあった絵は失う（PSD の層には枠の中だけが入るため）。
+- 決めたこと：PSD の戻しを取り消すと、そのとき作った判断待ちは「取り下げ」になる。判断待ちを決めた後に戻しを取り消すと、決めた結果も戻るので、新しい順に取り消す。
+- 決めたこと：利用者ごとの設定は操作の窓口の外（出来事の一覧と取り消しに入らない）。

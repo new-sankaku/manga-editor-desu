@@ -23,6 +23,16 @@ class Settings(BaseSettings):
     lock_ttl_seconds: int = 900
     # 絵のファイルを置くフォルダ。絵を扱う口は、これが無ければ止まる（S3互換の置き場は製品を選んでから足す）
     image_dir: str | None = None
+    # 書き出しで文字を描くときの書体のフォルダ。文字を描く書き出しは、これが無ければ止まる
+    font_dir: str | None = None
+    # 書き出しで使う Node（文字を描く・PSD を書く）
+    node_executable: str = "node"
+    # PSD を書く台本（v3/psd_writer/write_layered_psd.js）。PSD の書き出しは、これが無ければ止まる
+    psd_writer_script: str | None = None
+    # 文字を絵にする台本（v3/psd_writer/render_text.js）。文字のある書き出しは、これが無ければ止まる
+    text_render_script: str | None = None
+    # 書き出したファイルを置くフォルダ。書き出しは、これが無ければ止まる
+    export_dir: str | None = None
 
 
 @lru_cache

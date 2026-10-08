@@ -2,7 +2,6 @@
 import json
 import pathlib
 import subprocess
-import tempfile
 
 import numpy as np
 import pypdf
@@ -11,8 +10,9 @@ from PIL import Image
 
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.print_export.binarize_and_halftone import binarize, compose_line_and_tone, halftone_screen
-from v3server.print_export.layered_psd_request import (PageLayerSet, PsdLayer, PsdWriterError, TextInfo, build_page_psd_request,
+from v3server.print_export.layered_psd_request import (PsdWriterError, build_psd_request, psd_layers_from_nodes,
                                                        write_layered_psd)
+from v3server.print_export.page_render import Node
 from v3server.print_export.print_pdf_export import bilevel_image_from_black_mask, canvas_size_px, write_print_pdf
 
 # 試験用の寸法（実際の値は作品の設定から来る）
@@ -92,40 +92,53 @@ def _png(path, w, h, rgba):
     return path
 
 
-def _layer_set(tmp_path):
-    p = lambda n, c: _png(tmp_path / f"{n}.png", 20, 30, c)
-    return PageLayerSet(
-        panel_frame=PsdLayer(name="x", png_path=p("frame", (0, 0, 0, 255))),
-        ai_art_by_panel=[PsdLayer(name="コマ1の絵", png_path=p("a1", (255, 200, 190, 255)), blend_mode="multiply", opacity=0.5),
-                         PsdLayer(name="コマ2の絵", png_path=p("a2", (150, 190, 255, 255)), hidden=True)],
-        hand_drawn=PsdLayer(name="x", png_path=p("hand", (0, 0, 0, 0))),
-        balloon=PsdLayer(name="x", png_path=p("balloon", (255, 255, 255, 255))),
-        typeset_texts=[PsdLayer(name="セリフ1", png_path=p("t1", (0, 0, 0, 255)),
-                                text=TextInfo(text="きょうは\n早いね", orientation="vertical", font_name="TestFont", font_size=12,
-                                              color_rgb=(0, 0, 0), x=5, y=5))],
-        sfx=PsdLayer(name="x", png_path=p("sfx", (0, 0, 0, 255))),
-    )
+def _solid(w, h, rgba):
+    return Image.fromarray(np.tile(np.array(rgba, np.uint8), (h, w, 1)), "RGBA")
+
+
+A = "a" * 32
+B = "b" * 32
+T = "c" * 32
+
+
+def _nodes():
+    return [
+        Node("紙", "9" * 32 + "-paper", _solid(20, 30, (255, 255, 255, 255))),
+        Node("コマ1", A, children=[Node("コマの絵", A + "-image", _solid(10, 10, (255, 200, 190, 255)), 2, 3,
+                                       "multiply", 0.5, table="panels")], table="panels"),
+        Node("コマ2", B, children=[Node("panel_art", "d" * 32, _solid(5, 5, (150, 190, 255, 255)), hidden=True,
+                                       table="panel_layers")], table="panels"),
+        Node("コマ枠", "9" * 32 + "-frame", _solid(20, 30, (0, 0, 0, 255)), table="pages"),
+        Node("写植", "9" * 32 + "-typeset", children=[
+            Node("セリフ", T, _solid(4, 8, (0, 0, 0, 255)), 5, 5, table="text_items",
+                 text={"text": "きょうは\n早いね", "orientation": "vertical", "font_name": "TestFont", "font_size": 12,
+                       "color_rgb": [0, 0, 0], "x": 5.0, "y": 5.0})]),
+    ]
 
 
 def test_psd_writer_receives_request_and_layers_read_back(tmp_path):
-    composite = _png(tmp_path / "comp.png", 20, 30, (255, 255, 255, 255))
+    composite = _png(tmp_path / "comp.png", 24, 34, (255, 255, 255, 255))
     out = tmp_path / "page.psd"
-    req = build_page_psd_request(20, 30, composite, _layer_set(tmp_path), out)
+    layers = psd_layers_from_nodes(_nodes(), tmp_path, offset=(2, 2))
+    req = build_psd_request(24, 34, composite, layers, out)
     json.dumps(req)  # JSON にできる形
     back = write_layered_psd(req, "node", WRITER, 60)
     assert out.stat().st_size > 0
-    names = [(l["name"], l["depth"]) for l in back["layers"]]
-    assert names == [("コマ枠", 0), ("AIの絵", 0), ("コマ1の絵", 1), ("コマ2の絵", 1), ("人の手", 0), ("フキダシ", 0),
-                     ("写植", 0), ("セリフ1", 1), ("描き文字", 0)]
-    by = {l["name"]: l for l in back["layers"]}
-    assert by["AIの絵"]["group"] and by["写植"]["group"]
-    assert by["コマ1の絵"]["blend_mode"] == "multiply" and by["コマ1の絵"]["opacity"] == pytest.approx(0.5, abs=0.01)
-    assert by["コマ2の絵"]["hidden"] is True
-    assert by["セリフ1"]["text"] == "きょうは\n早いね" and by["セリフ1"]["orientation"] == "vertical"
+    names = [(l["name"].split(" [")[0], l["depth"]) for l in back["layers"]]
+    assert names == [("紙", 0), ("コマ1", 0), ("コマの絵", 1), ("コマ2", 0), ("panel_art", 1), ("コマ枠", 0),
+                     ("写植", 0), ("セリフ", 1)]
+    # どの層の名前も「名前 [id]」で終わる
+    assert all(l["name"].endswith("]") for l in back["layers"])
+    by = {l["name"].split(" [")[0]: l for l in back["layers"]}
+    assert by["コマの絵"]["blend_mode"] == "multiply" and by["コマの絵"]["opacity"] == pytest.approx(0.5, abs=0.01)
+    assert by["panel_art"]["hidden"] is True
+    assert by["セリフ"]["text"] == "きょうは\n早いね" and by["セリフ"]["orientation"] == "vertical"
+    # 紙の上の置き場（offset）が層の位置に足されている
+    assert req["layers"][1]["children"][0]["left"] == 4 and req["layers"][1]["children"][0]["top"] == 5
 
 
 def test_psd_writer_failure_raises(tmp_path):
-    req = build_page_psd_request(20, 30, None, _layer_set(tmp_path), tmp_path / "x.psd")
+    req = build_psd_request(20, 30, None, psd_layers_from_nodes(_nodes(), tmp_path), tmp_path / "x.psd")
     req["layers"][0]["png_path"] = str(tmp_path / "missing.png")
     with pytest.raises(PsdWriterError):
         write_layered_psd(req, "node", WRITER, 60)

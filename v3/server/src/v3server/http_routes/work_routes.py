@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from v3server.canonical_tables.event_and_lock_tables import Event
+from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
+from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate, PenStroke
 from v3server.canonical_tables.service_and_job_tables import WorkDestination
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
@@ -64,6 +66,10 @@ async def create_work(body: NewWork, session: SessionDep, authz: AuthzDep, actor
     return {"id": work.id}
 
 
+def all_columns(obj) -> dict:
+    return {c.key: getattr(obj, c.key) for c in obj.__table__.columns}
+
+
 @router.get("/works/{work_id}")
 async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     await require(authz, actor, "can_view", work_obj(work_id))
@@ -76,26 +82,32 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
 
     return {
         "work": row(work, "id", "title", "reading_direction", "text_direction", "medium", "trim_size",
-                    "default_page_count", "page_spec", "first_page_is_left", "head_seq"),
+                    "default_page_count", "page_spec", "first_page_is_left", "head_seq", "preferences"),
         "volumes": [row(v, "id", "number", "title", "removed") for v in await all_of(Volume)],
         "episodes": [row(e, "id", "volume_id", "number", "title", "deadline", "removed") for e in await all_of(Episode)],
         "pages": [row(p, "id", "episode_id", "number", "layout", "human_hand_fields", "removed") for p in await all_of(Page)],
         "panels": [
             row(p, "id", "page_id", "order", "frame", "role", "content", "image_id", "image_placement",
-                "human_hand_fields", "human_confirmed", "removed")
+                "frame_style", "adjustments", "fixed", "human_hand_fields", "human_confirmed", "removed")
             for p in await all_of(Panel)
         ],
         "text_items": [
             row(t, "id", "page_id", "panel_id", "item_kind", "order", "text", "speaker", "balloon_kind",
                 "writing_direction", "font_size_pt", "box_mm", "tail_target_mm", "joined_to_previous",
+                "font_family", "decoration", "ruby", "balloon_shape", "transform", "opacity", "adjustments", "fixed",
                 "human_hand_fields", "removed")
             for t in await all_of(TextItem)
         ],
         "panel_layers": [
             row(la, "id", "page_id", "panel_id", "role", "image_id", "stack_order", "visible", "opacity", "placement",
-                "human_hand_fields", "removed")
+                "adjustments", "fixed", "stroke_revision", "image_stroke_revision", "human_hand_fields", "removed")
             for la in await all_of(PanelLayer)
         ],
+        # 10.4 で足した表は、列をそのまま返す
+        **{name: [all_columns(x) for x in await all_of(model)]
+           for name, model in (("page_items", PageItem), ("pen_strokes", PenStroke),
+                               ("annotation_items", AnnotationItem), ("panel_templates", PanelTemplate),
+                               ("material_entries", MaterialEntry), ("work_plans", WorkPlan))},
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],
         "destinations": [d.service_id for d in await all_of(WorkDestination)],
     }

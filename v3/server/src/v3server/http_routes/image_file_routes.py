@@ -134,7 +134,7 @@ async def get_episode_image_provenance(work_id: str, episode_id: str, session: S
 async def list_protected_regions(work_id: str, image_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     await require(authz, actor, "can_view", work_obj(work_id))
     q = select(ProtectedRegion).where(ProtectedRegion.work_id == work_id, ProtectedRegion.image_id == image_id)
-    return [row(r, "id", "image_id", "polygon_px", "note", "created_by", "removed", "created_at")
+    return [row(r, "id", "image_id", "polygon_px", "mask_sha256", "note", "created_by", "removed", "created_at")
             for r in (await session.execute(q.order_by(ProtectedRegion.created_at))).scalars()]
 
 

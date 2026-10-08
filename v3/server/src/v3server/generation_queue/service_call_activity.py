@@ -17,7 +17,9 @@ from v3server.canonical_tables.service_and_job_tables import (
     ServiceProcess,
 )
 from v3server.database_engine import get_sessionmaker
+from v3server.generation_queue.known_processes import KNOWN_PROCESSES, handle_known_result
 from v3server.image_intake import take_in_image
+from v3server.llm_questions.answer_json_reader import BrokenAnswerError
 from v3server.openfga_permissions import Authz, open_authz
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_submit_and_undo import submit
@@ -149,6 +151,22 @@ async def call_service(job_id: str) -> None:
             except (V3Error, RuntimeError) as e:
                 await session.rollback()
                 raise ApplicationError(f"絵の登録を断られた: {e}", {"retry_after": None}, type="refused",
+                                       non_retryable=True) from e
+        if job.process in KNOWN_PROCESSES:
+            # 答えを読み、要るものを正本に入れる（依頼した人の代わりのAIとして、操作の窓口を通す）
+            actor = Actor(kind="ai", id=f"service:{service.id}", on_behalf_of=job.requested_by)
+            try:
+                output = await handle_known_result(session, job, actor, await _get_authz(), output)
+            except BrokenAnswerError as e:
+                await session.rollback()
+                job = await session.get(Job, job_id)
+                job.result = output
+                await session.commit()
+                raise ApplicationError(str(e), {"retry_after": None}, type="broken_response",
+                                       non_retryable=True) from e
+            except V3Error as e:
+                await session.rollback()
+                raise ApplicationError(f"答えを正本に入れるのを断られた: {e}", {"retry_after": None}, type="refused",
                                        non_retryable=True) from e
         job.result = output
         job.status = "done"

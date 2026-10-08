@@ -7,6 +7,7 @@
     "test": "node --test test/write_layered_psd.test.js"
   },
   "dependencies": {
+    "@napi-rs/canvas": "1.0.10",
     "ag-psd": "31.0.2",
     "pngjs": "7.0.0"
   }

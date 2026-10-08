@@ -21,6 +21,7 @@ from v3server.name_structure.name_draft_schema import (
     PanelFrame,
 )
 from v3server.operations.ai_involvement import (
+    ABOUT_TASK,
     DESIGN_DEFAULT_MODE,
     HUMAN_EDITABLE_FIELDS,
     TASKS,
@@ -171,7 +172,8 @@ def test_AIの関与の4択で_AIの手が許されるもの():
     # 選んでいない作業は設計の既定（AIが案を出し人が選ぶ）。既定であることも返す
     assert mode_of(w, "finishing") == (DESIGN_DEFAULT_MODE, False) and DESIGN_DEFAULT_MODE == "ai_proposes"
     assert [ai_may(w, "finishing", a) for a in ("propose", "decide", "check")] == [True, False, True]
-    assert set(TASKS) >= {t for fields in HUMAN_EDITABLE_FIELDS.values() for t in fields.values()}
+    # 赤入れの項目は、行の about_task を作業とする印（ABOUT_TASK）
+    assert set(TASKS) | {ABOUT_TASK} >= {t for fields in HUMAN_EDITABLE_FIELDS.values() for t in fields.values()}
 
 
 def test_項目を変えるAIは_その項目の作業の関与で止まり_人は止まらない():

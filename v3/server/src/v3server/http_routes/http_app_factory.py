@@ -12,18 +12,23 @@ from temporalio.client import Client
 
 from v3server.database_engine import get_sessionmaker
 from v3server.http_routes import (
+    ai_job_routes,
+    export_routes,
     image_file_routes,
     job_routes,
     lock_routes,
     name_check_routes,
     name_proposal_routes,
+    pen_stroke_routes,
     service_routes,
+    settings_and_search_routes,
     work_routes,
 )
 from v3server.openfga_permissions import open_authz
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import (
     AiInvolvementRefused,
+    FixedByPerson,
     Forbidden,
     HumanHandProtected,
     Invalid,
@@ -45,7 +50,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="V3 サーバー", lifespan=lifespan)
 
 _STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid: 422, HumanHandProtected: 409,
-           AiInvolvementRefused: 409}
+           AiInvolvementRefused: 409, FixedByPerson: 409}
 
 
 @app.exception_handler(V3Error)
@@ -54,7 +59,7 @@ async def v3_error(request: Request, exc: V3Error):
 
 
 for _routes in (work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,
-                name_check_routes):
+                name_check_routes, pen_stroke_routes, export_routes, settings_and_search_routes, ai_job_routes):
     app.include_router(_routes.router)
 
 

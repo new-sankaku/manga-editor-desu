@@ -13,6 +13,16 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Panel
+from v3server.name_structure.item_styles import (
+    Adjustment,
+    Adjustments,
+    BalloonShape,
+    Ruby,
+    TextDecoration,
+    check_ruby,
+    checked_adjustments,
+)
+from v3server.name_structure.item_transform import ItemTransform
 from v3server.name_structure.name_draft_schema import BalloonKind
 from v3server.operations.ai_involvement import (
     ROW_TASK,
@@ -43,6 +53,13 @@ class TextItemValues(BaseModel):
     box_mm: tuple[float, float, float, float] | None = None
     tail_target_mm: tuple[float, float] | None = None
     joined_to_previous: bool | None = None
+    font_family: str | None = None
+    decoration: TextDecoration | None = None
+    ruby: list[Ruby] = Field(default_factory=list)
+    balloon_shape: BalloonShape | None = None
+    transform: ItemTransform = Field(default_factory=ItemTransform)
+    opacity: float = Field(default=1.0, ge=0, le=1)
+    adjustments: list[Adjustment] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def _consistent(self):
@@ -52,6 +69,10 @@ class TextItemValues(BaseModel):
             raise ValueError("描き文字には話者と吹き出しの種類が無い")
         if self.item_kind == "drawn_sfx" and self.tail_target_mm is not None:
             raise ValueError("描き文字にはしっぽが無い")
+        if self.item_kind == "drawn_sfx" and self.balloon_shape is not None:
+            raise ValueError("描き文字にはフキダシの形が無い")
+        check_ruby(self.text, [r.model_dump() for r in self.ruby])
+        Adjustments(items=self.adjustments)
         return self
 
 
@@ -83,6 +104,13 @@ class AddTextItem(OpBase):
     box_mm: tuple[float, float, float, float] | None = None
     tail_target_mm: tuple[float, float] | None = None
     joined_to_previous: bool | None = None
+    font_family: str | None = None
+    decoration: dict[str, Any] | None = None
+    ruby: list[dict[str, Any]] = Field(default_factory=list)
+    balloon_shape: dict[str, Any] | None = None
+    transform: dict[str, Any] = Field(default_factory=dict)
+    opacity: float = 1.0
+    adjustments: list[dict[str, Any]] = Field(default_factory=list)
 
     ai_may_submit = True
 
@@ -93,7 +121,8 @@ class AddTextItem(OpBase):
     async def apply(self, ctx):
         panel = await ctx.session.get(Panel, self.panel_id)
         values = _check_text_values(self.model_dump(include=set(_TEXT_FIELDS)))
-        set_fields = {k for k, v in values.items() if v is not None} | {"panel_id"}
+        set_fields = {k for k, v in values.items() if v not in (None, [], {}) and not (k == "opacity" and v == 1.0)
+                      and not (k == "transform" and v == ItemTransform().model_dump())} | {"panel_id"}
         require_actor_may(ctx.actor, ctx.work, ROW_TASK["text_items"], "decide")
         require_ai_may_change_fields(ctx.actor, ctx.work, "text_items", set_fields)
         marks = sorted(set_fields) if ctx.actor.kind == "human" else []
@@ -103,7 +132,8 @@ class AddTextItem(OpBase):
 
 
 class UpdateTextItem(OpBase):
-    """文字を変える：文字・話者・種類・縦書きか横書きか・書体の大きさ・箱（動かす・大きさ）・しっぽの先・順・コマ。"""
+    """文字を変える：文字・話者・種類・縦書きか横書きか・書体の大きさ・箱（動かす・大きさ）・しっぽの先・順・コマ・
+    書体・飾り・ルビ・フキダシの形・置き方（角度・傾き・反転）・不透明度・仕上げ。"""
 
     type: Literal["update_text_item"] = "update_text_item"
     id: str
@@ -118,6 +148,13 @@ class UpdateTextItem(OpBase):
     box_mm: tuple[float, float, float, float] | None = None
     tail_target_mm: tuple[float, float] | None = None
     joined_to_previous: bool | None = None
+    font_family: str | None = None
+    decoration: dict[str, Any] | None = None
+    ruby: list[dict[str, Any]] | None = None
+    balloon_shape: dict[str, Any] | None = None
+    transform: dict[str, Any] | None = None
+    opacity: float | None = None
+    adjustments: list[dict[str, Any]] | None = None
     human_hand_fields: list[str] | None = None
 
     ai_may_submit = True
@@ -131,6 +168,9 @@ class UpdateTextItem(OpBase):
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True, mode="json")
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
+        for k in ("ruby", "transform", "opacity", "adjustments"):
+            if k in changes and changes[k] is None:
+                raise Invalid(f"{k} は空にできない（ルビ・仕上げを外すときは []、置き方を戻すときは {{}}）")
         if "panel_id" in changes:
             panel = await get_in_work(ctx.session, Panel, changes["panel_id"], ctx.work.id)
             if panel.page_id != item.page_id:
@@ -155,6 +195,7 @@ class AddPanelLayer(OpBase):
     visible: bool = True
     opacity: float = Field(default=1.0, ge=0, le=1)
     placement: dict[str, Any] | None = None
+    adjustments: list[dict[str, Any]] = Field(default_factory=list)
 
     ai_may_submit = True
 
@@ -170,17 +211,23 @@ class AddPanelLayer(OpBase):
         require_actor_may(ctx.actor, ctx.work, ROW_TASK["panel_layers"], "decide")
         if ctx.actor.kind == "ai" and self.role == "human_hand":
             raise Invalid("人の手の層はAIが作れない")
+        adjustments = checked_adjustments(self.adjustments)
         marks = ["image_id", "opacity", "placement", "role", "stack_order", "visible"] if ctx.actor.kind == "human" else []
+        if adjustments and ctx.actor.kind == "human":
+            marks.append("adjustments")
+        if adjustments:
+            require_ai_may_change_fields(ctx.actor, ctx.work, "panel_layers", {"adjustments"})
         ctx.session.add(PanelLayer(id=self.id, work_id=ctx.work.id, page_id=panel.page_id, panel_id=panel.id,
                                    role=self.role, image_id=self.image_id, stack_order=self.stack_order,
                                    visible=self.visible, opacity=self.opacity, placement=placement,
-                                   human_hand_fields=[m for m in marks if m != "placement" or placement is not None],
+                                   adjustments=adjustments, fixed=False,
+                                   human_hand_fields=sorted(m for m in marks if m != "placement" or placement is not None),
                                    removed=False))
         return {"type": "set_removed", "target_kind": "panel_layer", "id": self.id, "removed": True}
 
 
 class UpdatePanelLayer(OpBase):
-    """層を変える：絵を替える・重ねる順・見せるか・不透明度・切り抜きと置き場。"""
+    """層を変える：絵を替える・重ねる順・見せるか・不透明度・切り抜きと置き場（回転・傾き・反転も）・仕上げ。"""
 
     type: Literal["update_panel_layer"] = "update_panel_layer"
     id: str
@@ -190,6 +237,7 @@ class UpdatePanelLayer(OpBase):
     visible: bool | None = None
     opacity: float | None = Field(default=None, ge=0, le=1)
     placement: dict[str, Any] | None = None
+    adjustments: list[dict[str, Any]] | None = None
     human_hand_fields: list[str] | None = None
 
     ai_may_submit = True
@@ -203,9 +251,13 @@ class UpdatePanelLayer(OpBase):
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
-        for k in ("role", "stack_order", "visible", "opacity"):
+        for k in ("role", "stack_order", "visible", "opacity", "adjustments"):
             if k in changes and changes[k] is None:
                 raise Invalid(f"{k} は空にできない")
+        if "adjustments" in changes:
+            changes["adjustments"] = checked_adjustments(changes["adjustments"])
+        if "image_id" in changes and layer.stroke_revision > 0:
+            raise Invalid("ペンの線を持つ層の絵は線から作る控え。絵を替えるときは set_stroke_cache を使う")
         if changes.get("image_id") is not None:
             await get_in_work(ctx.session, ImageFile, changes["image_id"], ctx.work.id)
         if "placement" in changes:

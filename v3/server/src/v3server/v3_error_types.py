@@ -35,3 +35,9 @@ class AiInvolvementRefused(V3Error):
     """作業のAIの関与で、AIのその手が許されていない（V3ハーネス設計 4.2）。"""
 
     code = "ai_involvement_refused"
+
+
+class FixedByPerson(V3Error):
+    """人が「動かさない」を掛けた層・物を変えようとした。人もAIも変えられない。外せるのは人だけ。"""
+
+    code = "fixed_by_person"

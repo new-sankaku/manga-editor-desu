@@ -3,6 +3,8 @@
 request の形（ComfyUI の処理）
 - input_images: [{"node": ノード番号, "input": 入力名, "image_id": 絵, "purpose": "source" | "reference" | "mask"}]
   source は描き直す元の絵。生成した絵・人が描いた絵・持ち込んだ絵のどれでもよい（出どころで分けない）
+  purpose=mask は image_id の代わりに region_px（元の絵の画素の多角形の一覧）を渡してもよい（囲んで頼む。V3細部の決めごと 10.1）。
+  そのときは、ここで元の絵（source。1枚だけ）と同じ大きさのマスク（白が囲んだ所）を描く
 - protected_mask_input: {"node": ノード番号, "input": 入力名}。人の手の範囲のマスクを入れる所
 
 ここで行うこと
@@ -21,7 +23,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.text_and_layer_tables import ProtectedRegion
 from v3server.comfy_graphs.protected_region_mask import protected_mask_png
-from v3server.image_file_storage import store_image
+from v3server.hand_tools.vector_strokes import refuse_stale_stroke_cache
+from v3server.image_file_storage import read_image, store_image
 from v3server.operations.operation_base import get_in_work
 from v3server.v3_error_types import Invalid
 
@@ -44,6 +47,16 @@ def _slot(entry: Any, what: str) -> tuple[str, str]:
     return entry["node"], entry["input"]
 
 
+def _polygons(value: Any) -> list[list[tuple[float, float]]]:
+    try:
+        polys = [[(float(x), float(y)) for x, y in poly] for poly in value]
+    except (TypeError, ValueError) as e:
+        raise Invalid(f"region_px は多角形（[x, y] の一覧）の一覧: {e}") from e
+    if not polys or any(len(p) < 3 for p in polys):
+        raise Invalid("region_px の多角形は1つ以上、どれも3点以上")
+    return polys
+
+
 async def prepare_input_images(session: AsyncSession, work_id: str, request: dict[str, Any]) -> dict[str, Any]:
     if "prepared_inputs" in request:
         raise Invalid("prepared_inputs はサーバーが書く。依頼に入れられない")
@@ -55,16 +68,28 @@ async def prepare_input_images(session: AsyncSession, work_id: str, request: dic
         return request
     if not isinstance(entries, list):
         raise Invalid("input_images は一覧で渡す")
-    prepared, sources = [], []
+    prepared, sources, regions_in = [], [], []
     for e in entries:
         node, inp = _slot(e, "input_images")
         if e.get("purpose") not in PURPOSES:
             raise Invalid(f"input_images の purpose は {PURPOSES} のどれか: {e!r}")
+        if e["purpose"] == "mask" and "region_px" in e:
+            if "image_id" in e:
+                raise Invalid("マスクは image_id か region_px のどちらか")
+            regions_in.append((node, inp, _polygons(e["region_px"])))
+            continue
         img = await get_in_work(session, ImageFile, e.get("image_id", ""), work_id)
+        await refuse_stale_stroke_cache(session, img.id)
         prepared.append({"node": node, "input": inp, "purpose": e["purpose"], "image_id": img.id, "sha256": img.sha256,
                          "media_type": img.media_type})
         if e["purpose"] == "source":
             sources.append(img)
+    for node, inp, polys in regions_in:
+        if len(sources) != 1:
+            raise Invalid("囲んだ範囲（region_px）のマスクは、元の絵（purpose=source）が1枚のときだけ描ける")
+        stored = store_image(protected_mask_png(sources[0].width, sources[0].height, polys))
+        prepared.append({"node": node, "input": inp, "purpose": "mask", "image_id": None, "sha256": stored.sha256,
+                         "media_type": stored.media_type, "region_px": polys, "for_image_id": sources[0].id})
     protected = [(img, await protected_regions_for(session, img)) for img in sources]
     with_regions = [(img, rs) for img, rs in protected if rs]
     if len(with_regions) > 1:
@@ -76,7 +101,9 @@ async def prepare_input_images(session: AsyncSession, work_id: str, request: dic
         if not sources:
             raise Invalid("protected_mask_input は元の絵（purpose=source）と一緒に渡す")
         img, regions = with_regions[0] if with_regions else (sources[0], [])
-        stored = store_image(protected_mask_png(img.width, img.height, [r.polygon_px for r in regions]))
+        stored = store_image(protected_mask_png(img.width, img.height,
+                                                [r.polygon_px for r in regions if r.polygon_px is not None],
+                                                [read_image(r.mask_sha256) for r in regions if r.mask_sha256]))
         prepared.append({"node": node, "input": inp, "purpose": "protected_mask", "image_id": None,
                          "sha256": stored.sha256, "media_type": stored.media_type,
                          "region_ids": [r.id for r in regions], "for_image_id": img.id})

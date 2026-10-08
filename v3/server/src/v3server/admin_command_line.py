@@ -1,4 +1,4 @@
-"""管理の操作。`uv run python -m v3server.cli grant-admin <利用者>`
+"""管理の操作。`uv run python -m v3server.admin_command_line grant-admin <利用者>`
 
 つなぎ先と処理ごとの送り先は全作品で共通なので、サーバーの管理者（system:main の admin）だけが変えられる。
 最初の管理者は画面から作れないので、ここで付ける。
@@ -22,7 +22,7 @@ async def grant_admin(user: str, revoke: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="v3server.cli")
+    parser = argparse.ArgumentParser(prog="v3server.admin_command_line")
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("grant-admin", help="サーバーの管理者にする")
     p.add_argument("user")

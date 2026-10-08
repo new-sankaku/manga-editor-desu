@@ -8,10 +8,8 @@
 
 from typing import Any
 
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import Work
 from v3server.name_structure.name_draft_schema import PanelFrame
 from v3server.openfga_permissions import Authz
@@ -21,21 +19,13 @@ from v3server.operations.name_draft_conversion import (
     name_draft_of_episode,
 )
 from v3server.operations.name_proposal_operations import SubmitNameProposal
+from v3server.operations.panel_frame_operations import min_panel_mm
 from v3server.panel_layout.constrained_tier_layout import constrained_layout_draft
 from v3server.panel_layout.tier_ratio_layout import LayoutInputError
 from v3server.request_actor import Actor
 from v3server.v3_error_types import Invalid
 
-MIN_PANEL_KEY = "panel_short_side_min_mm"
 PROGRAM_ID = "program:panel_layout"
-
-
-async def _min_panel_mm(session: AsyncSession, work_id: str) -> float:
-    t = (await session.execute(select(Threshold).where(
-        Threshold.work_id == work_id, Threshold.key == MIN_PANEL_KEY))).scalar_one_or_none()
-    if t is None or t.status == "rejected":
-        raise Invalid(f"閾値 {MIN_PANEL_KEY} が無い。コマの最小の大きさが決まらないので割りを計算しない")
-    return float(t.value["value"])
 
 
 async def propose_panel_layout(session: AsyncSession, authz: Authz, requester: Actor, work_id: str,
@@ -49,7 +39,7 @@ async def propose_panel_layout(session: AsyncSession, authz: Authz, requester: A
             if r.frame and ("frame" in r.human_hand_fields or r.human_confirmed):
                 pinned[r.order] = PanelFrame.model_validate(r.frame)
     try:
-        laid, broken = constrained_layout_draft(draft, pinned, await _min_panel_mm(session, work_id))
+        laid, broken = constrained_layout_draft(draft, pinned, await min_panel_mm(session, work_id))
     except LayoutInputError as e:
         raise Invalid(f"コマ割りを計算できない: {e}") from e
     actor = Actor(kind="ai", id=PROGRAM_ID, on_behalf_of=requester.permission_user)

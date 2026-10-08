@@ -40,6 +40,8 @@ class Work(Base):
     default_page_count: Mapped[int | None] = mapped_column(Integer)
     # 作業ごとのAIの関与（operations/ai_involvement.py）。{作業: 関与}。選んでいない作業は設計の既定
     ai_involvement: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    # 作品の設定（言語・種類ごとの書体・書き出しの既定。operations/work_preference_operations.py の WorkPreferences）
+    preferences: Mapped[dict[str, Any]] = mapped_column(default=dict)
     # 出来事の列の最後の番号。書き込みは作品ごとに1本（V3ハーネス設計 9.3）にするため、この行を FOR UPDATE で取る
     head_seq: Mapped[int] = mapped_column(BigInteger, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -100,6 +102,12 @@ class Panel(Base):
     image_id: Mapped[str | None] = mapped_column(ForeignKey("image_files.id"))
     # コマの絵の切り抜きと置き場（name_structure/image_placement.py の ImagePlacement）。決めていなければ無い
     image_placement: Mapped[dict[str, Any] | None] = mapped_column()
+    # 枠の線と塗り（name_structure/item_styles.py の FrameStyle）。無ければ作品の既定（書き出しで決めていなければ止める）
+    frame_style: Mapped[dict[str, Any] | None] = mapped_column()
+    # コマの絵の仕上げ（item_styles.py の Adjustment の並び）
+    adjustments: Mapped[list[Any]] = mapped_column(default=list)
+    # 人が掛けた「動かさない」。人もAIも変えられない。外せるのは人だけ
+    fixed: Mapped[bool] = mapped_column(Boolean, default=False)
     # 人の手の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     # 人の確定印（V3ハーネス設計 9.2）。付いたコマはAIが何も変えられない

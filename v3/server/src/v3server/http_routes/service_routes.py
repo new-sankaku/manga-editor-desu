@@ -20,12 +20,12 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
+from v3server.generation_queue.known_processes import check_process_task
 from v3server.operations.ai_involvement import Task
 from v3server.usage_terms_schema import UsageTerms
 from v3server.v3_error_types import Invalid, NotFound
 
 # ---------------------------------------------------------------- つなぎ先と処理ごとの送り先（全作品で共通）
-
 
 router = APIRouter()
 
@@ -137,6 +137,7 @@ async def put_service_process(service_id: str, process: str, body: ServiceProces
 async def put_route(process: str, body: RouteBody, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     """処理の送り先を1つ決める。その先がその処理を受けられないときは選べない。"""
     await require(authz, actor, "admin", SYSTEM_OBJ)
+    check_process_task(process, body.ai_task, body.ai_action)
     sp = (
         await session.execute(
             select(ServiceProcess).where(ServiceProcess.service_id == body.service_id,

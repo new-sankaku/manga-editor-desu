@@ -1,8 +1,11 @@
-"""ページの層を PSD にする依頼（JSON）を組み、PSD 書き出しのプロセス（v3/psd_writer、Node の ag-psd）を呼ぶ。
+"""ページの層（print_export/page_render.py の Node）を PSD にする依頼（JSON）を組み、
+PSD 書き出しのプロセス（v3/psd_writer、Node の ag-psd）を呼ぶ。
 
-層の順は V3細部の決めごと 10.3：下から、コマ枠、AIの絵（コマごと）、人の手、フキダシ、写植、描き文字。
+層の順は V3細部の決めごと 10.3（page_render.py の docstring と同じ）。どの層の名前も「名前 [id]」で終わる。
 プロセスへは標準入力の JSON で渡し、標準出力で書いた PSD を読み戻した層の一覧を受け取る。
 Node の場所と書き出しの script は呼ぶ側が渡す（ここに置かない）。
+
+ペンの線は PSD では画素の層になる（線の値はサーバーに残る。PSD から線には戻せない）。
 """
 import json
 import pathlib
@@ -11,19 +14,13 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
-# 層の名前（画面に出る）
-LAYER_NAME_PANEL_FRAME = "コマ枠"
-LAYER_NAME_AI_ART = "AIの絵"
-LAYER_NAME_HAND_DRAWN = "人の手"
-LAYER_NAME_BALLOON = "フキダシ"
-LAYER_NAME_TYPESET = "写植"
-LAYER_NAME_SFX = "描き文字"
+from v3server.print_export.page_render import Node
 
-BlendMode = Literal["normal", "multiply"]
+BlendMode = Literal["normal", "multiply", "screen", "overlay", "darken", "lighten"]
 
 
 class TextInfo(BaseModel):
-    """文字層の文字の情報。層の画素は png_path に描いた絵を使う。"""
+    """文字層の文字の情報。層の画素は png_path に描いた絵を使う（ag-psd は文字を描かないため）。"""
 
     text: str
     orientation: Literal["vertical", "horizontal"]
@@ -50,44 +47,46 @@ class PsdLayer(BaseModel):
     text: Optional[TextInfo] = None
 
 
-class PageLayerSet(BaseModel):
-    """1ページの層の元。画像はどれも RGBA の PNG（ページと同じ大きさでなくてもよい。left・top で置く）。"""
+def psd_layers_from_nodes(nodes: list[Node], png_dir: pathlib.Path, offset: tuple[int, int] = (0, 0)
+                          ) -> list[PsdLayer]:
+    """Node を PsdLayer にし、絵を png_dir に書く。offset は紙の上でのページの左上（紙がページより大きいとき）。"""
+    out = []
+    for n in nodes:
+        if n.children is not None:
+            out.append(PsdLayer(name=n.full_name, children=psd_layers_from_nodes(n.children, png_dir, offset),
+                                hidden=n.hidden, blend_mode=n.blend, opacity=n.opacity))
+            continue
+        if n.image is None:
+            raise ValueError(f"層 {n.full_name} に絵が無い")
+        path = png_dir / f"{n.marker}.png"
+        n.image.save(path)
+        text = None
+        if n.text is not None:
+            text = TextInfo(**{**n.text, "x": n.text["x"] + offset[0], "y": n.text["y"] + offset[1]})
+        out.append(PsdLayer(name=n.full_name, png_path=path, hidden=n.hidden, blend_mode=n.blend, opacity=n.opacity,
+                            left=n.left + offset[0], top=n.top + offset[1], text=text))
+    return out
 
-    panel_frame: PsdLayer
-    ai_art_by_panel: list[PsdLayer]
-    hand_drawn: PsdLayer
-    balloon: PsdLayer
-    typeset_texts: list[PsdLayer]
-    sfx: PsdLayer
 
+def build_psd_request(width: int, height: int, composite_png: Optional[pathlib.Path], layers: list[PsdLayer],
+                      output_path: pathlib.Path) -> dict:
+    """書き出しプロセスに渡す辞書を組む。layers は下の層が先。"""
 
-def build_page_psd_request(width: int, height: int, composite_png: Optional[pathlib.Path], layers: PageLayerSet,
-                           output_path: pathlib.Path) -> dict:
-    """書き出しプロセスに渡す辞書を組む。children は下の層が先。"""
-    for t in layers.typeset_texts:
-        if t.text is None or t.png_path is None:
-            raise ValueError(f"写植の層 {t.name} は、文字の情報と描いた画像（png_path）の両方が要ります")
-    ai_group = PsdLayer(name=LAYER_NAME_AI_ART, children=layers.ai_art_by_panel)
-    typeset_group = PsdLayer(name=LAYER_NAME_TYPESET, children=layers.typeset_texts)
-    ordered = [
-        _renamed(layers.panel_frame, LAYER_NAME_PANEL_FRAME),
-        ai_group,
-        _renamed(layers.hand_drawn, LAYER_NAME_HAND_DRAWN),
-        _renamed(layers.balloon, LAYER_NAME_BALLOON),
-        typeset_group,
-        _renamed(layers.sfx, LAYER_NAME_SFX),
-    ]
+    def check(ls: list[PsdLayer]):
+        for la in ls:
+            if la.text is not None and la.png_path is None:
+                raise ValueError(f"文字の層 {la.name} は、文字の情報と描いた画像（png_path）の両方が要る")
+            if la.children:
+                check(la.children)
+
+    check(layers)
     return {
         "width": width,
         "height": height,
         "composite_png": str(composite_png) if composite_png else None,
         "output_path": str(output_path),
-        "layers": [json.loads(layer.model_dump_json(exclude_none=True)) for layer in ordered],
+        "layers": [json.loads(layer.model_dump_json(exclude_none=True)) for layer in layers],
     }
-
-
-def _renamed(layer: PsdLayer, name: str) -> PsdLayer:
-    return layer.model_copy(update={"name": name})
 
 
 class PsdWriterError(RuntimeError):

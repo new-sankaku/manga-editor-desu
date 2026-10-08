@@ -3,6 +3,7 @@
 
 from typing import Any, Literal
 
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 
 from v3server.canonical_tables.service_and_job_tables import Service, WorkDestination
@@ -10,11 +11,27 @@ from v3server.canonical_tables.threshold_and_finding_tables import (
     FindingReaction,
     Threshold,
 )
+from v3server.name_structure.item_styles import FrameStyle
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.openfga_permissions import WORK_ROLES, Tuple
 from v3server.operations.ai_involvement import Mode, Task
 from v3server.operations.operation_base import OpBase, Scope, _changed, work_obj
 from v3server.v3_error_types import Invalid, NotFound
+
+
+class WorkPreferences(BaseModel):
+    """作品ごとの設定（V3細部の決めごと 10.4 の言語・自動保存・設定）。利用者ごとの設定は user_settings（操作の窓口の外）。"""
+
+    model_config = ConfigDict(extra="forbid")
+
+    # 作品の文字の言語（セリフ・書き出しの書体を選ぶ元。画面の言語は利用者ごと）
+    language: str | None = None
+    # 文字の種類ごとの書体（書き出しで、文字に書体が無いときに使う。ここにも無ければ書き出しは止まる）
+    fonts_by_kind: dict[Literal["balloon", "caption", "drawn_sfx"], str] = Field(default_factory=dict)
+    # コマ枠の線と塗りの標準（コマに frame_style が無いときの見た目。書き出しで、ここにも無ければ止まる）
+    frame_style: FrameStyle | None = None
+    # 作品の画面の下書きを残す間隔（秒）。無ければ利用者の設定に従う
+    autosave_interval_seconds: int | None = Field(default=None, gt=0)
 
 
 class SetWorkSettings(OpBase):
@@ -28,6 +45,7 @@ class SetWorkSettings(OpBase):
     # ページの寸法（name_structure の PageSpec）と、1ページ目を左に置くか
     page_spec: PageSpec | None = None
     first_page_is_left: bool | None = None
+    preferences: WorkPreferences | None = None
 
     async def scope(self, session, work):
         return Scope("can_manage", work_obj(work.id))

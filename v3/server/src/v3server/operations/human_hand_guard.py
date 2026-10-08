@@ -6,6 +6,9 @@
 - AIが変えるときは、その項目の作業のAIの関与も確かめる（ai_involvement.py）
 - AIの案が人の手の所を変えようとしたときは、黙って捨てずに判断待ち（HeldAiChange）に置く（split_ai_proposal_changes）
 
+- 人が掛けた「動かさない」（fixed）の付いた行は、人もAIも変えられない（FixedByPerson）。外すのは SetFixed（人だけ）
+- この後に足した操作は、AIが人の手の所に当たったとき断らずに判断待ちに置く（change_or_hold・hold_ai_operation）
+
 どの項目に印を付けるか、どの作業に入るかは ai_involvement.HUMAN_EDITABLE_FIELDS の1か所で決める。
 """
 
@@ -22,7 +25,7 @@ from v3server.operations.ai_involvement import (
     require_ai_may_change_fields,
 )
 from v3server.request_actor import Actor
-from v3server.v3_error_types import HumanHandProtected
+from v3server.v3_error_types import FixedByPerson, HumanHandProtected
 
 
 def hand_fields_of(obj) -> frozenset[str]:
@@ -46,8 +49,20 @@ def refuse_if_ai_touches_human_hand(actor: Actor, obj, fields: set[str]) -> None
 
 
 def refuse_if_ai_removes_human_hand(actor: Actor, obj) -> None:
+    refuse_if_fixed(obj)
     if actor.kind == "ai" and is_human_held(obj):
         raise HumanHandProtected(f"{obj.__tablename__}:{obj.id} は人の手の印が付いている")
+
+
+def refuse_if_fixed(obj) -> None:
+    """人が「動かさない」を掛けた行は、誰も変えられない。"""
+    if getattr(obj, "fixed", False):
+        raise FixedByPerson(f"{obj.__tablename__}:{obj.id} は人が「動かさない」にしている。先に人が外す")
+
+
+def touches_human_hand(obj, fields: set[str]) -> bool:
+    """AIがこの行のこの項目を変えると、人の手の所に当たるか（行ごと動かす操作が、判断待ちにするかを決める）。"""
+    return getattr(obj, "human_confirmed", False) or bool(set(obj.human_hand_fields) & fields)
 
 
 def json_value(v: Any) -> Any:
@@ -101,8 +116,10 @@ def change_with_human_hand(actor: Actor, obj, changes: dict[str, Any], explicit_
     """
     if explicit_hand_fields is not None and actor.kind == "ai":
         raise HumanHandProtected("人の手の印を変えられるのは人だけ")
+    if changes:
+        refuse_if_fixed(obj)
     refuse_if_ai_touches_human_hand(actor, obj, set(changes))
-    require_ai_may_change_fields(actor, work, obj.__tablename__, set(changes))
+    require_ai_may_change_fields(actor, work, obj.__tablename__, set(changes), obj)
     before = {k: getattr(obj, k) for k in changes}
     before["human_hand_fields"] = list(obj.human_hand_fields)
     for k, v in changes.items():
@@ -115,3 +132,29 @@ def change_with_human_hand(actor: Actor, obj, changes: dict[str, Any], explicit_
     marks = set(obj.human_hand_fields)
     obj.human_hand_fields = sorted(marks | touched if human else marks - touched)
     return before
+
+
+def change_or_hold(ctx, obj, changes: dict[str, Any], page_id: str | None,
+                   explicit_hand_fields: list[str] | None = None) -> tuple[dict[str, Any], list[str]]:
+    """change_with_human_hand と同じ。ただしAIが人の手の所に当たったときは断らず、その項目を判断待ちに置き、
+    残りを当てる。(元の値, 置いた判断待ちの id) を返す。人の操作はそのまま当てる。"""
+    if ctx.actor.kind != "ai":
+        return change_with_human_hand(ctx.actor, obj, changes, explicit_hand_fields, work=ctx.work), []
+    changes = drop_unchanged(obj, changes)
+    if changes:
+        refuse_if_fixed(obj)
+    free, held = split_ai_proposal_changes(obj, changes)
+    held_ids = hold_ai_changes(ctx.session, ctx.work.id, obj, page_id, held, None) if held else []
+    before = change_with_human_hand(ctx.actor, obj, free, explicit_hand_fields, work=ctx.work)
+    return before, held_ids
+
+
+def hold_ai_operation(ctx, op: dict[str, Any], target, page_id: str | None, reason: str) -> str:
+    """行ごと動かすAIの操作（コマを分ける・合わせるなど）が人の手の所に当たったとき、操作ごと判断待ちに置く。
+    人が採ると、同じ操作を人の操作として当てる（held_change_operations.py）。"""
+    row = HeldAiChange(id=new_id(), work_id=ctx.work.id, target_table=target.__tablename__, target_id=target.id,
+                       page_id=page_id, field=op["type"], proposed_value=None, current_value=None, proposal_id=None,
+                       status="open", kind="ai_operation", choices=["accept", "reject"],
+                       payload={"op": json_value(op), "reason": reason})
+    ctx.session.add(row)
+    return row.id

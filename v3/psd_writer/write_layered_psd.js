@@ -1,8 +1,9 @@
 // 層の JSON（標準入力）と PNG から PSD を書く。p36・p52 の write.js を元にした。
 // 入力: { width, height, composite_png|null, output_path, layers: [層...] }（層は下が先）
-//   層: { name, png_path?, children?, hidden, blend_mode: normal|multiply, opacity 0..1, left, top,
+//   層: { name, png_path?, children?, hidden, blend_mode: normal|multiply|screen|overlay|darken|lighten, opacity 0..1, left, top,
 //         text?: { text, orientation, font_name, font_size, color_rgb, x, y } }
-//   children があればグループ。文字層は text と png_path（描いた画素）の両方が要る。
+//   children があればグループ。文字層は text と png_path（render_text.js で描いた画素）の両方が要る。
+//   ag-psd は文字を描かないので、画素が無いと文字層は空（0x0）になる（p59）。
 // 出力: output_path に PSD を書き、ag-psd で読み戻した層の一覧を標準出力に JSON で出す。
 // 失敗したら標準エラーに理由を書いて終了コード1。
 const fs = require('fs');
@@ -12,7 +13,7 @@ const { writePsdBuffer, readPsd, initializeCanvas } = require('ag-psd');
 // 画面の無い node では、読み戻しの画素の入れ物だけを渡す（絵を描く道具は使わない）
 initializeCanvas(() => { throw new Error('canvas not used'); }, (w, h) => ({ width: w, height: h, data: new Uint8ClampedArray(w * h * 4) }));
 
-const BLEND = { normal: 'normal', multiply: 'multiply' };
+const BLEND = { normal: 'normal', multiply: 'multiply', screen: 'screen', overlay: 'overlay', darken: 'darken', lighten: 'lighten' };
 
 function readPng(p) {
   const png = PNG.sync.read(fs.readFileSync(p));

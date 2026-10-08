@@ -58,20 +58,28 @@ def bilevel_image_from_black_mask(black: np.ndarray) -> Image.Image:
     return Image.fromarray((~black).astype(np.uint8) * 255, "L").convert("1", dither=Image.Dither.NONE)
 
 
+def paper_size_px(paper_mm: tuple[float, float], dpi: float) -> tuple[int, int]:
+    return (round(paper_mm[0] / _MM_PER_INCH * dpi), round(paper_mm[1] / _MM_PER_INCH * dpi))
+
+
 def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float, bilevel_codec: BilevelCodec,
-                    output_path: pathlib.Path) -> None:
+                    output_path: pathlib.Path, paper_mm: tuple[float, float] | None = None) -> None:
     """塗り足し込みの画像を1ページずつ並べた PDF を書く。
 
     画素数が spec と dpi から計算した値と違うときは例外にする（黙って拡大縮小しない）。
-    MediaBox は塗り足し込み、TrimBox は仕上がり、BleedBox は MediaBox と同じにする。
+    MediaBox は塗り足し込み（紙の大きさ paper_mm を渡したときは紙）、TrimBox は仕上がり、
+    BleedBox は塗り足し込みにする。紙を渡したときは、ページの絵が紙の真ん中に置いてある前提。
     """
     if not pages:
         raise ValueError("ページが1枚もありません")
-    expected = canvas_size_px(spec, dpi)
+    canvas_mm = canvas_size_mm(spec)
+    if paper_mm is not None and (paper_mm[0] < canvas_mm[0] or paper_mm[1] < canvas_mm[1]):
+        raise ValueError(f"紙 {paper_mm}mm が塗り足し込みのページ {canvas_mm}mm より小さい")
+    expected = paper_size_px(paper_mm, dpi) if paper_mm is not None else canvas_size_px(spec, dpi)
     for i, page in enumerate(pages):
         if page.size != expected:
             raise ValueError(f"{i + 1}ページ目の画素数 {page.size} が、寸法と dpi から計算した {expected} と違います")
-    w_mm, h_mm = canvas_size_mm(spec)
+    w_mm, h_mm = paper_mm if paper_mm is not None else canvas_mm
     layout = img2pdf.get_layout_fun((img2pdf.mm_to_pt(w_mm), img2pdf.mm_to_pt(h_mm)))
     raw = img2pdf.convert([_encode_page(p, bilevel_codec, dpi) for p in pages], layout_fun=layout)
 
@@ -79,9 +87,12 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float, bi
     writer = pypdf.PdfWriter()
     writer.append_pages_from_reader(reader)
     bleed_pt = spec.bleed_mm / _MM_PER_INCH * _PT_PER_INCH
+    mx = (w_mm - canvas_mm[0]) / 2 / _MM_PER_INCH * _PT_PER_INCH
+    my = (h_mm - canvas_mm[1]) / 2 / _MM_PER_INCH * _PT_PER_INCH
     for page in writer.pages:
         media = page.mediabox
-        left, bottom, right, top = float(media.left), float(media.bottom), float(media.right), float(media.top)
+        left, bottom = float(media.left) + mx, float(media.bottom) + my
+        right, top = float(media.right) - mx, float(media.top) - my
         page.bleedbox = pypdf.generic.RectangleObject([left, bottom, right, top])
         page.trimbox = pypdf.generic.RectangleObject([left + bleed_pt, bottom + bleed_pt, right - bleed_pt, top - bleed_pt])
     with open(output_path, "wb") as f:

@@ -5,11 +5,22 @@ from typing import Annotated, Union
 
 from pydantic import Field, TypeAdapter
 
+from v3server.operations.annotation_operations import (
+    AddAnnotation,
+    RecordAnnotationJob,
+    UpdateAnnotation,
+)
 from v3server.operations.held_change_operations import ResolveHeldChange
 from v3server.operations.image_file_operations import (
     AddProtectedRegion,
     RegisterImage,
     SetProtectedRegionRemoved,
+)
+from v3server.operations.material_and_plan_operations import (
+    AddMaterialEntry,
+    DecideMaterialProposal,
+    SetWorkPlan,
+    UpdateMaterialEntry,
 )
 from v3server.operations.name_proposal_operations import (
     ApplyNameProposal,
@@ -17,12 +28,37 @@ from v3server.operations.name_proposal_operations import (
     SetNameProposalStatus,
     SubmitNameProposal,
 )
+from v3server.operations.page_item_operations import (
+    AddPageItem,
+    ResetAdjustments,
+    SetFixed,
+    UpdatePageItem,
+)
+from v3server.operations.panel_frame_operations import (
+    AddShapePanel,
+    ApplyPanelTemplate,
+    MergePanels,
+    RandomSplitPanel,
+    SavePanelTemplate,
+    SplitPanel,
+)
+from v3server.operations.pen_stroke_operations import (
+    AddPenStrokes,
+    ErasePenStrokes,
+    ErasePixels,
+    RemovePenStrokes,
+    SetStrokeCache,
+    UpdatePenStrokes,
+)
+from v3server.operations.psd_import_operations import ApplyPsdImport
+from v3server.operations.row_snapshot import RestoreRows
 from v3server.operations.text_and_layer_operations import (
     AddPanelLayer,
     AddTextItem,
     UpdatePanelLayer,
     UpdateTextItem,
 )
+from v3server.operations.text_search_and_replace import ReplaceText
 from v3server.operations.work_setting_operations import (
     AllowDestination,
     RecordFindingReaction,
@@ -72,6 +108,32 @@ Op = Annotated[
         AddPanelLayer,
         UpdatePanelLayer,
         ResolveHeldChange,
+        RestoreRows,
+        SplitPanel,
+        MergePanels,
+        RandomSplitPanel,
+        AddShapePanel,
+        SavePanelTemplate,
+        ApplyPanelTemplate,
+        AddPageItem,
+        UpdatePageItem,
+        SetFixed,
+        ResetAdjustments,
+        AddPenStrokes,
+        UpdatePenStrokes,
+        RemovePenStrokes,
+        ErasePenStrokes,
+        SetStrokeCache,
+        ErasePixels,
+        AddAnnotation,
+        UpdateAnnotation,
+        RecordAnnotationJob,
+        SetWorkPlan,
+        AddMaterialEntry,
+        UpdateMaterialEntry,
+        DecideMaterialProposal,
+        ReplaceText,
+        ApplyPsdImport,
     ],
     Field(discriminator="type"),
 ]

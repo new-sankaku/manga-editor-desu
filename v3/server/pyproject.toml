@@ -10,6 +10,7 @@ dependencies = [
     "kiwisolver>=1.5.1",
     "numpy>=2.5.3",
     "pillow>=12.3.0",
+    "psd-tools>=1.21.0",
     "psycopg[binary]>=3.3.6",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
