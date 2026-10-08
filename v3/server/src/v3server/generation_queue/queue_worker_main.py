@@ -23,7 +23,7 @@ from v3server.generation_queue.queue_names_and_priority import (
 )
 from v3server.generation_queue.service_call_activity import call_service, set_job_status
 from v3server.image_file_storage import image_store
-from v3server.print_export.export_workflow import EXPORT_QUEUE, ExportRunWorkflow, run_export_activity
+from v3server.print_export.export_workflow import EXPORT_ACTIVITIES, EXPORT_QUEUE, ExportRunWorkflow
 from v3server.server_settings import get_settings
 
 log = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ class WorkerSet:
             self.client,
             task_queue=EXPORT_QUEUE,
             workflows=[ExportRunWorkflow],
-            activities=[run_export_activity],
+            activities=EXPORT_ACTIVITIES,
         )
         self._export_task = asyncio.create_task(self.export.run())
         await self.reload()

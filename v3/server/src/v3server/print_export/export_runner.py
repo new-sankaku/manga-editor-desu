@@ -15,6 +15,7 @@ Temporal の書き出しの待ち行列（print_export/export_workflow.py）の�
 - ノンブルは作品の preferences.nombre があるときに描く（無ければ描かない。紙に出す作品で無いことは入稿前の確かめが出す）
 """
 
+import asyncio
 import io
 import pathlib
 import tempfile
@@ -224,6 +225,12 @@ def check_spread_output(fmt: str, spread_output: str | None, has_spread: bool) -
         raise ExportRefused("PSD は見開きを joined（1枚）でしか出せない（層をノドで切らずに渡すため）")
 
 
+async def off_loop(fn, *args):
+    """描く・書く（Pillow と Node。数秒〜数十秒かかる）は別のスレッドで行う。作業者のイベントループを塞ぐと、
+    書き出しの生存の知らせ（export_workflow.py）が届かず、ほかの流れも止まる。1つずつ順に呼ぶ（並べない）。"""
+    return await asyncio.to_thread(fn, *args)
+
+
 async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, Any]]:
     s = get_settings()
     if not s.export_dir:
@@ -299,9 +306,10 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
             if sp is None:
                 plan = unit[0]
                 dpi = run.dpi or plan.dpi
-                rendered = _render(await content_of(plan), dpi)
-                emit(as_output(rendered, plan.color_mode, dpi), rendered.nodes, _file_stem(ps.file_code, plan), dpi,
-                     plan.color_mode, plan.page.id, {})
+                rendered = await off_loop(_render, await content_of(plan), dpi)
+                img = await off_loop(as_output, rendered, plan.color_mode, dpi)
+                await off_loop(emit, img, rendered.nodes, _file_stem(ps.file_code, plan), dpi, plan.color_mode,
+                               plan.page.id, {})
                 continue
             left, right = unit
             if left.color_mode != right.color_mode:
@@ -310,23 +318,23 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
             if dpi != (run.dpi or right.dpi):
                 raise ExportRefused(f"見開き {sp.id} の2ページの解像度が違う（{left.dpi}・{right.dpi}）")
             content = await _spread_content(session, sp, await content_of(left), await content_of(right))
-            rendered = _render_spread(content, dpi)
-            img = as_output(rendered, left.color_mode, dpi)
+            rendered = await off_loop(_render_spread, content, dpi)
+            img = await off_loop(as_output, rendered, left.color_mode, dpi)
             first, second = sorted(unit, key=lambda p: p.index)
             if run.spread_output in ("joined", "both"):
                 stem = f"{ps.file_code}_{first.episode.number:02d}_{first.index + 1:03d}-{second.index + 1:03d}"
-                emit(img, rendered.nodes, stem, dpi, left.color_mode, None,
-                     {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id]})
+                await off_loop(emit, img, rendered.nodes, stem, dpi, left.color_mode, None,
+                               {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id]})
             if run.spread_output in ("split", "both"):
                 halves = dict(zip(("left", "right"), split_spread(img, spec, dpi), strict=False))
                 for plan in (first, second):
-                    emit(halves[plan.spread_half], None, _file_stem(ps.file_code, plan), dpi, plan.color_mode,
-                         plan.page.id, {"spread_id": sp.id})
+                    await off_loop(emit, halves[plan.spread_half], None, _file_stem(ps.file_code, plan), dpi,
+                                   plan.color_mode, plan.page.id, {"spread_id": sp.id})
     except (RenderRefused, ColorModeError, TextRenderError) as e:
         raise ExportRefused(str(e)) from e
     if run.format == "pdf":
         name = f"{ps.file_code}.pdf"
-        write_print_pdf(pdf_pages, spec, pdf_dpis, ps.bilevel.pdf_codec if ps.bilevel else None, folder / name,
-                        tuple(run.paper_mm) if run.paper_mm else None)
+        await off_loop(write_print_pdf, pdf_pages, spec, pdf_dpis, ps.bilevel.pdf_codec if ps.bilevel else None,
+                       folder / name, tuple(run.paper_mm) if run.paper_mm else None)
         outputs.append({"page_id": None, "file": name, "bytes": (folder / name).stat().st_size})
     return outputs
