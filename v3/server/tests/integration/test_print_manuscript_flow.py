@@ -187,3 +187,15 @@ async def test_見開きと2階調とノンブルの書き出し_入稿前の確
     assert ("safe_area", p3) in kinds and ("text_overflow", p3) in kinds
     text_issue = next(i for i in got["issues"] if i["kind"] == "safe_area")
     assert text_issue["location"]["table"] == "text_items"
+    # 色（decoration.fill）の無い文字（取り込んだ文字・古い文字）：色を補わず、どの文字かを付けて error にする
+    panel4 = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_panel", "id": panel4, "page_id": p4, "order": 1})).status_code == 200
+    r = await op(api, wid, a, {"type": "add_text_item", "panel_id": panel4, "item_kind": "balloon", "order": 0,
+                               "text": "いろなし", "font_family": "ipag", "font_size_pt": 12,
+                               "writing_direction": "vertical", "box_mm": [20, 20, 40, 60]})
+    assert r.status_code == 200, r.text
+    got = (await api.post(f"/works/{wid}/preflight", headers=h(a), json={})).json()
+    color = [i for i in got["issues"] if i["kind"] == "text_color"]
+    assert len(color) == 1 and color[0]["severity"] == "error" and color[0]["page_id"] == p4
+    assert color[0]["location"]["table"] == "text_items" and "decoration.fill" in color[0]["message"]
+    assert "いろなし" in color[0]["message"]

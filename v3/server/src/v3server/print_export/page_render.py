@@ -461,6 +461,16 @@ def _draw_shape(size, geom, fill, line, width) -> Image.Image:
     return img
 
 
+def text_fill(t) -> str:
+    """文字の色（decoration.fill）。無ければ止める（色を補わない。取り込んだ文字・古い文字は無いことがある。
+    書き出し前の確認も、この関数で同じ理由を出す）。"""
+    fill = (t.decoration or {}).get("fill")
+    if not fill:
+        raise RenderRefused(f"文字「{t.text[:12]}」（{t.id}）の色（decoration.fill）が決まっていない。"
+                            "取り込んだ文字か古い文字は色を持たないことがある。文字の飾りで色を選び直す")
+    return fill
+
+
 def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], str]) -> dict:
     prefs = content.preferences or {}
     k = dpi / MM_PER_INCH
@@ -477,8 +487,7 @@ def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], st
                             "preferences.typesetting）")
     b = t.box_mm
     deco = dict(t.decoration or {})
-    if not deco.get("fill"):
-        raise RenderRefused(f"文字 {t.id} の色（decoration.fill）が決まっていない")
+    deco["fill"] = text_fill(t)
     spans = []
     for sp in t.spans or []:
         spans.append({"start": sp["start"], "end": sp["end"], "size_ratio": sp.get("size_ratio"),

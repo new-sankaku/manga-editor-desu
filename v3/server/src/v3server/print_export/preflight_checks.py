@@ -47,7 +47,7 @@ from v3server.print_export.book_layout import (
     plan_pages,
     print_settings_of,
 )
-from v3server.print_export.page_render import PageContent, RenderRefused, _text_job
+from v3server.print_export.page_render import PageContent, RenderRefused, _text_job, text_fill
 from v3server.print_export.text_render import RenderedText, TextRenderError
 
 Severity = Literal["error", "warning"]
@@ -135,6 +135,12 @@ def _check_text(session_texts, content: PageContent, plan: PagePlan, spec: PageS
             if over:
                 issues.append(Issue(pid, "safe_area", "warning" if t.item_kind == "drawn_sfx" else "error",
                                     f"文字「{t.text[:12]}」が安全線の外に出ている（{'・'.join(over)}）", loc))
+        try:
+            text_fill(t)
+        except RenderRefused as e:
+            # 解像度が決まっていなくても出す。色を補わないので、この文字は書き出せない
+            issues.append(Issue(pid, "text_color", "error", str(e), loc))
+            continue
         if dpi is None:
             continue
         try:
