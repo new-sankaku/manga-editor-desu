@@ -141,7 +141,9 @@ async def test_登録の役目が無い依頼は送らずに止まる(api, admin
     assert fake.calls == []
 
 
-async def test_取り消すと送り先の実行中の物も止める(api, admin, workers, fake_comfy):
+async def test_取り消すと送り先の実行中の物も止める(api, admin, workers, fake_comfy, monkeypatch):
+    # 取り消しは活動の生存の知らせの返事で届く。知らせの間隔（本番 5秒）を試験の中だけ縮める
+    monkeypatch.setattr(service_call_activity, "HEARTBEAT_SECONDS", 0.2)
     fake = fake_comfy(SlowFakeComfy(finish_after=None))
     a = user()
     ids = await new_work(api, a)
@@ -159,7 +161,7 @@ async def test_取り消すと送り先の実行中の物も止める(api, admin
 
     async def interrupted():
         return fake.interrupted
-    await wait_for(interrupted, timeout=40)  # 取り消しは活動の生存の知らせ（5秒ごと）で届く
+    await wait_for(interrupted, timeout=40)
 
 
 # ---------------------------------------------------------------- 作業者が途中で落ちたとき（点検5 4-2）

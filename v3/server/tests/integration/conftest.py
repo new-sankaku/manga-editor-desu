@@ -17,6 +17,7 @@ from v3server.server_settings import Settings, get_settings
 # 試験の DB のサーバーは、.env の V3_DATABASE_URL と同じ。V3_TEST_DATABASE_URL で替えられる（名前は v3_test の代わりの頭に使う）。
 # 利用者は開発用の見出し（X-V3-User）で名乗り、絵は手元のフォルダに置く
 _BASE_URL = make_url(os.environ.get("V3_TEST_DATABASE_URL") or make_url(Settings().database_url).set(database="v3_test"))
+XDIST_WORKER = os.environ.get("PYTEST_XDIST_WORKER")  # pytest-xdist で同時に流すときの作業者の名前（gw0 …）
 TEST_DB_NAME = f"{_BASE_URL.database}_{uuid.uuid4().hex[:10]}"
 TEST_DB = _BASE_URL.set(database=TEST_DB_NAME).render_as_string(hide_password=False)
 os.environ["V3_DATABASE_URL"] = TEST_DB
@@ -27,7 +28,11 @@ get_settings.cache_clear()
 import httpx  # noqa: E402
 import psycopg  # noqa: E402
 import pytest  # noqa: E402
-from temporalio.client import Client  # noqa: E402
+from google.protobuf.duration_pb2 import Duration  # noqa: E402
+from temporalio.api.workflowservice.v1 import DescribeNamespaceRequest, RegisterNamespaceRequest  # noqa: E402
+from temporalio.client import Client, WorkflowFailureError  # noqa: E402
+from temporalio.service import RPCError, RPCStatusCode  # noqa: E402
+from temporalio.testing import WorkflowEnvironment  # noqa: E402
 
 from v3server.database_engine import get_sessionmaker  # noqa: E402
 from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
@@ -53,10 +58,11 @@ def _maintenance(sql: str) -> None:
 def schema():
     _maintenance(f'CREATE DATABASE "{TEST_DB_NAME}"')
     try:
-        # 戻す移行も通ることを確かめてから作り直す
+        # 戻す移行も通ることを確かめてから作り直す。同時に流すときは、確かめるのは1つの作業者（gw0）だけ（中身は同じ）
         _alembic("upgrade", "head")
-        _alembic("downgrade", "base")
-        _alembic("upgrade", "head")
+        if XDIST_WORKER in (None, "gw0"):
+            _alembic("downgrade", "base")
+            _alembic("upgrade", "head")
         yield
     finally:
         _maintenance(f'DROP DATABASE IF EXISTS "{TEST_DB_NAME}" WITH (FORCE)')
@@ -68,9 +74,37 @@ async def authz(schema):
         return await open_authz(session)
 
 
+# いくつも同時に流す（pytest-xdist）ときは、作業者（gw0, gw1 …）ごとに Temporal の名前空間を分ける。同じ名前空間だと、
+# ほかの作業者が同じ待ち行列（v3-control・v3-export など）の依頼を取り、自分のデータベースに無い行を探して失敗する
+TEMPORAL_NAMESPACE = f"v3test-{XDIST_WORKER}" if XDIST_WORKER else "default"
+
+
+async def _ensure_namespace(address: str, namespace: str) -> None:
+    """名前空間が無ければ作り、使えるようになるまで待つ。開発用の Temporal の中に残るので、作るのは初めの1回だけ。"""
+    client = await Client.connect(address)
+    try:
+        await client.workflow_service.register_namespace(RegisterNamespaceRequest(
+            namespace=namespace, workflow_execution_retention_period=Duration(seconds=24 * 3600)))
+    except RPCError as e:
+        if e.status != RPCStatusCode.ALREADY_EXISTS:
+            raise
+    deadline = time.monotonic() + 30
+    while True:
+        try:
+            await client.workflow_service.describe_namespace(DescribeNamespaceRequest(namespace=namespace))
+            return
+        except RPCError:
+            if time.monotonic() > deadline:
+                raise
+            await asyncio.sleep(0.5)
+
+
 @pytest.fixture(scope="session")
 async def temporal():
-    return await Client.connect(get_settings().temporal_address)
+    address = get_settings().temporal_address
+    if TEMPORAL_NAMESPACE != "default":
+        await _ensure_namespace(address, TEMPORAL_NAMESPACE)
+    return await Client.connect(address, namespace=TEMPORAL_NAMESPACE)
 
 
 @pytest.fixture(scope="session")
@@ -92,7 +126,6 @@ async def workers(temporal):
 @pytest.fixture(scope="session")
 async def skipping_env():
     """時間を飛ばせる Temporal の試験用サーバー（temporalio が初回に取ってくる）。送り直しの間隔（5秒・10秒）を待たない。"""
-    from temporalio.testing import WorkflowEnvironment
     env = await WorkflowEnvironment.start_time_skipping()
     yield env
     await env.shutdown()
@@ -106,9 +139,10 @@ class SkippingTemporal:
 
     async def finished(self, job_id: str) -> None:
         """依頼の流れが終わるまで待つ。待っている間だけ、試験用サーバーは時間を飛ばす（状態を口で見て待つと飛ばない）。"""
-        from temporalio.client import WorkflowFailureError
+        # get_workflow_handle の handle は自分では時間を飛ばさない（飛ばすのは start_workflow が返す handle だけ）
         try:
-            await self.env.client.get_workflow_handle(f"job-{job_id}").result()
+            async with self.env.time_skipping_unlocked():
+                await self.env.client.get_workflow_handle(f"job-{job_id}").result()
         except WorkflowFailureError:
             pass  # 取り消した流れも「終わった」。どう終わったかは呼んだ試験が口で確かめる
 
