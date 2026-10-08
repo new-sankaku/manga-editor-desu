@@ -51,10 +51,12 @@ def _threshold_cell(shape: str) -> np.ndarray:
     return cell
 
 
-def halftone_screen(gray: np.ndarray, dpi: float, lines_per_inch: float, angle_deg: float, dot_shape: DotShape) -> np.ndarray:
+def halftone_screen(gray: np.ndarray, dpi: float, lines_per_inch: float, angle_deg: float, dot_shape: DotShape,
+                    origin_px: tuple[int, int] = (0, 0)) -> np.ndarray:
     """灰色を、線数・角度・形を指定した網点で2値にする。True=黒。
 
     黒の面積は元の濃度にほぼ比例する（p51：600・350dpi、60・85線、10〜90%で誤差0.004以内）。
+    origin_px：配列の左上がページのどの画素か。同じページの別の部分を網点にしても、網の目がページで揃う。
     """
     _check_gray(gray)
     if dpi <= 0 or lines_per_inch <= 0:
@@ -64,11 +66,11 @@ def halftone_screen(gray: np.ndarray, dpi: float, lines_per_inch: float, angle_d
     a = np.radians(angle_deg)
     cos_a, sin_a = float(np.cos(a)), float(np.sin(a))
     height, width = gray.shape
-    xs = np.arange(width, dtype=np.float32)[None, :]
+    xs = np.arange(origin_px[0], origin_px[0] + width, dtype=np.float32)[None, :]
     out = np.empty((height, width), dtype=bool)
     for top in range(0, height, _ROWS_PER_CHUNK):
         bottom = min(height, top + _ROWS_PER_CHUNK)
-        ys = np.arange(top, bottom, dtype=np.float32)[:, None]
+        ys = np.arange(origin_px[1] + top, origin_px[1] + bottom, dtype=np.float32)[:, None]
         u = (xs * cos_a + ys * sin_a) / period
         v = (-xs * sin_a + ys * cos_a) / period
         iu = np.floor((u % 1) * _CELL_SIZE).astype(np.intp) % _CELL_SIZE

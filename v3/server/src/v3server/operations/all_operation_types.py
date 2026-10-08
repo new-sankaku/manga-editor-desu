@@ -10,6 +10,7 @@ from v3server.operations.annotation_operations import (
     RecordAnnotationJob,
     UpdateAnnotation,
 )
+from v3server.operations.book_structure_operations import AddSpread, ReorderPages, UpdateSpread
 from v3server.operations.current_app_import_operations import ImportCurrentAppProject
 from v3server.operations.held_change_operations import ResolveHeldChange, UndoWithHeldChanges
 from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
@@ -145,6 +146,9 @@ Op = Annotated[
         SetTextTranslation,
         SetTextTranslationRemoved,
         SetReviewStatus,
+        ReorderPages,
+        AddSpread,
+        UpdateSpread,
     ],
     Field(discriminator="type"),
 ]

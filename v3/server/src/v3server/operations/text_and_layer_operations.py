@@ -24,6 +24,7 @@ from v3server.name_structure.item_styles import (
 )
 from v3server.name_structure.item_transform import ItemTransform
 from v3server.name_structure.name_draft_schema import BalloonKind
+from v3server.name_structure.print_settings import TextSpan, Typesetting, check_spans
 from v3server.operations.ai_involvement import (
     ROW_TASK,
     require_actor_may,
@@ -56,6 +57,8 @@ class TextItemValues(BaseModel):
     font_family: str | None = None
     decoration: TextDecoration | None = None
     ruby: list[Ruby] = Field(default_factory=list)
+    spans: list[TextSpan] = Field(default_factory=list)
+    typesetting: Typesetting | None = None
     balloon_shape: BalloonShape | None = None
     transform: ItemTransform = Field(default_factory=ItemTransform)
     opacity: float = Field(default=1.0, ge=0, le=1)
@@ -72,6 +75,7 @@ class TextItemValues(BaseModel):
         if self.item_kind == "drawn_sfx" and self.balloon_shape is not None:
             raise ValueError("描き文字にはフキダシの形が無い")
         check_ruby(self.text, [r.model_dump() for r in self.ruby])
+        check_spans(self.text, [sp.model_dump() for sp in self.spans])
         Adjustments(items=self.adjustments)
         return self
 
@@ -107,6 +111,8 @@ class AddTextItem(OpBase):
     font_family: str | None = None
     decoration: dict[str, Any] | None = None
     ruby: list[dict[str, Any]] = Field(default_factory=list)
+    spans: list[dict[str, Any]] = Field(default_factory=list)
+    typesetting: dict[str, Any] | None = None
     balloon_shape: dict[str, Any] | None = None
     transform: dict[str, Any] = Field(default_factory=dict)
     opacity: float = 1.0
@@ -133,7 +139,7 @@ class AddTextItem(OpBase):
 
 class UpdateTextItem(OpBase):
     """文字を変える：文字・話者・種類・縦書きか横書きか・書体の大きさ・箱（動かす・大きさ）・しっぽの先・順・コマ・
-    書体・飾り・ルビ・フキダシの形・置き方（角度・傾き・反転）・不透明度・仕上げ。"""
+    書体・飾り・ルビ・文字の一部の書式（spans）・組版（typesetting）・フキダシの形・置き方（角度・傾き・反転）・不透明度・仕上げ。"""
 
     type: Literal["update_text_item"] = "update_text_item"
     id: str
@@ -151,6 +157,8 @@ class UpdateTextItem(OpBase):
     font_family: str | None = None
     decoration: dict[str, Any] | None = None
     ruby: list[dict[str, Any]] | None = None
+    spans: list[dict[str, Any]] | None = None
+    typesetting: dict[str, Any] | None = None
     balloon_shape: dict[str, Any] | None = None
     transform: dict[str, Any] | None = None
     opacity: float | None = None
@@ -168,7 +176,7 @@ class UpdateTextItem(OpBase):
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True, mode="json")
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
-        for k in ("ruby", "transform", "opacity", "adjustments"):
+        for k in ("ruby", "spans", "transform", "opacity", "adjustments"):
             if k in changes and changes[k] is None:
                 raise Invalid(f"{k} は空にできない（ルビ・仕上げを外すときは []、置き方を戻すときは {{}}）")
         if "panel_id" in changes:

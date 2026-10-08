@@ -12,7 +12,13 @@ from conftest import h, new_work, user, wait_for
 from PIL import Image
 from sqlalchemy import select
 from test_human_ai_interchange import TERMS, ai_op, allow_ai, op, work_json
-from test_human_tools_and_finishing import FRAME_STYLE, export_env, ready_page  # noqa: F401  (export_env は fixture)
+from test_human_tools_and_finishing import (  # noqa: F401  (export_env は fixture)
+    FRAME_STYLE,
+    PRINT,
+    TYPESETTING,
+    export_env,
+    ready_page,
+)
 from test_human_edit_and_handover import image_dir  # noqa: F401  (fixture)
 
 from v3server.canonical_tables.image_file_tables import ImageFile
@@ -220,7 +226,8 @@ async def test_言語ごとに書き出す_訳文が足りなければ止める(
     ids, p, t = await ready_page(api, a)
     wid = ids["work"]
     assert (await op(api, wid, a, {"type": "set_work_settings",
-                                   "preferences": {"frame_style": FRAME_STYLE, "language": "ja"}})).status_code == 200
+                                   "preferences": {"frame_style": FRAME_STYLE, "typesetting": TYPESETTING,
+                                                   "print": PRINT, "language": "ja"}})).status_code == 200
 
     async def export(**kw):
         r = await api.post(f"/works/{wid}/exports", headers=h(a),
