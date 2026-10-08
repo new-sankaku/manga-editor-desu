@@ -131,6 +131,12 @@ const attr = (sel, name) => page.getAttribute(sel, name);
 const tool = () => page.evaluate(() => document.querySelector(".ftb .tool[aria-pressed=true]")?.dataset.tool);
 const html = (name) => page.evaluate((n) => document.documentElement.hasAttribute(n), name);
 const keymapOf = () => settings.get(USER)?.other?.keymap ?? {};
+// 画面は設定を後から送る（PUT /me/settings）。偽のサーバーに届くまで最大 5 秒待ってから確かめる（届かなければ false）
+async function stored(pred) {
+  const end = Date.now() + 5000;
+  while (!pred(keymapOf())) { if (Date.now() > end) return false; await new Promise((ok) => setTimeout(ok, 20)); }
+  return true;
+}
 
 // ===== 画像生成の画面
 await page.goto(`${ORIGIN}/web/index.html`);
@@ -252,7 +258,7 @@ await page.waitForSelector("#v3-keys[open]");
 await page.click("#v3-keys tr[data-id='workbench.pen'] [data-add]");
 await page.keyboard.press("k");
 await page.waitForFunction(() => document.querySelector("#v3-keys tr[data-id='workbench.pen']")?.textContent.includes("変えた"));
-check(JSON.stringify(keymapOf()["workbench.pen"]) === JSON.stringify(["b", "k"]), "ペンに K を足すと、利用者の設定（/me/settings の other.keymap）に残る");
+check(await stored((m) => JSON.stringify(m["workbench.pen"]) === JSON.stringify(["b", "k"])), "ペンに K を足すと、利用者の設定（/me/settings の other.keymap）に残る");
 await page.click("#v3-keys tr[data-id='workbench.erase'] [data-add]");
 await page.keyboard.press("k");
 await page.waitForSelector("#v3-keys .v3-conflict");
@@ -261,7 +267,7 @@ check(!(keymapOf()["workbench.erase"]), "重なりを選ぶ前は残さない");
 await shot(page, "15_keys_settings_conflict");
 await page.click("#v3-ks-take");
 await page.waitForFunction(() => !document.querySelector("#v3-keys .v3-conflict"));
-check(JSON.stringify(keymapOf()["workbench.erase"]) === JSON.stringify(["e", "k"]) && !keymapOf()["workbench.pen"], "「相手から外して割り当てる」で消しゴムが K、ペンは初めに戻る");
+check(await stored((m) => JSON.stringify(m["workbench.erase"]) === JSON.stringify(["e", "k"]) && !m["workbench.pen"]), "「相手から外して割り当てる」で消しゴムが K、ペンは初めに戻る");
 await page.keyboard.press("Escape");
 await page.keyboard.press("k");
 check(await tool() === "erase", "変えたキー K で消しゴムになる");
@@ -277,7 +283,7 @@ await page.click("#v3-ks-import");
 check(await page.isVisible("#v3-ks-import-list"), "今のアプリで違うキーが並ぶ");
 await page.click("#v3-ks-import-go");
 await page.waitForFunction(() => !document.querySelector("#v3-ks-import-list"));
-check((keymapOf()["workbench.zoomIn"] ?? []).includes("$mod+8") && (keymapOf()["view.help"] ?? []).includes("F1"), "読み込むと Ctrl+8（広げる）と F1（キーの一覧）が足される");
+check(await stored((m) => (m["workbench.zoomIn"] ?? []).includes("$mod+8") && (m["view.help"] ?? []).includes("F1")), "読み込むと Ctrl+8（広げる）と F1（キーの一覧）が足される");
 await page.keyboard.press("Escape");
 const z1 = await page.evaluate(() => window.v3Stage.c.getZoom());
 await page.keyboard.press("Control+8");
@@ -285,7 +291,7 @@ check(await page.evaluate(() => window.v3Stage.c.getZoom()) > z1, "読み込ん�
 await page.click("#v3-keys");
 await page.click("#v3-ks-reset");
 await page.waitForFunction(() => !document.querySelector("#v3-keys .flag.ai"));
-check(Object.keys(keymapOf()).length === 0, "全部を初めに戻すと、変えた割り当てが無くなる");
+check(await stored((m) => Object.keys(m).length === 0), "全部を初めに戻すと、変えた割り当てが無くなる");
 await page.keyboard.press("Escape");
 // 続けて押すキー：G のあと 8 は今の画面なので動かない。G のあと 0 で確認へ
 await page.keyboard.press("g");
