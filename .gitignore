@@ -172,3 +172,4 @@ test_offscreen.html
 
 # PoC（ONNXモデル等の大きなバイナリを含む。検索対象からも外す）
 poc/
+.claude/worktrees/
