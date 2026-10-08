@@ -26,6 +26,7 @@ from v3server.http_routes import (
     pen_stroke_routes,
     service_routes,
     settings_and_search_routes,
+    translation_review_import_routes,
     work_routes,
 )
 from v3server.openfga_permissions import open_authz
@@ -65,7 +66,7 @@ async def v3_error(request: Request, exc: V3Error):
 
 for _routes in (work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,
                 name_check_routes, pen_stroke_routes, export_routes, settings_and_search_routes, ai_job_routes,
-                image_generation_routes):
+                image_generation_routes, translation_review_import_routes):
     app.include_router(_routes.router)
 
 # 画像生成の画面（v3/web/）。同じ住所から配るので、画面の fetch は CORS なしで口を呼べる。認証は開発用の見出し X-V3-User

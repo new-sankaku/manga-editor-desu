@@ -21,6 +21,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import ExportRun
 from v3server.canonical_tables.page_item_tables import PageItem
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
+from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel, Work
 from v3server.hand_tools.vector_strokes import refuse_stale_stroke_cache
 from v3server.image_file_storage import read_image, store_image
@@ -39,7 +40,32 @@ class ExportRefused(ValueError):
     pass
 
 
-async def load_page_content(session: AsyncSession, work: Work, page_id: str) -> PageContent:
+async def translated_texts(session: AsyncSession, work: Work, texts: list[TextItem], language: str) -> list[TextItem]:
+    """文字を言語 language の訳文に差し替えた写し（行そのものは変えない）。訳文の無い文字があれば止める。
+    元の文字で埋めない（どの言語の版か分からなくなる）。ルビは元の文字の位置に付くので、訳文では外す。"""
+    if language == (work.preferences or {}).get("language"):
+        return texts
+    rows = {t.text_item_id: t for t in (await session.execute(select(TextItemTranslation).where(
+        TextItemTranslation.text_item_id.in_([t.id for t in texts]), TextItemTranslation.language == language,
+        TextItemTranslation.removed.is_(False)))).scalars()}
+    missing = [t.id for t in texts if t.id not in rows]
+    if missing:
+        raise ExportRefused(f"{language} の訳文が無い文字がある: {', '.join(missing)}")
+    out = []
+    for t in texts:
+        tr = rows[t.id]
+        values = {c.key: getattr(t, c.key) for c in TextItem.__table__.columns}
+        values.update(text=tr.text, ruby=[])
+        if tr.writing_direction is not None:
+            values["writing_direction"] = tr.writing_direction
+        if tr.font_size_pt is not None:
+            values["font_size_pt"] = tr.font_size_pt
+        out.append(TextItem(**values))
+    return out
+
+
+async def load_page_content(session: AsyncSession, work: Work, page_id: str,
+                            language: str | None = None) -> PageContent:
     page = await session.get(Page, page_id)
     if page is None or page.work_id != work.id or page.removed:
         raise ExportRefused(f"ページ {page_id} が無い")
@@ -51,6 +77,8 @@ async def load_page_content(session: AsyncSession, work: Work, page_id: str) -> 
         return list((await session.execute(q)).scalars())
 
     panels, layers, texts, items = await rows(Panel), await rows(PanelLayer), await rows(TextItem), await rows(PageItem)
+    if language is not None:
+        texts = await translated_texts(session, work, texts, language)
     image_ids = {p.image_id for p in panels if p.image_id} | {la.image_id for la in layers if la.image_id}
     for it in items:
         target = (it.spec or {}).get("target") or {}
@@ -118,7 +146,7 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
     outputs: list[dict[str, Any]] = []
     pdf_pages: list[Image.Image] = []
     for page_id in run.page_ids:
-        content = await load_page_content(session, work, page_id)
+        content = await load_page_content(session, work, page_id, run.language)
         try:
             rendered = _render(content, run.dpi)
         except RenderRefused as e:

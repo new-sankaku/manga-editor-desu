@@ -21,7 +21,7 @@ from sqlalchemy import select
 from temporalio.common import Priority
 
 from v3server.canonical_tables.material_and_setting_tables import ExportRun
-from v3server.canonical_tables.text_and_layer_tables import HeldAiChange
+from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, TextItem
 from v3server.canonical_tables.work_tree_tables import Page, Work
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require, row
 from v3server.image_file_storage import read_image
@@ -30,8 +30,9 @@ from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.operations.pen_stroke_operations import StoredResult
+from v3server.operations.text_translation_operations import LANGUAGE_PATTERN
 from v3server.operations.psd_import_operations import ApplyPsdImport, PsdImportEntry
-from v3server.print_export.export_runner import PSD_STROKE_NOTE
+from v3server.print_export.export_runner import PSD_STROKE_NOTE, ExportRefused, translated_texts
 from v3server.print_export.export_workflow import EXPORT_QUEUE, ExportRunWorkflow
 from v3server.print_export.page_render import mm_to_px_matrix
 from v3server.print_export.psd_import_matching import ExportedLayer, import_actions, match_layers, read_psd
@@ -40,8 +41,8 @@ from v3server.v3_error_types import Invalid, NotFound
 
 router = APIRouter()
 
-RUN_FIELDS = ("id", "work_id", "requested_by", "format", "page_ids", "dpi", "paper_mm", "status", "detail", "outputs",
-              "created_at", "updated_at")
+RUN_FIELDS = ("id", "work_id", "requested_by", "format", "page_ids", "dpi", "paper_mm", "language", "status", "detail",
+              "outputs", "created_at", "updated_at")
 
 
 class ExportRequest(BaseModel):
@@ -49,6 +50,8 @@ class ExportRequest(BaseModel):
     page_ids: list[str] = Field(min_length=1)
     dpi: int = Field(gt=0, le=2400)
     paper_mm: tuple[float, float] | None = None
+    # 言語ごとの書き出し（訳文に差し替える。print_export/export_runner.py の translated_texts）。無ければ元の文字
+    language: str | None = Field(default=None, pattern=LANGUAGE_PATTERN)
 
 
 async def _require_export(session, authz, actor, work_id: str, fmt: str, page_ids: list[str]) -> None:
@@ -57,6 +60,24 @@ async def _require_export(session, authz, actor, work_id: str, fmt: str, page_id
         return
     for pid in page_ids:
         await require(authz, actor, "can_draw", page_obj(pid))
+
+
+async def _check_language(session, work_id: str, req: ExportRequest) -> None:
+    """言語の書き出しは、始める前に訳文の揃いを確かめる（足りなければ、足りない文字を挙げて止める）。"""
+    if req.format == "psd":
+        # 直した PSD を戻すとき、文字の層を元の言語の文字と突き合わせるため（psd_import_matching.py）。未対応
+        raise Invalid("PSD は言語ごとに書き出さない（直した PSD を戻す突き合わせが元の言語の文字で動くため。未対応）")
+    work = await session.get(Work, work_id)
+    if not (work.preferences or {}).get("language"):
+        raise Invalid("作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない")
+    for pid in req.page_ids:
+        page = await session.get(Page, pid)
+        texts = (await session.execute(select(TextItem).where(
+            TextItem.page_id == page.id, TextItem.removed.is_(False)))).scalars().all()
+        try:
+            await translated_texts(session, work, list(texts), req.language)
+        except ExportRefused as e:
+            raise Invalid(str(e)) from e
 
 
 @router.post("/works/{work_id}/exports", status_code=201)
@@ -71,8 +92,10 @@ async def start_export(work_id: str, req: ExportRequest, session: SessionDep, au
         if page.removed:
             raise Invalid(f"ページ {pid} は抜かれている")
     await _require_export(session, authz, actor, work_id, req.format, req.page_ids)
+    if req.language is not None:
+        await _check_language(session, work_id, req)
     run = ExportRun(work_id=work_id, requested_by=actor.id, format=req.format, page_ids=req.page_ids, dpi=req.dpi,
-                    paper_mm=list(req.paper_mm) if req.paper_mm else None, status="queued", outputs=[])
+                    paper_mm=list(req.paper_mm) if req.paper_mm else None, language=req.language, status="queued", outputs=[])
     session.add(run)
     await session.flush()
     run.workflow_id = f"export-{run.id}"

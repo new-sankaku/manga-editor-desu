@@ -8,6 +8,7 @@ dependencies = [
     "httpx>=0.28.1",
     "img2pdf>=0.6.3",
     "kiwisolver>=1.5.1",
+    "lz4>=4.4.5",
     "numpy>=2.5.3",
     "pillow>=12.3.0",
     "psd-tools>=1.21.0",

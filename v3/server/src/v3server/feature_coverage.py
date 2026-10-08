@@ -60,8 +60,10 @@ ROWS_10_4: dict[str, object] = {
     "あらすじ・読者・人物を抜き出す・入れないもの": {
         "ops": ["set_work_plan"], "routes": ["POST /works/{work_id}/plan/extract-characters"]},
     "ページを足す・画像から足す・取り込む": {
-        "ops": ["add_page"], "routes": ["POST /works/{work_id}/images",
-                                        "POST /works/{work_id}/episodes/{episode_id}/name-imports"]},
+        "ops": ["add_page", "import_current_app_project"],
+        "routes": ["POST /works/{work_id}/images", "POST /works/{work_id}/episodes/{episode_id}/name-imports",
+                   "POST /works/{work_id}/episodes/{episode_id}/current-app-imports",
+                   "GET /works/{work_id}/current-app-imports/{report_id}"]},
     "画像の書き出し・コピー・解像度・紙の大きさ": {
         "routes": ["POST /works/{work_id}/exports", "GET /works/{work_id}/exports/{run_id}",
                    "GET /works/{work_id}/exports/{run_id}/files/{name}",

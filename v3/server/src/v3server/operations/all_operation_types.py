@@ -10,6 +10,7 @@ from v3server.operations.annotation_operations import (
     RecordAnnotationJob,
     UpdateAnnotation,
 )
+from v3server.operations.current_app_import_operations import ImportCurrentAppProject
 from v3server.operations.held_change_operations import ResolveHeldChange, UndoWithHeldChanges
 from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
 from v3server.operations.image_file_operations import (
@@ -52,6 +53,7 @@ from v3server.operations.pen_stroke_operations import (
     UpdatePenStrokes,
 )
 from v3server.operations.psd_import_operations import ApplyPsdImport
+from v3server.operations.review_operations import SetReviewStatus
 from v3server.operations.row_snapshot import RestoreRows
 from v3server.operations.text_and_layer_operations import (
     AddPanelLayer,
@@ -60,6 +62,7 @@ from v3server.operations.text_and_layer_operations import (
     UpdateTextItem,
 )
 from v3server.operations.text_search_and_replace import ReplaceText
+from v3server.operations.text_translation_operations import SetTextTranslation, SetTextTranslationRemoved
 from v3server.operations.work_setting_operations import (
     AllowDestination,
     RecordFindingReaction,
@@ -138,6 +141,10 @@ Op = Annotated[
         DecideMaterialProposal,
         ReplaceText,
         ApplyPsdImport,
+        ImportCurrentAppProject,
+        SetTextTranslation,
+        SetTextTranslationRemoved,
+        SetReviewStatus,
     ],
     Field(discriminator="type"),
 ]
