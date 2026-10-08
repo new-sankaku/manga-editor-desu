@@ -38,6 +38,10 @@ def _png(w: int, h: int, seed: int, step: int | None = None, total: int | None =
     for x in range(0, upto, 4):
         d.line([(x, 0), (x, h)], fill=(r, 150 - (x * 60 // max(w, 1)), 110))
     d.ellipse([w * 0.3, h * 0.2, w * 0.7, h * 0.8], outline=(60, 50, 40), width=3)
+    # 色は種の 120 通りにしか分かれない。種の全部を左上の2つの点に書き、種が違えば絵も違うようにする
+    # （同じ絵が2枚出ると、偽の評価役が絵の中身で選べず引き分けになり、回が1つ増える）
+    im.putpixel((0, 0), ((seed >> 24) & 255, (seed >> 16) & 255, (seed >> 8) & 255))
+    im.putpixel((1, 0), (seed & 255, 0, 0))
     buf = io.BytesIO()
     im.save(buf, format="PNG")
     return buf.getvalue()
