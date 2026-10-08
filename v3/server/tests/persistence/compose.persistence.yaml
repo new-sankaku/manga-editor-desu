@@ -1,0 +1,72 @@
+# 保存と再起動の確かめ（v3/web/test/persistence_e2e.mjs）だけが使う既製品。
+# v3/server/compose.yaml と同じ版・同じ設定で、名前（v3pe）と口だけを替える。ほかの作業の compose と同時に動かせるように。
+# LiteLLM は入れない（LLM は偽物。tests/persistence/fake_workers_main.py）。
+# どの口も 127.0.0.1 にだけ開く。OpenFGA は事前共有鍵が無い要求を断る（鍵は driver が環境変数で渡す）。
+name: v3pe
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: v3
+      POSTGRES_PASSWORD: v3
+      POSTGRES_DB: v3
+    ports:
+      - "127.0.0.1:${V3PE_PG_PORT:-55961}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../../docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U v3 -d v3"]
+      interval: 2s
+      retries: 30
+
+  temporal:
+    image: temporalio/temporal:1.9.1
+    user: "0:0"
+    command:
+      - server
+      - start-dev
+      - --ip
+      - 0.0.0.0
+      - --db-filename
+      - /data/temporal.db
+      - --dynamic-config-value
+      - matching.numTaskqueueReadPartitions=1
+      - --dynamic-config-value
+      - matching.numTaskqueueWritePartitions=1
+      - --dynamic-config-value
+      - matching.enableFairness=true
+    ports:
+      - "127.0.0.1:${V3PE_TEMPORAL_PORT:-57961}:7233"
+    volumes:
+      - temporaldata:/data
+
+  openfga-migrate:
+    image: openfga/openfga:v1.22.0
+    command: ["migrate"]
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://v3:v3@postgres:5432/openfga?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  openfga:
+    image: openfga/openfga:v1.22.0
+    command: ["run"]
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://v3:v3@postgres:5432/openfga?sslmode=disable
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+      OPENFGA_AUTHN_METHOD: preshared
+      OPENFGA_AUTHN_PRESHARED_KEYS: ${OPENFGA_PRESHARED_KEY:?OPENFGA_PRESHARED_KEY を渡してください}
+    ports:
+      - "127.0.0.1:${V3PE_OPENFGA_PORT:-58991}:8080"
+    depends_on:
+      openfga-migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
+  temporaldata:
