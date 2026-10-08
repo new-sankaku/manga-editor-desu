@@ -7,7 +7,7 @@
 //
 // 前提を作るのは口から（seed_work.py）。画面で行うのは、残るべき編集と、開き直した後の確かめだけ。ブラウザは1回だけ起こす。
 // 待つのは状態（保存の待ち行列が空・正本の値・画面の画素が落ち着く）で、決まった時間は待たない。
-// 結果は SHOTS（既定 /tmp/v3pe/shots）に写しと results.json を置く。手順と結果は llm_doc/V3サーバーの土台.md「保存と再起動の確かめ」。
+// 結果は PE_DIR（既定 /tmp/v3pe）の results.json に置く。画面の写しは SHOTS=<フォルダ> を付けたときだけそこへ置く（比べる写しは手元の記憶で持つ）。手順と結果は llm_doc/V3サーバーの土台.md「保存と再起動の確かめ」。
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
@@ -22,9 +22,11 @@ const STACK = `${SERVER}/tests/persistence/stack.sh`;
 const PE_DIR = process.env.PE_DIR || "/tmp/v3pe";
 const API = `http://127.0.0.1:${process.env.V3PE_API_PORT || 8961}`;
 const COMFY = `http://127.0.0.1:${process.env.V3PE_COMFY_PORT || 8963}`;
-const SHOTS = process.env.SHOTS || `${PE_DIR}/shots`;
+const SHOTS = process.env.SHOTS || null;
 const ADMIN = "pe-admin", USER = "pe-author";
-mkdirSync(SHOTS, { recursive: true });
+mkdirSync(PE_DIR, { recursive: true });
+if (SHOTS) mkdirSync(SHOTS, { recursive: true });
+const save = (name, data) => { if (SHOTS) writeFileSync(`${SHOTS}/${name}`, data); };
 
 const results = { scenarios: {}, checks: [], expected_changes: [], findings: [] };
 const t0 = Date.now();
@@ -50,7 +52,9 @@ async function api(method, p, body, who = USER) {
   if (r.status >= 300) throw new Error(`${method} ${p} → ${r.status} ${t.slice(0, 300)}`);
   return t ? JSON.parse(t) : null;
 }
-const ready = () => until(async () => (await fetch(`${API}/health/ready`)).status === 200, "口のサーバーと作業者がそろう", 90000);
+// /health/ready は作業者を見ない。作業者のプロセスが生きていることは stack.sh status で見る（前は作業者が落ちたまま進み、最後の承認で止まった）
+const workersUp = () => /^workers up$/m.test(execFileSync(STACK, ["status"], { encoding: "utf8" }));
+const ready = () => until(async () => workersUp() && (await fetch(`${API}/health/ready`)).status === 200, "口のサーバーと作業者がそろう", 90000);
 
 // ---------------------------------------------------------------- 一式を起こし、前提を口から入れる
 stack("up");
@@ -116,7 +120,7 @@ async function stableShot(locator, name) {
     prev = b;
     return same ? b : null;
   }, `${name} の写しが落ち着く`, 20000);
-  writeFileSync(`${SHOTS}/${name}.png`, buf);
+  save(`${name}.png`, buf);
   return buf;
 }
 // 2枚の PNG の違う画素の数（ブラウザで読む。色の差が 8 を超える画素）
@@ -367,13 +371,13 @@ try {
     const hz = await page.locator('.pchip[data-status="awaiting_review"]').count();
     return { ms, wb, dom: { layersDom, tr, rv, harnessAwaiting: hz > 0 } };
   }
-  async function shot(name) { writeFileSync(`${SHOTS}/${name}.png`, await page.screenshot()); }
+  async function shot(name) { if (SHOTS) save(`${name}.png`, await page.screenshot()); }
 
   // 写しは、開き直した画面で取る（場面 a の前の基準）
   const base = await canonical();
   const baseScreens = await screens("0_base");
   check(baseScreens.dom.harnessAwaiting, "基準：工程の画面に確認待ちの作業が出る");
-  writeFileSync(`${SHOTS}/base_canonical.json`, JSON.stringify(base, null, 1));
+  writeFileSync(`${PE_DIR}/base_canonical.json`, JSON.stringify(base, null, 1));
 
   async function compare(name) {
     const now = await canonical();
@@ -547,12 +551,12 @@ try {
   results.ok = false;
   results.error = String(e.stack || e);
   console.error(e);
-  try { await page.screenshot({ path: `${SHOTS}/failure.png` }); } catch { /* */ }
+  try { save("failure.png", await page.screenshot()); } catch { /* */ }
 } finally {
   results.seconds = Math.round((Date.now() - t0) / 1000);
   results.errors = errors;
-  writeFileSync(`${SHOTS}/results.json`, JSON.stringify(results, null, 1));
+  writeFileSync(`${PE_DIR}/results.json`, JSON.stringify(results, null, 1));
   await browser.close();
-  log(results.ok ? "全部通った" : "失敗", `${SHOTS}/results.json`);
+  log(results.ok ? "全部通った" : "失敗", `${PE_DIR}/results.json`);
   process.exit(results.ok ? 0 : 1);
 }

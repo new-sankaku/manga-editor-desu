@@ -238,8 +238,9 @@ await page.keyboard.press("Escape");
 const afterEsc2 = await page.evaluate(() => ({ focus: document.documentElement.hasAttribute("data-focus"), fs: !!document.fullscreenElement }));
 check(!afterEsc2.focus && afterEsc2.fs, "Esc 2回目：絵だけから抜ける（全画面のまま）");
 await page.keyboard.press("Escape");
-await page.waitForFunction(() => !document.fullscreenElement);
-check(!(await html("data-fullscreen")), "Esc 3回目：全画面から抜ける");
+// 全画面の印は fullscreenchange で外す。fullscreenElement が先に消えるので、印が外れるまで待つ（待たないと5回に1回落ちた）
+const esc3 = await page.waitForFunction(() => !document.fullscreenElement && !document.documentElement.hasAttribute("data-fullscreen"), null, { timeout: 5000 }).then(() => true, () => false);
+check(esc3, "Esc 3回目：全画面から抜ける");
 // ブラウザの側で全画面を抜けても、画面の状態が合う
 await page.keyboard.press("Shift+F");
 await page.keyboard.press("Control+Shift+F");
