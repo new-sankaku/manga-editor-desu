@@ -65,6 +65,9 @@ export const KEYS = [
   { id: "review.right", scope: "review", label: "読み通すとき、右のページへ（右から左の作品では前）", keys: ["ArrowRight"], chain: true },
   { id: "review.next", scope: "review", label: "読み通すとき、次のページ", keys: ["PageDown"], chain: true },
   { id: "review.prev", scope: "review", label: "読み通すとき、前のページ", keys: ["PageUp"], chain: true },
+  // 工程（harness）
+  { id: "harness.fit", scope: "harness", label: "図の全体を見る", keys: ["0"] },
+  { id: "harness.stageView", scope: "harness", label: "工程の図へ戻る", keys: [] },
 
   // ---------------------------------------------------------------- 原稿（22.2。処理は原稿の画面が結ぶ）
   { id: "manuscript.nextDecision", scope: "manuscript", label: "次の判断", keys: ["j"] },

@@ -5,10 +5,11 @@ html[data-focus]:not([data-peek]) [data-v3-panel]{display:none !important}
 
 /* 絵だけ・全画面の間の小さい帯（右下） */
 .v3-viewbar{position:fixed;right:12px;bottom:12px;z-index:30;display:flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-2);font:12px/1.4 var(--font);color:var(--ink-2)}
-.v3-viewbar-b{min-height:30px;padding:0 9px;border-radius:var(--r-sm);display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
+.v3-viewbar-b{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;min-height:30px;padding:0 9px;border-radius:var(--r-sm);display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
 .v3-viewbar-b:hover{background:var(--surface-2);color:var(--ink)}
 .v3-viewbar-b[aria-pressed="true"]{background:var(--raise);color:var(--ink);font-weight:600;box-shadow:var(--sh-1)}
 .v3-viewbar-b kbd{font:11px var(--font);color:var(--ink-4)}
+.v3-viewbar-b .lucide{width:16px;height:16px;flex:0 0 auto}
 
 /* 帯（common/nav.js）の右の、絵だけ・全画面・キーのボタン */
 .v3-nav-tools{margin-left:auto;display:inline-flex;align-items:center;gap:2px}

@@ -223,8 +223,12 @@ function onKeyDown(e) {
   if (e.isComposing || e.keyCode === 229) return;                 // IME の変換中
   // 開いている窓（dialog）の中のキーは、その窓が受ける
   if (e.target instanceof Element && e.target.closest("dialog[open]")) return;
+  // 閉じた窓の中の入力の欄に入ったままのことがある（Chromium で、Esc で閉じた直後に試験で見た）。
+  // 見えない欄に入ったままだとキーが「文字を打っている」として全部止まるので、欄から出して画面のキーとして受ける
+  const shut = e.target instanceof Element ? e.target.closest("dialog:not([open])") : null;
+  if (shut && e.target.closest(FIELD)) e.target.blur();
   if (MODS.includes(e.key) && pending) return;                     // 続けて押す途中の Shift などは途切れにしない
-  const inField = e.target instanceof Element && !!e.target.closest(FIELD);
+  const inField = !shut && e.target instanceof Element && !!e.target.closest(FIELD);
   const list = candidates(inField);
 
   if (pending) {

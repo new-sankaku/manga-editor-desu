@@ -65,6 +65,16 @@ const CANDS = {
 };
 const RECORDS = [{ id: "r1", target_kind: "page", target_id: "p2", from_status: "draft", to_status: "in_review", comment: "2ページの3コマ目、手の向きを見てください", actor_id: "key-editor", actor_kind: "human", created_at: "2026-10-08T09:00:00Z", reverts_record_id: null }];
 
+const HARNESS = {
+  last_event_id: 0, stale: [], progress: [],
+  stage_runs: ["S0", "S1", "S2", "S3", "S4", "S5"].map((stage) => ({ id: `r-${stage}`, stage, episode_id: "e1", status: stage === "S5" ? "running" : "done" })),
+  units: [
+    ...["S0", "S1", "S2", "S3", "S4"].map((st) => ({ unit_id: `u-${st}`, stage_run_id: `r-${st}`, kind: st === "S2" ? "name_draft" : "panel_image", status: "done", page_id: "p1", target_id: "pn1", attempt: 1, max_attempts: 3, step: "end" })),
+    { unit_id: "u-S5a", stage_run_id: "r-S5", kind: "panel_image", status: "running", page_id: "p1", target_id: "pn1", attempt: 1, max_attempts: 3, step: "generate" },
+    { unit_id: "u-S5b", stage_run_id: "r-S5", kind: "panel_image", status: "awaiting_review", page_id: "p1", target_id: "pn1", attempt: 2, max_attempts: 3, step: "review" },
+  ],
+};
+
 function answer(method, path, body, user) {
   const u = new URL(path, ORIGIN);
   const p = u.pathname;
@@ -83,6 +93,9 @@ function answer(method, path, body, user) {
   if (method === "GET" && p === "/works") return j([{ id: "w1", title: "砂の町", reading_direction: "rtl", text_direction: "vertical", medium: "paper" }]);
   if (method === "GET" && p === "/works/w1") return j(WORK);
   if (method === "GET" && p === "/services") return j([]);
+  // 工程の画面：今の状態（流れの続きは送らない。つないだままにする）
+  if (method === "GET" && p === "/works/w1/harness/snapshot") return j(HARNESS);
+  if (method === "GET" && p === "/works/w1/harness/review-items") return j({ items: [] });
   if (method === "GET" && p === "/works/w1/image-processes") return j([]);
   if (method === "GET" && p === "/works/w1/review-records") return j(RECORDS);
   if (method === "GET" && p === "/works/w1/panels/pn1/layers") return j({ panel: {}, layers: [] });
@@ -107,6 +120,7 @@ async function install(page) {
       if (!file.startsWith(WEB) || !existsSync(file)) return route.fulfill({ status: 404, body: "無い" });
       return route.fulfill({ status: 200, body: readFileSync(file), contentType: TYPES[extname(file)] || "application/octet-stream" });
     }
+    if (u.pathname.endsWith("/harness/stream")) return;   // 流れは開いたまま何も送らない（route を閉じない）
     const r = answer(req.method(), u.pathname + u.search, req.postData() ? JSON.parse(req.postData()) : null, req.headers()["x-v3-user"]);
     if (r.status === 404) misses.push(`${req.method()} ${u.pathname}`);
     return route.fulfill(r);
@@ -209,6 +223,7 @@ await page.fill("#v3-help-q", "");
 await shot(page, "13_keys_help");
 await page.keyboard.press("Escape");
 check(!(await page.isVisible("#v3-help")), "Esc でキーの一覧が閉じる");
+// 探す欄に入ったまま閉じても、すぐ次のキーが効く（閉じた窓の欄に残ったままキーが止まっていたのを直した）
 
 // 絵だけ・Tab・全画面・Esc の順
 await page.keyboard.press("Shift+F");
@@ -328,6 +343,25 @@ await page.click("#comment");
 await page.keyboard.press("Shift+?");
 check(!(await page.isVisible("#v3-help")), "コメントの欄で ? を打ってもキーの一覧は開かない");
 check((await page.inputValue("#comment")) === "?", "コメントの欄に ? が入る");
+
+// ===== 工程の画面：絵だけは図だけ（見張る画面）
+await page.goto(`${ORIGIN}/web/harness/?work=w1`);
+await page.waitForSelector("#graph canvas");
+await page.waitForFunction(() => document.querySelector("#fit kbd")?.textContent === "0");
+const h0 = await page.evaluate(() => document.querySelector(".graph-wrap").getBoundingClientRect().height);
+await page.keyboard.press("Shift+F");
+await page.waitForTimeout(200);
+const hv = await page.evaluate(() => ({ h: document.querySelector(".graph-wrap").getBoundingClientRect().height, vh: innerHeight,
+  hidden: ["#side", ".table-box", "header.top", ".v3-nav"].every((q) => getComputedStyle(document.querySelector(q)).display === "none") }));
+check(hv.hidden && hv.h > h0 && hv.h > hv.vh * 0.8, `工程の画面：Shift+F で図だけになり、図が画面の高さいっぱい（${Math.round(h0)} → ${Math.round(hv.h)}px）`);
+await shot(page, "17_harness_focus");
+await page.keyboard.press("Shift+?");
+await page.waitForSelector("#v3-help[open]");
+check(await page.isVisible("#v3-help tr[data-id='harness.fit']"), "工程の画面のキーの一覧に「図の全体を見る」が出る");
+await page.keyboard.press("Escape");
+await page.keyboard.press("0");
+await page.keyboard.press("Escape");
+check(!(await html("data-focus")) && await page.isVisible("#side"), "工程の画面：Esc で図だけから戻る");
 
 // ===== ほかの画面にも帯のボタンとキーがある
 // 偽のサーバーはこれらの画面の中身（話の一覧・進み・設定資料・つなぎ先など）を持たない。中身を読めずに出るエラーはここでは数えない

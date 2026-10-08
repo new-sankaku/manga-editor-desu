@@ -18,7 +18,11 @@
   --bad:#A8432F; --bad-ink:#823120; --bad-tint:#E7D0C0; --bad-line:#C89884;
   --ok:#5F8A55;
   /* 仕事の状態 */
-  --st-wait:var(--ink-4); --st-run:var(--ai); --st-done:var(--ok); --st-fail:var(--bad); --st-stale:var(--need);
+  --st-wait:var(--ink-4); --st-run:var(--ai); --st-done:var(--ok); --st-fail:var(--bad);
+  --run-bg:color-mix(in srgb,var(--ok) 22%,var(--surface)); --retry:var(--need-ink);
+  --stale:var(--ink-2); --stale-tint:color-mix(in srgb,var(--stale) 10%,transparent);
+  --hot-glow:color-mix(in srgb,var(--need) 25%,transparent); --hot-glow-2:color-mix(in srgb,var(--need) 60%,transparent);
+  --bad-stripe:color-mix(in srgb,var(--bad) 6%,transparent);
   /* 紙と、絵の上に重ねる印 */
   --paper:#FFFFFF;
   --mask:#4A6386; --protect:#C46A00; --pointer:#433F35;
