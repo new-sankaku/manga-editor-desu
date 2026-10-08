@@ -16,6 +16,7 @@ from test_harness import (  # noqa: F401  (fixture)
     admin,
     comfy,
     harness,
+    harness_temporal,
     make_work,
     no_duplicate_sends,
     no_leftover_flows,

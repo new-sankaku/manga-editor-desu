@@ -7,7 +7,6 @@
 import io
 import uuid
 
-import pytest
 from conftest import h, wait_for
 from harness_fakes import Script  # noqa: F401
 from PIL import Image
@@ -19,6 +18,7 @@ from test_harness import (  # noqa: F401  (fixture)
     admin,
     comfy,
     harness,
+    harness_temporal,
     jobs_of,
     make_work,
     no_leftover_flows,
@@ -34,8 +34,6 @@ from test_human_ai_interchange import op
 
 from v3server.canonical_tables.harness_tables import HarnessUnit
 from v3server.database_engine import get_sessionmaker
-
-pytestmark = pytest.mark.full
 
 PEOPLE_BOX = [{"name": "アオイ", "face": "中", "facing": "正面", "box_mm": [0, 0, 30, 40]}]
 

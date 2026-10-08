@@ -2,13 +2,13 @@
 偽の LLM で通す。LLM の答えは台本（Script.answers）で工程の問いごとに決める。
 """
 
-import pytest
 from conftest import h, wait_for
 from sqlalchemy import select
 from test_harness import (  # noqa: F401  (fixture)
     admin,
     comfy,
     harness,
+    harness_temporal,
     limits,
     make_work,
     no_leftover_flows,
@@ -23,8 +23,6 @@ from test_human_ai_interchange import PAGE_SPEC, op
 from v3server.canonical_tables.harness_tables import EpisodeOutline
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.database_engine import get_sessionmaker
-
-pytestmark = pytest.mark.full
 
 PLAN = {"synopsis": "海辺の町で少女が古い灯台の秘密を追う", "audience": "中学生から", "exclusions": None, "notes": None}
 OUTLINE = {"pages": [{"page": 1, "summary": "灯台を見上げる", "role": "導入"},

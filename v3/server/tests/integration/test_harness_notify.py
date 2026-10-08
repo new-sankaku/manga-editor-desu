@@ -7,6 +7,7 @@ from test_harness import (  # noqa: F401  (fixture)
     admin,
     comfy,
     harness,
+    harness_temporal,
     make_work,
     no_leftover_flows,
     script,
@@ -17,8 +18,6 @@ from test_harness import (  # noqa: F401  (fixture)
 )
 
 from v3server.harness import harness_notify
-
-pytestmark = pytest.mark.full
 
 
 @pytest.fixture

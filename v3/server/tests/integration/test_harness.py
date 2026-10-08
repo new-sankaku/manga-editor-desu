@@ -17,19 +17,23 @@ from test_human_ai_interchange import op
 from test_image_generation import SD
 from test_queue import admin  # noqa: F401  (fixture)
 
-from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessEvent, HarnessUnit, ServiceCallProgress
+from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessUnit, ServiceCallProgress
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.work_tree_tables import Panel
 from v3server.database_engine import get_sessionmaker
-from v3server.harness import live_stream
+from v3server.generation_queue.queue_worker_main import WorkerSet
+from v3server.harness import harness_notify, live_stream, queue_calls, upstream_watch
 from v3server.harness.harness_worker_main import HarnessWorker
 from v3server.harness.queue_calls import HARNESS_PROCESSES
+from v3server.http_routes.http_app_factory import app
 from v3server.server_settings import get_settings
+from v3server.service_senders import comfyui_sender
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS
 
-# 本物の Temporal を通すので遅い。流れの筋道は tests/unit/test_unit_workflow_timeskip.py（時間を飛ばす）で確かめる
-pytestmark = pytest.mark.full
+# Temporal は、full の印の付いた試験だけ本物（compose）を使い、ほかは試験用のサーバー（conftest の skipping。作業者ごとに
+# 1つ立てるので、同時に流しても依頼を取り合わない）を使う（harness_temporal）。流れの筋道だけの試験は
+# tests/unit/test_unit_workflow_timeskip.py（活動を差し替え、時間を飛ばす）
 
 FRAME = {"polygon_mm": [[0, 0], [60, 0], [60, 40], [0, 40]], "bleeds": False}
 CONTENT = {"content": "主人公が振り返る", "shot": "胸から上", "angle": "目の高さ",
@@ -83,8 +87,33 @@ async def no_leftover_flows(temporal):
 
 
 @pytest.fixture
-async def harness(temporal):
-    hw = HarnessWorker(temporal)
+async def harness_temporal(request, api, temporal, skipping_env, monkeypatch):
+    """(依頼の作業者, Temporal の client)。full・perf の印の試験は本物の Temporal、ほかは試験用のサーバー
+    （口 app.state.temporal も向け替え、終わったら戻す）。"""
+    real = request.node.get_closest_marker("full") or request.node.get_closest_marker("perf")
+    client = temporal if real else skipping_env.client
+    if not real:
+        # 速い組では見回りの間隔を縮める（ComfyUI の履歴を見る 1秒・依頼の状態を見る 0.3秒・上流を見る 1秒・知らせ 1秒。
+        # 本番の値のままだと、1つの絵ごとに1秒近く待つ）。何を確かめるかは変わらない。
+        # full・perf は本番の値のまま（遅れを測る試験がある）
+        for mod, name, sec in ((comfyui_sender, "POLL_SECONDS", 0.05), (queue_calls, "POLL_SECONDS", 0.05),
+                               (upstream_watch, "SCAN_SECONDS", 0.1), (harness_notify, "POLL_SECONDS", 0.1),
+                               (live_stream, "POLL_SECONDS", 0.05)):
+            monkeypatch.setattr(mod, name, sec)
+    ws = WorkerSet(client)
+    await ws.start()
+    before = app.state.temporal
+    app.state.temporal = client
+    try:
+        yield ws, client
+    finally:
+        app.state.temporal = before
+        await ws.shutdown()
+
+
+@pytest.fixture
+async def harness(harness_temporal):
+    hw = HarnessWorker(harness_temporal[1])
     await hw.start()
     yield hw
     await hw.shutdown()
@@ -114,7 +143,8 @@ async def _route(api, admin_user, sid, process, resend=0, **settings):
 
 
 @pytest.fixture
-async def services(api, admin, workers, comfy, monkeypatch, tmp_path):  # noqa: F811
+async def services(api, admin, harness_temporal, comfy, monkeypatch, tmp_path):  # noqa: F811
+    workers = harness_temporal[0]
     monkeypatch.setattr(get_settings(), "image_dir", str(tmp_path))
     comfy_sid = await _service(api, admin, kind="image", adapter="comfyui", endpoint=comfy.url,
                                send_mode="parallel", max_concurrency=4)
@@ -188,14 +218,14 @@ async def until_unit(api, w, *statuses, timeout=60, index=0):
     async def check():
         units = (await snap(api, w))["units"]
         return units[index] if len(units) > index and units[index]["status"] in statuses else None
-    return await wait_for(check, timeout)
+    return await wait_for(check, timeout, 0.05)
 
 
 async def until_stage(api, w, *statuses, timeout=60):
     async def check():
         runs = (await snap(api, w))["stage_runs"]
         return runs if runs and runs[-1]["status"] in statuses else None
-    return await wait_for(check, timeout)
+    return await wait_for(check, timeout, 0.05)
 
 
 async def unit_post(api, w, uid, what, body):
@@ -230,6 +260,7 @@ async def no_duplicate_sends(uid):
 # ---------------------------------------------------------------- 1周
 
 
+@pytest.mark.full  # 本物の Temporal で1周する
 async def test_1周_候補を採って工程を承認すると次の工程へ進む(api, services, harness, script, comfy):
     w = await make_work(api)
     run_id = await start(api, w)
@@ -312,36 +343,6 @@ async def test_仮の閾値で外れた候補は落とさず指摘だけ(api, se
     assert {c.check_verdict for c in cands} == {"flag"}
 
 
-async def test_評価役の答えが割れたら止まる(api, services, harness, script):
-    script.pair = "flip"  # くり返すたびに好みが逆になる（1回の中では左右を入れ替えても同じ答え）
-    w = await make_work(api)
-    await start(api, w, unit={"eval_repeats": 2, "disagreement_stop": 1})
-    u = await until_unit(api, w, "stopped")
-    assert "割れた" in u["stop_reason"] and u["attempt"] == 1
-
-
-async def test_予算に達したら止まる(api, services, harness, script):
-    w = await make_work(api)
-    await start(api, w, unit={"budget_cost": 1, "redo_on_reject": True})
-    u = await until_unit(api, w, "stopped", "awaiting_review")
-    # 1回目の文脈の問いで費用1を使い切る。1回目は最後まで回し、次の回の前に止まる
-    if u["status"] == "awaiting_review":
-        r = await unit_post(api, w, u["unit_id"], "review", {"action": "reject", "reason": "顔が暗い"})
-        assert r.status_code == 200, r.text
-        u = await until_unit(api, w, "stopped")
-    assert "予算" in u["stop_reason"]
-
-
-async def test_エラーが続いたら止まる(api, services, harness, script):
-    script.tags_broken = True
-    w = await make_work(api)
-    await start(api, w, unit={"error_stop": 2})
-    u = await until_unit(api, w, "stopped")
-    assert "エラーが2回続いた" in u["stop_reason"]
-    detail = (await snap(api, w, u["unit_id"]))["unit"]
-    assert [s["status"] for s in detail["steps"] if s["step"] == "context"] == ["failed", "failed"]
-
-
 async def test_閾値が無ければ閾値未設定で止まり_置いて再開すると進む(api, services, harness, script):
     w = await make_work(api, thresholds=False)
     await start(api, w)
@@ -416,6 +417,7 @@ async def _until_step(api, w, step, comfy=None):
     return await wait_for(check, 60, 0.05)
 
 
+@pytest.mark.full  # 取り消しが生存の知らせの返事で届くのを本物の Temporal で確かめる
 async def test_今すぐ止めるとComfyUIの実行をprompt_id付きで止め_再開で同じ段からやり直す(
         api, services, harness, script, comfy):
     comfy.step_seconds, comfy.steps = 0.5, 30
@@ -447,21 +449,6 @@ async def until_interrupted(comfy, prompt_id):
     assert await wait_for(check, 10, 0.1), comfy.interrupt_calls
 
 
-async def test_段の切れ目で止めると今の段を終えてから止まる(api, services, harness, script):
-    script.llm_sleep = 1.0
-    w = await make_work(api)
-    await start(api, w)
-    u = await _until_step(api, w, "context")
-    r = await unit_post(api, w, u["unit_id"], "control", {"action": "pause", "mode": "boundary"})
-    assert r.status_code == 200, r.text
-    u = await until_unit(api, w, "paused")
-    detail = (await snap(api, w, u["unit_id"]))["unit"]
-    assert [s["status"] for s in detail["steps"] if s["step"] == "context"] == ["done"]
-    script.llm_sleep = 0
-    await unit_post(api, w, u["unit_id"], "control", {"action": "resume"})
-    await until_unit(api, w, "awaiting_review")
-
-
 async def test_段を取り消すと半端な候補を却下にして次の回へ進む(api, services, harness, script, comfy):
     comfy.step_seconds, comfy.steps = 0.5, 30
     try:
@@ -482,26 +469,10 @@ async def test_段を取り消すと半端な候補を却下にして次の回�
         comfy.step_seconds, comfy.steps = 0.1, 6
 
 
-async def test_検査の途中で作業を取り消すと止まり終えてから取り消しになる(api, services, harness, script):
-    script.detector_sleep = 1.0
-    w = await make_work(api)
-    await start(api, w)
-    u = await _until_step(api, w, "check")
-    r = await unit_post(api, w, u["unit_id"], "control", {"action": "cancel_unit"})
-    assert r.status_code == 200, r.text
-    await until_unit(api, w, "cancelled")
-    jobs = await jobs_of(u["unit_id"])
-    assert all(j.status in ("done", "cancelled", "stopped") for j in jobs)
-    async with get_sessionmaker()() as session:
-        events = (await session.execute(select(HarnessEvent.payload).where(
-            HarnessEvent.unit_id == u["unit_id"], HarnessEvent.kind == "unit").order_by(HarnessEvent.id))).scalars().all()
-    statuses = [e["status"] for e in events]
-    assert statuses.index("cancelling") < statuses.index("cancelled")
-
-
-async def test_作業者が落ちても送り直しで依頼を重ねず続く(api, services, temporal, script, comfy):
+@pytest.mark.full  # 作業者が落ちたときの送り直しを本物の Temporal で確かめる
+async def test_作業者が落ちても送り直しで依頼を重ねず続く(api, services, harness_temporal, script, comfy):
     comfy.step_seconds = 0.4
-    hw = HarnessWorker(temporal)
+    hw = HarnessWorker(harness_temporal[1])
     await hw.start()
     try:
         w = await make_work(api)
@@ -509,7 +480,7 @@ async def test_作業者が落ちても送り直しで依頼を重ねず続く(a
         u = await _until_step(api, w, "generate", comfy)
         await hw.shutdown()  # 作業者が落ちる（依頼は取り消さない）
         comfy.step_seconds = 0.05
-        hw = HarnessWorker(temporal)
+        hw = HarnessWorker(harness_temporal[1])
         await hw.start()
         u = await until_unit(api, w, "awaiting_review", timeout=120)
         jobs = await no_duplicate_sends(u["unit_id"])

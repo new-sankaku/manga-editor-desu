@@ -36,6 +36,7 @@ class Script:
         self.records: list[RecordInput] = []
         self.count: dict[str, int] = {}
         self.changed = asyncio.Event()
+        self.usage = {"cost_used": 0.0, "seconds_used": 0.0}  # unit_usage の答え（使った費用と秒）
 
     def acts(self) -> list[Any]:
         @activity.defn(name="run_step")
@@ -55,7 +56,7 @@ class Script:
 
         @activity.defn(name="unit_usage")
         async def unit_usage(unit_id: str) -> dict[str, float]:
-            return {"cost_used": 0.0, "seconds_used": 0.0}
+            return dict(self.usage)
 
         return [run_step, record_unit, unit_usage]
 
@@ -354,3 +355,66 @@ async def test_待ちの上限を超えたら止まり_再開すると同じ段�
         await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
         assert (await h.result())["picked"] == "c1"
     assert [x[0] for x in s.steps].count("generate") == 2 and [x[0] for x in s.steps].count("context") == 1
+
+
+
+# ---------------------------------------------------------------- 止まる理由（前は本物の Temporal を通す試験で確かめていた）
+
+
+def _stop_reason(s: Script) -> str:
+    return [r.patch["stop_reason"] for r in s.records if r.patch.get("status") in ("stopped", "blocked")][-1]
+
+
+async def test_上限回数で止まり_上限を上げると続き_また止まる(env):
+    s = Script({"check": lambda n, a: _check(0, [], "check:寸法")})
+    worker, h = await _start(env, s, ["evaluator_pick"], max_attempts=2)
+    async with worker:
+        await s.until(lambda: "stopped" in s.statuses())
+        assert "上限回数（2回）" in _stop_reason(s) and s.count["context"] == 2
+        await h.execute_update(WorkUnitWorkflow.set_limits, LimitChange("human:a", {"max_attempts": 3}))
+        await s.until(lambda: s.statuses().count("stopped") == 2)
+        assert "上限回数（3回）" in _stop_reason(s) and s.count["context"] == 3
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
+        assert (await h.result())["status"] == "cancelled"
+
+
+async def test_予算に達したら次の回の前に止まる(env):
+    s = Script({"check": lambda n, a: _check(0, [], "check:寸法")})
+    # 1回目の文脈の問いで費用5を使い切る
+    s.answers["context"] = lambda n, a: s.usage.update(cost_used=5.0) or {}
+    worker, h = await _start(env, s, ["evaluator_pick"], budget_cost=5)
+    async with worker:
+        await s.until(lambda: "stopped" in s.statuses())
+        # 1回目は最後まで回し、次の回の前に止まる
+        assert "予算（費用 5.0/5）" in _stop_reason(s) and s.count["context"] == 1
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
+        await h.result()
+
+
+async def test_断られた段はblockedで待ち_再開すると同じ段から続く(env):
+    def context(n, a):
+        if n == 1:
+            raise ApplicationError("閾値未設定: person_score", "person_score", type="blocked", non_retryable=True)
+        return {}
+    s = Script({"context": context, "check": lambda n, a: _check(1),
+                "evaluate": lambda n, a: {"picked": "c1", "disagree": False, "failure": None}})
+    worker, h = await _start(env, s, ["evaluator_pick"])
+    async with worker:
+        await s.until(lambda: "blocked" in s.statuses())
+        assert "閾値未設定" in _stop_reason(s) and "generate" not in s.count
+        await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
+        assert (await h.result())["picked"] == "c1"
+    assert s.count["context"] == 2 and not s.events("error")
+
+
+async def test_段の途中で作業を取り消すと取り消し中を経て取り消しになる(env):
+    started = asyncio.Event()
+    s = Script({"check": lambda n, a: _check(1)})
+    worker, h = await _start_with(env, _swallowing(s, "check", started), ["evaluator_pick"])
+    async with worker:
+        await asyncio.wait_for(started.wait(), 20)
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
+        assert (await h.result())["status"] == "cancelled"
+    st = s.statuses()
+    assert st.index("cancelling") < st.index("cancelled")
+    assert "evaluate" not in s.count

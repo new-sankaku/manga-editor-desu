@@ -166,7 +166,7 @@ function applySnapshot(snap) {
 // ------------------------------------------------------------------ 出来事を当てる
 
 function onEvent({ id, event, data }) {
-  if (id) S.lastEventId = Number(id);
+  if (id) S.lastEventId = Math.max(S.lastEventId, Number(id));  // 確定の遅れた出来事は小さい id で後から届く
   probe.events += 1;
   const at = Date.parse(event === "progress" ? data.updated_at : data.at);
   const kind = event;
