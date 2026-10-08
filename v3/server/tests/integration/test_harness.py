@@ -60,7 +60,7 @@ SD_CN = {**SD, "controlnet_name": "cn.safetensors"}
 def limits(**over):
     unit = {"max_attempts": 3, "candidates_per_attempt": 2, "budget_cost": 1000, "budget_seconds": 600,
             "error_stop": 3, "same_failure_restart": 2, "eval_repeats": 1, "disagreement_stop": 2,
-            "review_notice_seconds": 600, "resend_limit": 0, "max_fix_rounds": 1}
+            "review_notice_seconds": 600, "resend_limit": 0, "max_fix_rounds": 1, "wait_seconds": 600}
     unit.update(over.pop("unit", {}))
     return {"unit": unit, "max_parallel_units": over.pop("max_parallel_units", 2),
             "completion": over.pop("completion", ["checks_pass", "evaluator_pick", "human_approve"])}
@@ -322,7 +322,7 @@ async def test_評価役の答えが割れたら止まる(api, services, harness
 
 async def test_予算に達したら止まる(api, services, harness, script):
     w = await make_work(api)
-    await start(api, w, unit={"budget_cost": 1})
+    await start(api, w, unit={"budget_cost": 1, "redo_on_reject": True})
     u = await until_unit(api, w, "stopped", "awaiting_review")
     # 1回目の文脈の問いで費用1を使い切る。1回目は最後まで回し、次の回の前に止まる
     if u["status"] == "awaiting_review":
@@ -363,6 +363,11 @@ async def test_却下の理由は次の回の問いに入り_却下した回の�
     r = await unit_post(api, w, u["unit_id"], "review", {"action": "reject"})
     assert r.status_code == 409  # 理由が要る
     r = await unit_post(api, w, u["unit_id"], "review", {"action": "reject", "reason": "表情が硬い"})
+    assert r.status_code == 200, r.text
+    # 却下は止まるだけ（決めごと 5.3）。再開で作り直す
+    u = await until_unit(api, w, "stopped")
+    assert "却下した（表情が硬い）" in u["stop_reason"]
+    r = await unit_post(api, w, u["unit_id"], "control", {"action": "resume"})
     assert r.status_code == 200, r.text
     await wait_for(lambda: _attempt_at_least(api, w, 2), 60)
     u = await until_unit(api, w, "awaiting_review")

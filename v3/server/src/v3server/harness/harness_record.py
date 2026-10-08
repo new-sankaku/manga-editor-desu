@@ -103,16 +103,17 @@ async def start_step(session: AsyncSession, unit: HarnessUnit, step_id: str, ste
 
 
 async def finish_step(session: AsyncSession, unit: HarnessUnit, step_id: str, status: str,
-                      detail: dict[str, Any] | None, cost: float = 0) -> float:
-    """段の1回分を終える。動いた秒を返す。"""
+                      detail: dict[str, Any] | None, cost: float = 0, waited: float = 0.0) -> float:
+    """段の1回分を終える。動いた秒（始まりから終わりまでから、送り先の順番を待った秒を引いた物）を返す。"""
     row = await session.get(HarnessStep, step_id)
     if row is None or row.finished_at is not None:
         return 0.0
     row.finished_at = now()
     row.status, row.detail, row.cost = status, detail, cost
-    seconds = (row.finished_at - row.started_at).total_seconds()
+    seconds = max((row.finished_at - row.started_at).total_seconds() - waited, 0.0)
     await add_event(session, unit.work_id, "step", {"unit_id": unit.id, "step_id": step_id, "step": row.step,
                                                    "attempt": row.attempt, "status": status, "detail": detail,
-                                                   "seconds": seconds, "finished_at": row.finished_at.isoformat()},
+                                                   "seconds": seconds, "waited_seconds": waited,
+                                                   "finished_at": row.finished_at.isoformat()},
                     unit.stage_run_id, unit.id)
     return seconds

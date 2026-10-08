@@ -11,6 +11,8 @@ GenerationJob → service_call_activity.call_service）を通す。作品ごと�
 
 import asyncio
 import base64
+import contextvars
+from dataclasses import dataclass
 from typing import Any
 
 from sqlalchemy import func, select
@@ -142,10 +144,26 @@ def _wait_state(jobs: list[Job]) -> tuple[str, dict[str, Any]]:
     return "running", counts
 
 
+@dataclass
+class WaitClock:
+    """段の中で、送り先の順番を待った秒（依頼がどれも動いていない間）。段の活動（run_step）が1つ置く。"""
+
+    limit: float | None
+    waited: float = 0.0
+
+
+# 今の段の待ちの時計。run_step の外（工程の検査の問い）では None で、待ちを数えない
+WAIT_CLOCK: contextvars.ContextVar[WaitClock | None] = contextvars.ContextVar("harness_wait_clock", default=None)
+
+
 async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
     """依頼が全部終わるまで待つ。取り消されたら依頼を取り消し、止まるまで待ってから取り消しを返す。
-    unit_id が None（工程の検査の問い）なら、待ちの様子は作業の行に書かない。"""
+    unit_id が None（工程の検査の問い）なら、待ちの様子は作業の行に書かない。
+    依頼がどれも動いていない間は順番待ちとして WAIT_CLOCK に足し、待ちの上限を超えたら依頼を取り消して wait_limit で止める。"""
     last_state = None
+    clock = WAIT_CLOCK.get()
+    loop = asyncio.get_running_loop()
+    seen = loop.time()
     try:
         while True:
             activity.heartbeat({"jobs": job_ids})
@@ -153,6 +171,15 @@ async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
                 jobs = [await session.get(Job, j) for j in job_ids]
                 if all(j.status in TERMINAL_JOB for j in jobs):
                     return jobs
+                t = loop.time()
+                if clock is not None and not any(j.status == "running" for j in jobs):
+                    clock.waited += t - seen
+                seen = t
+                if clock is not None and clock.limit is not None and clock.waited > clock.limit:
+                    await asyncio.shield(_cancel_and_wait(job_ids))
+                    raise ApplicationError(
+                        f"送り先の順番待ちが待ちの上限（{clock.limit:g} 秒）を超えた。上限を上げるか、空いてから再開する",
+                        {"waited_seconds": clock.waited}, type="wait_limit", non_retryable=True)
                 state, counts = _wait_state(jobs)
                 if state != last_state and unit_id is not None:
                     unit = await session.get(HarnessUnit, unit_id)

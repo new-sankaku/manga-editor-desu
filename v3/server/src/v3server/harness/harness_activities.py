@@ -60,6 +60,8 @@ class StepInput:
     attempt: int
     step_id: str
     args: dict[str, Any] = field(default_factory=dict)
+    # 送り先の順番を待ってよい秒（上限の wait_seconds）。None は前の作りの作業（待ちの上限なし。待ちも時間に数える）
+    wait_seconds: float | None = None
 
 
 @dataclass
@@ -90,6 +92,8 @@ async def run_step(inp: StepInput) -> dict[str, Any]:
             await patch_unit(session, unit.id, {"status": status_now, "current_step": inp.step, "attempt": inp.attempt})
         await session.commit()
     beat = asyncio.create_task(_beat())
+    clock = q.WaitClock(inp.wait_seconds)
+    q.WAIT_CLOCK.set(clock)
     status, detail, out = "failed", None, None
     try:
         out = await fn(unit, {**inp.args, "attempt": inp.attempt})
@@ -108,13 +112,15 @@ async def run_step(inp: StepInput) -> dict[str, Any]:
     finally:
         beat.cancel()
         if inp.step != "discard_round":
-            await asyncio.shield(_finish(inp, status, detail, (out or {}).get("cost", 0)))
+            await asyncio.shield(_finish(inp, status, detail, (out or {}).get("cost", 0), clock))
 
 
-async def _finish(inp: StepInput, status: str, detail: dict[str, Any] | None, cost: float) -> None:
+async def _finish(inp: StepInput, status: str, detail: dict[str, Any] | None, cost: float, clock: "q.WaitClock") -> None:
     async with get_sessionmaker()() as session:
         unit = await session.get(HarnessUnit, inp.unit_id)
-        seconds = await finish_step(session, unit, inp.step_id, status, detail, cost)
+        # 待ちの上限のある作業は、順番待ちの秒を時間に数えない（前の作りの作業は前のまま数える）
+        waited = clock.waited if inp.wait_seconds is not None else 0.0
+        seconds = await finish_step(session, unit, inp.step_id, status, detail, cost, waited)
         await patch_unit(session, unit.id, {"cost_used": float(unit.cost_used or 0) + cost,
                                             "seconds_used": float(unit.seconds_used or 0) + seconds})
         await session.commit()

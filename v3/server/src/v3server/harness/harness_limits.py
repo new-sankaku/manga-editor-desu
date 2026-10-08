@@ -29,8 +29,13 @@ class UnitLimits(BaseModel):
     candidates_per_attempt: int = Field(ge=1, le=8)
     # 費用の上限（呼び出しの記録の費用の合計。つなぎ先の単価の単位）
     budget_cost: float = Field(ge=0)
-    # 時間の上限（段を動かした秒の合計。判断待ちと一時停止は数えない）
+    # 時間の上限（段を動かした秒の合計。判断待ち・一時停止・送り先の順番待ちは数えない）
     budget_seconds: float = Field(gt=0)
+    # 1つの段の中で、送り先の順番を待ってよい秒（依頼がどれも動いていない間の合計）。超えたら止まって人を待つ。
+    # 待ちを時間の上限に数えると、混んだときに1台の ComfyUI を待つだけで作業が止まった（p60）ので、別の上限にした
+    wait_seconds: float = Field(gt=0)
+    # 却下したらすぐ作り直すか（決めごと 9章の4。既定は作り直さない：却下は止まるだけ。同 5.3）
+    redo_on_reject: bool = False
     # エラーが続いたら止める回数（設計 10章の6：3回）
     error_stop: int = Field(ge=1)
     # 同じ失敗がこの回数続いたら、文脈を捨てて出直す（設計 10章の6：2回）

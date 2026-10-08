@@ -17,7 +17,8 @@ const ACTIVE = new Set(["queued", "running", "waiting_limit", "waiting_budget", 
 const LIMIT_JA = { max_attempts: "回の上限", candidates_per_attempt: "1回の候補の数", budget_cost: "費用の上限",
                    budget_seconds: "秒の上限", error_stop: "続けて失敗したら止める", same_failure_restart: "同じ失敗で文脈から",
                    eval_repeats: "評価を繰り返す数", disagreement_stop: "評価が割れたら止める", review_notice_seconds: "判断待ちの知らせ（秒）",
-                   resend_limit: "送り直しの上限" };
+                   resend_limit: "送り直しの上限", max_fix_rounds: "直させる回数の上限", wait_seconds: "順番待ちの上限（秒）",
+                   redo_on_reject: "却下したらすぐ作り直す" };
 // 作業の種類の名前と、何を対象にするか（作品・話・コマ）
 const KIND_JA = { plan_interview: "企画の聞き取り", structure: "構成", settings_sheet: "設定資料", name_draft: "ネームの作業",
                   panel_drawing: "コマの作画", page_finishing: "仕上げ", overall_review: "総合", export: "書き出し" };
@@ -581,7 +582,8 @@ function reviewPanel(u, d, base) {
     h("h3", {}, "人の判断を待っています", since ? h("span", { cls: "since", dataset: { since }, text: ago(since) }) : null),
     h("div", { cls: "cands" }, cands.map((c) => candidateCard(c, picked, () => post(`${base}/review`, { action: "approve", candidate_id: c.id })))),
     h("label", { cls: "label", text: "却下" }), reason,
-    h("div", { cls: "actions" }, act("却下して作り直す", () => {
+    // 却下は止まるだけ（決めごと 5.3）。すぐ作り直すのは上限の redo_on_reject を入れたときだけ
+    h("div", { cls: "actions" }, act((u.limits || d.limits || {}).redo_on_reject ? "却下して作り直す" : "却下して止める", () => {
       if (!reason.value.trim()) throw new Error("理由を入れてください");
       return post(`${base}/review`, { action: "reject", reason: reason.value.trim() });
     }, "danger")),
@@ -625,12 +627,17 @@ function contentView(content) {
 
 function limitsForm(u, d, base) {
   const limits = u.limits || d.limits || {};
-  const inputs = Object.entries(limits).filter(([, v]) => typeof v === "number").map(([k, v]) =>
-    h("label", { cls: "lim" }, h("span", { cls: "label key", text: LIMIT_JA[k] || k }), h("input", { type: "number", name: k, value: v, step: "any" })));
+  const inputs = Object.entries(limits).filter(([, v]) => typeof v === "number" || typeof v === "boolean").map(([k, v]) =>
+    h("label", { cls: "lim" }, h("span", { cls: "label key", text: LIMIT_JA[k] || k }),
+      typeof v === "boolean" ? h("input", { type: "checkbox", name: k, checked: v })
+        : h("input", { type: "number", name: k, value: v, step: "any" })));
   const form = h("form", { cls: "box limits", onsubmit: async (e) => {
     e.preventDefault();
     const next = {};
-    for (const i of form.querySelectorAll("input")) if (Number(i.value) !== limits[i.name]) next[i.name] = Number(i.value);
+    for (const i of form.querySelectorAll("input")) {
+      const v = i.type === "checkbox" ? i.checked : Number(i.value);
+      if (v !== limits[i.name]) next[i.name] = v;
+    }
     try { await post(`${base}/limits`, { limits: next }); toast("上限を変えました"); }
     catch (err) { toast(`上限を変えられません：${err.message}`, true); }
   } }, h("h3", { text: "上限（動いている作業にも効く）" }), h("div", { cls: "lim-grid" }, inputs),

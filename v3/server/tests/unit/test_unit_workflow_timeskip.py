@@ -24,7 +24,7 @@ from v3server.harness.unit_workflow import Control, LimitChange, Review, UnitInp
 QUEUE = "unit-timeskip"
 LIMITS = {"max_attempts": 3, "candidates_per_attempt": 2, "budget_cost": 1000, "budget_seconds": 600,
           "error_stop": 3, "same_failure_restart": 2, "eval_repeats": 1, "disagreement_stop": 2,
-          "review_notice_seconds": 3600, "resend_limit": 0, "max_fix_rounds": 1}
+          "review_notice_seconds": 3600, "resend_limit": 0, "max_fix_rounds": 1, "wait_seconds": 600}
 
 
 class Script:
@@ -234,3 +234,123 @@ async def test_段の切れ目で止めると今の段を終えてから止ま�
         await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
         assert (await h.result())["picked"] == "c1"
     assert [x[0] for x in s.steps][-2:] == ["check", "evaluate"]
+
+
+# ---------------------------------------------------------------- 取り消しを頼んだ段が成功で終わる（p60）
+
+
+def _swallowing(s: Script, step: str, started: asyncio.Event) -> list[Any]:
+    """step の1回目だけ、取り消しが届いても止まらずに成功で終わる活動（取り消しの届く前に終わったのと同じ形）。"""
+    acts = s.acts()
+
+    @activity.defn(name="run_step")
+    async def run_step(inp: StepInput) -> dict[str, Any]:
+        if inp.step == step and not started.is_set():
+            started.set()
+            try:
+                while True:
+                    activity.heartbeat()
+                    await asyncio.sleep(0.05)
+            except asyncio.CancelledError:
+                pass
+        return await acts[0](inp)
+
+    return [run_step, *acts[1:]]
+
+
+async def _start_with(env: WorkflowEnvironment, acts: list[Any], completion: list[str], **lim: Any
+                      ) -> tuple[Worker, WorkflowHandle]:
+    # 取り消しは生存の知らせの返事で届く。作業者の間引きを本番（harness_worker_main）と同じ1秒より短くして待たない
+    worker = Worker(env.client, task_queue=QUEUE, workflows=[WorkUnitWorkflow], activities=acts,
+                    max_heartbeat_throttle_interval=timedelta(milliseconds=100),
+                    default_heartbeat_throttle_interval=timedelta(milliseconds=100))
+    handle = await env.client.start_workflow(
+        WorkUnitWorkflow.run, UnitInput("u" + uuid.uuid4().hex, "panel_drawing", {**LIMITS, **lim}, completion),
+        id=f"unit-{uuid.uuid4().hex}", task_queue=QUEUE)
+    return worker, handle
+
+
+async def test_段の取り消しは_段が成功で終わっても捨てずに当てる(env):
+    started = asyncio.Event()
+    s = Script({"check": lambda n, a: _check(1),
+                "evaluate": lambda n, a: {"picked": "c2", "disagree": False, "failure": None}})
+    worker, h = await _start_with(env, _swallowing(s, "generate", started), ["evaluator_pick"])
+    async with worker:
+        await asyncio.wait_for(started.wait(), 20)
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_step", "human:a"))
+        assert (await h.result())["picked"] == "c2"
+    # 1回目の生成は成功で終わったが、頼まれた段の取り消しを当てて回を捨て、2回目から作り直す
+    assert [r.extra["attempt"] for r in s.events("step_cancelled")] == [1]
+    assert s.called("discard_round")[0]["reason"] == "段を取り消した"
+    assert [a for st, a, _ in s.steps if st == "check"] == [2]
+
+
+async def test_作業の取り消しは_段が成功で終わっても次の段へ進まない(env):
+    started = asyncio.Event()
+    s = Script({"check": lambda n, a: _check(1)})
+    worker, h = await _start_with(env, _swallowing(s, "generate", started), ["evaluator_pick"])
+    async with worker:
+        await asyncio.wait_for(started.wait(), 20)
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
+        assert (await h.result())["status"] == "cancelled"
+    assert "check" not in [x[0] for x in s.steps]
+
+
+# ---------------------------------------------------------------- 却下は止まるだけ（決めごと 5.3）
+
+
+async def test_却下は止まるだけで_再開すると理由を入れて作り直す(env):
+    s = Script({"check": lambda n, a: _check(1),
+                "finalize": lambda n, a: {"candidate_id": a["candidate_id"]}})
+    worker, h = await _start(env, s, ["human_approve"])
+    async with worker:
+        await s.until(lambda: "awaiting_review" in s.statuses())
+        await h.execute_update(WorkUnitWorkflow.review, Review("reject", "human:a", reason="表情が硬い"))
+        await s.until(lambda: "stopped" in s.statuses())
+        stopped = next(r for r in s.records if r.patch.get("status") == "stopped")
+        assert "却下した（表情が硬い）" in stopped.patch["stop_reason"]
+        # 止まっている間は作り直さない。上限を変えても続かない（再開を押したときだけ）
+        await h.execute_update(WorkUnitWorkflow.set_limits, LimitChange("human:a", {"max_attempts": 5}))
+        assert len(s.called("context")) == 1
+        await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
+        await s.until(lambda: s.statuses().count("awaiting_review") == 2)
+        assert len(s.called("context")) == 2
+        await h.execute_update(WorkUnitWorkflow.review, Review("approve", "human:a", candidate_id="c1"))
+        assert (await h.result())["candidate_id"] == "c1"
+    assert s.called("context")[1]["reject_reason"] == "表情が硬い"
+    assert s.called("discard_round")[0]["reason"] == "却下: 表情が硬い"
+
+
+async def test_却下ですぐ作り直すのはredo_on_rejectのときだけ(env):
+    s = Script({"check": lambda n, a: _check(1)})
+    worker, h = await _start(env, s, ["human_approve"], redo_on_reject=True)
+    async with worker:
+        await s.until(lambda: "awaiting_review" in s.statuses())
+        await h.execute_update(WorkUnitWorkflow.review, Review("reject", "human:a", reason="背景を夜に"))
+        await s.until(lambda: s.statuses().count("awaiting_review") == 2)
+        assert "stopped" not in s.statuses()
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
+        assert (await h.result())["status"] == "cancelled"
+    assert s.called("context")[1]["reject_reason"] == "背景を夜に"
+
+
+# ---------------------------------------------------------------- 順番待ちは時間の上限に数えず、待ちの上限で止まる（p60）
+
+
+async def test_待ちの上限を超えたら止まり_再開すると同じ段を頼み直す(env):
+    def generate(n, a):
+        if n == 1:
+            raise ApplicationError("送り先の順番待ちが待ちの上限（5 秒）を超えた", type="wait_limit", non_retryable=True)
+        return {}
+    s = Script({"generate": generate, "check": lambda n, a: _check(1),
+                "evaluate": lambda n, a: {"picked": "c1", "disagree": False, "failure": None}})
+    worker, h = await _start(env, s, ["evaluator_pick"], wait_seconds=5)
+    async with worker:
+        await s.until(lambda: "stopped" in s.statuses())
+        stopped = next(r for r in s.records if r.patch.get("status") == "stopped")
+        assert "待ちの上限" in stopped.patch["stop_reason"] and stopped.extra == {"wait_limit": True}
+        # 失敗の数には入れない（混んでいるだけ）
+        assert not s.events("error")
+        await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
+        assert (await h.result())["picked"] == "c1"
+    assert [x[0] for x in s.steps].count("generate") == 2 and [x[0] for x in s.steps].count("context") == 1

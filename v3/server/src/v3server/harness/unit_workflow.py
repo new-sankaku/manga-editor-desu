@@ -6,7 +6,8 @@
 - 人の操作（Update。検証つき）
   - control：pause（now は今の段を取り消して止める。boundary は段の切れ目で止める）・resume・cancel_step（今の段だけ
     取り消して次の回へ）・cancel_unit（作業を取り消す。今の回の候補を却下にしてから cancelled）
-  - review：approve（候補か人が直した絵を採る）・reject（理由つき。理由は次の回の文脈の問いに入る）・edit（人が直した絵
+  - review：approve（候補か人が直した絵を採る）・reject（理由つき。止まるだけで、人が再開すると作り直す。理由は次の回の
+    文脈の問いに入る。上限の redo_on_reject を入れたときだけ、すぐ作り直す。決めごと 5.3）・edit（人が直した絵
     から続ける。人の手の範囲は今の仕組みで貼り戻す）・answer（作業役が人へ返した質問に答える。答えはそれまでの答えと
     一緒に次の回の文脈の問いに入る。却下ではないが、今の回の候補は使わないので却下にする）
   - set_limits：上限を変える（使った分より小さくはできない）
@@ -30,7 +31,14 @@ with workflow.unsafe.imports_passed_through():
 
 RECORD_TIMEOUT = timedelta(seconds=30)
 HEARTBEAT_TIMEOUT = timedelta(seconds=20)
-NON_RETRYABLE = ["blocked", "refused", "broken_response", "generation_failed", "job_stopped", "job_cancelled"]
+NON_RETRYABLE = ["blocked", "refused", "broken_response", "generation_failed", "job_stopped", "job_cancelled",
+                 "wait_limit"]
+# ワークフローの作りを変えた所の印（workflow.patched）。終わった作業・動いている作業の履歴を読み直す（query・replay）と
+# きに、前の作りの履歴は前の道を通る。印は消さない（消してよいのは、印より前に始まった作業が全部消えてから。
+# V3ハーネスの実装.md「ワークフローの作りを変えるときの決まり」）
+PATCH_CANCEL_AFTER_SUCCESS = "cancel-after-success"  # 取り消しを頼んだ段が成功で終わっても、取り消しを当てる
+PATCH_WAIT_NOT_IN_BUDGET = "wait-not-in-budget"      # 送り先の順番待ちを時間の上限に数えず、待ちの上限で持つ
+PATCH_REJECT_STOPS = "reject-stops"                  # 却下は止まるだけ（作り直すのは redo_on_reject のときだけ）
 CONTROL_ACTIONS = ("pause", "resume", "cancel_step", "cancel_unit")
 REVIEW_ACTIONS = ("approve", "reject", "edit", "answer")
 HUMAN_WAITS = frozenset({"awaiting_review", "paused", "stopped", "blocked"})
@@ -214,13 +222,15 @@ class WorkUnitWorkflow:
         await workflow.execute_activity(record_unit, RecordInput(self.unit_id, patch, event, extra),
                                         start_to_close_timeout=RECORD_TIMEOUT)
 
-    async def _hold(self, status: str, reason: str, extra: dict[str, Any] | None = None) -> str:
-        """人を待つ（一時停止・止まった・blocked）。resume を受けたら、その人を返す。取り消しなら _UnitCancelled。"""
+    async def _hold(self, status: str, reason: str, extra: dict[str, Any] | None = None,
+                    resume_on_limits: bool = True) -> str:
+        """人を待つ（一時停止・止まった・blocked）。resume を受けたら、その人を返す。取り消しなら _UnitCancelled。
+        resume_on_limits：止まった理由が上限なら、上限を上げたら再開を待たずに続く（却下で止まったときは続けない）。"""
         self.resume_by = None
         self.limits_changed = False
         await self._rec({"status": status, "stop_reason": reason}, "unit", extra)
         await workflow.wait_condition(lambda: self.resume_by is not None or self.cancel_unit_by is not None
-                                      or (status == "stopped" and self.limits_changed
+                                      or (status == "stopped" and resume_on_limits and self.limits_changed
                                           and stop_reason(self.limits, self.s) is None
                                           and not self.upstream_stop))
         if self.cancel_unit_by:
@@ -250,16 +260,17 @@ class WorkUnitWorkflow:
             await self._boundary()
             self.run_no += 1
             self.step = step
+            wait = self._wait_seconds()
             handle = workflow.start_activity(
-                run_step, StepInput(self.unit_id, step, attempt, f"{self.unit_id[:26]}{self.run_no:06d}", args),
-                start_to_close_timeout=timedelta(seconds=float(self.limits["budget_seconds"])),
+                run_step, StepInput(self.unit_id, step, attempt, f"{self.unit_id[:26]}{self.run_no:06d}", args, wait),
+                start_to_close_timeout=timedelta(seconds=float(self.limits["budget_seconds"]) + (wait or 0)),
                 heartbeat_timeout=HEARTBEAT_TIMEOUT,
                 retry_policy=RetryPolicy(maximum_attempts=int(self.limits["resend_limit"]) + 1,
                                          non_retryable_error_types=NON_RETRYABLE),
                 cancellation_type=workflow.ActivityCancellationType.WAIT_CANCELLATION_COMPLETED)
             self.current = handle
             try:
-                return await handle
+                result = await handle
             except ActivityError as e:
                 if isinstance(e.cause, CancelledError):
                     if self.cancel_unit_by:
@@ -272,12 +283,34 @@ class WorkUnitWorkflow:
                 if isinstance(e.cause, ApplicationError) and e.cause.type == "blocked":
                     await self._hold("blocked", e.cause.message, {"details": list(e.cause.details)})
                     continue
+                if isinstance(e.cause, ApplicationError) and e.cause.type == "wait_limit":
+                    # 混んでいて待ちの上限を超えた。人が上限を上げるか再開したら、同じ段を頼み直す
+                    await self._hold("stopped", e.cause.message, {"wait_limit": True})
+                    continue
                 raise
             finally:
                 self.current = None
                 # 段の費用と秒は活動が作業の行に足す（正本は行）。止まる理由の判定のため、行の値を読み直す
                 used = await workflow.execute_activity(unit_usage, self.unit_id, start_to_close_timeout=RECORD_TIMEOUT)
                 self.s["cost_used"], self.s["seconds_used"] = used["cost_used"], used["seconds_used"]
+            # 取り消しを頼んだ段が、取り消しの届く前に成功で終わることがある。temporalio 1.34.0 では、そのとき SDK の
+            # 取り消しが消える（p60）。ここでは取り消しを自前の変数で持つので消えないが、段の結果を使わずに頼まれた
+            # 取り消しを当てる（当てないと、段の取り消しが黙って捨てられ、作業はそのまま次の段へ進む）
+            if workflow.patched(PATCH_CANCEL_AFTER_SUCCESS):
+                if self.cancel_unit_by:
+                    raise _UnitCancelled()
+                if self.cancel_step_by:
+                    by, self.cancel_step_by = self.cancel_step_by, None
+                    raise _StepCancelled(by)
+            return result
+
+    def _wait_seconds(self) -> float | None:
+        """段の中で送り先の順番を待ってよい秒（待ちの上限）。待った秒は時間の上限に数えない（p60：数えると、
+        混んだときに1台の ComfyUI を待つだけで作業が止まった）。印より前に始まった作業は、上限に wait_seconds が
+        無いので前のまま（待ちも時間の上限に入る）。"""
+        if workflow.patched(PATCH_WAIT_NOT_IN_BUDGET) and "wait_seconds" in self.limits:
+            return float(self.limits["wait_seconds"])
+        return None
 
     async def _discard(self, attempt: int, reason: str, by: str) -> None:
         if attempt < 1:
@@ -382,6 +415,11 @@ class WorkUnitWorkflow:
                     if d.action == "reject":
                         reject_reason = d.reason
                         await self._discard(attempt, f"却下: {d.reason}", d.by)
+                        # 却下は止まるだけ。作り直すのは人が再開を押したとき（決めごと 5.3）。自動で作り直すのは
+                        # 上限の redo_on_reject を入れたときだけ（同 9章の4。既定は入れない）
+                        if workflow.patched(PATCH_REJECT_STOPS) and not self.limits.get("redo_on_reject"):
+                            await self._hold("stopped", f"却下した（{d.reason}）。作り直すときは再開を押す",
+                                             {"rejected_by": d.by}, resume_on_limits=False)
                         continue
                     if d.action == "answer":
                         answers = [*answers, d.reason]

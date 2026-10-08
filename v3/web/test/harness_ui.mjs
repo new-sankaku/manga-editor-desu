@@ -105,12 +105,16 @@ try {
   // ---------------------------------------------------------------- 2. 作業の図：戻りの辺を印が動く（却下→文脈）
   await page.fill("#reject-reason", "表情が硬い。もう少し柔らかく");
   const t0 = Date.now();
-  await page.click("text=却下して作り直す");
+  await page.click("text=却下して止める");
+  // 却下は止まるだけ（決めごと 5.3）。止まったのを見てから再開を押すと、理由を入れて作り直す
+  await page.waitForSelector(`.pchip[data-unit="${reviewUnit}"][data-status="stopped"]`, { timeout: 15000 });
+  check(true, "却下すると止まる（すぐには作り直さない）");
+  await page.click("text=再開");
   await page.waitForFunction(() => window.__harness.lastTraversal && window.__harness.lastTraversal.retry, null, { timeout: 15000 });
   const opToScreen = Date.now() - t0;
   await sleep(450);
   const trav = await page.evaluate(() => window.__harness.lastTraversal);
-  check(trav.from === "review" && trav.to === "context", "却下すると 人の判断→文脈 の戻りの辺を印が動く");
+  check(trav.from === "review" && trav.to === "context", "却下して再開すると 人の判断→文脈 の戻りの辺を印が動く");
   await shot("02_unit_retry_marker", "作業の図。却下で 人の判断→文脈 の戻りの辺（破線）を印が動いている途中。辺に「却下（理由つき） ×1」");
   results.latency.reject_click_to_marker_ms = opToScreen;
 
