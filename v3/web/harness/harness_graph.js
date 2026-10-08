@@ -140,6 +140,7 @@ const STYLE = [
   { selector: "edge", style: {
     width: 1.3, "line-color": C.edge, "target-arrow-color": C.edge, "target-arrow-shape": "triangle", "arrow-scale": 0.8,
     "curve-style": "straight", "edge-distances": "endpoints", label: "data(label)", "font-family": MONO, "font-size": FONT,
+    "text-wrap": "wrap", "line-height": LH,
     color: C.ink2, "text-background-color": C.bg, "text-background-opacity": 1, "text-background-padding": LABEL_PAD,
     "text-background-shape": "round-rectangle", "z-index": 5, "z-index-compare": "manual",
     "transition-property": "line-color, target-arrow-color, width", "transition-duration": "0.4s",
@@ -193,6 +194,11 @@ export class HarnessGraph {
     this.cy.on("mouseover", "edge", (e) => this.handlers.onHover?.(e.target.data("note") || ""));
     this.cy.on("mouseout", "edge", () => this.handlers.onHover?.(""));
     this.cy.on("render", () => this._queueOverlay());
+    // 箱の大きさが変わったら（右の欄の高さが変わって左の列が伸びた・縮んだなど）合わせ直す。fit が自分で変えた大きさでは呼ばない
+    new ResizeObserver(() => {
+      const wrap = this.container.parentElement;
+      if (this._fitSize && this._fitSize !== `${wrap.clientWidth}x${wrap.clientHeight}`) this.fit();
+    }).observe(this.container.parentElement);
     // 人を待つノードを脈打たせる（スタイルの transition で太さを行き来させる）
     this._pulse = setInterval(() => this.cy.nodes(".st-review, .st-blocked, .st-stopped, .st-paused").not(".frame").toggleClass("pulse-on"), 650);
     this.progress = [];
@@ -204,17 +210,19 @@ export class HarnessGraph {
   // ------------------------------------------------------------------ 並べる（1か所）
 
   // 今の要素から ELK の図を作って並べ、位置・大きさ・辺の折れ点を当てる。続けて呼ばれたら最後の1回だけ当てる
-  // 並べ方の案が複数あるとき（工程の図のページと作業の詰め方）は全部を並べ、図の箱の幅に倍率 1 で入る物のうち一番低い物を取る。
-  // 幅に入る物が無ければ一番細い物を取る（はみ出しは図の試験 harness_layout_ui.mjs が落とす）
+  // 並べ方の案が複数あるとき（工程の図の段の列の折り返しとページと作業の詰め方、作業の図の横向き・縦向き）は全部を並べ、図の箱の幅に倍率 1 で入る物のうち一番低い物を取る。
+  // 幅に入る物が無ければ一番細い物を取り、fit が図の幅を広げて箱の中で横に動かせるようにする（狭い窓）
   _relayout() {
     const gen = ++this._gen;
-    const graphs = this.view === "unit" ? [this._unitElk()] : this._stageCandidates();
-    const room = this.container.clientWidth - 2 * MARGIN;
+    const graphs = this.view === "unit" ? [this._unitElk("RIGHT"), this._unitElk("DOWN")] : this._stageCandidates();
+    const room = this.container.parentElement.clientWidth - 2 * MARGIN;
     this.layoutDone = Promise.all(graphs.map((g) => elk.layout(g))).then((all) => {
       if (gen !== this._gen) return;
       const fits = all.filter((r) => r.width <= room);
       const res = fits.length ? fits.reduce((a, b) => (b.height < a.height ? b : a)) : all.reduce((a, b) => (b.width < a.width ? b : a));
       this.layoutWidth = room;
+      if (this.view === "unit") this._labelDir(graphs[all.indexOf(res)].layoutOptions["elk.direction"]);
+      if (this.view === "stage") centerGroups(res);
       this._apply(res);
       this.fit();
       this.handlers.onLayout?.();
@@ -222,12 +230,13 @@ export class HarnessGraph {
     return this.layoutDone;
   }
 
-  // 窓の大きさが変わったとき。今の並びが箱の幅に入るなら倍率だけ合わせ（ノードは動かない）、入らなくなったときと、
-  // 並べたときより広くなって詰め方を選び直せるときだけ並べ直す
+  // 窓の大きさが変わったとき。今の並びが箱の幅に入るなら倍率だけ合わせ（ノードは動かない）。
+  // 並べ直すのは、箱の幅より 8% を超えてはみ出すようになったときと、並べたときより広くなって並べ方を選び直せるときだけ。
+  // 少しだけはみ出すときは並びを変えず、fit が図の幅を広げて箱の中で横に動かせるようにする（少し狭めただけで図が組み替わらないように）
   resized() {
-    const room = this.container.clientWidth - 2 * MARGIN;
+    const room = this.container.parentElement.clientWidth - 2 * MARGIN;
     const bb = this.cy.elements().boundingBox({ includeOverlays: false });
-    if (this.view === "stage" && (bb.w > room || room > this.layoutWidth * 1.25)) return this._relayout();
+    if (bb.w > room * 1.08 || room > this.layoutWidth * 1.25) return this._relayout();
     this.fit();
     return Promise.resolve();
   }
@@ -264,6 +273,7 @@ export class HarnessGraph {
       setEdgeGeometry(el, pts);
     }
     placeEdgeLabels(cy);
+    this._crossings = findCrossings(cy);
   }
 
   // 全体を見る。文字が 12px より小さくならないよう、倍率は 1 倍を下限にする。高さが足りなければ図の箱を伸ばす
@@ -272,19 +282,25 @@ export class HarnessGraph {
     if (!cy.elements().length) return;
     const wrap = this.container.parentElement;
     const focus = document.documentElement.hasAttribute("data-focus") && !document.documentElement.hasAttribute("data-peek");
-    wrap.style.height = "";
+    wrap.style.minHeight = "";
     const base = wrap.clientHeight;
     const bb = cy.elements().boundingBox({ includeOverlays: false });
+    // 図が倍率 1 でも箱の幅に入らないとき（狭い窓）は、図の幅を広げて箱の中で横に動かして見る。文字を小さくも、切りもしない
+    const wide = Math.ceil(bb.w + 2 * MARGIN);
+    const over = wide > wrap.clientWidth ? `${wide}px` : "";
+    for (const el of [this.container, this.overlay]) if (el.style.width !== over) el.style.width = over;
     const cw = this.container.clientWidth;
     const zw = (cw - 2 * MARGIN) / bb.w;
     const zh = (base - 2 * MARGIN) / bb.h;
     let z = Math.min(MAX_ZOOM, zw, Math.max(1, zh));
     if (z < 1) z = 1;
+    // 図が箱より高いときは箱を高くする（切らない）。低いときは箱を埋めたまま真ん中に置く。絵だけの画面では箱は画面いっぱいのまま
     const need = Math.ceil(bb.h * z + 2 * MARGIN);
-    if (!focus && need > base) wrap.style.height = `${need}px`;
+    if (!focus && need > base) wrap.style.minHeight = `${need}px`;
     cy.resize();
     const ch = this.container.clientHeight;
     cy.viewport({ zoom: z, pan: { x: (cw - bb.w * z) / 2 - bb.x1 * z, y: Math.max(MARGIN, (ch - bb.h * z) / 2) - bb.y1 * z } });
+    this._fitSize = `${wrap.clientWidth}x${wrap.clientHeight}`;
   }
 
   // ------------------------------------------------------------------ 工程の図
@@ -457,19 +473,23 @@ export class HarnessGraph {
     return n;
   }
 
-  // ページの中の作業の詰め方（横長〜縦長）と、工程の作業の枠の中のページの詰め方の組を案にする
+  // 段の列の折り返し（しない・2・1・0.3・縦に1列）、ページの中の作業の詰め方（横長〜縦長）、工程の作業の枠の中のページの詰め方の組を案にする
   _stageCandidates() {
     const out = [];
-    for (const page of [40, 4, 1.5]) for (const group of [1, 3, 8]) out.push(this._stageElk(page, group));
+    for (const wrap of [0, 2, 1, 0.3]) for (const page of [40, 4, 1.5, 0.3]) for (const group of [1, 3, 8]) out.push(this._stageElk(page, group, wrap));
+    // 電話の幅：折り返しても2つ並ぶと入らないので、段を縦に1列に並べ、ページも縦に積む案
+    for (const group of [0.3, 1]) out.push(this._stageElk(0.3, group, "down"));
     return out;
   }
 
-  _stageElk(pageAspect, groupAspect) {
+  // wrap が 0 なら段の列を1行に、数ならその縦横の比で折り返す（ELK の layered の折り返し）。"down" なら縦に1列
+  _stageElk(pageAspect, groupAspect, wrap) {
     const cy = this.cy;
     const size = (n) => ({ id: n.id(), width: n.data("w"), height: n.data("h") });
     // box は大きい物から詰めるので、ページ・作業の順を優先度で残す（先の物ほど高い）
     const ordered = (x, i, n) => ({ ...x, layoutOptions: { ...(x.layoutOptions || {}), "elk.priority": String(n - i) } });
-    const row = { id: "wrap:stages", layoutOptions: { ...LAYERED, "elk.direction": "RIGHT", "elk.padding": "[top=0,left=0,bottom=0,right=0]" },
+    const fold = wrap && wrap !== "down" ? { "elk.layered.wrapping.strategy": "MULTI_EDGE", "elk.aspectRatio": String(wrap) } : {};
+    const row = { id: "wrap:stages", layoutOptions: { ...LAYERED, ...fold, "elk.direction": wrap === "down" ? "DOWN" : "RIGHT", "elk.padding": "[top=0,left=0,bottom=0,right=0]" },
                   children: cy.nodes(".stage").map(size),
                   edges: cy.edges().map((e) => ({ id: e.id(), sources: [e.source().id()], targets: [e.target().id()] })) };
     const groups = this.groups.map((st) => {
@@ -620,8 +640,22 @@ export class HarnessGraph {
     });
   }
 
-  _unitElk() {
+  // 辺のラベルの向き：段を縦に並べたときは、戻りの線と飛ばす線が縦に走るので、ラベルも縦書き（1字ずつ改行）にする。
+  // 横書きのままだと、縦の線どうしの間をラベルの幅だけ空けることになり、図が箱の幅に入らない
+  _labelDir(dir) {
+    this.cy.batch(() => {
+      for (const e of this.cy.edges()) {
+        const short = e.data("short") ?? e.data("label");
+        e.data({ short, tate: dir === "DOWN", label: dir === "DOWN" ? tate(short) : short });
+      }
+    });
+  }
+
+  // dir は "RIGHT"（段を横に並べる）か "DOWN"（縦に並べる。箱の幅に横向きが入らないとき）。
+  // 縦のときは辺を全部 x と y を入れ替えた向きにする（上→左、下→右、右→下、左→上）。並び順の決まりはそのまま効く
+  _unitElk(dir) {
     const cy = this.cy;
+    const TURN = dir === "DOWN" ? { NORTH: "WEST", SOUTH: "EAST", EAST: "SOUTH", WEST: "NORTH" } : null;
     // 辺ごとにポートを作り、出る辺・入る辺を決める：前へ進む辺は右から左へ、戻りの辺は上から上へ、飛ばす辺は下から下へ。
     // 同じ辺に並ぶポートの順は自分で決める（ELK に任せると、上・下の辺で戻りの線どうしが入れ子にならずに交わる）。
     // 上・下の辺では、左へ行く線を左に、右へ行く線を右に置き、遠くへ行く線ほど外側（左へ行く線は右、右へ行く線は左）にする。
@@ -633,7 +667,7 @@ export class HarnessGraph {
       if (!ports.has(node)) ports.set(node, []);
       const d = COL[other] - COL[self];
       const key = side === "NORTH" || side === "SOUTH" ? (d < 0 ? -100 - d : 100 - d) : (side === "EAST" ? Math.abs(d) : 0);
-      ports.get(node).push({ id, side, key });
+      ports.get(node).push({ id, side: TURN ? TURN[side] : side, key });
       return id;
     };
     const edges = cy.edges().map((e) => {
@@ -656,17 +690,30 @@ export class HarnessGraph {
       if (n.hasClass("frame")) {
         const head = textSize(n.data("label")).h + 12;
         node.layoutOptions = { ...node.layoutOptions, "elk.padding": `[top=${head},left=${FRAME_PAD},bottom=${FRAME_PAD},right=${FRAME_PAD}]` };
-        node.children = cy.nodes(".part").filter((p) => p.data("box") === n.id()).map((p) => ({ id: p.id(), width: p.data("w"), height: p.data("h") }));
+        node.children = cy.nodes(".part").filter((p) => p.data("box") === n.id()).map((p, i, all) => ({ id: p.id(), width: p.data("w"), height: p.data("h"),
+                                                 layoutOptions: { "elk.priority": String(all.length - i) } }));  // box は大きい物から詰めるので順を残す
         // 開いた段は、名前の行が入る幅を下限にする
         node.layoutOptions["elk.nodeSize.constraints"] = "MINIMUM_SIZE";
         node.layoutOptions["elk.nodeSize.minimum"] = `(${textSize(n.data("label")).w + 2 * FRAME_PAD}, 0)`;
+        // 縦のときは中の子も縦に積む（layered のままだと子が同じ列に横に並び、図が箱の幅を超える）。線は枠にだけつながるので、
+        // 枠の中は別に並べてよい
+        if (dir === "DOWN") Object.assign(node.layoutOptions, { "elk.hierarchyHandling": "SEPARATE_CHILDREN", "elk.algorithm": "box",
+                                                                "elk.box.packingMode": "SIMPLE", "elk.aspectRatio": "0.2", "elk.spacing.nodeNode": "16" });
       } else {
         node.width = n.data("w");
         node.height = n.data("h");
       }
       return node;
     });
-    return { id: "root", layoutOptions: { ...LAYERED, "elk.direction": "RIGHT", "elk.hierarchyHandling": "INCLUDE_CHILDREN" }, children, edges };
+    // 縦のときは戻りの線と飛ばす線が縦に並ぶ。ラベルは線の上に縦書きで置くので、隣の線との間を1字の幅より広くする
+    // 縦書きのラベルは、隣の段へ入る横の線の間（段の高さ＋段の間）に収まらないと線に重なる。段の間をその分だけ広げる
+    const tall = Math.max(...cy.edges().map((e) => textSize(tate(e.data("short") ?? e.data("label"))).h)) + 2 * LABEL_PAD + 16;
+    const low = Math.min(...cy.nodes('[id ^= "step:"]').map((n) => n.data("h")));
+    const lane = dir === "DOWN"
+      ? { "elk.spacing.edgeEdge": String(Math.ceil(Math.max(...cy.edges().map((e) => textSize(tate(e.data("short") ?? e.data("label"))).w))) + 2 * LABEL_PAD + 12),
+          "elk.layered.spacing.nodeNodeBetweenLayers": String(Math.max(32, Math.ceil(tall - low))) }
+      : { "elk.layered.spacing.nodeNodeBetweenLayers": "24" };
+    return { id: "root", layoutOptions: { ...LAYERED, ...lane, "elk.direction": dir, "elk.hierarchyHandling": "INCLUDE_CHILDREN" }, children, edges };
   }
 
   // 辺をたどった。印を辺に沿って動かし、辺をしばらく明るくする
@@ -693,6 +740,37 @@ export class HarnessGraph {
     this._queueOverlay();
   }
 
+  // 線どうしが交わる所に橋を描く：横の線が縦の線を小さな半円でまたぐ（どちらの線が上を通るかを見分けられるように）。
+  // 下地の色で横の線の交わる所を消し、縦の線をつなぎ直してから、横の線の色で半円を描く
+  _drawBridges(ov) {
+    let svg = ov.querySelector("svg.hz-bridges");
+    if (!svg) {
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("class", "hz-bridges");
+      ov.appendChild(svg);
+    }
+    const z = this.cy.zoom(), pan = this.cy.pan();
+    const R = 6 * z;
+    // 下地の色は、図の後ろで最初に色を持つ要素から読む（色の値は書かない）
+    let gap = "";
+    for (let el = this.container; el && !gap; el = el.parentElement) {
+      const c = getComputedStyle(el).backgroundColor;
+      if (c && c !== "transparent" && !/rgba\(.*,\s*0\)$/.test(c)) gap = c;
+    }
+    const parts = [];
+    for (const c of this._crossings || []) {
+      const h = this.cy.getElementById(c.h), v = this.cy.getElementById(c.v);
+      if (!h.length || !v.length) continue;
+      const x = c.x * z + pan.x, y = c.y * z + pan.y;
+      const hw = parseFloat(h.style("width")) * z, vw = parseFloat(v.style("width")) * z;
+      parts.push(`<rect fill="${gap}" x="${x - R - 1}" y="${y - hw}" width="${2 * R + 2}" height="${2 * hw}"/>`,
+                 `<line x1="${x}" y1="${y - hw - 1}" x2="${x}" y2="${y + hw + 1}" stroke="${v.style("line-color")}" stroke-width="${vw}"/>`,
+                 `<path d="M ${x - R} ${y} A ${R} ${R} 0 0 1 ${x + R} ${y}" fill="none" stroke="${h.style("line-color")}" stroke-width="${hw}"/>`);
+    }
+    const html = parts.join("");
+    if (svg.dataset.html !== html) { svg.dataset.html = html; svg.innerHTML = html; }
+  }
+
   _queueOverlay() {
     if (this._raf) return;
     this._raf = requestAnimationFrame(() => { this._raf = null; this._drawOverlay(); });
@@ -701,6 +779,7 @@ export class HarnessGraph {
   _drawOverlay() {
     const ov = this.overlay;
     const keep = new Set();
+    this._drawBridges(ov);
     const now = performance.now();
     for (const m of [...this.markers]) {
       const t = Math.min(1, (now - m.t0) / m.dur);
@@ -762,6 +841,51 @@ export class HarnessGraph {
   destroy() { clearInterval(this._pulse); this.cy.destroy(); }
 }
 
+// 工程の図：工程の作業の枠を、その工程の段の真下に寄せる。重なるときは右へずらし、段の列の幅に収める。
+// ELK の layered は下の列を左に詰めるので、作業の枠が段から離れて見えるため
+function centerGroups(res) {
+  const row = res.children.find((c) => c.id === "wrap:stages");
+  const groups = res.children.filter((c) => c !== row).sort((a, b) => a.x - b.x);
+  if (!row || !groups.length) return;
+  const GAP = 32;
+  const want = groups.map((g) => {
+    const st = row.children.find((c) => c.id === `stage:${g.id.slice(6)}`);
+    return st ? row.x + st.x + st.width / 2 - g.width / 2 : g.x;
+  });
+  let right = -Infinity;
+  const left = want.map((x, i) => { const l = Math.max(x, right + GAP); right = l + groups[i].width; return l; });
+  const lo = Math.min(row.x, groups[0].x), hi = Math.max(row.x + row.width, res.width);
+  let shift = Math.min(0, hi - right);
+  shift = Math.max(shift, lo - left[0]);
+  groups.forEach((g, i) => { g.x = left[i] + shift; });
+}
+
+// 縦書きのラベル（1字ずつ改行）
+function tate(text) {
+  return [...(text || "")].join("\n");
+}
+
+// 線どうしの交わり（横の区間と縦の区間が、どちらの端でもない所で交わる）。橋を描く所
+function findCrossings(cy) {
+  const segs = [];
+  for (const e of cy.edges()) {
+    const pts = e.scratch("_pts") || [];
+    for (let i = 1; i < pts.length; i++) {
+      const p = pts[i - 1], q = pts[i];
+      if (Math.abs(p.y - q.y) < 0.5) segs.push({ id: e.id(), h: true, a: Math.min(p.x, q.x), b: Math.max(p.x, q.x), at: p.y });
+      else if (Math.abs(p.x - q.x) < 0.5) segs.push({ id: e.id(), h: false, a: Math.min(p.y, q.y), b: Math.max(p.y, q.y), at: p.x });
+    }
+  }
+  const out = [];
+  const END = 4;
+  for (const h of segs.filter((s) => s.h)) {
+    for (const v of segs.filter((s) => !s.h && s.id !== h.id)) {
+      if (v.at > h.a + END && v.at < h.b - END && h.at > v.a + END && h.at < v.b - END) out.push({ h: h.id, v: v.id, x: v.at, y: h.at });
+    }
+  }
+  return out;
+}
+
 // 辺のラベルを、その辺の線の上に置く（ELK はラベルを列の中のノードとして置くので、上・下のポートから縦に入る辺と重なる。
 // そこでラベルは ELK に渡さず、並べ終えた線の上で空いている所を探す）。
 // 長い横の線から順に、真ん中から左右へずらして、ほかのノード・ほかの辺の線・置いたラベルにかからない所に置く。
@@ -784,14 +908,21 @@ function placeEdgeLabels(cy) {
   const withLabel = cy.edges().filter((e) => e.data("label")).sort((a, b) => textSize(b.data("label")).w - textSize(a.data("label")).w);
   for (const e of cy.edges()) e.style({ "text-margin-x": 0, "text-margin-y": 0 });
   for (const e of withLabel) {
-    const t = textSize(e.data("label"));
-    const w = t.w + 2 * LABEL_PAD, h = t.h + 2 * LABEL_PAD;
+    // 縦書きのとき（段を縦に並べた図）は、横の区間に置くなら横書きに戻す。線の向きとラベルの向きをそろえる
+    const short = e.data("short") ?? e.data("label");
+    const vertical = !!e.data("tate");
+    const box = (horizontal) => {
+      const text = vertical && !horizontal ? tate(short) : (vertical ? short : e.data("label"));
+      const t = textSize(text);
+      return { text, w: t.w + 2 * LABEL_PAD, h: t.h + 2 * LABEL_PAD };
+    };
     const pts = e.scratch("_pts");
     const segs = pts.slice(1).map((q, i) => [pts[i], q]).sort((a, b) => Math.hypot(b[1].x - b[0].x, b[1].y - b[0].y) - Math.hypot(a[1].x - a[0].x, a[1].y - a[0].y));
     let at = null;
     for (const [p, q] of segs) {
       const len = Math.hypot(q.x - p.x, q.y - p.y);
       const horizontal = Math.abs(q.y - p.y) < 0.5;
+      const { text, w, h } = box(horizontal);
       const room = (horizontal ? w : h) + 8;
       if (len < room) continue;
       const mid = len / 2;
@@ -800,16 +931,18 @@ function placeEdgeLabels(cy) {
           const f = (mid + off) / len;
           const c = { x: p.x + (q.x - p.x) * f, y: p.y + (q.y - p.y) * f };
           const r = { x1: c.x - w / 2, y1: c.y - h / 2, x2: c.x + w / 2, y2: c.y + h / 2 };
-          if (free(r, e.id())) { at = { c, r }; break; }
+          if (free(r, e.id())) { at = { c, r, text }; break; }
         }
       }
       if (at) break;
     }
     if (!at) {
       const [p, q] = segs[0];
+      const { text, w, h } = box(Math.abs(q.y - p.y) < 0.5);
       const c = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
-      at = { c, r: { x1: c.x - w / 2, y1: c.y - h / 2, x2: c.x + w / 2, y2: c.y + h / 2 } };
+      at = { c, r: { x1: c.x - w / 2, y1: c.y - h / 2, x2: c.x + w / 2, y2: c.y + h / 2 }, text };
     }
+    if (at.text !== e.data("label")) e.data("label", at.text);
     placed.push(at.r);
     // Cytoscape は辺のラベルを辺の真ん中に描くので、そこからのずらしにする
     const mid = e.midpoint();

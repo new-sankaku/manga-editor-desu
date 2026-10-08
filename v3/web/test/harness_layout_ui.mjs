@@ -1,12 +1,12 @@
 // AIハーネスの図の読みやすさを、Cytoscape が描いた箱で確かめる（偽のサーバー。page.route で口を横取りして答える。本物ではない）。
 // 画面が出しうる状態（工程の図の開いた・たたんだ、作業の図の段を開いた・戻りが多い、実行中・判断待ち・止めた・失敗・古い・取り消し中）を、
-// 広い窓（1920×1080）と 1280×800 で開き、次を数える。1つでもあれば落ちる。
+// 1920×1080・1280×800・1024×768・390×844（電話の幅）の窓で開き、次を数える。1つでもあれば落ちる。
 //   - ノードどうしの重なり（枠の中の子は除く。子は枠からはみ出さない）
 //   - ラベルどうし・ラベルとノード・ラベルと辺の重なり（自分の物は除く）
 //   - 辺が端のノード以外を通る
 //   - 辺どうしが同じ線を通る（並んだ線が 6px より近い）
 //   - 戻りの辺・飛ばす辺が、前へ進む辺と交わる
-//   - 全体を見たときの文字が 12px より小さい・図が箱からはみ出す・ラベルがノードからはみ出す
+//   - 全体を見たときの文字が 12px より小さい・図が箱からはみ出す・ページが横に動く・ラベルがノードからはみ出す
 //   - 状態が変わったとき・窓の大きさが変わったときにノードが動く
 //   SIZES=1920x1080 のように窓を絞れる。SHOTS=<フォルダ> で写しを撮る（ui_common.mjs）
 import zlib from "node:zlib";
@@ -14,7 +14,7 @@ import { makeShot, openBrowser, serveWeb, SHOTS } from "./ui_common.mjs";
 
 const ORIGIN = "http://harness-layout.test";
 const USER = "layout-author";
-const SIZES = (process.env.SIZES || "1920x1080,1280x800").split(",").map((s) => s.split("x").map(Number));
+const SIZES = (process.env.SIZES || "1920x1080,1280x800,1024x768,390x844").split(",").map((s) => s.split("x").map(Number));
 
 // ---------------------------------------------------------------- 試験の絵（作品の絵ではない）
 function png(w, h, px) {
@@ -272,6 +272,9 @@ function measure() {
   const rb = cy.elements().renderedBoundingBox({ includeOverlays: false });
   const cw = cy.width(), ch = cy.height();
   if (rb.x1 < -1 || rb.y1 < -1 || rb.x2 > cw + 1 || rb.y2 > ch + 1) bad.outside.push(`図 ${rb.x1.toFixed(0)},${rb.y1.toFixed(0)}–${rb.x2.toFixed(0)},${rb.y2.toFixed(0)} 箱 ${cw}×${ch}`);
+  // 図の幅を広げたとき（狭い窓）も、動くのは図の箱の中だけで、ページは横に動かない
+  const doc = document.documentElement;
+  if (doc.scrollWidth > doc.clientWidth + 1) bad.outside.push(`ページの幅 ${doc.scrollWidth} 窓 ${doc.clientWidth}`);
   // 図の上の HTML（進み具合の帯）はノードの中
   for (const el of document.querySelectorAll(".hz-progress[data-pnode]")) {
     const n = cy.getElementById(el.dataset.pnode);

@@ -488,16 +488,39 @@ function renderTimeline() {
       h("span", { cls: "tl-name", text: STEP_JA[lane] }), h("div", { cls: "tl-track" }))));
     for (const b of bars) {
       const track = box.querySelector(`[data-lane="${b.lane}"] .tl-track`);
-      track.append(h("span", { cls: `tl-bar ${statusClass(b.status)}`, title: b.label, dataset: { t0: b.t0, t1: b.t1, live: b.status === "running" || b.status === "awaiting_review" ? "1" : "" } }));
+      track.append(h("span", { cls: `tl-bar ${statusClass(b.status)}`, dataset: { what: b.label, t0: b.t0, t1: b.t1, live: b.status === "running" || b.status === "awaiting_review" ? "1" : "" } }));
     }
   }
-  for (const el of box.querySelectorAll(".tl-bar")) {
+  // 時間の軸：段の始まりと終わりの時刻で区切り、区切りの間の幅を「長さ（秒）の対数」にする。
+  // 時刻の順と重なりはそのまま残り、長く待った間（人の判断・動いている段）に短い段が押しつぶされない。
+  // 本当の長さは棒の中の文字（入るときだけ）と、棒に指を置いたときの説明に出す
+  const live = (el) => (el.dataset.live ? Date.now() : Number(el.dataset.t1));
+  const els = [...box.querySelectorAll(".tl-bar")];
+  const cuts = [...new Set(els.flatMap((el) => [Number(el.dataset.t0), live(el)]))].sort((x, y) => x - y);
+  const acc = [0];
+  for (let i = 1; i < cuts.length; i++) acc.push(acc[i - 1] + Math.log1p((cuts[i] - cuts[i - 1]) / 1000) + 0.05);
+  const whole = acc.at(-1) || 1;
+  const at = (t) => acc[cuts.indexOf(t)] / whole;
+  const trackW = box.querySelector(".tl-track")?.clientWidth || 0;
+  for (const el of els) {
     const t0 = Number(el.dataset.t0);
-    const t1 = el.dataset.live ? Date.now() : Number(el.dataset.t1);
-    el.style.left = `${(100 * (t0 - tmin)) / span}%`;
-    el.style.width = `${Math.max(0.6, (100 * (t1 - t0)) / span)}%`;
+    const t1 = live(el);
+    const frac = Math.max(0.006, at(t1) - at(t0));
+    el.style.left = `${100 * at(t0)}%`;
+    el.style.width = `${100 * frac}%`;
+    const text = `${((t1 - t0) / 1000).toFixed(1)}秒`;
+    el.title = `${el.dataset.what}　${text}`;
+    el.textContent = frac * trackW >= textWidth(text, el) + 8 ? text : "";
   }
-  $("#timeline-span").textContent = `${((tmax - tmin) / 1000).toFixed(1)}秒`;
+  $("#timeline-span").textContent = `${((tmax - tmin) / 1000).toFixed(1)}秒（長い間は縮めて描いています）`;
+}
+
+// 文字の幅（時間の列の棒の中に入るかを見る）
+let measureCtx = null;
+function textWidth(text, el) {
+  measureCtx ||= document.createElement("canvas").getContext("2d");
+  measureCtx.font = getComputedStyle(el).font;
+  return measureCtx.measureText(text).width;
 }
 
 // ------------------------------------------------------------------ 横のパネル

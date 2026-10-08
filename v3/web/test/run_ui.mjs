@@ -27,7 +27,8 @@ const FAST = [
   { name: "keys_ui（偽のサーバー）", file: "keys_ui.mjs", env: shotsFor("keys") },
   { name: "manuscript_ui（偽のサーバー）", file: "manuscript_ui.mjs", env: { MOCK: "1", ...shotsFor("manuscript_mock") } },
   { name: "screens_ui（録った答え）", file: "screens_ui.mjs", env: { REPLAY: "1", ...shotsFor("screens_replay") } },
-  { name: "harness_layout_ui（図の重なり・偽のサーバー）", file: "harness_layout_ui.mjs", env: { SIZES: "1920x1080", ...shotsFor("harness_layout") } },
+  // 図の重なりは、普段は一番広い窓と電話の幅だけ（1つの窓で約50秒）。間の 1280×800・1024×768 は full で流す
+  { name: "harness_layout_ui（図の重なり・偽のサーバー）", file: "harness_layout_ui.mjs", env: { SIZES: "1920x1080,390x844", ...shotsFor("harness_layout") } },
 ];
 function fullJobs() {
   const origin = need("V3_ORIGIN");
@@ -35,6 +36,7 @@ function fullJobs() {
     ...FAST,
     { name: "manuscript_ui（本物のサーバー）", file: "manuscript_ui.mjs", env: { V3_ORIGIN: origin, ...shotsFor("manuscript") } },
     { name: "screens_ui（本物のサーバー）", file: "screens_ui.mjs", env: { V3_WEB: `${origin}/web/`, ...shotsFor("screens") } },
+    { name: "harness_layout_ui（図の重なり・間の窓）", file: "harness_layout_ui.mjs", env: { SIZES: "1280x800,1024x768", ...shotsFor("harness_layout_mid") } },
     { name: "harness_ui（動く見本）", file: "harness_ui.mjs", env: { CTRL: need("CTRL"), ...shotsFor("harness") }, alone: true },
   ];
   if (process.env.IMAGEGEN_WEB) {
