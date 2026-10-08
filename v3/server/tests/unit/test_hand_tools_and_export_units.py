@@ -14,7 +14,15 @@ from pydantic import ValidationError
 
 from v3server.generation_queue.known_processes import KNOWN_PROCESSES, check_process_task
 from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke, erase_pixels
-from v3server.hand_tools.vector_strokes import StrokeValues, crossing_indices, erase, moved, resample, stroke_box
+from v3server.hand_tools.vector_strokes import (
+    StrokeValues,
+    crossing_indices,
+    erase,
+    moved,
+    resample,
+    stroke_box,
+    stroke_cache_problem,
+)
 from v3server.llm_questions.extract_characters_question import (
     build_extract_characters_question,
     parse_extract_characters_answer,
@@ -131,6 +139,38 @@ def test_pixel_eraser_makes_mask():
     assert m.getpixel((10, 10)) == 255 and m.getpixel((0, 0)) == 0
 
 
+def test_pixel_eraser_box_matches_whole_image_drawing():
+    """線の範囲だけで計算しても、絵全体に線を描いて引いた（前の作り方）のと同じ画素になる。"""
+    from PIL import ImageChops, ImageDraw
+
+    def whole(base_png, strokes):
+        im = Image.open(io.BytesIO(base_png)).convert("RGBA")
+        alpha, erased = im.getchannel("A"), Image.new("L", im.size, 0)
+        for s in strokes:
+            m = Image.new("L", im.size, 0)
+            d, r = ImageDraw.Draw(m), s.width_px / 2
+            if len(s.points) > 1:
+                d.line(s.points, fill=255, width=max(1, round(s.width_px)), joint="curve")
+            for x, y in s.points:
+                d.ellipse((x - r, y - r, x + r, y + r), fill=255)
+            alpha = ImageChops.subtract(alpha, m.point(lambda v, o=s.opacity: round(v * o)))
+            erased = ImageChops.lighter(erased, m)
+        return np.asarray(alpha), np.asarray(erased.point(lambda v: 255 if v else 0))
+
+    rng = np.random.default_rng(5)
+    a = rng.integers(0, 256, size=(90, 120, 4), dtype=np.uint8)
+    base = _png_bytes(Image.fromarray(a, "RGBA"))
+    for _ in range(25):
+        strokes = [PixelEraserStroke(points=[tuple(map(float, p)) for p in rng.uniform(-20, 140, size=(int(rng.integers(1, 6)), 2))],
+                                     width_px=float(rng.uniform(0.5, 30)), opacity=float(rng.choice([1, .5, .33, .7])))
+                   for _ in range(int(rng.integers(1, 4)))]
+        out, mask = erase_pixels(base, strokes)
+        alpha, erased = whole(base, strokes)
+        assert (np.asarray(Image.open(io.BytesIO(out)))[..., 3] == alpha).all()
+        assert (np.asarray(Image.open(io.BytesIO(out)))[..., :3] == a[..., :3]).all()
+        assert (np.asarray(Image.open(io.BytesIO(mask))) == erased).all()
+
+
 # ---------------------------------------------------------------- ページの層
 
 
@@ -153,7 +193,7 @@ def _content(**over):
                             adjustments=[])
     hand = SimpleNamespace(id=L1, panel_id=P1, role="human_hand", image_id="img2", stack_order=0, opacity=1.0,
                            visible=True, placement={"crop_px": [0, 0, 4, 4], "dest_box_mm": [2, 2, 6, 6]},
-                           adjustments=[])
+                           adjustments=[], stroke_revision=0, image_stroke_revision=None)
     text = SimpleNamespace(id=T1, order=0, item_kind="dialogue", text="あい", speaker=None, box_mm=[5, 25, 15, 40],
                            font_size_pt=12, font_family="ipag", writing_direction="vertical",
                            decoration={"fill": "#000000"}, ruby=[], transform=None, opacity=1.0, adjustments=[],
@@ -344,3 +384,47 @@ def test_read_prompt_and_extract_questions():
     assert "既にいる人" in q and "あらすじ" in q
     got = parse_extract_characters_answer('{"characters":[{"name":"A","traits":null,"notes":"1行目"}]}')
     assert got[0].name == "A"
+
+
+def test_線の控えの絵が無い_古い層は理由を返す():
+    layer = SimpleNamespace(id="L", stroke_revision=0, image_id=None, image_stroke_revision=None)
+    assert stroke_cache_problem(layer) is None
+    layer.stroke_revision = 1
+    assert "無い" in stroke_cache_problem(layer)
+    layer.image_id, layer.image_stroke_revision = "I", 0
+    assert "古い" in stroke_cache_problem(layer)
+    layer.image_stroke_revision = 1
+    assert stroke_cache_problem(layer) is None
+
+
+_GS_ICC = pathlib.Path("/usr/share/color/icc/ghostscript")
+
+
+@pytest.mark.skipif(not (_GS_ICC / "default_cmyk.icc").exists(), reason="試験の ICC プロファイル（ghostscript の物）が無い")
+def test_cmyk_conversion_uses_the_profile_and_refuses_without_it(tmp_path):
+    import shutil
+
+    from v3server.name_structure.print_settings import ColorOutput
+    from v3server.print_export.cmyk_conversion import CmykRefused, to_cmyk
+
+    shutil.copy(_GS_ICC / "default_cmyk.icc", tmp_path / "press.icc")
+    shutil.copy(_GS_ICC / "srgb.icc", tmp_path / "rgb.icc")
+    co = ColorOutput(profile="press.icc", intent="relative_colorimetric", black_point_compensation=True)
+    im = Image.new("RGB", (4, 2), (255, 255, 255))
+    im.putpixel((1, 0), (0, 0, 0))
+    out = to_cmyk(im, str(tmp_path), co)
+    from PIL import ImageCms
+
+    attached = ImageCms.getOpenProfile(io.BytesIO(out.info["icc_profile"]))
+    assert out.mode == "CMYK" and attached.profile.xcolor_space.strip() == "CMYK"
+    assert ImageCms.getProfileDescription(attached) == ImageCms.getProfileDescription(str(tmp_path / "press.icc"))
+    assert out.getpixel((0, 0)) == (0, 0, 0, 0)  # 紙の白はインクを載せない
+    assert sum(out.getpixel((1, 0))) > 255 * 2  # 黒は濃く（色の量はプロファイルによる）
+    with pytest.raises(CmykRefused, match="V3_ICC_DIR"):
+        to_cmyk(im, None, co)
+    with pytest.raises(CmykRefused, match="無い"):
+        to_cmyk(im, str(tmp_path), co.model_copy(update={"profile": "other.icc"}))
+    with pytest.raises(CmykRefused, match="CMYK でない"):
+        to_cmyk(im, str(tmp_path), co.model_copy(update={"profile": "rgb.icc"}))
+    with pytest.raises(ValueError):
+        ColorOutput(profile="../press.icc", intent="perceptual", black_point_compensation=False)

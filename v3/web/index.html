@@ -6,12 +6,13 @@
 <title>V3 画像生成</title>
 <link rel="stylesheet" href="css/app.css">
 <link rel="stylesheet" href="common/nav.css">
+<link rel="stylesheet" href="common/keys.css">
 <script src="vendor/fabric-7.4.0/fabric.min.js"></script>
 <script src="vendor/lucide-0.468.0/lucide.min.js"></script>
 </head>
 <body>
 <div id="app">
-  <header class="top">
+  <header class="top" data-v3-panel>
     <div class="brand"><span class="mark"><i data-lucide="sparkles"></i></span><span>画像生成</span></div>
     <nav class="pickers" aria-label="作品・ページ・コマ">
       <select id="pick-work" class="field" aria-label="作品"></select>
@@ -24,7 +25,7 @@
     <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
     <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
   </header>
-  <nav class="v3-nav" data-v3-nav="workbench"></nav>
+  <nav class="v3-nav" data-v3-nav="workbench" data-v3-panel></nav>
 
   <div class="ws">
     <section class="canvas" aria-label="コマの絵">
@@ -32,16 +33,16 @@
       <div class="empty" id="stage-empty" hidden></div>
 
       <div class="ftb" role="toolbar" aria-label="道具">
-        <button class="tool" data-tool="select" aria-pressed="true" title="動かす・見る (V・H)"><i data-lucide="hand"></i>見る<kbd>V</kbd></button>
-        <button class="tool" data-tool="mask" aria-pressed="false" title="囲んで頼む (L)"><i data-lucide="lasso-select"></i>囲んで頼む<kbd>L</kbd></button>
-        <button class="tool" data-tool="extend" aria-pressed="false" title="描き足す"><i data-lucide="expand"></i>描き足す</button>
+        <button class="tool" data-tool="select" aria-pressed="true" data-key="workbench.select" title="動かす・見る"><i data-lucide="hand"></i>見る<kbd></kbd></button>
+        <button class="tool" data-tool="mask" aria-pressed="false" data-key="workbench.mask" title="囲んで頼む"><i data-lucide="lasso-select"></i>囲んで頼む<kbd></kbd></button>
+        <button class="tool" data-tool="extend" aria-pressed="false" data-key="workbench.extend" title="描き足す"><i data-lucide="expand"></i>描き足す<kbd></kbd></button>
         <span class="vsep"></span>
-        <button class="tool" data-tool="pen" aria-pressed="false" title="ペン (B)"><i data-lucide="pen-line"></i>ペン<kbd>B</kbd></button>
-        <button class="tool" data-tool="erase" aria-pressed="false" title="消しゴム (E)"><i data-lucide="eraser"></i>消しゴム<kbd>E</kbd></button>
+        <button class="tool" data-tool="pen" aria-pressed="false" data-key="workbench.pen" title="ペン"><i data-lucide="pen-line"></i>ペン<kbd></kbd></button>
+        <button class="tool" data-tool="erase" aria-pressed="false" data-key="workbench.erase" title="消しゴム"><i data-lucide="eraser"></i>消しゴム<kbd></kbd></button>
         <span class="vsep"></span>
-        <button class="tool" id="undo" aria-disabled="true" title="取り消す (Ctrl+Z)"><i data-lucide="undo-2"></i>取り消す</button>
-        <button class="tool" id="redo" aria-disabled="true" title="やり直す (Ctrl+Shift+Z・Ctrl+Y)"><i data-lucide="redo-2"></i>やり直す</button>
-        <button class="tool" id="keys-open" title="キーの一覧 (?)"><i data-lucide="keyboard"></i>キー<kbd>?</kbd></button>
+        <button class="tool" id="undo" aria-disabled="true" data-key="edit.undo" title="取り消す"><i data-lucide="undo-2"></i>取り消す</button>
+        <button class="tool" id="redo" aria-disabled="true" data-key="edit.redo" title="やり直す"><i data-lucide="redo-2"></i>やり直す</button>
+        <button class="tool" id="keys-open" data-key="view.help" title="キーの一覧"><i data-lucide="keyboard"></i>キー<kbd></kbd></button>
       </div>
 
       <div class="ftb sub" id="mask-bar" role="toolbar" aria-label="囲む道具" hidden>
@@ -83,9 +84,9 @@
       <div class="stage-msg" id="stage-msg"></div>
 
       <div class="zoom">
-        <button class="ibtn" id="zoom-out" title="縮める (−)"><i data-lucide="minus"></i></button>
-        <button class="ibtn" id="zoom-fit" title="合わせる"><i data-lucide="scan"></i></button>
-        <button class="ibtn" id="zoom-in" title="広げる (+)"><i data-lucide="plus"></i></button>
+        <button class="ibtn" id="zoom-out" data-key="workbench.zoomOut" title="縮める"><i data-lucide="minus"></i></button>
+        <button class="ibtn" id="zoom-fit" data-key="workbench.zoomFit" title="合わせる"><i data-lucide="scan"></i></button>
+        <button class="ibtn" id="zoom-in" data-key="workbench.zoomIn" title="広げる"><i data-lucide="plus"></i></button>
       </div>
 
       <div class="compare" id="compare" hidden>
@@ -101,7 +102,7 @@
       </div>
     </section>
 
-    <aside class="insp" aria-label="頼む・候補・版">
+    <aside class="insp" aria-label="頼む・候補・版" data-v3-strip>
       <div class="itabs" role="tablist">
         <button class="itab" role="tab" data-tab="ask" aria-selected="true"><i data-lucide="wand-sparkles"></i>頼む</button>
         <button class="itab" role="tab" data-tab="cands" aria-selected="false"><i data-lucide="layout-grid"></i>候補<span class="count" id="cand-count"></span></button>
@@ -131,7 +132,7 @@
           </div><input class="field num" id="seed" type="number" min="0" step="1" value="0" hidden></div>
         </div>
         <div class="meta" id="service-meta"></div>
-        <button class="btn ai block" id="generate"><i data-lucide="sparkles"></i>頼む<kbd>Ctrl+Enter</kbd></button>
+        <button class="btn ai block" id="generate" data-key="workbench.generate" title="頼む"><i data-lucide="sparkles"></i>頼む<kbd></kbd></button>
         <div id="progress" class="sec"></div>
       </div>
 
@@ -148,22 +149,6 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<dialog class="keys" id="keys" aria-labelledby="keys-title">
-  <div class="compare-h"><span class="h2 grow" id="keys-title">キーの一覧</span><button class="btn sm" id="keys-close"><i data-lucide="x"></i>閉じる</button></div>
-  <table class="keys-t">
-    <tr><th><kbd>V</kbd> <kbd>H</kbd></th><td>見る（動かす）</td></tr>
-    <tr><th><kbd>L</kbd></th><td>囲んで頼む</td></tr>
-    <tr><th><kbd>B</kbd></th><td>ペン</td></tr>
-    <tr><th><kbd>E</kbd></th><td>消しゴム</td></tr>
-    <tr><th><kbd>+</kbd> <kbd>−</kbd></th><td>広げる・縮める</td></tr>
-    <tr><th><kbd>Ctrl+Z</kbd></th><td>取り消す（囲みを塗ったのも、このコマの操作も、新しい順に）</td></tr>
-    <tr><th><kbd>Ctrl+Shift+Z</kbd> <kbd>Ctrl+Y</kbd></th><td>やり直す</td></tr>
-    <tr><th><kbd>Ctrl+Enter</kbd></th><td>頼む</td></tr>
-    <tr><th><kbd>Enter</kbd> <kbd>Esc</kbd></th><td>多角形を閉じる・やめる。Esc は入力欄から出る・比べるを閉じるにも使います</td></tr>
-    <tr><th><kbd>?</kbd></th><td>この一覧</td></tr>
-  </table>
-  <p class="meta">描き足すにはキーがありません（O は読む順に使います）。</p>
-</dialog>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="v3-lum-to-alpha"><feColorMatrix type="luminanceToAlpha"/></filter></svg>
 <script type="module" src="common/nav.js"></script>
 <script type="module" src="js/app.js"></script>

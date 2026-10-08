@@ -1,9 +1,5 @@
-/* V3 画像生成の画面。色は共通の組（common/theme.css。砂とベージュの明るい表示）を使う。部品の名前は画面の試作（v3poc/screen/index.html）に合わせる。暗い色の組は持たない。 */
+/* V3 画像生成の画面。色は共通の組の名前（common/theme.css）だけを使い、色の値を書かない。部品の名前は画面の試作（v3poc/screen/index.html）に合わせる。 */
 @import url("../common/theme.css");
-:root{
-  --r-sm:6px; --r:8px; --r-lg:12px;
-  --font:"IBM Plex Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
-}
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.5 var(--font);-webkit-font-smoothing:antialiased;font-feature-settings:"palt" 1}
@@ -73,7 +69,7 @@ svg.lucide{width:16px;height:16px;stroke-width:1.9;flex:0 0 auto}
 .chip svg.lucide{width:13px;height:13px}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--on)}
 .sw{width:32px;height:18px;border-radius:9px;background:var(--line-2);position:relative;flex:0 0 auto;transition:background .15s}
-.sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px rgba(var(--shade),.2);transition:transform .15s}
 .sw[aria-checked="true"]{background:var(--ink)}
 .sw[aria-checked="true"]::after{transform:translateX(14px)}
 .field{height:34px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--surface);padding:0 10px;font-size:13px;min-width:0;width:100%}
@@ -160,9 +156,9 @@ details.more>.kv{margin-top:10px}
 .compare-h{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
 .compare-b{flex:1 1 auto;min-height:0;display:flex;gap:12px;padding:12px;align-items:center;justify-content:center}
 .compare-b.side>figure{flex:1 1 0;min-width:0;height:100%;margin:0;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center}
-.compare-b.side img{width:100%;height:auto;min-height:0;max-height:calc(100% - 24px);object-fit:contain;background:#fff;box-shadow:var(--sh-1)}
+.compare-b.side img{width:100%;height:auto;min-height:0;max-height:calc(100% - 24px);object-fit:contain;background:var(--paper);box-shadow:var(--sh-1)}
 .compare-b figcaption{font-size:12px;color:var(--ink-2)}
-.slider-wrap{position:relative;max-width:100%;max-height:100%;aspect-ratio:var(--ar,4/3);height:100%;box-shadow:var(--sh-1);background:#fff}
+.slider-wrap{position:relative;max-width:100%;max-height:100%;aspect-ratio:var(--ar,4/3);height:100%;box-shadow:var(--sh-1);background:var(--paper)}
 .slider-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .slider-wrap .b{clip-path:inset(0 0 0 var(--cut,50%))}
 .slider-wrap .bar{position:absolute;top:0;bottom:0;left:var(--cut,50%);width:2px;background:var(--ink);pointer-events:none}
@@ -178,9 +174,15 @@ details.more>.kv{margin-top:10px}
 .btn kbd{font:11px var(--font);opacity:.7;margin-left:6px}
 .btn[aria-busy="true"]{cursor:progress}
 .stage-msg .note{flex-wrap:wrap}
-.keys{border:1px solid var(--line);border-radius:8px;padding:0;background:var(--surface);color:inherit;max-width:min(560px,calc(100vw - 32px))}
-.keys::backdrop{background:rgba(0,0,0,.3)}
 .keys-t{border-collapse:collapse;margin:8px 12px;width:calc(100% - 24px)}
 .keys-t th{text-align:left;white-space:nowrap;padding:4px 12px 4px 0;font-weight:normal;vertical-align:top}
 .keys-t td{padding:4px 0}
-.keys .meta{margin:4px 12px 12px}
+
+/* ---------- 絵だけ（common/fullscreen.js。V3細部の決めごと 22.5）：絵と候補の帯だけを残す。Tab の間（data-peek）はふつうに戻す ---------- */
+html[data-focus]:not([data-peek]) .ws{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]{border-left:0;border-top:1px solid var(--line);max-height:34vh}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]>.itabs,
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]>[data-pane]:not([data-pane="cands"]),
+html[data-focus]:not([data-peek]) #cand-help{display:none !important}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]>.insp-b[data-pane="cands"]{display:flex !important;padding:8px 12px 10px;gap:10px}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip] .cands{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:minmax(8em,11em);overflow-x:auto;padding-bottom:4px}

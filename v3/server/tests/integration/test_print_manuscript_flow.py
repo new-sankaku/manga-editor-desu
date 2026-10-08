@@ -12,7 +12,7 @@ from conftest import h, new_work, user, wait_for
 from PIL import Image
 from test_human_ai_interchange import PAGE_SPEC, ai_op, op, work_json
 from test_human_edit_and_handover import image_dir, live, upload  # noqa: F401  (image_dir は fixture)
-from test_human_tools_and_finishing import FRAME_STYLE, TYPESETTING, export_env, undo  # noqa: F401
+from test_human_tools_and_finishing import FRAME_STYLE, TYPESETTING, edit_psd, export_env, undo  # noqa: F401
 
 from v3server.v3_error_types import HumanHandProtected
 
@@ -112,6 +112,7 @@ async def _file(api, wid, a, run, name):
     return r.content
 
 
+@pytest.mark.full
 @needs_font
 async def test_見開きと2階調とノンブルの書き出し_入稿前の確かめ(api, authz, workers, export_env):
     a = user()
@@ -152,18 +153,58 @@ async def test_見開きと2階調とノンブルの書き出し_入稿前の確
     black = np.asarray(single.convert("L")) == 0
     assert black[-round(20 * k):, -round(30 * k):].any() and not black[:round(20 * k), :].any()
 
-    # PDF は見開きを分けて出す（4ページ）。PSD は見開きを1枚で出し、戻せない
+    # PDF は見開きを分けて出す（4ページ）。PSD は見開きを1枚で出し、直した PSD を2ページ分まとめて戻せる
     pdf_run = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2, p3, p4], "spread_output": "split"})
     assert pdf_run["status"] == "done", pdf_run["detail"]
     pdf = pypdf.PdfReader(io.BytesIO(await _file(api, wid, a, pdf_run, "BK.pdf")))
     assert len(pdf.pages) == 4
     bad = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2], "spread_output": "joined"})
     assert bad["status"] == "failed" and "split" in bad["detail"]
+    # 右のページ（p1。1ページ目が右）に絵の入ったコマを置く
+    panel1 = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_panel", "id": panel1, "page_id": p1, "order": 0, "frame": {
+        "polygon_mm": [[10, 10], [60, 10], [60, 60], [10, 60]], "bleeds": False}})).status_code == 200
+    buf = io.BytesIO()
+    Image.new("RGBA", (50, 50), (200, 200, 200, 255)).save(buf, format="PNG")
+    r = await api.post(f"/works/{wid}/panels/{panel1}/image", headers=h(a),
+                       files={"image": ("a.png", buf.getvalue(), "image/png")}, data={"origin": "human_drawn"})
+    assert r.status_code == 201, r.text
+    panel_image = r.json()["id"]
+    assert (await op(api, wid, a, {"type": "update_panel", "id": panel1, "image_placement": {
+        "crop_px": [0, 0, 50, 50], "dest_box_mm": [10, 10, 60, 60]}})).status_code == 200
     psd_run = await _export(api, wid, a, {"format": "psd", "page_ids": [p1, p2], "spread_output": "joined"})
     assert psd_run["status"] == "done", psd_run["detail"]
-    r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{p1}/psd", headers=h(a),
-                       files={"psd": ("a.psd", b"x", "image/vnd.adobe.photoshop")})
-    assert r.status_code == 422 and "見開き" in r.text
+    out = psd_run["outputs"][0]
+    assert out["page_ids"] == [p1, p2] and out["left_page_id"] == p2
+    data = (await _file(api, wid, a, psd_run, out["file"]))
+    # 直した PSD：右のページのコマの絵と、見開きの絵の画素を変え、右のページのコマに描き足す
+    edited = edit_psd(data, export_env / "edit-spread", (f"[{panel1}-image]", f"[{sid}-image]"),
+                      add_to_group=f"[{panel1}]")
+    r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{p2}/psd", headers=h(a),
+                       files={"psd": ("s.psd", edited, "image/vnd.adobe.photoshop")})
+    assert r.status_code == 200, r.text
+    res = r.json()
+    assert res["matches"]["changed"] == 2 and res["matches"]["new"] == 1, res["matches"]
+    w = await work_json(api, wid, a)
+    panel = next(x for x in w["panels"] if x["id"] == panel1)
+    assert panel["image_id"] != panel_image
+    # 右のページの絵は、右のページの基本枠の mm に戻る（見開きの左の端からの mm ではない）
+    box = panel["image_placement"]["dest_box_mm"]
+    assert -1 < box[0] < 15 and box[2] < PAGE_SPEC["frame_width_mm"], box
+    hand = [x for x in w["panel_layers"] if x["panel_id"] == panel1 and x["role"] == "human_hand" and not x["removed"]]
+    assert len(hand) == 1 and hand[0]["page_id"] == p1
+    # 見開きの絵はどちらのページの物でもないので判断待ち（層の真ん中の側のページに付く）
+    (spread_held,) = [x for x in res["held"] if x["kind"] == "psd_unmatched_layer"]
+    assert spread_held["payload"]["marker"] == f"{sid}-image"
+    # 2ページ分を1回で取り消せる
+    await undo(api, wid, a, res["event_id"])
+    w = await work_json(api, wid, a)
+    assert next(x for x in w["panels"] if x["id"] == panel1)["image_id"] == panel_image
+    assert not [x for x in w["panel_layers"] if x["panel_id"] == panel1 and x["role"] == "human_hand"
+                and not x["removed"]]
+    # 見開きを外した後のページ全体の確かめのため、描き足したコマは抜く
+    assert (await op(api, wid, a, {"type": "set_removed", "target_kind": "panel", "id": panel1,
+                                   "removed": True})).status_code == 200
 
     # 入稿前の確かめ：揃っていれば error は無い
     r = await api.post(f"/works/{wid}/preflight", headers=h(a), json={})
@@ -187,3 +228,65 @@ async def test_見開きと2階調とノンブルの書き出し_入稿前の確
     assert ("safe_area", p3) in kinds and ("text_overflow", p3) in kinds
     text_issue = next(i for i in got["issues"] if i["kind"] == "safe_area")
     assert text_issue["location"]["table"] == "text_items"
+    # 色（decoration.fill）の無い文字（取り込んだ文字・古い文字）：色を補わず、どの文字かを付けて error にする
+    panel4 = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_panel", "id": panel4, "page_id": p4, "order": 1})).status_code == 200
+    r = await op(api, wid, a, {"type": "add_text_item", "panel_id": panel4, "item_kind": "balloon", "order": 0,
+                               "text": "いろなし", "font_family": "ipag", "font_size_pt": 12,
+                               "writing_direction": "vertical", "box_mm": [20, 20, 40, 60]})
+    assert r.status_code == 200, r.text
+    got = (await api.post(f"/works/{wid}/preflight", headers=h(a), json={})).json()
+    color = [i for i in got["issues"] if i["kind"] == "text_color"]
+    assert len(color) == 1 and color[0]["severity"] == "error" and color[0]["page_id"] == p4
+    assert color[0]["location"]["table"] == "text_items" and "decoration.fill" in color[0]["message"]
+    assert "いろなし" in color[0]["message"]
+
+
+CMYK_ICC = pathlib.Path("/usr/share/color/icc/ghostscript/default_cmyk.icc")
+
+
+@pytest.mark.full
+@needs_font
+@pytest.mark.skipif(not CMYK_ICC.exists(), reason="試験の CMYK の ICC プロファイル（ghostscript の物）が無い")
+async def test_カラーのページを_ICC_プロファイルで_CMYK_にして_PDF_に入れる(api, authz, workers, export_env, monkeypatch):
+    import shutil
+
+    from v3server.server_settings import get_settings
+
+    a = user()
+    wid, ids, (p1, p2, p3, p4) = await book(api, a)
+    for p in (p1, p2, p3, p4):
+        assert (await op(api, wid, a, {"type": "update_page", "id": p, "page_kind": "body"})).status_code == 200
+    assert (await op(api, wid, a, {"type": "update_page", "id": p1, "page_kind": "color_page",
+                                   "color_mode": "color"})).status_code == 200
+    co = {"profile": "press.icc", "intent": "relative_colorimetric", "black_point_compensation": True}
+    r = await op(api, wid, a, {"type": "set_work_settings", "preferences": {
+        "frame_style": FRAME_STYLE, "typesetting": TYPESETTING, "print": {**PRINT, "color_output": co},
+        "nombre": NOMBRE}})
+    assert r.status_code == 200, r.text
+    # プロファイルの置き場が無い：入稿前の確かめが知らせ、書き出しは止まる（RGB のまま黙って出さない）
+    monkeypatch.setattr(get_settings(), "icc_dir", None)
+    got = (await api.post(f"/works/{wid}/preflight", headers=h(a), json={})).json()
+    assert [i["kind"] for i in got["issues"] if i["kind"] == "icc_profile"] == ["icc_profile"]
+    bad = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2, p3, p4], "spread_output": "split"})
+    assert bad["status"] == "failed" and "V3_ICC_DIR" in bad["detail"]
+    # 置き場にプロファイルを置くと、カラーのページだけ CMYK になり、PDF ではプロファイル付き（ICCBased・4色）
+    icc_dir = export_env / "icc"
+    icc_dir.mkdir()
+    shutil.copy(CMYK_ICC, icc_dir / "press.icc")
+    monkeypatch.setattr(get_settings(), "icc_dir", str(icc_dir))
+    got = (await api.post(f"/works/{wid}/preflight", headers=h(a), json={})).json()
+    assert not [i for i in got["issues"] if i["kind"] == "icc_profile"]
+    run = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2, p3, p4], "spread_output": "split"})
+    assert run["status"] == "done", run["detail"]
+    (out,) = run["outputs"]
+    assert [(m["page_id"], m["color_space"]) for m in out["pages"]] == \
+        [(p1, "CMYK"), (p2, "1bit"), (p3, "1bit"), (p4, "1bit")]
+    assert out["pages"][0]["icc_profile"] == "press.icc"
+    pdf = pypdf.PdfReader(io.BytesIO(await _file(api, wid, a, run, "BK.pdf")))
+    spaces = []
+    for page in pdf.pages:
+        xo = page["/Resources"]["/XObject"]
+        cs = xo[next(iter(xo))].get_object()["/ColorSpace"]
+        spaces.append((cs[0], cs[1].get_object()["/N"]) if isinstance(cs, list) else cs)
+    assert spaces[0] == ("/ICCBased", 4) and spaces[1] == "/DeviceGray"

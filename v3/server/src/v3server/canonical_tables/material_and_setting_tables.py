@@ -91,6 +91,8 @@ class ExportRun(Base):
     detail: Mapped[str | None] = mapped_column(Text)
     # [{"page_id": .., "file": 書き出しのフォルダの中の名前, "bytes": ..}]。PSD は層の記録（layers・offset_px）も持つ
     outputs: Mapped[list[Any]] = mapped_column(default=list)
+    # 書き出し終えたページ（page_ids のうち、ファイルにし終えた物。進み具合を画面に出す）
+    done_page_ids: Mapped[list[Any]] = mapped_column(default=list, server_default="[]")
     workflow_id: Mapped[str | None] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),

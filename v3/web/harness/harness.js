@@ -5,6 +5,7 @@
 import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost, put, op } from "../js/api.js";
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
+import { startKeys, km } from "../common/keys.js";
 import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait } from "./harness_graph.js";
 
 const STAGES = ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"];
@@ -69,6 +70,10 @@ async function main() {
   S.unitId = params.get("unit");
   if (S.unitId) S.view = "unit";
   await loadAuth();
+  // キー・キーの一覧・絵だけ（図だけを大きく出す。見張る画面として使う）・全画面（common/keys.js）
+  km.bind("harness.fit", () => graph?.cy.fit(undefined, 40));
+  km.bind("harness.stageView", () => openStageView());
+  await startKeys("harness");
   if (mode() === "oidc") {
     $("#user").value = myName();
     $("#user").readOnly = true;
@@ -87,6 +92,8 @@ async function main() {
   $("#tab-stage").addEventListener("click", () => openStageView());
   $("#tab-unit").addEventListener("click", () => S.unitId && openUnit(S.unitId));
   $("#fit").addEventListener("click", () => graph.cy.fit(undefined, 40));
+  // 絵だけ・Tab でパネルが出入りすると図の箱の大きさが変わる。Cytoscape は箱の大きさを自分では見ないので知らせる
+  window.addEventListener("v3-view", () => requestAnimationFrame(() => { graph.cy.resize(); graph.cy.fit(undefined, 40); }));
   setInterval(tick, 500);
   await loadWork();
   connect();

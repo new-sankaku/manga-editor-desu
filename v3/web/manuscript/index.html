@@ -6,6 +6,7 @@
 <title>V3 原稿</title>
 <link rel="stylesheet" href="../css/app.css">
 <link rel="stylesheet" href="../common/nav.css">
+<link rel="stylesheet" href="../common/keys.css">
 <link rel="stylesheet" href="css/manuscript.css">
 <script src="../vendor/fabric-7.4.0/fabric.min.js"></script>
 <script src="../vendor/lucide-0.468.0/lucide.min.js"></script>
@@ -13,7 +14,7 @@
 </head>
 <body>
 <div id="app" class="ms">
-  <header class="top">
+  <header class="top" data-v3-panel>
     <div class="brand"><span class="mark"><i data-lucide="book-open"></i></span><span>原稿</span></div>
     <nav class="pickers" aria-label="作品・話・ページ">
       <select id="pick-work" class="field" aria-label="作品"></select>
@@ -21,16 +22,16 @@
       <select id="pick-episode" class="field" aria-label="話"></select>
       <span class="slash">/</span>
       <select id="pick-page" class="field" aria-label="ページ"></select>
-      <button class="ibtn" id="prev-page" title="前の見開き・ページ (PageUp)" aria-label="前の見開き・ページ"><i data-lucide="chevron-left"></i></button>
-      <button class="ibtn" id="next-page" title="次の見開き・ページ (PageDown)" aria-label="次の見開き・ページ"><i data-lucide="chevron-right"></i></button>
+      <button class="ibtn" id="prev-page" data-key="manuscript.prevSpread" title="前の見開き・ページ" aria-label="前の見開き・ページ"><i data-lucide="chevron-left"></i></button>
+      <button class="ibtn" id="next-page" data-key="manuscript.nextSpread" title="次の見開き・ページ" aria-label="次の見開き・ページ"><i data-lucide="chevron-right"></i></button>
       <button class="btn sm" id="view-spread" aria-pressed="false"><i data-lucide="columns-2"></i>見開き</button>
       <span class="meta" id="reading"></span>
     </nav>
-    <a class="btn sm" id="to-workbench" href="../index.html" title="選んだコマの絵を画像生成の画面で頼む (L)"><i data-lucide="sparkles"></i>コマの絵を頼む</a>
+    <a class="btn sm" id="to-workbench" href="../index.html" data-key="manuscript.mask" title="選んだコマの絵を画像生成の画面で頼む"><i data-lucide="sparkles"></i>コマの絵を頼む</a>
     <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
     <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
   </header>
-  <nav class="v3-nav" data-v3-nav="manuscript"></nav>
+  <nav class="v3-nav" data-v3-nav="manuscript" data-v3-panel></nav>
 
   <div class="ws">
     <div class="ms-main">
@@ -40,22 +41,22 @@
 
         <div class="ftb" id="tools" role="toolbar" aria-label="道具">
           <span class="vsep"></span>
-          <button class="tool" id="undo" aria-disabled="true" title="取り消す (Ctrl+Z)"><i data-lucide="undo-2"></i>取り消す</button>
-          <button class="tool" id="redo" aria-disabled="true" title="やり直す (Ctrl+Shift+Z・Ctrl+Y)"><i data-lucide="redo-2"></i>やり直す</button>
-          <button class="tool" id="keys-open" title="キーの一覧 (?)"><i data-lucide="keyboard"></i>キー<kbd>?</kbd></button>
+          <button class="tool" id="undo" aria-disabled="true" data-key="edit.undo" title="取り消す"><i data-lucide="undo-2"></i>取り消す</button>
+          <button class="tool" id="redo" aria-disabled="true" data-key="edit.redo" title="やり直す"><i data-lucide="redo-2"></i>やり直す</button>
+          <button class="tool" id="keys-open" data-key="view.help" title="キーの一覧"><i data-lucide="keyboard"></i>キー<kbd></kbd></button>
         </div>
 
         <div class="stage-msg" id="stage-msg"></div>
 
         <div class="zoom">
-          <button class="ibtn" id="zoom-out" title="縮める (−)"><i data-lucide="minus"></i></button>
+          <button class="ibtn" id="zoom-out" data-key="manuscript.zoomOut" title="縮める"><i data-lucide="minus"></i></button>
           <span class="zoom-v num" id="zoom-v"></span>
-          <button class="ibtn" id="zoom-fit" title="合わせる (0)"><i data-lucide="scan"></i></button>
-          <button class="ibtn" id="zoom-in" title="広げる (+)"><i data-lucide="plus"></i></button>
+          <button class="ibtn" id="zoom-fit" data-key="manuscript.zoomFit" title="合わせる"><i data-lucide="scan"></i></button>
+          <button class="ibtn" id="zoom-in" data-key="manuscript.zoomIn" title="広げる"><i data-lucide="plus"></i></button>
         </div>
       </section>
 
-      <section class="dock" aria-label="ページの一覧">
+      <section class="dock" aria-label="ページの一覧" data-v3-panel>
         <div class="dock-h">
           <span class="lbl">ページ</span>
           <span class="meta" id="pages-note"></span>
@@ -66,38 +67,13 @@
       </section>
     </div>
 
-    <aside class="insp" aria-label="判断・道具・層・確かめ">
+    <aside class="insp" aria-label="判断・道具・層・確かめ" data-v3-panel>
       <div class="itabs" id="itabs" role="tablist"></div>
       <div class="insp-b" id="pane"></div>
     </aside>
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<dialog class="keys" id="keys" aria-labelledby="keys-title">
-  <div class="compare-h"><span class="h2 grow" id="keys-title">キーの一覧</span><button class="btn sm" id="keys-close"><i data-lucide="x"></i>閉じる</button></div>
-  <table class="keys-t">
-    <tr><th><kbd>V</kbd></th><td>選ぶ（コマを2回押すとコマの絵を動かす。文字を2回押すとその場で打つ）</td></tr>
-    <tr><th><kbd>F</kbd></th><td>コマ枠（動かす・角を直す・足す・合わせる）</td></tr>
-    <tr><th><kbd>C</kbd></th><td>ナイフ（コマを横・縦・斜めに分ける）</td></tr>
-    <tr><th><kbd>S</kbd></th><td>フキダシ</td></tr>
-    <tr><th><kbd>T</kbd></th><td>文字</td></tr>
-    <tr><th><kbd>N</kbd></th><td>トーン</td></tr>
-    <tr><th><kbd>H</kbd> <kbd>Space</kbd></th><td>手のひら（スペースは押している間だけ）</td></tr>
-    <tr><th><kbd>L</kbd></th><td>選んだコマの絵を画像生成の画面で頼む</td></tr>
-    <tr><th><kbd>J</kbd> <kbd>K</kbd></th><td>次・前の判断待ち</td></tr>
-    <tr><th><kbd>A</kbd> <kbd>X</kbd></th><td>判断待ちを受け入れる・断る（判断の欄を開いているとき）</td></tr>
-    <tr><th><kbd>D</kbd></th><td>右の欄を替える</td></tr>
-    <tr><th><kbd>W</kbd></th><td>見せるもの（層の欄）</td></tr>
-    <tr><th><kbd>+</kbd> <kbd>−</kbd> <kbd>0</kbd></th><td>広げる・縮める・合わせる。Ctrl とホイールでも広げる・縮める</td></tr>
-    <tr><th><kbd>PageUp</kbd> <kbd>PageDown</kbd></th><td>前・次の見開き（1ページで見ているときはページ）</td></tr>
-    <tr><th><kbd>Ctrl+Z</kbd></th><td>取り消す（このページの操作を新しい順に）</td></tr>
-    <tr><th><kbd>Ctrl+Shift+Z</kbd> <kbd>Ctrl+Y</kbd></th><td>やり直す</td></tr>
-    <tr><th><kbd>Delete</kbd></th><td>選んだ物を消す（取り消せます）</td></tr>
-    <tr><th><kbd>Esc</kbd></th><td>打つのをやめる・選ぶのをやめる・コマの絵を動かすのを終える</td></tr>
-    <tr><th><kbd>?</kbd></th><td>この一覧</td></tr>
-  </table>
-  <p class="meta">R（赤入れ）・B（ペン）・E（消しゴム）・U（図形）・O（読む順）・Q（順番待ち）は、この画面にまだありません。L の囲んで頼むは画像生成の画面で使います。</p>
-</dialog>
 <script type="module" src="../common/nav.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>

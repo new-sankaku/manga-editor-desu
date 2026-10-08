@@ -10,6 +10,8 @@ import { $, $$, h, icons, note, toast, fail } from "./ui.js";
 import * as panes from "./panes.js";
 import { rememberWork, storedWork } from "../../common/nav.js";
 import { PRINT_INK, PRINT_PAPER } from "./print_colors.js";
+import { startKeys, km } from "../../common/keys.js";
+import { openHelp } from "../../common/help_overlay.js";
 
 export const S = {
   works: [], workId: null, m: null, episodeId: null, pageId: null, spread: false,
@@ -379,10 +381,10 @@ export function selectedRow() {
   return r && !r.removed ? r : null;
 }
 
-// ---------------------------------------------------------------- 道具
+// ---------------------------------------------------------------- 道具（4つ目はキーの操作の名前。common/key_catalog.js）
 export const TOOLS = [
-  ["select", "選ぶ", "mouse-pointer-2", "V"], ["frame", "コマ枠", "square-dashed", "F"], ["knife", "ナイフ", "slice", "C"],
-  ["balloon", "フキダシ", "message-circle", "S"], ["text", "文字", "type", "T"], ["tone", "トーン", "grid-3x3", "N"], ["hand", "手のひら", "hand", "H"],
+  ["select", "選ぶ", "mouse-pointer-2", "manuscript.select"], ["frame", "コマ枠", "square-dashed", "manuscript.frame"], ["knife", "ナイフ", "slice", "manuscript.knife"],
+  ["balloon", "フキダシ", "message-circle", "manuscript.balloon"], ["text", "文字", "type", "manuscript.text"], ["tone", "トーン", "grid-3x3", "manuscript.tone"], ["hand", "手のひら", "hand", "manuscript.hand"],
 ];
 
 export function setTool(tool) {
@@ -443,53 +445,62 @@ export function removeSelected() {
   change("消す", [{ type: "set_removed", target_kind: kind, id: r.id, removed: true }], { pages: [pageId], reload: kind === "panel" });
 }
 
-// ---------------------------------------------------------------- キー（決めごと 22.2）
-const KEYS = {
-  v: () => setTool("select"), f: () => setTool("frame"), c: () => setTool("knife"), s: () => setTool("balloon"),
-  t: () => setTool("text"), n: () => setTool("tone"), h: () => setTool("hand"),
-  l: () => openWorkbench(),
-  r: () => notHere("赤入れ"), b: () => notHere("ペン"), e: () => notHere("消しゴム"), u: () => notHere("図形"), o: () => notHere("読む順"),
-  d: () => panes.cycleTab(), w: () => panes.openTab("layers"), q: () => notHere("順番待ち"),
-  j: () => panes.heldStep(1), k: () => panes.heldStep(-1), a: () => panes.heldDecide("accept"), x: () => panes.heldDecide("reject"),
-  "+": () => S.view.zoomBy(1.25), "=": () => S.view.zoomBy(1.25), "-": () => S.view.zoomBy(0.8), "0": () => S.view.fit(),
-  "?": () => $("#keys").showModal(),
-  pageup: () => flip(-1), pagedown: () => flip(1),
-  delete: () => removeSelected(), backspace: () => removeSelected(),
-};
+// ---------------------------------------------------------------- キー（決めごと 22章）
+// キーは common/keymap.js の1か所で受け、ここでは操作の名前（common/key_catalog.js の manuscript.*）に処理を結ぶだけ。
+// 文字を打っている間・IME の変換中は keymap.js が止める。Esc は「道具 → 画面 → 絵だけ → 全画面」の順に1つずつ抜ける
+function bindKeys() {
+  const tool = (t) => () => setTool(t);
+  km.bind("manuscript.select", tool("select"));
+  km.bind("manuscript.frame", tool("frame"));
+  km.bind("manuscript.knife", tool("knife"));
+  km.bind("manuscript.balloon", tool("balloon"));
+  km.bind("manuscript.text", tool("text"));
+  km.bind("manuscript.tone", tool("tone"));
+  km.bind("manuscript.hand", tool("hand"));
+  km.bind("manuscript.mask", () => openWorkbench());
+  km.bind("manuscript.side", () => panes.cycleTab());
+  km.bind("manuscript.show", () => panes.openTab("layers"));
+  km.bind("manuscript.nextDecision", () => panes.heldStep(1));
+  km.bind("manuscript.prevDecision", () => panes.heldStep(-1));
+  km.bind("manuscript.adopt", () => panes.heldDecide("accept"));
+  km.bind("manuscript.reject", () => panes.heldDecide("reject"));
+  km.bind("manuscript.zoomIn", () => S.view.zoomBy(1.25));
+  km.bind("manuscript.zoomOut", () => S.view.zoomBy(0.8));
+  km.bind("manuscript.zoomFit", () => S.view.fit());
+  km.bind("manuscript.prevSpread", () => flip(-1));
+  km.bind("manuscript.nextSpread", () => flip(1));
+  km.bind("manuscript.remove", () => removeSelected());
+  km.bind("edit.undo", () => step("undo"));
+  km.bind("edit.redo", () => step("redo"));
+  km.bind("manuscript.cancel", cancel);
+  km.bind("manuscript.pan", {
+    down: () => { if (!S.view.space) { S.view.space = true; $("#stage").classList.add("space"); } },
+    up: () => { S.view.space = false; $("#stage").classList.remove("space"); },
+  });
+  // この画面にまだ無い物（22.2 のキーは空けたまま。押すと無いと知らせる）
+  for (const [id, name] of [["manuscript.redline", "赤入れ"], ["manuscript.pen", "ペン"], ["manuscript.erase", "消しゴム"],
+                            ["manuscript.shape", "図形"], ["manuscript.order", "読む順"], ["manuscript.queue", "順番待ち"]]) {
+    km.bind(id, () => notHere(name), { missing: true });
+  }
+}
 
 function notHere(name) { toast(`「${name}」はこの画面にまだありません（キーは決めごと 22.2 のまま空けています）`, "need"); }
+
+// Esc：コマの絵を動かすのをやめる・ナイフとコマ枠の途中をやめる・選ぶのをやめる。することが無ければ false（絵だけ・全画面へ回す）
+function cancel() {
+  const active = S.view.c.getActiveObject();
+  const midTool = S.tool === "knife" || S.tool === "frame";
+  if (!S.imageEdit && !active && !midTool) return false;
+  if (S.imageEdit) { S.imageEdit = null; draw(); return true; }
+  if (midTool) S.view.setTool(S.tool, { frameMode: S.frameMode, knife: S.knife });
+  S.view.c.discardActiveObject(); S.view.c.requestRenderAll();
+  return !!active || midTool;
+}
 
 export function openWorkbench(panelId = S.sel && S.sel.kind === "panel" ? S.sel.id : null) {
   if (!panelId) { toast("絵を頼むコマを選んでください（選ぶ道具でコマを押す）", "need"); return; }
   if (S.saver.pending()) { toast("保存が済んでから開きます"); S.saver.idle().then(() => openWorkbench(panelId), () => {}); return; }
   location.href = workbenchUrl(panelId);
-}
-
-function typing(e) {
-  const t = e.target;
-  return t && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));
-}
-
-function onKey(e) {
-  if (e.key === "Escape") {
-    if ($("#keys").open) return;
-    if (S.imageEdit) { S.imageEdit = null; draw(); return; }
-    if (S.tool === "knife" || S.tool === "frame") S.view.setTool(S.tool, { frameMode: S.frameMode, knife: S.knife });
-    S.view.c.discardActiveObject(); S.view.c.requestRenderAll();
-    return;
-  }
-  const mod = e.ctrlKey || e.metaKey;
-  if (mod && !e.altKey) {
-    const k = e.key.toLowerCase();
-    if (typing(e) && (k === "z" || k === "y")) return; // 打っている所の取り消しはブラウザに任せる
-    if (k === "z") { e.preventDefault(); step(e.shiftKey ? "redo" : "undo"); return; }
-    if (k === "y") { e.preventDefault(); step("redo"); return; }
-    return;
-  }
-  if (typing(e) || e.altKey) return;
-  if (e.key === " ") { if (!S.view.space) { S.view.space = true; $("#stage").classList.add("space"); } e.preventDefault(); return; }
-  const fn = KEYS[e.key.toLowerCase()];
-  if (fn) { e.preventDefault(); fn(); }
 }
 
 // ---------------------------------------------------------------- 覚えておく
@@ -534,17 +545,16 @@ async function boot() {
   $("#zoom-in").addEventListener("click", () => S.view.zoomBy(1.25));
   $("#zoom-out").addEventListener("click", () => S.view.zoomBy(0.8));
   $("#zoom-fit").addEventListener("click", () => S.view.fit());
-  $("#keys-open").addEventListener("click", () => $("#keys").showModal());
-  $("#keys-close").addEventListener("click", () => $("#keys").close());
+  $("#keys-open").addEventListener("click", () => openHelp());
   for (const b of $$("#tools .tool[data-tool]")) b.addEventListener("click", () => setTool(b.dataset.tool));
-  document.addEventListener("keydown", onKey);
-  document.addEventListener("keyup", (e) => { if (e.key === " ") { S.view.space = false; $("#stage").classList.remove("space"); } });
   window.addEventListener("beforeunload", (e) => {
     if (S.saver && (S.saver.pending() || S.saver.failed)) { e.preventDefault(); e.returnValue = ""; }
   });
   panes.init();
   icons();
   try { await showWho(); } catch (e) { fail(e, "ログインの方式を読むこと"); return; }
+  bindKeys();
+  startKeys("manuscript");
   if (!api.currentUser()) { showEmpty("右上の「利用者」に名前を入れてください"); return; }
   loadWorks().catch((e) => { fail(e, "作品を読むこと"); showEmpty(`作品を読めませんでした：${api.errorText(e)}`); });
 }

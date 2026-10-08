@@ -12,6 +12,12 @@ from v3server.operations.annotation_operations import (
 )
 from v3server.operations.book_structure_operations import AddSpread, ReorderPages, UpdateSpread
 from v3server.operations.current_app_import_operations import ImportCurrentAppProject
+from v3server.operations.episode_plan_operations import (
+    AddForeshadowing,
+    CarryOverEpisodePlan,
+    SetEpisodePlan,
+    UpdateForeshadowing,
+)
 from v3server.operations.held_change_operations import ResolveHeldChange, UndoWithHeldChanges
 from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
 from v3server.operations.image_file_operations import (
@@ -86,7 +92,7 @@ from v3server.operations.work_tree_operations import (
 )
 
 Op = Annotated[
-    SetWorkSettings | SetAiInvolvement | SetMember | AllowDestination | SetThreshold | RecordFindingReaction | AddVolume | AddEpisode | UpdateEpisode | AddPage | AssignPage | AddPanel | UpdatePanel | UpdatePage | SetRemoved | SubmitNameProposal | SetNameProposalStatus | ApplyNameProposal | RestoreNameSnapshot | RegisterImage | AddProtectedRegion | SetProtectedRegionRemoved | AddTextItem | UpdateTextItem | AddPanelLayer | UpdatePanelLayer | ResolveHeldChange | UndoWithHeldChanges | RestoreRows | SplitPanel | MergePanels | RandomSplitPanel | AddShapePanel | SavePanelTemplate | ApplyPanelTemplate | AddPageItem | UpdatePageItem | SetFixed | ResetAdjustments | AddPenStrokes | UpdatePenStrokes | RemovePenStrokes | ErasePenStrokes | SetStrokeCache | ErasePixels | AdoptImage | SetImageDiscarded | AddAnnotation | UpdateAnnotation | RecordAnnotationJob | SetWorkPlan | SetEpisodeOutline | AddMaterialEntry | UpdateMaterialEntry | DecideMaterialProposal | ReplaceText | ApplyPsdImport | ImportCurrentAppProject | SetTextTranslation | SetTextTranslationRemoved | SetReviewStatus | ReorderPages | AddSpread | UpdateSpread,
+    SetWorkSettings | SetAiInvolvement | SetMember | AllowDestination | SetThreshold | RecordFindingReaction | AddVolume | AddEpisode | UpdateEpisode | AddPage | AssignPage | AddPanel | UpdatePanel | UpdatePage | SetRemoved | SubmitNameProposal | SetNameProposalStatus | ApplyNameProposal | RestoreNameSnapshot | RegisterImage | AddProtectedRegion | SetProtectedRegionRemoved | AddTextItem | UpdateTextItem | AddPanelLayer | UpdatePanelLayer | ResolveHeldChange | UndoWithHeldChanges | RestoreRows | SplitPanel | MergePanels | RandomSplitPanel | AddShapePanel | SavePanelTemplate | ApplyPanelTemplate | AddPageItem | UpdatePageItem | SetFixed | ResetAdjustments | AddPenStrokes | UpdatePenStrokes | RemovePenStrokes | ErasePenStrokes | SetStrokeCache | ErasePixels | AdoptImage | SetImageDiscarded | AddAnnotation | UpdateAnnotation | RecordAnnotationJob | SetWorkPlan | SetEpisodeOutline | AddMaterialEntry | UpdateMaterialEntry | DecideMaterialProposal | ReplaceText | ApplyPsdImport | ImportCurrentAppProject | SetTextTranslation | SetTextTranslationRemoved | SetReviewStatus | ReorderPages | AddSpread | UpdateSpread | SetEpisodePlan | CarryOverEpisodePlan | AddForeshadowing | UpdateForeshadowing,
     Field(discriminator="type"),
 ]
 

@@ -1,21 +1,18 @@
 /* AIハーネスの画面。色は common/theme.css（明るい砂の組だけ。暗い色の組は持たない）。細い線と、等幅の小さいラベル。
    幅は決め打ちしない（図と横のパネルは grid の割合で分け、狭い画面では縦に積む）。 */
 :root{
-  /* 色は common/theme.css の変数だけから作る（色の値をここに書かない。組を替えれば図も画面も替わる）。
-     ハーネスの状態の色の呼び名はここ1か所。図（harness_graph.js）もこの呼び名を getComputedStyle で読む。
-     theme.css にまだ無い状態の色（古い・動いている作業の下地・やり直しの線）は、近い変数から作っている */
+  /* 色は common/theme.css の変数だけを使う（色の値をここに書かない。組を替えれば図も画面も替わる）。
+     ここは工程の図の状態の呼び名を theme.css の変数に結ぶだけ。図（harness_graph.js）もこの呼び名を getComputedStyle で読む。
+     下地・やり直し・古い・光・斜線（--run-bg・--retry・--stale・--stale-tint・--hot-glow・--hot-glow-2・--bad-stripe）は theme.css の変数をそのまま使う */
   --bg-2:var(--surface-2);
   --h-node:var(--raise); --h-line:var(--line-2); --h-ink:var(--ink); --h-ink-2:var(--ink-3); --h-bg:var(--surface);
   --h-group-bg:var(--surface-2); --h-edge:var(--line-2);
-  --run:var(--ok); --run-bg:color-mix(in srgb,var(--ok) 22%,var(--surface)); --wait:var(--ink-4);
+  --run:var(--ok); --wait:var(--ink-4);
   --review:var(--need); --review-bg:var(--need-tint);
   --bad-bg:var(--bad-tint); --pause:var(--ai); --pause-bg:var(--ai-tint); --done:var(--ink-3); --done-bg:var(--surface-3);
-  --stale:var(--ink-2); --stale-tint:color-mix(in srgb,var(--ink-2) 10%,transparent);
-  --retry:var(--need-ink); --hot:var(--need);
-  --hot-glow:color-mix(in srgb,var(--need) 25%,transparent); --hot-glow-2:color-mix(in srgb,var(--need) 60%,transparent);
-  --bad-stripe:color-mix(in srgb,var(--bad) 6%,transparent);
-  --mono:"SFMono-Regular","Cascadia Mono",Consolas,"Noto Sans Mono CJK JP","Noto Sans Mono",monospace;
-  --sans:"Noto Sans JP","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
+  --hot:var(--need);
+  --mono:var(--font-mono);
+  --sans:var(--font);
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.55 var(--sans)}
@@ -53,6 +50,9 @@ input,textarea{font:12px var(--sans);color:var(--ink);background:var(--surface);
 .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,30%);grid-template-areas:"graph side" "table table";
   gap:12px;padding:12px 16px}
 @media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"graph" "side" "table"}}
+/* 絵だけ（common/fullscreen.js が html に data-focus を付ける）：図だけを画面いっぱいに出す。見張る画面として使う */
+html[data-focus]:not([data-peek]) .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"graph";padding:8px}
+html[data-focus]:not([data-peek]) .graph-wrap{height:calc(100vh - 16px - 40px)}
 .graph-box{grid-area:graph;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-width:0}
 .graph-head{display:flex;align-items:center;gap:12px;padding:6px 10px;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .legend{font-size:11px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
@@ -108,6 +108,7 @@ body[data-view="stage"] .timeline-box{display:none}
 .kv dd{margin:0;font-family:var(--mono)}
 .actions{display:flex;flex-wrap:wrap;gap:6px}
 .btn{font:11.5px var(--sans);border:1px solid var(--line-2);background:var(--surface);color:var(--ink);padding:4px 10px;cursor:pointer}
+.btn kbd{margin-left:6px;font:10px var(--mono);color:var(--ink-3)}
 .btn:hover{background:var(--bg)}
 .btn.primary{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .btn.danger{color:var(--bad);border-color:var(--bad)}

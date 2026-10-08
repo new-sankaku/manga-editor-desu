@@ -1,11 +1,10 @@
 """ハーネス：候補の中身と直させた元・1話の構成の正本・知らせ（アプリの中の一覧・外への送り先・届けた記録）
 
 Revision ID: 0030
-Revises: 0013
+Revises: 0021
 Create Date: 2026-10-08 20:00:00
 
-番号は並行して作っている 0020 番台（残りのサーバーの口）の後に置く。0020 番台と合わせるときは、down_revision を
-その最後の番号へ付け替える（ここで足す表と列は 0020 番台と重ならない）。
+0020 番台（残りのサーバーの口：0020・0021）の後に置く。ここで足す表と列は 0020 番台と重ならない。
 """
 from typing import Sequence, Union
 
@@ -14,7 +13,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 revision: str = '0030'
-down_revision: Union[str, Sequence[str], None] = '0013'
+down_revision: Union[str, Sequence[str], None] = '0021'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -1,0 +1,46 @@
+/* 色の組「砂漠」（V3細部の決めごと 8章）。明るい表示だけ。砂とベージュの地に、濃い茶色がかった灰色の文字と線。
+   名前の意味は common/theme.css に書いてある。ここは値だけ。名前を足す・消すときは theme.css と両方を直す
+   （test/theme_check.mjs が、theme.css の名前が全部ここにあるかを確かめる）。
+   値は画面の試作（v3poc/screen/index.html の :root）と同じ。試作と本物の画面をそろえるため、変えるときは両方を変える。 */
+:root{
+  /* 地 */
+  --bg:#DCD5BE; --canvas:#D3CBB1; --dot:#C2B99B;
+  --surface:#E9E3CF; --surface-2:#E2DBC4; --surface-3:#D8D0B7;
+  --on:#F4EFE0; --raise:#F4EFE0;
+  --glass:rgba(233,227,207,.92);
+  /* 線 */
+  --line:#C9C0A3; --line-2:#B2A887;
+  /* 文字 */
+  --ink:#433F35; --ink-2:#5C564A; --ink-3:#787162; --ink-4:#978F7B;
+  /* 印の色（AI・判断待ち・失敗・済み） */
+  --ai:#4A6386; --ai-ink:#3A4F6C; --ai-tint:#D5D6CB; --ai-line:#A2ADB5;
+  --need:#A86A16; --need-ink:#7A4C0D; --need-tint:#E9D9B5; --need-line:#CBAB70;
+  --bad:#A8432F; --bad-ink:#823120; --bad-tint:#E7D0C0; --bad-line:#C89884;
+  --ok:#5F8A55;
+  /* 仕事の状態 */
+  --st-wait:var(--ink-4); --st-run:var(--ai); --st-done:var(--ok); --st-fail:var(--bad);
+  --run-bg:color-mix(in srgb,var(--ok) 22%,var(--surface)); --retry:var(--need-ink);
+  --stale:var(--ink-2); --stale-tint:color-mix(in srgb,var(--stale) 10%,transparent);
+  --hot-glow:color-mix(in srgb,var(--need) 25%,transparent); --hot-glow-2:color-mix(in srgb,var(--need) 60%,transparent);
+  --bad-stripe:color-mix(in srgb,var(--bad) 6%,transparent);
+  /* 紙と、絵の上に重ねる印 */
+  --paper:#FFFFFF;
+  --mask:#4A6386; --protect:#C46A00; --pointer:#433F35;
+  /* 影と、開いた窓の後ろを暗くする色 */
+  --shade:67,63,53;
+  --sh-1:0 1px 2px rgba(var(--shade),.12),0 0 0 1px rgba(var(--shade),.05);
+  --sh-2:0 2px 6px rgba(var(--shade),.12),0 10px 28px rgba(var(--shade),.14);
+  --backdrop:rgba(var(--shade),.3);
+  /* 文字の形と角 */
+  --font:"IBM Plex Sans JP","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r-sm:6px; --r:8px; --r-lg:12px;
+  color-scheme:light;
+}
+/* 紙の物（ページ・候補の絵・設定資料の絵）。白いまま見せる */
+.paper,.cand{
+  --bg:#EFEADB; --canvas:#E9E3CF; --dot:#D8D0B7; --surface:#FFFFFF; --surface-2:#F8F5EC; --surface-3:#EFEADB;
+  --line:#E2DBC4; --line-2:#CFC6AA; --ink:#2B2822; --ink-2:#514B3F; --ink-3:#787162; --ink-4:#A69E89;
+  --ai-tint:#E8EAEC; --ai-line:#BFC8CF; --need-tint:#F6EBD3; --need-line:#E0C690; --bad-tint:#F5E3DA; --bad-line:#E2B9A8;
+  --on:#FFFFFF; --raise:#FFFFFF; color:var(--ink);
+}

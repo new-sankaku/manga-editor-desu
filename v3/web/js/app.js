@@ -4,6 +4,8 @@ import * as api from "./api.js";
 import { renderForm } from "./schema_form.js";
 import { Stage } from "./stage.js";
 import { drawStroke } from "./pen_render.js";
+import { startKeys, km } from "../common/keys.js";
+import { openHelp } from "../common/help_overlay.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -13,7 +15,7 @@ const STATUS = { queued: "順番待ち", running: "作っている", waiting_lim
 const ORIGIN = { generated: "AIが作った", human_drawn: "人が描いた", imported: "取り込んだ", human_edited: "人が直した" };
 const POLL_MS = 1500;
 const THUMB = 256;
-const PROT_RGB = [196, 106, 0];
+const PEN_INK = "#000000";   // 色の決め打ちを許す：ペンの線の色は絵の中身（墨）で、画面の色ではない（色の組を替えても変えない）
 
 // 取り消しの記録のうち、囲みの差分が持ってよい大きさ（全部のコマを合わせて）。超えたら古い物から捨てる
 const MASK_HISTORY_BYTES = 256 * 1024 * 1024;
@@ -207,7 +209,7 @@ async function loadProtected(imageId) {
   const headers = await api.imageHeaders(protPath);
   const count = headers.get("X-V3-Region-Count");
   if (count === null) throw new Error("人の手の範囲の数がサーバーから来ませんでした");
-  return { count: Number(count), canvas: Number(count) ? await api.maskOverlay(protPath, PROT_RGB, 1) : null };
+  return { count: Number(count), canvas: Number(count) ? await api.maskOverlay(protPath, stage.col.protectRgb, 1) : null };
 }
 
 function stashMask(panelId) {
@@ -255,6 +257,7 @@ function setTool(t) {
   $("#pen-bar").hidden = t !== "pen";
   $("#erase-bar").hidden = t !== "erase";
   stage.setTool(t);
+  km.setTool(t);   // "workbench:mask" のキー（多角形の Enter・Esc）は囲む道具の間だけ効く
   syncPenBar();
 }
 
@@ -498,7 +501,7 @@ function renderCandidates(currentId) {
       th.prepend(im);
       api.showIn(im, `/works/${S.workId}/images/${img.id}/thumbnail?size=${THUMB}`).catch((e) => fail(e, "候補の小さい絵を読む"));
       if (img.protected_mask_url) {
-        api.maskOverlay(img.protected_mask_url, PROT_RGB, 0.55, THUMB * 2).then((c) => {
+        api.maskOverlay(img.protected_mask_url, stage.col.protectRgb, 0.55, THUMB * 2).then((c) => {
           const copy = h("canvas", { class: "prot" });
           copy.width = c.width; copy.height = c.height;
           copy.getContext("2d").drawImage(c, 0, 0);
@@ -918,12 +921,12 @@ function drawServerStroke(ctx, s, f) {
 function penBegin() {
   if (S.viewing) throw new Error("昔の版を見ている間は描けません");
   if (!syncPenBar()) throw new Error($("#pen-note").textContent);
-  return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: "#000000" };
+  return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: PEN_INK };
 }
 
 function onPenStroke(points, pointerType) {
   const hand = S.hand, f = hand.frame;
-  const stroke = { id: newId(), brush: "pencil", color: "#000000", opacity: 1,
+  const stroke = { id: newId(), brush: "pencil", color: PEN_INK, opacity: 1,
                    width_mm: Number($("#pen-width [aria-pressed=true]").dataset.w), pointer_type: pointerType,
                    points: points.map((p) => [f.ox + p.x * f.sx, f.oy + p.y * f.sy, p.pressure, p.ms]) };
   hand.strokes.push(stroke);
@@ -1037,7 +1040,7 @@ function bindUi() {
   $("#pick-page").addEventListener("change", (e) => selectPage(e.target.value).catch(fail));
   $("#pick-panel").addEventListener("change", (e) => selectPanel(e.target.value).catch(fail));
   const user = $("#user");
-  user.addEventListener("change", () => { api.setUser(user.value.trim()); start(); });
+  user.addEventListener("change", () => { api.setUser(user.value.trim()); km.loadUserKeys(); start(); });
   for (const b of $$(".ftb .tool[data-tool]")) b.addEventListener("click", () => setTool(b.dataset.tool));
   for (const b of $$("#mask-tools button")) b.addEventListener("click", () => { pressed($("#mask-tools"), b); stage.setMaskTool(b.dataset.mask); });
   for (const b of $$("#pen-width button")) b.addEventListener("click", () => {
@@ -1072,9 +1075,7 @@ function bindUi() {
   $("#viewing-back").addEventListener("click", () => { S.viewing = null; $("#viewing").hidden = true; refreshPanel().catch(fail); });
   for (const b of $$("#compare-mode button")) b.addEventListener("click", () => { pressed($("#compare-mode"), b); renderCompare().catch(fail); });
   $("#compare-close").addEventListener("click", () => { $("#compare").hidden = true; });
-  $("#keys-open").addEventListener("click", () => $("#keys").showModal());
-  $("#keys-close").addEventListener("click", () => $("#keys").close());
-  window.addEventListener("keydown", onKey);
+  $("#keys-open").addEventListener("click", () => openHelp());
   window.addEventListener("online", () => { if (S.link) loadCandidates(); if (Q.failed) retrySaves(); });
   window.addEventListener("offline", () => { S.link = { text: "ネットにつながっていません", at: Date.now() + POLL_MAX_MS }; renderStatus(); });
   // 保存していない線・消した所があるときは、閉じる前に聞く
@@ -1083,11 +1084,9 @@ function bindUi() {
   });
 }
 
-// ---------------------------------------------------------------- キー（llm_doc/V3細部の決めごと.md 22.2）
-// キーはここ1か所で受け、画面のボタンを押したのと同じにする（ボタンの押せない状態もそのまま効く）
-const KEYS = { v: "[data-tool=select]", h: "[data-tool=select]", l: "[data-tool=mask]", b: "[data-tool=pen]",
-               e: "[data-tool=erase]", "+": "#zoom-in", "=": "#zoom-in", "-": "#zoom-out", "?": "#keys-open" };
-
+// ---------------------------------------------------------------- キー（llm_doc/V3細部の決めごと.md 22章）
+// キーは common/keymap.js の1か所で受け、ここでは操作の名前（common/key_catalog.js）に処理を結ぶだけ。
+// 処理は画面のボタンを押したのと同じにする（ボタンの押せない状態もそのまま効く）。押せなかったら false で、次の候補へ回す
 function press(sel) {
   const b = $(sel);
   if (!b || b.disabled || b.getAttribute("aria-disabled") === "true" || b.closest("[hidden]")) return false;
@@ -1095,26 +1094,36 @@ function press(sel) {
   return true;
 }
 
-function onKey(e) {
-  const k = e.key.toLowerCase();
-  const mod = e.ctrlKey || e.metaKey;
-  if (mod && k === "enter") { e.preventDefault(); press("#generate"); return; }
-  if (e.key === "Escape") {
-    if (e.target.closest("input,textarea,select")) { e.target.blur(); return; }
-    if (stage.polygonKey("Escape")) return;
-    if (!$("#compare").hidden) press("#compare-close");
-    return;
-  }
-  if (e.target.closest("input,textarea,select")) return;
-  if (mod && (k === "z" || k === "y")) {
-    e.preventDefault();
-    press(k === "y" || e.shiftKey ? "#redo" : "#undo");
-    return;
-  }
-  if (mod || e.altKey) return;
-  if (e.key === "Enter" && stage.polygonKey("Enter")) { e.preventDefault(); return; }
-  const sel = KEYS[e.key] || KEYS[k];
-  if (sel && press(sel)) e.preventDefault();
+function bindKeys() {
+  const btn = (sel) => () => press(sel);
+  km.bind("workbench.select", btn("[data-tool=select]"));
+  km.bind("workbench.mask", btn("[data-tool=mask]"));
+  km.bind("workbench.extend", btn("[data-tool=extend]"));
+  km.bind("workbench.pen", btn("[data-tool=pen]"));
+  km.bind("workbench.erase", btn("[data-tool=erase]"));
+  km.bind("workbench.zoomIn", btn("#zoom-in"));
+  km.bind("workbench.zoomOut", btn("#zoom-out"));
+  km.bind("workbench.zoomFit", btn("#zoom-fit"));
+  km.bind("workbench.generate", () => { press("#generate"); });
+  km.bind("edit.undo", () => { press("#undo"); });
+  km.bind("edit.redo", () => { press("#redo"); });
+  km.bind("save.state", showSaveState);
+  km.bind("workbench.compareClose", () => !$("#compare").hidden && press("#compare-close"));
+  km.bind("workbench.polyClose", () => stage.polygonKey("Enter"));
+  km.bind("workbench.polyCancel", () => stage.polygonKey("Escape"));
+  // Space を押している間だけ「見る（動かす）」にし、離したら前の道具へ戻す
+  let before = null;
+  km.bind("workbench.pan", {
+    down: () => { if (S.tool !== "select") { before = S.tool; setTool("select"); } },
+    up: () => { if (before) { setTool(before); before = null; } },
+  });
+}
+
+// Ctrl+S：保存の具合を知らせる（描いた線と消した所は、描いた後に後ろで送っている）
+function showSaveState() {
+  if (Q.failed) toast(`保存できていない変更があります（${Q.failed.job.label}）。左下の「もう一度送る」か「この変更を捨てる」を選んでください`, "bad");
+  else if (savingCount() || (S.hand && S.hand.dirty)) toast(`保存しています（${savingCount() || 1} 件）。済むと左下の印が消えます`);
+  else toast("描いた物は全部サーバーに残っています");
 }
 
 function maskBegin() {
@@ -1150,6 +1159,8 @@ stage = new Stage($("#stage"), {
 window.v3Stage = stage;
 bindUi();
 await showWho().catch(fail);
+bindKeys();
+startKeys("workbench");
 icons();
 setTool("select");
 start();

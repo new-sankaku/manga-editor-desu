@@ -18,6 +18,7 @@ import pypdf
 from PIL import Image
 
 from v3server.name_structure.reading_direction import PageSpec
+from v3server.print_export.cmyk_conversion import cmyk_tiff_bytes
 
 BilevelCodec = Literal["flate", "ccitt_g4"]
 
@@ -49,8 +50,13 @@ def _encode_page(image: Image.Image, bilevel_codec: BilevelCodec | None, dpi: fl
             raise ValueError(f"2値の符号化が不明です: {bilevel_codec}")
     elif image.mode in ("L", "RGB"):
         image.save(buf, format="PNG", dpi=(dpi, dpi))
+    elif image.mode == "CMYK":
+        # cmyk_conversion.to_cmyk で作った絵（ICC プロファイル付き）。img2pdf が ICCBased の色空間にする
+        if "icc_profile" not in image.info:
+            raise ValueError("CMYK のページに ICC プロファイルが付いていない")
+        return cmyk_tiff_bytes(image, dpi)
     else:
-        raise ValueError(f"画像のモードは 1・L・RGB のどれかにしてください（{image.mode}）")
+        raise ValueError(f"画像のモードは 1・L・RGB・CMYK のどれかにしてください（{image.mode}）")
     return buf.getvalue()
 
 
@@ -80,7 +86,7 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float | S
     canvas_mm = canvas_size_mm(spec)
     if paper_mm is not None and (paper_mm[0] < canvas_mm[0] or paper_mm[1] < canvas_mm[1]):
         raise ValueError(f"紙 {paper_mm}mm が塗り足し込みのページ {canvas_mm}mm より小さい")
-    dpis = list(dpi) if isinstance(dpi, (list, tuple)) else [dpi] * len(pages)
+    dpis: list[float] = [float(dpi)] * len(pages) if isinstance(dpi, (int, float)) else list(dpi)
     if len(dpis) != len(pages):
         raise ValueError(f"dpi の数 {len(dpis)} がページの数 {len(pages)} と違います")
     for i, (page, d) in enumerate(zip(pages, dpis, strict=False)):
@@ -97,11 +103,11 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float | S
     bleed_pt = spec.bleed_mm / _MM_PER_INCH * _PT_PER_INCH
     mx = (w_mm - canvas_mm[0]) / 2 / _MM_PER_INCH * _PT_PER_INCH
     my = (h_mm - canvas_mm[1]) / 2 / _MM_PER_INCH * _PT_PER_INCH
-    for page in writer.pages:
-        media = page.mediabox
+    for pdf_page in writer.pages:
+        media = pdf_page.mediabox
         left, bottom = float(media.left) + mx, float(media.bottom) + my
         right, top = float(media.right) - mx, float(media.top) - my
-        page.bleedbox = pypdf.generic.RectangleObject([left, bottom, right, top])
-        page.trimbox = pypdf.generic.RectangleObject([left + bleed_pt, bottom + bleed_pt, right - bleed_pt, top - bleed_pt])
+        pdf_page.bleedbox = pypdf.generic.RectangleObject([left, bottom, right, top])
+        pdf_page.trimbox = pypdf.generic.RectangleObject([left + bleed_pt, bottom + bleed_pt, right - bleed_pt, top - bleed_pt])
     with open(output_path, "wb") as f:
         writer.write(f)

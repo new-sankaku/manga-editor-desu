@@ -21,6 +21,7 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
+from v3server.hand_tools.vector_strokes import stroke_cache_problem
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import (
     BalloonShape,
@@ -461,8 +462,24 @@ def _draw_shape(size, geom, fill, line, width) -> Image.Image:
     return img
 
 
+def text_fill(t) -> str:
+    """文字の色（decoration.fill）。無ければ止める（色を補わない。取り込んだ文字・古い文字は無いことがある。
+    書き出し前の確認も、この関数で同じ理由を出す）。"""
+    fill = (t.decoration or {}).get("fill")
+    if not fill:
+        raise RenderRefused(f"文字「{t.text[:12]}」（{t.id}）の色（decoration.fill）が決まっていない。"
+                            "取り込んだ文字か古い文字は色を持たないことがある。文字の飾りで色を選び直す")
+    return fill
+
+
 def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], str]) -> dict:
-    prefs = content.preferences or {}
+    return text_job(t, content.preferences, content.text_direction, dpi, font_path)
+
+
+def text_job(t, preferences: dict[str, Any] | None, text_direction: str, dpi: float,
+             font_path: Callable[[str], str]) -> dict:
+    """文字1つを render_text.js へ渡す形にする（書き出し・入稿前の確かめ・1つだけ組む口で同じ）。"""
+    prefs = preferences or {}
     k = dpi / MM_PER_INCH
     if t.box_mm is None:
         raise RenderRefused(f"文字 {t.id} の箱（box_mm）が決まっていない")
@@ -477,8 +494,7 @@ def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], st
                             "preferences.typesetting）")
     b = t.box_mm
     deco = dict(t.decoration or {})
-    if not deco.get("fill"):
-        raise RenderRefused(f"文字 {t.id} の色（decoration.fill）が決まっていない")
+    deco["fill"] = text_fill(t)
     spans = []
     for sp in t.spans or []:
         spans.append({"start": sp["start"], "end": sp["end"], "size_ratio": sp.get("size_ratio"),
@@ -486,7 +502,7 @@ def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], st
                       "font_path": font_path(sp["font_family"]) if sp.get("font_family") else None})
     return {"id": t.id, "text": t.text, "font_path": font_path(family), "font_family": family,
             "font_size_px": t.font_size_pt / 72 * dpi,
-            "vertical": (t.writing_direction or content.text_direction) == "vertical",
+            "vertical": (t.writing_direction or text_direction) == "vertical",
             "color": deco["fill"], "language": prefs.get("language"),
             "box_w_px": max(1, round((b[2] - b[0]) * k)), "box_h_px": max(1, round((b[3] - b[1]) * k)),
             "typesetting": Typesetting.model_validate(raw_ts).model_dump(), "spans": spans,
@@ -561,6 +577,9 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
                 children.append(Node(LAYER_NAME_PANEL_IMAGE, f"{panel.id}-image", _clip(img, left, top, [poly_px]),
                                      left, top, blend_mode_of(panel.adjustments), table="panels"))
         for la in sorted((x for x in content.layers if x.panel_id == panel.id), key=lambda x: x.stack_order):
+            problem = stroke_cache_problem(la)
+            if problem:
+                raise RenderRefused(problem)
             if la.image_id is None:
                 continue
             if la.placement is None:

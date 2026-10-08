@@ -14,7 +14,7 @@ from v3server.canonical_tables.service_and_job_tables import (
     ServiceProcess,
 )
 from v3server.generation_queue.image_process_registry import SPECS, parse_settings
-from v3server.generation_queue.known_processes import check_process_task
+from v3server.generation_queue.known_processes import KNOWN_PROCESSES, check_process_task
 from v3server.http_routes.http_dependencies import (
     SYSTEM_OBJ,
     ActorDep,
@@ -67,6 +67,18 @@ class ServiceProcessBody(BaseModel):
     comfy_graph_settings: dict[str, Any] | None = None
 
 
+class ServiceProcessPatch(BaseModel):
+    """処理の中身のうち、送った項目だけを変える（送らない項目は今の値のまま。comfy_workflow も送らなければ残る）。"""
+
+    aptitude: Literal["good", "normal", "poor"] | None = None
+    cost_per_call: float | None = None
+    model: str | None = None
+    comfy_workflow: dict[str, Any] | None = None
+    comfy_wait_seconds: int | None = Field(default=None, ge=1)
+    comfy_check_choices: bool | None = None
+    comfy_graph_settings: dict[str, Any] | None = None
+
+
 class RouteBody(BaseModel):
     service_id: str
     resend_limit: int = Field(ge=0)
@@ -80,6 +92,8 @@ SERVICE_FIELDS = ("id", "name", "kind", "location", "adapter", "endpoint", "send
                   "paused", "monthly_budget", "usage_terms")
 SP_FIELDS = ("service_id", "process", "aptitude", "cost_per_call", "model", "comfy_wait_seconds",
              "comfy_check_choices", "comfy_graph_settings")
+# 管理者に返す項目。ComfyUI の手順（comfy_workflow）も返す（画面が直して PATCH で戻すため）
+ADMIN_SP_FIELDS = (*SP_FIELDS, "comfy_workflow")
 ROUTE_FIELDS = ("process", "service_id", "resend_limit", "regenerate_limit", "ai_task", "ai_action")
 
 
@@ -120,7 +134,7 @@ async def list_services(session: SessionDep, authz: AuthzDep, actor: ActorDep):
     routes = (await session.execute(select(ProcessRoute))).scalars().all()
     return {
         "services": [row(s, *SERVICE_FIELDS) for s in services],
-        "processes": [row(sp, *SP_FIELDS) for sp in sps],
+        "processes": [row(sp, *ADMIN_SP_FIELDS) for sp in sps],
         "routes": [row(r, *ROUTE_FIELDS) for r in routes],
     }
 
@@ -164,14 +178,52 @@ async def put_service_process(service_id: str, process: str, body: ServiceProces
     if sp is None:
         sp = ServiceProcess(service_id=service_id, process=process)
         session.add(sp)
-    if body.comfy_graph_settings is not None:
-        if process not in SPECS:
-            raise Invalid(f"comfy_graph_settings は画像生成の処理（{', '.join(SPECS)}）だけに入れる")
-        parse_settings(SPECS[process], body.comfy_graph_settings)
+    _check_graph_settings(process, body.comfy_graph_settings)
     for k, v in body.model_dump().items():
         setattr(sp, k, v)
     await session.commit()
-    return row(sp, *SP_FIELDS)
+    return row(sp, *ADMIN_SP_FIELDS)
+
+
+def _check_graph_settings(process: str, settings: dict[str, Any] | None) -> None:
+    if settings is None:
+        return
+    if process not in SPECS:
+        raise Invalid(f"comfy_graph_settings は画像生成の処理（{', '.join(SPECS)}）だけに入れる")
+    parse_settings(SPECS[process], settings)
+
+
+@router.patch("/services/{service_id}/processes/{process}")
+async def patch_service_process(service_id: str, process: str, body: ServiceProcessPatch, session: SessionDep,
+                                authz: AuthzDep, actor: ActorDep):
+    """登録した処理の中身を一部だけ直す。無い処理は足さない（足すのは PUT）。null を送った項目は空にする。"""
+    await require(authz, actor, "admin", SYSTEM_OBJ)
+    sp = (
+        await session.execute(
+            select(ServiceProcess).where(ServiceProcess.service_id == service_id, ServiceProcess.process == process)
+        )
+    ).scalar_one_or_none()
+    if sp is None:
+        raise NotFound(f"services:{service_id} の処理 {process}")
+    changes = body.model_dump(exclude_unset=True)
+    if not changes:
+        raise Invalid("変える項目がない")
+    if "comfy_check_choices" in changes and changes["comfy_check_choices"] is None:
+        raise Invalid("comfy_check_choices は true か false")
+    _check_graph_settings(process, changes.get("comfy_graph_settings"))
+    for k, v in changes.items():
+        setattr(sp, k, v)
+    await session.commit()
+    return row(sp, *ADMIN_SP_FIELDS)
+
+
+@router.get("/known-processes")
+async def list_known_processes(session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """アプリが中身を知っている処理の、作業と手（ai_task・ai_action）。送り先がまだ無い処理も返す（routed=false）。
+    送り先を決める画面が、PUT /routes/{process} に送る作業と手をここから取る。ログインした人なら読める（中身は秘密でない）。"""
+    routed = set((await session.execute(select(ProcessRoute.process))).scalars())
+    return [{"process": p, "ai_task": task, "ai_action": action, "routed": p in routed}
+            for p, (task, action) in sorted(KNOWN_PROCESSES.items())]
 
 
 @router.put("/routes/{process}")

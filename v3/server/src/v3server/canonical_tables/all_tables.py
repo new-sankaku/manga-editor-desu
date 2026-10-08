@@ -2,6 +2,7 @@
 
 from v3server.canonical_tables import (  # noqa: F401
     check_result_tables,
+    episode_plan_tables,
     event_and_lock_tables,
     harness_tables,
     image_file_tables,
@@ -9,6 +10,7 @@ from v3server.canonical_tables import (  # noqa: F401
     name_proposal_tables,
     page_item_tables,
     service_and_job_tables,
+    service_set_and_preview_tables,
     text_and_layer_tables,
     threshold_and_finding_tables,
     translation_review_import_tables,

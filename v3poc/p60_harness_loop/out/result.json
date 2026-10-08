@@ -1,0 +1,3958 @@
+{
+ "settings": {
+  "width": 320,
+  "height": 320,
+  "limits_default": {
+   "max_attempts": 4,
+   "candidates_per_attempt": 2,
+   "budget_usd": 1.0,
+   "budget_seconds": 1800,
+   "resend_limit": 2,
+   "eval_repeats": 2,
+   "eval_min_score": 3,
+   "same_failure_reset": 2,
+   "error_stop": 3
+  },
+  "model": "SD1.5（UNet・文の符号化・VAE を分けた fp16）CPU",
+  "evaluator": "Claude CLI sonnet",
+  "comfy_for_a": "本物の ComfyUI 0.39.2（CPU）",
+  "comfy_for_b_to_s": "【模型】mock_comfy.py（口だけ ComfyUI と同じ。絵は (a) の本物の絵から選ぶ。1段 3 秒×8段）。絵の良し悪しに関わる数は未検証"
+ },
+ "parts": {
+  "a": {
+   "summary": {
+    "guided": {
+     "units": 8,
+     "first_attempt_fail": 7,
+     "regenerations": 7,
+     "regeneration_fail": 6,
+     "regeneration_pass": 1,
+     "passed_within_3": 2,
+     "by_panel": {
+      "1": {
+       "passed_within_3": 1,
+       "units": 4
+      },
+      "2": {
+       "passed_within_3": 1,
+       "units": 4
+      }
+     }
+    },
+    "blind": {
+     "units": 8,
+     "first_attempt_fail": 7,
+     "regenerations": 8,
+     "regeneration_fail": 6,
+     "regeneration_pass": 2,
+     "passed_within_3": 3,
+     "by_panel": {
+      "1": {
+       "passed_within_3": 0,
+       "units": 4
+      },
+      "2": {
+       "passed_within_3": 3,
+       "units": 4
+      }
+     }
+    }
+   },
+   "rows": [
+    {
+     "unit": "a-055040-p1-s11-guided",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2398.78,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2399/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s11-guided"
+     },
+     "stop_reason": "予算（時間 2399/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2398.78,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 11,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "7d03a72a-92d4-59aa-865c-e8d8eb5812f4.png",
+       "gen_seconds": 504.78
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1011,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "2debfa69-b034-537d-b791-48fe835e5690.png",
+       "gen_seconds": 817.24
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 58.75
+      },
+      "context": {
+       "count": 2,
+       "total_s": 137.43
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 2202.6
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(1girl:1.4)",
+       "(one person clearly visible:1.2)",
+       "(full body:1.4)",
+       "(wide shot:1.3)",
+       "feet visible",
+       "small figure in distance"
+      ],
+      "neg": [
+       "no humans",
+       "empty scenery",
+       "close-up",
+       "cropped",
+       "out of frame"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p1-s11-blind",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2310.72,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2311/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s11-blind"
+     },
+     "stop_reason": "予算（時間 2311/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2310.72,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 11,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "dcb30fc6-6015-5654-a921-dafb268f2017.png",
+       "gen_seconds": 530.34
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1011,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "T"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "94e25778-9e7f-5d68-ab19-ade9d5a9d938.png",
+       "gen_seconds": 822.27
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 74.69
+      },
+      "context": {
+       "count": 2,
+       "total_s": 185.78
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 2050.25
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p1-s22-guided",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2482.35,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2482/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s22-guided"
+     },
+     "stop_reason": "予算（時間 2482/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2482.35,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 22,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "14ca08ed-b11b-59a6-9f1f-9c0be3d72613.png",
+       "gen_seconds": 508.24
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1022,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "452d3713-dc34-5040-923f-61e51230a52a.png",
+       "gen_seconds": 817.27
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 117.47
+      },
+      "context": {
+       "count": 2,
+       "total_s": 221.63
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 2143.25
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(full body:1.4)",
+       "(wide shot:1.3)",
+       "feet visible",
+       "small figure in distance",
+       "(1girl:1.4)",
+       "(one person clearly visible:1.2)"
+      ],
+      "neg": [
+       "close-up",
+       "cropped",
+       "out of frame",
+       "no humans",
+       "empty scenery"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p1-s22-blind",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 1908.89,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 1909/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s22-blind"
+     },
+     "stop_reason": "予算（時間 1909/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 1908.89,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 22,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "c54f18b6-b258-5c8c-b7e6-7e16b82352e4.png",
+       "gen_seconds": 294.01
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1022,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "cf97ad36-f659-5ce7-bad3-390201a309b2.png",
+       "gen_seconds": 510.99
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 769.98
+      },
+      "context": {
+       "count": 2,
+       "total_s": 205.47
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 933.44
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p1-s33-guided",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2161.99,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2162/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s33-guided"
+     },
+     "stop_reason": "予算（時間 2162/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2161.99,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 33,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "2308fd9d-968b-5230-87b4-ee8c88d4adb8.png",
+       "gen_seconds": 649.38
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1033,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "T"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "9878ea32-10bc-5e5f-a06a-b8c8d2cab7d1.png",
+       "gen_seconds": 789.56
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 211.46
+      },
+      "context": {
+       "count": 2,
+       "total_s": 53.71
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1896.82
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(full body:1.4)",
+       "(wide shot:1.3)",
+       "feet visible",
+       "small figure in distance"
+      ],
+      "neg": [
+       "close-up",
+       "cropped",
+       "out of frame"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p1-s33-blind",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2153.15,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2153/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s33-blind"
+     },
+     "stop_reason": "予算（時間 2153/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2153.15,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 33,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "15d2e96c-d0ef-56b6-b279-acd19278aa51.png",
+       "gen_seconds": 787.28
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1033,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "016afc36-2e0b-568f-9b75-1b85a423728d.png",
+       "gen_seconds": 602.2
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 439.11
+      },
+      "context": {
+       "count": 2,
+       "total_s": 6.19
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1707.85
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p1-s44-guided",
+     "status": "done",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 1576.56,
+       "usd": 0.0
+      },
+      "image": "0e749742-4df5-56f0-965f-da92f46b5e0d.png",
+      "persons": 1,
+      "reason": "合格",
+      "status": "done",
+      "unit_id": "a-055040-p1-s44-guided"
+     },
+     "stop_reason": "合格",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 1576.56,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 44,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "1412c17c-34be-53c4-a2f7-eddc93293673.png",
+       "gen_seconds": 396.93
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1044,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "0e749742-4df5-56f0-965f-da92f46b5e0d.png",
+       "gen_seconds": 519.19
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 461.66
+      },
+      "context": {
+       "count": 2,
+       "total_s": 68.8
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1046.1
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(full body:1.4)",
+       "(wide shot:1.3)",
+       "feet visible",
+       "small figure in distance"
+      ],
+      "neg": [
+       "close-up",
+       "cropped",
+       "out of frame"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p1-s44-blind",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2159.05,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2159/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p1-s44-blind"
+     },
+     "stop_reason": "予算（時間 2159/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2159.05,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 44,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "3a376b1e-3e60-5760-bc93-4a3d4fd369a5.png",
+       "gen_seconds": 676.72
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1044,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "a43b397f-c141-5e85-a1be-46b88dc0da97.png",
+       "gen_seconds": 752.94
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 245.84
+      },
+      "context": {
+       "count": 2,
+       "total_s": 134.1
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1779.11
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p2-s11-guided",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2590.66,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2591/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p2-s11-guided"
+     },
+     "stop_reason": "予算（時間 2591/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2590.66,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 11,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "3bed96b7-9642-5b13-b1d3-19d9b3ec8714.png",
+       "gen_seconds": 844.89
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1011,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "T"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "77f6f238-f4df-59b6-bfc9-f23318e77100.png",
+       "gen_seconds": 812.68
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 512.37
+      },
+      "context": {
+       "count": 2,
+       "total_s": 222.43
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1855.86
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(2girls:1.5)",
+       "(two girls side by side:1.3)"
+      ],
+      "neg": [
+       "solo"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p2-s11-blind",
+     "status": "done",
+     "result": {
+      "attempts": 3,
+      "budget": {
+       "seconds": 2782.36,
+       "usd": 0.0
+      },
+      "image": "9a617336-c872-5ad6-bbc3-cb10ebb03e83.png",
+      "persons": 2,
+      "reason": "合格",
+      "status": "done",
+      "unit_id": "a-055040-p2-s11-blind"
+     },
+     "stop_reason": "合格",
+     "attempt": 3,
+     "round": 1,
+     "budget": {
+      "seconds": 2782.36,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 11,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "8725ac39-ec6f-562f-b5ca-526c8144947d.png",
+       "gen_seconds": 149.78
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1011,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "T"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "c2879e3a-9360-55e6-8d30-6b391ffc594d.png",
+       "gen_seconds": 508.12
+      },
+      {
+       "id": "a3c0",
+       "source": "ai",
+       "seed": 2011,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 2,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "9a617336-c872-5ad6-bbc3-cb10ebb03e83.png",
+       "gen_seconds": 733.2
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 3,
+       "total_s": 300.96
+      },
+      "context": {
+       "count": 3,
+       "total_s": 878.44
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 3,
+       "total_s": 1602.96
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p2-s22-guided",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2149.18,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2149/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p2-s22-guided"
+     },
+     "stop_reason": "予算（時間 2149/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2149.18,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 22,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "1a778f1b-0b86-5f52-8546-b069d775fea5.png",
+       "gen_seconds": 770.23
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1022,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "dacfdb40-67b7-5a3a-8d95-d18ff3696b93.png",
+       "gen_seconds": 658.33
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 373.65
+      },
+      "context": {
+       "count": 2,
+       "total_s": 59.97
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1715.56
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(2girls:1.5)",
+       "(two girls side by side:1.3)"
+      ],
+      "neg": [
+       "solo"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p2-s22-blind",
+     "status": "done",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2228.2,
+       "usd": 0.0
+      },
+      "image": "47059c4e-fc4e-5cef-9313-3b42a279524d.png",
+      "persons": 2,
+      "reason": "合格",
+      "status": "done",
+      "unit_id": "a-055040-p2-s22-blind"
+     },
+     "stop_reason": "合格",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2228.2,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 22,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "0e6aadb5-ee7f-540d-867d-159007d44649.png",
+       "gen_seconds": 611.03
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1022,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 2,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "47059c4e-fc4e-5cef-9313-3b42a279524d.png",
+       "gen_seconds": 796.68
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 144.58
+      },
+      "context": {
+       "count": 2,
+       "total_s": 104.6
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1979.02
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p2-s33-guided",
+     "status": "done",
+     "result": {
+      "attempts": 1,
+      "budget": {
+       "seconds": 730.56,
+       "usd": 0.0
+      },
+      "image": "51955a7e-2097-5d57-8d24-85f6c67f085f.png",
+      "persons": 2,
+      "reason": "合格",
+      "status": "done",
+      "unit_id": "a-055040-p2-s33-guided"
+     },
+     "stop_reason": "合格",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 730.56,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 33,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 2,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "51955a7e-2097-5d57-8d24-85f6c67f085f.png",
+       "gen_seconds": 492.76
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 1,
+       "total_s": 236.62
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.26
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 1,
+       "total_s": 493.68
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p2-s33-blind",
+     "status": "done",
+     "result": {
+      "attempts": 1,
+      "budget": {
+       "seconds": 854.07,
+       "usd": 0.0
+      },
+      "image": "5e3b7ad6-4b5e-5ef1-b817-4d0f326e6f08.png",
+      "persons": 2,
+      "reason": "合格",
+      "status": "done",
+      "unit_id": "a-055040-p2-s33-blind"
+     },
+     "stop_reason": "合格",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 854.07,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 33,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 2,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "5e3b7ad6-4b5e-5ef1-b817-4d0f326e6f08.png",
+       "gen_seconds": 723.72
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 1,
+       "total_s": 128.89
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.89
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 1,
+       "total_s": 724.29
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    },
+    {
+     "unit": "a-055040-p2-s44-guided",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2702.66,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2703/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p2-s44-guided"
+     },
+     "stop_reason": "予算（時間 2703/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2702.66,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 44,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "0a5d6180-1219-5390-ba8d-cba349ab36d8.png",
+       "gen_seconds": 493.32
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1044,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 3,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "05213f75-c11c-5ad1-ae0a-f83edf6266a0.png",
+       "gen_seconds": 788.44
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 230.99
+      },
+      "context": {
+       "count": 2,
+       "total_s": 153.16
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 2318.51
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [
+       "(2girls:1.5)",
+       "(two girls side by side:1.3)",
+       "(exactly 2 people:1.3)"
+      ],
+      "neg": [
+       "solo",
+       "crowd",
+       "group",
+       "3girls"
+      ]
+     }
+    },
+    {
+     "unit": "a-055040-p2-s44-blind",
+     "status": "stopped",
+     "result": {
+      "attempts": 2,
+      "budget": {
+       "seconds": 2156.43,
+       "usd": 0.0
+      },
+      "image": null,
+      "persons": null,
+      "reason": "予算（時間 2156/1800 秒）",
+      "status": "stopped",
+      "unit_id": "a-055040-p2-s44-blind"
+     },
+     "stop_reason": "予算（時間 2156/1800 秒）",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 2156.43,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 44,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "5dda35b2-fb81-5fa8-a85b-ae85ef4a4877.png",
+       "gen_seconds": 636.64
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1044,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "b22f34a8-2b93-532c-ae65-e84317f2680e.png",
+       "gen_seconds": 552.9
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 584.44
+      },
+      "context": {
+       "count": 2,
+       "total_s": 193.64
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 1378.35
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "adjust": {
+      "add": [],
+      "neg": []
+     }
+    }
+   ],
+   "counts": {
+    "prompt_posts": 31,
+    "duplicate_posts": 0,
+    "registrations": 31,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 0,
+    "duplicate_versions": 0,
+    "claude_calls": 0,
+    "claude_killed": 0,
+    "claude_usd": 0
+   }
+  },
+  "b": {
+   "b1_attempt_cap_and_limits": {
+    "first_stop": "上限回数（1回）",
+    "round_attempts": 1,
+    "raise_to_2": null,
+    "second_stop": "上限回数（2回）",
+    "lower_to_1_refused": "回数の上限 1 は、もう使った 2 より小さい",
+    "budget_below_used_refused": "費用の上限 0.0 は、もう使った 0.0496 より小さい",
+    "unknown_limit_refused": "知らない上限 ['no_such']",
+    "history_len": {
+     "before_raise": 22,
+     "after_second_stop": 51,
+     "after_3_refused": 51
+    },
+    "approve": null,
+    "result": {
+     "approved": {
+      "activity_attempt": 1,
+      "attempt": 2,
+      "cand": 0,
+      "check": {
+       "h_ratios": [
+        1.0
+       ],
+       "passed": true,
+       "persons": 1,
+       "results": [
+        {
+         "id": "size",
+         "status": "合格",
+         "title": "大きさ",
+         "value": "320x320"
+        },
+        {
+         "detail": null,
+         "id": "persons",
+         "status": "合格",
+         "title": "人数",
+         "value": 1
+        }
+       ],
+       "seconds": 10.83,
+       "touch": "BT"
+      },
+      "eval": {
+       "calls": 1,
+       "cost_usd": 0.0496,
+       "median": 1,
+       "scores": [
+        1
+       ],
+       "seconds": 14.18,
+       "spread": 0,
+       "whys": [
+        "絵に写っているのは、窓の前に立つ人物を後ろから、ほぼ全身で捉えた構図です。顔が見えないので、驚いた表情はありません。胸から上という範囲も合っていません。人数は1人ですが、表情と範囲の両方が狙いと合わないので、このコマには使えません。"
+       ]
+      },
+      "gen_seconds": 24.46,
+      "id": "a2c0",
+      "image": "579e5744-2c01-55b7-8a44-2aaf2dcea02a.png",
+      "mode": "t2i",
+      "pid": "579e5744-2c01-55b7-8a44-2aaf2dcea02a",
+      "round": 1,
+      "seed": 1501,
+      "source": "ai",
+      "spec_version": 1
+     },
+     "attempts": 2,
+     "budget": {
+      "seconds": 77.87,
+      "usd": 0.0496
+     },
+     "image": "579e5744-2c01-55b7-8a44-2aaf2dcea02a.png",
+     "persons": 1,
+     "reason": "人が採用した",
+     "status": "done",
+     "unit_id": "b1-070734",
+     "version": {
+      "new": true,
+      "version_image": "versions/b1-070734_v1.png"
+     }
+    },
+    "status": "COMPLETED",
+    "state": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 77.87,
+      "usd": 0.0496
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 501,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "0f67c4b8-33c4-5af3-b4a0-df2cbecd1bb2.png",
+       "gen_seconds": 24.61
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1501,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         1
+        ],
+        "median": 1
+       },
+       "stale": false,
+       "image": "579e5744-2c01-55b7-8a44-2aaf2dcea02a.png",
+       "gen_seconds": 24.46
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 14.32
+      },
+      "context": {
+       "count": 2,
+       "total_s": 0.1
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.13
+      },
+      "evaluate": {
+       "count": 1,
+       "total_s": 14.26
+      },
+      "generate": {
+       "count": 2,
+       "total_s": 49.19
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [
+      {
+       "attempt": 2,
+       "ids": [
+        "a2c0"
+       ],
+       "scores": [
+        [
+         1
+        ]
+       ]
+      }
+     ]
+    }
+   },
+   "b2_budget_usd": {
+    "result": {
+     "attempts": 1,
+     "budget": {
+      "seconds": 40.03,
+      "usd": 0.0493
+     },
+     "image": "fd0a70d5-7452-517a-8b07-e73b0aa303eb.png",
+     "persons": 1,
+     "reason": "予算（費用 0.049/0.03 ドル）",
+     "status": "stopped",
+     "unit_id": "b2-070734"
+    },
+    "status": "COMPLETED",
+    "seconds": 40.2,
+    "state": {
+     "status": "stopped",
+     "stop_reason": "予算（費用 0.049/0.03 ドル）",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 40.03,
+      "usd": 0.0493
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 502,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         2
+        ],
+        "median": 2
+       },
+       "stale": false,
+       "image": "fd0a70d5-7452-517a-8b07-e73b0aa303eb.png",
+       "gen_seconds": 24.4
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 1,
+       "total_s": 5.36
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.25
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 1,
+       "total_s": 9.58
+      },
+      "generate": {
+       "count": 1,
+       "total_s": 24.84
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [
+      {
+       "attempt": 1,
+       "ids": [
+        "a1c0"
+       ],
+       "scores": [
+        [
+         2
+        ]
+       ]
+      }
+     ]
+    },
+    "errors_in_row": 0,
+    "last_error": null
+   },
+   "b3_budget_seconds": {
+    "result": {
+     "attempts": 1,
+     "budget": {
+      "seconds": 50.68,
+      "usd": 0.0
+     },
+     "image": null,
+     "persons": null,
+     "reason": "予算（時間 51/5 秒）",
+     "status": "stopped",
+     "unit_id": "b3-070734"
+    },
+    "status": "COMPLETED",
+    "seconds": 50.8,
+    "state": {
+     "status": "stopped",
+     "stop_reason": "予算（時間 51/5 秒）",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 50.68,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 503,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "65dea572-60c1-5604-89f6-44b2d4dd3138.png",
+       "gen_seconds": 48.37
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 1,
+       "total_s": 1.31
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.57
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 1,
+       "total_s": 48.8
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": []
+    },
+    "errors_in_row": 0,
+    "last_error": null
+   },
+   "b4_transport_errors": {
+    "result": {
+     "attempts": 3,
+     "budget": {
+      "seconds": 9.2,
+      "usd": 0.0
+     },
+     "image": null,
+     "persons": null,
+     "reason": "エラーが3回続いた",
+     "status": "stopped",
+     "unit_id": "b4-070734"
+    },
+    "status": "COMPLETED",
+    "seconds": 50.8,
+    "state": {
+     "status": "stopped",
+     "stop_reason": "エラーが3回続いた",
+     "attempt": 3,
+     "round": 1,
+     "budget": {
+      "seconds": 9.2,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [],
+     "nodes": {
+      "check": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "context": {
+       "count": 3,
+       "total_s": 0.91
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 3,
+       "total_s": 8.29
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": []
+    },
+    "errors_in_row": 3,
+    "last_error": {
+     "kind": "transport",
+     "message": "/queue: All connection attempts failed",
+     "node": "generate"
+    }
+   },
+   "b5_refused": {
+    "result": {
+     "attempts": 1,
+     "budget": {
+      "seconds": 0.93,
+      "usd": 0.0
+     },
+     "image": null,
+     "persons": null,
+     "reason": "内容で断られた（送り直さない）",
+     "status": "stopped",
+     "unit_id": "b5-070734"
+    },
+    "status": "COMPLETED",
+    "seconds": 50.4,
+    "state": {
+     "status": "stopped",
+     "stop_reason": "内容で断られた（送り直さない）",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 0.93,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [],
+     "nodes": {
+      "check": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.42
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 1,
+       "total_s": 0.51
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": []
+    },
+    "errors_in_row": 1,
+    "last_error": {
+     "kind": "refused",
+     "message": "/prompt 400: {\"error\":{\"type\":\"prompt_outputs_failed_validation\"},\"node_errors\":{\"1\":{\"errors\":[{\"type\":\"value_not_in_list\",\"message\":\"unet_name: no_such_unet.safetensors\"}]}}}",
+     "node": "generate"
+    }
+   },
+   "counts": {
+    "prompt_posts": 4,
+    "duplicate_posts": 0,
+    "registrations": 4,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 1,
+    "duplicate_versions": 0,
+    "claude_calls": 2,
+    "claude_killed": 0,
+    "claude_usd": 0.099
+   }
+  },
+  "c": {
+   "c1_idempotent": {
+    "steps": {
+     "generate": {
+      "down_seconds": 4.5,
+      "recovered_after_s": 12.7
+     },
+     "check": {
+      "down_seconds": 3.0,
+      "recovered_after_s": 18.0
+     },
+     "evaluate": {
+      "down_seconds": 3.0,
+      "recovered_after_s": 32.8
+     },
+     "review_wait_restart": {
+      "before": {
+       "status": "awaiting_review",
+       "review_reason": "上限回数（4回）",
+       "candidates": 4
+      },
+      "after": {
+       "status": "awaiting_review",
+       "review_reason": "上限回数（4回）",
+       "candidates": 4,
+       "restart_seconds": 6.2
+      }
+     }
+    },
+    "approve": null,
+    "result": {
+     "approved": {
+      "activity_attempt": 1,
+      "attempt": 4,
+      "cand": 0,
+      "check": {
+       "h_ratios": [
+        1.0
+       ],
+       "passed": true,
+       "persons": 1,
+       "results": [
+        {
+         "id": "size",
+         "status": "合格",
+         "title": "大きさ",
+         "value": "320x320"
+        },
+        {
+         "detail": null,
+         "id": "persons",
+         "status": "合格",
+         "title": "人数",
+         "value": 1
+        }
+       ],
+       "seconds": 2.36,
+       "touch": "BT"
+      },
+      "eval": {
+       "calls": 2,
+       "cost_usd": 0.1032,
+       "median": 2.5,
+       "scores": [
+        3,
+        2
+       ],
+       "seconds": 24.46,
+       "spread": 1,
+       "whys": [
+        "写っているのは少女1人で、口が開いていて驚きとして読める。ただ、目は縞模様のレンズのようなもので隠れていて表情ははっきりしない。範囲も顔のアップで、胸から上にはなっていない。ずれはあるが、驚いた少女のコマとして使える。",
+        "少女は1人で、顔のアップです。ただし、目の部分が縞模様の帯のように崩れていて、驚いた表情には読み取れません。口は少し開いていますが、驚きよりも歯を食いしばった表情に見えます。画面は顔が大半を占めていて、胸から上という範囲にも足りません。そのため、狙いのうち表情と範囲が合っていません。"
+       ]
+      },
+      "gen_seconds": 24.39,
+      "id": "a4c0",
+      "image": "c0aee02f-b10b-5c79-a01c-278f29c5b24c.png",
+      "mode": "t2i",
+      "pid": "c0aee02f-b10b-5c79-a01c-278f29c5b24c",
+      "round": 1,
+      "seed": 3601,
+      "source": "ai",
+      "spec_version": 1
+     },
+     "attempts": 4,
+     "budget": {
+      "seconds": 229.1,
+      "usd": 0.401
+     },
+     "image": "c0aee02f-b10b-5c79-a01c-278f29c5b24c.png",
+     "persons": 1,
+     "reason": "人が採用した",
+     "status": "done",
+     "unit_id": "c1-070734",
+     "version": {
+      "new": true,
+      "version_image": "versions/c1-070734_v1.png"
+     }
+    },
+    "status": "COMPLETED",
+    "state": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 4,
+     "round": 1,
+     "budget": {
+      "seconds": 229.1,
+      "usd": 0.401
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 601,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         1,
+         1
+        ],
+        "median": 1.0
+       },
+       "stale": false,
+       "image": "ad76ca8a-6dbc-5f8c-b9ee-0e8fcf06532e.png",
+       "gen_seconds": 0.16
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1601,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": {
+        "scores": [
+         1,
+         1
+        ],
+        "median": 1.0
+       },
+       "stale": false,
+       "image": "5b562e70-7ce2-5a95-9438-05c3da2a7e0c.png",
+       "gen_seconds": 24.46
+      },
+      {
+       "id": "a3c0",
+       "source": "ai",
+       "seed": 2601,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": {
+        "scores": [
+         2,
+         2
+        ],
+        "median": 2.0
+       },
+       "stale": false,
+       "image": "9aa9cb1a-7ef7-562f-b02e-f862d2d9c894.png",
+       "gen_seconds": 24.35
+      },
+      {
+       "id": "a4c0",
+       "source": "ai",
+       "seed": 3601,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         3,
+         2
+        ],
+        "median": 2.5
+       },
+       "stale": false,
+       "image": "c0aee02f-b10b-5c79-a01c-278f29c5b24c.png",
+       "gen_seconds": 24.39
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 4,
+       "total_s": 28.06
+      },
+      "context": {
+       "count": 4,
+       "total_s": 0.19
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.09
+      },
+      "evaluate": {
+       "count": 4,
+       "total_s": 98.18
+      },
+      "generate": {
+       "count": 4,
+       "total_s": 102.67
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [
+      {
+       "attempt": 1,
+       "ids": [
+        "a1c0"
+       ],
+       "scores": [
+        [
+         1,
+         1
+        ]
+       ]
+      },
+      {
+       "attempt": 2,
+       "ids": [
+        "a2c0"
+       ],
+       "scores": [
+        [
+         1,
+         1
+        ]
+       ]
+      },
+      {
+       "attempt": 3,
+       "ids": [
+        "a3c0"
+       ],
+       "scores": [
+        [
+         2,
+         2
+        ]
+       ]
+      },
+      {
+       "attempt": 4,
+       "ids": [
+        "a4c0"
+       ],
+       "scores": [
+        [
+         3,
+         2
+        ]
+       ]
+      }
+     ]
+    },
+    "counts": {
+     "prompt_posts": 4,
+     "duplicate_posts": 0,
+     "registrations": 4,
+     "duplicate_registrations": 0,
+     "withdrawn": 0,
+     "already_registered_skips": 0,
+     "versions": 1,
+     "duplicate_versions": 0,
+     "claude_calls": 8,
+     "claude_killed": 0,
+     "claude_usd": 0.401
+    }
+   },
+   "c2_not_idempotent": {
+    "kill": {
+     "down_seconds": 3.0
+    },
+    "result": {
+     "attempts": 1,
+     "budget": {
+      "seconds": 57.18,
+      "usd": 0.0
+     },
+     "image": "cd960766-7119-409b-97cf-5835759e8c8e.png",
+     "persons": 1,
+     "reason": "合格",
+     "status": "done",
+     "unit_id": "c2-070734"
+    },
+    "status": "COMPLETED",
+    "state": {
+     "status": "done",
+     "stop_reason": "合格",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 57.18,
+      "usd": 0.0
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 602,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "cd960766-7119-409b-97cf-5835759e8c8e.png",
+       "gen_seconds": 24.49
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 1,
+       "total_s": 3.39
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.05
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "generate": {
+       "count": 1,
+       "total_s": 53.74
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": []
+    },
+    "counts": {
+     "prompt_posts": 2,
+     "duplicate_posts": 0,
+     "registrations": 1,
+     "duplicate_registrations": 0,
+     "withdrawn": 0,
+     "already_registered_skips": 0,
+     "versions": 0,
+     "duplicate_versions": 0,
+     "claude_calls": 0,
+     "claude_killed": 0,
+     "claude_usd": 0
+    }
+   },
+   "comfy_history_delta_c1_c2": 6,
+   "orphans_after": {
+    "comfy_orphans": 0,
+    "comfy_queue": {
+     "running": [],
+     "pending": []
+    }
+   }
+  },
+  "d": {
+   "d2_reject_with_reason": {
+    "stop_reason_1": "上限回数（4回）",
+    "overdue_events": 1,
+    "reject": null,
+    "reason_words": [
+     {
+      "add": "night city background, city lights, street at night",
+      "reason": "背景を夜の街にしてほしい",
+      "remove": "",
+      "why": "理由は「足りない物（夜の街の背景）」を言っているので、足す語句だけを短く加えた。人数と胸から上という元の狙いを保つため語句は最小限にし、外すべき余計な物は指摘されていないので空にした。"
+     }
+    ],
+    "before": {
+     "image": "44255509-fb47-5af9-a61c-6227076cd0da.png",
+     "measure": {
+      "answer": "いいえ",
+      "why": "背景は、明るい白や水色の窓ガラスが並ぶ格子窓です。人物は黒いマントを着て、窓に向かって後ろ向きに立っています。街並みや夜空、街灯のような夜の街を示すものは見当たりません。",
+      "cost": 0.048196600000000006
+     }
+    },
+    "after": {
+     "image": "5f2281df-d362-526a-80da-be529433cb02.png",
+     "eval": {
+      "calls": 1,
+      "cost_usd": 0.0498,
+      "median": 2,
+      "scores": [
+       2
+      ],
+      "seconds": 8.97,
+      "spread": 0,
+      "whys": [
+       "絵には顔が2つ並んでいて、少女1人という人数が合いません。右の顔は目を見開いた驚き顔で、胸から上に近い構図です。左の顔は崩れています。背景は縞模様と色の乱れで、夜の街には見えません。人数と背景の2点が狙いに合っていません。"
+      ]
+     },
+     "measure": {
+      "answer": "判断できない",
+      "why": "絵は強く歪んだ低解像度の人物像で、背景は横縞や暗い帯状の模様になっています。建物、窓の明かり、空、街灯といった街だと分かるものは見えません。暗い色調ではありますが、夜の街だと言える根拠はなく、夜の街ではないとも言い切れません。",
+      "cost": 0.048430799999999996
+     }
+    }
+   },
+   "d2_reject_empty_refused": "却下には理由が要る",
+   "d3_human_edit": {
+    "edit": null,
+    "human_candidate": {
+     "check": {
+      "h_ratios": [],
+      "passed": false,
+      "persons": 0,
+      "results": [
+       {
+        "id": "size",
+        "status": "合格",
+        "title": "大きさ",
+        "value": "320x320"
+       },
+       {
+        "detail": "1人のはずが0人",
+        "id": "persons",
+        "status": "不合格",
+        "title": "人数",
+        "value": 0
+       }
+      ],
+      "seconds": 3.35,
+      "touch": ""
+     },
+     "eval": null
+    },
+    "reject_after_edit": null,
+    "i2i_candidates": 4,
+    "protected_diff": [
+     {
+      "id": "a9c0",
+      "inside_changed": 0,
+      "inside_total": 21025,
+      "outside_changed": 79464,
+      "outside_total": 81375
+     },
+     {
+      "id": "a10c0",
+      "inside_changed": 0,
+      "inside_total": 21025,
+      "outside_changed": 77558,
+      "outside_total": 81375
+     },
+     {
+      "id": "a11c0",
+      "inside_changed": 0,
+      "inside_total": 21025,
+      "outside_changed": 77840,
+      "outside_total": 81375
+     },
+     {
+      "id": "a12c0",
+      "inside_changed": 0,
+      "inside_total": 21025,
+      "outside_changed": 77405,
+      "outside_total": 81375
+     }
+    ],
+    "edited": "human_edit_d2-070734.png",
+    "mask": "human_mask_d2-070734.png"
+   },
+   "d_approve": null,
+   "d2_state": {
+    "status": "done",
+    "stop_reason": "人が採用した",
+    "attempt": 12,
+    "round": 3,
+    "budget": {
+     "seconds": 437.69,
+     "usd": 0.8825
+    },
+    "resets": 0,
+    "candidates": [
+     {
+      "id": "a1c0",
+      "source": "ai",
+      "seed": 701,
+      "mode": "t2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "T"
+      },
+      "eval": {
+       "scores": [
+        2
+       ],
+       "median": 2
+      },
+      "stale": false,
+      "image": "d0d96360-803a-50b0-8616-971e20bd42ac.png",
+      "gen_seconds": 24.42
+     },
+     {
+      "id": "a2c0",
+      "source": "ai",
+      "seed": 1701,
+      "mode": "t2i",
+      "check": {
+       "passed": false,
+       "persons": 0,
+       "touch": ""
+      },
+      "eval": null,
+      "stale": false,
+      "image": "fb609cb1-c58b-5b3e-a180-701e83d53d4e.png",
+      "gen_seconds": 24.47
+     },
+     {
+      "id": "a3c0",
+      "source": "ai",
+      "seed": 2701,
+      "mode": "t2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "BT"
+      },
+      "eval": {
+       "scores": [
+        1
+       ],
+       "median": 1
+      },
+      "stale": false,
+      "image": "966148ef-68bc-5d21-bec6-fc52d7a9f9f8.png",
+      "gen_seconds": 24.33
+     },
+     {
+      "id": "a4c0",
+      "source": "ai",
+      "seed": 3701,
+      "mode": "t2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "BT"
+      },
+      "eval": {
+       "scores": [
+        1
+       ],
+       "median": 1
+      },
+      "stale": false,
+      "image": "44255509-fb47-5af9-a61c-6227076cd0da.png",
+      "gen_seconds": 24.41
+     },
+     {
+      "id": "a5c0",
+      "source": "ai",
+      "seed": 4701,
+      "mode": "t2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "T"
+      },
+      "eval": {
+       "scores": [
+        2
+       ],
+       "median": 2
+      },
+      "stale": false,
+      "image": "eb909181-58f3-5187-a969-9e0f980039b7.png",
+      "gen_seconds": 24.36
+     },
+     {
+      "id": "a6c0",
+      "source": "ai",
+      "seed": 5701,
+      "mode": "t2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "BT"
+      },
+      "eval": {
+       "scores": [
+        1
+       ],
+       "median": 1
+      },
+      "stale": false,
+      "image": "53477879-3cba-59bd-bd4e-05b60ddc2bf4.png",
+      "gen_seconds": 24.42
+     },
+     {
+      "id": "a7c0",
+      "source": "ai",
+      "seed": 6701,
+      "mode": "t2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": ""
+      },
+      "eval": {
+       "scores": [
+        2
+       ],
+       "median": 2
+      },
+      "stale": false,
+      "image": "5f2281df-d362-526a-80da-be529433cb02.png",
+      "gen_seconds": 24.46
+     },
+     {
+      "id": "a8c0",
+      "source": "ai",
+      "seed": 7701,
+      "mode": "t2i",
+      "check": {
+       "passed": false,
+       "persons": 2,
+       "touch": "BT"
+      },
+      "eval": null,
+      "stale": false,
+      "image": "3f66f04b-9301-5e58-a650-1efc44bc9ef6.png",
+      "gen_seconds": 24.4
+     },
+     {
+      "id": "h9",
+      "source": "human",
+      "seed": null,
+      "mode": null,
+      "check": {
+       "passed": false,
+       "persons": 0,
+       "touch": ""
+      },
+      "eval": null,
+      "stale": false,
+      "image": "human_edit_d2-070734.png",
+      "gen_seconds": null
+     },
+     {
+      "id": "a9c0",
+      "source": "ai",
+      "seed": 8701,
+      "mode": "i2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "BT"
+      },
+      "eval": {
+       "scores": [
+        2
+       ],
+       "median": 2
+      },
+      "stale": false,
+      "image": "4e3e5f2a-9f3f-5309-84aa-af175bed4a8b.png",
+      "gen_seconds": 24.52
+     },
+     {
+      "id": "a10c0",
+      "source": "ai",
+      "seed": 9701,
+      "mode": "i2i",
+      "check": {
+       "passed": true,
+       "persons": 1,
+       "touch": "B"
+      },
+      "eval": {
+       "scores": [
+        2
+       ],
+       "median": 2
+      },
+      "stale": false,
+      "image": "d606b69c-a2fe-5c2b-bb54-5227b649e364.png",
+      "gen_seconds": 24.53
+     },
+     {
+      "id": "a11c0",
+      "source": "ai",
+      "seed": 10701,
+      "mode": "i2i",
+      "check": {
+       "passed": false,
+       "persons": 0,
+       "touch": ""
+      },
+      "eval": null,
+      "stale": false,
+      "image": "0784ca86-5cd3-5a58-951a-bc09a854b2c3.png",
+      "gen_seconds": 24.51
+     },
+     {
+      "id": "a12c0",
+      "source": "ai",
+      "seed": 11701,
+      "mode": "i2i",
+      "check": {
+       "passed": false,
+       "persons": 2,
+       "touch": "B"
+      },
+      "eval": null,
+      "stale": false,
+      "image": "e2611f75-48c3-51f2-9bdc-2e0e708e7fab.png",
+      "gen_seconds": 24.58
+     }
+    ],
+    "nodes": {
+     "check": {
+      "count": 13,
+      "total_s": 41.16
+     },
+     "context": {
+      "count": 12,
+      "total_s": 14.18
+     },
+     "cut_out": {
+      "count": 1,
+      "total_s": 0.0
+     },
+     "done": {
+      "count": 1,
+      "total_s": 0.06
+     },
+     "evaluate": {
+      "count": 8,
+      "total_s": 88.26
+     },
+     "generate": {
+      "count": 12,
+      "total_s": 294.09
+     },
+     "review": {
+      "count": 0,
+      "total_s": 0.0
+     }
+    },
+    "disagreements": [
+     {
+      "attempt": 1,
+      "ids": [
+       "a1c0"
+      ],
+      "scores": [
+       [
+        2
+       ]
+      ]
+     },
+     {
+      "attempt": 3,
+      "ids": [
+       "a3c0"
+      ],
+      "scores": [
+       [
+        1
+       ]
+      ]
+     },
+     {
+      "attempt": 4,
+      "ids": [
+       "a4c0"
+      ],
+      "scores": [
+       [
+        1
+       ]
+      ]
+     },
+     {
+      "attempt": 5,
+      "ids": [
+       "a5c0"
+      ],
+      "scores": [
+       [
+        2
+       ]
+      ]
+     },
+     {
+      "attempt": 6,
+      "ids": [
+       "a6c0"
+      ],
+      "scores": [
+       [
+        1
+       ]
+      ]
+     },
+     {
+      "attempt": 7,
+      "ids": [
+       "a7c0"
+      ],
+      "scores": [
+       [
+        2
+       ]
+      ]
+     },
+     {
+      "attempt": 9,
+      "ids": [
+       "a9c0"
+      ],
+      "scores": [
+       [
+        2
+       ]
+      ]
+     },
+     {
+      "attempt": 10,
+      "ids": [
+       "a10c0"
+      ],
+      "scores": [
+       [
+        2
+       ]
+      ]
+     }
+    ]
+   },
+   "d2_status": "COMPLETED",
+   "d4_upstream_while_waiting": {
+    "stale_after_signal": [
+     "a1c0",
+     "a2c0",
+     "a3c0",
+     "a4c0"
+    ],
+    "approve_refused": "候補が古い（上流が変わった）。却下して作り直すか、上流を戻す",
+    "reject": null,
+    "fresh_after": [
+     "a5c0",
+     "a6c0",
+     "a7c0",
+     "a8c0"
+    ],
+    "approve_after": null,
+    "status": "COMPLETED"
+   },
+   "counts": {
+    "prompt_posts": 20,
+    "duplicate_posts": 0,
+    "registrations": 20,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 2,
+    "duplicate_versions": 0,
+    "claude_calls": 16,
+    "claude_killed": 0,
+    "claude_usd": 0.7744
+   },
+   "orphans_after": {
+    "comfy_orphans": 0,
+    "comfy_queue": {
+     "running": [],
+     "pending": []
+    }
+   }
+  },
+  "e": {
+   "executions": [
+    {
+     "pid": "0f67c4b8-33c4-5af3-b4a0-df2cbecd1bb2",
+     "unit": "b1-070734",
+     "exec_seconds": 24.14,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "579e5744-2c01-55b7-8a44-2aaf2dcea02a",
+     "unit": "b1-070734",
+     "exec_seconds": 24.16,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "fd0a70d5-7452-517a-8b07-e73b0aa303eb",
+     "unit": "b2-070734",
+     "exec_seconds": 24.11,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "65dea572-60c1-5604-89f6-44b2d4dd3138",
+     "unit": "b3-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "ad76ca8a-6dbc-5f8c-b9ee-0e8fcf06532e",
+     "unit": "c1-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "5b562e70-7ce2-5a95-9438-05c3da2a7e0c",
+     "unit": "c1-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "9aa9cb1a-7ef7-562f-b02e-f862d2d9c894",
+     "unit": "c1-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "c0aee02f-b10b-5c79-a01c-278f29c5b24c",
+     "unit": "c1-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "5509ba45-7fdf-4bff-912e-b173db1f8004",
+     "unit": "c2-070734",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "cd960766-7119-409b-97cf-5835759e8c8e",
+     "unit": "c2-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d0d96360-803a-50b0-8616-971e20bd42ac",
+     "unit": "d2-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "fb609cb1-c58b-5b3e-a180-701e83d53d4e",
+     "unit": "d2-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "966148ef-68bc-5d21-bec6-fc52d7a9f9f8",
+     "unit": "d2-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "44255509-fb47-5af9-a61c-6227076cd0da",
+     "unit": "d2-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "eb909181-58f3-5187-a969-9e0f980039b7",
+     "unit": "d2-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "53477879-3cba-59bd-bd4e-05b60ddc2bf4",
+     "unit": "d2-070734",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "5f2281df-d362-526a-80da-be529433cb02",
+     "unit": "d2-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "3f66f04b-9301-5e58-a650-1efc44bc9ef6",
+     "unit": "d2-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "4e3e5f2a-9f3f-5309-84aa-af175bed4a8b",
+     "unit": "d2-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d606b69c-a2fe-5c2b-bb54-5227b649e364",
+     "unit": "d2-070734",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "0784ca86-5cd3-5a58-951a-bc09a854b2c3",
+     "unit": "d2-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e2611f75-48c3-51f2-9bdc-2e0e708e7fab",
+     "unit": "d2-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "69e68c93-59ba-5a3e-96f4-d82d0492d999",
+     "unit": "d4-070734",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "242adc11-82c0-52b5-8016-8bd5abd758f6",
+     "unit": "d4-070734",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "3b0bc7c9-12f0-5116-929c-59f853639d3d",
+     "unit": "d4-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "4ccd404f-a8d8-5eb4-9c40-f95844c1f1e6",
+     "unit": "d4-070734",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "1c3f2986-fbe0-51b9-a71e-9e90ade0ae39",
+     "unit": "d4-070734",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "b760e2ef-d84d-5798-b9a7-fadfb293d809",
+     "unit": "d4-070734",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "c5dee940-9408-5ae7-9403-75a43dd342a9",
+     "unit": "d4-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "8c5da5f5-f5a4-5efd-a71f-bd069c39900d",
+     "unit": "d4-070734",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "51cd3db8-0685-53b8-a211-bf98f964fcbe",
+     "unit": "ip-070734",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "49925ad1-cf03-590c-84e0-7ce00ffc47f3",
+     "unit": "stage-070734-p1",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "be178993-30f7-5ba0-9a03-611b8503dc09",
+     "unit": "stage-070734-p2",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "cbe9029b-c351-5334-844f-94b054cc6858",
+     "unit": "stage-070734-p3",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "be178993-30f7-5ba0-9a03-611b8503dc09",
+     "unit": "stage-070734-p2",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "cbe9029b-c351-5334-844f-94b054cc6858",
+     "unit": "stage-070734-p3",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e599177d-5e9b-56dd-b8a1-75a553ab2fde",
+     "unit": "stage-070734-p1",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "4e90d51c-5f1b-55a8-92df-dafc695e261d",
+     "unit": "stage-070734-p2",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "dfc2780c-565f-5c24-89c5-638cde1b463c",
+     "unit": "stage-070734-p3",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d429a2d3-d90a-57dc-a9dd-90836e377c4d",
+     "unit": "stage-070734-p2",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "2d6f01ad-294a-5b69-8c2a-1fbeccff2dcb",
+     "unit": "stage-070734-p2",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "ac14896d-0160-5ffe-922d-e464d47f92a3",
+     "unit": "stage-070734-p3",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "08e87251-3e9d-5185-87c7-379415f1615b",
+     "unit": "stage-070734-p3",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "7c4ab8b6-9468-5200-89ac-939a6d98c37e",
+     "unit": "stage-070734-p3",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    }
+   ]
+  },
+  "s": {
+   "stage": "stage-070734",
+   "status": "COMPLETED",
+   "result": {
+    "page": {
+     "counts": {
+      "データなし": 22,
+      "合格": 10,
+      "閾値未設定": 22
+     },
+     "failed_lines": [],
+     "measured": {
+      "1": 1,
+      "2": 2,
+      "3": 1
+     },
+     "page_image": "pages/stage-070734.png",
+     "passed": true
+    },
+    "status": "done"
+   },
+   "seconds": 357.7,
+   "stage_state": {
+    "S0": {
+     "detail": "試作では固定の入力（harness_config.py）",
+     "ended": "2026-10-08T07:37:42.031305+00:00",
+     "name": "企画",
+     "status": "done"
+    },
+    "S1": {
+     "detail": "試作では固定の入力（harness_config.py）",
+     "ended": "2026-10-08T07:37:42.031305+00:00",
+     "name": "構成",
+     "status": "done"
+    },
+    "S2": {
+     "detail": "試作では固定の入力（harness_config.py）",
+     "ended": "2026-10-08T07:37:42.031305+00:00",
+     "name": "設定資料",
+     "status": "done"
+    },
+    "S3": {
+     "detail": {
+      "counts": {
+       "データなし": 22,
+       "合格": 10,
+       "閾値未設定": 22
+      },
+      "failed_lines": [],
+      "measured": null,
+      "passed": true
+     },
+     "ended": "2026-10-08T07:37:42.146668+00:00",
+     "name": "ネーム",
+     "started": "2026-10-08T07:37:42.031305+00:00",
+     "status": "done"
+    },
+    "S4": {
+     "detail": [
+      {
+       "reason": "人が採用した",
+       "status": "done",
+       "unit_id": "stage-070734-p1"
+      },
+      {
+       "reason": "人が採用した",
+       "status": "done",
+       "unit_id": "stage-070734-p2"
+      },
+      {
+       "reason": "人が採用した",
+       "status": "done",
+       "unit_id": "stage-070734-p3"
+      }
+     ],
+     "ended": "2026-10-08T07:43:23.810686+00:00",
+     "name": "作画",
+     "started": "2026-10-08T07:37:42.146668+00:00",
+     "status": "done"
+    },
+    "S5": {
+     "detail": "試作の対象外（吹き出し・文字は置かない）",
+     "ended": "2026-10-08T07:43:23.810686+00:00",
+     "name": "仕上げ",
+     "status": "skipped"
+    },
+    "S6": {
+     "detail": {
+      "counts": {
+       "データなし": 22,
+       "合格": 10,
+       "閾値未設定": 22
+      },
+      "failed_lines": [],
+      "measured": {
+       "1": 1,
+       "2": 2,
+       "3": 1
+      },
+      "page_image": "pages/stage-070734.png",
+      "passed": true
+     },
+     "ended": "2026-10-08T07:43:24.113282+00:00",
+     "name": "総合",
+     "started": "2026-10-08T07:43:23.810686+00:00",
+     "status": "done"
+    },
+    "S7": {
+     "detail": {
+      "page_image": "pages/stage-070734.png"
+     },
+     "ended": "2026-10-08T07:43:24.113282+00:00",
+     "name": "書き出し",
+     "status": "done"
+    }
+   },
+   "stage_pause": {
+    "all_children_paused": true,
+    "comfy_queue_while_paused": {
+     "running": [
+      "be178993-30f7-5ba0-9a03-611b8503dc09"
+     ],
+     "pending": []
+    }
+   },
+   "approved_via_screen": [
+    {
+     "waiting": [
+      "stage-070734-p1"
+     ],
+     "shot": {
+      "name": "approve_0",
+      "errors": [],
+      "approved": 1,
+      "messages": [
+       "",
+       "",
+       "",
+       ""
+      ]
+     }
+    },
+    {
+     "waiting": [
+      "stage-070734-p2"
+     ],
+     "shot": {
+      "name": "approve_1",
+      "errors": [],
+      "approved": 1,
+      "messages": [
+       "",
+       "",
+       "",
+       ""
+      ]
+     }
+    },
+    {
+     "waiting": [
+      "stage-070734-p3"
+     ],
+     "shot": {
+      "name": "approve_2",
+      "errors": [],
+      "approved": 1,
+      "messages": [
+       "",
+       "",
+       "",
+       ""
+      ]
+     }
+    }
+   ],
+   "units": {
+    "stage-070734-p1": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 1,
+     "round": 1,
+     "budget": {
+      "seconds": 129.96,
+      "usd": 0.0997
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 1000,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": {
+        "scores": [
+         3,
+         3
+        ],
+        "median": 3.0
+       },
+       "stale": false,
+       "image": "49925ad1-cf03-590c-84e0-7ce00ffc47f3.png",
+       "gen_seconds": 0.16
+      },
+      {
+       "id": "a1c1",
+       "source": "ai",
+       "seed": 1001,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 2,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "e599177d-5e9b-56dd-b8a1-75a553ab2fde.png",
+       "gen_seconds": 72.07
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 2,
+       "total_s": 8.55
+      },
+      "context": {
+       "count": 1,
+       "total_s": 0.09
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.3
+      },
+      "evaluate": {
+       "count": 1,
+       "total_s": 24.51
+      },
+      "generate": {
+       "count": 3,
+       "total_s": 96.81
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "history_length": 67
+    },
+    "stage-070734-p2": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 2,
+     "round": 1,
+     "budget": {
+      "seconds": 226.38,
+      "usd": 0.1008
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 1100,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "be178993-30f7-5ba0-9a03-611b8503dc09.png",
+       "gen_seconds": 24.39
+      },
+      {
+       "id": "a1c1",
+       "source": "ai",
+       "seed": 1101,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "4e90d51c-5f1b-55a8-92df-dafc695e261d.png",
+       "gen_seconds": 72.26
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 2100,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "d429a2d3-d90a-57dc-a9dd-90836e377c4d.png",
+       "gen_seconds": 42.89
+      },
+      {
+       "id": "a2c1",
+       "source": "ai",
+       "seed": 2101,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 2,
+        "touch": "B"
+       },
+       "eval": {
+        "scores": [
+         3,
+         3
+        ],
+        "median": 3.0
+       },
+       "stale": false,
+       "image": "2d6f01ad-294a-5b69-8c2a-1fbeccff2dcb.png",
+       "gen_seconds": 24.45
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 4,
+       "total_s": 10.15
+      },
+      "context": {
+       "count": 2,
+       "total_s": 0.32
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.11
+      },
+      "evaluate": {
+       "count": 1,
+       "total_s": 27.3
+      },
+      "generate": {
+       "count": 5,
+       "total_s": 188.61
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [],
+     "history_length": 97
+    },
+    "stage-070734-p3": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 3,
+     "round": 1,
+     "budget": {
+      "seconds": 327.69,
+      "usd": 0.2968
+     },
+     "resets": 0,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 1200,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "cbe9029b-c351-5334-844f-94b054cc6858.png",
+       "gen_seconds": 48.78
+      },
+      {
+       "id": "a1c1",
+       "source": "ai",
+       "seed": 1201,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         1,
+         1
+        ],
+        "median": 1.0
+       },
+       "stale": false,
+       "image": "dfc2780c-565f-5c24-89c5-638cde1b463c.png",
+       "gen_seconds": 72.09
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 2200,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "T"
+       },
+       "eval": {
+        "scores": [
+         1,
+         1
+        ],
+        "median": 1.0
+       },
+       "stale": false,
+       "image": "ac14896d-0160-5ffe-922d-e464d47f92a3.png",
+       "gen_seconds": 39.68
+      },
+      {
+       "id": "a2c1",
+       "source": "ai",
+       "seed": 2201,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "08e87251-3e9d-5185-87c7-379415f1615b.png",
+       "gen_seconds": 24.43
+      },
+      {
+       "id": "a3c0",
+       "source": "ai",
+       "seed": 3200,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         2,
+         2
+        ],
+        "median": 2.0
+       },
+       "stale": false,
+       "image": "7c4ab8b6-9468-5200-89ac-939a6d98c37e.png",
+       "gen_seconds": 24.36
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 5,
+       "total_s": 21.16
+      },
+      "context": {
+       "count": 3,
+       "total_s": 0.28
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.05
+      },
+      "evaluate": {
+       "count": 3,
+       "total_s": 72.21
+      },
+      "generate": {
+       "count": 6,
+       "total_s": 234.04
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [
+      {
+       "attempt": 1,
+       "ids": [
+        "a1c1"
+       ],
+       "scores": [
+        [
+         1,
+         1
+        ]
+       ]
+      },
+      {
+       "attempt": 2,
+       "ids": [
+        "a2c0"
+       ],
+       "scores": [
+        [
+         1,
+         1
+        ]
+       ]
+      },
+      {
+       "attempt": 3,
+       "ids": [
+        "a3c0"
+       ],
+       "scores": [
+        [
+         2,
+         2
+        ]
+       ]
+      }
+     ],
+     "history_length": 127
+    }
+   },
+   "shots": {
+    "graph_running": {
+     "name": "graph_running",
+     "errors": []
+    },
+    "paused": {
+     "name": "stage_paused",
+     "errors": []
+    },
+    "review_wait": {
+     "name": "review_wait",
+     "errors": []
+    },
+    "node_detail": {
+     "name": "node_detail",
+     "errors": [],
+     "detail": "ノードの詳細　stage-070734-p1 / 検査\n✓ 完了\n回数 2\n使った時間 9秒\n{\n \"passed\": false,\n \"persons\": 2,\n \"touch\": \"B\"\n}\n出来事（新しい30件）\n07:39:24 回1 running \n07:39:27 回1 done {\"passed\":true,\"persons\":1,\"touch\":\"\"}\n07:39:27 回1 r"
+    },
+    "stage_done": {
+     "name": "stage_done",
+     "errors": []
+    }
+   },
+   "counts": {
+    "prompt_posts": 13,
+    "duplicate_posts": 2,
+    "registrations": 11,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 3,
+    "duplicate_versions": 0,
+    "claude_calls": 10,
+    "claude_killed": 0,
+    "claude_usd": 0.4973
+   },
+   "orphans": {
+    "comfy_orphans": 0,
+    "comfy_queue": {
+     "running": [],
+     "pending": []
+    }
+   }
+  }
+ },
+ "node_seconds_mean_per_run": {
+  "check": 104.67,
+  "context": 43.36,
+  "cut_out": 0.0,
+  "generate": 502.6,
+  "done": 0.12,
+  "evaluate": 19.33
+ },
+ "comfy_exec_seconds": {
+  "n": 44,
+  "median": 24.08,
+  "min": 24.06,
+  "max": 24.16
+ },
+ "eval_spread": {
+  "n": 9,
+  "same": 8,
+  "diff1": 1,
+  "diff2plus": 0
+ },
+ "comfy_executions_by_unit": {
+  "b1-070734": {
+   "success": 2,
+   "interrupted": 0,
+   "other": 0
+  },
+  "b2-070734": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "b3-070734": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "c1-070734": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "c2-070734": {
+   "success": 2,
+   "interrupted": 0,
+   "other": 0
+  },
+  "d2-070734": {
+   "success": 12,
+   "interrupted": 0,
+   "other": 0
+  },
+  "d4-070734": {
+   "success": 8,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ip-070734": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "stage-070734-p1": {
+   "success": 2,
+   "interrupted": 0,
+   "other": 0
+  },
+  "stage-070734-p2": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "stage-070734-p3": {
+   "success": 5,
+   "interrupted": 0,
+   "other": 0
+  }
+ },
+ "comfy_queue_at_end": {
+  "queue_running": [],
+  "queue_pending": []
+ }
+}
