@@ -243,7 +243,7 @@ def _tone_alpha(spec: ToneSpec, box_px: tuple[int, int, int, int], dpi: float, c
     if k in ("sand", "snow"):
         r = max(0.5, spec.grain_mm / MM_PER_INCH * dpi / 2)
         n = int(spec.density * w * h / max(1.0, (2 * r) ** 2))
-        for x, y in zip(rng.uniform(0, w, n), rng.uniform(0, h, n)):
+        for x, y in zip(rng.uniform(0, w, n), rng.uniform(0, h, n), strict=False):
             d.ellipse((x - r, y - r, x + r, y + r), fill=255)
         return m
     if k == "focus_lines":
@@ -266,7 +266,7 @@ def _tone_alpha(spec: ToneSpec, box_px: tuple[int, int, int, int], dpi: float, c
         span = math.hypot(w, h)
         width = max(1.0, spec.density * span / spec.line_count)
         for off, length, pos in zip(rng.uniform(-span / 2, span / 2, spec.line_count),
-                                    rng.uniform(0.3, 1.0, spec.line_count), rng.uniform(-0.5, 0.5, spec.line_count)):
+                                    rng.uniform(0.3, 1.0, spec.line_count), rng.uniform(-0.5, 0.5, spec.line_count), strict=False):
             cx, cy = w / 2 + nx * off + ux * pos * span, h / 2 + ny * off + uy * pos * span
             hl = length * span / 2
             d.polygon([(cx - ux * hl, cy - uy * hl), (cx + ux * hl + nx * width / 2, cy + uy * hl + ny * width / 2),
@@ -493,7 +493,7 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
                     balloons.append(Node(LAYER_NAME_BALLOON, f"{t.id}-balloon", bimg.crop(bbox), bbox[0], bbox[1],
                                          table="text_items"))
     rendered = render_texts(jobs) if jobs else []
-    for t, job, img in zip(texts, jobs, rendered):
+    for t, job, img in zip(texts, jobs, rendered, strict=False):
         b = t.box_mm
         tr = ItemTransform.model_validate(t.transform or {})
         # 描いた絵の真ん中を箱の真ん中に合わせる

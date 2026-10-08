@@ -55,10 +55,15 @@ target-version = "py313"
 [tool.ruff.lint]
 # 既定（E4・E7・E9・F）に、import の並び（I）・よくある誤り（B）・新しい書き方（UP）・時差の無い時刻（DTZ）を足す
 select = ["E4", "E7", "E9", "F", "I", "B", "UP", "DTZ"]
+# 型引数の書き方（def f[T]）は今のままにする
+ignore = ["UP047"]
 
 [tool.ruff.lint.per-file-ignores]
-# 試験は fixture を import して引数の名前で受ける（F811）。conftest は環境変数を決めてから import する（E402）
-"tests/**" = ["F811", "E402"]
+# 試験は fixture を import して引数の名前で受ける（F811）。conftest は環境変数を決めてから import する（E402）。
+# 試験の中の短い名前・lambda・使わない周回の変数は許す
+"tests/**" = ["F811", "E402", "E741", "E731", "B007"]
+# 内側の関数は同じ周回の中でだけ呼ぶ（V3点検/5 0節。誤検出）
+"src/v3server/panel_layout/panel_geometry.py" = ["B023"]
 
 [tool.mypy]
 python_version = "3.13"

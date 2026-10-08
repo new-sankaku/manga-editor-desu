@@ -9,7 +9,8 @@
 """
 import io
 import pathlib
-from typing import Literal, Sequence
+from collections.abc import Sequence
+from typing import Literal
 
 import img2pdf
 import numpy as np

@@ -52,7 +52,7 @@ class StrokeValues(BaseModel):
             if not 0 <= p <= 1:
                 raise ValueError(f"筆圧は 0〜1: {p}")
         times = [p[3] for p in self.points]
-        if any(b < a for a, b in zip(times, times[1:])):
+        if any(b < a for a, b in zip(times, times[1:], strict=False)):
             raise ValueError("点の時刻が描いた順に並んでいない")
         return self
 
@@ -71,13 +71,13 @@ def _seg_point_dist(p, a, b) -> float:
 def _dist_to_path(p, path) -> float:
     if len(path) == 1:
         return math.hypot(p[0] - path[0][0], p[1] - path[0][1])
-    return min(_seg_point_dist(p, a, b) for a, b in zip(path, path[1:]))
+    return min(_seg_point_dist(p, a, b) for a, b in zip(path, path[1:], strict=False))
 
 
 def resample(points: list[StrokePoint], step_mm: float) -> list[StrokePoint]:
     """点の間が step_mm 以下になるよう、間に点を足す（筆圧・時刻も間を取る）。"""
     out = [tuple(points[0])]
-    for a, b in zip(points, points[1:]):
+    for a, b in zip(points, points[1:], strict=False):
         n = max(1, math.ceil(math.hypot(b[0] - a[0], b[1] - a[1]) / step_mm))
         for i in range(1, n + 1):
             t = i / n
@@ -114,8 +114,8 @@ def _seg_intersect(p1, p2, q1, q2) -> bool:
 def crossing_indices(points: list[StrokePoint], others: list[list[StrokePoint]]) -> list[int]:
     """この線の点 i と i+1 の間でほかの線と交わる i の一覧。"""
     out = []
-    for i, (a, b) in enumerate(zip(points, points[1:])):
-        if any(_seg_intersect(a, b, c, d) for o in others for c, d in zip(o, o[1:])):
+    for i, (a, b) in enumerate(zip(points, points[1:], strict=False)):
+        if any(_seg_intersect(a, b, c, d) for o in others for c, d in zip(o, o[1:], strict=False)):
             out.append(i)
     return out
 

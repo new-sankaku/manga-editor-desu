@@ -42,7 +42,7 @@ def render_texts(items: list[dict], node_executable: str, script: str, timeout_s
         if done.returncode != 0:
             raise TextRenderError(f"文字を描けなかった（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")
         out = []
-        for it, info in zip(req["items"], json.loads(done.stdout)["items"]):
+        for it, info in zip(req["items"], json.loads(done.stdout)["items"], strict=False):
             if info["opaque_pixels"] == 0:
                 raise TextRenderError(f"文字 {it['id']} を描いたが、見える画素が無い（書体に字が無い・文字が空 など）")
             out.append(Image.open(io.BytesIO(pathlib.Path(it["output_path"]).read_bytes())).convert("RGBA"))

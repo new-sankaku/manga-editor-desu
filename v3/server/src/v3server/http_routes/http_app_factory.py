@@ -9,12 +9,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from starlette.middleware.sessions import SessionMiddleware
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 from temporalio.client import Client
 
 from v3server.database_engine import get_sessionmaker
+from v3server.health_checks import readiness
 from v3server.http_routes import (
     ai_job_routes,
     export_routes,
@@ -30,7 +31,6 @@ from v3server.http_routes import (
     settings_and_search_routes,
     work_routes,
 )
-from v3server.health_checks import readiness
 from v3server.image_file_storage import image_store
 from v3server.openfga_permissions import open_authz
 from v3server.request_authentication import DEV_MODE_WARNING
@@ -47,7 +47,6 @@ from v3server.v3_error_types import (
     QueueNotRunning,
     V3Error,
 )
-
 
 log = logging.getLogger(__name__)
 

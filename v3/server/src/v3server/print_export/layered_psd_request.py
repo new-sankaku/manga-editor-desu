@@ -10,7 +10,7 @@ Node の場所と書き出しの script は呼ぶ側が渡す（ここに置か�
 import json
 import pathlib
 import subprocess
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -36,15 +36,15 @@ class PsdLayer(BaseModel):
     """1つの層かグループ。children があればグループ（png_path は持たない）。"""
 
     name: str
-    png_path: Optional[pathlib.Path] = None
-    children: Optional[list["PsdLayer"]] = None
+    png_path: pathlib.Path | None = None
+    children: list["PsdLayer"] | None = None
     hidden: bool = False
     blend_mode: BlendMode = "normal"
     opacity: float = Field(default=1.0, ge=0, le=1)
     # 層の画素を置く左上（ページの画素）
     left: int = 0
     top: int = 0
-    text: Optional[TextInfo] = None
+    text: TextInfo | None = None
 
 
 def psd_layers_from_nodes(nodes: list[Node], png_dir: pathlib.Path, offset: tuple[int, int] = (0, 0)
@@ -68,7 +68,7 @@ def psd_layers_from_nodes(nodes: list[Node], png_dir: pathlib.Path, offset: tupl
     return out
 
 
-def build_psd_request(width: int, height: int, composite_png: Optional[pathlib.Path], layers: list[PsdLayer],
+def build_psd_request(width: int, height: int, composite_png: pathlib.Path | None, layers: list[PsdLayer],
                       output_path: pathlib.Path) -> dict:
     """書き出しプロセスに渡す辞書を組む。layers は下の層が先。"""
 

@@ -14,8 +14,9 @@
 """
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field
@@ -198,7 +199,7 @@ def _prep_outpaint(p: OutpaintParams, i: PrepIn) -> PrepOut:
     _check_control(p, i)
     if p.unit != "px":
         raise Invalid("描き足すの量は、依頼を受ける前に画素へ直す（resolve_outpaint）")
-    l, t, r, b = (int(round(v)) for v in (p.left, p.top, p.right, p.bottom))
+    l, t, r, b = (int(round(v)) for v in (p.left, p.top, p.right, p.bottom))  # noqa: E741  左・上・右・下
     if l + t + r + b == 0:
         raise Invalid("広げる量がどの辺も0")
     w, h = i.source_size

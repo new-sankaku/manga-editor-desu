@@ -56,7 +56,7 @@ async def readiness(client: Client, include_workers: bool = False) -> dict[str, 
     if include_workers:
         checks["workers"] = _pollers(client)
     results = await asyncio.gather(*checks.values(), return_exceptions=True)
-    detail = {name: "ok" if r is None else f"{type(r).__name__}: {r}" for name, r in zip(checks, results)}
+    detail = {name: "ok" if r is None else f"{type(r).__name__}: {r}" for name, r in zip(checks, results, strict=False)}
     return {"ok": all(v == "ok" for v in detail.values()), "checks": detail}
 
 

@@ -12,7 +12,7 @@
 - Pillow・OpenCV・scikit-image には線数と角度を指定する網点が無い。ImageMagick は固定の閾値表のみ。
   そのため numpy で書いた。
 """
-from functools import lru_cache
+from functools import cache
 from typing import Literal
 
 import numpy as np
@@ -30,7 +30,7 @@ def _check_gray(gray: np.ndarray) -> None:
         raise ValueError("灰色の画像は uint8 の2次元配列で渡してください")
 
 
-@lru_cache(maxsize=None)
+@cache
 def _threshold_cell(shape: str) -> np.ndarray:
     """網点セルの閾値表（0..1）。面積が濃度に比例するように、値の順位で並べ直す。"""
     u, v = np.meshgrid((np.arange(_CELL_SIZE) + 0.5) / _CELL_SIZE, (np.arange(_CELL_SIZE) + 0.5) / _CELL_SIZE)

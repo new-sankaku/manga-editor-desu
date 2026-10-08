@@ -43,7 +43,7 @@ def check_same_shot_angle_next(draft: NameDraft, thresholds: Thresholds) -> Chec
     """前のコマと写す範囲も角度も同じになる回数（p27）。"""
     seq = _reading_panels(draft)
     items = [Finding(page=pb, panel=b.n, value=f"{b.shot}・{b.angle}", note=f"コマ{a.n}と同じ範囲・角度")
-             for (_, a), (pb, b) in zip(seq, seq[1:]) if (a.shot, a.angle) == (b.shot, b.angle)]
+             for (_, a), (pb, b) in zip(seq, seq[1:], strict=False) if (a.shot, a.angle) == (b.shot, b.angle)]
     return count_limit_result("same_shot_angle_next", "同じ範囲・角度の連続", thresholds, "same_shot_angle_next_max", items)
 
 
@@ -176,7 +176,7 @@ def check_conversation_sides(draft: NameDraft, thresholds: Thresholds) -> CheckR
     title = "会話する2人の左右"
     findings = []
     looked = 0
-    for scene, ps in _scenes(draft):
+    for _scene, ps in _scenes(draft):
         last: dict[tuple[str, str], tuple[bool, int]] = {}
         for page, p in ps:
             placed = sorted((f for f in p.people if f.box_mm is not None), key=lambda f: f.name)

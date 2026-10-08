@@ -13,9 +13,9 @@ import pathlib
 from typing import Annotated, Literal
 
 import numpy as np
-from PIL import Image
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import FileResponse
+from PIL import Image
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from temporalio.common import Priority

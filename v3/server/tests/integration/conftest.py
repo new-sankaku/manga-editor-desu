@@ -16,16 +16,16 @@ os.environ["V3_DATABASE_URL"] = TEST_DB
 os.environ["V3_AUTH_MODE"] = "dev_header"
 get_settings.cache_clear()
 
+import httpx  # noqa: E402
+import pytest  # noqa: E402
+from temporalio.client import Client  # noqa: E402
+
 from v3server.database_engine import get_sessionmaker  # noqa: E402
 from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
 from v3server.http_routes.http_app_factory import app  # noqa: E402
 from v3server.openfga_permissions import open_authz  # noqa: E402
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E402
 from v3server.service_senders.sender_result_types import AdapterError, AdapterResult  # noqa: E402
-
-import httpx  # noqa: E402
-import pytest  # noqa: E402
-from temporalio.client import Client  # noqa: E402
 
 
 def _alembic(*args: str) -> None:

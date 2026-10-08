@@ -5,8 +5,8 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from temporalio.client import WorkflowExecutionStatus
 from conftest import h, new_work, user, wait_for
+from temporalio.client import WorkflowExecutionStatus
 
 from v3server.admin_command_line import grant_admin
 from v3server.database_engine import get_sessionmaker

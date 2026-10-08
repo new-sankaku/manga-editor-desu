@@ -409,7 +409,7 @@ class ApplyPanelTemplate(OpBase):
             raise Invalid(f"新しいコマの id は {len(tpl.frames)} 個要る")
         plan = _Plan()
         plan.removes.extend(current)
-        for i, (f, pid) in enumerate(zip(tpl.frames, ids)):
+        for i, (f, pid) in enumerate(zip(tpl.frames, ids, strict=False)):
             poly = [(x * spec.frame_width_mm, y * spec.frame_height_mm) for x, y in f["polygon"]]
             plan.creates.append(_new_panel(ctx, self.page_id, self.first_order + i, _frame(poly, f["bleeds"]),
                                            f.get("frame_style"), pid))
