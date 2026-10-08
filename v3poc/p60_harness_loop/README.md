@@ -14,6 +14,7 @@
 | `api_server.py` | 画面の口（FastAPI）。Temporal の query・describe と ComfyUI の websocket から状態を返し、操作を signal・update・cancel で送る |
 | `screen/index.html` | 画面。Cytoscape.js 3.30.2＋cytoscape-dagre 2.5.0（dagre 0.8.5） |
 | `shoot.mjs` | Playwright で画面を開いて撮る・ボタンを押す |
+| `mock_comfy.py` | 【モック】口だけ ComfyUI と同じ物。b〜s はこれで流した（CPU の ComfyUI が1枚1〜10分で流しきれないため）。絵は (a) で本物が作った絵から seed と文で選ぶ。絵の良し悪しに関わる数は未検証 |
 | `infra.py` | Temporal（docker の `p60-temporal`、口 64260）・ComfyUI（63260）・検出器（63261）の起動と停止 |
 | `run.py`・`scenarios.py` | 測定の場面 a・b・c・d・i・s・e と、まとめ（collect） |
 
@@ -38,8 +39,11 @@ mkdir -p $S/cdn && cd $S/cdn && curl -sO https://cdn.jsdelivr.net/npm/cytoscape@
   && curl -sO https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js && cd -
 
 # 4. 測る（作業者と画面の口は run.py が立てる）。場面は順に流す。ComfyUI は1件ずつなので並べても速くならない
-$S/venv_api/bin/python run.py a          # 検査の結果を使う作り直し と seed だけの作り直し
-$S/venv_api/bin/python run.py b c d i s e collect
+$S/venv_api/bin/python run.py a          # 検査の結果を使う作り直し と seed だけの作り直し（本物の ComfyUI）
+# b〜s はモックの ComfyUI で流した：本物を止めてからモックを立て、作業者を立て直す
+$S/venv_api/bin/python -c "import infra; infra._kill('comfy'); infra.kill_worker()"
+P60_COMFY_MOCK=1 P60_MOCK_STEP_SEC=3 $S/venv_api/bin/python -c "import infra; infra.start_comfy(); infra.start_worker()"
+P60_COMFY_MOCK=1 $S/venv_api/bin/python run.py b c d i s e collect
 
 # 5. 画面だけ見る：ブラウザで http://127.0.0.1:63262/?stage=<工程のID>（作業だけなら ?unit=<IDの頭>）
 

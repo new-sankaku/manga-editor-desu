@@ -1,5 +1,5 @@
 {
- "stage": "stage-070734",
+ "stage": "stage-081056",
  "status": "COMPLETED",
  "result": {
   "page": {
@@ -14,28 +14,28 @@
     "2": 2,
     "3": 1
    },
-   "page_image": "pages/stage-070734.png",
+   "page_image": "pages/stage-081056.png",
    "passed": true
   },
   "status": "done"
  },
- "seconds": 357.7,
+ "seconds": 348.6,
  "stage_state": {
   "S0": {
    "detail": "試作では固定の入力（harness_config.py）",
-   "ended": "2026-10-08T07:37:42.031305+00:00",
+   "ended": "2026-10-08T08:37:04.735422+00:00",
    "name": "企画",
    "status": "done"
   },
   "S1": {
    "detail": "試作では固定の入力（harness_config.py）",
-   "ended": "2026-10-08T07:37:42.031305+00:00",
+   "ended": "2026-10-08T08:37:04.735422+00:00",
    "name": "構成",
    "status": "done"
   },
   "S2": {
    "detail": "試作では固定の入力（harness_config.py）",
-   "ended": "2026-10-08T07:37:42.031305+00:00",
+   "ended": "2026-10-08T08:37:04.735422+00:00",
    "name": "設定資料",
    "status": "done"
   },
@@ -50,9 +50,9 @@
     "measured": null,
     "passed": true
    },
-   "ended": "2026-10-08T07:37:42.146668+00:00",
+   "ended": "2026-10-08T08:37:04.783391+00:00",
    "name": "ネーム",
-   "started": "2026-10-08T07:37:42.031305+00:00",
+   "started": "2026-10-08T08:37:04.735422+00:00",
    "status": "done"
   },
   "S4": {
@@ -60,27 +60,27 @@
     {
      "reason": "人が採用した",
      "status": "done",
-     "unit_id": "stage-070734-p1"
+     "unit_id": "stage-081056-p1"
     },
     {
      "reason": "人が採用した",
      "status": "done",
-     "unit_id": "stage-070734-p2"
+     "unit_id": "stage-081056-p2"
     },
     {
      "reason": "人が採用した",
      "status": "done",
-     "unit_id": "stage-070734-p3"
+     "unit_id": "stage-081056-p3"
     }
    ],
-   "ended": "2026-10-08T07:43:23.810686+00:00",
+   "ended": "2026-10-08T08:42:36.795991+00:00",
    "name": "作画",
-   "started": "2026-10-08T07:37:42.146668+00:00",
+   "started": "2026-10-08T08:37:04.783391+00:00",
    "status": "done"
   },
   "S5": {
    "detail": "試作の対象外（吹き出し・文字は置かない）",
-   "ended": "2026-10-08T07:43:23.810686+00:00",
+   "ended": "2026-10-08T08:42:36.795991+00:00",
    "name": "仕上げ",
    "status": "skipped"
   },
@@ -97,19 +97,19 @@
      "2": 2,
      "3": 1
     },
-    "page_image": "pages/stage-070734.png",
+    "page_image": "pages/stage-081056.png",
     "passed": true
    },
-   "ended": "2026-10-08T07:43:24.113282+00:00",
+   "ended": "2026-10-08T08:42:37.049155+00:00",
    "name": "総合",
-   "started": "2026-10-08T07:43:23.810686+00:00",
+   "started": "2026-10-08T08:42:36.795991+00:00",
    "status": "done"
   },
   "S7": {
    "detail": {
-    "page_image": "pages/stage-070734.png"
+    "page_image": "pages/stage-081056.png"
    },
-   "ended": "2026-10-08T07:43:24.113282+00:00",
+   "ended": "2026-10-08T08:42:37.049155+00:00",
    "name": "書き出し",
    "status": "done"
   }
@@ -118,7 +118,7 @@
   "all_children_paused": true,
   "comfy_queue_while_paused": {
    "running": [
-    "be178993-30f7-5ba0-9a03-611b8503dc09"
+    "6767d283-5cc8-5bec-858b-8d547a939954"
    ],
    "pending": []
   }
@@ -126,7 +126,7 @@
  "approved_via_screen": [
   {
    "waiting": [
-    "stage-070734-p1"
+    "stage-081056-p1"
    ],
    "shot": {
     "name": "approve_0",
@@ -142,7 +142,7 @@
   },
   {
    "waiting": [
-    "stage-070734-p2"
+    "stage-081056-p2"
    ],
    "shot": {
     "name": "approve_1",
@@ -158,7 +158,7 @@
   },
   {
    "waiting": [
-    "stage-070734-p3"
+    "stage-081056-p3"
    ],
    "shot": {
     "name": "approve_2",
@@ -174,14 +174,14 @@
   }
  ],
  "units": {
-  "stage-070734-p1": {
+  "stage-081056-p1": {
    "status": "done",
    "stop_reason": "人が採用した",
    "attempt": 1,
    "round": 1,
    "budget": {
-    "seconds": 129.96,
-    "usd": 0.0997
+    "seconds": 105.51,
+    "usd": 0.1012
    },
    "resets": 0,
    "candidates": [
@@ -197,14 +197,14 @@
      },
      "eval": {
       "scores": [
-       3,
-       3
+       4,
+       4
       ],
-      "median": 3.0
+      "median": 4.0
      },
      "stale": false,
-     "image": "49925ad1-cf03-590c-84e0-7ce00ffc47f3.png",
-     "gen_seconds": 0.16
+     "image": "a7d442b4-a896-5955-9e16-5d64a4e009ea.png",
+     "gen_seconds": 0.13
     },
     {
      "id": "a1c1",
@@ -218,18 +218,18 @@
      },
      "eval": null,
      "stale": false,
-     "image": "e599177d-5e9b-56dd-b8a1-75a553ab2fde.png",
-     "gen_seconds": 72.07
+     "image": "eda76927-9b0f-5ae6-a2d6-fc7829ddde92.png",
+     "gen_seconds": 48.9
     }
    ],
    "nodes": {
     "check": {
      "count": 2,
-     "total_s": 8.55
+     "total_s": 9.72
     },
     "context": {
      "count": 1,
-     "total_s": 0.09
+     "total_s": 0.06
     },
     "cut_out": {
      "count": 1,
@@ -237,15 +237,15 @@
     },
     "done": {
      "count": 1,
-     "total_s": 0.3
+     "total_s": 0.15
     },
     "evaluate": {
      "count": 1,
-     "total_s": 24.51
+     "total_s": 22.05
     },
     "generate": {
      "count": 3,
-     "total_s": 96.81
+     "total_s": 73.68
     },
     "review": {
      "count": 0,
@@ -255,14 +255,14 @@
    "disagreements": [],
    "history_length": 67
   },
-  "stage-070734-p2": {
+  "stage-081056-p2": {
    "status": "done",
    "stop_reason": "人が採用した",
    "attempt": 2,
    "round": 1,
    "budget": {
-    "seconds": 226.38,
-    "usd": 0.1008
+    "seconds": 224.78,
+    "usd": 0.1018
    },
    "resets": 0,
    "candidates": [
@@ -278,8 +278,8 @@
      },
      "eval": null,
      "stale": false,
-     "image": "be178993-30f7-5ba0-9a03-611b8503dc09.png",
-     "gen_seconds": 24.39
+     "image": "6767d283-5cc8-5bec-858b-8d547a939954.png",
+     "gen_seconds": 24.43
     },
     {
      "id": "a1c1",
@@ -293,8 +293,8 @@
      },
      "eval": null,
      "stale": false,
-     "image": "4e90d51c-5f1b-55a8-92df-dafc695e261d.png",
-     "gen_seconds": 72.26
+     "image": "13127fcf-6335-527b-9592-76c727c69ef6.png",
+     "gen_seconds": 72.16
     },
     {
      "id": "a2c0",
@@ -308,8 +308,8 @@
      },
      "eval": null,
      "stale": false,
-     "image": "d429a2d3-d90a-57dc-a9dd-90836e377c4d.png",
-     "gen_seconds": 42.89
+     "image": "fe09a384-855b-5379-9619-ccf29e0bcb51.png",
+     "gen_seconds": 33.15
     },
     {
      "id": "a2c1",
@@ -329,18 +329,18 @@
       "median": 3.0
      },
      "stale": false,
-     "image": "2d6f01ad-294a-5b69-8c2a-1fbeccff2dcb.png",
-     "gen_seconds": 24.45
+     "image": "bbf27413-545c-5add-a9b8-29230c3d9651.png",
+     "gen_seconds": 24.43
     }
    ],
    "nodes": {
     "check": {
      "count": 4,
-     "total_s": 10.15
+     "total_s": 23.26
     },
     "context": {
      "count": 2,
-     "total_s": 0.32
+     "total_s": 0.49
     },
     "cut_out": {
      "count": 1,
@@ -348,15 +348,15 @@
     },
     "done": {
      "count": 1,
-     "total_s": 0.11
+     "total_s": 0.12
     },
     "evaluate": {
      "count": 1,
-     "total_s": 27.3
+     "total_s": 22.14
     },
     "generate": {
      "count": 5,
-     "total_s": 188.61
+     "total_s": 178.89
     },
     "review": {
      "count": 0,
@@ -366,14 +366,14 @@
    "disagreements": [],
    "history_length": 97
   },
-  "stage-070734-p3": {
+  "stage-081056-p3": {
    "status": "done",
    "stop_reason": "人が採用した",
    "attempt": 3,
    "round": 1,
    "budget": {
-    "seconds": 327.69,
-    "usd": 0.2968
+    "seconds": 320.53,
+    "usd": 0.297
    },
    "resets": 0,
    "candidates": [
@@ -389,8 +389,8 @@
      },
      "eval": null,
      "stale": false,
-     "image": "cbe9029b-c351-5334-844f-94b054cc6858.png",
-     "gen_seconds": 48.78
+     "image": "34479ef0-8729-50c7-8c7d-e5d9bce9ff54.png",
+     "gen_seconds": 72.22
     },
     {
      "id": "a1c1",
@@ -410,8 +410,8 @@
       "median": 1.0
      },
      "stale": false,
-     "image": "dfc2780c-565f-5c24-89c5-638cde1b463c.png",
-     "gen_seconds": 72.09
+     "image": "d9b896bd-3525-5299-b54e-27f607ac8701.png",
+     "gen_seconds": 47.99
     },
     {
      "id": "a2c0",
@@ -431,8 +431,8 @@
       "median": 1.0
      },
      "stale": false,
-     "image": "ac14896d-0160-5ffe-922d-e464d47f92a3.png",
-     "gen_seconds": 39.68
+     "image": "83c62b89-c4e3-54ff-8868-ce6c26bcfb3a.png",
+     "gen_seconds": 37.74
     },
     {
      "id": "a2c1",
@@ -446,8 +446,8 @@
      },
      "eval": null,
      "stale": false,
-     "image": "08e87251-3e9d-5185-87c7-379415f1615b.png",
-     "gen_seconds": 24.43
+     "image": "e9f72faf-b8ef-58ab-af1a-e03a1074571f.png",
+     "gen_seconds": 24.42
     },
     {
      "id": "a3c0",
@@ -467,18 +467,18 @@
       "median": 2.0
      },
      "stale": false,
-     "image": "7c4ab8b6-9468-5200-89ac-939a6d98c37e.png",
-     "gen_seconds": 24.36
+     "image": "2f85009a-465f-5910-84ac-693760db1ab4.png",
+     "gen_seconds": 24.41
     }
    ],
    "nodes": {
     "check": {
      "count": 5,
-     "total_s": 21.16
+     "total_s": 21.74
     },
     "context": {
      "count": 3,
-     "total_s": 0.28
+     "total_s": 0.29
     },
     "cut_out": {
      "count": 1,
@@ -486,15 +486,15 @@
     },
     "done": {
      "count": 1,
-     "total_s": 0.05
+     "total_s": 0.04
     },
     "evaluate": {
      "count": 3,
-     "total_s": 72.21
+     "total_s": 66.7
     },
     "generate": {
      "count": 6,
-     "total_s": 234.04
+     "total_s": 231.8
     },
     "review": {
      "count": 0,
@@ -558,7 +558,7 @@
   "node_detail": {
    "name": "node_detail",
    "errors": [],
-   "detail": "ノードの詳細　stage-070734-p1 / 検査\n✓ 完了\n回数 2\n使った時間 9秒\n{\n \"passed\": false,\n \"persons\": 2,\n \"touch\": \"B\"\n}\n出来事（新しい30件）\n07:39:24 回1 running \n07:39:27 回1 done {\"passed\":true,\"persons\":1,\"touch\":\"\"}\n07:39:27 回1 r"
+   "detail": "ノードの詳細　stage-081056-p1 / 検査\n✓ 完了\n回数 2\n使った時間 10秒\n{\n \"passed\": false,\n \"persons\": 2,\n \"touch\": \"B\"\n}\n出来事（新しい30件）\n08:38:24 回1 running \n08:38:28 回1 done {\"passed\":true,\"persons\":1,\"touch\":\"\"}\n08:38:28 回1 "
   },
   "stage_done": {
    "name": "stage_done",
@@ -576,7 +576,7 @@
   "duplicate_versions": 0,
   "claude_calls": 10,
   "claude_killed": 0,
-  "claude_usd": 0.4973
+  "claude_usd": 0.5
  },
  "orphans": {
   "comfy_orphans": 0,

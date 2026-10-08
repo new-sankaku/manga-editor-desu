@@ -196,7 +196,19 @@ class WorkUnitWorkflow:
                 cancellation_type=ActivityCancellationType.WAIT_CANCELLATION_COMPLETED,
             )
             try:
-                r = await self._handle
+                try:
+                    # Temporal の取り消し（作業・工程ごと）は、活動が先に成功で終わると SDK の中で消えてしまう（p60 で実測）。
+                    # shield で受けて、ここで活動を止めてから上げる
+                    r = await asyncio.shield(self._handle)
+                except asyncio.CancelledError:
+                    self._mark_cancelling()
+                    self._handle.cancel()
+                    try:
+                        await self._handle
+                    except BaseException:
+                        pass
+                    self._node(node, "cancelled", "作業ごと取り消した")
+                    raise
                 self._node(node, "done", _summary(node, r))
                 if (self.s.get("last_error") or {}).get("node") in (None, node):
                     self.s["errors_in_row"] = 0  # 失敗した段がうまく行ったときだけ数え直す（文脈の段の成功では消さない）
