@@ -104,5 +104,5 @@ class ReplaceText(OpBase):
             pid = getattr(obj, "page_id", None)
             if pid:
                 page_ids.add(pid)
-            rc.change_or_hold(obj, changes, pid)
+            rc.change(obj, changes)
         return rc.inverse(sorted(page_ids), f"「{self.find}」を「{self.replace}」に置き換えた取り消し")

@@ -10,7 +10,8 @@ from v3server.operations.annotation_operations import (
     RecordAnnotationJob,
     UpdateAnnotation,
 )
-from v3server.operations.held_change_operations import ResolveHeldChange
+from v3server.operations.held_change_operations import ResolveHeldChange, UndoWithHeldChanges
+from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
 from v3server.operations.image_file_operations import (
     AddProtectedRegion,
     RegisterImage,
@@ -108,6 +109,7 @@ Op = Annotated[
         AddPanelLayer,
         UpdatePanelLayer,
         ResolveHeldChange,
+        UndoWithHeldChanges,
         RestoreRows,
         SplitPanel,
         MergePanels,
@@ -125,6 +127,8 @@ Op = Annotated[
         ErasePenStrokes,
         SetStrokeCache,
         ErasePixels,
+        AdoptImage,
+        SetImageDiscarded,
         AddAnnotation,
         UpdateAnnotation,
         RecordAnnotationJob,

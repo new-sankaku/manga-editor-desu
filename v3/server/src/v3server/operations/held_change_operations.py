@@ -10,9 +10,13 @@
   - psd_vector_changed：コマ枠・フキダシ・トーン・図形の層の画素が変わった（線や形の値には戻せない）。
     adopt_as_image（画素を人の手の層として置く。元の物は残す）・discard
   - psd_layer_missing：PSD から層が消えた。remove_item（その物を抜く）・keep
-どれも取り消せる（取り消すと判断待ちに戻り、変えた値も元に戻る）。"""
+どれも取り消せる（取り消すと判断待ちに戻り、変えた値も元に戻る）。
+
+UndoWithHeldChanges：AIの変更で判断待ちを置いた操作の取り消し。窓口が取り消しの操作を包む（human_hand_guard.inverse_with_held）。"""
 
 from typing import Any, Literal
+
+from pydantic import Field
 
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
@@ -24,6 +28,8 @@ from v3server.canonical_tables.text_and_layer_tables import (
     TextItem,
 )
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from sqlalchemy import select
+
 from v3server.operations.human_hand_guard import change_with_human_hand
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
 from v3server.v3_error_types import HumanHandProtected, Invalid
@@ -107,7 +113,7 @@ class ResolveHeldChange(OpBase):
             if before_status == "accepted" and self.restore is not None:
                 restore = dict(self.restore)
                 marks = restore.pop("human_hand_fields")
-                change_with_human_hand(ctx.actor, target, restore, marks, work=ctx.work)
+                change_with_human_hand(ctx, target, restore, marks)
             held.status = "open"
             return {"type": self.type, "id": self.id, "decision": "accept" if before_status == "accepted" else "reject"}
         if held.status != "open":
@@ -119,7 +125,7 @@ class ResolveHeldChange(OpBase):
             before = {"removed": target.removed, "human_hand_fields": list(target.human_hand_fields)}
             target.removed = bool(held.proposed_value)
         else:
-            before = change_with_human_hand(ctx.actor, target, {held.field: held.proposed_value}, work=ctx.work)
+            before = change_with_human_hand(ctx, target, {held.field: held.proposed_value})
         held.status = "accepted"
         return {"type": self.type, "id": self.id, "decision": "reopen", "restore": before}
 
@@ -175,3 +181,38 @@ class ResolveHeldChange(OpBase):
         held.status = "rejected" if choice in _NOTHING else "accepted"
         held.chosen = choice
         return {"type": self.type, "id": self.id, "decision": "reopen", "restore": {"undo": undo, "params": self.params}}
+
+
+class UndoWithHeldChanges(OpBase):
+    """判断待ちを置いた操作の取り消し。中の取り消し（undo）を当て、withdraw のうちまだ決めていない判断待ちを下げる。
+    これを取り消す（やり直す）ときは、下げた判断待ちを reopen で開き直す。決めた後の判断待ちは触らない。
+    人の手の印を元に戻す操作を含むので、人だけが出せる。"""
+
+    type: Literal["undo_with_held_changes"] = "undo_with_held_changes"
+    undo: dict[str, Any]
+    withdraw: list[str] = Field(default_factory=list)
+    reopen: list[str] = Field(default_factory=list)
+
+    def _inner(self):
+        from v3server.operations.all_operation_types import op_adapter
+
+        return op_adapter.validate_python(self.undo)
+
+    async def scope(self, session, work):
+        return await self._inner().scope(session, work)
+
+    async def apply(self, ctx):
+        rows = (await ctx.session.execute(select(HeldAiChange).where(
+            HeldAiChange.id.in_(self.withdraw + self.reopen), HeldAiChange.work_id == ctx.work.id))).scalars().all()
+        withdrawn, reopened = [], []
+        for row in rows:
+            if row.id in self.withdraw and row.status == "open":
+                row.status = "withdrawn"
+                withdrawn.append(row.id)
+            elif row.id in self.reopen and row.status == "withdrawn":
+                row.status = "open"
+                reopened.append(row.id)
+        inner_inverse = await self._inner().apply(ctx)
+        if inner_inverse is None:
+            return None
+        return {"type": self.type, "undo": inner_inverse, "withdraw": sorted(reopened), "reopen": sorted(withdrawn)}

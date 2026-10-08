@@ -86,7 +86,7 @@ class UpdateAnnotation(OpBase):
         if "region_mm" in changes:
             changes["region_mm"] = _region(changes["region_mm"])
         rc = RowChanges(ctx)
-        rc.change_or_hold(item, changes, item.page_id)
+        rc.change(item, changes)
         return rc.inverse([item.page_id], "赤入れを直した取り消し")
 
 

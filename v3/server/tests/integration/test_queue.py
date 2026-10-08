@@ -2,8 +2,10 @@
 
 import asyncio
 import uuid
+from datetime import timedelta
 
 import pytest
+from temporalio.client import WorkflowExecutionStatus
 from conftest import h, new_work, user, wait_for
 
 from v3server.admin_command_line import grant_admin
@@ -197,13 +199,14 @@ async def test_人の依頼をAIの依頼より先に送る(api, admin, workers,
     await api.patch(f"/services/{sid}", headers=h(admin), json={"paused": True})
     await workers.reload()
 
+    # 依頼を受ける口は、送信を待ち行列に入れ終えてから返す（job_start_and_control.enqueue）。
+    # ここまでで6件とも待ち行列に入っている
     ai = Actor(kind="ai", id="ai-test", on_behalf_of=a)
     async with get_sessionmaker()() as session:
         for i in range(3):
             await job_start_and_control.enqueue(session, authz, temporal, ai, wid, p, {"tag": f"ai{i}"}, "ai")
     for i in range(3):
         await enqueue(api, wid, a, p, tag=f"human{i}")
-    await asyncio.sleep(1)
 
     await api.patch(f"/services/{sid}", headers=h(admin), json={"paused": False})
     await workers.reload()
@@ -229,7 +232,6 @@ async def test_同じ優先順位の中では作品ごとに順に送る(api, ad
         await enqueue(api, w1, a, p, tag=f"fairA{i}")
     for i in range(3):
         await enqueue(api, w2, a, p, tag=f"fairB{i}")
-    await asyncio.sleep(1)
 
     await api.patch(f"/services/{sid}", headers=h(admin), json={"paused": False})
     await workers.reload()
@@ -242,3 +244,20 @@ async def test_同じ優先順位の中では作品ごとに順に送る(api, ad
     b_pos = [i + 1 for i, t in enumerate(order) if t.startswith("fairB")]
     # 公平さが無ければ B は 9〜11 番目。作品ごとに回れば、最初の6件の中に B が3件とも入る
     assert b_pos[-1] <= 6, order
+
+
+async def test_待ち行列に入れられなければ依頼を止めて知らせる(api, admin, workers, fake_adapter, temporal, monkeypatch):
+    """制御の作業者が動いていないとき。依頼を受けた（201）と返さず、依頼を止めて 503 で知らせる。"""
+
+    a = user()
+    wid = (await new_work(api, a))["work"]
+    _, p = await make_service(api, admin)
+    # 作業者のいない制御の待ち行列へ流す
+    monkeypatch.setattr(job_start_and_control, "CONTROL_QUEUE", f"v3-control-nobody-{uuid.uuid4().hex[:6]}")
+    monkeypatch.setattr(job_start_and_control, "QUEUE_ENTRY_WAIT", timedelta(seconds=2))
+    r = await api.post(f"/works/{wid}/jobs", headers=h(a), json={"process": p, "request": {"tag": "nobody"}})
+    assert r.status_code == 503 and r.json()["code"] == "queue_not_running", r.text
+    (j,) = (await api.get(f"/works/{wid}/jobs", headers=h(a))).json()
+    assert (j["status"], j["failure_kind"]) == ("stopped", "queue_not_running")
+    desc = await temporal.get_workflow_handle(job_start_and_control.workflow_id(j["id"])).describe()
+    assert desc.status == WorkflowExecutionStatus.TERMINATED

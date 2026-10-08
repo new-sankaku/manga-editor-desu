@@ -4,7 +4,9 @@ request の形（ComfyUI の処理）
 - input_images: [{"node": ノード番号, "input": 入力名, "image_id": 絵, "purpose": "source" | "reference" | "mask"}]
   source は描き直す元の絵。生成した絵・人が描いた絵・持ち込んだ絵のどれでもよい（出どころで分けない）
   purpose=mask は image_id の代わりに region_px（元の絵の画素の多角形の一覧）を渡してもよい（囲んで頼む。V3細部の決めごと 10.1）。
-  そのときは、ここで元の絵（source。1枚だけ）と同じ大きさのマスク（白が囲んだ所）を描く
+  そのときは、ここで元の絵（source。1枚だけ）と同じ大きさのマスク（白が囲んだ所）を描く。
+  control は形の指定（線画・落書き・骨格・奥行き）の絵。image_id か png_base64 で渡す。
+  png_base64（画面で塗ったマスク・描いた形の PNG。元の絵と同じ大きさ。白か不透明の所が囲んだ所）でもよい
 - protected_mask_input: {"node": ノード番号, "input": 入力名}。人の手の範囲のマスクを入れる所
 
 ここで行うこと
@@ -13,8 +15,11 @@ request の形（ComfyUI の処理）
   無い依頼は断る（人の範囲を描き直させないため。V3細部の決めごと 10.2）。範囲は、元の絵と、同じ大きさのまま続く前の版のものを使う
 - 元の絵が1枚なら、生成した絵の元の版（register.based_on_image_id）をその絵にする
 prepared_inputs は依頼する側が書けない（書いてあれば断る）。
+画像生成の処理（request.image_process）は、最後に image_process_preparation.py でマスクと絵を下ごしらえする。
 """
 
+import base64
+import binascii
 from typing import Any
 
 from sqlalchemy import select
@@ -28,7 +33,7 @@ from v3server.image_file_storage import read_image, store_image
 from v3server.operations.operation_base import get_in_work
 from v3server.v3_error_types import Invalid
 
-PURPOSES = ("source", "reference", "mask")
+PURPOSES = ("source", "reference", "mask", "control")
 
 
 async def protected_regions_for(session: AsyncSession, img: ImageFile) -> list[ProtectedRegion]:
@@ -58,6 +63,22 @@ def _polygons(value: Any) -> list[list[tuple[float, float]]]:
 
 
 async def prepare_input_images(session: AsyncSession, work_id: str, request: dict[str, Any]) -> dict[str, Any]:
+    out = await _prepare(session, work_id, request)
+    if "image_process" in out:
+        from v3server.generation_queue.image_process_preparation import finish_image_process
+
+        out = finish_image_process(out)
+    return out
+
+
+def _png(value: Any) -> bytes:
+    try:
+        return base64.b64decode(value, validate=True)
+    except (binascii.Error, TypeError, ValueError) as e:
+        raise Invalid(f"png_base64 が base64 でない: {e}") from e
+
+
+async def _prepare(session: AsyncSession, work_id: str, request: dict[str, Any]) -> dict[str, Any]:
     if "prepared_inputs" in request:
         raise Invalid("prepared_inputs はサーバーが書く。依頼に入れられない")
     entries = request.get("input_images")
@@ -77,6 +98,13 @@ async def prepare_input_images(session: AsyncSession, work_id: str, request: dic
             if "image_id" in e:
                 raise Invalid("マスクは image_id か region_px のどちらか")
             regions_in.append((node, inp, _polygons(e["region_px"])))
+            continue
+        if e["purpose"] in ("mask", "control") and "png_base64" in e:
+            if "image_id" in e:
+                raise Invalid("マスク・形の指定の絵は image_id か png_base64 のどちらか")
+            stored = store_image(_png(e["png_base64"]))
+            prepared.append({"node": node, "input": inp, "purpose": e["purpose"], "image_id": None,
+                             "sha256": stored.sha256, "media_type": stored.media_type, "painted": True})
             continue
         img = await get_in_work(session, ImageFile, e.get("image_id", ""), work_id)
         await refuse_stale_stroke_cache(session, img.id)

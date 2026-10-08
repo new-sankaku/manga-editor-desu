@@ -32,5 +32,5 @@ async def submit_ai_proposal(session: AsyncSession, authz: Authz, ai_actor: Acto
     event = await operation_submit_and_undo.submit(session, authz, ai_actor, work_id, ApplyNameProposal(id=op.id))
     out["applied"] = True
     out["apply_event_id"] = event.id
-    out["held_change_ids"] = (event.inverse or {}).get("held_change_ids", [])
+    out["held_change_ids"] = [x["id"] for x in event.held_changes or []]
     return out

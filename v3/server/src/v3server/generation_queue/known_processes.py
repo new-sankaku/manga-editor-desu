@@ -15,6 +15,7 @@ from typing import Any
 
 from v3server.llm_questions.extract_characters_question import parse_extract_characters_answer
 from v3server.llm_questions.read_prompt_question import parse_read_prompt_answer
+from v3server.generation_queue.image_process_registry import SPECS
 from v3server.v3_error_types import Invalid
 
 KNOWN_PROCESSES: dict[str, tuple[str, str]] = {
@@ -22,6 +23,8 @@ KNOWN_PROCESSES: dict[str, tuple[str, str]] = {
     "remove_background": ("drawing", "propose"),
     "read_prompt": ("drawing", "propose"),
     "extract_characters": ("settings_material", "propose"),
+    # 画像生成の処理（文から絵・囲んで直すなど）は一覧の側で決める
+    **{s.name: (s.ai_task, s.ai_action) for s in SPECS.values()},
 }
 
 

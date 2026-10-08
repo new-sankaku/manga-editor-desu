@@ -44,6 +44,16 @@ class ComfyNodeGraph:
         """ノードを足す。入力に NodeOutput を渡すとつなぎになる。まだ無いノードへのつなぎは例外。"""
         node_id = str(self._next_id)
         self._next_id += 1
+        return self._put(node_id, class_type, inputs)
+
+    def add_named(self, node_id: str, class_type: str, **inputs: Any) -> Node:
+        """番号の代わりに名前を付けてノードを足す。送り手が絵を上げて入れる LoadImage に使う
+        （名前で入れ先を指すので、入力名の一致で別のノードを書き換えることが起きない。ai-verification.md 1.1 の原因A）。"""
+        if node_id in self._nodes or node_id.isdigit():
+            raise KeyError(f'ノードの名前 {node_id} は使えない（重なっているか、数字だけ）')
+        return self._put(node_id, class_type, inputs)
+
+    def _put(self, node_id: str, class_type: str, inputs: dict[str, Any]) -> Node:
         self._nodes[node_id] = {
             'class_type': class_type,
             'inputs': {name: self._to_value(value) for name, value in inputs.items()},

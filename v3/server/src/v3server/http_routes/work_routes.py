@@ -144,13 +144,14 @@ async def get_members(work_id: str, authz: AuthzDep, actor: ActorDep):
 async def submit_op(work_id: str, op: Annotated[Op, Field(discriminator="type")], session: SessionDep,
                     authz: AuthzDep, actor: ActorDep):
     event = await operation_submit_and_undo.submit(session, authz, actor, work_id, op)
-    return {"event_id": event.id, "seq": event.seq}
+    # AIの変更が人の手の所に当たって判断待ちに置いた分（id・表・行・項目）。無ければ空
+    return {"event_id": event.id, "seq": event.seq, "held_changes": event.held_changes or []}
 
 
 @router.post("/works/{work_id}/events/{event_id}/undo")
 async def undo_event(work_id: str, event_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     event = await operation_submit_and_undo.undo(session, authz, actor, work_id, event_id)
-    return {"event_id": event.id, "seq": event.seq}
+    return {"event_id": event.id, "seq": event.seq, "held_changes": event.held_changes or []}
 
 
 @router.get("/works/{work_id}/events")
@@ -164,6 +165,6 @@ async def list_events(work_id: str, session: SessionDep, authz: AuthzDep, actor:
     ).scalars().all()
     return [
         row(e, "id", "seq", "actor_kind", "actor_id", "on_behalf_of", "op_type", "payload", "undoes_event_id",
-            "created_at") | {"undoable": e.inverse is not None}
+            "created_at") | {"undoable": e.inverse is not None, "held_changes": e.held_changes or []}
         for e in events
     ]

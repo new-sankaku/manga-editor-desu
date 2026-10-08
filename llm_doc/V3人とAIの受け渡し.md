@@ -216,8 +216,8 @@
 
 ## 7. 確かめたこと
 
-`cd v3/server && uv run pytest -q tests/unit` → 197 件通過。
-`uv run pytest -q tests/integration --ignore=tests/integration/test_comfyui_real.py --ignore=tests/integration/test_detector_real.py` → 47 件通過（合わせて 244 件）。
+`cd v3/server && uv run pytest -q tests/unit` → 234 件通過（2026-10-08、AIの直接の変更を判断待ちに揃えた後。ほかの作業で足された試験を含む）。
+`uv run pytest -q tests/integration --ignore=tests/integration/test_comfyui_real.py --ignore=tests/integration/test_detector_real.py` → 56 件通過・3 件飛ばし（試験の書体が無い）。続けて7回流し、ほかの作業の試験ファイルが途中で同じ試験用データベースを作り直したと見られる1回（未検証）を除いて、すべて通った。
 移行 `0006_human_tools_and_finishing.py`：`alembic downgrade base` → `upgrade head` → `downgrade 0005` → `upgrade head` が通り、`alembic check` が「No new upgrade operations detected」。
 `v3/psd_writer` の `npm test` → 2 件通過。
 前からある `tests/integration/test_queue.py::test_人の依頼をAIの依頼より先に送る` が時々落ちていた件は、依頼を受ける口が流れを始めただけで返し、送信が待ち行列に入る順が頼んだ順と入れ替わっていたのが原因だった。口を送信が待ち行列に入ってから返す形に直した（経緯と数字は `V3サーバーの土台.md` 7章・8章）。

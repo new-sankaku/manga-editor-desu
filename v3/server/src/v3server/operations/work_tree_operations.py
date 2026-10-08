@@ -19,8 +19,9 @@ from v3server.openfga_permissions import Tuple
 from v3server.operations.ai_involvement import ROW_ACTION, ROW_TASK, field_task, require_actor_may
 from v3server.operations.human_hand_guard import (
     change_with_human_hand,
-    refuse_if_ai_removes_human_hand,
+    page_id_of,
     refuse_if_fixed,
+    remove_or_hold,
 )
 from v3server.operations.operation_base import (
     OpBase,
@@ -192,7 +193,7 @@ class AddPanel(OpBase):
 
 
 class UpdatePanel(OpBase):
-    """コマを変える。人が変えた項目には人の手の印が付く。AIは人の手の所を変えられない（human_hand_guard.py）。"""
+    """コマを変える。人が変えた項目には人の手の印が付く。AIの変更が人の手の所に当たると判断待ちに置く（human_hand_guard.py）。"""
 
     type: Literal["update_panel"] = "update_panel"
     id: str
@@ -243,7 +244,7 @@ class UpdatePanel(OpBase):
         if "image_placement" in changes:
             changes["image_placement"] = await validated_placement(
                 ctx.session, ctx.work.id, changes["image_placement"], changes.get("image_id", panel.image_id))
-        before = change_with_human_hand(ctx.actor, panel, changes, self.human_hand_fields, work=ctx.work)
+        before = change_with_human_hand(ctx, panel, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}
 
 
@@ -266,7 +267,7 @@ class UpdatePage(OpBase):
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
-        before = change_with_human_hand(ctx.actor, page, changes, self.human_hand_fields, work=ctx.work)
+        before = change_with_human_hand(ctx, page, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}
 
 
@@ -309,13 +310,15 @@ class SetRemoved(OpBase):
         if ctx.actor.kind == "ai":
             if self.target_kind in ("volume", "episode", "panel_template"):
                 raise HumanHandProtected("巻・話・コマの型を抜く・戻すのは人だけ")
-            # 人の手の印か確定印の付いた行を、AIは抜けない
-            refuse_if_ai_removes_human_hand(ctx.actor, obj)
             task = ROW_TASK[obj.__tablename__]
             require_actor_may(ctx.actor, ctx.work, field_task(obj, task), ROW_ACTION.get(obj.__tablename__, "decide"))
         if obj.removed == self.removed:
             raise Invalid("すでにその状態")
-        obj.removed = self.removed
+        # 人の手の印か確定印の付いた行にAIが当たったら、抜かずに判断待ちに置く（human_hand_guard.py）
+        if not remove_or_hold(ctx, obj, self.removed):
+            # 何も変えていない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
+            return {"type": "restore_rows", "label": "抜く・戻すを判断待ちにした取り消し",
+                    "page_ids": [p for p in [page_id_of(obj)] if p], "snapshot": {obj.__tablename__: {}}}
         return {**self.model_dump(), "removed": not self.removed}
 
 

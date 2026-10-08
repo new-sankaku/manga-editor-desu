@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V3 画像生成</title>
+<link rel="stylesheet" href="css/app.css">
+<script src="vendor/fabric-7.4.0/fabric.min.js"></script>
+<script src="vendor/lucide-0.468.0/lucide.min.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand"><span class="mark"><i data-lucide="sparkles"></i></span><span>画像生成</span></div>
+    <nav class="pickers" aria-label="作品・ページ・コマ">
+      <select id="pick-work" class="field" aria-label="作品"></select>
+      <span class="slash">/</span>
+      <select id="pick-page" class="field" aria-label="ページ"></select>
+      <span class="slash">/</span>
+      <select id="pick-panel" class="field" aria-label="コマ"></select>
+    </nav>
+    <label class="who">利用者 <input id="user" class="field" autocomplete="username"></label>
+  </header>
+
+  <div class="ws">
+    <section class="canvas" aria-label="コマの絵">
+      <div class="stage-host" id="stage"></div>
+      <div class="empty" id="stage-empty" hidden></div>
+
+      <div class="ftb" role="toolbar" aria-label="道具">
+        <button class="tool" data-tool="select" aria-pressed="true" title="動かす・見る (V)"><i data-lucide="hand"></i>見る<kbd>V</kbd></button>
+        <button class="tool" data-tool="mask" aria-pressed="false" title="囲んで頼む (M)"><i data-lucide="lasso-select"></i>囲んで頼む<kbd>M</kbd></button>
+        <button class="tool" data-tool="extend" aria-pressed="false" title="描き足す (O)"><i data-lucide="expand"></i>描き足す<kbd>O</kbd></button>
+        <span class="vsep"></span>
+        <button class="tool" data-tool="pen" aria-pressed="false" title="ペン (P)"><i data-lucide="pen-line"></i>ペン<kbd>P</kbd></button>
+        <button class="tool" data-tool="erase" aria-pressed="false" title="消しゴム (E)"><i data-lucide="eraser"></i>消しゴム<kbd>E</kbd></button>
+        <span class="vsep"></span>
+        <button class="tool" id="undo" aria-disabled="true" title="取り消す (Ctrl+Z)"><i data-lucide="undo-2"></i>取り消す</button>
+        <button class="tool" id="redo" aria-disabled="true" title="やり直す (Ctrl+Shift+Z)"><i data-lucide="redo-2"></i>やり直す</button>
+      </div>
+
+      <div class="ftb sub" id="mask-bar" role="toolbar" aria-label="囲む道具" hidden>
+        <div class="seg" id="mask-tools">
+          <button data-mask="brush" aria-pressed="true"><i data-lucide="brush"></i>筆</button>
+          <button data-mask="eraser" aria-pressed="false"><i data-lucide="eraser"></i>消す</button>
+          <button data-mask="lasso" aria-pressed="false"><i data-lucide="lasso"></i>投げ縄</button>
+          <button data-mask="polygon" aria-pressed="false"><i data-lucide="pentagon"></i>多角形</button>
+          <button data-mask="rect" aria-pressed="false"><i data-lucide="square-dashed"></i>四角</button>
+        </div>
+        <label class="row meta">太さ <input id="brush-size" type="range" min="2" max="200" value="24"><span id="brush-size-v" class="num">24</span></label>
+        <span class="vsep"></span>
+        <button class="ibtn" id="mask-undo" title="囲みを1つ戻す" aria-label="囲みを1つ戻す"><i data-lucide="undo-dot"></i></button>
+        <button class="ibtn" id="mask-invert" title="囲みを反転する" aria-label="囲みを反転する"><i data-lucide="flip-horizontal-2"></i></button>
+        <button class="ibtn" id="mask-fill" title="全部を囲む" aria-label="全部を囲む"><i data-lucide="paint-bucket"></i></button>
+        <button class="ibtn" id="mask-clear" title="囲みを全部消す" aria-label="囲みを全部消す"><i data-lucide="trash-2"></i></button>
+        <button class="ibtn" id="mask-show" aria-pressed="true" title="囲みを見せる・隠す" aria-label="囲みを見せる・隠す"><i data-lucide="eye"></i></button>
+      </div>
+
+      <div class="ftb sub" id="pen-bar" role="toolbar" aria-label="ペン" hidden>
+        <span class="meta">太さ</span>
+        <div class="seg" id="pen-width">
+          <button data-w="0.3" aria-pressed="false">0.3mm</button>
+          <button data-w="0.6" aria-pressed="true">0.6mm</button>
+          <button data-w="1.2" aria-pressed="false">1.2mm</button>
+        </div>
+        <span class="meta" id="pen-note"></span>
+      </div>
+
+      <div class="ftb sub" id="erase-bar" role="toolbar" aria-label="消しゴム" hidden>
+        <label class="row meta">太さ <input id="erase-size" type="range" min="2" max="200" value="16"><span id="erase-size-v" class="num">16</span>px</label>
+        <span class="meta">コマの絵の画素を消します。消した所は人の手の範囲になります</span>
+      </div>
+
+      <div class="viewing" id="viewing" hidden>
+        <i data-lucide="history"></i><span id="viewing-text"></span>
+        <button class="btn sm" id="viewing-back">今の絵に戻る</button>
+      </div>
+
+      <div class="stage-msg" id="stage-msg"></div>
+
+      <div class="zoom">
+        <button class="ibtn" id="zoom-out" title="縮める"><i data-lucide="minus"></i></button>
+        <button class="ibtn" id="zoom-fit" title="合わせる"><i data-lucide="scan"></i></button>
+        <button class="ibtn" id="zoom-in" title="広げる"><i data-lucide="plus"></i></button>
+      </div>
+
+      <div class="compare" id="compare" hidden>
+        <div class="compare-h">
+          <span class="h2 grow" id="compare-title">比べる</span>
+          <div class="seg" id="compare-mode">
+            <button data-mode="side" aria-pressed="true"><i data-lucide="columns-2"></i>並べる</button>
+            <button data-mode="slider" aria-pressed="false"><i data-lucide="split"></i>重ねて動かす</button>
+          </div>
+          <button class="btn sm" id="compare-close"><i data-lucide="x"></i>閉じる</button>
+        </div>
+        <div class="compare-b" id="compare-body"></div>
+      </div>
+    </section>
+
+    <aside class="insp" aria-label="頼む・候補・版">
+      <div class="itabs" role="tablist">
+        <button class="itab" role="tab" data-tab="ask" aria-selected="true"><i data-lucide="wand-sparkles"></i>頼む</button>
+        <button class="itab" role="tab" data-tab="cands" aria-selected="false"><i data-lucide="layout-grid"></i>候補<span class="count" id="cand-count"></span></button>
+        <button class="itab" role="tab" data-tab="versions" aria-selected="false"><i data-lucide="history"></i>版</button>
+      </div>
+
+      <div class="insp-b" data-pane="ask">
+        <div class="sec">
+          <div class="sec-h"><span class="lbl">頼むこと</span></div>
+          <div class="chips" id="process-list"></div>
+          <div class="meta" id="process-hint"></div>
+        </div>
+        <div class="sec" id="input-notes"></div>
+        <div class="sec" id="form"></div>
+      </div>
+      <div class="insp-f" data-pane="ask">
+        <div class="kv">
+          <span class="k">つなぎ先</span><div class="v"><select class="field" id="service"></select></div>
+          <span class="k">枚数</span>
+          <div class="v"><div class="seg" id="count">
+            <button data-n="1" aria-pressed="false">1</button><button data-n="2" aria-pressed="false">2</button>
+            <button data-n="4" aria-pressed="true">4</button><button data-n="6" aria-pressed="false">6</button>
+          </div></div>
+          <span class="k">種（seed）</span>
+          <div class="v"><div class="seg" id="seed-mode">
+            <button data-m="random" aria-pressed="true">乱数</button><button data-m="fixed" aria-pressed="false">固定</button>
+          </div><input class="field num" id="seed" type="number" min="0" step="1" value="0" hidden></div>
+        </div>
+        <div class="meta" id="service-meta"></div>
+        <button class="btn ai block" id="generate"><i data-lucide="sparkles"></i>頼む</button>
+        <div id="progress" class="sec"></div>
+      </div>
+
+      <div class="insp-b" data-pane="cands" hidden>
+        <div class="note" id="cand-help"><i data-lucide="info"></i><span>小さい絵を押すと選べます。2枚まで選んで「比べる」。1枚なら今の絵と比べます。橙の所は人の手の範囲で、元の画素のまま残しています。</span></div>
+        <div id="sets" class="sec"></div>
+      </div>
+
+      <div class="insp-b" data-pane="versions" hidden>
+        <div class="note"><i data-lucide="info"></i><span>このコマに置いたことのある絵です。「見る」で画面に出し、「戻す」でコマの絵をその版にします（取り消せます）。</span></div>
+        <div id="versions" class="vtree"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

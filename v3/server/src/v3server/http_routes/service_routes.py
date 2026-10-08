@@ -20,6 +20,7 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
+from v3server.generation_queue.image_process_registry import SPECS, parse_settings
 from v3server.generation_queue.known_processes import check_process_task
 from v3server.operations.ai_involvement import Task
 from v3server.usage_terms_schema import UsageTerms
@@ -60,6 +61,8 @@ class ServiceProcessBody(BaseModel):
     comfy_workflow: dict[str, Any] | None = None
     comfy_wait_seconds: int | None = Field(default=None, ge=1)
     comfy_check_choices: bool = False
+    # 画像生成の処理（generation_queue/image_process_registry.py）の中身。モデル名・サンプラーなど。処理の形で確かめる
+    comfy_graph_settings: dict[str, Any] | None = None
 
 
 class RouteBody(BaseModel):
@@ -73,6 +76,8 @@ class RouteBody(BaseModel):
 
 SERVICE_FIELDS = ("id", "name", "kind", "location", "adapter", "endpoint", "send_mode", "max_concurrency", "state",
                   "paused", "monthly_budget", "usage_terms")
+SP_FIELDS = ("service_id", "process", "aptitude", "cost_per_call", "model", "comfy_wait_seconds",
+             "comfy_check_choices", "comfy_graph_settings")
 ROUTE_FIELDS = ("process", "service_id", "resend_limit", "regenerate_limit", "ai_task", "ai_action")
 
 
@@ -83,8 +88,7 @@ async def list_services(session: SessionDep, actor: ActorDep):
     routes = (await session.execute(select(ProcessRoute))).scalars().all()
     return {
         "services": [row(s, *SERVICE_FIELDS) for s in services],
-        "processes": [row(sp, "service_id", "process", "aptitude", "cost_per_call", "model",
-                                        "comfy_wait_seconds", "comfy_check_choices") for sp in sps],
+        "processes": [row(sp, *SP_FIELDS) for sp in sps],
         "routes": [row(r, *ROUTE_FIELDS) for r in routes],
     }
 
@@ -126,11 +130,14 @@ async def put_service_process(service_id: str, process: str, body: ServiceProces
     if sp is None:
         sp = ServiceProcess(service_id=service_id, process=process)
         session.add(sp)
+    if body.comfy_graph_settings is not None:
+        if process not in SPECS:
+            raise Invalid(f"comfy_graph_settings は画像生成の処理（{', '.join(SPECS)}）だけに入れる")
+        parse_settings(SPECS[process], body.comfy_graph_settings)
     for k, v in body.model_dump().items():
         setattr(sp, k, v)
     await session.commit()
-    return row(sp, "service_id", "process", "aptitude", "cost_per_call", "model",
-                                        "comfy_wait_seconds", "comfy_check_choices")
+    return row(sp, *SP_FIELDS)
 
 
 @router.put("/routes/{process}")

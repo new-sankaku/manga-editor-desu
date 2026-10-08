@@ -1,8 +1,8 @@
 """文字（吹き出し・ナレーションの箱・描き文字）と、コマの絵の層を、足す・変える操作。抜く・戻すは SetRemoved。
 
 人もAIも同じ操作で変える。値の確かめ（種類・範囲）は誰が出しても同じ。
-違うのは human_hand_guard.py の1か所だけ：人が変えた項目に人の手の印が付き、AIは印の付いた項目を変えられず、
-AIが変えるときはその項目の作業のAIの関与を確かめる。
+違うのは human_hand_guard.py の1か所だけ：人が変えた項目に人の手の印が付き、AIの変更が印の付いた項目に当たると
+その項目は判断待ちに置き（残りは当てる）、AIが変えるときはその項目の作業のAIの関与を確かめる。
 """
 
 from typing import Any, Literal
@@ -178,7 +178,7 @@ class UpdateTextItem(OpBase):
         merged = {k: getattr(item, k) for k in _TEXT_FIELDS} | {k: v for k, v in changes.items() if k != "panel_id"}
         checked = _check_text_values(merged)
         changes = {k: checked.get(k, v) for k, v in changes.items()}
-        before = change_with_human_hand(ctx.actor, item, changes, self.human_hand_fields, work=ctx.work)
+        before = change_with_human_hand(ctx, item, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}
 
 
@@ -265,5 +265,5 @@ class UpdatePanelLayer(OpBase):
                                                              changes.get("image_id", layer.image_id))
         if ctx.actor.kind == "ai" and (layer.role == "human_hand" or changes.get("role") == "human_hand"):
             raise Invalid("人の手の層はAIが変えられない")
-        before = change_with_human_hand(ctx.actor, layer, changes, self.human_hand_fields, work=ctx.work)
+        before = change_with_human_hand(ctx, layer, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}

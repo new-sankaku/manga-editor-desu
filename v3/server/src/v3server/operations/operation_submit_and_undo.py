@@ -4,7 +4,8 @@
 1. 作品の行を FOR UPDATE で取る（作品ごとに書き込みは1本。V3ハーネス設計 9.3）
 2. 権限を確かめる（AIは頼んだ人の権限）。AIが出せない操作（ai_may_submit が無い）はここで止める
 3. ロックを確かめる
-4. 正本を変え、出来事を1件追記する
+4. 正本を変え、出来事を1件追記する。AIの変更が人の手の所に当たって判断待ちに置いた分は、出来事に残して返す
+   （human_hand_guard.py）。取り消すと、まだ決めていない判断待ちを下げる
 5. 権限の組（OpenFGA）を書き、確定する。確定に失敗したら書いた組を戻す
 """
 
@@ -18,6 +19,7 @@ from v3server.canonical_tables.event_and_lock_tables import Event, Lock
 from v3server.canonical_tables.work_tree_tables import Work
 from v3server.openfga_permissions import Authz
 from v3server.operations.all_operation_types import op_adapter
+from v3server.operations.human_hand_guard import inverse_with_held
 from v3server.operations.operation_base import ApplyContext, OpBase
 from v3server.request_actor import Actor
 from v3server.v3_error_types import Forbidden, Locked, NotFound, NotUndoable
@@ -38,6 +40,7 @@ def append_event(
     payload: dict[str, Any],
     inverse: dict[str, Any] | None = None,
     undoes_event_id: str | None = None,
+    held_changes: list[dict[str, Any]] | None = None,
 ) -> Event:
     """出来事を1件足す。呼ぶ前に lock_work で作品の行を取っておくこと。"""
     work.head_seq += 1
@@ -51,6 +54,7 @@ def append_event(
         payload=payload,
         inverse=inverse,
         undoes_event_id=undoes_event_id,
+        held_changes=held_changes or None,
     )
     session.add(event)
     return event
@@ -105,9 +109,9 @@ async def submit(
             raise locked_error(lock)
 
         ctx = ApplyContext(session=session, work=work, actor=actor)
-        inverse = await op.apply(ctx)
+        inverse = inverse_with_held(ctx, await op.apply(ctx))
         event = append_event(
-            session, work, actor, op.type, op.model_dump(mode="json"), inverse, undoes_event_id
+            session, work, actor, op.type, op.model_dump(mode="json"), inverse, undoes_event_id, ctx.held_changes
         )
         await session.flush()
     except Exception:

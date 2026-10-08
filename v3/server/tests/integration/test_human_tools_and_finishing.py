@@ -134,6 +134,46 @@ async def test_トーンと図形_動かさない_まとめて戻す_AIが人の
     assert (await op(api, wid, a, {"type": "update_page_item", "id": tone, "opacity": 0.5})).status_code == 200
 
 
+async def test_新しい操作でも_AIの変更が人の手の所に当たるとその項目だけ判断待ちにし_取り消すと下がる(api, authz):
+    a = user()
+    ids = await framed_page(api, a, texts=("1",))
+    wid = ids["work"]
+    await allow_ai(api, wid, a, "finishing")
+    shape = uuid.uuid4().hex
+    spec = {"kind": "symbol", "symbol_name": "星", "points_mm": [[0, 0], [10, 0], [5, 8]],
+            "stroke": {"color": "#000000", "width_mm": 0.3}}
+    await ai_op(authz, wid, a, {"type": "add_page_item", "id": shape, "page_id": ids["page1"], "item_kind": "shape",
+                                "spec": spec, "box_mm": [10, 10, 20, 18], "stack_order": 1})
+    # 人が不透明度だけ直す（人の手の印が付く）
+    assert (await op(api, wid, a, {"type": "update_page_item", "id": shape, "opacity": 0.8})).status_code == 200
+
+    async def item():
+        return next(x for x in (await work_json(api, wid, a))["page_items"] if x["id"] == shape)
+
+    async def open_held():
+        return [x for x in (await api.get(f"/works/{wid}/held-changes", headers=h(a))).json() if x["target_id"] == shape]
+
+    visible = (await item())["visible"]
+    ev = await ai_op(authz, wid, a, {"type": "update_page_item", "id": shape, "opacity": 0.3, "visible": not visible})
+    assert [(x["target_table"], x["target_id"], x["field"]) for x in ev.held_changes] == [
+        ("page_items", shape, "opacity")]
+    (listed,) = (await api.get(f"/works/{wid}/events", headers=h(a), params={"after": ev.seq - 1})).json()
+    assert listed["held_changes"] == ev.held_changes
+    assert ((await item())["opacity"], (await item())["visible"]) == (0.8, not visible)
+    (held,) = await open_held()
+    assert (held["field"], held["proposed_value"], held["current_value"]) == ("opacity", 0.3, 0.8)
+
+    # 取り消すと判断待ちは下がり、やり直すと開き直す
+    r = await undo(api, wid, a, ev.id)
+    assert (await item())["visible"] == visible and await open_held() == []
+    await undo(api, wid, a, r["event_id"])
+    assert (await item())["visible"] == (not visible) and [x["id"] for x in await open_held()] == [held["id"]]
+    # 採らない
+    r = await op(api, wid, a, {"type": "resolve_held_change", "id": held["id"], "decision": "reject"})
+    assert r.status_code == 200, r.text
+    assert await open_held() == [] and (await item())["opacity"] == 0.8
+
+
 async def test_文字の書体_飾り_ルビ_角度_フキダシの形(api, authz):
     a = user()
     ids = await framed_page(api, a, texts=("ことば",))

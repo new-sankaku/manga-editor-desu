@@ -31,7 +31,7 @@ from v3server.operations.ai_involvement import (
 )
 from v3server.operations.human_hand_guard import (
     drop_unchanged,
-    split_ai_proposal_changes,
+    split_held_changes,
 )
 from v3server.operations.text_and_layer_operations import TextItemValues
 from v3server.panel_layout.tier_ratio_layout import LayoutInputError, layout_draft
@@ -195,11 +195,11 @@ def test_同じ値は変更に数えない():
     assert drop_unchanged(row, {"order": 2}) == {"order": 2}
 
 
-def test_AIの案は人の手の所に当たる分を分けて返す():
+def test_AIの変更は人の手の所に当たる分を分けて返す():
     row = Panel(human_hand_fields=["frame"], human_confirmed=False)
-    assert split_ai_proposal_changes(row, {"frame": {}, "content": {}}) == ({"content": {}}, {"frame": {}})
+    assert split_held_changes(row, {"frame": {}, "content": {}}) == ({"content": {}}, {"frame": {}})
     confirmed = Panel(human_hand_fields=[], human_confirmed=True)
-    assert split_ai_proposal_changes(confirmed, {"content": {}}) == ({}, {"content": {}})
+    assert split_held_changes(confirmed, {"content": {}}) == ({}, {"content": {}})
 
 
 # ---------------------------------------------------------------- 値の形（人もAIも同じに確かめる）

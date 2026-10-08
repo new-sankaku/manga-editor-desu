@@ -31,7 +31,6 @@ from v3server.server_settings import get_settings
 from v3server.v3_error_types import (
     AiInvolvementRefused,
     Forbidden,
-    HumanHandProtected,
     Invalid,
 )
 
@@ -126,9 +125,9 @@ async def test_人が文字を足し_直し_抜き_取り消せる_検査も同�
     chars = next(x for x in run["report"]["results"] if x["check_id"] == "balloon_chars")
     assert chars["status"] == "閾値未設定" and chars["value"] is not None
 
-    # AIは人が直した項目を変えられない
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "update_text_item", "id": balloon["id"], "text": "AI"})
+    # AIは人が直した項目を書かず、判断待ちに置く
+    ev = await ai_op(authz, wid, a, {"type": "update_text_item", "id": balloon["id"], "text": "AI"})
+    assert [x["field"] for x in ev.held_changes] == ["text"]
     # 抜いて戻す。直したのを取り消すと元に戻る
     assert (await op(api, wid, a, {"type": "set_removed", "target_kind": "text_item", "id": sfx,
                                    "removed": True})).status_code == 200
@@ -136,6 +135,55 @@ async def test_人が文字を足し_直し_抜き_取り消せる_検査も同�
     assert r.status_code == 200, r.text
     item = next(t for t in (await work_json(api, wid, a))["text_items"] if t["id"] == balloon["id"])
     assert item["text"] == "1" and "box_mm" not in item["human_hand_fields"]
+
+
+async def open_held(api, wid, a) -> list[dict]:
+    return (await api.get(f"/works/{wid}/held-changes", headers=h(a))).json()
+
+
+async def test_前からある操作でも_AIの変更が人の手の所に当たるとその項目だけ判断待ちにし_残りは当てる(api, authz):
+    a = user()
+    ids = await setup_name(api, a)
+    wid = ids["work"]
+    w = await work_json(api, wid, a)
+    panel1 = min(live(w["panels"], page_id=ids["page1"]), key=lambda p: p["order"])
+    (balloon,) = live(w["text_items"], panel_id=panel1["id"])
+    # セリフにだけ人の手の印を残す
+    assert (await op(api, wid, a, {"type": "update_text_item", "id": balloon["id"],
+                                   "human_hand_fields": ["text"]})).status_code == 200
+    await allow_ai(api, wid, a, "name", "finishing")
+
+    # AIがセリフ（印あり）と不透明度（印なし）を1回で変える。不透明度は当て、セリフは判断待ち
+    ev = await ai_op(authz, wid, a, {"type": "update_text_item", "id": balloon["id"], "text": "AIのセリフ",
+                                     "opacity": 0.5})
+    assert [(x["target_table"], x["target_id"], x["field"]) for x in ev.held_changes] == [
+        ("text_items", balloon["id"], "text")]
+    # 出来事の一覧にも残る
+    (listed,) = (await api.get(f"/works/{wid}/events", headers=h(a), params={"after": ev.seq - 1})).json()
+    assert listed["id"] == ev.id and listed["held_changes"] == ev.held_changes
+
+    async def item():
+        return next(t for t in (await work_json(api, wid, a))["text_items"] if t["id"] == balloon["id"])
+
+    now = await item()
+    assert (now["text"], now["opacity"], now["human_hand_fields"]) == (balloon["text"], 0.5, ["text"])
+    (held,) = await open_held(api, wid, a)
+    assert (held["id"], held["field"], held["proposed_value"], held["current_value"]) == (
+        ev.held_changes[0]["id"], "text", "AIのセリフ", balloon["text"])
+
+    # 取り消すと、当てた項目が戻り、判断待ちは下がる。やり直すと、当てた項目も判断待ちも戻る
+    r = await api.post(f"/works/{wid}/events/{ev.id}/undo", headers=h(a))
+    assert r.status_code == 200, r.text
+    assert (await item())["opacity"] == balloon["opacity"] and await open_held(api, wid, a) == []
+    r = await api.post(f"/works/{wid}/events/{r.json()['event_id']}/undo", headers=h(a))
+    assert r.status_code == 200, r.text
+    assert (await item())["opacity"] == 0.5 and [x["id"] for x in await open_held(api, wid, a)] == [held["id"]]
+
+    # 人が採ると、その値が人の判断として入る
+    r = await op(api, wid, a, {"type": "resolve_held_change", "id": held["id"], "decision": "accept"})
+    assert r.status_code == 200, r.text
+    now = await item()
+    assert now["text"] == "AIのセリフ" and "text" in now["human_hand_fields"]
 
 
 async def test_AIの案が人の直した所に当たると判断待ちになり_人が採る_採らない_戻すを選べる(api, authz):
@@ -162,6 +210,8 @@ async def test_AIの案が人の直した所に当たると判断待ちになり
                                 "pages": [page]})
     r = await op(api, wid, a, {"type": "apply_name_proposal", "id": prop})
     assert r.status_code == 200, r.text
+    # 判断待ちに置いた項目は、操作の返事で呼んだ側に返る
+    assert [(x["target_id"], x["field"]) for x in r.json()["held_changes"]] == [(balloon["id"], "text")]
     texts = {t["id"]: t["text"] for t in (await work_json(api, wid, a))["text_items"]}
     assert texts[balloon["id"]] == "人のセリフ" and "AI2" in texts.values()
     (held,) = (await api.get(f"/works/{wid}/held-changes", headers=h(a))).json()
@@ -388,8 +438,8 @@ async def test_絵の切り抜きと置き場と層を人が直し_AIは人の�
     panel = next(p for p in (await work_json(api, wid, a))["panels"] if p["id"] == pid)
     assert panel["image_placement"]["crop_px"] == [4, 2, 60, 30] and "image_placement" in panel["human_hand_fields"]
     await allow_ai(api, wid, a, "drawing")
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "image_placement": None})
+    ev = await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "image_placement": None})
+    assert [x["field"] for x in ev.held_changes] == ["image_placement"]
 
     # 層：線画とトーンを重ね、順・見せるか・不透明度を変え、取り消す
     line, tone_layer = uuid.uuid4().hex, uuid.uuid4().hex
@@ -405,10 +455,10 @@ async def test_絵の切り抜きと置き場と層を人が直し_AIは人の�
     assert (await api.post(f"/works/{wid}/events/{r.json()['event_id']}/undo", headers=h(a))).status_code == 200
     layer = next(x for x in (await work_json(api, wid, a))["panel_layers"] if x["id"] == tone_layer)
     assert (layer["stack_order"], layer["visible"], layer["opacity"]) == (1, True, 0.5)
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "update_panel_layer", "id": tone_layer, "opacity": 0.1})
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "set_removed", "target_kind": "panel_layer", "id": line, "removed": True})
+    ev = await ai_op(authz, wid, a, {"type": "update_panel_layer", "id": tone_layer, "opacity": 0.1})
+    assert [x["field"] for x in ev.held_changes] == ["opacity"]
+    ev = await ai_op(authz, wid, a, {"type": "set_removed", "target_kind": "panel_layer", "id": line, "removed": True})
+    assert [x["field"] for x in ev.held_changes] == ["removed"]
     assert (await op(api, wid, a, {"type": "update_panel_layer", "id": tone_layer, "opacity": 2})).status_code == 422
     prov = (await api.get(f"/works/{wid}/episodes/{ids['episode']}/image-provenance", headers=h(a))).json()
     assert [x["used_as"] for x in prov] == ["panel_image", "layer", "layer"]

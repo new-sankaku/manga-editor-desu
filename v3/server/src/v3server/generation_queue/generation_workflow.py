@@ -4,6 +4,9 @@
 - 「1件ずつ」「同時にN件まで」は、つなぎ先ごとの待ち行列の作業者の同時実行数で決まる（generation_queue/queue_worker_main.py）
 - 休ませたつなぎ先は作業者を止めるので、頼んだものは待ち行列に残り、戻すと順に送られる
 - 失敗したとき、別のつなぎ先へは回さない（方針7）
+- 依頼を受ける口（job_start_and_control.enqueue）は、流れを始めるのと一緒に until_queued を送り、送信をつなぎ先の
+  待ち行列に入れ終えてから返す。同じ扱いの依頼を頼んだ順に送るため（V3細部の決めごと 4.4）。流れを始めただけで返すと、
+  続けて頼んだ依頼の送信が、制御の作業者と Temporal の中で前後して待ち行列に入る（2026-10-08 実測。V3サーバーの土台 7章）
 """
 
 import asyncio
@@ -36,6 +39,12 @@ class JobInput:
 class GenerationJob:
     def __init__(self) -> None:
         self._resumed = False
+        self._queued = False
+
+    @workflow.update
+    async def until_queued(self) -> None:
+        """送信をつなぎ先の待ち行列に入れるまで待つ。"""
+        await workflow.wait_condition(lambda: self._queued)
 
     @workflow.signal
     def resume(self) -> None:
@@ -56,7 +65,7 @@ class GenerationJob:
         try:
             while True:
                 try:
-                    await workflow.execute_activity(
+                    sending = workflow.start_activity(
                         "call_service",
                         inp.job_id,
                         task_queue=service_queue(inp.service_id),
@@ -73,6 +82,9 @@ class GenerationJob:
                         ),
                         priority=job_priority(inp.requested_via, inp.work_id),
                     )
+                    # 送信を待ち行列に入れる指示と until_queued の返事は、同じワークフロータスクの結果として一緒に Temporal に渡る
+                    self._queued = True
+                    await sending
                     return "done"
                 except ActivityError as e:
                     cause = e.cause

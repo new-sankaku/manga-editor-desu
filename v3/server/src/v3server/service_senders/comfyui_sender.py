@@ -4,6 +4,8 @@ request の形
 - overrides: {ノード番号: {入力名: 値}}。手順の中の値を差し替える
 - register: {"role": 絵の役目, "page_id": ページ, "panel_id": コマ, "based_on_image_id": 元の版}。受け取った絵を登録するときの引数
   （role は必須。ほかは省ける。登録は generation_queue/service_call_activity.py が行う）
+- image_process: 画像生成の処理（generation_queue/image_process_registry.py）。あれば手順は保存した物（comfy_workflow）を使わず、
+  処理の build でその場で組む。中身は ServiceProcess.comfy_graph_settings。overrides は使えない
 - prepared_inputs: 依頼を受けたときにサーバーが書いた、上げる絵の一覧（generation_queue/input_image_preparation.py）。
   各絵を置き場から読んで /upload/image に上げ（type=input、overwrite=true）、返ってきた名前を node・input に入れる。
   /upload/image の 4xx は refused、5xx は transport
@@ -26,7 +28,9 @@ from typing import Any
 import httpx
 
 from v3server.canonical_tables.service_and_job_tables import Service, ServiceProcess
+from v3server.generation_queue.image_process_registry import build_prompt
 from v3server.image_file_storage import read_image
+from v3server.v3_error_types import Invalid
 from v3server.service_senders.sender_result_types import (
     AdapterError,
     AdapterResult,
@@ -200,7 +204,10 @@ async def _fetch_images(client: httpx.AsyncClient, images: list[dict[str, Any]])
 def _validate_request(service: Service, sp: ServiceProcess, request: dict[str, Any]) -> None:
     if service.endpoint is None:
         raise AdapterError("refused", f"{service.name} に住所が無い")
-    if sp.comfy_workflow is None:
+    if "image_process" in request:
+        if request.get("overrides"):
+            raise AdapterError("refused", "画像生成の処理（image_process）に overrides は使えない（引数で渡す）")
+    elif sp.comfy_workflow is None:
         raise AdapterError("refused", f"{service.name} の {sp.process} に手順が無い")
     if sp.comfy_wait_seconds is None:
         raise AdapterError("refused", f"{service.name} の {sp.process} に待ちの上限（comfy_wait_seconds）が決まっていない")
@@ -263,11 +270,19 @@ async def _wait_history(client: httpx.AsyncClient, prompt_id: str, limit: float)
 async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, Any]) -> AdapterResult:
     """画像。手元の ComfyUI の /prompt に手順を送り、/history で終わりを待ち、/view で絵を受け取る。"""
     _validate_request(service, sp, request)
-    prompt = {k: {**v, "inputs": dict(v.get("inputs", {}))} for k, v in sp.comfy_workflow.items()}
-    for node_id, inputs in request.get("overrides", {}).items():
-        if node_id not in prompt:
-            raise AdapterError("refused", f"手順にノード {node_id} が無い")
-        prompt[node_id]["inputs"].update(inputs)
+    ip = request.get("image_process")
+    if ip is not None:
+        try:
+            prompt = build_prompt(ip["name"], sp.comfy_graph_settings, ip["params"], ip["seed"], ip["prepared"],
+                                  f"v3_{ip['name']}")
+        except Invalid as e:
+            raise AdapterError("refused", str(e)) from e
+    else:
+        prompt = {k: {**v, "inputs": dict(v.get("inputs", {}))} for k, v in sp.comfy_workflow.items()}
+        for node_id, inputs in request.get("overrides", {}).items():
+            if node_id not in prompt:
+                raise AdapterError("refused", f"手順にノード {node_id} が無い")
+            prompt[node_id]["inputs"].update(inputs)
 
     prompt_id: str | None = None
     try:
@@ -306,5 +321,6 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
     return AdapterResult(
         output={"prompt_id": prompt_id, "images": images, "uploaded_inputs": uploaded},
         image_files=files,
-        settings=request.get("overrides", {}),
+        settings=ip["params"] if ip is not None else request.get("overrides", {}),
+        seed=ip["seed"] if ip is not None else None,
     )

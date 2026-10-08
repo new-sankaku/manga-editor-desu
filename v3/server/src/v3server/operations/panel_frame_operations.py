@@ -133,9 +133,8 @@ class _Plan:
             refuse_if_fixed(o)
         rc = RowChanges(ctx)
         if ctx.actor.kind == "ai" and self.touched_human_hand():
-            held_id = hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0],
-                                        "人の手の印の付いたコマ・文字に当たる")
-            rc.before = {"held_ai_changes": {held_id: {"status": "withdrawn"}}}
+            # 何も変えない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
+            hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0], "人の手の印の付いたコマ・文字に当たる")
             return rc.inverse(page_ids, label)
         for o, values, keep_marks in self.changes:
             if keep_marks:

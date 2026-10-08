@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, Node
+from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, Node, NodeOutput
 
 
 class ControlKind(Enum):
@@ -51,24 +51,30 @@ def insert_control(graph: ComfyNodeGraph, sampler: Node, control: ControlSetting
     奥行き・線画（p18）：壁・床・机・道の並びは向きを変えても揃うが、壁に何を描くかは揃わない。
     線画（p20）：線画から作ったトーンの絵に、特徴の言葉の色が漏れた。
     """
-    cn = graph.add('ControlNetLoader', control_net_name=control.controlnet_name)
-    cn_out = cn[0]
+    image = graph.add('LoadImage', image=image_name)
+    apply = control_conditioning(graph, graph.input_link(sampler, 'positive'), graph.input_link(sampler, 'negative'),
+                                 control, image[0])
+    graph.connect(sampler, 'positive', apply[0])
+    graph.connect(sampler, 'negative', apply[1])
+    return apply
+
+
+def control_conditioning(graph: ComfyNodeGraph, positive: NodeOutput, negative: NodeOutput,
+                         control: ControlSettings, image_out: NodeOutput) -> Node:
+    """positive・negative に制御を掛けた ControlNetApplyAdvanced のノード（[0] が positive、[1] が negative）。
+    insert_control と、画像生成の処理（generation_queue/image_process_registry.py）の両方が使う。"""
+    cn_out = graph.add('ControlNetLoader', control_net_name=control.controlnet_name)[0]
     if control.union_type is not None:
         cn_out = graph.add('SetUnionControlNetType', control_net=cn_out, type=control.union_type)[0]
-    image = graph.add('LoadImage', image=image_name)
-    image_out = image[0]
     if control.invert_image:
         image_out = graph.add('ImageInvert', image=image_out)[0]
-    apply = graph.add(
+    return graph.add(
         'ControlNetApplyAdvanced',
-        positive=graph.input_link(sampler, 'positive'),
-        negative=graph.input_link(sampler, 'negative'),
+        positive=positive,
+        negative=negative,
         control_net=cn_out,
         image=image_out,
         strength=control.strength,
         start_percent=control.start_percent,
         end_percent=control.end_percent,
     )
-    graph.connect(sampler, 'positive', apply[0])
-    graph.connect(sampler, 'negative', apply[1])
-    return apply

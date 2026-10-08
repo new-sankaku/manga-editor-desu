@@ -5,7 +5,7 @@
 - PenStroke：ペンの線（人の手の層ごと。点・筆圧・時刻・筆・太さ・色・種）。線が正本で、層の絵は線から作った控え
 - PanelTemplate：コマの型（作品ごとに人が保存した枠の並び）
 
-どれも人が直せる。人が変えた項目には人の手の印が付き、AIは変えられない（operations/human_hand_guard.py）。
+どれも人が直せる。人が変えた項目には人の手の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。
 """
 
 from datetime import datetime

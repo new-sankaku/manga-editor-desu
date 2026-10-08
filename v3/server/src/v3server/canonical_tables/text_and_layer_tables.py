@@ -1,5 +1,5 @@
 """コマの中の文字（吹き出し・ナレーションの箱・描き文字）と、コマの絵の層と、人の手の範囲（AIが描き直さない所）。
-どれも人が直接直せる。人が変えた項目には人の手の印が付き、AIは変えられない（operations/human_hand_guard.py）。"""
+どれも人が直接直せる。人が変えた項目には人の手の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。"""
 
 from datetime import datetime
 from typing import Any

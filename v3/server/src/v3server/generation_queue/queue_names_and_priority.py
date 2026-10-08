@@ -17,6 +17,9 @@ PRIORITY_KEY = {"human": 1, "ai": 3}
 # 制限に当たったとき、提供元が待ち時間を返さなかった場合に待つ時間
 RATE_LIMIT_WAIT = timedelta(seconds=30)
 
+# 依頼を受ける口が、送信をつなぎ先の待ち行列に入れ終えるまで待つ長さ。超えたら制御の作業者が動いていないとして依頼を止める
+QUEUE_ENTRY_WAIT = timedelta(seconds=30)
+
 
 def service_queue(service_id: str) -> str:
     return f"v3-service-{service_id}"

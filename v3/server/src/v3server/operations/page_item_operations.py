@@ -1,7 +1,7 @@
 """トーン・集中線・スピード線と、図形・絵記号（PageItem）を置く・変える操作。
 人の「動かさない」（SetFixed）と、仕上げをまとめて外す（ResetAdjustments）も、ここに置く。
 
-AIが人の手の印の付いた項目に当たったときは、断らずに判断待ちに置き、残りを当てる（RowChanges.change_or_hold）。
+AIが人の手の印の付いた項目に当たったときは、断らずに判断待ちに置き、残りを当てる（human_hand_guard.py。どの操作も同じ）。
 """
 
 from typing import Any, Literal
@@ -149,7 +149,7 @@ class UpdatePageItem(OpBase):
         if "adjustments" in changes:
             changes["adjustments"] = checked_adjustments(changes["adjustments"])
         rc = RowChanges(ctx)
-        rc.change_or_hold(item, changes, item.page_id)
+        rc.change(item, changes)
         return rc.inverse([item.page_id], "トーン・図形を変えた取り消し")
 
 
@@ -218,5 +218,5 @@ class ResetAdjustments(OpBase):
             raise Invalid("外す仕上げが無い")
         rc = RowChanges(ctx)
         for o in objs:
-            rc.change_or_hold(o, {"adjustments": []}, page_id)
+            rc.change(o, {"adjustments": []})
         return rc.inverse([page_id], "仕上げをまとめて外した取り消し")

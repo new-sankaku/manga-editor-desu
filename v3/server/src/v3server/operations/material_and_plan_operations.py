@@ -110,7 +110,7 @@ class SetWorkPlan(OpBase):
             rc.before["work_plans"] = {plan.id: {"synopsis": None, "audience": None, "exclusions": [], "notes": None,
                                                  "human_hand_fields": []}}
         else:
-            rc.change_or_hold(plan, changes, None)
+            rc.change(plan, changes)
         return rc.inverse([], "企画を変えた取り消し")
 
 
@@ -176,7 +176,7 @@ class UpdateMaterialEntry(OpBase):
         changes = {k: checked[k] for k in changes}
         await _check_images(ctx.session, ctx.work.id, changes)
         rc = RowChanges(ctx)
-        rc.change_or_hold(entry, changes, None)
+        rc.change(entry, changes)
         return rc.inverse([], "設定資料を変えた取り消し")
 
 

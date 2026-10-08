@@ -74,3 +74,19 @@ def build_text_to_image(
     decoded = g.add('VAEDecode', samples=sampler[0], vae=ckpt[2])
     save = g.add('SaveImage', images=decoded[0], filename_prefix=filename_prefix)
     return TextToImageGraph(g, ckpt, pos, neg, sampler, decoded, save)
+
+
+def build_text_to_image_process(settings: 'DiffusionSettings', positive_text: str, negative_text: str, seed: int,
+                                width: int, height: int, extras: 'Extras', filename_prefix: str) -> ComfyNodeGraph:
+    """画像生成の処理「文から作る」（generation_queue/image_process_registry.py）の手順。
+    上の build_text_to_image と同じ形で、モデルの読み方（checkpoint か別々のファイルか）と追加学習を中身から決める。"""
+    from v3server.comfy_graphs.model_loader_nodes import add_model_loaders, add_sampler, add_text_and_extras
+    from v3server.comfy_graphs.source_and_masks import save
+
+    g = ComfyNodeGraph()
+    m = add_model_loaders(g, settings)
+    model, pos, neg = add_text_and_extras(g, m, positive_text, negative_text, extras)
+    latent = g.add('EmptyLatentImage', width=width, height=height, batch_size=1)[0]
+    sampled = add_sampler(g, settings.sampler, model, pos, neg, latent, seed, 1.0)
+    save(g, g.add('VAEDecode', samples=sampled, vae=m.vae)[0], filename_prefix)
+    return g

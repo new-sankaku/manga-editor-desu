@@ -30,9 +30,8 @@ from v3server.operations.ai_involvement import (
 from v3server.operations.human_hand_guard import (
     change_with_human_hand,
     drop_unchanged,
-    hold_ai_changes,
     is_human_held,
-    split_ai_proposal_changes,
+    remove_or_hold,
 )
 from v3server.operations.name_draft_conversion import (
     BALLOON_ITEM_KINDS,
@@ -126,7 +125,6 @@ class _Applier:
         self.mark_human = ctx.actor.kind == "human" and prop.made_by in ("human", "imported")
         self.snapshot: dict[str, Any] = {"pages": {}, "panels": {}, "text_items": {}, "created_pages": [],
                                          "created_panels": [], "created_text_items": []}
-        self.held: list[str] = []
 
     def remember(self, kind: str, obj, fields: tuple[str, ...]) -> None:
         self.snapshot[kind].setdefault(obj.id, {k: getattr(obj, k) for k in fields})
@@ -137,19 +135,14 @@ class _Applier:
         fields = {k: v for k, v in fields.items() if v is not None} if new else drop_unchanged(obj, fields)
         if not fields:
             return
-        if self.hold:
-            fields, held = split_ai_proposal_changes(obj, fields)
-            self.held += hold_ai_changes(self.ctx.session, self.ctx.work.id, obj, page_id, held, self.prop.id)
-        if fields:
-            change_with_human_hand(self.ctx.actor, obj, fields, mark_as_human=self.mark_human, work=self.ctx.work)
+        # 人の手の所は書かずに判断待ちへ（human_hand_guard.py。直接の操作と同じ所を通る）
+        change_with_human_hand(self.ctx, obj, fields, mark_as_human=self.mark_human, ai_change=self.hold,
+                               proposal_id=self.prop.id, page_id=page_id)
 
     def remove(self, obj, page_id: str) -> None:
-        if self.hold and is_human_held(obj):
-            self.held += hold_ai_changes(self.ctx.session, self.ctx.work.id, obj, page_id, {"removed": True},
-                                         self.prop.id)
-            return
-        require_actor_may(self.ctx.actor, self.ctx.work, ROW_TASK[obj.__tablename__], "decide")
-        obj.removed = True
+        if not (self.hold and is_human_held(obj)):
+            require_actor_may(self.ctx.actor, self.ctx.work, ROW_TASK[obj.__tablename__], "decide")
+        remove_or_hold(self.ctx, obj, True, ai_change=self.hold, proposal_id=self.prop.id, page_id=page_id)
 
     async def create(self, kind: str, obj) -> None:
         require_actor_may(self.ctx.actor, self.ctx.work, ROW_TASK[obj.__tablename__], "decide")
@@ -233,9 +226,10 @@ class ApplyNameProposal(OpBase):
         prop.status = "applied"
         await ctx.session.flush()
         undo = {"type": "restore_name_snapshot", "proposal_id": self.id, "snapshot": a.snapshot}
-        if a.held:
-            # 判断待ちに置いた行（取り消しの操作と一緒に出来事へ残す）
-            undo["held_change_ids"] = a.held
+        held = [x["id"] for x in ctx.held_changes if x["proposal_id"] == prop.id]
+        if held:
+            # 案の採用で置いた判断待ちは、この取り消しが下げる（窓口の包みには入れない。human_hand_guard.inverse_with_held）
+            undo["held_change_ids"] = held
         return undo
 
 

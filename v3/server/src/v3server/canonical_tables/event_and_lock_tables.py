@@ -38,6 +38,8 @@ class Event(Base):
     payload: Mapped[dict[str, Any]] = mapped_column()
     # 取り消すときに流す操作。取り消せない出来事（ロックなど）は空
     inverse: Mapped[dict[str, Any] | None] = mapped_column()
+    # この操作で置いた判断待ち（AIの変更が人の手の所に当たった分。id・表・行・項目）。無ければ空
+    held_changes: Mapped[list[Any] | None] = mapped_column()
     # この出来事が取り消した出来事
     undoes_event_id: Mapped[str | None] = mapped_column(ForeignKey("events.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

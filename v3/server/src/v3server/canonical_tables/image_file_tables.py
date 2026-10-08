@@ -4,7 +4,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from v3server.canonical_tables.table_base import Base, new_id
@@ -41,6 +41,8 @@ class ImageFile(Base):
     dpi: Mapped[int | None] = mapped_column(Integer)
     # 生成の設定（モデル・seed など）や、取り込んだときの付帯の情報
     details: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    # 候補を人が却下した印（operations/image_candidate_operations.py の SetImageDiscarded）。絵は消さない
+    discarded: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

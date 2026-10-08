@@ -37,6 +37,8 @@ class ApplyContext:
     actor: Actor
     tuple_writes: list[Tuple] = field(default_factory=list)
     tuple_deletes: list[Tuple] = field(default_factory=list)
+    # この操作で置いた判断待ち（AIの変更が人の手の所に当たった分）。積むのは human_hand_guard.py だけ
+    held_changes: list[dict[str, Any]] = field(default_factory=list)
 
 
 async def get_in_work(session: AsyncSession, model, obj_id: str, work_id: str):

@@ -36,7 +36,7 @@ router = APIRouter()
 
 IMAGE_FIELDS = ("id", "page_id", "panel_id", "role", "origin", "job_id", "based_on_image_id", "source_note",
                 "usage_terms", "registered_by_kind", "registered_by_id", "sha256", "media_type", "width", "height", "dpi",
-                "details", "created_at")
+                "details", "discarded", "created_at")
 HumanOrigin = Literal["human_drawn", "imported", "human_edited"]
 
 

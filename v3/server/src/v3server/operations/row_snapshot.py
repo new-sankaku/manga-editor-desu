@@ -1,7 +1,7 @@
 """いくつもの行を1回で変える操作（コマを分ける・合わせる・型を当てる・置き換え・ペン・PSD の戻しなど）を、1回で取り消すための部品。
 
 - RowChanges：操作の中で行を変える・足すときに使う。変える前の値を覚え、取り消しの操作（RestoreRows）を組む。
-  項目を変えるのは human_hand_guard.change_with_human_hand を通す（人の手の印・動かさない・AIの関与が同じにかかる）
+  項目を変えるのは human_hand_guard.change_with_human_hand を通す（人の手の印・判断待ち・動かさない・AIの関与が同じにかかる）
 - RestoreRows：覚えた値に戻す操作。戻す前の値を覚えて、同じ形の操作を取り消しとして返すので、取り消しの取り消しもできる
 
 戻す操作は人だけが出せる（AIが出すと、人の手の印の付いた値を前の値に戻せてしまうため）。
@@ -23,7 +23,7 @@ from v3server.canonical_tables.text_and_layer_tables import (
     TextItem,
 )
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from v3server.operations.human_hand_guard import change_or_hold, change_with_human_hand, json_value, refuse_if_fixed
+from v3server.operations.human_hand_guard import change_with_human_hand, json_value, refuse_if_fixed
 from v3server.operations.operation_base import ApplyContext, OpBase, Scope, page_obj, work_obj
 from v3server.v3_error_types import Invalid, NotFound
 
@@ -42,22 +42,12 @@ class RowChanges:
             row.setdefault(f, json_value(getattr(obj, f)))
 
     def change(self, obj, changes: dict[str, Any], mark_as_human: bool | None = None) -> None:
-        """人の手の印を付けて変える（AIなら印を外す）。"""
+        """人の手の印を付けて変える（AIなら印を外す）。AIが人の手の印の付いた項目に当たったら、その項目は判断待ちに置いて
+        残りを変える（human_hand_guard.py）。"""
         if not changes:
             return
         self._remember(obj, [*changes, "human_hand_fields"])
-        change_with_human_hand(self.ctx.actor, obj, changes, mark_as_human=mark_as_human, work=self.ctx.work)
-
-    def change_or_hold(self, obj, changes: dict[str, Any], page_id: str | None) -> list[str]:
-        """人なら change と同じ。AIが人の手の印の付いた項目に当たったら、その項目は判断待ちに置いて残りを変える。
-        置いた判断待ちは、取り消すと withdrawn（下げた）になる。"""
-        if not changes:
-            return []
-        self._remember(obj, [*changes, "human_hand_fields"])
-        _, held_ids = change_or_hold(self.ctx, obj, changes, page_id)
-        for hid in held_ids:
-            self.before.setdefault("held_ai_changes", {})[hid] = {"status": "withdrawn"}
-        return held_ids
+        change_with_human_hand(self.ctx, obj, changes, mark_as_human=mark_as_human)
 
     def set_plain(self, obj, changes: dict[str, Any]) -> None:
         """人の手の印を持たない表の項目（状態・抜いた印）を変える。"""

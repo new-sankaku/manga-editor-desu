@@ -65,22 +65,26 @@ async def test_人が変えた項目はAIが変えられず_ほかの項目は�
     assert panel["human_hand_fields"] == ["frame", "order"]
     await allow_ai(api, wid, a, "name", "panel_layout")
 
-    # 人が引いた枠をAIは変えられない。中身は変えられる
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "frame": {"polygon_mm": [[0, 0], [1, 0], [1, 1]],
-                                                                               "bleeds": False}})
+    # 人が引いた枠をAIは書かずに判断待ちに置く。中身は変えられる
+    ev = await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "frame": {"polygon_mm": [[0, 0], [1, 0], [1, 1]],
+                                                                                "bleeds": False}})
+    assert [(x["target_id"], x["field"]) for x in ev.held_changes] == [(pid, "frame")]
+    panel = next(p for p in (await work_json(api, wid, a))["panels"] if p["id"] == pid)
+    assert panel["frame"]["polygon_mm"] == frame["polygon_mm"]
     await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "content": {"content": "AIの中身"}})
     # AIは人の手の印を外せない。人は外せる
     with pytest.raises(HumanHandProtected):
         await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "human_hand_fields": []})
     assert (await op(api, wid, a, {"type": "update_panel", "id": pid, "human_hand_fields": []})).status_code == 200
     await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "frame": frame})
-    # 確定印の付いたコマはAIが何も変えられず、抜くこともできない
+    # 確定印の付いたコマは、AIが変えても抜いても、どの項目も書かずに判断待ちに置く
     assert (await op(api, wid, a, {"type": "update_panel", "id": pid, "human_confirmed": True})).status_code == 200
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "content": {"content": "x"}})
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "set_removed", "target_kind": "panel", "id": pid, "removed": True})
+    before = next(p for p in (await work_json(api, wid, a))["panels"] if p["id"] == pid)
+    ev = await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "content": {"content": "x"}})
+    assert [x["field"] for x in ev.held_changes] == ["content"]
+    ev = await ai_op(authz, wid, a, {"type": "set_removed", "target_kind": "panel", "id": pid, "removed": True})
+    assert [x["field"] for x in ev.held_changes] == ["removed"]
+    assert next(p for p in (await work_json(api, wid, a))["panels"] if p["id"] == pid) == before
 
 
 async def test_AIの案と人の案と取り込みの案が同じ形で採用される(api, authz):
@@ -190,10 +194,10 @@ async def test_人が描いた絵と持ち込んだ絵を登録してコマに�
                        data={"role": "panel_art", "origin": "human_drawn"})
     assert r.status_code == 422
 
-    # 人が選んだ絵は、AIが別の絵に替えられない
+    # 人が選んだ絵は、AIが別の絵に替えず、判断待ちに置く
     assert (await op(api, wid, a, {"type": "update_panel", "id": pid, "image_id": img})).status_code == 200
-    with pytest.raises(HumanHandProtected):
-        await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "image_id": None})
+    ev = await ai_op(authz, wid, a, {"type": "update_panel", "id": pid, "image_id": None})
+    assert [x["field"] for x in ev.held_changes] == ["image_id"]
     # AIが登録するのは生成した絵だけで、依頼が要る
     with pytest.raises(Invalid):
         await ai_op(authz, wid, a, {"type": "register_image", "role": "panel_art", "origin": "human_drawn",

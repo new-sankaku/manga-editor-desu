@@ -51,6 +51,19 @@ async def _heartbeat_forever() -> None:
         await asyncio.sleep(HEARTBEAT_SECONDS)
 
 
+def _image_details(job: Job, inputs: list[str]) -> dict:
+    """登録する絵の details。画像生成の処理（image_process）なら、処理・引数・シード・候補のまとまり・つなぎ先と、
+    元の絵の画素との対応（geometry：新しい画素 = 元の画素 × scale + offset。置き場を引き継ぐときに使う）を書く。"""
+    details: dict = {"input_image_ids": inputs} if inputs else {}
+    ip = job.request.get("image_process")
+    if ip is not None:
+        prepared = ip["prepared"]
+        details.update(process=ip["name"], params=ip["params"], requested_params=ip.get("requested_params"),
+                       seed=ip["seed"], candidate_set_id=ip.get("candidate_set_id"), service_id=job.service_id,
+                       geometry=prepared["geometry"] if prepared.get("source_size") else None)
+    return details
+
+
 async def _register_images(session, job: Job, service: Service, result) -> list[dict]:
     """受け取った絵を置き場に置き、AI の操作として登録する（操作の窓口 submit を通す）。
     依頼した人の権限で動く。登録の引数は job.request["register"]（comfyui_sender.py の docstring）。"""
@@ -66,7 +79,7 @@ async def _register_images(session, job: Job, service: Service, result) -> list[
             role=register["role"], origin="generated", page_id=register.get("page_id"),
             panel_id=register.get("panel_id"), job_id=job.id, based_on_image_id=register.get("based_on_image_id"),
             sha256=stored.sha256, media_type=stored.media_type, width=stored.width, height=stored.height,
-            dpi=stored.dpi, details={"input_image_ids": inputs} if inputs else {},
+            dpi=stored.dpi, details=_image_details(job, inputs),
         )
         await submit(session, authz, actor, job.work_id, op)
         registered.append({"image_id": op.id, "sha256": stored.sha256})

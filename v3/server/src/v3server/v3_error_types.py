@@ -41,3 +41,9 @@ class FixedByPerson(V3Error):
     """人が「動かさない」を掛けた層・物を変えようとした。人もAIも変えられない。外せるのは人だけ。"""
 
     code = "fixed_by_person"
+
+
+class QueueNotRunning(V3Error):
+    """依頼を待ち行列に入れられなかった（制御の作業者が動いていない）。依頼は止めてある（stopped）。"""
+
+    code = "queue_not_running"

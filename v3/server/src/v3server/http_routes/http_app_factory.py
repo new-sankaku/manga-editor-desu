@@ -6,7 +6,10 @@
 from contextlib import asynccontextmanager
 from datetime import datetime
 
+from pathlib import Path
+
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from temporalio.client import Client
 
@@ -15,6 +18,7 @@ from v3server.http_routes import (
     ai_job_routes,
     export_routes,
     image_file_routes,
+    image_generation_routes,
     job_routes,
     lock_routes,
     name_check_routes,
@@ -35,6 +39,7 @@ from v3server.v3_error_types import (
     Locked,
     NotFound,
     NotUndoable,
+    QueueNotRunning,
     V3Error,
 )
 
@@ -50,7 +55,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="V3 サーバー", lifespan=lifespan)
 
 _STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid: 422, HumanHandProtected: 409,
-           AiInvolvementRefused: 409, FixedByPerson: 409}
+           AiInvolvementRefused: 409, FixedByPerson: 409, QueueNotRunning: 503}
 
 
 @app.exception_handler(V3Error)
@@ -59,8 +64,13 @@ async def v3_error(request: Request, exc: V3Error):
 
 
 for _routes in (work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,
-                name_check_routes, pen_stroke_routes, export_routes, settings_and_search_routes, ai_job_routes):
+                name_check_routes, pen_stroke_routes, export_routes, settings_and_search_routes, ai_job_routes,
+                image_generation_routes):
     app.include_router(_routes.router)
+
+# 画像生成の画面（v3/web/）。同じ住所から配るので、画面の fetch は CORS なしで口を呼べる。認証は開発用の見出し X-V3-User
+WEB_DIR = Path(__file__).resolve().parents[4] / "web"
+app.mount("/web", StaticFiles(directory=WEB_DIR, html=True), name="web")
 
 
 @app.get("/health")

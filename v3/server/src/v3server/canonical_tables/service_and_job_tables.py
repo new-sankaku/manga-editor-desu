@@ -71,6 +71,9 @@ class ServiceProcess(Base):
     comfy_wait_seconds: Mapped[int | None] = mapped_column(Integer)
     # 送る前に /object_info で、手順の選択肢（モデル名など）が ComfyUI に入っているか確かめる
     comfy_check_choices: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    # 画像生成の処理（generation_queue/image_process_registry.py）の中身。モデル・サンプラーなど、手順をサーバーが組むときに
+    # 使う値。形は処理ごとの Settings（同じファイル）。comfy_workflow の代わりにこれを持つ
+    comfy_graph_settings: Mapped[dict[str, Any] | None] = mapped_column()
 
 
 class ProcessRoute(Base):
