@@ -9,7 +9,7 @@ from typing import get_args
 
 from pydantic import BaseModel
 
-from v3server.llm_questions.answer_json_reader import read_answer
+from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
 from v3server.name_structure.name_draft_schema import (
     BackgroundKind,
     BalloonKind,
@@ -103,11 +103,18 @@ def parse_name_draft_answer(
     page_spec: PageSpec,
     first_page_is_left: bool,
 ) -> NameDraft:
-    """答えをネームの形に読む。選択肢の外の値・欠けた欄は BrokenAnswerError。中身の良し悪しは見ない。"""
+    """答えをネームの形に読む。選択肢の外の値・欠けた欄は BrokenAnswerError。中身の良し悪しは見ない。
+    ネームの形は未定（None）の項目を許すが（人が枠だけ描いた・取り込んだネームのため）、AI には全部の欄を埋めさせる。
+    欠けた欄を未定として受け取ると、問いの答えが崩れたことに気付けないため。"""
     pages = read_answer(answer, _NameDraftAnswer).pages
-    return NameDraft(
+    draft = NameDraft(
         reading_direction=reading_direction,
         page_spec=page_spec,
         first_page_is_left=first_page_is_left,
         pages=pages,
     )
+    missing = draft.undecided_fields()
+    if missing:
+        raise BrokenAnswerError(f"欠けた欄がある: {', '.join(f'{k}（{v[0]} ほか{len(v)}か所）' for k, v in missing.items())}",
+                                answer)
+    return draft

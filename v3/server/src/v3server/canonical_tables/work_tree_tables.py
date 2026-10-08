@@ -38,6 +38,8 @@ class Work(Base):
     # 1ページ目を左のページに置くか（V3ハーネス設計 6章）。決めるまでは無い
     first_page_is_left: Mapped[bool | None] = mapped_column(Boolean)
     default_page_count: Mapped[int | None] = mapped_column(Integer)
+    # 作業ごとのAIの関与（operations/ai_involvement.py）。{作業: 関与}。選んでいない作業は設計の既定
+    ai_involvement: Mapped[dict[str, Any]] = mapped_column(default=dict)
     # 出来事の列の最後の番号。書き込みは作品ごとに1本（V3ハーネス設計 9.3）にするため、この行を FOR UPDATE で取る
     head_seq: Mapped[int] = mapped_column(BigInteger, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -96,6 +98,8 @@ class Panel(Base):
     content: Mapped[dict[str, Any]] = mapped_column(default=dict)
     # コマに使う絵（image_files の行）。生成した絵・人が描いた絵・取り込んだ絵のどれでもよい
     image_id: Mapped[str | None] = mapped_column(ForeignKey("image_files.id"))
+    # コマの絵の切り抜きと置き場（name_structure/image_placement.py の ImagePlacement）。決めていなければ無い
+    image_placement: Mapped[dict[str, Any] | None] = mapped_column()
     # 人の手の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     # 人の確定印（V3ハーネス設計 9.2）。付いたコマはAIが何も変えられない

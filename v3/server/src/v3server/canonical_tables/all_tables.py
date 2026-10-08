@@ -6,6 +6,7 @@ from v3server.canonical_tables import (  # noqa: F401
     image_file_tables,
     name_proposal_tables,
     service_and_job_tables,
+    text_and_layer_tables,
     threshold_and_finding_tables,
     work_tree_tables,
 )

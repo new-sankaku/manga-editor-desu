@@ -80,7 +80,8 @@ async def make_comfy_service(api, admin_user):
     assert r.status_code == 200, r.text
     assert r.json()["comfy_wait_seconds"] == 30
     r = await api.put(f"/routes/{process}", headers=h(admin_user),
-                      json={"service_id": sid, "resend_limit": 0, "regenerate_limit": 0})
+                      json={"service_id": sid, "resend_limit": 0, "regenerate_limit": 0, "ai_task": "drawing",
+                            "ai_action": "propose"})
     assert r.status_code == 200, r.text
     await_reload = process
     return sid, await_reload

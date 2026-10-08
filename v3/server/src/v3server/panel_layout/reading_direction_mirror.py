@@ -112,5 +112,9 @@ def crosses_gutter_edge(xs: list[float], side: PageSide, spec: PageSpec, eps: fl
 
 
 def page_reading_sequence(page: NamePage) -> list[int]:
-    """ページの中のコマの番号を読む順に並べたもの（rows を上の段から順につないだもの）。"""
+    """ページの中のコマの番号を読む順に並べたもの（rows を上の段から順につないだもの）。
+    段の割りが未定のページ（人が自由に枠を描いた・取り込んだ）は、コマの番号の順。番号は読む順として付いている
+    （NamePanel.n・Panel.order）ので、推し量った順ではない。"""
+    if page.rows is None:
+        return sorted(p.n for p in page.panels)
     return [n for row in page.rows for n in row]

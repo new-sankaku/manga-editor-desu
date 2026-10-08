@@ -18,6 +18,12 @@ class LayoutInputError(ValueError):
 def validate_tier_input(page: NamePage, spec: PageSpec) -> tuple[list[float], list[list[float]]]:
     if page.spread:
         raise LayoutInputError(f"{page.page}ページ：見開きのページの割りは、まだ計算できない")
+    if page.rows is None:
+        raise LayoutInputError(f"{page.page}ページ：段の割り（rows）が決まっていない")
+    undecided_shape = [p.n for p in page.panels if p.shape is None]
+    if undecided_shape:
+        # 断ち切りにするかは形で決まるので、未定のまま計算しない
+        raise LayoutInputError(f"{page.page}ページ：形が未定のコマ {undecided_shape} がある")
     if page.row_height_ratios is None or page.cell_width_ratios is None:
         raise LayoutInputError(f"{page.page}ページ：段の高さの比かコマの幅の比が決まっていない")
     hs, ws = page.row_height_ratios, page.cell_width_ratios

@@ -2,8 +2,11 @@
 
 request の形
 - overrides: {ノード番号: {入力名: 値}}。手順の中の値を差し替える
-- register: {"role": 絵の役目, "page_id": ページ, "panel_id": コマ}。受け取った絵を登録するときの引数
-  （role は必須。page_id・panel_id は省ける。登録は generation_queue/service_call_activity.py が行う）
+- register: {"role": 絵の役目, "page_id": ページ, "panel_id": コマ, "based_on_image_id": 元の版}。受け取った絵を登録するときの引数
+  （role は必須。ほかは省ける。登録は generation_queue/service_call_activity.py が行う）
+- prepared_inputs: 依頼を受けたときにサーバーが書いた、上げる絵の一覧（generation_queue/input_image_preparation.py）。
+  各絵を置き場から読んで /upload/image に上げ（type=input、overwrite=true）、返ってきた名前を node・input に入れる。
+  /upload/image の 4xx は refused、5xx は transport
 
 失敗の種類
 - /prompt の 429 は rate_limited（Retry-After）、5xx は transport、その他の 4xx は refused
@@ -23,6 +26,7 @@ from typing import Any
 import httpx
 
 from v3server.canonical_tables.service_and_job_tables import Service, ServiceProcess
+from v3server.image_file_storage import read_image
 from v3server.service_senders.sender_result_types import (
     AdapterError,
     AdapterResult,
@@ -205,6 +209,31 @@ def _validate_request(service: Service, sp: ServiceProcess, request: dict[str, A
         raise AdapterError("refused", "request.register.role が無い。受け取った絵の役目が決まらない")
 
 
+async def _upload_inputs(client: httpx.AsyncClient, prompt: dict[str, Any], request: dict[str, Any]) -> list[dict]:
+    """元の絵・マスクを ComfyUI の input に上げ、手順の入力に名前を入れる。上げた名前の一覧を返す。"""
+    uploaded = []
+    for entry in request.get("prepared_inputs", []):
+        node, inp = entry["node"], entry["input"]
+        if node not in prompt:
+            raise AdapterError("refused", f"手順にノード {node} が無い（上げる絵の入れ先）")
+        ext = entry["media_type"].split("/")[-1]
+        name = f"v3_{entry['sha256']}.{ext}"
+        r = await client.post("/upload/image", files={"image": (name, read_image(entry["sha256"]), entry["media_type"])},
+                              data={"type": "input", "overwrite": "true"})
+        if r.status_code >= 500:
+            raise AdapterError("transport", f"/upload/image が {r.status_code}")
+        if r.status_code >= 400:
+            raise AdapterError("refused", f"/upload/image が {r.status_code}: {_short(r.text)}")
+        body = _json_object(r, "/upload/image")
+        if not isinstance(body.get("name"), str):
+            raise AdapterError("broken_response", "/upload/image の返事に name が無い")
+        value = f"{body['subfolder']}/{body['name']}" if body.get("subfolder") else body["name"]
+        prompt[node]["inputs"][inp] = value
+        uploaded.append({"node": node, "input": inp, "name": value, "purpose": entry["purpose"],
+                         "image_id": entry.get("image_id")})
+    return uploaded
+
+
 async def _wait_history(client: httpx.AsyncClient, prompt_id: str, limit: float) -> dict[str, Any]:
     started = time.monotonic()
     while True:
@@ -244,6 +273,7 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
     try:
         async with httpx.AsyncClient(base_url=service.endpoint, timeout=REQUEST_TIMEOUT) as client:
             try:
+                uploaded = await _upload_inputs(client, prompt, request)
                 if sp.comfy_check_choices:
                     await check_choices(client, prompt)
                 r = await client.post("/prompt", json={"prompt": prompt})
@@ -274,7 +304,7 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
     except (httpx.TimeoutException, httpx.TransportError) as e:
         raise AdapterError("transport", str(e) or type(e).__name__) from e
     return AdapterResult(
-        output={"prompt_id": prompt_id, "images": images},
+        output={"prompt_id": prompt_id, "images": images, "uploaded_inputs": uploaded},
         image_files=files,
         settings=request.get("overrides", {}),
     )

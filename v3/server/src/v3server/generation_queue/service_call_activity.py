@@ -17,7 +17,7 @@ from v3server.canonical_tables.service_and_job_tables import (
     ServiceProcess,
 )
 from v3server.database_engine import get_sessionmaker
-from v3server.image_file_storage import store_image
+from v3server.image_intake import take_in_image
 from v3server.openfga_permissions import Authz, open_authz
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_submit_and_undo import submit
@@ -56,12 +56,15 @@ async def _register_images(session, job: Job, service: Service, result) -> list[
     actor = Actor(kind="ai", id=f"service:{service.id}", on_behalf_of=job.requested_by)
     authz = await _get_authz()
     registered = []
+    inputs = [e["image_id"] for e in job.request.get("prepared_inputs", []) if e.get("image_id")]
     for data in result.image_files:
-        stored = store_image(data)
+        # 生成の出口も、人の絵と同じ入口を通す（規制の判定を差し込む場所。V3ハーネス設計 12章）
+        stored = await take_in_image(session, job.work_id, data, "generated")
         op = RegisterImage(
             role=register["role"], origin="generated", page_id=register.get("page_id"),
-            panel_id=register.get("panel_id"), job_id=job.id, sha256=stored.sha256, media_type=stored.media_type,
-            width=stored.width, height=stored.height, dpi=stored.dpi,
+            panel_id=register.get("panel_id"), job_id=job.id, based_on_image_id=register.get("based_on_image_id"),
+            sha256=stored.sha256, media_type=stored.media_type, width=stored.width, height=stored.height,
+            dpi=stored.dpi, details={"input_image_ids": inputs} if inputs else {},
         )
         await submit(session, authz, actor, job.work_id, op)
         registered.append({"image_id": op.id, "sha256": stored.sha256})

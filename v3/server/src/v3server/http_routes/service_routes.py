@@ -20,6 +20,8 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
+from v3server.operations.ai_involvement import Task
+from v3server.usage_terms_schema import UsageTerms
 from v3server.v3_error_types import Invalid, NotFound
 
 # ---------------------------------------------------------------- つなぎ先と処理ごとの送り先（全作品で共通）
@@ -37,6 +39,8 @@ class NewService(BaseModel):
     send_mode: Literal["serial", "parallel"]
     max_concurrency: int = Field(default=1, ge=1)
     monthly_budget: float | None = None
+    # 利用規約の要点（V3細部の決めごと 20章）。人が確かめて入れる。無ければ未記録
+    usage_terms: UsageTerms | None = None
 
 
 class ServicePatch(BaseModel):
@@ -46,6 +50,7 @@ class ServicePatch(BaseModel):
     paused: bool | None = None
     monthly_budget: float | None = None
     state: Literal["connected", "stopped", "key_rejected", "unchecked"] | None = None
+    usage_terms: UsageTerms | None = None
 
 
 class ServiceProcessBody(BaseModel):
@@ -61,10 +66,14 @@ class RouteBody(BaseModel):
     service_id: str
     resend_limit: int = Field(ge=0)
     regenerate_limit: int = Field(ge=0)
+    # この処理が何の作業の、どの手か（operations/ai_involvement.py）。作る処理は propose、検査する処理は check
+    ai_task: Task
+    ai_action: Literal["propose", "check"]
 
 
 SERVICE_FIELDS = ("id", "name", "kind", "location", "adapter", "endpoint", "send_mode", "max_concurrency", "state",
-                  "paused", "monthly_budget")
+                  "paused", "monthly_budget", "usage_terms")
+ROUTE_FIELDS = ("process", "service_id", "resend_limit", "regenerate_limit", "ai_task", "ai_action")
 
 
 @router.get("/services")
@@ -76,14 +85,14 @@ async def list_services(session: SessionDep, actor: ActorDep):
         "services": [row(s, *SERVICE_FIELDS) for s in services],
         "processes": [row(sp, "service_id", "process", "aptitude", "cost_per_call", "model",
                                         "comfy_wait_seconds", "comfy_check_choices") for sp in sps],
-        "routes": [row(r, "process", "service_id", "resend_limit", "regenerate_limit") for r in routes],
+        "routes": [row(r, *ROUTE_FIELDS) for r in routes],
     }
 
 
 @router.post("/services", status_code=201)
 async def create_service(body: NewService, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     await require(authz, actor, "admin", SYSTEM_OBJ)
-    service = Service(**body.model_dump())
+    service = Service(**body.model_dump(mode="json"))
     session.add(service)
     await session.commit()
     return row(service, *SERVICE_FIELDS)
@@ -97,7 +106,7 @@ async def patch_service(service_id: str, body: ServicePatch, session: SessionDep
     service = await session.get(Service, service_id)
     if service is None:
         raise NotFound(f"services:{service_id}")
-    for k, v in body.model_dump(exclude_unset=True).items():
+    for k, v in body.model_dump(exclude_unset=True, mode="json").items():
         setattr(service, k, v)
     await session.commit()
     return row(service, *SERVICE_FIELDS)
@@ -144,4 +153,4 @@ async def put_route(process: str, body: RouteBody, session: SessionDep, authz: A
         for k, v in body.model_dump().items():
             setattr(route, k, v)
     await session.commit()
-    return row(route, "process", "service_id", "resend_limit", "regenerate_limit")
+    return row(route, *ROUTE_FIELDS)

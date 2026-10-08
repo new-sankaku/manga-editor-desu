@@ -18,6 +18,10 @@ class NameProposal(Base):
     episode_id: Mapped[str] = mapped_column(ForeignKey("episodes.id"), index=True)
     # 作り手：ai（AIが作った）・human（人が作った）・imported（外のネームを取り込んだ）
     made_by: Mapped[str] = mapped_column(String(16))
+    # 何の作業の案か（operations/ai_involvement.py の作業）：name（ネーム全体）・panel_layout（コマ割りの計算）
+    task: Mapped[str] = mapped_column(String(16), server_default="name")
+    # 取り込んだときの元の文書（MangaImport など）。変換で落とした物（除外のセリフなど）も残すため、丸ごと持つ
+    source_document: Mapped[dict[str, Any] | None] = mapped_column()
     submitted_by_kind: Mapped[str] = mapped_column(String(8))
     submitted_by_id: Mapped[str] = mapped_column(String(128))
     # AIが作ったときの依頼

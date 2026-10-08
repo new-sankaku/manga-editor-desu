@@ -32,7 +32,8 @@ async def make_service(api, admin, *, location="local", send_mode="serial", n=1,
                       json={"model": "fake", "cost_per_call": 10})
     assert r.status_code == 200, r.text
     r = await api.put(f"/routes/{process}", headers=h(admin),
-                      json={"service_id": sid, "resend_limit": 2, "regenerate_limit": 0})
+                      json={"service_id": sid, "resend_limit": 2, "regenerate_limit": 0, "ai_task": "name",
+                            "ai_action": "propose"})
     assert r.status_code == 200, r.text
     return sid, process
 

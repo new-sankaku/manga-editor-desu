@@ -2,7 +2,7 @@
 
 1回の操作の流れ
 1. 作品の行を FOR UPDATE で取る（作品ごとに書き込みは1本。V3ハーネス設計 9.3）
-2. 権限を確かめる（AIは頼んだ人の権限）
+2. 権限を確かめる（AIは頼んだ人の権限）。AIが出せない操作（ai_may_submit が無い）はここで止める
 3. ロックを確かめる
 4. 正本を変え、出来事を1件追記する
 5. 権限の組（OpenFGA）を書き、確定する。確定に失敗したら書いた組を戻す
@@ -96,6 +96,8 @@ async def submit(
             ).first()
             if already is not None:
                 raise NotUndoable("すでに取り消している")
+        if actor.kind == "ai" and not op.ai_may_submit:
+            raise Forbidden(f"{op.type} はAIが出せない操作")
         scope = await op.scope(session, work)
         if not await authz.check(actor.permission_user, scope.relation, scope.object):
             raise Forbidden(f"{actor.permission_user} に {scope.object} の {scope.relation} が無い")

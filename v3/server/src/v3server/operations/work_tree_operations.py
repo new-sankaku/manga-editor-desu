@@ -4,13 +4,20 @@
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, field_validator
 
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.table_base import new_id
+from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Volume
+from v3server.name_structure.image_placement import ImagePlacement
+from v3server.name_structure.name_draft_schema import PanelFrame
 from v3server.openfga_permissions import Tuple
-from v3server.operations.human_hand_guard import change_with_human_hand
+from v3server.operations.ai_involvement import ROW_TASK, require_actor_may
+from v3server.operations.human_hand_guard import (
+    change_with_human_hand,
+    refuse_if_ai_removes_human_hand,
+)
 from v3server.operations.operation_base import (
     OpBase,
     Scope,
@@ -20,6 +27,27 @@ from v3server.operations.operation_base import (
     work_obj,
 )
 from v3server.v3_error_types import HumanHandProtected, Invalid
+
+
+def _frame_dict(v: dict[str, Any] | None) -> dict[str, Any]:
+    """枠は人が描いても計算で決めても同じ形（PanelFrame）。空の辞書（None も）は「枠がまだ無い」。
+    四角でない形・斜めの枠も、多角形の頂点で持つ。"""
+    if not v:
+        return {}
+    return PanelFrame.model_validate(v).model_dump(mode="json")
+
+
+async def validated_placement(session, work_id: str, placement: dict[str, Any] | None, image_id: str | None):
+    """絵の切り抜きと置き場を確かめる。絵が決まっていなければ置けない。切り抜きは絵の大きさの中。"""
+    if placement is None:
+        return None
+    if image_id is None:
+        raise Invalid("絵が決まっていないので、切り抜きと置き場を決められない")
+    pl = ImagePlacement.model_validate(placement)
+    img = await get_in_work(session, ImageFile, image_id, work_id)
+    if not pl.fits_image(img.width, img.height):
+        raise Invalid(f"切り抜き {pl.crop_px} が絵の大きさ {img.width}x{img.height} の外に出ている")
+    return pl.model_dump(mode="json")
 
 
 class AddVolume(OpBase):
@@ -128,11 +156,22 @@ class AddPanel(OpBase):
     role: str | None = None
     content: dict[str, Any] = Field(default_factory=dict)
 
+    ai_may_submit = True
+
+    @field_validator("frame")
+    @classmethod
+    def _frame(cls, v):
+        return _frame_dict(v)
+
     async def scope(self, session, work):
         await get_in_work(session, Page, self.page_id, work.id)
         return Scope("can_draw", page_obj(self.page_id), [("page", self.page_id)])
 
     async def apply(self, ctx):
+        require_actor_may(ctx.actor, ctx.work, ROW_TASK["panels"], "decide")
+        # 人が足したコマは、足した項目に人の手の印を付ける（人が描いた枠をAIが割り直さないように）
+        marks = sorted(k for k in ("order", "frame", "role", "content") if getattr(self, k)) \
+            if ctx.actor.kind == "human" else []
         ctx.session.add(
             Panel(
                 id=self.id,
@@ -142,6 +181,7 @@ class AddPanel(OpBase):
                 frame=self.frame,
                 role=self.role,
                 content=self.content,
+                human_hand_fields=marks,
             )
         )
         return {"type": "set_removed", "target_kind": "panel", "id": self.id, "removed": True}
@@ -157,9 +197,18 @@ class UpdatePanel(OpBase):
     role: str | None = None
     content: dict[str, Any] | None = None
     image_id: str | None = None
+    # 絵の切り抜きと置き場（ImagePlacement）。None を渡すと置き場を決めていない状態に戻す
+    image_placement: dict[str, Any] | None = None
     human_confirmed: bool | None = None
     # 人の手の印をこの値にする。人だけが渡せる（取り消しで元に戻すときと、人が印を外すとき）
     human_hand_fields: list[str] | None = None
+
+    ai_may_submit = True
+
+    @field_validator("frame")
+    @classmethod
+    def _frame(cls, v):
+        return _frame_dict(v)
 
     async def scope(self, session, work):
         panel = await get_in_work(session, Panel, self.id, work.id)
@@ -174,7 +223,10 @@ class UpdatePanel(OpBase):
             raise HumanHandProtected("人の確定印を変えられるのは人だけ")
         if "image_id" in changes and changes["image_id"] is not None:
             await get_in_work(ctx.session, ImageFile, changes["image_id"], ctx.work.id)
-        before = change_with_human_hand(ctx.actor, panel, changes, self.human_hand_fields)
+        if "image_placement" in changes:
+            changes["image_placement"] = await validated_placement(
+                ctx.session, ctx.work.id, changes["image_placement"], changes.get("image_id", panel.image_id))
+        before = change_with_human_hand(ctx.actor, panel, changes, self.human_hand_fields, work=ctx.work)
         return {"type": self.type, "id": self.id, **before}
 
 
@@ -186,6 +238,8 @@ class UpdatePage(OpBase):
     layout: dict[str, Any] | None = None
     human_hand_fields: list[str] | None = None
 
+    ai_may_submit = True
+
     async def scope(self, session, work):
         await get_in_work(session, Page, self.id, work.id)
         return Scope("can_draw", page_obj(self.id), [("page", self.id)])
@@ -195,38 +249,46 @@ class UpdatePage(OpBase):
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
-        before = change_with_human_hand(ctx.actor, page, changes, self.human_hand_fields)
+        before = change_with_human_hand(ctx.actor, page, changes, self.human_hand_fields, work=ctx.work)
         return {"type": self.type, "id": self.id, **before}
 
 
 # ---------------------------------------------------------------- 抜く・戻す
 
 
-_REMOVABLE = {"volume": Volume, "episode": Episode, "page": Page, "panel": Panel}
+_REMOVABLE = {"volume": Volume, "episode": Episode, "page": Page, "panel": Panel, "text_item": TextItem,
+              "panel_layer": PanelLayer}
 
 
 class SetRemoved(OpBase):
-    """巻・話・ページ・コマを抜く・戻す。消さない（ごみ箱。V3細部の決めごと 18章）。"""
+    """巻・話・ページ・コマ・文字・層を抜く・戻す。消さない（ごみ箱。V3細部の決めごと 18章）。"""
 
     type: Literal["set_removed"] = "set_removed"
-    target_kind: Literal["volume", "episode", "page", "panel"]
+    target_kind: Literal["volume", "episode", "page", "panel", "text_item", "panel_layer"]
     id: str
     removed: bool
+
+    ai_may_submit = True
 
     async def scope(self, session, work):
         obj = await get_in_work(session, _REMOVABLE[self.target_kind], self.id, work.id)
         if self.target_kind == "panel":
             return Scope("can_draw", page_obj(obj.page_id), [("page", obj.page_id), ("panel", obj.id)])
+        if self.target_kind in ("text_item", "panel_layer"):
+            return Scope("can_draw", page_obj(obj.page_id),
+                         [("page", obj.page_id), ("panel", obj.panel_id), ("item", obj.id)])
         if self.target_kind == "page":
             return Scope("can_manage", work_obj(work.id), [("page", obj.id)], page_tree=obj.id)
         return Scope("can_manage", work_obj(work.id))
 
     async def apply(self, ctx):
         obj = await ctx.session.get(_REMOVABLE[self.target_kind], self.id)
-        if self.target_kind in ("page", "panel"):
-            # 人の手の印か確定印の付いたページ・コマを、AIは抜けない
-            if ctx.actor.kind == "ai" and (obj.human_hand_fields or getattr(obj, "human_confirmed", False)):
-                raise HumanHandProtected(f"{self.target_kind}:{self.id} は人の手の印が付いている")
+        if ctx.actor.kind == "ai":
+            if self.target_kind in ("volume", "episode"):
+                raise HumanHandProtected("巻・話を抜く・戻すのは人だけ")
+            # 人の手の印か確定印の付いた行を、AIは抜けない
+            refuse_if_ai_removes_human_hand(ctx.actor, obj)
+            require_actor_may(ctx.actor, ctx.work, ROW_TASK[obj.__tablename__], "decide")
         if obj.removed == self.removed:
             raise Invalid("すでにその状態")
         obj.removed = self.removed

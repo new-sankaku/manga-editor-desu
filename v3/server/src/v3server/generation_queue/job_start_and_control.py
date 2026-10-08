@@ -7,13 +7,15 @@ from temporalio.client import Client
 
 from v3server.allowed_destinations import is_allowed
 from v3server.canonical_tables.service_and_job_tables import Job, ProcessRoute, Service
-from v3server.canonical_tables.work_tree_tables import Page
+from v3server.canonical_tables.work_tree_tables import Page, Work
 from v3server.generation_queue.generation_workflow import GenerationJob, JobInput
 from v3server.generation_queue.queue_names_and_priority import (
     CONTROL_QUEUE,
     job_priority,
 )
+from v3server.generation_queue.input_image_preparation import prepare_input_images
 from v3server.openfga_permissions import Authz
+from v3server.operations.ai_involvement import require_ai_may
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.request_actor import Actor
 from v3server.v3_error_types import Forbidden, Invalid, NotFound
@@ -46,6 +48,11 @@ async def enqueue(
     route = await session.get(ProcessRoute, process)
     if route is None:
         raise Invalid(f"{process} の送り先が決まっていない")
+    if route.ai_task is None or route.ai_action is None:
+        raise Invalid(f"{process} が何の作業の処理か（ai_task・ai_action）が決まっていない")
+    # 頼んだのが人でもAIでも、処理をするのはAI。作業のAIの関与で許されていなければ受けない
+    require_ai_may(await session.get(Work, work_id), route.ai_task, route.ai_action)
+    request = await prepare_input_images(session, work_id, request)
     service = await session.get(Service, route.service_id)
     if not await is_allowed(session, work_id, service):
         # 別の先へは回さない。人が送ってよい先に足すか、送り先を変える

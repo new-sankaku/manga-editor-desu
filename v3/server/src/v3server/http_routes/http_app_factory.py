@@ -23,6 +23,7 @@ from v3server.http_routes import (
 from v3server.openfga_permissions import open_authz
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import (
+    AiInvolvementRefused,
     Forbidden,
     HumanHandProtected,
     Invalid,
@@ -43,7 +44,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="V3 サーバー", lifespan=lifespan)
 
-_STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid: 422, HumanHandProtected: 409}
+_STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid: 422, HumanHandProtected: 409,
+           AiInvolvementRefused: 409}
 
 
 @app.exception_handler(V3Error)

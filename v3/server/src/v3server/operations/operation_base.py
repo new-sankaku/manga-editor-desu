@@ -9,7 +9,7 @@
 
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -56,6 +56,10 @@ def page_obj(page_id: str) -> str:
 
 class OpBase(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+    # AIが出してよい操作か。出してよい操作も、中でAIの関与（ai_involvement.py）と人の手の印を確かめる。
+    # 出してよくない操作（作品の設定・参加者・人の手の範囲など）をAIが出すと、窓口が止める
+    ai_may_submit: ClassVar[bool] = False
 
     async def scope(self, session: AsyncSession, work: Work) -> Scope:
         raise NotImplementedError

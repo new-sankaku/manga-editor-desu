@@ -29,3 +29,9 @@ class HumanHandProtected(V3Error):
     """AIが、人の手の印か人の確定印の付いた所を変えようとした（V3細部の決めごと 10.2）。"""
 
     code = "human_hand_protected"
+
+
+class AiInvolvementRefused(V3Error):
+    """作業のAIの関与で、AIのその手が許されていない（V3ハーネス設計 4.2）。"""
+
+    code = "ai_involvement_refused"

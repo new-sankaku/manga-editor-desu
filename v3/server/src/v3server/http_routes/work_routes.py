@@ -9,6 +9,7 @@ from sqlalchemy import select
 
 from v3server.canonical_tables.event_and_lock_tables import Event
 from v3server.canonical_tables.service_and_job_tables import WorkDestination
+from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import (
     Episode,
@@ -26,6 +27,7 @@ from v3server.http_routes.http_dependencies import (
 )
 from v3server.openfga_permissions import Tuple
 from v3server.operations import operation_submit_and_undo
+from v3server.operations.ai_involvement import TASK_TITLES, TASKS, mode_of
 from v3server.operations.all_operation_types import Op
 from v3server.operations.operation_base import work_obj
 from v3server.v3_error_types import NotFound
@@ -79,13 +81,38 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
         "episodes": [row(e, "id", "volume_id", "number", "title", "deadline", "removed") for e in await all_of(Episode)],
         "pages": [row(p, "id", "episode_id", "number", "layout", "human_hand_fields", "removed") for p in await all_of(Page)],
         "panels": [
-            row(p, "id", "page_id", "order", "frame", "role", "content", "image_id", "human_hand_fields",
-                "human_confirmed", "removed")
+            row(p, "id", "page_id", "order", "frame", "role", "content", "image_id", "image_placement",
+                "human_hand_fields", "human_confirmed", "removed")
             for p in await all_of(Panel)
+        ],
+        "text_items": [
+            row(t, "id", "page_id", "panel_id", "item_kind", "order", "text", "speaker", "balloon_kind",
+                "writing_direction", "font_size_pt", "box_mm", "tail_target_mm", "joined_to_previous",
+                "human_hand_fields", "removed")
+            for t in await all_of(TextItem)
+        ],
+        "panel_layers": [
+            row(la, "id", "page_id", "panel_id", "role", "image_id", "stack_order", "visible", "opacity", "placement",
+                "human_hand_fields", "removed")
+            for la in await all_of(PanelLayer)
         ],
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],
         "destinations": [d.service_id for d in await all_of(WorkDestination)],
     }
+
+
+@router.get("/works/{work_id}/ai-involvement")
+async def get_ai_involvement(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """作業ごとのAIの関与。作品が選んでいない作業は設計の既定を返し、chosen=false で分かるようにする。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    work = await session.get(Work, work_id)
+    if work is None:
+        raise NotFound(f"works:{work_id}")
+    out = []
+    for task in TASKS:
+        mode, chosen = mode_of(work, task)
+        out.append({"task": task, "title": TASK_TITLES[task], "mode": mode, "chosen": chosen})
+    return out
 
 
 @router.get("/works/{work_id}/members")

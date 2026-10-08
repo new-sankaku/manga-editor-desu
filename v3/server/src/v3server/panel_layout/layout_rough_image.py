@@ -126,7 +126,7 @@ def draw_page_rough(page: NamePage, spec: PageSpec, style: RoughStyle) -> Image.
     font = _font(style)
     for p in page.panels:
         if style.show_figures:
-            for f in p.people:
+            for f in p.people or []:  # 未定（None）なら描く人物が無い
                 if f.box_mm is not None:
                     c.draw.rectangle(c.box_px(f.box_mm), outline=(120, 120, 120), width=max(1, style.line_px // 2))
                     x0, y0, _, _ = c.box_px(f.box_mm)
@@ -134,7 +134,7 @@ def draw_page_rough(page: NamePage, spec: PageSpec, style: RoughStyle) -> Image.
                 if f.face_box_mm is not None:
                     c.draw.ellipse(c.box_px(f.face_box_mm), outline=(120, 120, 120), width=max(1, style.line_px // 2))
         if style.show_balloons:
-            for b in p.balloons:
+            for b in p.balloons or []:  # 未定（None）なら描く吹き出しが無い
                 if b.box_mm is None:
                     continue
                 c.draw.ellipse(c.box_px(b.box_mm), fill="white", outline="black", width=style.line_px)

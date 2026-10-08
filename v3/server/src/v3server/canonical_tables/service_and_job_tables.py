@@ -47,6 +47,8 @@ class Service(Base):
     paused: Mapped[bool] = mapped_column(Boolean, default=False)
     # 予算: 月の上限（円）。None は上限なし
     monthly_budget: Mapped[float | None] = mapped_column(Numeric(12, 2))
+    # 利用規約の要点（V3細部の決めごと 20章。usage_terms_schema.py の UsageTerms）。人が確かめて入れる。無ければ未記録
+    usage_terms: Mapped[dict[str, Any] | None] = mapped_column()
 
 
 class ServiceProcess(Base):
@@ -81,6 +83,10 @@ class ProcessRoute(Base):
     # 送り直しの回数（通信の失敗）と作り直しの回数（出来が悪い）は別に持つ（同 4.5）
     resend_limit: Mapped[int] = mapped_column(Integer, default=3)
     regenerate_limit: Mapped[int] = mapped_column(Integer, default=0)
+    # この処理が何の作業の、どの手か（operations/ai_involvement.py）。依頼のときにAIの関与と照らす。
+    # 決まっていない処理は頼めない（job_start_and_control.enqueue）
+    ai_task: Mapped[str | None] = mapped_column(String(32))
+    ai_action: Mapped[str | None] = mapped_column(String(8))
 
 
 class WorkDestination(Base):

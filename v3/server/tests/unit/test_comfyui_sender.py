@@ -40,12 +40,17 @@ class FakeComfy:
         self.object_info = OBJECT_INFO
         self.hist_n = 0
         self.interrupt_fails = False
+        self.upload = lambda req: httpx.Response(404)
+        self.last_prompt = None
 
     def __call__(self, req: httpx.Request) -> httpx.Response:
         path = req.url.path
         self.calls.append((req.method, path))
         if path == "/prompt":
+            self.last_prompt = json.loads(req.content)["prompt"]
             return self.prompt_response()
+        if path == "/upload/image":
+            return self.upload(req)
         if path.startswith("/history/"):
             if self.history_response is not None:
                 return self.history_response()
@@ -346,3 +351,53 @@ async def test_cancel_cleanup_failure_still_raises_cancelled(comfy):
     comfy.interrupt_fails = True
     await cancel_during_wait(comfy, {"queue_running": [[0, PID, {}, {}, []]], "queue_pending": []})
     assert comfy.called("POST", "/interrupt")
+
+
+# ---------------------------------------------------------------- 元の絵とマスクを上げる（prepared_inputs）
+
+
+@pytest.fixture
+def stored_png(monkeypatch, tmp_path):
+    """置き場に絵を1枚置き、その sha256 を返す。"""
+    import io as _io
+
+    from PIL import Image
+
+    from v3server.image_file_storage import store_image
+    from v3server.server_settings import get_settings
+    monkeypatch.setattr(get_settings(), "image_dir", str(tmp_path))
+    buf = _io.BytesIO()
+    Image.new("L", (8, 8), 0).save(buf, format="PNG")
+    return store_image(buf.getvalue()).sha256
+
+
+def _prepared(sha, node="1", inp="unet_name", purpose="source"):
+    return {"node": node, "input": inp, "purpose": purpose, "image_id": "img1", "sha256": sha, "media_type": "image/png"}
+
+
+async def test_prepared_inputs_are_uploaded_and_put_into_the_workflow(comfy, stored_png):
+    sent = {}
+
+    def upload(req):
+        sent["body"] = req.content
+        return httpx.Response(200, json={"name": f"v3_{stored_png}.png", "subfolder": "sub", "type": "input"})
+    comfy.upload = upload
+    r = await call_comfyui(SERVICE, sp(), {**REQUEST, "prepared_inputs": [_prepared(stored_png)]})
+    assert r.output["uploaded_inputs"] == [{"node": "1", "input": "unet_name", "name": f"sub/v3_{stored_png}.png",
+                                            "purpose": "source", "image_id": "img1"}]
+    # 上げた名前が手順の入力に入って送られる。上げる前に /prompt は呼ばない
+    assert comfy.last_prompt["1"]["inputs"]["unet_name"] == f"sub/v3_{stored_png}.png"
+    assert comfy.calls.index(("POST", "/upload/image")) < comfy.calls.index(("POST", "/prompt"))
+    assert b'name="overwrite"' in sent["body"] and b'name="type"' in sent["body"]
+
+
+async def test_upload_failures(comfy, stored_png):
+    comfy.upload = lambda req: httpx.Response(500)
+    assert (await failure(request={**REQUEST, "prepared_inputs": [_prepared(stored_png)]})).kind == "transport"
+    comfy.upload = lambda req: httpx.Response(400, text="bad")
+    assert (await failure(request={**REQUEST, "prepared_inputs": [_prepared(stored_png)]})).kind == "refused"
+    comfy.upload = lambda req: httpx.Response(200, json={"x": 1})
+    assert (await failure(request={**REQUEST, "prepared_inputs": [_prepared(stored_png)]})).kind == "broken_response"
+    e = await failure(request={**REQUEST, "prepared_inputs": [_prepared(stored_png, node="99")]})
+    assert e.kind == "refused" and "99" in e.detail
+    assert not comfy.called("POST", "/prompt")

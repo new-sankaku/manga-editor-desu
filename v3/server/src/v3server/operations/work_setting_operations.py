@@ -12,6 +12,7 @@ from v3server.canonical_tables.threshold_and_finding_tables import (
 )
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.openfga_permissions import WORK_ROLES, Tuple
+from v3server.operations.ai_involvement import Mode, Task
 from v3server.operations.operation_base import OpBase, Scope, _changed, work_obj
 from v3server.v3_error_types import Invalid, NotFound
 
@@ -37,6 +38,29 @@ class SetWorkSettings(OpBase):
             raise Invalid("変える項目がない")
         before = _changed(ctx.work, changes)
         return {"type": self.type, **before}
+
+
+class SetAiInvolvement(OpBase):
+    """作業ごとのAIの関与を選ぶ（operations/ai_involvement.py）。mode を None にすると設計の既定に戻す。"""
+
+    type: Literal["set_ai_involvement"] = "set_ai_involvement"
+    task: Task
+    mode: Mode | None
+
+    async def scope(self, session, work):
+        return Scope("can_manage", work_obj(work.id))
+
+    async def apply(self, ctx):
+        current = dict(ctx.work.ai_involvement or {})
+        before = current.get(self.task)
+        if before == self.mode:
+            raise Invalid("すでにその状態")
+        if self.mode is None:
+            current.pop(self.task)
+        else:
+            current[self.task] = self.mode
+        ctx.work.ai_involvement = current
+        return {"type": self.type, "task": self.task, "mode": before}
 
 
 class SetMember(OpBase):

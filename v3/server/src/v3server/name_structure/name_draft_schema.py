@@ -1,5 +1,10 @@
 """ネームの構造データ（V3ハーネス設計 5.3・6章）。試作 p27 の出力の形を元にした。
-LLM の答えも、人が画面で直したものも、この形で持つ。中身の良し悪しはここでは確かめない（name_checks の役目）。"""
+LLM の答えも、人が画面で直したものも、取り込んだものも、この形で持つ。中身の良し悪しはここでは確かめない（name_checks の役目）。
+
+人が枠だけ描いたネームや、取り込んだネームには、まだ決めていない項目がある（大きさ・写す範囲・人物など）。
+その項目は None（未定）で持つ。推し量って埋めない（V3ハーネス設計 1章の芯5）。
+未定の項目を使う検査は「データなし」になる（name_checks/name_check_runner.py）。AI の答えは未定を許さない
+（llm_questions/name_draft_question.py が undecided_fields で確かめる）。"""
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -31,8 +36,9 @@ class FigureInPanel(BaseModel):
 class Balloon(BaseModel):
     """吹き出し1つ。位置は仕上げ（S5）で決めるまで無い。"""
 
-    speaker: str
-    kind: BalloonKind
+    # 話者と種類は、取り込んだネームでは分からないことがある（未定は None）
+    speaker: str | None = None
+    kind: BalloonKind | None = None
     text: str
     # 吹き出しの楕円を囲む四角（基本枠の座標・mm）。仕上げで置いた後にだけ入る
     box_mm: tuple[float, float, float, float] | None = None
@@ -51,18 +57,19 @@ class NamePanel(BaseModel):
     """コマ1つ。番号は作品の最初からの通し番号。"""
 
     n: int
-    size: PanelSize
-    shape: PanelShape
-    shot: ShotRange
-    angle: CameraAngle
-    people: list[FigureInPanel]
-    background: BackgroundKind
-    scene: int
-    role: StoryRole
-    hook: bool
-    content: str
-    balloons: list[Balloon]
-    sfx: list[str]
+    # ここから sfx までは、未定なら None（人が枠だけ描いた・取り込んだネーム）
+    size: PanelSize | None = None
+    shape: PanelShape | None = None
+    shot: ShotRange | None = None
+    angle: CameraAngle | None = None
+    people: list[FigureInPanel] | None = None
+    background: BackgroundKind | None = None
+    scene: int | None = None
+    role: StoryRole | None = None
+    hook: bool | None = None
+    content: str | None = None
+    balloons: list[Balloon] | None = None
+    sfx: list[str] | None = None
     # コマ割りの計算（panel_layout）の後にだけ入る
     frame: PanelFrame | None = None
     # 場所の名前。同じ名前なら同じ場所。無ければ場面の番号を場所とみなす
@@ -76,7 +83,8 @@ class NamePage(BaseModel):
 
     page: int
     spread: bool
-    rows: list[list[int]]
+    # 段の割り。人が自由に枠を描いたページや取り込んだページでは未定（None）。そのときの読む順はコマの番号の順
+    rows: list[list[int]] | None = None
     panels: list[NamePanel]
     # 段の高さの比と、段ごとのコマの幅の比（読む順）。決めていなければ無い
     row_height_ratios: list[float] | None = None
@@ -100,3 +108,31 @@ class NameDraft(BaseModel):
 
     def all_panels(self) -> list[NamePanel]:
         return [p for pg in self.pages for p in pg.panels]
+
+    def undecided_fields(self) -> dict[str, list[str]]:
+        """未定の項目の名前 → 未定の場所（「1ページ」「1ページ コマ3」）。全部決まっていれば空。
+        項目の名前は NamePanel・NamePage の項目名。吹き出しの項目は "balloons.kind" の形。"""
+        out: dict[str, list[str]] = {}
+
+        def add(field: str, where: str) -> None:
+            out.setdefault(field, []).append(where)
+
+        for pg in self.pages:
+            if pg.rows is None:
+                add("rows", f"{pg.page}ページ")
+            for p in pg.panels:
+                where = f"{pg.page}ページ コマ{p.n}"
+                for field in PANEL_DECIDABLE_FIELDS:
+                    if getattr(p, field) is None:
+                        add(field, where)
+                for b in p.balloons or []:
+                    for field in BALLOON_DECIDABLE_FIELDS:
+                        if getattr(b, field) is None:
+                            add(f"balloons.{field}", where)
+        return out
+
+
+# 未定（None）で持てる項目。検査の「要る項目」（name_checks/name_check_runner.py）はこの名前で書く
+PANEL_DECIDABLE_FIELDS = ("size", "shape", "shot", "angle", "people", "background", "scene", "role", "hook", "content",
+                          "balloons", "sfx")
+BALLOON_DECIDABLE_FIELDS = ("speaker", "kind")

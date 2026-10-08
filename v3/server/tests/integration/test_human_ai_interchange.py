@@ -1,6 +1,7 @@
 """人とAIのどちらが作っても同じ流れに乗るか。人の手の印をAIが上書きしないか。"""
 
 import io
+import json
 import uuid
 
 import pytest
@@ -10,10 +11,14 @@ from PIL import Image
 from v3server.database_engine import get_sessionmaker
 from v3server.operations import operation_submit_and_undo
 from v3server.request_actor import Actor
-from v3server.v3_error_types import HumanHandProtected, Invalid
+from v3server.v3_error_types import AiInvolvementRefused, HumanHandProtected, Invalid
 
 PAGE_SPEC = {"frame_width_mm": 150, "frame_height_mm": 220, "trim_width_mm": 182, "trim_height_mm": 257,
              "bleed_mm": 3, "gutter_x_mm": 2, "gutter_y_mm": 5}
+
+
+TERMS = {"commercial_use": "yes", "rights_holder": "作者本人", "training_use": "no", "credit_required": "no",
+         "terms_note": "作者と書面で確認", "checked_on": "2026-10-08"}
 
 
 def name_panel(n: int, text: str) -> dict:
@@ -37,6 +42,13 @@ async def ai_op(authz, wid, on_behalf_of, body):
             session, authz, Actor(kind="ai", id="ai-test", on_behalf_of=on_behalf_of), wid, body)
 
 
+async def allow_ai(api, wid, u, *tasks, mode="ai_auto"):
+    """作業のAIの関与を選ぶ（既定は「AIが案を出し人が選ぶ」なので、AIに直接変えさせる試験で使う）。"""
+    for t in tasks:
+        r = await op(api, wid, u, {"type": "set_ai_involvement", "task": t, "mode": mode})
+        assert r.status_code == 200, r.text
+
+
 async def work_json(api, wid, u):
     return (await api.get(f"/works/{wid}", headers=h(u))).json()
 
@@ -49,7 +61,9 @@ async def test_人が変えた項目はAIが変えられず_ほかの項目は�
     frame = {"polygon_mm": [[0, 0], [150, 0], [150, 70], [0, 70]], "bleeds": False}
     assert (await op(api, wid, a, {"type": "update_panel", "id": pid, "frame": frame})).status_code == 200
     panel = next(p for p in (await work_json(api, wid, a))["panels"] if p["id"] == pid)
-    assert panel["human_hand_fields"] == ["frame"]
+    # 人が足したコマなので読む順にも印が付く
+    assert panel["human_hand_fields"] == ["frame", "order"]
+    await allow_ai(api, wid, a, "name", "panel_layout")
 
     # 人が引いた枠をAIは変えられない。中身は変えられる
     with pytest.raises(HumanHandProtected):
@@ -126,8 +140,15 @@ async def test_AIが採用すると人の手の所は残し_残した所を記�
     ai_prop = uuid.uuid4().hex
     await ai_op(authz, wid, a, {"type": "submit_name_proposal", "id": ai_prop, "episode_id": ep, "made_by": "ai",
                                 "pages": [name_page(1, ["AI1"])]})
+    # 既定（AIが案を出し人が選ぶ）では、AIは採用できない
+    with pytest.raises(AiInvolvementRefused):
+        await ai_op(authz, wid, a, {"type": "apply_name_proposal", "id": ai_prop})
+    await allow_ai(api, wid, a, "name", "panel_layout")
     event = await ai_op(authz, wid, a, {"type": "apply_name_proposal", "id": ai_prop})
-    assert event.inverse["kept_human_hand"]
+    # 人の手の所に当たった変更は、捨てずに判断待ちに置く
+    assert event.inverse["held_change_ids"]
+    held = (await api.get(f"/works/{wid}/held-changes", headers=h(a))).json()
+    assert {x["field"] for x in held} >= {"content", "removed"}
     w = await work_json(api, wid, a)
     p1 = sorted([p for p in w["panels"] if p["page_id"] == ids["page1"] and not p["removed"]], key=lambda p: p["order"])
     # 人が作った2コマは中身も数もそのまま
@@ -155,6 +176,10 @@ async def test_人が描いた絵と持ち込んだ絵を登録してコマに�
     assert r.status_code == 422
     r = await api.post(f"/works/{wid}/images", headers=h(a), files=files,
                        data={"role": "panel_art", "origin": "imported", "panel_id": pid, "source_note": "作者の手描き"})
+    assert r.status_code == 422  # 利用の条件が無い
+    r = await api.post(f"/works/{wid}/images", headers=h(a), files=files,
+                       data={"role": "panel_art", "origin": "imported", "panel_id": pid, "source_note": "作者の手描き",
+                             "usage_terms": json.dumps(TERMS)})
     assert r.status_code == 201, r.text
     img = r.json()["id"]
     got = (await api.get(f"/works/{wid}/images", headers=h(a), params={"panel_id": pid})).json()
