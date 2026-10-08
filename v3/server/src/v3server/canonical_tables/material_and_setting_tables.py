@@ -81,6 +81,8 @@ class ExportRun(Base):
     dpi: Mapped[int] = mapped_column(Integer)
     # 紙の大きさ（mm の [幅, 高さ]）。ページの絵はこの真ん中に置く。無ければ塗り足し込みのページの大きさ
     paper_mm: Mapped[list[Any] | None] = mapped_column()
+    # 文字の言語。無ければ元の言語（TextItem.text）。言語を決めたら訳文（text_item_translations）で描く
+    language: Mapped[str | None] = mapped_column(String(35))
     # queued・running・done・failed
     status: Mapped[str] = mapped_column(String(16), default="queued")
     detail: Mapped[str | None] = mapped_column(Text)

@@ -21,7 +21,7 @@ from v3server.canonical_tables.work_tree_tables import Work
 from v3server.request_actor import Actor
 from v3server.v3_error_types import AiInvolvementRefused, Invalid
 
-Task = Literal["plan", "structure", "settings_material", "name", "panel_layout", "drawing", "finishing"]
+Task = Literal["plan", "structure", "settings_material", "name", "panel_layout", "drawing", "finishing", "translation"]
 Mode = Literal["ai_auto", "ai_proposes", "human_makes_ai_checks", "no_ai"]
 Action = Literal["propose", "decide", "check"]
 
@@ -36,6 +36,7 @@ TASK_TITLES = {
     "panel_layout": "コマ割り（S3。枠・読む順・段の割り）",
     "drawing": "作画（S4。コマの絵・層・絵の置き方）",
     "finishing": "仕上げ（S5。文字の置き場・書体と飾り・しっぽ・フキダシの形・トーン・図形・絵の仕上げ）",
+    "translation": "翻訳（元の言語のほかの言語の文字）",
 }
 
 _ALLOWED: dict[str, frozenset[str]] = {
@@ -78,6 +79,9 @@ HUMAN_EDITABLE_FIELDS: dict[str, dict[str, str]] = {
                          "proposal_state": "settings_material"},
     "work_plans": {"synopsis": "plan", "audience": "plan", "exclusions": "plan", "notes": "plan"},
     "panel_templates": {"name": "panel_layout", "frames": "panel_layout"},
+    "text_item_translations": {"text": "translation", "writing_direction": "translation",
+                               "font_size_pt": "translation"},
+    "element_generation_settings": {"prompt": "drawing", "negative_prompt": "drawing"},
     "pen_strokes": {k: "drawing" for k in ("points", "width_mm", "color", "opacity", "brush", "brush_options", "seed",
                                            "stack_order")},
 }
@@ -85,7 +89,8 @@ HUMAN_EDITABLE_FIELDS: dict[str, dict[str, str]] = {
 # 行を抜く・足すときの作業
 ROW_TASK = {"pages": "panel_layout", "panels": "panel_layout", "text_items": "name", "panel_layers": "drawing",
             "page_items": "finishing", "annotation_items": ABOUT_TASK, "material_entries": "settings_material",
-            "panel_templates": "panel_layout", "pen_strokes": "drawing"}
+            "panel_templates": "panel_layout", "pen_strokes": "drawing",
+            "text_item_translations": "translation", "element_generation_settings": "drawing"}
 
 # 行を変えるときのAIの手。書いていない表は decide（正本の値を変える）
 ROW_ACTION = {"annotation_items": "check"}
