@@ -14,6 +14,7 @@ from v3server.current_app_import.fabric_geometry import css_color, object_polygo
 from v3server.current_app_import.import_plan import TakenImage, build_import_plan, referenced_image_keys
 from v3server.current_app_import.project_file_reader import (
     ProjectFileError,
+    UnpackBudget,
     data_url_bytes,
     read_project_file,
     unpack_container,
@@ -25,6 +26,8 @@ from v3server.review_progress import PageStatus, estimate
 from v3server.v3_error_types import Invalid
 
 FIXTURE = pathlib.Path(__file__).resolve().parents[1] / "fixtures" / "current_app_project_4pages.lz4"
+# ほどいた中身の上限（V3_CURRENT_APP_IMPORT_MAX_BYTES）。上限を試す試験のほかは十分に大きくする
+LIMIT = 1 << 30
 A4 = PageSpec(frame_width_mm=180, frame_height_mm=270, trim_width_mm=210, trim_height_mm=297, bleed_mm=3,
               gutter_x_mm=2, gutter_y_mm=5)
 
@@ -46,21 +49,21 @@ def page_files(objects: list[dict], width=600, height=848.57) -> list[tuple[str,
 
 
 def test_本物のファイルを読む():
-    p = read_project_file(FIXTURE.read_bytes())
+    p = read_project_file(FIXTURE.read_bytes(), LIMIT)
     assert not p.single_page and len(p.pages) == 4
     assert [len(x.canvas["objects"]) for x in p.pages] == [0, 10, 0, 2]
     assert p.pages[1].page_width_mm == 210 and p.pages[1].history_count > 0
 
 
 def test_1ページのファイルも読み_最後の状態を使う():
-    p = read_project_file(container(page_files([{"type": "rect"}])))
+    p = read_project_file(container(page_files([{"type": "rect"}])), LIMIT)
     assert p.single_page and p.pages[0].canvas["objects"] == [{"type": "rect"}] and p.pages[0].history_count == 1
 
 
 @pytest.mark.parametrize("data", [b"", b"\x05\x00\x00\x00abc", b"\x02\x00\x00\x00{}xx"])
 def test_形の違うファイルは止める(data):
     with pytest.raises(ProjectFileError):
-        unpack_container(data)
+        unpack_container(data, UnpackBudget(LIMIT))
 
 
 def test_古いzipの形と中身の違う入れ物は止める():
@@ -68,11 +71,31 @@ def test_古いzipの形と中身の違う入れ物は止める():
     with zipfile.ZipFile(buf, "w") as z:
         z.writestr("a.json", "{}")
     with pytest.raises(ProjectFileError):
-        read_project_file(buf.getvalue())
+        read_project_file(buf.getvalue(), LIMIT)
     with pytest.raises(ProjectFileError, match="中身でない"):
-        read_project_file(container([("other.bin", b"x")]))
+        read_project_file(container([("other.bin", b"x")]), LIMIT)
     with pytest.raises(ProjectFileError, match="canvas_info"):
-        read_project_file(container(page_files([])[:2]))
+        read_project_file(container(page_files([])[:2]), LIMIT)
+
+
+def test_ほどいた大きさの上限を超える物は止める():
+    # 1バイトの繰り返しは LZ4 でとても小さくなる（縮めた本体は数 KB で、ほどくと 64MB）
+    bomb = b"\0" * (64 << 20)
+    small = container([("state_000000.json", bomb)])
+    assert len(small) < 1 << 20
+    with pytest.raises(ProjectFileError, match="上限"):
+        read_project_file(small, 1 << 20)
+    # 見出しの大きさをごまかしても、ほどくときに上限で止まる（見出しは小さく、中身は大きい）
+    body = lz4.frame.compress(bomb)
+    head = json.dumps([{"name": "state_000000.json", "size": 10}]).encode()
+    with pytest.raises(ProjectFileError, match="上限"):
+        read_project_file(struct.pack("<I", len(head)) + head + body, 1 << 20)
+    # 入れ子の入れ物は合計で数える（1つずつは上限の内でも、合わせると超える）
+    page = container(page_files([{"type": "rect"}]) + [("pad.bin", b"\0" * (600 << 10))])
+    nested = container([("lz4_part_0.lz4", page), ("lz4_part_1.lz4", page)])
+    assert len(read_project_file(container([("lz4_part_0.lz4", page)]), 1 << 20).pages) == 1
+    with pytest.raises(ProjectFileError, match="上限"):
+        read_project_file(nested, 1 << 20)
 
 
 def test_dataURLはbase64だけ読む():
@@ -111,7 +134,7 @@ def test_色():
 
 
 def fixture_plan(tmp_dir: pathlib.Path):
-    proj = read_project_file(FIXTURE.read_bytes())
+    proj = read_project_file(FIXTURE.read_bytes(), LIMIT)
     imgs = {}
     for i, (k, v) in enumerate(referenced_image_keys(proj).items()):
         path = tmp_dir / f"{i}.bin"
@@ -146,7 +169,7 @@ def test_コマの位置は基本枠からのmmで_読む順は右から(tmp_pat
 
 
 def test_寸法の違うページは物を入れず報告する():
-    proj = read_project_file(container(page_files([{"type": "rect", "isPanel": True}])))
+    proj = read_project_file(container(page_files([{"type": "rect", "isPanel": True}])), LIMIT)
     proj.pages[0].page_width_mm = 182
     plan = build_import_plan(proj, A4, "rtl", {}, "x", "試験")
     assert len(plan.pages) == 1 and not plan.panels
@@ -154,7 +177,7 @@ def test_寸法の違うページは物を入れず報告する():
 
 
 def test_入口で止めた絵は入れず理由を残す():
-    proj = read_project_file(FIXTURE.read_bytes())
+    proj = read_project_file(FIXTURE.read_bytes(), LIMIT)
     blocked = {k: TakenImage(None, None, None, None, None, blocked="判定で止めた") for k in referenced_image_keys(proj)}
     plan = build_import_plan(proj, A4, "rtl", blocked, "x", "試験")
     assert not plan.images

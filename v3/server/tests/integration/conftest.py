@@ -1,4 +1,8 @@
-"""試験は compose の PostgreSQL（v3_test）・OpenFGA・Temporal を実際に使う。先に `docker compose up -d` しておく。"""
+"""試験は compose の PostgreSQL・OpenFGA・Temporal を実際に使う。先に `docker compose up -d` しておく。
+
+データベースは、流すたびに新しく作る（v3_test_<ランダム>）。終わったら消す。前は v3_test を全員で使い、別の作業の試験が
+始めに表を全部消して作り直す（downgrade base）ので、流している途中の試験が落ちることがあった（2026-10-08）。
+OpenFGA のストアはデータベースに id を持つので、データベースを分けるとストアも分かれる。"""
 
 import asyncio
 import os
@@ -10,16 +14,18 @@ from sqlalchemy.engine import make_url
 
 from v3server.server_settings import Settings, get_settings
 
-# 試験の DB は、.env の V3_DATABASE_URL と同じサーバーの v3_test。別の作業と同じデータベースを使わないときは
-# V3_TEST_DATABASE_URL で替える。利用者は開発用の見出し（X-V3-User）で名乗り、絵は手元のフォルダに置く
-TEST_DB = os.environ.get("V3_TEST_DATABASE_URL") or make_url(Settings().database_url).set(
-    database="v3_test").render_as_string(hide_password=False)
+# 試験の DB のサーバーは、.env の V3_DATABASE_URL と同じ。V3_TEST_DATABASE_URL で替えられる（名前は v3_test の代わりの頭に使う）。
+# 利用者は開発用の見出し（X-V3-User）で名乗り、絵は手元のフォルダに置く
+_BASE_URL = make_url(os.environ.get("V3_TEST_DATABASE_URL") or make_url(Settings().database_url).set(database="v3_test"))
+TEST_DB_NAME = f"{_BASE_URL.database}_{uuid.uuid4().hex[:10]}"
+TEST_DB = _BASE_URL.set(database=TEST_DB_NAME).render_as_string(hide_password=False)
 os.environ["V3_DATABASE_URL"] = TEST_DB
 os.environ["V3_AUTH_MODE"] = "dev_header"
 os.environ["V3_IMAGE_STORE"] = "local"
 get_settings.cache_clear()
 
 import httpx  # noqa: E402
+import psycopg  # noqa: E402
 import pytest  # noqa: E402
 from temporalio.client import Client  # noqa: E402
 
@@ -36,10 +42,24 @@ def _alembic(*args: str) -> None:
                    capture_output=True)
 
 
+def _maintenance(sql: str) -> None:
+    """データベースを作る・消す（サーバーの postgres データベースにつないで流す）。"""
+    url = _BASE_URL.set(database="postgres", drivername="postgresql")
+    with psycopg.connect(url.render_as_string(hide_password=False), autocommit=True) as conn:
+        conn.execute(sql)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def schema():
-    _alembic("downgrade", "base")
-    _alembic("upgrade", "head")
+    _maintenance(f'CREATE DATABASE "{TEST_DB_NAME}"')
+    try:
+        # 戻す移行も通ることを確かめてから作り直す
+        _alembic("upgrade", "head")
+        _alembic("downgrade", "base")
+        _alembic("upgrade", "head")
+        yield
+    finally:
+        _maintenance(f'DROP DATABASE IF EXISTS "{TEST_DB_NAME}" WITH (FORCE)')
 
 
 @pytest.fixture(scope="session")

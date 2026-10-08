@@ -25,6 +25,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.translation_review_import_tables import ElementGenerationSetting
 from v3server.current_app_import.project_file_reader import data_url_bytes, read_project_file
 from v3server.database_engine import get_sessionmaker
+from v3server.server_settings import get_settings
 from v3server.v3_error_types import Forbidden
 
 FIXTURE = pathlib.Path(__file__).resolve().parents[1] / "fixtures" / "current_app_project_4pages.lz4"
@@ -62,7 +63,7 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     rep = r.json()
 
     # 元のファイル（独立に読む）
-    src = read_project_file(FIXTURE.read_bytes())
+    src = read_project_file(FIXTURE.read_bytes(), 1 << 30)
     objects = [o for p in src.pages for o in p.canvas["objects"]]
     assert rep["counts"]["pages"] == len(src.pages) == 4
     assert rep["counts"]["source_objects"] == len(objects)
@@ -124,6 +125,31 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     async with get_sessionmaker()() as s:
         assert all(x.removed for x in (await s.execute(select(ElementGenerationSetting).where(
             ElementGenerationSetting.work_id == wid))).scalars())
+
+
+async def test_ほどくと大きくなるファイルは上限で断る(api, image_dir, monkeypatch):  # noqa: F811
+    """縮めた本体は小さく、ほどくと大きい（圧縮の爆弾）。送る本体の上限（V3_REQUEST_MAX_BYTES）の内でも、
+    ほどいた大きさの上限（V3_CURRENT_APP_IMPORT_MAX_BYTES）で止め、何も入れない。"""
+    import json
+    import struct
+
+    import lz4.frame
+
+    a = user()
+    ids = await new_work(api, a)
+    wid = ids["work"]
+    assert (await op(api, wid, a, {"type": "set_work_settings", "page_spec": A4_SPEC})).status_code == 200
+    monkeypatch.setattr(get_settings(), "current_app_import_max_bytes", 8 << 20)
+    body = lz4.frame.compress(b"\0" * (256 << 20))
+    head = json.dumps([{"name": "state_000000.json", "size": 16}]).encode()
+    bomb = struct.pack("<I", len(head)) + head + body
+    assert len(bomb) < 2 << 20
+    before = len((await work_json(api, wid, a))["pages"])
+    r = await api.post(f"/works/{wid}/episodes/{ids['episode']}/current-app-imports", headers=h(a),
+                       files={"project": ("bomb.lz4", bomb, "application/octet-stream")},
+                       data={"image_origin": "imported", "usage_terms": json.dumps(TERMS)})
+    assert r.status_code == 422 and "V3_CURRENT_APP_IMPORT_MAX_BYTES" in r.text, r.text
+    assert len((await work_json(api, wid, a))["pages"]) == before
 
 
 async def test_人が描いた絵として取り込むと出どころは人(api, image_dir):  # noqa: F811

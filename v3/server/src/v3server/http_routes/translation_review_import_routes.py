@@ -50,6 +50,7 @@ from v3server.operations.current_app_import_operations import ImportCurrentAppPr
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.operations.text_translation_operations import LANGUAGE_PATTERN
 from v3server.review_progress import work_progress
+from v3server.server_settings import get_settings
 from v3server.usage_terms_schema import UsageTerms
 from v3server.v3_error_types import Invalid, NotFound
 
@@ -91,7 +92,7 @@ async def import_current_app_project(
     data = await project.read()
     name = project.filename or "project.lz4"
     try:
-        parsed = read_project_file(data)
+        parsed = read_project_file(data, get_settings().current_app_import_max_bytes)
     except (ProjectFileError, json.JSONDecodeError, UnicodeDecodeError) as e:
         raise Invalid(f"今のアプリのプロジェクトとして読めない: {e}") from e
     taken: dict[str, TakenImage] = {}
