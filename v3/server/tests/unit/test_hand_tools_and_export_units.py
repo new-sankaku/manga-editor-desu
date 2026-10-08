@@ -14,7 +14,7 @@ from pydantic import ValidationError
 
 from v3server.generation_queue.known_processes import KNOWN_PROCESSES, check_process_task
 from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke, erase_pixels
-from v3server.hand_tools.vector_strokes import StrokeValues, erase, moved
+from v3server.hand_tools.vector_strokes import StrokeValues, crossing_indices, erase, moved, resample, stroke_box
 from v3server.llm_questions.extract_characters_question import (
     build_extract_characters_question,
     parse_extract_characters_answer,
@@ -89,6 +89,37 @@ def test_stroke_values_rules():
     with pytest.raises(ValidationError):  # 時刻が逆
         StrokeValues.model_validate({**ok, "points": [(0, 0, .5, 1), (1, 1, .5, 0)]})
     assert moved([(1, 2, .5, 0)], 1, -1) == [[2, 1, .5, 0]]
+    # 筆圧の無い線（null）は受ける。1本の中で混ざるのは断る
+    StrokeValues.model_validate({**ok, "points": [(0, 0, None, 0), (1, 1, None, 1)]})
+    with pytest.raises(ValidationError):
+        StrokeValues.model_validate({**ok, "points": [(0, 0, None, 0), (1, 1, .5, 1)]})
+    assert moved([(1, 2, None, 0)], 1, -1) == [[2, 1, None, 0]]
+
+
+def test_pressure_free_strokes_resample_and_erase_without_inventing_pressure():
+    pts = [(0, 0, None, 0), (4, 0, None, 4)]
+    assert all(p[2] is None for p in resample(pts, 1))
+    pieces = erase(pts, 0.5, [(2, -1), (2, 1)], 0.5, "touched", [])
+    assert len(pieces) == 2 and all(p[2] is None for piece in pieces for p in piece)
+
+
+def test_crossings_use_the_index_and_match_the_plain_rule():
+    # 索引で絞った答えが、全部の区間の組を調べた答えと同じになる（ずらした線をたくさん並べて比べる）
+    def orient(a, b, c):
+        return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+
+    def plain(points, others):
+        return [i for i, (a, b) in enumerate(zip(points, points[1:], strict=False))
+                if any((orient(c, d, a) > 0) != (orient(c, d, b) > 0) and (orient(a, b, c) > 0) != (orient(a, b, d) > 0)
+                       for o in others for c, d in zip(o, o[1:], strict=False))]
+
+    rng = np.random.default_rng(3)
+    pts = [(x, float(np.sin(x)), .5, x) for x in np.linspace(0, 20, 60)]
+    others = [[(float(x), float(y), .5, i) for i, (x, y) in enumerate(rng.uniform(-2, 22, size=(5, 2)))]
+              for _ in range(40)] + [[(2, -3, .5, 0), (2, 3, .5, 1)], [(50, 50, .5, 0), (60, 60, .5, 1)]]
+    assert crossing_indices(pts, others) == plain(pts, others) and crossing_indices(pts, others)
+    assert crossing_indices(pts, []) == [] and crossing_indices(pts[:1], others) == []
+    assert stroke_box([(1, 2, None, 0), (3, -1, None, 1)], 1.0) == (0.5, -1.5, 3.5, 2.5)
 
 
 def test_pixel_eraser_makes_mask():
@@ -111,6 +142,8 @@ def _png_bytes(img):
 
 PID, P1, L1, T1, I1 = "9" * 32, "a" * 32, "b" * 32, "c" * 32, "d" * 32
 FRAME_STYLE = {"line_width_mm": 0.5, "line_color": "#000000"}
+TYPESETTING = {"line_spacing_ratio": 0.3, "line_break": "character", "tate_chu_yoko_max_digits": 2,
+               "tate_chu_yoko_marks": True, "align": "start"}
 
 
 def _content(**over):
@@ -124,13 +157,14 @@ def _content(**over):
     text = SimpleNamespace(id=T1, order=0, item_kind="dialogue", text="あい", speaker=None, box_mm=[5, 25, 15, 40],
                            font_size_pt=12, font_family="ipag", writing_direction="vertical",
                            decoration={"fill": "#000000"}, ruby=[], transform=None, opacity=1.0, adjustments=[],
+                           panel_id=P1, tail_target_mm=None, joined_to_previous=False, spans=[], typesetting=None,
                            balloon_shape={"kind": "custom", "outline_mm": [(4, 24), (16, 24), (16, 41), (4, 41)],
                                           "line_width_mm": 0.3, "line_color": "#000000", "fill_color": "#ffffff"})
     tone = SimpleNamespace(id=I1, item_kind="tone", box_mm=[0, 0, 30, 20], transform=None, stack_order=0, opacity=1.0,
                            visible=True, adjustments=[],
                            spec={"kind": "dots", "target": {"kind": "panel", "panel_id": P1}, "density": 0.3,
                                  "lines_per_inch": 30})
-    values = dict(page_id=PID, spec=SPEC, text_direction="vertical", preferences={"frame_style": FRAME_STYLE},
+    values = dict(page_id=PID, spec=SPEC, text_direction="vertical", preferences={"frame_style": FRAME_STYLE, "typesetting": TYPESETTING},
                   panels=[panel], layers=[hand], texts=[text], page_items=[tone],
                   images={"img1": "x", "img2": "y"})
     values.update(over)
@@ -183,8 +217,9 @@ def test_render_page_refuses_missing_values():
 def test_text_render_and_font_lookup(tmp_path):
     got = render_texts([{"id": "t", "text": "縦書き", "font_path": font_path(FONT_DIR, "ipag"), "font_size_px": 24,
                          "vertical": True, "color": "#000000", "box_w_px": 40, "box_h_px": 100,
-                         "line_gap_ratio": 0.2, "decoration": {"fill": "#000000"}, "ruby": []}], NODE, TEXT_SCRIPT)
-    assert np.asarray(got[0])[..., 3].sum() > 0
+                         "typesetting": TYPESETTING, "spans": [], "language": "ja",
+                         "decoration": {"fill": "#000000"}, "ruby": []}], NODE, TEXT_SCRIPT)
+    assert np.asarray(got[0].image)[..., 3].sum() > 0 and got[0].lines == 1 and not got[0].overflow
     with pytest.raises(TextRenderError, match="無い"):
         font_path(FONT_DIR, "存在しない書体")
     with pytest.raises(TextRenderError, match="V3_FONT_DIR"):
@@ -260,7 +295,16 @@ def test_psd_round_trip_matching(tmp_path):
            "layers": edited}
     write_layered_psd(req, NODE, WRITER, 60)
 
-    read = read_psd((tmp_path / "edited.psd").read_bytes())
+    psd_path = tmp_path / "edited.psd"
+    # 層の数・画素数の上限：超えたら展開せずに止める
+    from psd_tools import PSDImage
+
+    n_layers = len(list(PSDImage.open(psd_path).descendants()))
+    with pytest.raises(Invalid, match="層が多すぎる"):
+        read_psd(psd_path, max_pixels=w * h, max_layers=n_layers - 1)
+    with pytest.raises(Invalid, match="画素が多すぎる"):
+        read_psd(psd_path, max_pixels=w * h - 1, max_layers=n_layers)
+    read = read_psd(psd_path, max_pixels=w * h, max_layers=n_layers)
     matches = match_layers(read, exported)
     kinds = {(m.kind, m.marker) for m in matches}
     assert ("changed", f"{P1}-image") in kinds

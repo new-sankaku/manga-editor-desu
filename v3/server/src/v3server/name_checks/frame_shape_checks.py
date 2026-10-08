@@ -251,7 +251,7 @@ def check_frame_reading_order(draft: NameDraft, thresholds: Thresholds) -> Check
     for pg in draft.pages:
         bb = rtl_bboxes(pg, draft)
         ns = sorted(bb)
-        for k, m in zip(ns, ns[1:]):
+        for k, m in zip(ns, ns[1:], strict=False):
             a, b = bb[k], bb[m]
             vov = min(a[3], b[3]) - max(a[1], b[1])
             if b[3] <= a[1] + FLOAT_EPS:
@@ -330,7 +330,7 @@ def check_row_cut_offset(draft: NameDraft, thresholds: Thresholds) -> CheckResul
         cuts = []
         for row in _row_boxes(pg, draft):
             # 右から読む写しなので、段の中は右のコマから並ぶ
-            cuts.append([(a[0] + b[2]) / 2 for a, b in zip(row, row[1:])])
+            cuts.append([(a[0] + b[2]) / 2 for a, b in zip(row, row[1:], strict=False)])
         for i in range(len(cuts) - 1):
             if not cuts[i] or not cuts[i + 1]:
                 continue
@@ -375,7 +375,7 @@ def check_gutter_side_contents(draft: NameDraft, thresholds: Thresholds) -> Chec
     findings = []
     looked = 0
     skipped = [pg.page for pg in draft.pages if pg.spread and not occupies_two_pages(pg)]
-    for pg, side in zip(draft.pages, sides):
+    for pg, side in zip(draft.pages, sides, strict=False):
         if occupies_two_pages(pg):
             g = spread_gutter_x(spec)
             for p in pg.panels:

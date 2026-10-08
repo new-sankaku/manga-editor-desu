@@ -11,6 +11,7 @@ from v3server.canonical_tables import (  # noqa: F401
     service_and_job_tables,
     text_and_layer_tables,
     threshold_and_finding_tables,
+    translation_review_import_tables,
     work_tree_tables,
 )
 from v3server.canonical_tables.table_base import Base

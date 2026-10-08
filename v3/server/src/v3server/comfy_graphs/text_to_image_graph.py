@@ -7,8 +7,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, Node, NodeOutput
+
+if TYPE_CHECKING:  # 注記の文字列だけで使う（実行時には読まない）
+    from v3server.comfy_graphs.model_loader_nodes import DiffusionSettings, Extras
 
 
 @dataclass(frozen=True)
@@ -76,8 +80,8 @@ def build_text_to_image(
     return TextToImageGraph(g, ckpt, pos, neg, sampler, decoded, save)
 
 
-def build_text_to_image_process(settings: 'DiffusionSettings', positive_text: str, negative_text: str, seed: int,
-                                width: int, height: int, extras: 'Extras', filename_prefix: str) -> ComfyNodeGraph:
+def build_text_to_image_process(settings: DiffusionSettings, positive_text: str, negative_text: str, seed: int,
+                                width: int, height: int, extras: Extras, filename_prefix: str) -> ComfyNodeGraph:
     """画像生成の処理「文から作る」（generation_queue/image_process_registry.py）の手順。
     上の build_text_to_image と同じ形で、モデルの読み方（checkpoint か別々のファイルか）と追加学習を中身から決める。"""
     from v3server.comfy_graphs.model_loader_nodes import add_model_loaders, add_sampler, add_text_and_extras

@@ -87,7 +87,7 @@ def check_balloon_order(draft: NameDraft, thresholds: Thresholds) -> CheckResult
         for p in pg.panels:
             placed = [(k, to_right_to_left_box(b.box_mm, draft.reading_direction, width))
                       for k, b in enumerate(p.balloons) if b.box_mm is not None]
-            for (_, a), (kb, b) in zip(placed, placed[1:]):
+            for (_, a), (kb, b) in zip(placed, placed[1:], strict=False):
                 looked += 1
                 vov = min(a[3], b[3]) - max(a[1], b[1])
                 if b[3] <= a[1] + FLOAT_EPS:

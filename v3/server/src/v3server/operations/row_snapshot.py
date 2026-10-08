@@ -9,26 +9,28 @@
 
 from typing import Any, Literal
 
+from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import (
     AnnotationItem,
     PageItem,
     PanelTemplate,
     PenStroke,
 )
-from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.text_and_layer_tables import (
     HeldAiChange,
     PanelLayer,
     ProtectedRegion,
     TextItem,
 )
+from v3server.canonical_tables.translation_review_import_tables import ElementGenerationSetting, TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
 from v3server.operations.human_hand_guard import change_with_human_hand, json_value, refuse_if_fixed
 from v3server.operations.operation_base import ApplyContext, OpBase, Scope, page_obj, work_obj
 from v3server.v3_error_types import Invalid, NotFound
 
 ROW_MODELS = {m.__tablename__: m for m in (Page, Panel, TextItem, PanelLayer, ProtectedRegion, HeldAiChange, PageItem,
-                                            AnnotationItem, PenStroke, PanelTemplate, MaterialEntry, WorkPlan)}
+                                            AnnotationItem, PenStroke, PanelTemplate, MaterialEntry, WorkPlan,
+                                            TextItemTranslation, ElementGenerationSetting)}
 
 
 class RowChanges:

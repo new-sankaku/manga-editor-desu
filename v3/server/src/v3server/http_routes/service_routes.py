@@ -7,11 +7,14 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
+from v3server.allowed_destinations import effective_location, is_allowed, proves_local
 from v3server.canonical_tables.service_and_job_tables import (
     ProcessRoute,
     Service,
     ServiceProcess,
 )
+from v3server.generation_queue.image_process_registry import SPECS, parse_settings
+from v3server.generation_queue.known_processes import check_process_task
 from v3server.http_routes.http_dependencies import (
     SYSTEM_OBJ,
     ActorDep,
@@ -20,9 +23,8 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
-from v3server.generation_queue.image_process_registry import SPECS, parse_settings
-from v3server.generation_queue.known_processes import check_process_task
 from v3server.operations.ai_involvement import Task
+from v3server.operations.operation_base import work_obj
 from v3server.usage_terms_schema import UsageTerms
 from v3server.v3_error_types import Invalid, NotFound
 
@@ -81,8 +83,38 @@ SP_FIELDS = ("service_id", "process", "aptitude", "cost_per_call", "model", "com
 ROUTE_FIELDS = ("process", "service_id", "resend_limit", "regenerate_limit", "ai_task", "ai_action")
 
 
+def _require_local_proven(location: str, adapter: str, endpoint: str | None) -> None:
+    """local と登録するなら、手元と言えること（allowed_destinations.proves_local）。言えなければ断る（api で登録する）。"""
+    if location != "local":
+        return
+    ok, why = proves_local(adapter, endpoint)
+    if not ok:
+        raise Invalid(f"local と言えない（{why}）。api として登録し、作品ごとに送ってよい先へ載せる")
+
+
+# 作品の参加者に見せる項目。住所（endpoint）・月の予算・処理ごとの費用と中身は、管理者だけが見る
+MEMBER_SERVICE_FIELDS = ("id", "name", "kind", "state", "paused", "usage_terms")
+
+
+@router.get("/works/{work_id}/services")
+async def list_work_services(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """作品の参加者が見るつなぎ先：名前・種類・手元か・状態・利用規約の要点と、この作品から送ってよいか。
+    処理ごとの送り先は、処理の名前と送り先の id だけ。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    services = (await session.execute(select(Service).order_by(Service.name))).scalars().all()
+    routes = (await session.execute(select(ProcessRoute))).scalars().all()
+    return {
+        "services": [row(s, *MEMBER_SERVICE_FIELDS) | {"location": effective_location(s),
+                                                        "allowed": await is_allowed(session, work_id, s)}
+                     for s in services],
+        "routes": [row(r, "process", "service_id") for r in routes],
+    }
+
+
 @router.get("/services")
-async def list_services(session: SessionDep, actor: ActorDep):
+async def list_services(session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """つなぎ先の全部（住所・予算・費用・中身を含む）。管理者だけ。作品の参加者は /works/{id}/services。"""
+    await require(authz, actor, "admin", SYSTEM_OBJ)
     services = (await session.execute(select(Service).order_by(Service.name))).scalars().all()
     sps = (await session.execute(select(ServiceProcess))).scalars().all()
     routes = (await session.execute(select(ProcessRoute))).scalars().all()
@@ -96,6 +128,7 @@ async def list_services(session: SessionDep, actor: ActorDep):
 @router.post("/services", status_code=201)
 async def create_service(body: NewService, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     await require(authz, actor, "admin", SYSTEM_OBJ)
+    _require_local_proven(body.location, body.adapter, body.endpoint)
     service = Service(**body.model_dump(mode="json"))
     session.add(service)
     await session.commit()
@@ -112,6 +145,7 @@ async def patch_service(service_id: str, body: ServicePatch, session: SessionDep
         raise NotFound(f"services:{service_id}")
     for k, v in body.model_dump(exclude_unset=True, mode="json").items():
         setattr(service, k, v)
+    _require_local_proven(service.location, service.adapter, service.endpoint)
     await session.commit()
     return row(service, *SERVICE_FIELDS)
 

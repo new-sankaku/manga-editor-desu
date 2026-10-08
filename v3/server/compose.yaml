@@ -1,4 +1,5 @@
 # V3サーバーが使う既製品。アプリ本体（v3server）はこのcomposeに入れず、手元で uv run で動かす。
+# どの口も 127.0.0.1 にだけ開く（ほかの機械から直接つながせない。点検5 5-4）。
 # 版は固定する。上げるときは llm_doc/V3サーバーの土台.md の「動かした版」も直す。
 name: v3
 
@@ -10,7 +11,7 @@ services:
       POSTGRES_PASSWORD: v3
       POSTGRES_DB: v3
     ports:
-      - "55432:5432"
+      - "127.0.0.1:55432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
@@ -40,8 +41,9 @@ services:
       - --dynamic-config-value
       - matching.enableFairness=true
     ports:
-      - "57233:7233"
-      - "58233:8233"
+      - "127.0.0.1:57233:7233"
+      # Temporal の画面
+      - "127.0.0.1:58233:8233"
     volumes:
       - temporaldata:/data
 
@@ -63,8 +65,11 @@ services:
       OPENFGA_DATASTORE_ENGINE: postgres
       OPENFGA_DATASTORE_URI: postgres://v3:v3@postgres:5432/openfga?sslmode=disable
       OPENFGA_PLAYGROUND_ENABLED: "false"
+      # 事前共有鍵が無い要求は断る。v3server は同じ .env の OPENFGA_PRESHARED_KEY を Bearer で送る（openfga_permissions.py）
+      OPENFGA_AUTHN_METHOD: preshared
+      OPENFGA_AUTHN_PRESHARED_KEYS: ${OPENFGA_PRESHARED_KEY:?OPENFGA_PRESHARED_KEY を .env に書いてください}
     ports:
-      - "58080:8080"
+      - "127.0.0.1:58080:8080"
     depends_on:
       openfga-migrate:
         condition: service_completed_successfully
@@ -78,7 +83,7 @@ services:
       # 単価の表を外から取りに行かない。費用はつなぎ先ごとに人が入れる（V3細部の決めごと 4.1）
       LITELLM_LOCAL_MODEL_COST_MAP: "True"
     ports:
-      - "54000:4000"
+      - "127.0.0.1:54000:4000"
     volumes:
       - ./docker/litellm.yaml:/app/config.yaml:ro
 

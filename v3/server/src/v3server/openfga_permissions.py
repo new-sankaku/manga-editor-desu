@@ -93,7 +93,9 @@ async def _set_value(session: AsyncSession, key: str, value: str) -> None:
 
 async def open_authz(session: AsyncSession) -> Authz:
     """ストアが無ければ作り、model.json が変わっていれば新しいモデルを書く。"""
-    client = httpx.AsyncClient(base_url=get_settings().openfga_url, timeout=10)
+    settings = get_settings()
+    client = httpx.AsyncClient(base_url=settings.openfga_url, timeout=10,
+                               headers={"Authorization": f"Bearer {settings.openfga_preshared_key}"})
     model_text = MODEL_PATH.read_text(encoding="utf-8")
     model_hash = hashlib.sha256(model_text.encode()).hexdigest()
 

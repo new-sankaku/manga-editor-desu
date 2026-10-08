@@ -7,9 +7,9 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from v3server.canonical_tables.event_and_lock_tables import Event
+from v3server.canonical_tables.event_and_lock_tables import Event, UndoConflict
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
-from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate, PenStroke
+from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate
 from v3server.canonical_tables.service_and_job_tables import WorkDestination
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
@@ -17,6 +17,7 @@ from v3server.canonical_tables.work_tree_tables import (
     Episode,
     Page,
     Panel,
+    Spread,
     Volume,
     Work,
 )
@@ -85,7 +86,8 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
                     "default_page_count", "page_spec", "first_page_is_left", "head_seq", "preferences"),
         "volumes": [row(v, "id", "number", "title", "removed") for v in await all_of(Volume)],
         "episodes": [row(e, "id", "volume_id", "number", "title", "deadline", "removed") for e in await all_of(Episode)],
-        "pages": [row(p, "id", "episode_id", "number", "layout", "human_hand_fields", "removed") for p in await all_of(Page)],
+        "pages": [row(p, "id", "episode_id", "number", "layout", "page_kind", "color_mode", "dpi", "nombre_display",
+                      "human_hand_fields", "removed") for p in await all_of(Page)],
         "panels": [
             row(p, "id", "page_id", "order", "frame", "role", "content", "image_id", "image_placement",
                 "frame_style", "adjustments", "fixed", "human_hand_fields", "human_confirmed", "removed")
@@ -94,7 +96,8 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
         "text_items": [
             row(t, "id", "page_id", "panel_id", "item_kind", "order", "text", "speaker", "balloon_kind",
                 "writing_direction", "font_size_pt", "box_mm", "tail_target_mm", "joined_to_previous",
-                "font_family", "decoration", "ruby", "balloon_shape", "transform", "opacity", "adjustments", "fixed",
+                "font_family", "decoration", "ruby", "spans", "typesetting", "balloon_shape", "transform", "opacity",
+                "adjustments", "fixed",
                 "human_hand_fields", "removed")
             for t in await all_of(TextItem)
         ],
@@ -103,11 +106,13 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
                 "adjustments", "fixed", "stroke_revision", "image_stroke_revision", "human_hand_fields", "removed")
             for la in await all_of(PanelLayer)
         ],
-        # 10.4 で足した表は、列をそのまま返す
+        # 10.4 で足した表は、列をそのまま返す。ペンの線は返さない（1冊分の点は大きすぎる）。
+        # 線は層ごとに GET /works/{id}/layers/{layer_id}/pen-strokes で区切って取る（pen_stroke_routes.py）
         **{name: [all_columns(x) for x in await all_of(model)]
-           for name, model in (("page_items", PageItem), ("pen_strokes", PenStroke),
+           for name, model in (("page_items", PageItem),
                                ("annotation_items", AnnotationItem), ("panel_templates", PanelTemplate),
-                               ("material_entries", MaterialEntry), ("work_plans", WorkPlan))},
+                               ("material_entries", MaterialEntry), ("work_plans", WorkPlan),
+                               ("spreads", Spread))},
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],
         "destinations": [d.service_id for d in await all_of(WorkDestination)],
     }
@@ -168,3 +173,12 @@ async def list_events(work_id: str, session: SessionDep, authz: AuthzDep, actor:
             "created_at") | {"undoable": e.inverse is not None, "held_changes": e.held_changes or []}
         for e in events
     ]
+
+
+@router.get("/works/{work_id}/undo-conflicts")
+async def list_undo_conflicts(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """後の変更を上書きするので止めた取り消しの記録（operations/field_change_record.py）。古い順。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    rows = (await session.execute(select(UndoConflict).where(UndoConflict.work_id == work_id)
+                                  .order_by(UndoConflict.created_at))).scalars().all()
+    return [row(c, "id", "event_id", "actor_kind", "actor_id", "conflicts", "created_at") for c in rows]

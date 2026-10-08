@@ -1,11 +1,13 @@
 """1ページを層ごとの絵にする（書き出しの PNG・PDF・PSD で同じ物を使う）。
 
 層の順（下から。V3細部の決めごと 10.3）：
-  紙 → コマごとの絵のグループ（地の色・コマの1枚の絵・層） → トーン・図形 → コマ枠 → 人の手 → フキダシ → 写植 → 描き文字
+  紙 → コマごとの絵のグループ（地の色・コマの1枚の絵・層） → トーン・図形 → コマ枠 → 人の手 → フキダシ → 写植 → 描き文字 → ノンブル
+見開き（render_spread）は：紙 → 見開きの絵 → 左のページの層（紙を除く。ノドで切る） → 右のページの層（同じ）
 どの層の名前も「名前 [id]」で終わる。id は正本の行の id か、ページ・コマの id に「-paper」などを付けたもの
 （PSD を戻すとき、この印で層と行を結び付ける。print_export/psd_import_matching.py）。
 
-座標：正本は基本枠の mm（x は右、y は下）。絵は塗り足しを含むページの画素（dpi）。
+座標：正本は基本枠の mm（x は右、y は下）。絵は塗り足しを含むページの画素（dpi）。見開きでは、右のページは仕上がりの幅だけ右に置く。
+フキダシのしっぽと、つなげたフキダシ（joined_to_previous）は、外形と多角形の和（shapely）で1つの形にして描く（重なった所に線を残さない）。
 足りない値（書体・文字の大きさ・枠の線・置き場の決まっていない絵）は、補わずに止める（RenderRefused）。
 """
 
@@ -17,6 +19,7 @@ from typing import Any
 
 import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import (
@@ -27,9 +30,12 @@ from v3server.name_structure.item_styles import (
     blend_mode_of,
 )
 from v3server.name_structure.item_transform import ItemTransform, transform_matrix
+from v3server.name_structure.print_settings import Typesetting
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.print_export.binarize_and_halftone import halftone_screen
+from v3server.print_export.book_layout import NombrePlace
 from v3server.print_export.print_pdf_export import canvas_size_px
+from v3server.print_export.text_render import RenderedText
 
 MM_PER_INCH = 25.4
 
@@ -43,13 +49,20 @@ LAYER_NAME_HAND_DRAWN = "人の手"
 LAYER_NAME_BALLOON = "フキダシ"
 LAYER_NAME_TYPESET = "写植"
 LAYER_NAME_SFX = "描き文字"
+LAYER_NAME_NOMBRE = "ノンブル"
+LAYER_NAME_SPREAD_IMAGE = "見開きの絵"
+LAYER_NAME_PAGE = "ページ"
 
-# 行と行の間（文字の大きさとの比）。今のアプリの縦書きの行間に合わせる値ではなく、書き出しの決めごと（未検証）
-LINE_GAP_RATIO = 0.2
+# ノンブルは1行の数字なので、組版は決まった形で組む（行間・改行・縦中横は使わない）
+NOMBRE_TYPESETTING = {"line_spacing_ratio": 0, "line_break": "none", "tate_chu_yoko_max_digits": 0,
+                      "tate_chu_yoko_marks": False, "align": "start"}
+
+# しっぽの曲がりを折れ線にするときの分け数（見た目の決まりではなく、曲線を多角形にする細かさ）
+TAIL_CURVE_STEPS = 16
 
 # 合成のときに作る印（ページ・コマの id に付ける）
 SYNTHETIC_SUFFIXES = ("-paper", "-fill", "-image", "-items", "-frame", "-hand", "-balloons", "-typeset", "-sfx",
-                      "-balloon")
+                      "-balloon", "-nombre")
 
 
 class RenderRefused(ValueError):
@@ -96,6 +109,8 @@ class PageContent:
     texts: list[Any]
     page_items: list[Any]
     images: dict[str, Any] = field(default_factory=dict)
+    # ノンブル（book_layout.py が決める）。出さないページは None
+    nombre: NombrePlace | None = None
 
 
 @dataclass
@@ -109,10 +124,34 @@ class RenderedPage:
 # ---------------------------------------------------------------- 座標
 
 
-def mm_to_px_matrix(spec: PageSpec, dpi: float) -> np.ndarray:
+def mm_to_px_matrix(spec: PageSpec, dpi: float, offset_x_mm: float = 0.0) -> np.ndarray:
+    """基本枠の mm → 絵の画素。offset_x_mm は、見開きの絵の中でこのページを右へずらす幅（右のページは仕上がりの幅）。"""
     ox, oy = spec.frame_origin_in_trim()
     k = dpi / MM_PER_INCH
-    return np.array([[k, 0, (ox + spec.bleed_mm) * k], [0, k, (oy + spec.bleed_mm) * k], [0, 0, 1]], float)
+    return np.array([[k, 0, (ox + spec.bleed_mm + offset_x_mm) * k], [0, k, (oy + spec.bleed_mm) * k], [0, 0, 1]], float)
+
+
+@dataclass
+class PageCanvas:
+    """ページを描く絵の大きさと、その中のページの置き場（見開きでは右のページを仕上がりの幅だけ右へ）。"""
+
+    size_px: tuple[int, int]
+    offset_x_mm: float
+
+
+def single_page_canvas(spec: PageSpec, dpi: float) -> PageCanvas:
+    return PageCanvas(canvas_size_px(spec, dpi), 0.0)
+
+
+def spread_size_px(spec: PageSpec, dpi: float) -> tuple[int, int]:
+    """見開き（2ページの仕上がり＋外側の塗り足し）の画素数。"""
+    return (round((2 * spec.trim_width_mm + 2 * spec.bleed_mm) / MM_PER_INCH * dpi),
+            round((spec.trim_height_mm + 2 * spec.bleed_mm) / MM_PER_INCH * dpi))
+
+
+def gutter_x_px(spec: PageSpec, dpi: float) -> int:
+    """見開きの絵の中のノドの位置（画素）。"""
+    return round((spec.bleed_mm + spec.trim_width_mm) / MM_PER_INCH * dpi)
 
 
 def _pts(m: np.ndarray, points) -> list[tuple[float, float]]:
@@ -229,21 +268,27 @@ def _tone_alpha(spec: ToneSpec, box_px: tuple[int, int, int, int], dpi: float, c
     k = spec.kind
     if k in ("dots", "lines"):
         gray = np.full((h, w), round(255 * (1 - spec.density)), np.uint8)
-        black = halftone_screen(gray, dpi, spec.lines_per_inch, spec.angle_deg, "round" if k == "dots" else "line")
+        black = halftone_screen(gray, dpi, spec.lines_per_inch, spec.angle_deg, "round" if k == "dots" else "line",
+                                origin_px=(box_px[0], box_px[1]))
         return Image.fromarray(black.astype(np.uint8) * 255, "L")
     if k == "gradient":
+        # 濃さを density から density_end へ、angle_deg の向きに変え、網点にする（網の目はページで揃える）
         a = math.radians(spec.angle_deg)
         ys, xs = np.mgrid[0:h, 0:w]
         t = (xs * math.cos(a) + ys * math.sin(a))
         t = (t - t.min()) / max(1e-9, t.max() - t.min())
-        return Image.fromarray((spec.density * (1 - t) * 255).astype(np.uint8), "L")
+        dens = spec.density + (spec.density_end - spec.density) * t
+        gray = np.clip(np.round(255 * (1 - dens)), 0, 255).astype(np.uint8)
+        black = halftone_screen(gray, dpi, spec.lines_per_inch, spec.screen_angle_deg, spec.dot_shape,
+                                origin_px=(box_px[0], box_px[1]))
+        return Image.fromarray(black.astype(np.uint8) * 255, "L")
     rng = np.random.default_rng(spec.seed)
     m = Image.new("L", (w, h), 0)
     d = ImageDraw.Draw(m)
     if k in ("sand", "snow"):
         r = max(0.5, spec.grain_mm / MM_PER_INCH * dpi / 2)
         n = int(spec.density * w * h / max(1.0, (2 * r) ** 2))
-        for x, y in zip(rng.uniform(0, w, n), rng.uniform(0, h, n)):
+        for x, y in zip(rng.uniform(0, w, n), rng.uniform(0, h, n), strict=False):
             d.ellipse((x - r, y - r, x + r, y + r), fill=255)
         return m
     if k == "focus_lines":
@@ -266,7 +311,7 @@ def _tone_alpha(spec: ToneSpec, box_px: tuple[int, int, int, int], dpi: float, c
         span = math.hypot(w, h)
         width = max(1.0, spec.density * span / spec.line_count)
         for off, length, pos in zip(rng.uniform(-span / 2, span / 2, spec.line_count),
-                                    rng.uniform(0.3, 1.0, spec.line_count), rng.uniform(-0.5, 0.5, spec.line_count)):
+                                    rng.uniform(0.3, 1.0, spec.line_count), rng.uniform(-0.5, 0.5, spec.line_count), strict=False):
             cx, cy = w / 2 + nx * off + ux * pos * span, h / 2 + ny * off + uy * pos * span
             hl = length * span / 2
             d.polygon([(cx - ux * hl, cy - uy * hl), (cx + ux * hl + nx * width / 2, cy + uy * hl + ny * width / 2),
@@ -353,16 +398,143 @@ def _placed_image(img: Image.Image, placement: dict, mm2px: np.ndarray, size, ad
     return _clip(out, left, top, [crop_quad]), left, top
 
 
-def render_page(content: PageContent, dpi: float, load_image: Callable[[str], bytes],
-                render_texts: Callable[[list[dict]], list[Image.Image]], font_path: Callable[[str], str]
-                ) -> RenderedPage:
-    spec = content.spec
-    size = canvas_size_px(spec, dpi)
+def _unit(dx: float, dy: float) -> tuple[float, float]:
+    n = math.hypot(dx, dy)
+    return dx / n, dy / n
+
+
+def tail_polygon(body: Polygon, tip: tuple[float, float], base_width: float, bend_ratio: float) -> Polygon | None:
+    """フキダシの外形 body から tip へ伸びるしっぽの多角形（画素）。先が外形の中なら None（しっぽは見えない）。
+
+    根元は、外形の中の点から先へ引いた線が外形を出る所。そこから幅の半分だけ内側に根元の辺を置くので、
+    外形と重ねて和を取ると、根元に線が残らない。曲がりは、両側の辺を同じ向きに膨らませる（2次の曲線）。"""
+    tip_pt = Point(tip)
+    if body.contains(tip_pt):
+        return None
+    c = body.centroid if body.contains(body.centroid) else body.representative_point()
+    crossing = LineString([c, tip_pt]).intersection(body.exterior)
+    pts = [crossing] if crossing.geom_type == "Point" else list(getattr(crossing, "geoms", []))
+    pts = [p for p in pts if p.geom_type == "Point"]
+    if not pts:
+        return None
+    exit_pt = min(pts, key=lambda p: p.distance(tip_pt))
+    dx, dy = _unit(tip[0] - c.x, tip[1] - c.y)
+    nx, ny = -dy, dx
+    bx, by = exit_pt.x - dx * base_width / 2, exit_pt.y - dy * base_width / 2
+    length = math.hypot(tip[0] - bx, tip[1] - by)
+    sides = []
+    for sgn in (1, -1):
+        sx, sy = bx + sgn * nx * base_width / 2, by + sgn * ny * base_width / 2
+        cx = (sx + tip[0]) / 2 + nx * bend_ratio * length
+        cy = (sy + tip[1]) / 2 + ny * bend_ratio * length
+        curve = []
+        for i in range(TAIL_CURVE_STEPS + 1):
+            t = i / TAIL_CURVE_STEPS
+            curve.append(((1 - t) ** 2 * sx + 2 * (1 - t) * t * cx + t * t * tip[0],
+                          (1 - t) ** 2 * sy + 2 * (1 - t) * t * cy + t * t * tip[1]))
+        sides.append(curve)
+    ring = sides[0] + list(reversed(sides[1]))[1:]
+    return Polygon(ring).buffer(0)
+
+
+def balloon_geometry(t, bs: BalloonShape, mm2px: np.ndarray) -> Polygon:
+    """フキダシ1つの形（画素）。しっぽの先（文字の tail_target_mm）があれば、しっぽを足した形。"""
+    body = Polygon(_pts(mm2px, bs.outline_mm)).buffer(0)
+    if t.tail_target_mm is None:
+        return body
+    if bs.tail_base_width_mm is None or bs.tail_bend_ratio is None:
+        raise RenderRefused(f"フキダシ {t.id} のしっぽの根元の幅・曲がり（balloon_shape.tail_base_width_mm・tail_bend_ratio）"
+                            "が決まっていない")
+    k = mm2px[0, 0]
+    tail = tail_polygon(body, _pts(mm2px, [t.tail_target_mm])[0], bs.tail_base_width_mm * k, bs.tail_bend_ratio)
+    return body if tail is None else body.union(tail)
+
+
+def _draw_shape(size, geom, fill, line, width) -> Image.Image:
+    img = Image.new("RGBA", size, (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    polys = list(geom.geoms) if isinstance(geom, MultiPolygon) else [geom]
+    for p in polys:
+        d.polygon(list(p.exterior.coords), fill=fill, outline=line, width=width)
+        for hole in p.interiors:
+            d.polygon(list(hole.coords), fill=(0, 0, 0, 0), outline=line, width=width)
+    return img
+
+
+def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], str]) -> dict:
+    prefs = content.preferences or {}
     k = dpi / MM_PER_INCH
-    mm2px = mm_to_px_matrix(spec, dpi)
+    if t.box_mm is None:
+        raise RenderRefused(f"文字 {t.id} の箱（box_mm）が決まっていない")
+    if t.font_size_pt is None:
+        raise RenderRefused(f"文字 {t.id} の大きさ（font_size_pt）が決まっていない")
+    family = t.font_family or prefs.get("fonts_by_kind", {}).get(t.item_kind)
+    if family is None:
+        raise RenderRefused(f"文字 {t.id} の書体が決まっていない（文字の font_family か、作品の preferences.fonts_by_kind）")
+    raw_ts = t.typesetting or prefs.get("typesetting")
+    if raw_ts is None:
+        raise RenderRefused(f"文字 {t.id} の組版（行間・自動の改行・縦中横）が決まっていない（文字の typesetting か、作品の "
+                            "preferences.typesetting）")
+    b = t.box_mm
+    deco = dict(t.decoration or {})
+    if not deco.get("fill"):
+        raise RenderRefused(f"文字 {t.id} の色（decoration.fill）が決まっていない")
+    spans = []
+    for sp in t.spans or []:
+        spans.append({"start": sp["start"], "end": sp["end"], "size_ratio": sp.get("size_ratio"),
+                      "embolden_ratio": sp.get("embolden_ratio"), "color": sp.get("color"),
+                      "font_path": font_path(sp["font_family"]) if sp.get("font_family") else None})
+    return {"id": t.id, "text": t.text, "font_path": font_path(family), "font_family": family,
+            "font_size_px": t.font_size_pt / 72 * dpi,
+            "vertical": (t.writing_direction or content.text_direction) == "vertical",
+            "color": deco["fill"], "language": prefs.get("language"),
+            "box_w_px": max(1, round((b[2] - b[0]) * k)), "box_h_px": max(1, round((b[3] - b[1]) * k)),
+            "typesetting": Typesetting.model_validate(raw_ts).model_dump(), "spans": spans,
+            "decoration": deco, "ruby": t.ruby or []}
+
+
+def text_jobs(content: PageContent, dpi: float, font_path: Callable[[str], str]) -> list[dict]:
+    """ページの文字（読む順）を、render_text.js に渡す形にする。入稿前の確かめも同じ形で組む。"""
+    return [_text_job(t, content, dpi, font_path) for t in sorted(content.texts, key=lambda t: t.order)]
+
+
+def nombre_job(content: PageContent, dpi: float, font_path: Callable[[str], str]) -> dict | None:
+    nb = content.nombre
+    if nb is None:
+        return None
+    return {"id": f"{content.page_id}-nombre", "text": nb.text, "font_path": font_path(nb.font_family),
+            "font_size_px": nb.font_size_pt / 72 * dpi, "vertical": False, "color": nb.color,
+            "language": (content.preferences or {}).get("language"), "box_w_px": 1, "box_h_px": 1,
+            "typesetting": NOMBRE_TYPESETTING, "spans": [], "decoration": {"fill": nb.color}, "ruby": []}
+
+
+def _nombre_node(content: PageContent, rt: RenderedText, dpi: float, offset_x_mm: float) -> Node:
+    nb = content.nombre
+    k = dpi / MM_PER_INCH
+    bleed = content.spec.bleed_mm
+    ax = (nb.x_mm + bleed + offset_x_mm) * k
+    ay = (nb.y_mm + bleed) * k
+    left = ax - {"left": 0, "center": rt.block_w / 2, "right": rt.block_w}[nb.anchor_x]
+    top = ay - {"top": 0, "bottom": rt.block_h}[nb.anchor_y]
+    img = rt.image
+    return Node(LAYER_NAME_NOMBRE, f"{content.page_id}-nombre", img, round(left - (img.width - rt.block_w) / 2),
+                round(top - (img.height - rt.block_h) / 2), table="pages")
+
+
+def render_page(content: PageContent, dpi: float, load_image: Callable[[str], bytes],
+                render_texts: Callable[[list[dict]], list[RenderedText]], font_path: Callable[[str], str],
+                canvas: PageCanvas | None = None, with_paper: bool = True) -> RenderedPage:
+    """1ページを層にする。canvas を渡すと、その大きさの絵の中にページを置く（見開き。render_spread が使う）。"""
+    spec = content.spec
+    canvas = canvas or single_page_canvas(spec, dpi)
+    size = canvas.size_px
+    k = dpi / MM_PER_INCH
+    mm2px = mm_to_px_matrix(spec, dpi, canvas.offset_x_mm)
     pid = content.page_id
     prefs = content.preferences or {}
-    nodes: list[Node] = [Node(LAYER_NAME_PAPER, f"{pid}-paper", Image.new("RGBA", size, (255, 255, 255, 255)))]
+    nodes: list[Node] = []
+    if with_paper:
+        nodes.append(Node(LAYER_NAME_PAPER, f"{pid}-paper", Image.new("RGBA", size, (255, 255, 255, 255))))
 
     def open_image(image_id: str) -> Image.Image:
         return Image.open(io.BytesIO(load_image(image_id))).convert("RGBA")
@@ -455,45 +627,45 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
     nodes.append(Node(LAYER_NAME_PANEL_FRAME, f"{pid}-frame", frame, table="pages"))
     nodes.append(Node(LAYER_NAME_HAND_DRAWN, f"{pid}-hand", children=hand))
 
-    # フキダシと文字
+    # フキダシ（しっぽと、つなげたフキダシを1つの形にする）
+    texts = sorted(content.texts, key=lambda t: t.order)
+    groups: list[dict[str, Any]] = []
+    last_in_panel: dict[str, int] = {}
+    for t in texts:
+        if not t.balloon_shape:
+            continue
+        bs = BalloonShape.model_validate(t.balloon_shape)
+        if bs.kind == "none":
+            continue
+        if bs.line_width_mm is None or bs.line_color is None:
+            raise RenderRefused(f"フキダシ {t.id} の線（line_width_mm・line_color）が決まっていない")
+        geom = balloon_geometry(t, bs, mm2px)
+        if t.joined_to_previous and t.panel_id in last_in_panel:
+            g = groups[last_in_panel[t.panel_id]]
+            g["geom"] = g["geom"].union(geom)
+            g["joined"].append(t.id)
+        else:
+            last_in_panel[t.panel_id] = len(groups)
+            groups.append({"id": t.id, "shape": bs, "geom": geom, "joined": []})
     balloons: list[Node] = []
+    for g in groups:
+        bs = g["shape"]
+        bimg = _draw_shape(size, g["geom"], _hex(bs.fill_color) if bs.fill_color else None, _hex(bs.line_color),
+                           max(1, round(bs.line_width_mm * k)))
+        bbox = bimg.getbbox()
+        if bbox:
+            balloons.append(Node(LAYER_NAME_BALLOON, f"{g['id']}-balloon", bimg.crop(bbox), bbox[0], bbox[1],
+                                 table="text_items"))
+
+    # 写植・描き文字・ノンブル
     typeset: list[Node] = []
     sfx: list[Node] = []
-    texts = sorted(content.texts, key=lambda t: t.order)
-    jobs = []
-    for t in texts:
-        if t.box_mm is None:
-            raise RenderRefused(f"文字 {t.id} の箱（box_mm）が決まっていない")
-        if t.font_size_pt is None:
-            raise RenderRefused(f"文字 {t.id} の大きさ（font_size_pt）が決まっていない")
-        family = t.font_family or prefs.get("fonts_by_kind", {}).get(t.item_kind)
-        if family is None:
-            raise RenderRefused(f"文字 {t.id} の書体が決まっていない（文字の font_family か、作品の preferences.fonts_by_kind）")
-        b = t.box_mm
-        deco = dict(t.decoration or {})
-        if not deco.get("fill"):
-            raise RenderRefused(f"文字 {t.id} の色（decoration.fill）が決まっていない")
-        jobs.append({"id": t.id, "text": t.text, "font_path": font_path(family),
-                     "font_size_px": t.font_size_pt / 72 * dpi,
-                     "vertical": (t.writing_direction or content.text_direction) == "vertical",
-                     "color": deco["fill"],
-                     "box_w_px": max(1, round((b[2] - b[0]) * k)), "box_h_px": max(1, round((b[3] - b[1]) * k)),
-                     "line_gap_ratio": LINE_GAP_RATIO, "decoration": deco, "ruby": t.ruby or []})
-        if t.balloon_shape:
-            bs = BalloonShape.model_validate(t.balloon_shape)
-            if bs.kind != "none":
-                if bs.line_width_mm is None or bs.line_color is None:
-                    raise RenderRefused(f"フキダシ {t.id} の線（line_width_mm・line_color）が決まっていない")
-                bimg = Image.new("RGBA", size, (0, 0, 0, 0))
-                ImageDraw.Draw(bimg).polygon(_pts(mm2px, bs.outline_mm),
-                                             fill=_hex(bs.fill_color) if bs.fill_color else None,
-                                             outline=_hex(bs.line_color), width=max(1, round(bs.line_width_mm * k)))
-                bbox = bimg.getbbox()
-                if bbox:
-                    balloons.append(Node(LAYER_NAME_BALLOON, f"{t.id}-balloon", bimg.crop(bbox), bbox[0], bbox[1],
-                                         table="text_items"))
-    rendered = render_texts(jobs) if jobs else []
-    for t, job, img in zip(texts, jobs, rendered):
+    jobs = text_jobs(content, dpi, font_path)
+    nb_job = nombre_job(content, dpi, font_path)
+    all_jobs = jobs + ([nb_job] if nb_job else [])
+    rendered = render_texts(all_jobs) if all_jobs else []
+    for t, job, rt in zip(texts, jobs, rendered, strict=False):
+        img = rt.image
         b = t.box_mm
         tr = ItemTransform.model_validate(t.transform or {})
         # 描いた絵の真ん中を箱の真ん中に合わせる
@@ -505,7 +677,7 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
             continue
         timg, left, top = got
         info = {"text": t.text, "orientation": "vertical" if job["vertical"] else "horizontal",
-                "font_name": t.font_family or prefs["fonts_by_kind"][t.item_kind], "font_size": job["font_size_px"],
+                "font_name": job["font_family"], "font_size": job["font_size_px"],
                 "color_rgb": list(_hex(job["color"])[:3]), "x": float(left), "y": float(top)}
         node = Node(t.speaker or t.item_kind, t.id, timg, left, top, blend_mode_of(t.adjustments or []), t.opacity,
                     text=info, table="text_items")
@@ -513,4 +685,74 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
     nodes.append(Node(LAYER_NAME_BALLOON, f"{pid}-balloons", children=balloons))
     nodes.append(Node(LAYER_NAME_TYPESET, f"{pid}-typeset", children=typeset))
     nodes.append(Node(LAYER_NAME_SFX, f"{pid}-sfx", children=sfx))
+    if nb_job:
+        nodes.append(_nombre_node(content, rendered[-1], dpi, canvas.offset_x_mm))
     return RenderedPage(size[0], size[1], nodes, composite(nodes, size))
+
+
+def _crop_nodes_x(nodes: list[Node], x0: int, x1: int) -> list[Node]:
+    """層の絵を x0 ≤ x < x1 の範囲に切る（見開きで、ページの層をノドで切る）。範囲に入らない層は除く。"""
+    out = []
+    for n in nodes:
+        if n.children is not None:
+            out.append(Node(n.name, n.marker, None, n.left, n.top, n.blend, n.opacity, n.hidden,
+                            _crop_nodes_x(n.children, x0, x1), n.text, n.table))
+            continue
+        if n.image is None:
+            out.append(n)
+            continue
+        a, b = max(x0, n.left), min(x1, n.left + n.image.width)
+        if b <= a:
+            continue
+        img = n.image.crop((a - n.left, 0, b - n.left, n.image.height))
+        out.append(Node(n.name, n.marker, img, a, n.top, n.blend, n.opacity, n.hidden, None, n.text, n.table))
+    return out
+
+
+@dataclass
+class SpreadContent:
+    """見開き1つ。left・right は左右のページ（どちらが前のページかは book_layout.py が読む向きで決める）。"""
+
+    spread_id: str
+    left: PageContent
+    right: PageContent
+    image_id: str | None
+    image_placement: dict | None
+    adjustments: list
+    # 見開きの絵の id → sha256（PageContent.images と同じ）
+    images: dict[str, str]
+
+
+def render_spread(content: SpreadContent, dpi: float, load_image: Callable[[str], bytes],
+                  render_texts: Callable[[list[dict]], list[RenderedText]], font_path: Callable[[str], str]
+                  ) -> RenderedPage:
+    """見開きを1枚の絵にする。左右のページの層はノドで切り（ページの塗り足しが相手のページに出ないように）、
+    ノドをまたぐ絵は見開きの絵（Spread の image）だけにする。"""
+    spec = content.left.spec
+    size = spread_size_px(spec, dpi)
+    gx = gutter_x_px(spec, dpi)
+    nodes: list[Node] = [Node(LAYER_NAME_PAPER, f"{content.spread_id}-paper",
+                              Image.new("RGBA", size, (255, 255, 255, 255)))]
+    if content.image_id is not None:
+        if content.image_placement is None:
+            raise RenderRefused(f"見開き {content.spread_id} の絵の置き場が決まっていない")
+        img = Image.open(io.BytesIO(load_image(content.image_id))).convert("RGBA")
+        got = _placed_image(img, content.image_placement, mm_to_px_matrix(spec, dpi, 0.0), size, content.adjustments,
+                            dpi)
+        if got:
+            im, left, top = got
+            nodes.append(Node(LAYER_NAME_SPREAD_IMAGE, f"{content.spread_id}-image", im, left, top,
+                              blend_mode_of(content.adjustments), table="spreads"))
+    for page, offset, (x0, x1) in ((content.left, 0.0, (0, gx)), (content.right, spec.trim_width_mm, (gx, size[0]))):
+        r = render_page(page, dpi, load_image, render_texts, font_path, PageCanvas(size, offset), with_paper=False)
+        nodes.append(Node(LAYER_NAME_PAGE, page.page_id, children=_crop_nodes_x(r.nodes, x0, x1), table="pages"))
+    return RenderedPage(size[0], size[1], nodes, composite(nodes, size))
+
+
+def split_spread(img: Image.Image, spec: PageSpec, dpi: float) -> tuple[Image.Image, Image.Image]:
+    """見開きの絵をノドで左右の2ページに分ける。どちらのページも、ノドの側にも塗り足しの幅だけ相手の絵を残す
+    （1ページの絵と同じ大きさ。print_pdf_export.canvas_size_px）。"""
+    w, h = canvas_size_px(spec, dpi)
+    if img.height != h:
+        raise RenderRefused(f"見開きの高さ {img.height} がページの高さ {h} と違う")
+    return img.crop((0, 0, w, h)), img.crop((img.width - w, 0, img.width, h))

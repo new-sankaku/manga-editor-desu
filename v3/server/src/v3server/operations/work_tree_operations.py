@@ -11,10 +11,11 @@ from v3server.canonical_tables.material_and_setting_tables import MaterialEntry
 from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
-from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Volume
+from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Spread, Volume
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import FrameStyle, checked_adjustments
 from v3server.name_structure.name_draft_schema import PanelFrame
+from v3server.name_structure.print_settings import ColorMode, NombreDisplay, PageKind
 from v3server.openfga_permissions import Tuple
 from v3server.operations.ai_involvement import ROW_ACTION, ROW_TASK, field_task, require_actor_may
 from v3server.operations.human_hand_guard import (
@@ -249,11 +250,16 @@ class UpdatePanel(OpBase):
 
 
 class UpdatePage(OpBase):
-    """ページの段の割りを変える。人が引いた割りも、AIが決めた割りも同じ形（name_structure の NamePage の rows など）。"""
+    """ページの段の割りを変える。人が引いた割りも、AIが決めた割りも同じ形（name_structure の NamePage の rows など）。
+    ページの種類・色の種類・解像度・ノンブルの出し方（name_structure/print_settings.py）も変える。これらは入稿の形なので人だけ。"""
 
     type: Literal["update_page"] = "update_page"
     id: str
     layout: dict[str, Any] | None = None
+    page_kind: PageKind | None = None
+    color_mode: ColorMode | None = None
+    dpi: int | None = Field(default=None, gt=0, le=2400)
+    nombre_display: NombreDisplay | None = None
     human_hand_fields: list[str] | None = None
 
     ai_may_submit = True
@@ -267,8 +273,13 @@ class UpdatePage(OpBase):
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
+        if ctx.actor.kind == "ai" and set(changes) & _PRINT_FIELDS:
+            raise HumanHandProtected("ページの種類・色の種類・解像度・ノンブルの出し方を変えるのは人だけ")
         before = change_with_human_hand(ctx, page, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}
+
+
+_PRINT_FIELDS = {"page_kind", "color_mode", "dpi", "nombre_display"}
 
 
 # ---------------------------------------------------------------- 抜く・戻す
@@ -276,7 +287,7 @@ class UpdatePage(OpBase):
 
 _REMOVABLE = {"volume": Volume, "episode": Episode, "page": Page, "panel": Panel, "text_item": TextItem,
               "panel_layer": PanelLayer, "page_item": PageItem, "annotation": AnnotationItem,
-              "material_entry": MaterialEntry, "panel_template": PanelTemplate}
+              "material_entry": MaterialEntry, "panel_template": PanelTemplate, "spread": Spread}
 
 
 class SetRemoved(OpBase):
@@ -285,7 +296,7 @@ class SetRemoved(OpBase):
 
     type: Literal["set_removed"] = "set_removed"
     target_kind: Literal["volume", "episode", "page", "panel", "text_item", "panel_layer", "page_item", "annotation",
-                         "material_entry", "panel_template"]
+                         "material_entry", "panel_template", "spread"]
     id: str
     removed: bool
 
@@ -308,18 +319,31 @@ class SetRemoved(OpBase):
         obj = await ctx.session.get(_REMOVABLE[self.target_kind], self.id)
         refuse_if_fixed(obj)
         if ctx.actor.kind == "ai":
-            if self.target_kind in ("volume", "episode", "panel_template"):
-                raise HumanHandProtected("巻・話・コマの型を抜く・戻すのは人だけ")
+            if self.target_kind in ("volume", "episode", "panel_template", "spread"):
+                raise HumanHandProtected("巻・話・コマの型・見開きを抜く・戻すのは人だけ")
             task = ROW_TASK[obj.__tablename__]
             require_actor_may(ctx.actor, ctx.work, field_task(obj, task), ROW_ACTION.get(obj.__tablename__, "decide"))
         if obj.removed == self.removed:
             raise Invalid("すでにその状態")
+        if self.target_kind == "spread" and not self.removed:
+            await _refuse_broken_spread(ctx, obj)
         # 人の手の印か確定印の付いた行にAIが当たったら、抜かずに判断待ちに置く（human_hand_guard.py）
         if not remove_or_hold(ctx, obj, self.removed):
             # 何も変えていない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
             return {"type": "restore_rows", "label": "抜く・戻すを判断待ちにした取り消し",
                     "page_ids": [p for p in [page_id_of(obj)] if p], "snapshot": {obj.__tablename__: {}}}
         return {**self.model_dump(), "removed": not self.removed}
+
+
+async def _refuse_broken_spread(ctx, spread) -> None:
+    """解いた見開きを戻すとき、その間にページの並びが変わって組が崩れていれば止める。"""
+    from v3server.print_export.book_layout import check_spreads, episode_pages, episode_spreads
+
+    others = [s for s in await episode_spreads(ctx.session, spread.episode_id) if s.id != spread.id]
+    broken = [m for s, m in check_spreads(await episode_pages(ctx.session, spread.episode_id), others + [spread],
+                                          ctx.work) if s.id == spread.id]
+    if broken:
+        raise Invalid("見開きに戻せない: " + "; ".join(broken))
 
 
 def _jsonable(v):

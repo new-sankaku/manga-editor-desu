@@ -10,8 +10,12 @@ from PIL import Image
 
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.print_export.binarize_and_halftone import binarize, compose_line_and_tone, halftone_screen
-from v3server.print_export.layered_psd_request import (PsdWriterError, build_psd_request, psd_layers_from_nodes,
-                                                       write_layered_psd)
+from v3server.print_export.layered_psd_request import (
+    PsdWriterError,
+    build_psd_request,
+    psd_layers_from_nodes,
+    write_layered_psd,
+)
 from v3server.print_export.page_render import Node
 from v3server.print_export.print_pdf_export import bilevel_image_from_black_mask, canvas_size_px, write_print_pdf
 

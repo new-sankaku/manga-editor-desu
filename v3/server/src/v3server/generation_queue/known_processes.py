@@ -13,9 +13,9 @@
 
 from typing import Any
 
+from v3server.generation_queue.image_process_registry import SPECS
 from v3server.llm_questions.extract_characters_question import parse_extract_characters_answer
 from v3server.llm_questions.read_prompt_question import parse_read_prompt_answer
-from v3server.generation_queue.image_process_registry import SPECS
 from v3server.v3_error_types import Invalid
 
 KNOWN_PROCESSES: dict[str, tuple[str, str]] = {
@@ -34,9 +34,11 @@ def check_process_task(process: str, ai_task: str | None, ai_action: str | None)
         raise Invalid(f"{process} は ai_task={want[0]}・ai_action={want[1]} の処理（今は {ai_task}・{ai_action}）")
 
 
-async def handle_known_result(session, job, actor, authz, output: dict[str, Any]) -> dict[str, Any]:
+async def handle_known_result(session, job, actor, authz, output: dict[str, Any], *,
+                              commit: bool = True) -> dict[str, Any]:
     """答えを読み、要るものは操作の窓口を通して正本に入れる。足した物の id などを output に足して返す。
-    答えの形が崩れていれば BrokenAnswerError（呼ぶ側で broken_response として止める）。"""
+    答えの形が崩れていれば BrokenAnswerError（呼ぶ側で broken_response として止める）。
+    commit=False なら確定は呼ぶ側に任せる（依頼の終わりと同じ確定に入れる。service_call_activity.py）。"""
     from v3server.operations.material_and_plan_operations import AddMaterialEntry
     from v3server.operations.operation_submit_and_undo import submit
 
@@ -46,7 +48,7 @@ async def handle_known_result(session, job, actor, authz, output: dict[str, Any]
         added = []
         for c in parse_extract_characters_answer(output["text"]):
             op = AddMaterialEntry(kind="character", name=c.name, traits=c.traits, notes=c.notes, job_id=job.id)
-            await submit(session, authz, actor, job.work_id, op)
+            await submit(session, authz, actor, job.work_id, op, commit=commit)
             added.append(op.id)
         return {**output, "material_entry_ids": added}
     return output

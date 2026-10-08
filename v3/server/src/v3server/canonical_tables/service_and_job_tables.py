@@ -133,9 +133,14 @@ class Job(Base):
 
 
 class CallLog(Base):
-    """呼び出し口の記録（V3ハーネス設計 11章）。送った・送らなかったの両方を残す。"""
+    """呼び出し口の記録（V3ハーネス設計 11章）。送った・送らなかったの両方を残す。
+
+    送る前に1行置いて確定し（outcome=sending・idempotency_key・費用の取り置き）、受け取ったら答えを result に残して確定する
+    （received）。正本への登録と依頼の終わりは1回で確定する（ok）。作業者が落ちて Temporal がやり直したときは、
+    受け取った答え（received）があれば送らずにそれを登録する（generation_queue/service_call_activity.py）。"""
 
     __tablename__ = "call_logs"
+    __table_args__ = (UniqueConstraint("idempotency_key", name="uq_call_logs_idempotency_key"),)
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
     job_id: Mapped[str] = mapped_column(ForeignKey("jobs.id"), index=True)
@@ -149,8 +154,13 @@ class CallLog(Base):
     tokens_out: Mapped[int | None] = mapped_column(Integer)
     cost: Mapped[float | None] = mapped_column(Numeric(12, 4))
     duration_ms: Mapped[int | None] = mapped_column(Integer)
-    # ok / blocked / failed
+    # sending（送る前に置いた）/ received（答えを受け取った）/ ok（登録まで済んだ）/ blocked / failed
+    # / unknown（送ったまま答えを残す前に落ちた。費用がかかったかは分からないので取り置きを残す）
     outcome: Mapped[str] = mapped_column(String(8))
+    # この依頼のこの回の鍵（"{job_id}:{attempt}"）。送る前に置く。送り先には渡していない（受け付ける先があるかは未検証）
+    idempotency_key: Mapped[str | None] = mapped_column(String(80))
+    # 受け取った答え。output・model・settings など送り手の返事と、置き場に置いた絵の sha256（image_sha256s）
+    result: Mapped[dict[str, Any] | None] = mapped_column()
     failure_kind: Mapped[str | None] = mapped_column(String(32))
     detail: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -33,13 +33,13 @@ import httpx
 from v3server.canonical_tables.service_and_job_tables import Service, ServiceProcess
 from v3server.generation_queue.image_process_registry import build_prompt
 from v3server.image_file_storage import read_image
-from v3server.v3_error_types import Invalid
 from v3server.service_senders.comfyui_progress import ProgressListener
 from v3server.service_senders.sender_result_types import (
     AdapterError,
     AdapterResult,
     retry_after_seconds,
 )
+from v3server.v3_error_types import Invalid
 
 # /history を見る間隔（秒）。ComfyUI の側に待たせる口が無いので、見に行く
 POLL_SECONDS = 1.0
@@ -328,7 +328,7 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
                 if prompt_id is not None:
                     try:
                         await asyncio.wait_for(cancel_prompt(client, prompt_id), CANCEL_TIMEOUT)
-                    except (httpx.HTTPError, AdapterError, asyncio.TimeoutError) as e:
+                    except (TimeoutError, httpx.HTTPError, AdapterError) as e:
                         log.warning("ComfyUI の %s を止められなかった: %r", prompt_id, e)
                 raise
     except (httpx.TimeoutException, httpx.TransportError) as e:

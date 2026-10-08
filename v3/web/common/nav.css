@@ -1,0 +1,6 @@
+/* 画面どうしを行き来する帯（common/nav.js）。色は common/theme.css の組を使う */
+.v3-nav{flex:0 0 auto;display:flex;flex-wrap:wrap;gap:2px 4px;padding:0 12px;background:var(--surface-2);border-bottom:1px solid var(--line);font:13px/1.5 var(--font,sans-serif)}
+.v3-nav-a{min-height:34px;padding:0 9px;display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);text-decoration:none;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.v3-nav-a:hover{color:var(--ink)}
+.v3-nav-a[aria-current="page"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.v3-nav-a svg.lucide{width:15px;height:15px;stroke-width:1.9}

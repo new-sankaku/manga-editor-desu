@@ -32,7 +32,7 @@ class BlindCopies:
 
 
 def _blind_name(original: str, salt: str) -> str:
-    digest = hashlib.sha256(f"{salt}\0{Path(original).resolve()}".encode("utf-8")).hexdigest()[:16]
+    digest = hashlib.sha256(f"{salt}\0{Path(original).resolve()}".encode()).hexdigest()[:16]
     return f"img_{digest}{Path(original).suffix.lower()}"
 
 

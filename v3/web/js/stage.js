@@ -1,21 +1,27 @@
 // 絵を見て、囲む・描き足す枠を動かす・ペンで描く・画素を消す所（fabric.js。vendor/fabric-7.4.0）。
 // 座標は絵の画素（1単位 = 元の絵の 1 画素）。拡大と移動は fabric の viewportTransform で行う。
+// 手の出来事は PointerEvent で受ける（enablePointerEvents）。ペンタブレットの筆圧・pointerType が届き、
+// 間の点（getCoalescedEvents）も拾う。
 // 囲んだ範囲は fabric の図形ではなく、絵と同じ大きさの画素のマスク（offscreen の canvas）に塗る。
 // 送るのは画素のマスクなので、見えている物と送る物が同じになる。人の手の範囲は、塗るたびにマスクから引く（塗れない）。
+// 塗るときに触るのは、線が当たった所の画素だけ（全画素を読まない）。1回の変更はタイルの差分で覚える（mask_tiles.js）。
+import { MaskEdit } from "./mask_tiles.js";
+import { drawSegment } from "./pen_render.js";
+
 const { Canvas, FabricImage, Rect, Polyline, Circle, Point } = window.fabric;
 
 const MASK_RGB = "rgb(61,90,214)";       // --ai
-const PROT_RGB = [196, 106, 0];          // --need
-const MASK_HISTORY = 30;
 
 export class Stage {
   constructor(host, hooks) {
     this.host = host;
-    this.hooks = hooks; // { onExtend(l,t,r,b), onPenStroke(points), onErase(points, widthPx), onMaskChange(hasMask) }
+    // { onExtend(e), penBegin() → {canvas, widthPx, color}, onPenStroke(points, pointerType), eraseBegin(),
+    //   onErase(points, widthPx), onMaskEdit(edit), maskBegin() → 塗ってよいか, onRefuse(message) }
+    this.hooks = hooks;
     const el = document.createElement("canvas");
     host.append(el);
     this.c = new Canvas(el, { selection: false, preserveObjectStacking: true, fireRightClick: false,
-                              stopContextMenu: true, enableRetinaScaling: true });
+                              stopContextMenu: true, enableRetinaScaling: true, enablePointerEvents: true });
     this.tool = "select";
     this.maskTool = "brush";
     this.brushPx = 24;
@@ -23,11 +29,10 @@ export class Stage {
     this.erasePx = 16;
     this.base = null; this.size = null;
     this.layerObjs = [];
-    this.maskCanvas = null; this.maskObj = null;
+    this.maskCanvas = null; this.maskObj = null; this.maskBox = null; this.edit = null;
     this.protCanvas = null; this.protObj = null;
     this.extendRect = null; this.extend = null;
     this.drag = null; this.poly = null;
-    this.maskHistory = [];
     this.cursor = new Circle({ radius: 10, fill: "rgba(0,0,0,0)", stroke: "#14171C", strokeWidth: 1,
                                originX: "center", originY: "center", selectable: false, evented: false,
                                visible: false, strokeUniform: true, excludeFromExport: true });
@@ -45,27 +50,36 @@ export class Stage {
   }
 
   // ---------------------------------------------------------------- 絵を出す
-  // key：出す絵の id。前と違う絵なら囲んだ範囲を消す（前の絵の上で塗った物を、別の絵に重ねない）
-  async show({ image, protectedCanvas, layers, key }) {
+  // layers：[{ image か canvas, x, y, w, h, opacity }]。canvas の層（描いている人の手の層）は、描くたびに描き直す。
+  // keepView：拡大と位置をそのままにする（同じコマの絵を替えたとき）。
+  // keepMask：囲んだ範囲を残す。絵の大きさが違えば残せないので消して、戻り値の maskKept を false にする
+  async show({ image, protectedCanvas, layers, keepView = false, keepMask = false }) {
     for (const o of this.c.getObjects()) if (o !== this.cursor) this.c.remove(o);
     this.layerObjs = [];
     this.extendRect = null;
-    this.size = image ? { w: image.naturalWidth, h: image.naturalHeight } : null;
-    if (!image) { this.base = null; this.maskCanvas = null; this.c.requestRenderAll(); return; }
+    this.drag = null;
+    const size = image ? { w: image.naturalWidth || image.width, h: image.naturalHeight || image.height } : null;
+    const sameSize = !!(size && this.size && size.w === this.size.w && size.h === this.size.h);
+    this.size = size;
+    const hadMask = !!this.maskBox;
+    if (!image) { this.base = null; this.maskCanvas = null; this.maskBox = null; this.c.requestRenderAll(); return { maskKept: !hadMask }; }
     const opts = { left: 0, top: 0, originX: "left", originY: "top", selectable: false, evented: false };
-    this.base = new FabricImage(image, opts);
+    this.base = new FabricImage(image, { ...opts, objectCaching: false });
     this.c.add(this.base);
     for (const l of layers || []) {
-      const o = new FabricImage(l.image, { ...opts, left: l.x, top: l.y,
-        scaleX: l.w / l.image.naturalWidth, scaleY: l.h / l.image.naturalHeight, opacity: l.opacity ?? 1 });
+      const src = l.canvas || l.image;
+      const sw = l.canvas ? l.canvas.width : l.image.naturalWidth, sh = l.canvas ? l.canvas.height : l.image.naturalHeight;
+      const o = new FabricImage(src, { ...opts, left: l.x, top: l.y, scaleX: l.w / sw, scaleY: l.h / sh,
+                                       opacity: l.opacity ?? 1, objectCaching: false });
       this.layerObjs.push(o);
       this.c.add(o);
     }
-    if (!this.maskCanvas || this.maskKey !== key || this.maskCanvas.width !== this.size.w || this.maskCanvas.height !== this.size.h) {
+    const kept = keepMask && sameSize && this.maskCanvas;
+    if (!kept) {
       this.maskCanvas = document.createElement("canvas");
-      this.maskCanvas.width = this.size.w; this.maskCanvas.height = this.size.h;
-      this.maskHistory = [];
-      this.maskKey = key;
+      this.maskCanvas.width = size.w; this.maskCanvas.height = size.h;
+      this.maskCanvas.getContext("2d", { willReadFrequently: true });
+      this.maskBox = null;
     }
     this.maskObj = new FabricImage(this.maskCanvas, { ...opts, opacity: 0.45, objectCaching: false,
                                                      visible: this.maskVisible !== false });
@@ -74,13 +88,17 @@ export class Stage {
     if (this.protCanvas) {
       this.protObj = new FabricImage(this.protCanvas, { ...opts, opacity: 0.5, objectCaching: false });
       this.c.add(this.protObj);
-      this.subtractProtected();
+      if (this.maskBox) this.subtractProtected(this.maskBox);
     } else this.protObj = null;
     this.c.bringObjectToFront(this.cursor);
     if (this.extend) this.setExtend(this.extend);
-    this.fit();
-    this.maskChanged();
+    if (!(keepView && sameSize)) this.fit();
+    this.prepareErase();
+    this.c.requestRenderAll();
+    return { maskKept: !hadMask || !!kept };
   }
+
+  redraw() { this.c.requestRenderAll(); }
 
   fit() {
     if (!this.size) return;
@@ -102,6 +120,7 @@ export class Stage {
 
   // ---------------------------------------------------------------- 道具
   setTool(tool) {
+    const extendChanged = (tool === "extend") !== (this.tool === "extend");
     this.tool = tool;
     this.poly = null; this.drag = null;
     this.clearPreview();
@@ -112,9 +131,15 @@ export class Stage {
     }
     this.c.defaultCursor = tool === "select" ? "grab" : "crosshair";
     this.syncCursor();
-    this.fit();
+    // 描き足す枠を出す・しまうときだけ合わせ直す（ほかの道具に替えても拡大はそのまま）
+    if (extendChanged) this.fit();
+    this.prepareErase();
     this.c.requestRenderAll();
   }
+
+  // 消しゴムを選んだとき・消しゴムのまま絵を替えたときに、絵を canvas に写しておく
+  // （大きい絵では写すのに数百 ms かかるので、消し始めたときに写すと最初の線が遅れる）
+  prepareErase() { if (this.tool === "erase" && this.base) this.baseCanvas(); }
 
   setMaskTool(t) { this.maskTool = t; this.poly = null; this.clearPreview(); this.syncCursor(); }
   setBrushPx(px) { this.brushPx = px; this.syncCursor(); }
@@ -131,60 +156,97 @@ export class Stage {
   // ---------------------------------------------------------------- マスク
   maskCtx() { return this.maskCanvas.getContext("2d"); }
 
-  pushHistory() {
-    if (!this.maskCanvas) return;
-    this.maskHistory.push(this.maskCtx().getImageData(0, 0, this.size.w, this.size.h));
-    if (this.maskHistory.length > MASK_HISTORY) this.maskHistory.shift();
+  clip(rect) {
+    const x0 = Math.max(0, Math.floor(rect[0])), y0 = Math.max(0, Math.floor(rect[1]));
+    const x1 = Math.min(this.size.w, Math.ceil(rect[2])), y1 = Math.min(this.size.h, Math.ceil(rect[3]));
+    return x1 > x0 && y1 > y0 ? [x0, y0, x1, y1] : null;
   }
 
-  undoMask() {
-    const d = this.maskHistory.pop();
-    if (!d) return false;
-    this.maskCtx().putImageData(d, 0, 0);
-    this.maskChanged();
+  beginEdit() { this.edit = new MaskEdit(this.maskBox); }
+
+  // rect に塗る前に、その所の前の画素を覚える
+  touch(rect) { this.edit.touch(this.maskCanvas, rect, this.maskBox); }
+
+  // 塗った後：人の手の範囲を引き、塗った所の外接の箱を広げ、画面を描き直す
+  painted(rect, grow = true) {
+    this.subtractProtected(rect);
+    if (grow) this.maskBox = this.maskBox ? [Math.min(this.maskBox[0], rect[0]), Math.min(this.maskBox[1], rect[1]),
+      Math.max(this.maskBox[2], rect[2]), Math.max(this.maskBox[3], rect[3])] : rect.slice();
+    this.c.requestRenderAll();
+  }
+
+  endEdit() {
+    const e = this.edit;
+    this.edit = null;
+    if (e && e.tiles.size) this.hooks.onMaskEdit && this.hooks.onMaskEdit(e);
+  }
+
+  // 取り消す・やり直す（どちらも入れ替え）。どのコマの変更かは呼ぶ側（app.js のコマごとの記録）が決める
+  swapMaskEdit(edit) {
+    if (!this.maskCanvas) return false;
+    this.maskBox = edit.swap(this.maskCanvas, this.maskBox);
+    this.c.requestRenderAll();
     return true;
   }
 
-  subtractProtected() {
+  subtractProtected(rect) {
     if (!this.protCanvas || !this.maskCanvas) return;
+    const r = this.clip(rect);
+    if (!r) return;
+    const [x0, y0, x1, y1] = r;
     const x = this.maskCtx();
     x.save();
     x.globalCompositeOperation = "destination-out";
-    x.drawImage(this.protCanvas, 0, 0);
+    x.drawImage(this.protCanvas, x0, y0, x1 - x0, y1 - y0, x0, y0, x1 - x0, y1 - y0);
     x.restore();
   }
 
-  maskChanged() {
-    this.subtractProtected();
-    if (this.maskObj) this.maskObj.dirty = true;
-    this.c.requestRenderAll();
-    this.hooks.onMaskChange && this.hooks.onMaskChange(this.hasMask());
-  }
+  whole() { return [0, 0, this.size.w, this.size.h]; }
 
-  clearMask() { if (!this.maskCanvas) return; this.pushHistory(); this.maskCtx().clearRect(0, 0, this.size.w, this.size.h); this.maskChanged(); }
+  clearMask() {
+    if (!this.maskCanvas || !this.maskBox) return;
+    this.beginEdit();
+    const b = this.maskBox;
+    this.touch(b);
+    this.maskCtx().clearRect(b[0], b[1], b[2] - b[0], b[3] - b[1]);
+    this.maskBox = null;
+    this.c.requestRenderAll();
+    this.endEdit();
+  }
   fillMask() {
     if (!this.maskCanvas) return;
-    this.pushHistory();
+    this.beginEdit();
+    this.touch(this.whole());
     const x = this.maskCtx();
     x.fillStyle = MASK_RGB; x.fillRect(0, 0, this.size.w, this.size.h);
-    this.maskChanged();
+    this.painted(this.whole());
+    this.endEdit();
   }
+  // 反転：塗った色で全体を埋めた上から、今の囲みを抜く（画素ごとの計算をしない）
   invertMask() {
     if (!this.maskCanvas) return;
-    this.pushHistory();
+    this.beginEdit();
+    this.touch(this.whole());
+    const t = document.createElement("canvas");
+    t.width = this.size.w; t.height = this.size.h;
+    const tx = t.getContext("2d");
+    tx.fillStyle = MASK_RGB; tx.fillRect(0, 0, t.width, t.height);
+    tx.globalCompositeOperation = "destination-out";
+    tx.drawImage(this.maskCanvas, 0, 0);
     const x = this.maskCtx();
-    const d = x.getImageData(0, 0, this.size.w, this.size.h);
-    for (let i = 0; i < d.data.length; i += 4) {
-      const a = 255 - d.data[i + 3];
-      d.data[i] = 61; d.data[i + 1] = 90; d.data[i + 2] = 214; d.data[i + 3] = a;
-    }
-    x.putImageData(d, 0, 0);
-    this.maskChanged();
+    x.clearRect(0, 0, this.size.w, this.size.h);
+    x.drawImage(t, 0, 0);
+    this.maskBox = null;
+    this.painted(this.whole());
+    this.endEdit();
   }
 
+  // 囲んだ所があるか。塗った所の外接の箱の中だけを読む（頼むときに1回）
   hasMask() {
-    if (!this.maskCanvas) return false;
-    const d = this.maskCtx().getImageData(0, 0, this.size.w, this.size.h).data;
+    if (!this.maskCanvas || !this.maskBox) return false;
+    const r = this.clip(this.maskBox);
+    if (!r) return false;
+    const d = this.maskCtx().getImageData(r[0], r[1], r[2] - r[0], r[3] - r[1]).data;
     for (let i = 3; i < d.length; i += 4) if (d[i] >= 128) return true;
     return false;
   }
@@ -201,18 +263,56 @@ export class Stage {
     return c.toDataURL("image/png").split(",")[1];
   }
 
+  // コマを替える前に、囲みを外へ出す。持つのは塗った所の箱の画素だけ（絵の全体の canvas は捨てる）。囲みが無ければ null
+  takeMask() {
+    if (!this.maskCanvas || !this.maskBox) return null;
+    const r = this.clip(this.maskBox);
+    if (!r) return null;
+    const c = document.createElement("canvas");
+    c.width = r[2] - r[0]; c.height = r[3] - r[1];
+    c.getContext("2d").drawImage(this.maskCanvas, r[0], r[1], c.width, c.height, 0, 0, c.width, c.height);
+    return { w: this.size.w, h: this.size.h, box: this.maskBox, rect: r, canvas: c };
+  }
+
+  // 前に出した囲みを戻す。大きさが違えば戻さずに false
+  putMask(saved) {
+    if (!saved || !this.size || saved.w !== this.size.w || saved.h !== this.size.h) return false;
+    const x = this.maskCtx();
+    x.clearRect(0, 0, this.size.w, this.size.h);
+    x.drawImage(saved.canvas, saved.rect[0], saved.rect[1]);
+    this.maskBox = saved.box;
+    if (this.protCanvas) this.subtractProtected(this.maskBox);
+    this.c.requestRenderAll();
+    return true;
+  }
+
+  segRect(a, b, w) {
+    const r = w / 2 + 2;
+    return this.clip([Math.min(a.x, b.x) - r, Math.min(a.y, b.y) - r, Math.max(a.x, b.x) + r, Math.max(a.y, b.y) + r]);
+  }
+
   paintLine(a, b, erase) {
+    const rect = this.segRect(a, b, this.brushPx);
+    if (!rect) return;
+    this.touch(rect);
     const x = this.maskCtx();
     x.save();
     x.globalCompositeOperation = erase ? "destination-out" : "source-over";
-    x.strokeStyle = MASK_RGB; x.fillStyle = MASK_RGB;
+    x.strokeStyle = MASK_RGB;
     x.lineWidth = this.brushPx; x.lineCap = "round"; x.lineJoin = "round";
-    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
+    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(a === b ? b.x + 0.01 : b.x, b.y); x.stroke();
     x.restore();
+    this.painted(rect, !erase);
   }
 
   fillPolygon(points) {
     if (points.length < 3) return;
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of points) { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); }
+    const rect = this.clip([x0 - 1, y0 - 1, x1 + 1, y1 + 1]);
+    if (!rect) return;
+    this.beginEdit();
+    this.touch(rect);
     const x = this.maskCtx();
     x.save();
     x.fillStyle = MASK_RGB;
@@ -220,7 +320,8 @@ export class Stage {
     for (const p of points.slice(1)) x.lineTo(p.x, p.y);
     x.closePath(); x.fill();
     x.restore();
-    this.maskChanged();
+    this.painted(rect);
+    this.endEdit();
   }
 
   // ---------------------------------------------------------------- 描き足す枠
@@ -258,7 +359,7 @@ export class Stage {
     this.hooks.onExtend && this.hooks.onExtend(e);
   }
 
-  // ---------------------------------------------------------------- 線の見本（描いている間だけ）
+  // ---------------------------------------------------------------- 線の見本（多角形・投げ縄・四角だけ）
   clearPreview() {
     if (this.preview) { this.c.remove(this.preview); this.preview = null; }
     this.c.requestRenderAll();
@@ -276,6 +377,14 @@ export class Stage {
     return new Polyline(points.map((p) => ({ x: p.x, y: p.y })), {
       stroke, strokeWidth: width, fill: fill || "", strokeLineCap: "round", strokeLineJoin: "round",
       strokeUniform: width < 3, originX: "left", originY: "top" });
+  }
+
+  // 多角形の途中で Enter（閉じる）・Esc（やめる）。キーは app.js の1か所で受ける。扱ったら true
+  polygonKey(key) {
+    if (!this.poly) return false;
+    if (key === "Escape") { this.poly = null; this.clearPreview(); return true; }
+    if (key === "Enter") { this.closePolygon(); return true; }
+    return false;
   }
 
   // ---------------------------------------------------------------- 手の動き
@@ -296,11 +405,12 @@ export class Stage {
     c.on("mouse:down", (o) => this.onDown(c.getScenePoint(o.e), o.e));
     c.on("mouse:up", (o) => this.onUp(c.getScenePoint(o.e), o.e));
     c.on("mouse:dblclick", () => { if (this.poly) this.closePolygon(); });
-    window.addEventListener("keydown", (e) => {
-      if (e.target.closest && e.target.closest("input,textarea,select")) return;
-      if (e.key === "Escape" && this.poly) { this.poly = null; this.clearPreview(); }
-      if (e.key === "Enter" && this.poly) this.closePolygon();
-    });
+  }
+
+  // 1回の出来事と、その間にまとめられた出来事（ペンタブレットの細かい点）
+  events(e) {
+    const list = typeof e.getCoalescedEvents === "function" ? e.getCoalescedEvents() : [];
+    return list.length ? list : [e];
   }
 
   onDown(p, e) {
@@ -311,12 +421,12 @@ export class Stage {
       return;
     }
     if (t === "mask") {
+      if (this.hooks.maskBegin && !this.hooks.maskBegin()) return;
       const m = this.maskTool;
       if (m === "brush" || m === "eraser") {
-        this.pushHistory();
+        this.beginEdit();
         this.drag = { kind: m, last: p };
         this.paintLine(p, p, m === "eraser");
-        this.maskChanged();
       } else if (m === "lasso") {
         this.drag = { kind: "lasso", points: [p] };
       } else if (m === "rect") {
@@ -334,18 +444,55 @@ export class Stage {
       return;
     }
     if (t === "pen") {
-      this.drag = { kind: "pen", points: [this.penPoint(p, e)], t0: performance.now() };
+      const target = this.refusable(() => this.hooks.penBegin());
+      if (!target) return;
+      this.drag = { kind: "pen", points: [], t0: e.timeStamp, pointerType: e.pointerType || "mouse", target };
+      const pt = this.penPoint(p, e);
+      this.drag.points.push(pt);
+      drawSegment(target.canvas.getContext("2d"), pt, pt, target.widthPx, target.color);
       return;
     }
     if (t === "erase") {
-      this.drag = { kind: "erase", points: [p] };
+      if (!this.refusable(() => this.hooks.eraseBegin())) return;
+      const canvas = this.baseCanvas();
+      this.drag = { kind: "erase", points: [p], canvas };
+      this.eraseSeg(canvas, p, p);
     }
   }
 
+  // 描き始めてよいか（app.js が理由を返して断る）
+  refusable(fn) {
+    try { return fn(); } catch (err) { this.hooks.onRefuse && this.hooks.onRefuse(err.message); return null; }
+  }
+
+  // 画素の消しゴム：保存を待たずに、絵の写し（canvas）から消して見せる。サーバーの答えが来たら、その絵に替わる
+  baseCanvas() {
+    const el = this.base.getElement();
+    if (el instanceof HTMLCanvasElement) return el;
+    const c = document.createElement("canvas");
+    c.width = this.size.w; c.height = this.size.h;
+    c.getContext("2d").drawImage(el, 0, 0);
+    this.base.setElement(c);
+    return c;
+  }
+
+  eraseSeg(canvas, a, b) {
+    const x = canvas.getContext("2d");
+    x.save();
+    x.globalCompositeOperation = "destination-out";
+    x.lineWidth = this.erasePx; x.lineCap = "round"; x.lineJoin = "round";
+    x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(a === b ? b.x + 0.01 : b.x, b.y); x.stroke();
+    x.restore();
+  }
+
+  // 筆圧は、機器が筆圧を返すペン（pointerType=pen）のときだけ持つ。マウス・指は筆圧を返さない機器でも 0.5 が来る
+  // （https://www.w3.org/TR/pointerevents3/#dom-pointerevent-pressure）ので、その値は使わずに null にする
   penPoint(p, e) {
-    // PointerEvent の筆圧（マウスは押している間 0.5 が来る。https://www.w3.org/TR/pointerevents3/#dom-pointerevent-pressure）
-    return { x: p.x, y: p.y, pressure: typeof e.pressure === "number" ? e.pressure : 0.5,
-             ms: this.drag && this.drag.t0 !== undefined ? performance.now() - this.drag.t0 : 0 };
+    const pressure = e.pointerType === "pen" && typeof e.pressure === "number" ? e.pressure : null;
+    const pts = this.drag.points;
+    // 描き始めからの ms（出来事の時刻）。まとめられた出来事の時刻が前後しても、並びは描いた順のまま
+    const ms = Math.max(0, e.timeStamp - this.drag.t0, pts.length ? pts[pts.length - 1].ms : 0);
+    return { x: p.x, y: p.y, pressure, ms };
   }
 
   onMove(p, e) {
@@ -358,9 +505,11 @@ export class Stage {
       d.x = e.clientX; d.y = e.clientY;
       this.c.setViewportTransform(v);
     } else if (d.kind === "brush" || d.kind === "eraser") {
-      this.paintLine(d.last, p, d.kind === "eraser");
-      d.last = p;
-      this.maskChanged();
+      for (const ev of this.events(e)) {
+        const q = this.c.getScenePoint(ev);
+        this.paintLine(d.last, q, d.kind === "eraser");
+        d.last = q;
+      }
     } else if (d.kind === "lasso") {
       d.points.push(p);
       this.setPreview(this.polyline(d.points, "#3D5AD6", 1.5, "rgba(61,90,214,0.15)"));
@@ -370,11 +519,19 @@ export class Stage {
         originX: "left", originY: "top", fill: "rgba(61,90,214,0.15)", stroke: "#3D5AD6", strokeWidth: 1.5,
         strokeUniform: true }));
     } else if (d.kind === "pen") {
-      d.points.push(this.penPoint(p, e));
-      this.setPreview(this.polyline(d.points, "#14171C", this.penWidthPx));
+      const x = d.target.canvas.getContext("2d");
+      for (const ev of this.events(e)) {
+        const pt = this.penPoint(this.c.getScenePoint(ev), ev);
+        const last = d.points[d.points.length - 1];
+        d.points.push(pt);
+        drawSegment(x, last, pt, d.target.widthPx, d.target.color);
+      }
     } else if (d.kind === "erase") {
-      d.points.push(p);
-      this.setPreview(this.polyline(d.points, "rgba(204,53,39,0.45)", this.erasePx));
+      for (const ev of this.events(e)) {
+        const q = this.c.getScenePoint(ev);
+        this.eraseSeg(d.canvas, d.points[d.points.length - 1], q);
+        d.points.push(q);
+      }
     }
   }
 
@@ -382,20 +539,20 @@ export class Stage {
     const d = this.drag;
     this.drag = null;
     if (!d) return;
-    if (d.kind === "lasso") {
+    if (d.kind === "brush" || d.kind === "eraser") {
+      this.endEdit();
+    } else if (d.kind === "lasso") {
       this.clearPreview();
-      this.pushHistory();
       this.fillPolygon(d.points);
     } else if (d.kind === "rect") {
       this.clearPreview();
       const x0 = Math.min(d.from.x, p.x), y0 = Math.min(d.from.y, p.y), x1 = Math.max(d.from.x, p.x), y1 = Math.max(d.from.y, p.y);
       if (x1 - x0 < 1 || y1 - y0 < 1) return;
-      this.pushHistory();
       this.fillPolygon([{ x: x0, y: y0 }, { x: x1, y: y0 }, { x: x1, y: y1 }, { x: x0, y: y1 }]);
     } else if (d.kind === "pen") {
-      this.hooks.onPenStroke && this.hooks.onPenStroke(d.points, () => this.clearPreview());
+      this.hooks.onPenStroke && this.hooks.onPenStroke(d.points, d.pointerType);
     } else if (d.kind === "erase") {
-      this.hooks.onErase && this.hooks.onErase(d.points, this.erasePx, () => this.clearPreview());
+      this.hooks.onErase && this.hooks.onErase(d.points, this.erasePx);
     }
   }
 
@@ -403,6 +560,6 @@ export class Stage {
     const pts = this.poly;
     this.poly = null;
     this.clearPreview();
-    if (pts && pts.length >= 3) { this.pushHistory(); this.fillPolygon(pts); }
+    if (pts && pts.length >= 3) this.fillPolygon(pts);
   }
 }

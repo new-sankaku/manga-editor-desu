@@ -40,8 +40,28 @@ class Event(Base):
     inverse: Mapped[dict[str, Any] | None] = mapped_column()
     # この操作で置いた判断待ち（AIの変更が人の手の所に当たった分。id・表・行・項目）。無ければ空
     held_changes: Mapped[list[Any] | None] = mapped_column()
+    # この操作で変えた行と項目（前の値と後の値）。取り消しが後の変更を上書きしないかを見る（operations/field_change_record.py）。
+    # この仕組みより前の出来事は空
+    field_changes: Mapped[dict[str, Any] | None] = mapped_column()
     # この出来事が取り消した出来事
     undoes_event_id: Mapped[str | None] = mapped_column(ForeignKey("events.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UndoConflict(Base):
+    """取り消しが、後の出来事の変更を上書きするので止めた記録（operations/field_change_record.py）。
+    取り消しは当てず、後の変更をそのまま残す。どちらの値も消さない（取り消す前の値は、取り消そうとした出来事の field_changes にある）。"""
+
+    __tablename__ = "undo_conflicts"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
+    # 取り消そうとした出来事
+    event_id: Mapped[str] = mapped_column(ForeignKey("events.id"), index=True)
+    actor_kind: Mapped[str] = mapped_column(String(8))
+    actor_id: Mapped[str] = mapped_column(String(128))
+    # [{"table", "id", "field", "undone_after", "current", "events": [後で変えた出来事]}]
+    conflicts: Mapped[list[Any]] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

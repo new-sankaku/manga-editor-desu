@@ -5,10 +5,11 @@ import uuid
 from datetime import timedelta
 
 import pytest
-from temporalio.client import WorkflowExecutionStatus
 from conftest import h, new_work, user, wait_for
+from temporalio.client import WorkflowExecutionStatus
 
 from v3server.admin_command_line import grant_admin
+from v3server.canonical_tables.service_and_job_tables import Service
 from v3server.database_engine import get_sessionmaker
 from v3server.generation_queue import job_start_and_control
 from v3server.request_actor import Actor
@@ -25,9 +26,12 @@ async def admin():
 async def make_service(api, admin, *, location="local", send_mode="serial", n=1, budget=None):
     name = f"svc-{uuid.uuid4().hex[:6]}"
     process = f"proc-{uuid.uuid4().hex[:6]}"
+    # 手元と言えるのは、送り先へ直接送る送り手で住所がこの機械のもの（allowed_destinations.py）。litellm は api だけ
+    where = ({"adapter": "comfyui", "endpoint": "http://127.0.0.1:8188"} if location == "local"
+             else {"adapter": "litellm"})
     r = await api.post("/services", headers=h(admin), json={
-        "name": name, "kind": "text", "location": location, "adapter": "litellm", "send_mode": send_mode,
-        "max_concurrency": n, "monthly_budget": budget})
+        "name": name, "kind": "text", "location": location, "send_mode": send_mode,
+        "max_concurrency": n, "monthly_budget": budget} | where)
     assert r.status_code == 201, r.text
     sid = r.json()["id"]
     r = await api.put(f"/services/{sid}/processes/{process}", headers=h(admin),
@@ -62,6 +66,61 @@ async def test_管理者でなければつなぎ先を変えられない(api):
     r = await api.post("/services", headers=h(user()), json={
         "name": "x", "kind": "text", "location": "local", "adapter": "litellm", "send_mode": "serial"})
     assert r.status_code == 403
+
+
+async def test_つなぎ先の一覧は管理者だけ_参加者には住所と費用を見せない(api, admin):
+    a = user()
+    wid = (await new_work(api, a))["work"]
+    sid, p = await make_service(api, admin, budget=50)
+    assert (await api.get("/services", headers=h(a))).status_code == 403
+    full = (await api.get("/services", headers=h(admin))).json()
+    assert any(s["id"] == sid and s["endpoint"] == "http://127.0.0.1:8188" for s in full["services"])
+
+    r = await api.get(f"/works/{wid}/services", headers=h(a))
+    assert r.status_code == 200, r.text
+    mine = next(s for s in r.json()["services"] if s["id"] == sid)
+    assert set(mine) == {"id", "name", "kind", "location", "state", "paused", "usage_terms", "allowed"}
+    assert (mine["location"], mine["allowed"]) == ("local", True)
+    assert {"process": p, "service_id": sid} in r.json()["routes"]
+    assert "processes" not in r.json()
+    # 招かれていない人は作品のつなぎ先も見られない
+    assert (await api.get(f"/works/{wid}/services", headers=h(user()))).status_code == 403
+
+
+async def test_手元と言えない先はlocalで登録できない(api, admin):
+    base = {"kind": "image", "location": "local", "send_mode": "serial"}
+    for body in ({"adapter": "litellm"},
+                 {"adapter": "comfyui", "endpoint": "http://192.168.0.10:8188"},
+                 {"adapter": "comfyui", "endpoint": "https://comfy.example.com"},
+                 {"adapter": "comfyui"}):
+        r = await api.post("/services", headers=h(admin), json=base | body | {"name": f"x-{uuid.uuid4().hex[:6]}"})
+        assert r.status_code == 422, (body, r.text)
+    for endpoint in ("http://127.0.0.1:8188", "http://[::1]:8188", "http://localhost:8188"):
+        r = await api.post("/services", headers=h(admin), json=base | {
+            "adapter": "comfyui", "endpoint": endpoint, "name": f"x-{uuid.uuid4().hex[:6]}"})
+        assert r.status_code == 201, (endpoint, r.text)
+    # 後から住所を外の機械に変えるのも断る
+    r = await api.patch(f"/services/{r.json()['id']}", headers=h(admin), json={"endpoint": "http://10.0.0.5:8188"})
+    assert r.status_code == 422, r.text
+
+
+async def test_手元と言えないlocalの記録は送ってよい先に載せるまで送らない(api, admin, workers, fake_adapter):
+    """この仕組みより前に local と登録された先（住所を確かめていない）は、api と同じに扱う。"""
+    a = user()
+    wid = (await new_work(api, a))["work"]
+    sid, p = await make_service(api, admin, location="api")
+    async with get_sessionmaker()() as session:
+        (await session.get(Service, sid)).location = "local"
+        await session.commit()
+    await workers.reload()
+    r = await api.post(f"/works/{wid}/jobs", headers=h(a), json={"process": p, "request": {"tag": "x"}})
+    assert r.status_code == 403
+    mine = next(s for s in (await api.get(f"/works/{wid}/services", headers=h(a))).json()["services"] if s["id"] == sid)
+    assert (mine["location"], mine["allowed"]) == ("api", False)
+    assert (await api.post(f"/works/{wid}/ops", headers=h(a), json={
+        "type": "allow_destination", "service_id": sid, "allowed": True})).status_code == 200
+    jid = await enqueue(api, wid, a, p, tag="legacy-local")
+    await until_status(api, wid, a, jid, "done")
 
 
 async def test_1件ずつと同時にN件まで(api, admin, workers, fake_adapter):
@@ -188,6 +247,23 @@ async def test_予算の上限で待ち_続けるで再開する(api, admin, wor
     await api.patch(f"/services/{sid}", headers=h(admin), json={"monthly_budget": 100})
     assert (await api.post(f"/works/{wid}/jobs/{second}/resume", headers=h(a))).status_code == 202
     await until_status(api, wid, a, second, "done")
+
+
+async def test_同時に送っても予算を超えない(api, admin, workers, fake_adapter):
+    """予算はつなぎ先の行を取ってから数え、送る前に費用を取り置く。同時に3件送れる先でも、上限20・1回10なら2件だけ送る。"""
+    a = user()
+    wid = (await new_work(api, a))["work"]
+    sid, p = await make_service(api, admin, send_mode="parallel", n=3, budget=20)
+    await workers.reload()
+    jids = [await enqueue(api, wid, a, p, tag=f"par-{i}", sleep=1) for i in range(3)]
+    finals = [(await until_status(api, wid, a, j, "done", "waiting_budget"))["status"] for j in jids]
+    assert sorted(finals) == ["done", "done", "waiting_budget"]
+    # 送って失敗した分は取り置きを外す：失敗した後も、残りの予算で送れる
+    await api.patch(f"/services/{sid}", headers=h(admin), json={"monthly_budget": 30})
+    jid = await enqueue(api, wid, a, p, tag="fail-then", script=["refused"])
+    await until_status(api, wid, a, jid, "stopped")
+    jid = await enqueue(api, wid, a, p, tag="after-fail")
+    await until_status(api, wid, a, jid, "done")
 
 
 async def test_人の依頼をAIの依頼より先に送る(api, admin, workers, fake_adapter, authz, temporal):

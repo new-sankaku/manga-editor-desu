@@ -18,6 +18,11 @@ from v3server.v3_error_types import FixedByPerson, Forbidden
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 FONT_DIR = "/usr/share/fonts/opentype/ipafont-gothic"
 FRAME_STYLE = {"line_width_mm": 0.5, "line_color": "#000000"}
+TYPESETTING = {"line_spacing_ratio": 0.3, "line_break": "character", "tate_chu_yoko_max_digits": 2,
+               "tate_chu_yoko_marks": True, "align": "start"}
+PRINT = {"file_code": "T", "color_mode": "color", "dpi_by_color_mode": {"bilevel": 600, "grayscale": 350, "color": 350},
+         "safe_area": {"top_mm": 5, "bottom_mm": 5, "gutter_mm": 5, "outer_mm": 5},
+         "page_count_multiple": None, "page_count_scope": "episode"}
 
 
 def png(w=40, h_=30, rgba=(200, 100, 50, 255)) -> bytes:
@@ -202,9 +207,21 @@ async def test_文字の書体_飾り_ルビ_角度_フキダシの形(api, auth
 # ---------------------------------------------------------------- ペン・消しゴム
 
 
-def stroke(x0, x1, y=50.0, brush="pencil", **kw):
-    pts = [[x0 + (x1 - x0) * i / 10, y, 0.5, float(i)] for i in range(11)]
+def stroke(x0, x1, y=50.0, brush="pencil", pressure=0.5, **kw):
+    pts = [[x0 + (x1 - x0) * i / 10, y, pressure, float(i)] for i in range(11)]
     return {"brush": brush, "points": pts, "width_mm": 0.5, "color": "#000000", "opacity": 1.0} | kw
+
+
+async def layer_strokes(api, wid, a, layer, **params):
+    """層の線を、区切りを全部たどって読む（GET /works/{id}/layers/{layer}/pen-strokes）。"""
+    out, after = [], -1
+    while True:
+        r = await api.get(f"/works/{wid}/layers/{layer}/pen-strokes", headers=h(a), params={"after": after, **params})
+        assert r.status_code == 200, r.text
+        out += r.json()["strokes"]
+        after = r.json()["next_after"]
+        if after is None:
+            return out
 
 
 async def test_ペンの線は1本ずつの物で_選んで変え_線の消しゴムで分かれ_控えの古さが分かる(api, authz, image_dir):
@@ -219,7 +236,8 @@ async def test_ペンの線は1本ずつの物で_選んで変え_線の消し�
                                "strokes": [stroke(10, 30), stroke(10, 30, y=60, brush="crayon", seed=7)]})
     assert r.status_code == 200, r.text
     w = await work_json(api, wid, a)
-    strokes = live(w["pen_strokes"], layer_id=layer)
+    assert "pen_strokes" not in w  # 作品全体の口は線を返さない
+    strokes = await layer_strokes(api, wid, a, layer)
     assert len(strokes) == 2 and all("points" in s["human_hand_fields"] for s in strokes)
     lay = next(x for x in w["panel_layers"] if x["id"] == layer)
     assert lay["stroke_revision"] == 1
@@ -230,19 +248,19 @@ async def test_ペンの線は1本ずつの物で_選んで変え_線の消し�
     r = await op(api, wid, a, {"type": "update_pen_strokes", "ids": [s["id"] for s in strokes], "move_mm": [5, 0],
                                "color": "#ff0000"})
     assert r.status_code == 200, r.text
-    moved = live((await work_json(api, wid, a))["pen_strokes"], layer_id=layer)
+    moved = await layer_strokes(api, wid, a, layer)
     assert all(s["color"] == "#ff0000" and s["points"][0][0] == 15 for s in moved)
     await undo(api, wid, a, r.json()["event_id"])
-    back = live((await work_json(api, wid, a))["pen_strokes"], layer_id=layer)
+    back = await layer_strokes(api, wid, a, layer)
     assert all(s["color"] == "#000000" and s["points"][0][0] == 10 for s in back)
     # 触れた所だけ消す：1本目が2本に分かれ、2本目は触れていないので残る
     r = await op(api, wid, a, {"type": "erase_pen_strokes", "layer_id": layer, "mode": "touched",
                                "path_mm": [[20, 45], [20, 55]], "width_mm": 1})
     assert r.status_code == 200, r.text
-    after = live((await work_json(api, wid, a))["pen_strokes"], layer_id=layer)
+    after = await layer_strokes(api, wid, a, layer)
     assert len(after) == 3
     await undo(api, wid, a, r.json()["event_id"])
-    assert len(live((await work_json(api, wid, a))["pen_strokes"], layer_id=layer)) == 2
+    assert len(await layer_strokes(api, wid, a, layer)) == 2
 
     # 控え：古い版から描いた控えは受けない。今の版なら層の絵になる
     w = await work_json(api, wid, a)
@@ -268,6 +286,64 @@ async def test_ペンの線は1本ずつの物で_選んで変え_線の消し�
     assert other.status_code == 201, other.text
     r = await op(api, wid, a, {"type": "update_panel_layer", "id": layer, "image_id": other.json()["id"]})
     assert r.status_code == 422
+
+
+async def test_筆圧の無い線はnullで持ち_線は層ごとに区切って読め_消しゴムは近くの線だけを見る(api, authz, image_dir):
+    a = user()
+    ids = await framed_page(api, a, texts=("1",))
+    wid = ids["work"]
+    p = await first_panel(api, wid, a, ids["page1"])
+    layer = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_panel_layer", "id": layer, "panel_id": p["id"], "role": "human_hand",
+                                   "stack_order": 0})).status_code == 200
+    # マウスの線に筆圧を入れて送ると断る。null なら受けて、そのまま残す
+    r = await op(api, wid, a, {"type": "add_pen_strokes", "layer_id": layer,
+                               "strokes": [stroke(0, 10, pointer_type="mouse")]})
+    assert r.status_code == 422 and "筆圧" in r.text
+    # 1本の中で筆圧のある点と無い点が混ざっていれば断る
+    mixed = stroke(0, 10, pointer_type="pen")
+    mixed["points"][3][2] = None
+    assert (await op(api, wid, a, {"type": "add_pen_strokes", "layer_id": layer, "strokes": [mixed]})).status_code == 422
+    sid = uuid.uuid4().hex
+    r = await op(api, wid, a, {"type": "add_pen_strokes", "layer_id": layer, "strokes": [
+        stroke(0, 10, y=10, pressure=None, pointer_type="mouse", id=sid),
+        stroke(0, 10, y=20, pressure=0.8, pointer_type="pen")]})
+    assert r.status_code == 200, r.text
+    got = {s["id"]: s for s in await layer_strokes(api, wid, a, layer)}
+    assert got[sid]["pointer_type"] == "mouse" and all(pt[2] is None for pt in got[sid]["points"])
+    assert "pointer_type" not in got[sid]["human_hand_fields"]
+    assert sorted(s["pointer_type"] for s in got.values()) == ["mouse", "pen"]
+    # 画面が決めた id は2度使えない
+    r = await op(api, wid, a, {"type": "add_pen_strokes", "layer_id": layer,
+                               "strokes": [stroke(0, 10, pressure=None, pointer_type="mouse", id=sid)]})
+    assert r.status_code == 422
+    # 区切って読む：1本ずつでも全部たどれる。points=false なら点を省く
+    for i in range(5):
+        assert (await op(api, wid, a, {"type": "add_pen_strokes", "layer_id": layer,
+                                       "strokes": [stroke(100, 110, y=100 + i * 10)]})).status_code == 200
+    one = await layer_strokes(api, wid, a, layer, limit=1)
+    assert len(one) == 7 and [s["stack_order"] for s in one] == sorted(s["stack_order"] for s in one)
+    assert all("points" not in s for s in await layer_strokes(api, wid, a, layer, points="false"))
+    # 消しゴムは通り道の近くの線だけを変える（遠くの線は読まない・変えない）
+    r = await op(api, wid, a, {"type": "erase_pen_strokes", "layer_id": layer, "mode": "whole",
+                               "path_mm": [[5, 5], [5, 12]], "width_mm": 1})
+    assert r.status_code == 200, r.text
+    left = await layer_strokes(api, wid, a, layer)
+    assert sid not in {s["id"] for s in left} and len(left) == 6
+    # 取り消すと線が戻り、外接の箱も点に合う（戻した線を消しゴムでまた消せる）
+    await undo(api, wid, a, r.json()["event_id"])
+    assert sid in {s["id"] for s in await layer_strokes(api, wid, a, layer)}
+    r = await op(api, wid, a, {"type": "update_pen_strokes", "ids": [sid], "move_mm": [50, 0]})
+    assert r.status_code == 200, r.text
+    r = await op(api, wid, a, {"type": "erase_pen_strokes", "layer_id": layer, "mode": "whole",
+                               "path_mm": [[5, 5], [5, 12]], "width_mm": 1})
+    assert r.status_code == 422  # 動かした後は、もとの所に線は無い
+    r = await op(api, wid, a, {"type": "erase_pen_strokes", "layer_id": layer, "mode": "whole",
+                               "path_mm": [[55, 5], [55, 12]], "width_mm": 1})
+    assert r.status_code == 200, r.text
+    # コマの層だけを読む口
+    r = await api.get(f"/works/{wid}/panels/{p['id']}/layers", headers=h(a))
+    assert r.status_code == 200 and [x["id"] for x in r.json()["layers"]] == [layer]
 
 
 async def test_画素の消しゴムは新しい版と人の手の範囲を作る(api, authz, image_dir):
@@ -352,7 +428,8 @@ async def ready_page(api, a):
     wid = ids["work"]
     p = await first_panel(api, wid, a, ids["page1"])
     assert (await op(api, wid, a, {"type": "set_work_settings",
-                                   "preferences": {"frame_style": FRAME_STYLE}})).status_code == 200
+                                   "preferences": {"frame_style": FRAME_STYLE, "typesetting": TYPESETTING,
+                                                   "print": PRINT}})).status_code == 200
     r = await api.post(f"/works/{wid}/panels/{p['id']}/image", headers=h(a),
                        files={"image": ("a.png", png(), "image/png")}, data={"origin": "human_drawn"})
     assert r.status_code == 201, r.text

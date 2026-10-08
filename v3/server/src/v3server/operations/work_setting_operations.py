@@ -6,12 +6,14 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 
+from v3server.allowed_destinations import is_local
 from v3server.canonical_tables.service_and_job_tables import Service, WorkDestination
 from v3server.canonical_tables.threshold_and_finding_tables import (
     FindingReaction,
     Threshold,
 )
 from v3server.name_structure.item_styles import FrameStyle
+from v3server.name_structure.print_settings import NombreSettings, PrintSettings, Typesetting
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.openfga_permissions import WORK_ROLES, Tuple
 from v3server.operations.ai_involvement import Mode, Task
@@ -32,6 +34,12 @@ class WorkPreferences(BaseModel):
     frame_style: FrameStyle | None = None
     # 作品の画面の下書きを残す間隔（秒）。無ければ利用者の設定に従う
     autosave_interval_seconds: int | None = Field(default=None, gt=0)
+    # 入稿の設定（色の種類と解像度の既定・2階調の作り方・安全線・ページ数の決まり・ファイル名の略号）。書き出しに要る
+    print: PrintSettings | None = None
+    # ノンブル（位置・書体・始まりの番号・ページの種類ごとの出し方）。無ければノンブルを描かない（入稿前の確かめが紙の作品に印を出す）
+    nombre: NombreSettings | None = None
+    # 写植の組版の標準（文字に typesetting が無いときに使う。ここにも無ければ書き出しは止まる）
+    typesetting: Typesetting | None = None
 
 
 class SetWorkSettings(OpBase):
@@ -114,8 +122,8 @@ class AllowDestination(OpBase):
         service = await ctx.session.get(Service, self.service_id)
         if service is None:
             raise NotFound(f"services:{self.service_id}")
-        if service.location != "api":
-            raise Invalid("手元のつなぎ先は常に送ってよい。足す・外すのはAPIだけ")
+        if is_local(service):
+            raise Invalid("手元のつなぎ先は常に送ってよい。足す・外すのは、手元と言えない先だけ（allowed_destinations.py）")
         row = await ctx.session.get(WorkDestination, (ctx.work.id, self.service_id))
         if self.allowed and row is None:
             ctx.session.add(WorkDestination(work_id=ctx.work.id, service_id=self.service_id))

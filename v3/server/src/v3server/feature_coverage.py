@@ -59,13 +59,18 @@ ROWS_10_4: dict[str, object] = {
         "ops": ["add_material_entry", "update_material_entry", "decide_material_proposal", "set_removed"]},
     "あらすじ・読者・人物を抜き出す・入れないもの": {
         "ops": ["set_work_plan"], "routes": ["POST /works/{work_id}/plan/extract-characters"]},
+    # 並べ替え・見開き・ページの種類と色の種類と解像度とノンブルの出し方も、ページの行で受ける（V3点検の結果 §3）
     "ページを足す・画像から足す・取り込む": {
-        "ops": ["add_page"], "routes": ["POST /works/{work_id}/images",
-                                        "POST /works/{work_id}/episodes/{episode_id}/name-imports"]},
+        "ops": ["add_page", "reorder_pages", "add_spread", "update_spread", "update_page", "set_removed",
+                "import_current_app_project"],
+        "routes": ["POST /works/{work_id}/images", "POST /works/{work_id}/episodes/{episode_id}/name-imports",
+                   "POST /works/{work_id}/episodes/{episode_id}/current-app-imports",
+                   "GET /works/{work_id}/current-app-imports/{report_id}"]},
     "画像の書き出し・コピー・解像度・紙の大きさ": {
         "routes": ["POST /works/{work_id}/exports", "GET /works/{work_id}/exports/{run_id}",
                    "GET /works/{work_id}/exports/{run_id}/files/{name}",
-                   "POST /works/{work_id}/exports/{run_id}/pages/{page_id}/psd"]},
+                   "POST /works/{work_id}/exports/{run_id}/pages/{page_id}/psd",
+                   "POST /works/{work_id}/preflight"]},
     "マス目・基本枠・印の表示": SCREEN,
     "言語・自動保存・設定": {"ops": ["set_work_settings"], "routes": ["GET /me/settings", "PUT /me/settings"]},
     "探す・置き換え": {"ops": ["replace_text"], "routes": ["GET /works/{work_id}/search"]},

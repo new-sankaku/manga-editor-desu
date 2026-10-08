@@ -71,6 +71,7 @@
 
 - 利用の条件は同じ形 `UsageTerms`（`usage_terms_schema.py`）：商用に使えるか・権利が誰にあるか・学習に使われるか（使ってよいか）・クレジット・規約のURLか確かめた所・確かめた日。分からない項目は `unknown` と書く。
 - 持ち込んだ絵は登録のときに必須。サービスの規約は口 `POST /services`・`PATCH /services/{id}` の `usage_terms`（管理者）。生成した絵は依頼からサービスをたどって規約を出す。どちらも無ければ `terms_missing=true`（補って埋めない）。
+- 今のアプリのプロジェクトから取り込んだ絵は、取り込む人が出どころを選ぶ：`imported`（持ち込んだ絵。利用の条件が要る）か `human_drawn`（人が描いた絵）。どちらも人の登録で、`source_note` にファイルの名前と sha256 を残す（9章）。
 - 規制の判定は入口 `image_intake.take_in_image` の1か所。判定の手段と閾値は後で決める（V3ハーネス設計 12章）ので、今は全部の絵に `not_judged` を記録する（表 `image_intake_screenings`）。手段を決めたら `INTAKE_JUDGES` に足す。止めた絵も置き場には残し、登録を断る。
 
 ### 2.5 AIの関与（4択）
@@ -178,10 +179,10 @@
 | 赤入れ | `annotation_items`。`add_annotation`・`update_annotation`（文・範囲・作業・済み）・`set_removed(annotation)`。AIが付けるのは、その作業の検査の関与で許されているときだけ。赤入れから依頼を作る口 `POST /works/{id}/annotations/{id}/job`（依頼に赤入れの文と範囲を添え、`record_annotation_job` で赤入れに残す）。権限は赤入れを付けられる人（can_comment） |
 | ペン | 線（`pen_strokes`）が正本。1本ずつの物で、点（x・y・筆圧・時刻）の並び・筆（今のアプリの12種）・太さ・色・不透明度・乱れの種（seed）を持つ。`add_pen_strokes`・`update_pen_strokes`（何本でもまとめて動かす・太さ・色・不透明度・筆を変える）・`remove_pen_strokes`。人だけが出せる。層の絵は線から作った控えで、画面が描いて口 `POST /works/{id}/layers/{id}/stroke-cache`（`set_stroke_cache`）で上げる。層は線の版（`stroke_revision`）と、控えを作った版（`image_stroke_revision`）を持ち、違えば古い控えとして、AIへ渡す依頼と書き出しを止める |
 | 消しゴム | 線の消しゴム `erase_pen_strokes`：線ごと（whole）・交わりまで（to_crossings）・触れた所だけ（touched。線が分かれる）。答えは線のデータ。線を持たない絵（AIの絵の層・コマの1枚の絵）は画素の消しゴム `POST /works/{id}/panels/{id}/erase-pixels`（`erase_pixels`）で、新しい版（human_edited）と、消した所の人の手の範囲（マスク）を作る |
-| 文字（写植・描き文字） | `text_items` に書体（`font_family`）・飾り（`decoration`：塗り・縁・光彩・影・残像・帯・字間）・ルビ（`ruby`）・置き方（`transform`）・不透明度・仕上げを足した。描き文字はフキダシの形を持たない |
+| 文字（写植・描き文字） | `text_items` に書体（`font_family`）・飾り（`decoration`：塗り・縁・光彩・影・残像・帯・字間）・ルビ（`ruby`）・置き方（`transform`）・不透明度・仕上げを足した。文字の一部の書式（`spans`：書体・大きさの比・太らせる幅・色）と組版（`typesetting`：行間・自動の改行・縦中横・揃え。無ければ作品の `preferences.typesetting`）も持つ。禁則・縦中横・約物の向き・自動の改行は書き出しの組版（`v3/psd_writer/text_layout.js`。`V3サーバーの土台.md` 3.6）。描き文字はフキダシの形を持たない |
 | コマ枠 | 枠を動かす：`update_panel.frame`。分ける `split_panel`・合わせる `merge_panels` は1つの操作で、1回で取り消せる（10.1 の決まり：細すぎる分け方は閾値 `panel_short_side_min_mm` で断る。絵は大きい側に残る。隣り合わない2つは合わせない）。枠の線と塗り：`update_panel.frame_style`（無ければ作品の `preferences.frame_style`） |
 | ナイフ | `split_panel`（横・縦・斜め。斜めは角度。間の幅は `gap_mm`、無ければ作品のコマの間） |
-| フキダシ | `update_text_item` の `box_mm`・`tail_target_mm`・`text`・`balloon_shape`（型の名前と、箱に合わせた外形・線・塗り。自分で描いた形も外形で持つ） |
+| フキダシ | `update_text_item` の `box_mm`・`tail_target_mm`・`text`・`balloon_shape`（型の名前と、箱に合わせた外形・線・塗り・しっぽの根元の幅と曲がり。自分で描いた形も外形で持つ）。書き出しはしっぽを外形と1つの形にして描き、`joined_to_previous` のフキダシもつなげる |
 | トーン | `page_items`（`item_kind=tone`）。網点・線・砂目・グラデ・雪・集中線・スピード線、線数・濃さ・角度・本数・中心、貼る所（コマ・囲む・塗る＝マスクの絵）。`add_page_item`・`update_page_item` |
 | 図形 | `page_items`（`item_kind=shape`）。四角・楕円・多角形・線・絵記号（名前と外形）、線・塗り・影 |
 | 手のひら | 画面だけ |
@@ -205,8 +206,8 @@
 | 手順・モデル・シード・参照 | 手順・モデル：`service_processes`。シード：依頼の `overrides`、記録は `call_logs.seed`。参照：`input_images` の purpose=reference。人物ごとの生成の設定：設定資料の `generation`（指示文・否定の指示文・LoRA・参照の絵・シード） |
 | 設定資料（人物・小物・背景・その他） | `material_entries`（名前・特徴・服・絵・生成の設定・メモ）。`add_material_entry`・`update_material_entry`・`set_removed(material_entry)`。AIが足すと案（proposed）で、人が `decide_material_proposal` で採る |
 | あらすじ・読者・人物を抜き出す・入れないもの | `work_plans`（`set_work_plan`）。人物を抜き出す：口 `POST /works/{id}/plan/extract-characters`（extract_characters。答えの人物はAIの案として設定資料に入る） |
-| ページを足す・画像から足す・取り込む | ページを足す：`add_page`。画像から足す・取り込む：絵の口と `name-imports`。絵からコマを見つける解析は外（manga-analyzer） |
-| 画像の書き出し・コピー・解像度・紙の大きさ | 口 `POST /works/{id}/exports`（形：png・pdf・psd、ページ、解像度、紙の大きさ）。書き出しは書き出しの待ち行列（Temporal の v3-export）で行い、`GET /works/{id}/exports/{id}` で状態、`.../files/{name}` でファイル。紙の大きさを渡すと、ページを紙の真ん中に置く。コピーは画面だけ。直した PSD を戻す口 `POST /works/{id}/exports/{id}/pages/{page}/psd`（`apply_psd_import`） |
+| ページを足す・画像から足す・取り込む | ページを足す：`add_page`。並べ替える：`reorder_pages`。見開き：`add_spread`・`update_spread`（見開きにまたがる絵）・`set_removed(spread)`。ページの種類・色の種類・解像度・ノンブルの出し方：`update_page`（どれも人だけ）。画像から足す・取り込む：絵の口と `name-imports`。絵からコマを見つける解析は外（manga-analyzer）。今のアプリのプロジェクト（.lz4）：口 `POST /works/{id}/episodes/{id}/current-app-imports`（`import_current_app_project`。9章） |
+| 画像の書き出し・コピー・解像度・紙の大きさ | 口 `POST /works/{id}/exports`（形：png・pdf・psd、ページ、解像度（無ければページごと）、見開きの出し方、紙の大きさ）。色の種類（2階調・グレー・カラー）と解像度はページごと、ノンブルは作品の `preferences.nombre`。入稿前の確かめ：口 `POST /works/{id}/preflight`（`V3サーバーの土台.md` 3.6）。書き出しは書き出しの待ち行列（Temporal の v3-export）で行い、`GET /works/{id}/exports/{id}` で状態、`.../files/{name}` でファイル。紙の大きさを渡すと、ページを紙の真ん中に置く。コピーは画面だけ。直した PSD を戻す口 `POST /works/{id}/exports/{id}/pages/{page}/psd`（`apply_psd_import`） |
 | マス目・基本枠・印の表示 | 基本枠：`page_spec`。表示は画面だけ |
 | 言語・自動保存・設定 | 利用者ごと：口 `GET/PUT /me/settings`（その人だけの物なので操作の窓口の外）。作品ごと：`set_work_settings.preferences`（言語・文字の種類ごとの書体・コマ枠の標準・自動保存の間隔） |
 | 探す・置き換え | 探す：口 `GET /works/{id}/search`（文字・話す人・設定資料・企画・赤入れ）。置き換え：`replace_text`（当たった全部を1回で変え、1回で取り消せる。ルビの付いた文字で字数が変わる所は止める） |
@@ -308,3 +309,47 @@
 - 決めたこと：PSD で差し替えた絵は、重ね方のほかの仕上げを外し、枠の外にあった絵は失う（PSD の層には枠の中だけが入るため）。
 - 決めたこと：PSD の戻しを取り消すと、そのとき作った判断待ちは「取り下げ」になる。判断待ちを決めた後に戻しを取り消すと、決めた結果も戻るので、新しい順に取り消す。
 - 決めたこと：利用者ごとの設定は操作の窓口の外（出来事の一覧と取り消しに入らない）。
+
+---
+
+## 9. 今のアプリのプロジェクトの取り込み（2026-10-08）
+
+今のアプリ（ブラウザだけで動く版）の「プロジェクトを保存」で出した `.lz4` を、話の後ろにページとして足す。人の操作で、作品の作者（`can_manage`）だけが出せる。AIは出せない。
+
+- 口：`POST /works/{id}/episodes/{eid}/current-app-imports`（multipart：`project` にファイル、`image_origin` に `imported` か `human_drawn`、`imported` なら `usage_terms` に `UsageTerms` の JSON）。報告は `GET /works/{id}/current-app-imports/{report_id}`
+- 読む所：`current_app_import/project_file_reader.py`（入れ物の形は `js/core/compression/lz4.js` と同じ。LZ4 は Python の `lz4` ライブラリでほどく）。古い zip の形は読まない（止める）
+- 形の計算：`current_app_import/fabric_geometry.py`（fabric.js 5.3.0 の位置・回転・拡大・傾き・反転・原点、多角形と道（M・L・Q・C・Z）の点）
+- 行の案と報告：`current_app_import/import_plan.py`。正本へ入れるのは操作 `import_current_app_project`（`operations/current_app_import_operations.py`）で、中はページ・コマ・絵の登録・コマの絵・層・文字を足す前からの操作の apply をそのまま通す。値の確かめ・人の手の印・AIの関与は1つずつ足したときと同じにかかる。1回で取り消せる（作ったページ・コマ・層・文字・AIの設定に抜いた印を付ける。絵と報告は残す）
+- 寸法：今のアプリのページ（`canvas_info.json` の mm）を仕上がりの大きさとみなし、作品の `page_spec` の仕上がりと比べる。違うページはページだけ作り、中の物は全部「入れられない」にする。座標は 画素 × mm/画素 − 基本枠の原点
+
+移し方（元の物 → 正本）
+
+| 元の物 | 入れる所 | 報告の状態 |
+|---|---|---|
+| ページ | `pages`（話の最後の番号の後ろ） | 移した |
+| コマ（`isPanel` の多角形・四角） | `panels.frame`（mm の多角形、基本枠からはみ出せば塗り足し）。読む順は位置から決める（今のアプリは読む順を持たない）。枠の線は `frame_style` | 変えて移した（理由を書く） |
+| コマの中の絵（最初の、不透明で見えている物） | 絵の登録（`image_files`）と `panels.image_id`・`image_placement`（切り抜き・置く箱・回転・傾き・反転） | 変えて移した |
+| トーン・効果線の絵、2枚目からの絵 | `panel_layers`（トーンは role=tone、ほかは art） | 変えて移した |
+| 縦書き・横書きの文字 | `text_items` の caption（コマの中にあるとき） | 変えて移した |
+| フキダシ（形・四角・文字の組） | `text_items` の balloon。外形は `balloon_shape` の custom に mm の点で入れる。四角は「要らない」 | 変えて移した |
+| コマ・絵ごとのAIの設定（`text2img_*`・`img2img*`・`temp*`） | `element_generation_settings`（指示文と否定の指示文、元の値はそのまま `source_values`） | 移した |
+| プロジェクトの基本のプロンプト | 同じ表の `project_base`（全ページで同じなら1行、違えばページごと） | 移した |
+| ペンの線・コマの外の絵や文字・知らない種類 | 入れない | 入れられない（理由を書く） |
+| 取り消しの記録・書体・参照の絵・一覧の小さな絵 | 入れない | 要らない（理由を書く） |
+
+- 報告（`current_app_import_reports`）には、元のページ番号・物の番号・種類・名前・状態・入れた表と行・理由を、元の物1つにつき1行残す。黙って落とさない（試験で、元の物が全部ちょうど1回出ることを確かめる）
+- 絵は入口（`image_intake.take_in_image`、入口の種類は `human_upload`）を通す。読めない絵・入口で止めた絵は入れず、報告に理由を残す
+- 本物の見本：今のアプリを Playwright（Chromium、`/opt/pw-browsers`）で動かし、コマ割りのテンプレート・コマの指示文・コマの絵・トーン・縦書きと横書きの文字・フキダシ・ペンの線・2ページ目を作って保存した4ページのファイル（`v3/server/tests/fixtures/current_app_project_4pages.lz4`、作り方は同じ場所の `build_current_app_project.js`）
+- 突き合わせの結果（`tests/integration/test_translation_review_import.py`）：報告の行は19（元の物12個と、ページ・取り消しの記録などページ単位の行）で、移した4・変えて移した10・入れられない1（ペンの線）・要らない4。コマ3つ・文字4つ（文字は元と全部同じ）・コマの絵1枚・トーンの層1つ・AIの設定6行。絵の sha256 は元の data URL の中身と同じ
+- 未検証：フキダシの外形（最も大きい輪を使う）としっぽの位置。縦書きの字間・行間は移していない（報告に書く）
+- 作っていない：ペンの線を `pen_strokes` へ移す。コマの外の物（V3 はコマに属さない絵の層を持たない）。フキダシの格子。取り込みの画面
+
+## 10. 翻訳（2026-10-08）
+
+- 元の言語は作品の `preferences.language`。決まっていないと訳文は置けない（どれが元か分からないため）
+- 訳文は文字1つ×言語1つで1行（`text_item_translations`：文字・書く向き・文字の大きさ）。言語は BCP 47 の形（`en`・`zh-Hans` など。中身が正しい言語かまでは見ない）
+- 操作：`set_text_translation`（無ければ足す、あれば変える）・`set_text_translation_removed`。読む口：`GET /works/{id}/translations?language=`（訳文と、訳文の無い文字）
+- 権限：作品の `can_translate`（作者・翻訳者）。翻訳者はページの `can_draw` を持たないので、元の文字・位置・フキダシ・コマは変えられない（試験で確かめた）。ロックは文字1つ（`item`）にだけ当たり、ページを描いている人のロックでは止めない
+- 人の手の印と判断待ち：言語ごとに別の行なので、印も判断待ちも言語ごとに分かれる。AIの関与の作業に「翻訳（translation）」を足した。AI（機械の翻訳）の変更が人の置いた訳文に当たると判断待ちになり、印の無い言語は変えられる（試験で確かめた）。判断待ちは訳文を置ける人が決める
+- 言語ごとの書き出し：`POST /works/{id}/exports` に `language`。訳文に差し替えた写しで描く（行は変えない）。訳文の無い文字があれば、その文字を挙げて止める（元の文字で埋めない）。ルビは元の文字の位置に付くので訳文では外す。PSD は言語ごとに書き出さない（直した PSD を戻す突き合わせが元の言語の文字で動くため。未対応）
+- 未検証：訳文の長さでフキダシからはみ出すか（箱は元のまま。はみ出しの検査は無い）

@@ -1,0 +1,24 @@
+# 入口。TLS はここで終え、アプリと Keycloak へ渡す（compose.prod.yaml）。
+# V3_TLS: 公開の名前なら ACME の連絡先のメール（証明書を自動で取る）。手元の試験では internal
+{$V3_SITE_ADDRESS} {
+	tls {$V3_TLS}
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy same-origin
+		-Server
+	}
+
+	handle /kc/* {
+		# Keycloak の管理と master の realm は外に出さない（管理画面は 127.0.0.1 の口から）
+		@kc_closed path /kc/admin /kc/admin/* /kc/realms/master /kc/realms/master/*
+		respond @kc_closed 404
+		reverse_proxy keycloak:8080
+	}
+	handle {
+		reverse_proxy app:8000
+	}
+}

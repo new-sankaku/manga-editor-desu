@@ -29,7 +29,7 @@ def validate_tier_input(page: NamePage, spec: PageSpec) -> tuple[list[float], li
     hs, ws = page.row_height_ratios, page.cell_width_ratios
     if len(hs) != len(page.rows) or len(ws) != len(page.rows):
         raise LayoutInputError(f"{page.page}ページ：段の数 {len(page.rows)} と比の数（高さ {len(hs)}・幅 {len(ws)}）が合わない")
-    for i, (row, wr) in enumerate(zip(page.rows, ws)):
+    for i, (row, wr) in enumerate(zip(page.rows, ws, strict=False)):
         if not row:
             raise LayoutInputError(f"{page.page}ページ：{i + 1}段目にコマが無い")
         if len(row) != len(wr):
@@ -40,7 +40,7 @@ def validate_tier_input(page: NamePage, spec: PageSpec) -> tuple[list[float], li
     if sorted(seq) != sorted(p.n for p in page.panels) or len(set(seq)) != len(seq):
         raise LayoutInputError(f"{page.page}ページ：段に並べたコマの番号と、ページのコマの番号が合わない")
     if page.cut_slants is not None:
-        if len(page.cut_slants) != len(page.rows) or any(len(k) != len(r) - 1 for k, r in zip(page.cut_slants, page.rows)):
+        if len(page.cut_slants) != len(page.rows) or any(len(k) != len(r) - 1 for k, r in zip(page.cut_slants, page.rows, strict=False)):
             raise LayoutInputError(f"{page.page}ページ：区切りの傾きの数が、段ごとの区切りの数（コマ数−1）と合わない")
     if spec.gutter_x_mm >= spec.gutter_y_mm:
         raise LayoutInputError("規格の左右の隙間が上下の隙間より狭くない")
@@ -56,18 +56,18 @@ def tier_boxes(page: NamePage, spec: PageSpec, direction: ReadingDirection) -> d
     avail_h = H - spec.gutter_y_mm * (len(hs) - 1)
     out: dict[int, Box] = {}
     y = 0.0
-    for row, h_ratio, w_ratios in zip(page.rows, hs, ws):
+    for row, h_ratio, w_ratios in zip(page.rows, hs, ws, strict=False):
         h = avail_h * h_ratio / sum(hs)
         avail_w = W - spec.gutter_x_mm * (len(row) - 1)
         if direction == "right_to_left":
             x = W
-            for n, wr in zip(row, w_ratios):
+            for n, wr in zip(row, w_ratios, strict=False):
                 w = avail_w * wr / sum(w_ratios)
                 out[n] = (x - w, y, x, y + h)
                 x -= w + spec.gutter_x_mm
         else:
             x = 0.0
-            for n, wr in zip(row, w_ratios):
+            for n, wr in zip(row, w_ratios, strict=False):
                 w = avail_w * wr / sum(w_ratios)
                 out[n] = (x, y, x + w, y + h)
                 x += w + spec.gutter_x_mm
@@ -111,7 +111,7 @@ def layout_draft(draft: NameDraft) -> NameDraft:
     """全ページのコマに枠を入れた写しを返す（元の draft は変えない）。1ページでも比が足りなければ例外にする。"""
     sides = page_sides(draft)
     pages = []
-    for page, side in zip(draft.pages, sides):
+    for page, side in zip(draft.pages, sides, strict=False):
         frames = page_frames(page, draft.page_spec, draft.reading_direction, side)
         panels = [p.model_copy(update={"frame": frames[p.n]}) for p in page.panels]
         pages.append(page.model_copy(update={"panels": panels}))

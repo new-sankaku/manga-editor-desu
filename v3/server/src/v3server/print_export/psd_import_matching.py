@@ -12,13 +12,15 @@
 描き直さずに保存しても画素が変わる道具があれば、そこでは changed になる（未検証）。
 """
 
-import io
+import pathlib
 import re
 from dataclasses import dataclass, field
 from typing import Literal
 
 import numpy as np
 from PIL import Image
+
+from v3server.v3_error_types import Invalid
 
 MARKER_RE = re.compile(r"\[([0-9a-f]{32}(?:-[a-z]+)?)\]\s*$")
 _GIMP_SUFFIX_RE = re.compile(r" #\d+$")
@@ -67,10 +69,24 @@ class Match:
     extra: dict = field(default_factory=dict)
 
 
-def read_psd(data: bytes) -> list[ReadLayer]:
+def read_psd(path: str | pathlib.Path, *, max_pixels: int, max_layers: int) -> list[ReadLayer]:
+    """PSD を読む。画素を展開する前に、紙の画素数・層の数（グループも数える）・層ごとの画素数を上限と比べて止める
+    （psd-tools は層を全部展開するので、上限が無いとメモリを食い潰す。点検5 3-1）。"""
     from psd_tools import PSDImage
 
-    psd = PSDImage.open(io.BytesIO(data))
+    try:
+        psd = PSDImage.open(path)
+    except Exception as e:
+        raise Invalid(f"PSD として読めない: {e}") from e
+    if psd.width * psd.height > max_pixels:
+        raise Invalid(f"PSD の画素が多すぎる: {psd.width}×{psd.height}（上限 {max_pixels} 画素。V3_IMAGE_MAX_PIXELS）")
+    layers = list(psd.descendants())
+    if len(layers) > max_layers:
+        raise Invalid(f"PSD の層が多すぎる: {len(layers)}（上限 {max_layers}。V3_PSD_MAX_LAYERS）")
+    for layer in layers:
+        if layer.width * layer.height > max_pixels:
+            raise Invalid(f"PSD の層「{clean_name(layer.name)}」の画素が多すぎる: {layer.width}×{layer.height}"
+                          f"（上限 {max_pixels} 画素）")
     out: list[ReadLayer] = []
 
     def walk(group, parent_marker):

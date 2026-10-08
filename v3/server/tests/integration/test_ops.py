@@ -47,6 +47,69 @@ async def test_取り消しと取り消しの取り消し(api):
     assert (await panel_of(api, wid, a, pid))["content"] == {"place": "屋上"}
 
 
+async def _two_people_on_one_panel(api):
+    a, b = user(), user()
+    ids = await new_work(api, a)
+    wid, pid = ids["work"], uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "set_member", "user": b, "role": "author", "granted": True})).status_code == 200
+    assert (await op(api, wid, a, {"type": "add_panel", "id": pid, "page_id": ids["page1"], "order": 1,
+                                    "content": {"place": "教室"}})).status_code == 200
+    r = await op(api, wid, a, {"type": "update_panel", "id": pid, "content": {"place": "屋上"}})
+    assert r.status_code == 200, r.text
+    return a, b, wid, pid, r.json()["event_id"]
+
+
+async def test_後で他の人が同じ項目を変えていたら取り消さず記録する(api):
+    a, b, wid, pid, upd = await _two_people_on_one_panel(api)
+    r = await op(api, wid, b, {"type": "update_panel", "id": pid, "content": {"place": "廊下"}})
+    later = r.json()["event_id"]
+
+    r = await api.post(f"/works/{wid}/events/{upd}/undo", headers=h(a))
+    assert r.status_code == 409, r.text
+    body = r.json()
+    assert body["code"] == "undo_conflict"
+    [c] = body["conflicts"]
+    assert (c["table"], c["id"], c["field"]) == ("panels", pid, "content")
+    assert [e["event_id"] for e in c["events"]] == [later]
+    assert c["events"][0]["actor_id"] == b
+    # B さんの値は残る
+    assert (await panel_of(api, wid, a, pid))["content"] == {"place": "廊下"}
+    # 記録が残る
+    recs = (await api.get(f"/works/{wid}/undo-conflicts", headers=h(a))).json()
+    assert [(x["id"], x["event_id"]) for x in recs] == [(body["undo_conflict_id"], upd)]
+    # 取り消していないので、後で B さんが自分の変更を取り消せば、A さんの取り消しは通る
+    assert (await api.post(f"/works/{wid}/events/{later}/undo", headers=h(b))).status_code == 200
+    r = await api.post(f"/works/{wid}/events/{upd}/undo", headers=h(a))
+    assert r.status_code == 200, r.text
+    assert (await panel_of(api, wid, a, pid))["content"] == {"place": "教室"}
+
+
+async def test_後で他の人が別の項目を変えていても取り消せる(api):
+    a, b, wid, pid, upd = await _two_people_on_one_panel(api)
+    r = await op(api, wid, b, {"type": "update_panel", "id": pid, "role": "establishing"})
+    assert r.status_code == 200, r.text
+
+    r = await api.post(f"/works/{wid}/events/{upd}/undo", headers=h(a))
+    assert r.status_code == 200, r.text
+    panel = await panel_of(api, wid, a, pid)
+    assert panel["content"] == {"place": "教室"}
+    assert panel["role"] == "establishing"
+    # B さんが付けた人の手の印は残る（取り消しで戻すのは、A さんの操作が付けた分だけ）
+    assert "role" in panel["human_hand_fields"]
+
+
+async def test_足した行を後で他の人が変えていたら取り消しで抜かない(api):
+    a, b = user(), user()
+    ids = await new_work(api, a)
+    wid, pid = ids["work"], uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "set_member", "user": b, "role": "author", "granted": True})).status_code == 200
+    add = (await op(api, wid, a, {"type": "add_panel", "id": pid, "page_id": ids["page1"], "order": 1})).json()
+    assert (await op(api, wid, b, {"type": "update_panel", "id": pid, "content": {"place": "教室"}})).status_code == 200
+    r = await api.post(f"/works/{wid}/events/{add['event_id']}/undo", headers=h(a))
+    assert r.status_code == 409, r.text
+    assert (await panel_of(api, wid, a, pid))["removed"] is False
+
+
 async def test_追加の取り消しは消さずに抜く(api):
     a = user()
     ids = await new_work(api, a)

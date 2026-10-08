@@ -40,6 +40,21 @@ async def intake_status(session, work_id: str, sha256: str) -> str | None:
     return "blocked" if "blocked" in rows else rows[-1]
 
 
+async def register_image_scope(session, work_id: str, page_id: str | None,
+                               panel_id: str | None) -> tuple[Scope, str | None]:
+    """絵を登録できる権限の範囲と、絵が属するページ。アップロードの口は、ファイルを書く前にこれで確かめる。"""
+    if panel_id is not None:
+        panel = await get_in_work(session, Panel, panel_id, work_id)
+        if page_id is not None and page_id != panel.page_id:
+            raise Invalid("コマとページが合わない")
+        page_id = panel.page_id
+    if page_id is not None:
+        await get_in_work(session, Page, page_id, work_id)
+        return Scope("can_draw", page_obj(page_id)), page_id
+    # ページに属さない絵（設定資料・参照）は作品を管理できる人だけ
+    return Scope("can_manage", work_obj(work_id)), None
+
+
 class RegisterImage(OpBase):
     type: Literal["register_image"] = "register_image"
     id: str = Field(default_factory=new_id)
@@ -61,16 +76,8 @@ class RegisterImage(OpBase):
     ai_may_submit = True
 
     async def scope(self, session, work):
-        if self.panel_id is not None:
-            panel = await get_in_work(session, Panel, self.panel_id, work.id)
-            if self.page_id is not None and self.page_id != panel.page_id:
-                raise Invalid("コマとページが合わない")
-            self.page_id = panel.page_id
-        if self.page_id is not None:
-            await get_in_work(session, Page, self.page_id, work.id)
-            return Scope("can_draw", page_obj(self.page_id))
-        # ページに属さない絵（設定資料・参照）は作品を管理できる人だけ
-        return Scope("can_manage", work_obj(work.id))
+        scope, self.page_id = await register_image_scope(session, work.id, self.page_id, self.panel_id)
+        return scope
 
     async def apply(self, ctx):
         # 出どころを偽れない：AIが登録するのは生成した絵だけ。人は描いた絵・持ち込んだ絵・手を入れた絵

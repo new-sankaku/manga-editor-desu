@@ -17,6 +17,7 @@ UndoWithHeldChanges：AIの変更で判断待ちを置いた操作の取り消�
 from typing import Any, Literal
 
 from pydantic import Field
+from sqlalchemy import select
 
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
@@ -27,16 +28,16 @@ from v3server.canonical_tables.text_and_layer_tables import (
     PanelLayer,
     TextItem,
 )
+from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from sqlalchemy import select
-
 from v3server.operations.human_hand_guard import change_with_human_hand
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
 from v3server.v3_error_types import HumanHandProtected, Invalid
 
 HELD_TARGETS = {"pages": Page, "panels": Panel, "text_items": TextItem, "panel_layers": PanelLayer,
                 "page_items": PageItem, "annotation_items": AnnotationItem, "material_entries": MaterialEntry,
-                "work_plans": WorkPlan, "panel_templates": PanelTemplate}
+                "work_plans": WorkPlan, "panel_templates": PanelTemplate,
+                "text_item_translations": TextItemTranslation}
 
 # kind ごとの選べる手。何もしない手（reject・discard・keep）は値を変えない
 CHOICES = {
@@ -88,6 +89,10 @@ class ResolveHeldChange(OpBase):
             # 採ると、その操作を人の操作として当てる。その操作と同じ権限・ロックで確かめる
             inner = await _inner_op(held).scope(session, work)
             return Scope(inner.relation, inner.object, inner.lock_targets, inner.page_tree)
+        if held.target_table == "text_item_translations":
+            # 訳文の判断待ちは、訳文を置ける人（作者・翻訳者）が決める。ロックは訳文を置く操作と同じ
+            tr = await get_in_work(session, TextItemTranslation, held.target_id, work.id)
+            return Scope("can_translate", work_obj(work.id), [("item", tr.text_item_id)])
         if held.page_id is None:
             return Scope("can_manage", work_obj(work.id))
         locks = [("page", held.page_id)]
