@@ -27,7 +27,7 @@ const FAST = [
   { name: "keys_ui（偽のサーバー）", file: "keys_ui.mjs", env: shotsFor("keys") },
   { name: "manuscript_ui（偽のサーバー）", file: "manuscript_ui.mjs", env: { MOCK: "1", ...shotsFor("manuscript_mock") } },
   { name: "screens_ui（録った答え）", file: "screens_ui.mjs", env: { REPLAY: "1", ...shotsFor("screens_replay") } },
-  // 図の重なりは、普段は一番広い窓と電話の幅だけ（1つの窓で約50秒）。間の 1280×800・1024×768 は full で流す
+  // 図の重なりは、普段は一番広い窓と電話の幅だけ（2つの窓で約35秒。ページを4枚まで同時に開く）。間の 1280×800・1024×768 は full で流す
   { name: "harness_layout_ui（図の重なり・偽のサーバー）", file: "harness_layout_ui.mjs", env: { SIZES: "1920x1080,390x844", ...shotsFor("harness_layout") } },
 ];
 function fullJobs() {

@@ -59,7 +59,7 @@ const S = {
   reviewItems: [], toast: null, thresholds: null, notes: [], notify: null,
 };
 // 確かめのための値（Playwright で読む。画面の動きには使わない）
-const probe = window.__harness = { latencies: [], events: 0, lastTraversal: null, conn: "connecting", reconnects: 0 };
+const probe = window.__harness = { latencies: [], events: 0, lastTraversal: null, conn: "connecting", reconnects: 0, resizes: 0 };
 
 let graph;
 
@@ -107,7 +107,7 @@ async function main() {
   window.addEventListener("v3-view", () => requestAnimationFrame(() => graph.resized()));
   // 窓の大きさが変わったら、並べ直さずに全体を見直す（ノードは動かない。倍率と位置だけ）
   let resizeTimer = null;
-  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => graph.resized(), 120); });
+  window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { graph.resized(); probe.resizes += 1; }, 120); });
   setInterval(tick, 500);
   await loadWork();
   connect();
@@ -647,8 +647,23 @@ function candidateCard(c, picked, approve) {
     h("div", { cls: "cand-meta" },
       h("span", { cls: "label", text: `#${c.k_index + 1} ${{ pass: "通過", flag: "指摘あり", drop: "落ちた" }[c.check_verdict] || "検査前"}${c.id === picked ? "・評価役が選んだ" : ""}` }),
       issues.length ? h("ul", { cls: "issues" }, issues.slice(0, 6).map((t) => h("li", { text: t }))) : null,
-      c.evaluation ? h("span", { cls: "muted", text: `票 ${c.evaluation.votes}/${c.evaluation.repeats}` }) : null,
+      c.evaluation ? h("span", { cls: "muted eval", text: evaluationText(c.evaluation) }) : null,
       c.check_verdict !== "drop" && (c.image_id || c.proposal_id || c.content) ? act("これを採用", approve, "primary") : null));
+}
+
+// 候補の評価（harness_candidates.evaluation）を短い行にする。サーバーが書く形は3つ：
+//   作画の2枚ずつの比べ（panel_drawing_steps.evaluate）：repeats（くり返しごとの勝ち・分け・負け）と top_count（1位になった回数）
+//   通った候補が1枚（同）：score が null と why
+//   作画以外の工程（stage_steps_common・name_draft_steps）：by が program と flags（外れの数）
+// どれでもない形は、黙って隠さずに読めないと出す
+function evaluationText(ev) {
+  if (Array.isArray(ev.repeats)) {
+    const sum = (k) => ev.repeats.reduce((a, r) => a + r[k], 0);
+    return `比べ 勝ち${sum("wins")}・分け${sum("ties")}・負け${sum("losses")}　1位 ${ev.top_count}/${ev.repeats.length}回`;
+  }
+  if (ev.by === "program") return `外れ ${ev.flags} 件（外れの少ない案を選ぶ）`;
+  if (ev.why) return ev.why;
+  return `評価を読めない（${Object.keys(ev).join("・")}）`;
 }
 
 // 絵の無い候補（企画・構成・設定資料・仕上げ・総合・書き出し）の中身を、種類を問わず短い行で出す

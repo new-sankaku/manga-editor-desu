@@ -97,6 +97,10 @@ try {
   await page.waitForSelector(".review-box .cand img[src]", { timeout: 15000 });
   await page.waitForFunction(() => document.querySelectorAll(".review-box .cand").length === 2, null, { timeout: 15000 });
   check(true, "判断のパネルに候補が2枚出る");
+  // 候補のカードの評価の行（前は「票 undefined」と出ていた。サーバーに無い値を読んでいた）
+  const evals = await page.$$eval(".review-box .cand .eval", (els) => els.map((e) => e.textContent));
+  check(evals.length === 2 && evals.every((t) => /^比べ 勝ち\d+・分け\d+・負け\d+　1位 \d+\/\d+回$/.test(t)),
+        `候補のカードに評価役の比べの結果が出る（${evals.join(" / ")}）`);
   await shot("04_review_panel", "人の判断待ち。人の判断のノードが脈打ち、横のパネルに候補（検査の指摘・評価役の選択）と採用・却下・直した絵");
 
   // ---------------------------------------------------------------- 2. 作業の図：戻りの辺を印が動く（却下→文脈）

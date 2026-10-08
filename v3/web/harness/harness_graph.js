@@ -203,31 +203,47 @@ export class HarnessGraph {
     this._pulse = setInterval(() => this.cy.nodes(".st-review, .st-blocked, .st-stopped, .st-paused").not(".frame").toggleClass("pulse-on"), 650);
     this.progress = [];
     this.markers = [];
-    this._gen = 0;
+    this._dirty = false;
+    this._laying = false;
     this.layoutDone = Promise.resolve();
   }
 
   // ------------------------------------------------------------------ 並べる（1か所）
 
-  // 今の要素から ELK の図を作って並べ、位置・大きさ・辺の折れ点を当てる。続けて呼ばれたら最後の1回だけ当てる
+  // 今の要素から ELK の図を作って並べ、位置・大きさ・辺の折れ点を当てる。
+  // 同じ処理の中で続けて呼ばれた分（読み込みで段と作業を入れる・ページを全部たたむ など）は1回にまとめる。
+  // 並べている間にまた呼ばれたら、今の結果は当てずに、終わってから今の要素で1回だけ並べ直す（並べる案を同時にいくつも走らせない）。
+  // layoutDone は、当て終えて呼ばれた分が残っていないときに解ける
   // 並べ方の案が複数あるとき（工程の図の段の列の折り返しとページと作業の詰め方、作業の図の横向き・縦向き）は全部を並べ、図の箱の幅に倍率 1 で入る物のうち一番低い物を取る。
   // 幅に入る物が無ければ一番細い物を取り、fit が図の幅を広げて箱の中で横に動かせるようにする（狭い窓）
   _relayout() {
-    const gen = ++this._gen;
-    const graphs = this.view === "unit" ? [this._unitElk("RIGHT"), this._unitElk("DOWN")] : this._stageCandidates();
-    const room = this.container.parentElement.clientWidth - 2 * MARGIN;
-    this.layoutDone = Promise.all(graphs.map((g) => elk.layout(g))).then((all) => {
-      if (gen !== this._gen) return;
-      const fits = all.filter((r) => r.width <= room);
-      const res = fits.length ? fits.reduce((a, b) => (b.height < a.height ? b : a)) : all.reduce((a, b) => (b.width < a.width ? b : a));
-      this.layoutWidth = room;
-      if (this.view === "unit") this._labelDir(graphs[all.indexOf(res)].layoutOptions["elk.direction"]);
-      if (this.view === "stage") centerGroups(res);
-      this._apply(res);
-      this.fit();
-      this.handlers.onLayout?.();
-    });
+    this._dirty = true;
+    if (!this._laying) this.layoutDone = this._layoutLoop();
     return this.layoutDone;
+  }
+
+  async _layoutLoop() {
+    this._laying = true;
+    try {
+      while (this._dirty) {
+        await Promise.resolve();  // 同じ処理の中で続けて呼ばれた分を待ってから並べる
+        this._dirty = false;
+        const graphs = this.view === "unit" ? [this._unitElk("RIGHT"), this._unitElk("DOWN")] : this._stageCandidates();
+        const room = this.container.parentElement.clientWidth - 2 * MARGIN;
+        const all = await Promise.all(graphs.map((g) => elk.layout(g)));
+        if (this._dirty) continue;
+        const fits = all.filter((r) => r.width <= room);
+        const res = fits.length ? fits.reduce((a, b) => (b.height < a.height ? b : a)) : all.reduce((a, b) => (b.width < a.width ? b : a));
+        this.layoutWidth = room;
+        if (this.view === "unit") this._labelDir(graphs[all.indexOf(res)].layoutOptions["elk.direction"]);
+        if (this.view === "stage") centerGroups(res);
+        this._apply(res);
+        this.fit();
+        this.handlers.onLayout?.();
+      }
+    } finally {
+      this._laying = false;
+    }
   }
 
   // 窓の大きさが変わったとき。今の並びが箱の幅に入るなら倍率だけ合わせ（ノードは動かない）。

@@ -9,6 +9,8 @@
 //   - 全体を見たときの文字が 12px より小さい・図が箱からはみ出す・ページが横に動く・ラベルがノードからはみ出す
 //   - 状態が変わったとき・窓の大きさが変わったときにノードが動く
 //   SIZES=1920x1080 のように窓を絞れる。SHOTS=<フォルダ> で写しを撮る（ui_common.mjs）
+//   窓と状態の組は、1つの組を1つのページで開き、LAYOUT_LANES 枚（既定は CPU の数。最大 4）まで同時に流す
+import { cpus } from "node:os";
 import zlib from "node:zlib";
 import { makeShot, openBrowser, serveWeb, SHOTS } from "./ui_common.mjs";
 
@@ -70,7 +72,9 @@ function steps(names, last = "running", attemptOf = () => 1) {
                                    detail: step === "evaluate" ? { rounds: [{ repeat: 0, verdict: "a" }, { repeat: 1, verdict: "tie" }], tops: { 0: "c1", 1: null } } : null }));
 }
 const cands = (attempt) => [0, 1].map((k) => ({ id: `c${k + 1}`, k_index: k, attempt, status: "generated", image_id: `c${k + 1}`, check_verdict: "pass",
-  check: { findings: [{ name: "人物の位置", ok: true }, { name: "顔と吹き出しの重なり", ok: k === 0 }, { name: "手", ok: null }] } }));
+  check: { findings: [{ name: "人物の位置", ok: true }, { name: "顔と吹き出しの重なり", ok: k === 0 }, { name: "手", ok: null }] },
+  // 評価はサーバーの作画の比べ（panel_drawing_steps.evaluate）と同じ形
+  evaluation: { repeats: [{ wins: 1 - k, ties: 0, losses: k, score: 1 - k }], top_count: 1 - k } }));
 const jobs = (attempt) => [
   { id: "j1", harness_key: `u:a${attempt}:gen0`, service_id: "s1", service_name: "手元の ComfyUI", status: "done", failure_kind: null },
   { id: "j2", harness_key: `u:a${attempt}:gen1`, service_id: "s1", service_name: "手元の ComfyUI", status: "running", failure_kind: null },
@@ -121,7 +125,17 @@ const SCENARIOS = [
     unit: () => { const u = unit("p1-1", "running", "evaluate"); return { u, d: detail(u, ["cut_out", "context", "generate", "check", "fix", "check", "evaluate"]) }; },
     open: ["generate", "check", "fix", "evaluate"] },
   { name: "04_unit_review", what: "作業の図。人の判断待ち（脈打つ）。横の欄に候補と採用・却下",
-    unit: () => { const u = unit("p1-1", "awaiting_review", "review"); return { u, d: detail(u, ["cut_out", "context", "generate", "check", "evaluate"], "done") }; } },
+    unit: () => { const u = unit("p1-1", "awaiting_review", "review"); return { u, d: detail(u, ["cut_out", "context", "generate", "check", "evaluate"], "done") }; },
+    // 候補のカードに評価の行が出る（前は「票 undefined」と出ていた。サーバーに無い値を読んでいた）
+    cards: () => {
+      const texts = [...document.querySelectorAll(".review-box .cand")].map((c) => c.textContent);
+      const bad = texts.length === 2 ? [] : [`候補のカードが ${texts.length} 枚`];
+      for (const t of texts) if (/undefined|NaN|読めない/.test(t)) bad.push(t);
+      for (const want of ["比べ 勝ち1・分け0・負け0　1位 1/1回", "比べ 勝ち0・分け0・負け1　1位 0/1回"]) {
+        if (!texts.some((t) => t.includes(want))) bad.push(`評価の行「${want}」が無い`);
+      }
+      return bad;
+    } },
   { name: "02_unit_many_retries", what: "作業の図。3回目。戻りの辺を全部通った（段の回数と、横の欄の戻った回数）。却下で戻る印が動いている途中",
     unit: () => { const u = unit("p1-1", "running", "check", { attempt: 3 }); return { u, d: detail(u, MANY, "running", { attemptOf: MANY_ATT, decisions: MANY_DEC, candidates: cands(3) }) }; },
     marker: ["review", "context"] },
@@ -139,6 +153,7 @@ const SCENARIOS = [
 function answerFor(sc) {
   const u0 = sc.unit ? sc.unit() : null;
   const units = sc.units || [...stageUnits("running").units.filter((u) => u.unit_id !== u0.u.unit_id), u0.u];
+  let snapshots = 0;
   return (method, url) => {
     const p = url.pathname;
     const j = (json, status = 200) => ({ status, body: JSON.stringify(json), contentType: "application/json" });
@@ -147,6 +162,8 @@ function answerFor(sc) {
     if (method === "GET" && p === "/works") return j([{ id: "w1", title: "砂の街（試験）" }]);
     if (method === "GET" && p === "/works/w1") return j(work(sc.pages));
     if (method === "GET" && p === "/works/w1/harness/snapshot") {
+      // 切断の場面：つなぎ直しも断る（画面は切断中のまま。つなぎ直しで図を作り直している途中を測らない）
+      if (sc.stream === "down" && snapshots++ > 0) return j({ detail: "切断中" }, 503);
       return j({ last_event_id: 0, stage_runs: RUNS, units, stale: sc.stale || [], progress: sc.progress || [],
                  ...(u0 && url.searchParams.get("unit_id") ? { unit: u0.d } : {}) });
     }
@@ -315,61 +332,93 @@ async function settle(page) {
   throw new Error("並べ直しが止まらない");
 }
 
-for (const [W, H] of SIZES) {
-  const context = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
-  await context.addInitScript((u) => localStorage.setItem("v3.user", u), USER);
-  for (const sc of SCENARIOS) {
-    const page = await context.newPage();
-    const errors = [];
-    page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
-    // 切断の場面では、流れを断った 503 がブラウザの読み込みの失敗として出る（それだけは場面どおり）
-    page.on("console", (m) => { if (m.type() === "error" && !(sc.stream === "down" && /status of 503/.test(m.text()))) errors.push(`console: ${m.text()}`); });
-    const answer = answerFor(sc);
-    await serveWeb(page, ORIGIN, async (route, u) => {
-      // 流れは開いたまま何も送らない。切断の場面では断る
-      if (u.pathname.endsWith("/harness/stream")) return sc.stream === "down" ? route.fulfill({ status: 503, body: "" }) : undefined;
-      return route.fulfill(answer(route.request().method(), u));
-    });
-    const u0 = sc.unit ? sc.unit() : null;
-    await page.goto(`${ORIGIN}/web/harness/?work=w1${u0 ? `&unit=${u0.u.unit_id}` : ""}`);
-    await settle(page);
-    if (sc.act === "fold") { await page.click("#fold"); await settle(page); }
-    for (const st of sc.open || []) { await page.evaluate((s) => window.__harness.toggleStep(s), st); await settle(page); }
-    const m = await page.evaluate(measure);
-    // 状態が変わっただけでは動かない：作業の状態の出来事を当てて、ノードの位置を比べる
-    const target = u0 ? u0.u : sc.units[sc.units.length - 1];
-    await page.evaluate((u) => window.__harness.applyEvent({ id: null, event: "unit", data: { ...u, cost_used: u.cost_used + 1, at: new Date().toISOString() } }), target);
-    await settle(page);
-    const m2 = await page.evaluate(measure);
-    const moved = Object.keys(m.pos).filter((k) => m2.pos[k] && (m2.pos[k][0] !== m.pos[k][0] || m2.pos[k][1] !== m.pos[k][1]));
-    if (moved.length) m.bad.movedOnUpdate = moved;
-    // 窓の大きさを少し変えても、並べ直さない（倍率と位置だけ）
-    await page.setViewportSize({ width: W - 40, height: H });
-    await page.waitForTimeout(250);
-    await settle(page);
-    const m3 = await page.evaluate(measure);
-    const moved3 = Object.keys(m.pos).filter((k) => m3.pos[k] && (m3.pos[k][0] !== m.pos[k][0] || m3.pos[k][1] !== m.pos[k][1]));
-    if (moved3.length) m.bad.movedOnResize = moved3;
-    if (total(m3.bad)) m.bad.afterResize = Object.entries(m3.bad).filter(([, v]) => v.length).map(([k, v]) => `${k}: ${v.slice(0, 3).join(" / ")}`);
-    await page.setViewportSize({ width: W, height: H });
-    await page.waitForTimeout(250);
-    await settle(page);
+// 窓と状態の組を、いくつかのページで同時に流す（1つの組は1つのページで閉じる。並べるのはページの中なので、同時に流しても答えは変わらない）
+async function runOne(context, W, H, sc) {
+  const page = await context.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
+  // 切断の場面では、流れを断った 503 がブラウザの読み込みの失敗として出る（それだけは場面どおり）
+  page.on("console", (m) => { if (m.type() === "error" && !(sc.stream === "down" && /status of 503/.test(m.text()))) errors.push(`console: ${m.text()}`); });
+  const answer = answerFor(sc);
+  await serveWeb(page, ORIGIN, async (route, u) => {
+    // 流れは開いたまま何も送らない。切断の場面では断る
+    if (u.pathname.endsWith("/harness/stream")) return sc.stream === "down" ? route.fulfill({ status: 503, body: "" }) : undefined;
+    return route.fulfill(answer(route.request().method(), u));
+  });
+  const u0 = sc.unit ? sc.unit() : null;
+  await page.goto(`${ORIGIN}/web/harness/?work=w1${u0 ? `&unit=${u0.u.unit_id}` : ""}`);
+  await settle(page);
+  if (sc.act === "fold") { await page.click("#fold"); await settle(page); }
+  for (const st of sc.open || []) { await page.evaluate((s) => window.__harness.toggleStep(s), st); await settle(page); }
+  const m = await page.evaluate(measure);
+  // 状態が変わっただけでは動かない：作業の状態の出来事を当てて、ノードの位置を比べる
+  const target = u0 ? u0.u : sc.units[sc.units.length - 1];
+  await page.evaluate((u) => window.__harness.applyEvent({ id: null, event: "unit", data: { ...u, cost_used: u.cost_used + 1, at: new Date().toISOString() } }), target);
+  await settle(page);
+  const m2 = await page.evaluate(measure);
+  const moved = Object.keys(m.pos).filter((k) => m2.pos[k] && (m2.pos[k][0] !== m.pos[k][0] || m2.pos[k][1] !== m.pos[k][1]));
+  if (moved.length) m.bad.movedOnUpdate = moved;
+  // 窓の大きさを少し変えても、並べ直さない（倍率と位置だけ）
+  await resize(page, W - 40, H);
+  const m3 = await page.evaluate(measure);
+  const moved3 = Object.keys(m.pos).filter((k) => m3.pos[k] && (m3.pos[k][0] !== m.pos[k][0] || m3.pos[k][1] !== m.pos[k][1]));
+  if (moved3.length) m.bad.movedOnResize = moved3;
+  if (total(m3.bad)) m.bad.afterResize = Object.entries(m3.bad).filter(([, v]) => v.length).map(([k, v]) => `${k}: ${v.slice(0, 3).join(" / ")}`);
+  if (sc.cards) {
+    const bad = await page.evaluate(sc.cards);
+    if (bad.length) m.bad.cards = bad;
+  }
+  if (errors.length) m.bad.pageErrors = errors;
+  if (SHOTS) {
+    await resize(page, W, H);  // 写しは元の窓の大きさで撮る
+    // 印が動いている途中を撮る（写しのためだけ。数える物は上で測り終えている）
     if (sc.marker) {
       await page.evaluate(([a, b]) => window.__harness.graph().traverse(a, b), sc.marker);
       await page.waitForTimeout(600);
     }
-    if (errors.length) m.bad.pageErrors = errors;
-    const n = total(m.bad);
-    failures += n ? 1 : 0;
-    const tag = `${W}x${H} ${sc.name}`;
-    console.log(`${n ? "NG" : "ok"} ${tag}  倍率 ${m.zoom.toFixed(2)}  最小の文字 ${m.minFont.toFixed(1)}px  辺の交わり ${m.crossings}`);
-    for (const [k, v] of Object.entries(m.bad)) if (v.length) console.log(`   ${k} ${v.length}: ${v.slice(0, 6).join(" / ")}`);
-    results.push({ size: `${W}x${H}`, name: sc.name, count: n, bad: m.bad, zoom: m.zoom, minFont: m.minFont, crossings: m.crossings });
-    if (SHOTS) await makeShot(page, { prefix: W === 1920 ? "" : `${W}x${H}_` })(sc.name, sc.fullPage ? { fullPage: true } : {});
-    await page.close();
+    await makeShot(page, { prefix: W === 1920 ? "" : `${W}x${H}_` })(sc.name, sc.fullPage ? { fullPage: true } : {});
   }
-  await context.close();
+  await page.close();
+  return m;
 }
+
+// 窓の大きさを変え、画面が resize を受けて図を見直し終えるまで待つ（harness.js の resize の後の resized。決まった秒数は待たない）
+async function resize(page, w, h) {
+  const before = await page.evaluate(() => window.__harness.resizes);
+  await page.setViewportSize({ width: w, height: h });
+  await page.waitForFunction((n) => window.__harness.resizes > n, before, { timeout: 15000 });
+  await settle(page);
+}
+
+const contexts = [];
+const tasks = [];
+for (const [W, H] of SIZES) {
+  const context = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+  await context.addInitScript((u) => localStorage.setItem("v3.user", u), USER);
+  contexts.push(context);
+  for (const sc of SCENARIOS) tasks.push({ context, W, H, sc });
+}
+// 同時に流すページの数（既定は CPU の数。最大 4）。run_ui.mjs がほかの試験と同時に流すときも同じ
+const LANES = Number(process.env.LAYOUT_LANES || Math.min(cpus().length, 4));
+const done = new Array(tasks.length);
+let next = 0;
+await Promise.all(Array.from({ length: LANES }, async () => {
+  while (next < tasks.length) {
+    const i = next++;
+    const { context, W, H, sc } = tasks[i];
+    done[i] = await runOne(context, W, H, sc);
+  }
+}));
+for (const [i, { W, H, sc }] of tasks.entries()) {
+  const m = done[i];
+  const n = total(m.bad);
+  failures += n ? 1 : 0;
+  const tag = `${W}x${H} ${sc.name}`;
+  console.log(`${n ? "NG" : "ok"} ${tag}  倍率 ${m.zoom.toFixed(2)}  最小の文字 ${m.minFont.toFixed(1)}px  辺の交わり ${m.crossings}`);
+  for (const [k, v] of Object.entries(m.bad)) if (v.length) console.log(`   ${k} ${v.length}: ${v.slice(0, 6).join(" / ")}`);
+  results.push({ size: `${W}x${H}`, name: sc.name, count: n, bad: m.bad, zoom: m.zoom, minFont: m.minFont, crossings: m.crossings });
+}
+for (const c of contexts) await c.close();
 await browser.close();
 if (process.env.RESULT) (await import("node:fs")).writeFileSync(process.env.RESULT, JSON.stringify(results, null, 2));
 console.log(`\n図の読みやすさ：${results.length - failures}/${results.length} が通った`);
