@@ -6,6 +6,7 @@ import { Stage } from "./stage.js";
 import { drawStroke } from "./pen_render.js";
 import { startKeys, km } from "../common/keys.js";
 import { openHelp } from "../common/help_overlay.js";
+import { pollMs } from "../common/poll_interval.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -13,7 +14,7 @@ const ACTIVE = new Set(["queued", "running", "waiting_limit", "waiting_budget"])
 const STATUS = { queued: "順番待ち", running: "作っている", waiting_limit: "回数の上限で待ち", waiting_budget: "予算で待ち",
                  stopped: "止まった", done: "できた", cancelled: "止めた" };
 const ORIGIN = { generated: "AIが作った", human_drawn: "人が描いた", imported: "取り込んだ", human_edited: "人が直した" };
-const POLL_MS = 1500;
+const POLL_MS = pollMs(1500);
 const THUMB = 256;
 const PEN_INK = "#000000";   // 色の決め打ちを許す：ペンの線の色は絵の中身（墨）で、画面の色ではない（色の組を替えても変えない）
 

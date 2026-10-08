@@ -2,17 +2,14 @@
 // 先に動く見本を起こす（ComfyUI・LLM・検出器は偽物）：
 //   (cd v3/server && uv run python tests/integration/harness_screen_demo.py --port 8790)
 // そのあと：
-//   CTRL=http://127.0.0.1:8791 SHOTS=v3/web/harness/screenshots \
+//   CTRL=http://127.0.0.1:8791 \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/harness_ui.mjs
-import { createRequire } from "node:module";
-import { mkdirSync, statSync, writeFileSync } from "node:fs";
-const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
+import { statSync, writeFileSync } from "node:fs";
+import { openBrowser, SHOTS } from "./ui_common.mjs";
 
 const CTRL = process.env.CTRL;
-const SHOTS = process.env.SHOTS;
-if (!CTRL || !SHOTS) throw new Error("CTRL・SHOTS を決めてください");
-mkdirSync(SHOTS, { recursive: true });
+// 画面の写しは SHOTS=<フォルダ> を付けたときだけ撮る（ui_common.mjs）。普段は run_ui.mjs full から流す
+if (!CTRL) throw new Error("CTRL を決めてください");
 
 const info = await (await fetch(`${CTRL}/info`)).json();
 const API = new URL(info.web).origin;
@@ -27,7 +24,7 @@ const api = async (method, path, body) => {
 };
 const snapshot = async () => (await api("GET", `/works/${info.wid}/harness/snapshot`)).body;
 
-const browser = await chromium.launch();
+const browser = await openBrowser();
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const page = await context.newPage();
 const errors = [];
@@ -37,6 +34,7 @@ await page.addInitScript((u) => localStorage.setItem("v3.user", u), info.user);
 
 const results = { shots: [], checks: [], latency: {} };
 async function shot(name, what, opts = {}) {
+  if (!SHOTS) return;
   const path = `${SHOTS}/${name}.png`;
   await page.screenshot({ path, ...opts });
   const size = statSync(path).size;
@@ -154,7 +152,7 @@ try {
   const real = errors.filter((e) => !/Failed to load resource|ERR_CONNECTION_REFUSED|Failed to fetch/.test(e));
   check(real.length === 0, `画面のエラーが無い ${real.join(" / ")}`);
 } catch (e) {
-  await page.screenshot({ path: `${SHOTS}/failed.png` });
+  if (SHOTS) await page.screenshot({ path: `${SHOTS}/failed.png` });
   console.error(e, errors);
   process.exitCode = 1;
 } finally {

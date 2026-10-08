@@ -46,17 +46,21 @@ class RenderedText:
     missing_chars: list[str]
 
 
+def _call(req: dict, node_executable: str, script: str, timeout_seconds: float) -> list[dict]:
+    done = subprocess.run([node_executable, script], input=json.dumps(req, ensure_ascii=False), capture_output=True,
+                          text=True, encoding="utf-8", timeout=timeout_seconds)
+    if done.returncode != 0:
+        raise TextRenderError(f"文字を描けなかった（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")
+    return json.loads(done.stdout)["items"]
+
+
 def _run(items: list[dict], node_executable: str, script: str, timeout_seconds: float, measure_only: bool
          ) -> list[RenderedText]:
     with tempfile.TemporaryDirectory() as tmp:
         req = {"items": [{**it, "output_path": str(pathlib.Path(tmp) / f"{i}.png"), "measure_only": measure_only}
                          for i, it in enumerate(items)]}
-        done = subprocess.run([node_executable, script], input=json.dumps(req, ensure_ascii=False), capture_output=True,
-                              text=True, encoding="utf-8", timeout=timeout_seconds)
-        if done.returncode != 0:
-            raise TextRenderError(f"文字を描けなかった（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")
         out = []
-        for it, info in zip(req["items"], json.loads(done.stdout)["items"], strict=False):
+        for it, info in zip(req["items"], _call(req, node_executable, script, timeout_seconds), strict=False):
             image = None
             if not measure_only:
                 if info["missing_chars"]:
@@ -81,3 +85,10 @@ def measure_texts(items: list[dict], node_executable: str, script: str, timeout_
                   ) -> list[RenderedText]:
     """描かずに組むだけ（入稿前の確かめ：はみ出し・書体に無い字）。"""
     return _run(items, node_executable, script, timeout_seconds, True)
+
+
+def layout_texts(items: list[dict], node_executable: str, script: str, timeout_seconds: float = 120) -> list[dict]:
+    """描かずに組み、行の切れ目と字の置き場を返す（render_text.js の layoutDetail。画面が書き出しと同じ組み方で字を置く）。
+    返す形：{id, overflow, lines, block_w, block_h, missing_chars, layout: {block_origin, lines, glyphs, ruby}}（画素）。"""
+    req = {"items": [{**it, "measure_only": True, "layout_detail": True} for it in items]}
+    return _call(req, node_executable, script, timeout_seconds)

@@ -27,9 +27,12 @@ from v3server.http_routes import (
     login_routes,
     name_check_routes,
     name_proposal_routes,
+    page_assignment_and_preview_routes,
     pen_stroke_routes,
+    service_inspection_and_set_routes,
     service_routes,
     settings_and_search_routes,
+    text_typeset_routes,
     translation_review_import_routes,
     work_routes,
 )
@@ -96,7 +99,8 @@ async def v3_error(request: Request, exc: V3Error):
 
 for _routes in (login_routes, work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,
                 name_check_routes, pen_stroke_routes, export_routes, settings_and_search_routes, ai_job_routes,
-                image_generation_routes, translation_review_import_routes, harness_routes):
+                image_generation_routes, translation_review_import_routes, page_assignment_and_preview_routes,
+                service_inspection_and_set_routes, text_typeset_routes, harness_routes):
     app.include_router(_routes.router)
 
 # 画像生成の画面（v3/web/）。同じ住所から配るので、画面の fetch は CORS なしで口を呼べる。ログインは /auth/（login_routes.py）

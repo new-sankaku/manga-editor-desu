@@ -1,0 +1,773 @@
+{
+ "pause_resume": {
+  "steps": {
+   "generate": {
+    "node": "generate",
+    "settled_seconds": 12.5,
+    "node_status": "paused",
+    "unit_status": "paused",
+    "comfy_prompt_left": false,
+    "pids": [
+     "dc205c59-57c4-5fd5-b2ed-ef3ecfed8e83"
+    ],
+    "events_after": [
+     "generate:pause_requested",
+     "generate:paused",
+     "generate:paused"
+    ],
+    "resumed_done_after_s": 0.7,
+    "resume_sent_at": 1791447085.3978045
+   },
+   "check": {
+    "node": "check",
+    "settled_seconds": 5.54,
+    "node_status": "done",
+    "unit_status": "paused",
+    "comfy_prompt_left": false,
+    "pids": [],
+    "events_after": [
+     "check:pause_requested",
+     "check:done",
+     "evaluate:paused"
+    ],
+    "resumed_done_after_s": 0.1,
+    "resume_sent_at": 1791447095.2417917
+   },
+   "evaluate": {
+    "node": "evaluate",
+    "settled_seconds": 12.26,
+    "node_status": "paused",
+    "unit_status": "paused",
+    "comfy_prompt_left": false,
+    "pids": [],
+    "events_after": [
+     "evaluate:pause_requested",
+     "evaluate:paused",
+     "evaluate:paused"
+    ],
+    "resumed_done_after_s": 10.7,
+    "resume_sent_at": 1791447111.2304118
+   },
+   "review": {
+    "paused_flag": true,
+    "status": "awaiting_review",
+    "approve_while_paused": null
+   }
+  },
+  "status": "COMPLETED",
+  "state": {
+   "status": "done",
+   "stop_reason": "人が採用した",
+   "attempt": 4,
+   "round": 1,
+   "budget": {
+    "seconds": 156.87,
+    "usd": 0.1982
+   },
+   "resets": 1,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 801,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "T"
+     },
+     "eval": {
+      "scores": [
+       2,
+       2
+      ],
+      "median": 2.0
+     },
+     "stale": false,
+     "image": "dc205c59-57c4-5fd5-b2ed-ef3ecfed8e83.png",
+     "gen_seconds": 0.11
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1801,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "2c59e300-ff3c-52c4-9876-ccd4b85bf960.png",
+     "gen_seconds": 24.44
+    },
+    {
+     "id": "a3c0",
+     "source": "ai",
+     "seed": 2801,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": {
+      "scores": [
+       1,
+       1
+      ],
+      "median": 1.0
+     },
+     "stale": false,
+     "image": "3c9f49d8-6606-519d-aafd-563c41f408c5.png",
+     "gen_seconds": 24.43
+    },
+    {
+     "id": "a4c0",
+     "source": "ai",
+     "seed": 3801,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "63c20a2c-6183-5ddb-859e-73b63e2f0955.png",
+     "gen_seconds": 24.36
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 4,
+     "total_s": 14.71
+    },
+    "context": {
+     "count": 4,
+     "total_s": 0.29
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 1,
+     "total_s": 0.05
+    },
+    "evaluate": {
+     "count": 3,
+     "total_s": 43.68
+    },
+    "generate": {
+     "count": 5,
+     "total_s": 98.19
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [
+    {
+     "attempt": 1,
+     "ids": [
+      "a1c0"
+     ],
+     "scores": [
+      [
+       2,
+       2
+      ]
+     ]
+    },
+    {
+     "attempt": 3,
+     "ids": [
+      "a3c0"
+     ],
+     "scores": [
+      [
+       1,
+       1
+      ]
+     ]
+    }
+   ]
+  },
+  "counts": {
+   "prompt_posts": 4,
+   "duplicate_posts": 0,
+   "registrations": 4,
+   "duplicate_registrations": 0,
+   "withdrawn": 0,
+   "already_registered_skips": 0,
+   "versions": 1,
+   "duplicate_versions": 0,
+   "claude_calls": 5,
+   "claude_killed": 1,
+   "claude_usd": 0.1983
+  }
+ },
+ "cancel_step": {
+  "steps": {
+   "generate": {
+    "node": "generate",
+    "settled_seconds": 12.06,
+    "node_status": "running",
+    "unit_status": "running",
+    "comfy_prompt_left": false,
+    "pids": [
+     "7b0fc036-9769-5b82-bc46-724bb931532c"
+    ],
+    "events_after": [
+     "generate:cancelled",
+     "generate:running"
+    ]
+   },
+   "limits_k_to_1": null,
+   "check": {
+    "node": "check",
+    "settled_seconds": 3.31,
+    "node_status": "done",
+    "unit_status": "running",
+    "comfy_prompt_left": false,
+    "pids": [],
+    "events_after": [
+     "check:done",
+     "check:regenerate",
+     "context:running"
+    ]
+   },
+   "evaluate": {
+    "node": "evaluate",
+    "settled_seconds": 11.89,
+    "node_status": "cancelled",
+    "unit_status": "awaiting_review",
+    "comfy_prompt_left": false,
+    "pids": [],
+    "events_after": [
+     "evaluate:cancelled",
+     "review:awaiting_review"
+    ]
+   },
+   "review_reason": "判定できない観点がある（評価が終わらなかった）",
+   "approve": null
+  },
+  "status": "COMPLETED",
+  "state": {
+   "status": "done",
+   "stop_reason": "人が採用した",
+   "attempt": 3,
+   "round": 1,
+   "budget": {
+    "seconds": 130.66,
+    "usd": 0.0
+   },
+   "resets": 1,
+   "candidates": [
+    {
+     "id": "a1c1",
+     "source": "ai",
+     "seed": 803,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "168c703f-8748-524d-8462-03505ba0be14.png",
+     "gen_seconds": 24.42
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1802,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "5b76d3a4-13e8-5d82-983a-ace2b84e2a39.png",
+     "gen_seconds": 24.5
+    },
+    {
+     "id": "a3c0",
+     "source": "ai",
+     "seed": 2802,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "6cf50d85-e9e1-53b6-8281-e07853aea42f.png",
+     "gen_seconds": 30.67
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 3,
+     "total_s": 13.7
+    },
+    "context": {
+     "count": 3,
+     "total_s": 0.23
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 1,
+     "total_s": 0.07
+    },
+    "evaluate": {
+     "count": 1,
+     "total_s": 12.09
+    },
+    "generate": {
+     "count": 4,
+     "total_s": 104.64
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": []
+  },
+  "counts": {
+   "prompt_posts": 4,
+   "duplicate_posts": 0,
+   "registrations": 3,
+   "duplicate_registrations": 0,
+   "withdrawn": 0,
+   "already_registered_skips": 0,
+   "versions": 1,
+   "duplicate_versions": 0,
+   "claude_calls": 1,
+   "claude_killed": 1,
+   "claude_usd": 0
+  }
+ },
+ "upstream_each_step": {
+  "steps": {
+   "generate": {
+    "node": "generate",
+    "settled_seconds": 11.81,
+    "node_status": "stale",
+    "unit_status": "awaiting_review",
+    "comfy_prompt_left": false,
+    "pids": [
+     "e829ac8c-e0c6-513c-a5ae-f7c0f5eddd22"
+    ],
+    "events_after": [
+     "generate:upstream_changed",
+     "generate:stale",
+     "review:awaiting_review"
+    ],
+    "review_reason": "上流が変わった（作り直しは人が頼む）",
+    "stale_candidates": [],
+    "approve_refused": "採用できる候補が無い",
+    "reject": null
+   },
+   "check": {
+    "node": "check",
+    "settled_seconds": 5.42,
+    "node_status": "done",
+    "unit_status": "awaiting_review",
+    "comfy_prompt_left": false,
+    "pids": [],
+    "events_after": [
+     "check:upstream_changed",
+     "check:done",
+     "review:awaiting_review"
+    ],
+    "review_reason": "上流が変わった（作り直しは人が頼む）",
+    "stale_candidates": [
+     "a2c0"
+    ],
+    "approve_refused": "採用できる候補が無い",
+    "reject": null
+   },
+   "evaluate": {
+    "node": "evaluate",
+    "settled_seconds": 12.26,
+    "node_status": "done",
+    "unit_status": "awaiting_review",
+    "comfy_prompt_left": false,
+    "pids": [],
+    "events_after": [
+     "evaluate:upstream_changed",
+     "evaluate:done",
+     "review:awaiting_review"
+    ],
+    "review_reason": "上流が変わった（作り直しは人が頼む）",
+    "stale_candidates": [
+     "a2c0",
+     "a4c0"
+    ],
+    "approve_refused": "採用できる候補が無い",
+    "reject": null
+   },
+   "final_approve": "採用できる候補が無い"
+  },
+  "status": "CANCELED",
+  "state": {
+   "status": "cancelled",
+   "stop_reason": "作業ごと取り消した",
+   "attempt": 8,
+   "round": 4,
+   "budget": {
+    "seconds": 254.2,
+    "usd": 0.7529
+   },
+   "resets": 1,
+   "candidates": [
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1803,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 2,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": true,
+     "image": "77f9235c-e201-5d8f-baee-b953debecf96.png",
+     "gen_seconds": 24.5
+    },
+    {
+     "id": "a4c0",
+     "source": "ai",
+     "seed": 3803,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": {
+      "scores": [
+       1
+      ],
+      "median": 1
+     },
+     "stale": true,
+     "image": "5acbc13b-c437-5b8b-b561-7cff2dc92d18.png",
+     "gen_seconds": 24.55
+    },
+    {
+     "id": "a5c0",
+     "source": "ai",
+     "seed": 4803,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 2,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "48cfbb38-fc3a-5625-85bc-51febc5d6ff9.png",
+     "gen_seconds": 24.44
+    },
+    {
+     "id": "a6c0",
+     "source": "ai",
+     "seed": 5803,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "bfafa6b6-ddf2-51ed-bfa9-42d17a63253f.png",
+     "gen_seconds": 24.44
+    },
+    {
+     "id": "a7c0",
+     "source": "ai",
+     "seed": 6803,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "31a182e0-16a7-5d70-bff5-f4d2c0c597c6.png",
+     "gen_seconds": 24.37
+    },
+    {
+     "id": "a8c0",
+     "source": "ai",
+     "seed": 7803,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "90a77b19-8e48-5607-948c-0a5a97a60060.png",
+     "gen_seconds": 24.51
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 6,
+     "total_s": 32.86
+    },
+    "context": {
+     "count": 8,
+     "total_s": 11.34
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 1,
+     "total_s": 12.13
+    },
+    "generate": {
+     "count": 8,
+     "total_s": 197.87
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": []
+  },
+  "counts": {
+   "prompt_posts": 8,
+   "duplicate_posts": 0,
+   "registrations": 6,
+   "duplicate_registrations": 0,
+   "withdrawn": 0,
+   "already_registered_skips": 0,
+   "versions": 0,
+   "duplicate_versions": 0,
+   "claude_calls": 2,
+   "claude_killed": 0,
+   "claude_usd": 0.0911
+  }
+ },
+ "cancel_unit_each_step": {
+  "generate": {
+   "node": "generate",
+   "settled_seconds": 12.29,
+   "node_status": "cancelled",
+   "unit_status": "cancelled",
+   "comfy_prompt_left": false,
+   "pids": [
+    "7d479e01-a18b-5e48-b088-f7c581275b28"
+   ],
+   "events_after": [
+    "generate:cancelled",
+    "generate:unit_cancel_requested",
+    "generate:cleanup"
+   ],
+   "status": "CANCELED",
+   "cleanup": [
+    {
+     "interrupted": 0,
+     "removed": 0,
+     "withdrawn": 0
+    }
+   ],
+   "store_orphans": 0,
+   "counts": {
+    "prompt_posts": 1,
+    "duplicate_posts": 0,
+    "registrations": 0,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 0,
+    "duplicate_versions": 0,
+    "claude_calls": 0,
+    "claude_killed": 0,
+    "claude_usd": 0
+   }
+  },
+  "check": {
+   "node": "check",
+   "settled_seconds": 2.81,
+   "node_status": "cancelled",
+   "unit_status": "cancelled",
+   "comfy_prompt_left": false,
+   "pids": [],
+   "events_after": [
+    "check:cancelled",
+    "check:unit_cancel_requested",
+    "check:cleanup"
+   ],
+   "status": "CANCELED",
+   "cleanup": [
+    {
+     "interrupted": 0,
+     "removed": 0,
+     "withdrawn": 0
+    }
+   ],
+   "store_orphans": 0,
+   "counts": {
+    "prompt_posts": 1,
+    "duplicate_posts": 0,
+    "registrations": 1,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 0,
+    "duplicate_versions": 0,
+    "claude_calls": 0,
+    "claude_killed": 0,
+    "claude_usd": 0
+   }
+  },
+  "evaluate": {
+   "node": "evaluate",
+   "settled_seconds": 12.32,
+   "node_status": "cancelled",
+   "unit_status": "cancelled",
+   "comfy_prompt_left": false,
+   "pids": [],
+   "events_after": [
+    "evaluate:cancelled",
+    "evaluate:unit_cancel_requested",
+    "evaluate:cleanup"
+   ],
+   "status": "CANCELED",
+   "cleanup": [
+    {
+     "interrupted": 0,
+     "removed": 0,
+     "withdrawn": 0
+    }
+   ],
+   "store_orphans": 0,
+   "counts": {
+    "prompt_posts": 1,
+    "duplicate_posts": 0,
+    "registrations": 1,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 0,
+    "duplicate_versions": 0,
+    "claude_calls": 2,
+    "claude_killed": 1,
+    "claude_usd": 0.0497
+   }
+  },
+  "review": {
+   "settled_seconds": 0.21,
+   "status": "CANCELED",
+   "cleanup": [
+    {
+     "interrupted": 0,
+     "removed": 0,
+     "withdrawn": 0
+    }
+   ],
+   "store_orphans": 0,
+   "counts": {
+    "prompt_posts": 4,
+    "duplicate_posts": 0,
+    "registrations": 4,
+    "duplicate_registrations": 0,
+    "withdrawn": 0,
+    "already_registered_skips": 0,
+    "versions": 0,
+    "duplicate_versions": 0,
+    "claude_calls": 4,
+    "claude_killed": 0,
+    "claude_usd": 0.1986
+   }
+  }
+ },
+ "cancel_stage": {
+  "stage_status": "CANCELED",
+  "settled_seconds": 14.42,
+  "children": {
+   "istage-081056-p1": {
+    "status": "CANCELED",
+    "cleanup": [
+     {
+      "interrupted": 0,
+      "removed": 0,
+      "withdrawn": 0
+     }
+    ],
+    "store_orphans": 0
+   },
+   "istage-081056-p2": {
+    "status": "CANCELED",
+    "cleanup": [
+     {
+      "interrupted": 1,
+      "removed": 0,
+      "withdrawn": 0
+     }
+    ],
+    "store_orphans": 0
+   },
+   "istage-081056-p3": {
+    "status": "CANCELED",
+    "cleanup": [
+     {
+      "interrupted": 0,
+      "removed": 0,
+      "withdrawn": 0
+     }
+    ],
+    "store_orphans": 0
+   }
+  },
+  "orphans": {
+   "comfy_orphans": 1,
+   "comfy_queue": {
+    "running": [
+     "4d9b3857-ec4b-5e01-b64d-f6d5563819a0"
+    ],
+    "pending": []
+   }
+  },
+  "counts": {
+   "prompt_posts": 3,
+   "duplicate_posts": 0,
+   "registrations": 0,
+   "duplicate_registrations": 0,
+   "withdrawn": 0,
+   "already_registered_skips": 0,
+   "versions": 0,
+   "duplicate_versions": 0,
+   "claude_calls": 0,
+   "claude_killed": 0,
+   "claude_usd": 0
+  }
+ }
+}

@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
+from v3server.canonical_tables.episode_plan_tables import EpisodePlan, Foreshadowing
 from v3server.canonical_tables.event_and_lock_tables import Event, UndoConflict
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate
@@ -112,7 +113,8 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
            for name, model in (("page_items", PageItem),
                                ("annotation_items", AnnotationItem), ("panel_templates", PanelTemplate),
                                ("material_entries", MaterialEntry), ("work_plans", WorkPlan),
-                               ("spreads", Spread))},
+                               ("spreads", Spread), ("episode_plans", EpisodePlan),
+                               ("foreshadowings", Foreshadowing))},
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],
         "destinations": [d.service_id for d in await all_of(WorkDestination)],
     }

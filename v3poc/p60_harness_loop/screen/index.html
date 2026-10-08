@@ -45,8 +45,8 @@ section.box > h2 { font-size: 12px; font-weight: normal; letter-spacing: .15em; 
 .bar > i { position: absolute; inset: 0 auto 0 0; background: var(--sand-3); }
 .bar.live > i { background: var(--run); }
 .thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-.thumb { width: 84px; border: 1px solid var(--line); font-size: 10px; position: relative; background: var(--sand-1); }
-.thumb img { width: 100%; display: block; }
+.thumb { flex: 0 1 96px; min-width: 64px; border: 1px solid var(--line); font-size: 10px; position: relative; background: var(--sand-1); }
+.thumb img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; background: var(--sand-2); }
 .thumb.best { outline: 2px solid var(--done); }
 .thumb .tag { display: block; padding: 1px 3px; }
 .thumb.fail .tag { color: var(--fail); } .thumb.stale::after { content: "≈ 古い"; position: absolute; top: 2px; left: 2px; background: var(--stale); color: #fff; padding: 0 3px; }
@@ -249,7 +249,7 @@ function card(u, live) {
     const ok = c.check ? c.check.passed : null;
     const ev = c.eval ? ` 評価${c.eval.median}（${c.eval.scores.join("・")}）` : "";
     return `<div class="thumb ${ok === false ? "fail" : ""} ${c.stale ? "stale" : ""} ${c.id === best ? "best" : ""}" title="${esc(c.id)}">
-      <img src="/img/${esc(c.image)}" alt="${esc(c.id)}" loading="lazy">
+      <img src="/img/${esc(c.image)}" alt="${esc(c.id)}">
       <span class="tag">${esc(c.id)}${c.source === "human" ? " 人" : ""} ${ok === null ? "…" : ok ? "✓検査" : "✕検査"}${ev}</span></div>`;
   }).join("");
   const review = st.status === "awaiting_review" ? `<div class="review"><div>${chip("awaiting_review")} ${esc(st.review_reason)}</div>
@@ -342,7 +342,10 @@ async function refresh() {
   const live = { progress: r.live.progress, previews: r.previews };
   const focus = document.activeElement && document.activeElement.matches("input[data-r]");
   if (!focus) {
-    document.getElementById("cards").innerHTML = units.map(u => card(u, live)).join("");
+    // 中身が変わったときだけ描き直す（絵を毎回読み直さない）
+    const html = units.map(u => card(u, live)).join("");
+    const cardsEl = document.getElementById("cards");
+    if (cardsEl.dataset.html !== html) { cardsEl.innerHTML = html; cardsEl.dataset.html = html; }
     document.getElementById("stage-card").innerHTML = stage ? `<div class="card" data-wf="${esc(stage.id)}"><h3>${chip(stage.describe.status === "CANCELED" ? "cancelled" :
       stage.describe.status === "RUNNING" ? (stage.state.paused ? "paused" : "running") : "done")} 工程 ${esc(stage.id)}</h3>
       ${stage.state.page ? `<div class="row">ページの検査：${stage.state.page.passed ? "✓ 合格" : "✕ 不合格"} ${esc((stage.state.page.failed_lines || []).join(" "))}</div>

@@ -6,6 +6,7 @@ from typing import Any, Literal
 
 from pydantic import Field, field_validator
 
+from v3server.canonical_tables.episode_plan_tables import Foreshadowing
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry
 from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate
@@ -287,7 +288,8 @@ _PRINT_FIELDS = {"page_kind", "color_mode", "dpi", "nombre_display"}
 
 _REMOVABLE = {"volume": Volume, "episode": Episode, "page": Page, "panel": Panel, "text_item": TextItem,
               "panel_layer": PanelLayer, "page_item": PageItem, "annotation": AnnotationItem,
-              "material_entry": MaterialEntry, "panel_template": PanelTemplate, "spread": Spread}
+              "material_entry": MaterialEntry, "panel_template": PanelTemplate, "spread": Spread,
+              "foreshadowing": Foreshadowing}
 
 
 class SetRemoved(OpBase):
@@ -296,7 +298,7 @@ class SetRemoved(OpBase):
 
     type: Literal["set_removed"] = "set_removed"
     target_kind: Literal["volume", "episode", "page", "panel", "text_item", "panel_layer", "page_item", "annotation",
-                         "material_entry", "panel_template", "spread"]
+                         "material_entry", "panel_template", "spread", "foreshadowing"]
     id: str
     removed: bool
 

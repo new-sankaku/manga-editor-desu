@@ -1,4 +1,4 @@
-"""【模型】ComfyUI の代わり（P60 の b〜s を流すため。絵の中身は本物ではない）。
+"""【モック】ComfyUI の代わり（P60 の b〜s を流すため。絵の中身は本物ではない）。
 この環境の CPU では1枚に1〜3分かかり、b〜s の場面を流しきれなかったので、口だけ ComfyUI 0.39.2 と同じにした物を使う。
 - 口：/system_stats・/prompt（prompt_id を受ける。同じ番号の重複を調べないのも本物と同じ）・/queue（見る・消す）・
   /interrupt（prompt_id 付き）・/history・/upload/image・/view・/ws（executing・progress・途中の絵）

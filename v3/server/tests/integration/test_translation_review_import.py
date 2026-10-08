@@ -17,6 +17,7 @@ from test_human_tools_and_finishing import (  # noqa: F401  (export_env は fixt
     FRAME_STYLE,
     PRINT,
     TYPESETTING,
+    edit_psd,
     export_env,
     ready_page,
 )
@@ -25,6 +26,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.translation_review_import_tables import ElementGenerationSetting
 from v3server.current_app_import.project_file_reader import data_url_bytes, read_project_file
 from v3server.database_engine import get_sessionmaker
+from v3server.server_settings import get_settings
 from v3server.v3_error_types import Forbidden
 
 FIXTURE = pathlib.Path(__file__).resolve().parents[1] / "fixtures" / "current_app_project_4pages.lz4"
@@ -62,15 +64,17 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     rep = r.json()
 
     # 元のファイル（独立に読む）
-    src = read_project_file(FIXTURE.read_bytes())
+    src = read_project_file(FIXTURE.read_bytes(), 1 << 30)
     objects = [o for p in src.pages for o in p.canvas["objects"]]
     assert rep["counts"]["pages"] == len(src.pages) == 4
     assert rep["counts"]["source_objects"] == len(objects)
     # 元の物は1つずつ、ちょうど1回、報告に出る（黙って落とさない）
     seen = sorted((e["page_index"], e["object_index"]) for e in rep["entries"] if e["object_index"] is not None)
     assert seen == sorted((p.index, i) for p in src.pages for i in range(len(p.canvas["objects"])))
-    unmapped = [e for e in rep["entries"] if e["status"] == "unmapped"]
-    assert [e["source_kind"] for e in unmapped] == ["pen_stroke"] and unmapped[0]["note"]
+    assert [e for e in rep["entries"] if e["status"] == "unmapped"] == []
+    # ペンの線（今のアプリの PencilBrush の path）は、コマの人の手の層の線（pen_strokes）に
+    (pen,) = [e for e in rep["entries"] if e["source_kind"] == "pen_stroke"]
+    assert pen["status"] == "converted" and pen["target_table"] == "panel_layers" and "pencil" in pen["note"]
     assert rep["source_sha256"] == hashlib.sha256(FIXTURE.read_bytes()).hexdigest()
 
     w = await work_json(api, wid, a)
@@ -91,7 +95,21 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     # 枠の線は今のアプリのコマの線から
     assert all(p["frame_style"] and p["frame_style"]["line_width_mm"] > 0 for p in panels)
     layers = [la for la in live(w["panel_layers"]) if la["page_id"] in new_pages]
-    assert [la["role"] for la in layers] == ["tone"]
+    assert sorted(la["role"] for la in layers) == ["human_hand", "tone"]
+    hand = next(la for la in layers if la["role"] == "human_hand")
+    assert hand["id"] == pen["target_id"] and hand["image_id"] is None and hand["stroke_revision"] == 1
+    (src_path,) = [o for o in objects if o.get("type") == "path" and not o.get("customType")]
+    mm_per_px = A4_SPEC["trim_width_mm"] / src.pages[1].canvas_width_px
+    strokes = (await api.get(f"/works/{wid}/layers/{hand['id']}/pen-strokes", headers=h(a))).json()["strokes"]
+    (st,) = strokes
+    assert st["brush"] == "pencil" and st["color"] == "#000000" and st["opacity"] == 1
+    assert abs(st["width_mm"] - src_path["strokeWidth"] * mm_per_px) < 1e-3
+    # 点は元の線の範囲（画素）を mm に直した所にある（基本枠の原点は仕上がりの左上から余白の分ずれる）
+    ox = (A4_SPEC["trim_width_mm"] - A4_SPEC["frame_width_mm"]) / 2
+    xs = [p_[0] for p_ in st["points"]]
+    x0 = src_path["path"][0][1] * mm_per_px - ox
+    assert abs(min(xs) - x0) < 1 and all(p_[2] is None for p_ in st["points"])
+    # 控えの絵が無いので、入稿前の確かめは止める（線が黙って抜けない）
 
     async with get_sessionmaker()() as s:
         imgs = (await s.execute(select(ImageFile).where(ImageFile.work_id == wid))).scalars().all()
@@ -112,6 +130,11 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     assert ("project_base", src.pages[0].base_prompt["text2img_prompt"]) in prompts
     assert all(s_.source_values for s_ in settings)
 
+    assert (await op(api, wid, a, {"type": "set_work_settings", "preferences": {"print": PRINT}})).status_code == 200
+    r = await api.post(f"/works/{wid}/preflight", headers=h(a), json={"page_ids": [hand["page_id"]]})
+    assert r.status_code == 200, r.text
+    assert any(i["kind"] == "stroke_cache" and i["location"]["id"] == hand["id"] for i in r.json()["issues"])
+
     got = await api.get(f"/works/{wid}/current-app-imports/{rep['id']}", headers=h(b))
     assert got.status_code == 200 and got.json()["counts"] == rep["counts"]
 
@@ -124,6 +147,31 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     async with get_sessionmaker()() as s:
         assert all(x.removed for x in (await s.execute(select(ElementGenerationSetting).where(
             ElementGenerationSetting.work_id == wid))).scalars())
+
+
+async def test_ほどくと大きくなるファイルは上限で断る(api, image_dir, monkeypatch):  # noqa: F811
+    """縮めた本体は小さく、ほどくと大きい（圧縮の爆弾）。送る本体の上限（V3_REQUEST_MAX_BYTES）の内でも、
+    ほどいた大きさの上限（V3_CURRENT_APP_IMPORT_MAX_BYTES）で止め、何も入れない。"""
+    import json
+    import struct
+
+    import lz4.frame
+
+    a = user()
+    ids = await new_work(api, a)
+    wid = ids["work"]
+    assert (await op(api, wid, a, {"type": "set_work_settings", "page_spec": A4_SPEC})).status_code == 200
+    monkeypatch.setattr(get_settings(), "current_app_import_max_bytes", 8 << 20)
+    body = lz4.frame.compress(b"\0" * (256 << 20))
+    head = json.dumps([{"name": "state_000000.json", "size": 16}]).encode()
+    bomb = struct.pack("<I", len(head)) + head + body
+    assert len(bomb) < 2 << 20
+    before = len((await work_json(api, wid, a))["pages"])
+    r = await api.post(f"/works/{wid}/episodes/{ids['episode']}/current-app-imports", headers=h(a),
+                       files={"project": ("bomb.lz4", bomb, "application/octet-stream")},
+                       data={"image_origin": "imported", "usage_terms": json.dumps(TERMS)})
+    assert r.status_code == 422 and "V3_CURRENT_APP_IMPORT_MAX_BYTES" in r.text, r.text
+    assert len((await work_json(api, wid, a))["pages"]) == before
 
 
 async def test_人が描いた絵として取り込むと出どころは人(api, image_dir):  # noqa: F811
@@ -236,6 +284,16 @@ async def test_言語ごとに書き出す_訳文が足りなければ止める(
 
     r = await export(language="en")
     assert r.status_code == 422 and t["id"] in r.text
+
+    async def text_issues(**kw):
+        r = await api.post(f"/works/{wid}/preflight", headers=h(a), json={"page_ids": [ids["page1"]]} | kw)
+        assert r.status_code == 200, r.text
+        return [i for i in r.json()["issues"] if (i["location"] or {}).get("table") == "text_items"]
+
+    # 言語の確かめ：訳文の無い文字を、どの文字かを付けて出す
+    (miss,) = await text_issues(language="en")
+    assert miss["kind"] == "translation" and miss["location"]["id"] == t["id"]
+    # PSD も言語ごとに書き出せる（訳文が足りなければ同じく止める）
     assert (await export(language="en", format="psd")).status_code == 422
     r = await op(api, wid, a, {"type": "set_text_translation", "text_item_id": t["id"], "language": "en",
                                "text": "WOW", "writing_direction": "horizontal"})
@@ -262,6 +320,42 @@ async def test_言語ごとに書き出す_訳文が足りなければ止める(
     en = Image.open(io.BytesIO((await pixels(runs["en"])).content))
     assert ja.size == en.size and ja.tobytes() != en.tobytes()
     # 元の文字の行は変わっていない
+    (row,) = [x for x in live((await work_json(api, wid, a))["text_items"]) if x["id"] == t["id"]]
+    assert row["text"] == "あ"
+    assert await text_issues(language="en") == []
+    # 訳文が箱からはみ出すと、その言語の確かめでだけ text_overflow を出す
+    r = await op(api, wid, a, {"type": "set_text_translation", "text_item_id": t["id"], "language": "en",
+                               "text": "WOW " * 60})
+    assert r.status_code == 200, r.text
+    (over,) = await text_issues(language="en")
+    assert over["kind"] == "text_overflow" and over["location"]["id"] == t["id"]
+    assert await text_issues() == [] and await text_issues(language="ja") == []
+    r = await op(api, wid, a, {"type": "set_text_translation", "text_item_id": t["id"], "language": "en",
+                               "text": "WOW", "writing_direction": "horizontal"})
+    assert r.status_code == 200, r.text
+
+    # 言語ごとの PSD：文字の層は訳文。直した PSD を戻すと、文字の層の判断待ちは訳文の行へ付き、打ち直すと訳文だけが変わる
+    r = await export(language="en", format="psd")
+    assert r.status_code == 201, r.text
+    psd_run = await finished(r.json()["id"])
+    assert psd_run["status"] == "done", psd_run["detail"]
+    out = psd_run["outputs"][0]
+    data = (await api.get(f"/works/{wid}/exports/{psd_run['id']}/files/{out['file']}", headers=h(a))).content
+    edited = edit_psd(data, export_env / "edit-en", (f"[{t['id']}]",))
+    r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{ids['page1']}/psd", headers=h(a),
+                       files={"psd": ("edited.psd", edited, "image/vnd.adobe.photoshop")})
+    assert r.status_code == 200, r.text
+    (held,) = [x for x in r.json()["held"] if x["kind"] == "psd_text_pixels"]
+    assert held["target_table"] == "text_item_translations" and held["payload"]["language"] == "en"
+    assert held["choices"] == ["retype", "discard"]
+    r = await op(api, wid, a, {"type": "resolve_held_change", "id": held["id"], "decision": "choose",
+                               "choice": "adopt_as_image"})
+    assert r.status_code == 422
+    r = await op(api, wid, a, {"type": "resolve_held_change", "id": held["id"], "decision": "choose",
+                               "choice": "retype", "params": {"text": "WOW!"}})
+    assert r.status_code == 200, r.text
+    got = (await api.get(f"/works/{wid}/translations", params={"language": "en"}, headers=h(a))).json()
+    assert [x["text"] for x in got["translations"] if x["text_item_id"] == t["id"]] == ["WOW!"]
     (row,) = [x for x in live((await work_json(api, wid, a))["text_items"]) if x["id"] == t["id"]]
     assert row["text"] == "あ"
 

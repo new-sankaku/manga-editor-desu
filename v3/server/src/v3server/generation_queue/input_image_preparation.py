@@ -28,8 +28,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.text_and_layer_tables import ProtectedRegion
 from v3server.comfy_graphs.protected_region_mask import protected_mask_png
+from v3server.generation_queue.protected_mask_cache import protected_mask_sha256
 from v3server.hand_tools.vector_strokes import refuse_stale_stroke_cache
-from v3server.image_file_storage import read_image, store_image
+from v3server.image_file_storage import store_image
 from v3server.operations.operation_base import get_in_work
 from v3server.v3_error_types import Invalid
 
@@ -129,11 +130,9 @@ async def _prepare(session: AsyncSession, work_id: str, request: dict[str, Any])
         if not sources:
             raise Invalid("protected_mask_input は元の絵（purpose=source）と一緒に渡す")
         img, regions = with_regions[0] if with_regions else (sources[0], [])
-        stored = store_image(protected_mask_png(img.width, img.height,
-                                                [r.polygon_px for r in regions if r.polygon_px is not None],
-                                                [read_image(r.mask_sha256) for r in regions if r.mask_sha256]))
+        mask_sha = await protected_mask_sha256(session, img.width, img.height, regions)
         prepared.append({"node": node, "input": inp, "purpose": "protected_mask", "image_id": None,
-                         "sha256": stored.sha256, "media_type": stored.media_type,
+                         "sha256": mask_sha, "media_type": "image/png",
                          "region_ids": [r.id for r in regions], "for_image_id": img.id})
     out = {**request, "prepared_inputs": prepared}
     register = out.get("register")

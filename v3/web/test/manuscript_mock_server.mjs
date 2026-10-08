@@ -4,12 +4,10 @@
 // 操作は画面と同じ model.js で当て、取り消しは「取り消していない出来事を初めから当て直す」で作る。
 // 本物と違う所：権限・人の手の守り（判断待ちを作る）・ナイフの番号の振り方・入稿前の確かめの中身（簡単な検査だけ）。
 // 判断待ちは、偽のサーバーが試験のために2件作る（AIの案ではない）。
-import { readFileSync, existsSync } from "node:fs";
-import { extname, join, normalize } from "node:path";
+import { serveWeb } from "./ui_common.mjs";
 import { Model } from "../manuscript/js/model.js";
 import { bbox } from "../manuscript/js/geometry.js";
 
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".mjs": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml", ".json": "application/json" };
 const clone = (x) => JSON.parse(JSON.stringify(x));
 const hex = () => Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join("");
 
@@ -152,14 +150,8 @@ export class MockServer {
 
   // Playwright の page に付ける。origin の /web/ は v3/web のファイルを出し、それ以外は口として答える
   async install(page, origin) {
-    await page.route(`${origin}/**`, async (route) => {
+    await serveWeb(page, origin, async (route, u) => {
       const req = route.request();
-      const u = new URL(req.url());
-      if (u.pathname.startsWith("/web/")) {
-        const f = normalize(join(this.webDir, decodeURIComponent(u.pathname.slice(5))));
-        if (!f.startsWith(this.webDir) || !existsSync(f)) return route.fulfill({ status: 404, body: "無い" });
-        return route.fulfill({ status: 200, body: readFileSync(f), contentType: TYPES[extname(f)] || "application/octet-stream" });
-      }
       let body = null, form = null;
       const ct = req.headers()["content-type"] || "";
       if (ct.startsWith("multipart/form-data")) form = parseMultipart(req.postDataBuffer(), ct);

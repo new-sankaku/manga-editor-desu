@@ -34,6 +34,8 @@ dev = [
     "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "pytest-xdist>=3.8.0",
     "ruff>=0.16.10",
 ]
 
@@ -49,6 +51,10 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
+markers = [
+    "full: 重い共有の処理（描画・PSD・組版・Temporal）を通す試験。速い組（fast）からは外す",
+    "perf: 時間を測る試験（大きな絵を使う）。別に流す",
+]
 
 # lint と型の検査（.github/workflows/v3-server.yml でも流す。V3サーバーの土台 1.7）
 [tool.ruff]

@@ -19,7 +19,8 @@ import uvicorn  # noqa: E402
 import websockets  # noqa: E402
 from fastapi import FastAPI, HTTPException  # noqa: E402
 from fastapi.responses import FileResponse, Response  # noqa: E402
-from temporalio.client import Client, WorkflowExecutionStatus, WorkflowUpdateFailedError  # noqa: E402
+from temporalio.client import (Client, WorkflowExecutionStatus, WorkflowQueryFailedError,  # noqa: E402
+                              WorkflowUpdateFailedError)
 from temporalio.service import RPCError  # noqa: E402
 
 from harness_config import API_PORT, COMFY_PORT, HERE, STORE, TASK_QUEUE, TEMPORAL_ADDR  # noqa: E402
@@ -106,8 +107,12 @@ async def state(limit: int = 40) -> dict:
         try:
             desc = await _describe(h)
             st = await h.query("state")
-        except RPCError as e:
-            out.append({"id": w.id, "error": str(e)})
+        except (RPCError, WorkflowQueryFailedError) as e:
+            # 古い版の作業の流れで終わった物は、今の作業者で読み直すと決定性の誤りになる（p60 で実測）。一覧からは外す
+            item = {"id": w.id, "error": str(e)[:300]}
+            if w.status != WorkflowExecutionStatus.RUNNING:
+                _closed_cache[key] = item
+            out.append(item)
             continue
         item = {"id": w.id, "run_id": w.run_id, "type": w.workflow_type, "describe": desc, "state": st}
         if desc["status"] != WorkflowExecutionStatus.RUNNING.name:

@@ -2,8 +2,9 @@
 
 - POST /works/{id}/episodes/{eid}/current-app-imports：今のアプリのプロジェクト（.lz4）を取り込む（作者だけ）。
   ファイルを読み、絵を入口に通し、行の案と報告を作って ImportCurrentAppProject を窓口に出す
+- GET  /works/{id}/current-app-imports：取り込みの報告の一覧（新しい順。entries は返さず数だけ。?episode_id= で絞る）
 - GET  /works/{id}/current-app-imports/{report_id}：取り込みの報告（入れた物・入れられなかった物と理由）
-- GET  /works/{id}/translations?language=：言語ごとの訳文と、訳文の無い文字
+- GET  /works/{id}/translations?language=：言語ごとの訳文と、訳文の無い文字と、抜いた訳文
 - GET  /works/{id}/review-records：確認の記録（コメントつき）
 - GET  /works/{id}/progress：話ごとの進み具合と締切の見込み（未検証。review_progress.py）
 訳文・確認の状態を変えるのは窓口の操作（set_text_translation・set_text_translation_removed・set_review_status）。
@@ -50,6 +51,7 @@ from v3server.operations.current_app_import_operations import ImportCurrentAppPr
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.operations.text_translation_operations import LANGUAGE_PATTERN
 from v3server.review_progress import work_progress
+from v3server.server_settings import get_settings
 from v3server.usage_terms_schema import UsageTerms
 from v3server.v3_error_types import Invalid, NotFound
 
@@ -91,7 +93,7 @@ async def import_current_app_project(
     data = await project.read()
     name = project.filename or "project.lz4"
     try:
-        parsed = read_project_file(data)
+        parsed = read_project_file(data, get_settings().current_app_import_max_bytes)
     except (ProjectFileError, json.JSONDecodeError, UnicodeDecodeError) as e:
         raise Invalid(f"今のアプリのプロジェクトとして読めない: {e}") from e
     taken: dict[str, TakenImage] = {}
@@ -113,6 +115,17 @@ async def import_current_app_project(
     return {"event_id": event.id, "page_ids": [p.id for p in plan.pages], **row(report, *REPORT_FIELDS)}
 
 
+@router.get("/works/{work_id}/current-app-imports")
+async def list_current_app_imports(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
+                                   episode_id: str | None = None):
+    await require(authz, actor, "can_view", work_obj(work_id))
+    q = select(CurrentAppImportReport).where(CurrentAppImportReport.work_id == work_id)
+    if episode_id is not None:
+        q = q.where(CurrentAppImportReport.episode_id == episode_id)
+    reports = (await session.execute(q.order_by(CurrentAppImportReport.created_at.desc()))).scalars().all()
+    return [row(r, *(f for f in REPORT_FIELDS if f != "entries")) for r in reports]
+
+
 @router.get("/works/{work_id}/current-app-imports/{report_id}")
 async def get_current_app_import(work_id: str, report_id: str, session: SessionDep, authz: AuthzDep,
                                  actor: ActorDep):
@@ -122,20 +135,24 @@ async def get_current_app_import(work_id: str, report_id: str, session: SessionD
 
 @router.get("/works/{work_id}/translations")
 async def list_translations(work_id: str, language: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """言語の訳文と、訳文の無い文字（抜いていないページ・文字だけ）。"""
+    """言語の訳文と、訳文の無い文字（抜いていないページ・文字だけ）と、抜いた訳文。
+    抜いた訳文のある文字へ足すと、その行を戻して書き直す（set_text_translation）。"""
     if not re.match(LANGUAGE_PATTERN, language):
         raise Invalid(f"言語の形が正しくない: {language}")
     await require(authz, actor, "can_view", work_obj(work_id))
     work = await _work(session, work_id)
     items = (await session.execute(select(TextItem).join(Page, Page.id == TextItem.page_id).where(
         TextItem.work_id == work_id, TextItem.removed.is_(False), Page.removed.is_(False)))).scalars().all()
-    rows = {t.text_item_id: t for t in (await session.execute(select(TextItemTranslation).where(
-        TextItemTranslation.work_id == work_id, TextItemTranslation.language == language,
-        TextItemTranslation.removed.is_(False)))).scalars()}
+    all_rows = (await session.execute(select(TextItemTranslation).where(
+        TextItemTranslation.work_id == work_id, TextItemTranslation.language == language))).scalars().all()
+    rows = {t.text_item_id: t for t in all_rows if not t.removed}
+    removed = {t.text_item_id: t for t in all_rows if t.removed}
     return {"source_language": (work.preferences or {}).get("language"), "language": language,
             "translations": [row(rows[i.id], *TRANSLATION_FIELDS) | {"source_text": i.text}
                              for i in items if i.id in rows],
-            "missing_text_item_ids": [i.id for i in items if i.id not in rows]}
+            "missing_text_item_ids": [i.id for i in items if i.id not in rows],
+            "removed_translations": [row(removed[i.id], *TRANSLATION_FIELDS) | {"source_text": i.text}
+                                     for i in items if i.id in removed]}
 
 
 @router.get("/works/{work_id}/review-records")

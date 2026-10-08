@@ -19,6 +19,7 @@ import asyncio
 import io
 import pathlib
 import tempfile
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from PIL import Image
@@ -42,6 +43,7 @@ from v3server.print_export.book_layout import (
     plan_pages,
     print_settings_of,
 )
+from v3server.print_export.cmyk_conversion import CmykRefused, to_cmyk
 from v3server.print_export.color_mode_output import ColorModeError, page_image
 from v3server.print_export.layered_psd_request import build_psd_request, psd_layers_from_nodes, write_layered_psd
 from v3server.print_export.page_render import (
@@ -69,16 +71,25 @@ class ExportRefused(ValueError):
 async def translated_texts(session: AsyncSession, work: Work, texts: list[TextItem], language: str) -> list[TextItem]:
     """文字を言語 language の訳文に差し替えた写し（行そのものは変えない）。訳文の無い文字があれば止める。
     元の文字で埋めない（どの言語の版か分からなくなる）。ルビと文字の一部の書式（spans）は元の文字の位置に付くので、訳文では外す。"""
+    out, missing = await translate_texts(session, work, texts, language)
+    if missing:
+        raise ExportRefused(f"{language} の訳文が無い文字がある: {', '.join(t.id for t in missing)}")
+    return out
+
+
+async def translate_texts(session: AsyncSession, work: Work, texts: list[TextItem], language: str
+                          ) -> tuple[list[TextItem], list[TextItem]]:
+    """訳文のある文字の写しと、訳文の無い文字（元の行）を分けて返す（入稿前の確かめは、無い文字をどれか付けて出す）。"""
     if language == (work.preferences or {}).get("language"):
-        return texts
+        return texts, []
     rows = {t.text_item_id: t for t in (await session.execute(select(TextItemTranslation).where(
         TextItemTranslation.text_item_id.in_([t.id for t in texts]), TextItemTranslation.language == language,
         TextItemTranslation.removed.is_(False)))).scalars()}
-    missing = [t.id for t in texts if t.id not in rows]
-    if missing:
-        raise ExportRefused(f"{language} の訳文が無い文字がある: {', '.join(missing)}")
+    missing = [t for t in texts if t.id not in rows]
     out = []
     for t in texts:
+        if t.id not in rows:
+            continue
         tr = rows[t.id]
         values = {c.key: getattr(t, c.key) for c in TextItem.__table__.columns}
         values.update(text=tr.text, ruby=[], spans=[])
@@ -87,7 +98,15 @@ async def translated_texts(session: AsyncSession, work: Work, texts: list[TextIt
         if tr.font_size_pt is not None:
             values["font_size_pt"] = tr.font_size_pt
         out.append(TextItem(**values))
-    return out
+    return out, missing
+
+
+async def _image_sha256(session: AsyncSession, image_id: str) -> str:
+    img = await session.get(ImageFile, image_id)
+    if img is None:
+        raise ExportRefused(f"絵 {image_id} が無い")
+    await refuse_stale_stroke_cache(session, image_id)
+    return img.sha256
 
 
 async def load_page_content(session: AsyncSession, work: Work, page_id: str,
@@ -112,9 +131,7 @@ async def load_page_content(session: AsyncSession, work: Work, page_id: str,
             image_ids.add(target["image_id"])
     images = {}
     for iid in image_ids:
-        img = await session.get(ImageFile, iid)
-        await refuse_stale_stroke_cache(session, iid)
-        images[iid] = img.sha256
+        images[iid] = await _image_sha256(session, iid)
     return PageContent(page_id=page.id, spec=PageSpec.model_validate(work.page_spec),
                        text_direction=work.text_direction, preferences=work.preferences or {}, panels=panels,
                        layers=layers, texts=texts, page_items=items, images=images)
@@ -131,9 +148,14 @@ def _text_renderer():
     return texts, (lambda family: font_path(s.font_dir, family))
 
 
-def _render(content: PageContent, dpi: int) -> RenderedPage:
+def _render(content: PageContent, dpi: float) -> RenderedPage:
     texts, fonts = _text_renderer()
     return render_page(content, dpi, lambda iid: read_image(content.images[iid]), texts, fonts)
+
+
+def render_page_image(content: PageContent, dpi: float) -> Image.Image:
+    """ページ1枚を、層を重ねた RGBA の絵にする（確認の画面の下見。http_routes/page_assignment_and_preview_routes.py）。"""
+    return _render(content, dpi).composite
 
 
 def _render_spread(content: SpreadContent, dpi: int) -> RenderedPage:
@@ -158,6 +180,8 @@ def _manifest(nodes: list[Node], offset: tuple[int, int], out: list[dict[str, An
         if n.children is not None:
             _manifest(n.children, offset, out)
             continue
+        if n.image is None:
+            continue
         buf = io.BytesIO()
         n.image.save(buf, format="PNG")
         stored = store_image(buf.getvalue())
@@ -174,23 +198,24 @@ async def _spread_content(session: AsyncSession, spread: Spread, left: PageConte
                           ) -> SpreadContent:
     images = {}
     if spread.image_id:
-        img = await session.get(ImageFile, spread.image_id)
-        await refuse_stale_stroke_cache(session, spread.image_id)
-        images[spread.image_id] = img.sha256
+        images[spread.image_id] = await _image_sha256(session, spread.image_id)
     return SpreadContent(spread.id, left, right, spread.image_id, spread.image_placement, spread.adjustments or [],
                          images)
 
 
-def _check_plan(plan: PagePlan, run: ExportRun, nombre_on: bool) -> None:
+def _check_plan(plan: PagePlan, run: ExportRun, nombre_on: bool) -> tuple[str, int]:
+    """(色の種類, 解像度)。決まっていなければ止める。"""
     pid = plan.page.id
     if plan.color_mode is None:
         raise ExportRefused(f"ページ {pid} の色の種類が決まっていない（ページの color_mode か、作品の preferences.print）")
-    if run.dpi is None and plan.dpi is None:
+    dpi = run.dpi or plan.dpi
+    if dpi is None:
         raise ExportRefused(f"ページ {pid} の解像度が決まっていない（ページの dpi か、作品の preferences.print）")
     if nombre_on and plan.nombre_display is None:
         raise ExportRefused(f"ページ {pid} のノンブルの出し方が決まっていない（ページの種類 page_kind か nombre_display）")
     if nombre_on and plan.nombre_display != "none" and plan.side is None:
         raise ExportRefused("1ページ目を左に置くか（作品の first_page_is_left）が決まっていないので、ノンブルの左右を決められない")
+    return plan.color_mode, dpi
 
 
 def export_units(run_page_ids: list[str], plans: dict[str, PagePlan]) -> list[tuple[Spread | None, list[PagePlan]]]:
@@ -231,11 +256,15 @@ async def off_loop(fn, *args):
     return await asyncio.to_thread(fn, *args)
 
 
-async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, Any]]:
+async def run_export(session: AsyncSession, run: ExportRun,
+                     pages_done: Callable[[list[str]], Awaitable[None]]) -> list[dict[str, Any]]:
+    """pages_done には、描き終えたページの id を、ページ（見開きは2ページ）ごとに渡す（進み具合。PDF はファイルを最後に書く）。"""
     s = get_settings()
     if not s.export_dir:
         raise ExportRefused("V3_EXPORT_DIR が無い。書き出したファイルを置く所が無い")
     work = await session.get(Work, run.work_id)
+    if work is None:
+        raise ExportRefused(f"作品 {run.work_id} が無い")
     if work.page_spec is None:
         raise ExportRefused("作品のページの寸法（page_spec）が決まっていない")
     spec = PageSpec.model_validate(work.page_spec)
@@ -251,8 +280,7 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
         plans = await plan_pages(session, work, list(run.page_ids))
     except BookLayoutError as e:
         raise ExportRefused(str(e)) from e
-    for plan in plans.values():
-        _check_plan(plan, run, ns is not None)
+    checked = {pid: _check_plan(plan, run, ns is not None) for pid, plan in plans.items()}
     units = export_units(list(run.page_ids), plans)
     check_spread_output(run.format, run.spread_output, any(sp is not None for sp, _ in units))
     folder = pathlib.Path(s.export_dir) / run.id
@@ -261,18 +289,34 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
     async def content_of(plan: PagePlan) -> PageContent:
         content = await load_page_content(session, work, plan.page.id, run.language)
         if ns is not None:
-            content.nombre = nombre_place(ns, plan.nombre_display, plan.nombre_number, plan.side, spec)
+            # 出し方・番号は _check_plan と book_layout.plan_pages が決めてある。出さないページは左右が無くてよい
+            if plan.nombre_display == "none":
+                content.nombre = None
+            elif plan.nombre_display is None or plan.nombre_number is None or plan.side is None:
+                raise ExportRefused(f"ページ {plan.page.id} のノンブルの出し方・番号・左右が決まっていない")
+            else:
+                content.nombre = nombre_place(ns, plan.nombre_display, plan.nombre_number, plan.side, spec)
         return content
 
     outputs: list[dict[str, Any]] = []
     pdf_pages: list[Image.Image] = []
     pdf_dpis: list[int] = []
+    pdf_metas: list[dict[str, Any]] = []
 
     def emit(img: Image.Image, nodes: list[Node] | None, stem: str, dpi: int, color_mode: str,
              page_id: str | None, extra: dict[str, Any]) -> None:
         paper_px = paper_size_px(tuple(run.paper_mm), dpi) if run.paper_mm else None
         flat, offset = _on_paper(img, paper_px)
         meta = {"page_id": page_id, "dpi": dpi, "color_mode": color_mode, **extra}
+        if run.format == "pdf" and color_mode == "color" and ps.color_output is not None:
+            # カラーのページを入稿先のプロファイルで CMYK に（PNG・PSD は RGB のまま。設定は PDF だけに効く）
+            try:
+                flat = to_cmyk(flat, s.icc_dir, ps.color_output)
+            except CmykRefused as e:
+                raise ExportRefused(str(e)) from e
+            meta |= {"color_space": "CMYK", "icc_profile": ps.color_output.profile}
+        else:
+            meta["color_space"] = {"1": "1bit", "L": "Gray"}.get(flat.mode, flat.mode)
         if run.format == "png":
             name = f"{stem}.png"
             flat.save(folder / name, dpi=(dpi, dpi))
@@ -280,7 +324,10 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
         elif run.format == "pdf":
             pdf_pages.append(flat)
             pdf_dpis.append(dpi)
+            pdf_metas.append(meta)
         elif run.format == "psd":
+            if nodes is None:
+                raise ExportRefused("PSD は見開きを1枚で書く（分けた見開きは層を持たない）")
             if not s.psd_writer_script:
                 raise ExportRefused("V3_PSD_WRITER_SCRIPT が無い。PSD を書けない")
             name = f"{stem}.psd"
@@ -305,36 +352,40 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
         for sp, unit in units:
             if sp is None:
                 plan = unit[0]
-                dpi = run.dpi or plan.dpi
+                mode, dpi = checked[plan.page.id]
                 rendered = await off_loop(_render, await content_of(plan), dpi)
-                img = await off_loop(as_output, rendered, plan.color_mode, dpi)
-                await off_loop(emit, img, rendered.nodes, _file_stem(ps.file_code, plan), dpi, plan.color_mode,
-                               plan.page.id, {})
+                img = await off_loop(as_output, rendered, mode, dpi)
+                await off_loop(emit, img, rendered.nodes, _file_stem(ps.file_code, plan), dpi, mode, plan.page.id, {})
+                await pages_done([plan.page.id])
                 continue
             left, right = unit
             if left.color_mode != right.color_mode:
                 raise ExportRefused(f"見開き {sp.id} の2ページの色の種類が違う（{left.color_mode}・{right.color_mode}）")
-            dpi = run.dpi or left.dpi
-            if dpi != (run.dpi or right.dpi):
+            mode, dpi = checked[left.page.id]
+            if dpi != checked[right.page.id][1]:
                 raise ExportRefused(f"見開き {sp.id} の2ページの解像度が違う（{left.dpi}・{right.dpi}）")
             content = await _spread_content(session, sp, await content_of(left), await content_of(right))
             rendered = await off_loop(_render_spread, content, dpi)
-            img = await off_loop(as_output, rendered, left.color_mode, dpi)
+            img = await off_loop(as_output, rendered, mode, dpi)
             first, second = sorted(unit, key=lambda p: p.index)
             if run.spread_output in ("joined", "both"):
                 stem = f"{ps.file_code}_{first.episode.number:02d}_{first.index + 1:03d}-{second.index + 1:03d}"
-                await off_loop(emit, img, rendered.nodes, stem, dpi, left.color_mode, None,
-                               {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id]})
+                await off_loop(emit, img, rendered.nodes, stem, dpi, mode, None,
+                               {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id],
+                                "left_page_id": content.left.page_id})
             if run.spread_output in ("split", "both"):
                 halves = dict(zip(("left", "right"), split_spread(img, spec, dpi), strict=False))
                 for plan in (first, second):
-                    await off_loop(emit, halves[plan.spread_half], None, _file_stem(ps.file_code, plan), dpi,
-                                   plan.color_mode, plan.page.id, {"spread_id": sp.id})
+                    if plan.spread_half is None:
+                        raise ExportRefused(f"ページ {plan.page.id} が見開きの左右のどちらか決まっていない")
+                    await off_loop(emit, halves[plan.spread_half], None, _file_stem(ps.file_code, plan), dpi, mode,
+                                   plan.page.id, {"spread_id": sp.id})
+            await pages_done([first.page.id, second.page.id])
     except (RenderRefused, ColorModeError, TextRenderError) as e:
         raise ExportRefused(str(e)) from e
     if run.format == "pdf":
         name = f"{ps.file_code}.pdf"
         await off_loop(write_print_pdf, pdf_pages, spec, pdf_dpis, ps.bilevel.pdf_codec if ps.bilevel else None,
                        folder / name, tuple(run.paper_mm) if run.paper_mm else None)
-        outputs.append({"page_id": None, "file": name, "bytes": (folder / name).stat().st_size})
+        outputs.append({"page_id": None, "file": name, "bytes": (folder / name).stat().st_size, "pages": pdf_metas})
     return outputs
