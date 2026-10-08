@@ -134,6 +134,9 @@ class Typesetting(_Strict):
     tate_chu_yoko_marks: bool
     # 行の揃え：start（縦書きは天、横書きは左）・center
     align: Literal["start", "center"]
+    # 行末の句読点（、。など）をぶら下げるか（行の長さを1字だけ越えて行末に残し、箱の外に出す）。
+    # 無い設定は今までと同じ（ぶら下げず、禁則で前の字ごと次の行へ送る）
+    hanging_punctuation: bool = False
 
 
 class TextSpan(_Strict):

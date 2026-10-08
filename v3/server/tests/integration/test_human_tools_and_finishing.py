@@ -569,3 +569,44 @@ async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, wor
     assert not live(w["panel_layers"], panel_id=p["id"], role="human_hand")
     held = (await api.get(f"/works/{wid}/held-changes", headers=h(a))).json()
     assert not [x for x in held if x["id"] == text_held[0]["id"] and x["status"] == "open"]
+
+
+async def test_文字1つを書き出しと同じ組み方で組み_行の切れ目と字の置き場を返す(api, authz, export_env):
+    a = user()
+    ids = await framed_page(api, a)
+    wid = ids["work"]
+    p = await first_panel(api, wid, a, ids["page1"])
+    # 72dpi で 12pt は 12 画素。列の長さはちょうど4字（48 画素 = 16.933mm）
+    col_mm = 48 / 72 * 25.4
+    tid = uuid.uuid4().hex
+    r = await op(api, wid, a, {"type": "add_text_item", "id": tid, "panel_id": p["id"], "item_kind": "balloon",
+                               "order": 5, "text": "あいうえ。漢字", "font_family": "ipag", "font_size_pt": 12,
+                               "writing_direction": "vertical", "box_mm": [10, 10, 40, 10 + col_mm],
+                               "decoration": {"fill": "#000000"}, "ruby": [{"start": 5, "end": 7, "text": "かんじ"}],
+                               "typesetting": {**TYPESETTING, "hanging_punctuation": True}})
+    assert r.status_code == 200, r.text
+    r = await api.post(f"/works/{wid}/text-items/{tid}/typeset", headers=h(a), json={"dpi": 72})
+    assert r.status_code == 200, r.text
+    got = r.json()
+    assert got["vertical"] and not got["overflow"] and got["missing_chars"] == []
+    # ぶら下げ：「。」は1列目の末に残り、箱の外（下）に出る
+    assert [(ln["start"], ln["end"]) for ln in got["lines"]] == [(0, 5), (5, 7)]
+    dot = next(g for g in got["glyphs_mm"] if g["text"] == "。")
+    assert dot["hanging"] and dot["line"] == 0 and dot["at"][1] >= col_mm - 0.01
+    # 縦書きは右の列から：2列目の字は1列目より左
+    first = next(g for g in got["glyphs_mm"] if g["text"] == "あ")
+    kan = next(g for g in got["glyphs_mm"] if g["text"] == "漢")
+    assert kan["at"][0] < first["at"][0]
+    assert len(got["ruby_mm"]) == 3 and all(rb["at"][0] > kan["at"][0] for rb in got["ruby_mm"])
+    # 画素の値は解像度に比例し、ミリの値は解像度によらない
+    r2 = (await api.post(f"/works/{wid}/text-items/{tid}/typeset", headers=h(a), json={"dpi": 144})).json()
+    assert abs(r2["block_px"][1] - 2 * got["block_px"][1]) < 1
+    assert all(abs(x - y) < 0.2 for g1, g2 in zip(got["glyphs_mm"], r2["glyphs_mm"], strict=True)
+               for x, y in zip(g1["at"], g2["at"], strict=True))
+    # 色の無い文字は、書き出しと同じ理由で断る（色を補わない）
+    t2 = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_text_item", "id": t2, "panel_id": p["id"], "item_kind": "balloon",
+                                   "order": 6, "text": "いろなし", "font_family": "ipag", "font_size_pt": 12,
+                                   "box_mm": [10, 40, 40, 80], "typesetting": TYPESETTING})).status_code == 200
+    r = await api.post(f"/works/{wid}/text-items/{t2}/typeset", headers=h(a), json={"dpi": 72})
+    assert r.status_code == 422 and "decoration.fill" in r.text

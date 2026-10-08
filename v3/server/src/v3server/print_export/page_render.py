@@ -472,7 +472,13 @@ def text_fill(t) -> str:
 
 
 def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], str]) -> dict:
-    prefs = content.preferences or {}
+    return text_job(t, content.preferences, content.text_direction, dpi, font_path)
+
+
+def text_job(t, preferences: dict[str, Any] | None, text_direction: str, dpi: float,
+             font_path: Callable[[str], str]) -> dict:
+    """文字1つを render_text.js へ渡す形にする（書き出し・入稿前の確かめ・1つだけ組む口で同じ）。"""
+    prefs = preferences or {}
     k = dpi / MM_PER_INCH
     if t.box_mm is None:
         raise RenderRefused(f"文字 {t.id} の箱（box_mm）が決まっていない")
@@ -495,7 +501,7 @@ def _text_job(t, content: PageContent, dpi: float, font_path: Callable[[str], st
                       "font_path": font_path(sp["font_family"]) if sp.get("font_family") else None})
     return {"id": t.id, "text": t.text, "font_path": font_path(family), "font_family": family,
             "font_size_px": t.font_size_pt / 72 * dpi,
-            "vertical": (t.writing_direction or content.text_direction) == "vertical",
+            "vertical": (t.writing_direction or text_direction) == "vertical",
             "color": deco["fill"], "language": prefs.get("language"),
             "box_w_px": max(1, round((b[2] - b[0]) * k)), "box_h_px": max(1, round((b[3] - b[1]) * k)),
             "typesetting": Typesetting.model_validate(raw_ts).model_dump(), "spans": spans,
