@@ -91,6 +91,7 @@ export class NetworkError extends Error {}
 
 export const get = (p) => call("GET", p);
 export const post = (p, json) => call("POST", p, { json });
+export const put = (p, json) => call("PUT", p, { json });
 export const postForm = (p, form) => call("POST", p, { form });
 export const op = (workId, body) => post(`/works/${workId}/ops`, body);
 export const undo = (workId, eventId) => post(`/works/${workId}/events/${eventId}/undo`);

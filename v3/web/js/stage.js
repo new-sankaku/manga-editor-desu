@@ -112,6 +112,12 @@ export class Stage {
     this.syncCursor();
   }
 
+  panBy(dx, dy) {
+    const v = this.c.viewportTransform.slice();
+    v[4] += dx; v[5] += dy;
+    this.c.setViewportTransform(v);
+  }
+
   zoomBy(f) {
     const ctr = new Point(this.c.width / 2, this.c.height / 2);
     this.c.zoomToPoint(ctr, Math.min(32, Math.max(0.02, this.c.getZoom() * f)));
@@ -390,9 +396,15 @@ export class Stage {
   // ---------------------------------------------------------------- 手の動き
   bind() {
     const c = this.c;
+    // ホイール（V3細部の決めごと 22.6）：Ctrl（Mac は Cmd）を押しながらで拡大・縮小、そのままで上下、Shift で左右に動かす。
+    // タッチパッドの2本指でつまむ動きは、ブラウザが Ctrl 付きのホイールとして送ると言われている（未検証）
     c.on("mouse:wheel", (o) => {
       const e = o.e;
-      c.zoomToPoint(new Point(e.offsetX, e.offsetY), Math.min(32, Math.max(0.02, c.getZoom() * (0.999 ** e.deltaY))));
+      if (e.ctrlKey || e.metaKey) {
+        c.zoomToPoint(new Point(e.offsetX, e.offsetY), Math.min(32, Math.max(0.02, c.getZoom() * (0.999 ** e.deltaY))));
+        this.syncCursor();
+      } else if (e.shiftKey) this.panBy(-(e.deltaX || e.deltaY), 0);
+      else this.panBy(-e.deltaX, -e.deltaY);
       e.preventDefault(); e.stopPropagation();
     });
     c.on("mouse:move", (o) => {
@@ -500,10 +512,8 @@ export class Stage {
     if (this.poly && !d) { this.setPreview(this.polyline([...this.poly, p], this.col.maskLine, 1.5)); return; }
     if (!d) return;
     if (d.kind === "pan") {
-      const v = this.c.viewportTransform.slice();
-      v[4] += e.clientX - d.x; v[5] += e.clientY - d.y;
+      this.panBy(e.clientX - d.x, e.clientY - d.y);
       d.x = e.clientX; d.y = e.clientY;
-      this.c.setViewportTransform(v);
     } else if (d.kind === "brush" || d.kind === "eraser") {
       for (const ev of this.events(e)) {
         const q = this.c.getScenePoint(ev);
