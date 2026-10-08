@@ -135,6 +135,13 @@ def _render(content: PageContent, dpi: int) -> RenderedPage:
     return render_page(content, dpi, lambda iid: read_image(content.images[iid]), texts, fonts)
 
 
+async def render_page_preview(session: AsyncSession, work: Work, page_id: str, dpi: int) -> Image.Image:
+    """1ページを書き出しと同じ描き方で描いた絵（RGB）。総合の工程（S6）が黒の量・白さを測り、VLM に見せるのに使う。
+    文字があって文字の組み方（V3_TEXT_RENDER_SCRIPT）が無ければ ExportRefused。"""
+    content = await load_page_content(session, work, page_id)
+    return _render(content, dpi).composite.convert("RGB")
+
+
 def _render_spread(content: SpreadContent, dpi: int) -> RenderedPage:
     texts, fonts = _text_renderer()
     images = {**content.left.images, **content.right.images, **content.images}

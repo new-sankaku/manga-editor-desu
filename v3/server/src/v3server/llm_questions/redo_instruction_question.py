@@ -9,6 +9,12 @@ from pydantic import BaseModel
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
 
 _FORMAT = '出力はJSONだけにしてください。形式：{"tags":"カンマ区切りのタグ"}'
+# 作り直しの選び方と、それぞれで起きること（決め打ちにしない。CLAUDE.md）
+_REDO_CHOICES = """新しいタグの列の作り方には、次のような手があります。どれを選ぶか、どこまで変えるかは任せます。
+・理由に当たるタグだけを変え、ほかは残す：前の絵で合っていた所は残りやすいが、理由に書かれていない問題も残る
+・タグの列を大きく組み替える：前と違う絵になりやすいが、前の絵で合っていた所も変わることがある
+・タグを減らして短くする：指示どうしのぶつかりは減るが、コマの中身のうち描かれない所が出やすい
+・タグを足して細かくする：狙いを細かく伝えられるが、モデルが一部のタグを無視しやすくなる"""
 
 
 def _head(panel_content: str, model_description: str) -> str:
@@ -39,11 +45,11 @@ def build_redo_tags_question(
     if not previous_tags:
         raise ValueError("previous_tags が空")
     if reason is None:
-        ask = "このタグの列で作った絵は採用されませんでした。作り直してください。"
+        ask = "このタグの列で作った絵は採用されませんでした。理由は分かりません。\n" + _REDO_CHOICES
     else:
         if not reason.strip():
             raise ValueError("reason が空の文字列。理由が無いときは None を渡す")
-        ask = f"このタグの列で作った絵は採用されませんでした。採用されなかった理由：{reason}\n作り直してください。"
+        ask = f"このタグの列で作った絵は採用されませんでした。採用されなかった理由：{reason}\n" + _REDO_CHOICES
     return (
         _head(panel_content, model_description)
         + f"\n前に作ったタグの列はこれです。\n{', '.join(previous_tags)}\n\n{ask}\n\n"

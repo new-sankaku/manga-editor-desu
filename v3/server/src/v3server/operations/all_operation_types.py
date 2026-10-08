@@ -22,6 +22,7 @@ from v3server.operations.image_file_operations import (
 from v3server.operations.material_and_plan_operations import (
     AddMaterialEntry,
     DecideMaterialProposal,
+    SetEpisodeOutline,
     SetWorkPlan,
     UpdateMaterialEntry,
 )
@@ -85,7 +86,7 @@ from v3server.operations.work_tree_operations import (
 )
 
 Op = Annotated[
-    SetWorkSettings | SetAiInvolvement | SetMember | AllowDestination | SetThreshold | RecordFindingReaction | AddVolume | AddEpisode | UpdateEpisode | AddPage | AssignPage | AddPanel | UpdatePanel | UpdatePage | SetRemoved | SubmitNameProposal | SetNameProposalStatus | ApplyNameProposal | RestoreNameSnapshot | RegisterImage | AddProtectedRegion | SetProtectedRegionRemoved | AddTextItem | UpdateTextItem | AddPanelLayer | UpdatePanelLayer | ResolveHeldChange | UndoWithHeldChanges | RestoreRows | SplitPanel | MergePanels | RandomSplitPanel | AddShapePanel | SavePanelTemplate | ApplyPanelTemplate | AddPageItem | UpdatePageItem | SetFixed | ResetAdjustments | AddPenStrokes | UpdatePenStrokes | RemovePenStrokes | ErasePenStrokes | SetStrokeCache | ErasePixels | AdoptImage | SetImageDiscarded | AddAnnotation | UpdateAnnotation | RecordAnnotationJob | SetWorkPlan | AddMaterialEntry | UpdateMaterialEntry | DecideMaterialProposal | ReplaceText | ApplyPsdImport | ImportCurrentAppProject | SetTextTranslation | SetTextTranslationRemoved | SetReviewStatus | ReorderPages | AddSpread | UpdateSpread,
+    SetWorkSettings | SetAiInvolvement | SetMember | AllowDestination | SetThreshold | RecordFindingReaction | AddVolume | AddEpisode | UpdateEpisode | AddPage | AssignPage | AddPanel | UpdatePanel | UpdatePage | SetRemoved | SubmitNameProposal | SetNameProposalStatus | ApplyNameProposal | RestoreNameSnapshot | RegisterImage | AddProtectedRegion | SetProtectedRegionRemoved | AddTextItem | UpdateTextItem | AddPanelLayer | UpdatePanelLayer | ResolveHeldChange | UndoWithHeldChanges | RestoreRows | SplitPanel | MergePanels | RandomSplitPanel | AddShapePanel | SavePanelTemplate | ApplyPanelTemplate | AddPageItem | UpdatePageItem | SetFixed | ResetAdjustments | AddPenStrokes | UpdatePenStrokes | RemovePenStrokes | ErasePenStrokes | SetStrokeCache | ErasePixels | AdoptImage | SetImageDiscarded | AddAnnotation | UpdateAnnotation | RecordAnnotationJob | SetWorkPlan | SetEpisodeOutline | AddMaterialEntry | UpdateMaterialEntry | DecideMaterialProposal | ReplaceText | ApplyPsdImport | ImportCurrentAppProject | SetTextTranslation | SetTextTranslationRemoved | SetReviewStatus | ReorderPages | AddSpread | UpdateSpread,
     Field(discriminator="type"),
 ]
 

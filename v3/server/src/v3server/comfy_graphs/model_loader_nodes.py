@@ -69,19 +69,24 @@ class DiffusionSettings(_Strict):
 
 @dataclass(frozen=True)
 class Extras:
-    """処理の引数から決まる、手順に足す物。control は形の指定（ControlNet。controlnet_nodes.py）。"""
+    """処理の引数から決まる、手順に足す物。control は形の指定（ControlNet。controlnet_nodes.py）。
+    regions は範囲ごとの文（regional_prompt_nodes.py。人物ごとの置き場を文の範囲で渡すとき）。"""
 
     control: ControlSettings | None
+    regions: tuple = ()
 
 
 def add_text_and_extras(g: ComfyNodeGraph, m: LoadedModel, positive_text: str, negative_text: str,
                         extras: Extras) -> tuple[NodeOutput, NodeOutput, NodeOutput]:
     """文を読み、形の指定を掛けて (model, positive, negative) を返す。形の指定の絵は名前のノード control。"""
     from v3server.comfy_graphs.controlnet_nodes import control_conditioning
+    from v3server.comfy_graphs.regional_prompt_nodes import regional_positive
     from v3server.comfy_graphs.source_and_masks import CONTROL, load_image
 
     pos = g.add("CLIPTextEncode", text=positive_text, clip=m.clip)[0]
     neg = g.add("CLIPTextEncode", text=negative_text, clip=m.clip)[0]
+    if extras.regions:
+        pos = regional_positive(g, pos, m.clip, list(extras.regions))
     model = m.model
     if extras.control is not None:
         applied = control_conditioning(g, pos, neg, extras.control, load_image(g, CONTROL))

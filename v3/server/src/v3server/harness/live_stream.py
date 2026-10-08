@@ -9,7 +9,7 @@
 
 import asyncio
 import json
-from collections.abc import AsyncIterator, Callable, Awaitable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -25,6 +25,7 @@ from v3server.canonical_tables.harness_tables import (
     HarnessUnit,
     ServiceCallProgress,
 )
+from v3server.canonical_tables.service_and_job_tables import CallLog, Job, Service
 from v3server.database_engine import get_sessionmaker
 from v3server.harness.harness_record import unit_counters
 
@@ -37,7 +38,10 @@ STAGE_FIELDS = ("id", "episode_id", "stage", "status", "requested_by", "limits",
                 "next_stage_run_id", "created_at", "updated_at")
 STEP_FIELDS = ("id", "unit_id", "step", "attempt", "status", "started_at", "finished_at", "detail", "cost")
 CANDIDATE_FIELDS = ("id", "unit_id", "attempt", "k_index", "job_id", "image_id", "proposal_id", "seed", "status",
-                    "check", "check_verdict", "evaluation", "picked", "dropped_reason", "created_at")
+                    "check", "check_verdict", "evaluation", "picked", "dropped_reason", "content", "made_with",
+                    "fixed_from", "fix_round", "created_at")
+# 作業の図の「生成」を送り先ごとに分けて出すための、依頼の行
+JOB_FIELDS = ("id", "process", "service_id", "status", "failure_kind", "created_at", "updated_at")
 MARK_FIELDS = ("id", "unit_id", "upstream_key", "effect", "reason", "status", "created_at")
 
 
@@ -99,7 +103,18 @@ async def unit_detail(session: AsyncSession, unit_id: str) -> dict[str, Any]:
     # 人の判断（採用・却下・直した絵）は段の行に無い。画面の時間の列と戻りの辺の数に使う
     decisions = (await session.execute(select(HarnessEvent).where(
         HarnessEvent.unit_id == unit_id, HarnessEvent.kind == "review").order_by(HarnessEvent.id))).scalars().all()
+    jobs = (await session.execute(
+        select(Job, Service.name, func.coalesce(func.sum(CallLog.cost), 0))
+        .join(Service, Service.id == Job.service_id).outerjoin(CallLog, CallLog.job_id == Job.id)
+        .where(Job.work_id == u.work_id, Job.request["harness_key"].as_string().like(f"{unit_id}:%"))
+        .group_by(Job.id, Service.name).order_by(Job.created_at))).all()
+    fallbacks = (await session.execute(select(HarnessEvent).where(
+        HarnessEvent.unit_id == unit_id, HarnessEvent.kind == "fix_fallback").order_by(HarnessEvent.id))).scalars().all()
     return {**await unit_counters(session, u), "review": u.review, "result": u.result, "limits": u.limits,
+            "jobs": [{**row_of(j, JOB_FIELDS), "service_name": name, "cost": float(cost),
+                      "harness_key": j.request.get("harness_key"), "progress_key": j.request.get("progress_key")}
+                     for j, name, cost in jobs],
+            "fix_fallbacks": [{"event_id": e.id, "at": e.created_at.isoformat(), **e.payload} for e in fallbacks],
             "decisions": [{"event_id": e.id, "at": e.created_at.isoformat(), "action": e.payload.get("action"),
                            "by": e.payload.get("by"), "reason": e.payload.get("reason"),
                            "attempt": (e.payload.get("review") or {}).get("attempt")} for e in decisions],

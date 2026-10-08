@@ -16,8 +16,8 @@ from temporalio.client import Client
 from temporalio.service import RPCError, RPCStatusCode
 
 from v3server.canonical_tables.event_and_lock_tables import Event
-from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.harness_tables import HarnessStaleMark, HarnessUnit, HarnessWatchCursor
+from v3server.canonical_tables.table_base import new_id
 from v3server.database_engine import get_sessionmaker
 from v3server.harness.harness_record import add_event
 from v3server.harness.upstream_versions import stale_entries, upstream_of

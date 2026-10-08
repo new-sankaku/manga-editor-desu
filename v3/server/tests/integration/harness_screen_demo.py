@@ -43,12 +43,12 @@ from temporalio.client import Client  # noqa: E402
 from test_harness import CONTENT, DRAWING, FRAME, THRESHOLDS, limits  # noqa: E402
 from test_image_generation import SD  # noqa: E402
 
+from v3server.admin_command_line import grant_admin  # noqa: E402
 from v3server.database_engine import get_sessionmaker  # noqa: E402
 from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
 from v3server.harness.harness_worker_main import HarnessWorker  # noqa: E402
 from v3server.harness.queue_calls import HARNESS_PROCESSES  # noqa: E402
 from v3server.http_routes.http_app_factory import app  # noqa: E402
-from v3server.admin_command_line import grant_admin  # noqa: E402
 from v3server.openfga_permissions import open_authz  # noqa: E402
 from v3server.server_settings import get_settings  # noqa: E402
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E402

@@ -19,6 +19,7 @@ from typing import Any, Literal
 from pydantic import Field
 from sqlalchemy import select
 
+from v3server.canonical_tables.harness_tables import EpisodeOutline
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem, PanelTemplate
@@ -36,7 +37,7 @@ from v3server.v3_error_types import HumanHandProtected, Invalid
 
 HELD_TARGETS = {"pages": Page, "panels": Panel, "text_items": TextItem, "panel_layers": PanelLayer,
                 "page_items": PageItem, "annotation_items": AnnotationItem, "material_entries": MaterialEntry,
-                "work_plans": WorkPlan, "panel_templates": PanelTemplate,
+                "work_plans": WorkPlan, "panel_templates": PanelTemplate, "episode_outlines": EpisodeOutline,
                 "text_item_translations": TextItemTranslation}
 
 # kind ごとの選べる手。何もしない手（reject・discard・keep）は値を変えない

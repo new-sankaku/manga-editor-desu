@@ -27,14 +27,17 @@ CUT_OUT = "cut_out"
 CONTEXT = "context"
 GENERATE = "generate"
 CHECK = "check"
+FIX = "fix"                          # 直させる：検査で落ちた所（文字・顔）だけを囲んで直し、直した候補だけ検査し直す
 EVALUATE = "evaluate"
 REVIEW = "review"
 FINALIZE = "finalize"
-STEPS = (CUT_OUT, CONTEXT, GENERATE, CHECK, EVALUATE, REVIEW, FINALIZE)
+STEPS = (CUT_OUT, CONTEXT, GENERATE, CHECK, FIX, EVALUATE, REVIEW, FINALIZE)
 
 # 作り直しの辺（画面のグラフの戻りの辺）。（どこから, どこへ, 理由）
 RETRY_EDGES = (
-    (CHECK, CONTEXT, "検査で全部落ちた"),
+    (CHECK, FIX, "落ちた所だけ直す"),
+    (FIX, CHECK, "直した候補だけ検査し直す"),
+    (CHECK, CONTEXT, "直せない・直す上限で全部を作り直す"),
     (EVALUATE, CONTEXT, "評価で選べない・割れた"),
     (REVIEW, CONTEXT, "却下（理由つき）"),
     (REVIEW, GENERATE, "人が直した絵から続ける"),
@@ -43,7 +46,12 @@ RETRY_EDGES = (
 STAGES = ("S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7")
 STAGE_TITLES = {"S0": "企画", "S1": "構成", "S2": "設定資料", "S3": "ネーム", "S4": "作画", "S5": "仕上げ",
                 "S6": "総合", "S7": "書き出し"}
-# 作業を切り出す工程と作業の種類。ここに無い工程は、作業を切り出さず工程の検査と人の判断だけを回す
-UNIT_KIND_OF_STAGE = {"S3": "name_draft", "S4": "panel_drawing"}
+# 工程と作業の種類（設計 7章の工程の表）。どの工程も作業を切り出す。人だけで決める所は、作業の中の段を人の判断にする
+# （例：S5 の吹き出しの置き場は人が置き、プログラムは検査だけ。S7 の入稿は人が決める）
+UNIT_KIND_OF_STAGE = {"S0": "plan_interview", "S1": "structure", "S2": "settings_sheet", "S3": "name_draft",
+                      "S4": "panel_drawing", "S5": "page_finishing", "S6": "overall_review", "S7": "export"}
+# 人が採るまで終わらない工程（完成条件に human_approve を必ず足す）。S4 は検査と評価役で終えてよい（設計 8.1）、
+# S5 は人が置いた物をプログラムが検査するだけなので、人の採用を条件にするかは頼む人が決める
+HUMAN_APPROVE_STAGES = frozenset({"S0", "S1", "S2", "S3", "S6", "S7"})
 # 決めごと 5.2：判断待ちは工程の前のものから
 STAGE_ORDER = {s: i for i, s in enumerate(STAGES)}

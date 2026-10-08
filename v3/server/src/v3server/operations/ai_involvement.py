@@ -79,6 +79,7 @@ HUMAN_EDITABLE_FIELDS: dict[str, dict[str, str]] = {
                          "generation": "settings_material", "notes": "settings_material",
                          "proposal_state": "settings_material"},
     "work_plans": {"synopsis": "plan", "audience": "plan", "exclusions": "plan", "notes": "plan"},
+    "episode_outlines": {"outline": "structure"},
     "panel_templates": {"name": "panel_layout", "frames": "panel_layout"},
     "text_item_translations": {"text": "translation", "writing_direction": "translation",
                                "font_size_pt": "translation"},
@@ -90,6 +91,7 @@ HUMAN_EDITABLE_FIELDS: dict[str, dict[str, str]] = {
 # 行を抜く・足すときの作業
 ROW_TASK = {"pages": "panel_layout", "panels": "panel_layout", "text_items": "name", "panel_layers": "drawing",
             "page_items": "finishing", "annotation_items": ABOUT_TASK, "material_entries": "settings_material",
+            "episode_outlines": "structure",
             "panel_templates": "panel_layout", "pen_strokes": "drawing",
             "text_item_translations": "translation", "element_generation_settings": "drawing"}
 

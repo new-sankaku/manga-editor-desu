@@ -28,22 +28,39 @@ from v3server.harness.queue_calls import HARNESS_PROCESSES
 from v3server.server_settings import get_settings
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS
 
+# 本物の Temporal を通すので遅い。流れの筋道は tests/unit/test_unit_workflow_timeskip.py（時間を飛ばす）で確かめる
+pytestmark = pytest.mark.full
+
 FRAME = {"polygon_mm": [[0, 0], [60, 0], [60, 40], [0, 40]], "bleeds": False}
 CONTENT = {"content": "主人公が振り返る", "shot": "胸から上", "angle": "目の高さ",
            "people": [{"name": "アオイ", "face": "中", "facing": "正面"}]}
 THRESHOLDS = {"person_score": 0.5, "edge_px": 4, "text_score": 0.5}
+NO_CONTROL = {"steps": 4, "cfg": 7, "control": "none", "control_strength": 1.0, "control_end": 1.0,
+              "control_invert": False}
+INPAINT = {**NO_CONTROL, "denoise": 0.6, "grow_px": 4, "feather_px": 4, "encode": "noise_mask", "only_masked": False,
+           "padding_px": 32}
 DRAWING = {"model_description": "Stable Diffusion 1.5 系。英語のタグをカンマ区切りで受ける",
            "quality_words": "best quality", "style_words": "manga style", "negative_words": "lowres",
            "long_side": 256, "base_params": {"steps": 4, "cfg": 7, "control": "none", "control_strength": 1.0,
                                              "control_end": 1.0, "control_invert": False},
            "redraw_params": {"steps": 4, "cfg": 7, "control": "none", "control_strength": 1.0, "control_end": 1.0,
-                             "control_invert": False, "strength": 0.6}}
+                             "control_invert": False, "strength": 0.6},
+           "person_placement": "pose",
+           "controls": {"pose": {"strength": 0.8, "end": 0.8}, "depth": {"strength": 0.8, "end": 0.8},
+                        "lineart": {"strength": 0.8, "end": 0.8}},
+           "fix": {"process": "inpaint", "params": {**INPAINT, "denoise": 0.6},
+                   "words": {"text": "no text", "face": "same face"}, "grow_px": 4}}
+# 背景の正本を使うときの決めごと（場所の3Dから奥行きを描いて渡し、背景の上に人物を描く）
+BACKGROUND = {"control": "depth", "depth_jump_log": 0.05, "thickness_px": 2,
+              "params": NO_CONTROL, "composite_params": {**INPAINT, "denoise": 0.8}}
+# 形の指定を使う道があるので、つなぎ先の中身に ControlNet の名前を入れる
+SD_CN = {**SD, "controlnet_name": "cn.safetensors"}
 
 
 def limits(**over):
     unit = {"max_attempts": 3, "candidates_per_attempt": 2, "budget_cost": 1000, "budget_seconds": 600,
             "error_stop": 3, "same_failure_restart": 2, "eval_repeats": 1, "disagreement_stop": 2,
-            "review_notice_seconds": 600, "resend_limit": 0}
+            "review_notice_seconds": 600, "resend_limit": 0, "max_fix_rounds": 1}
     unit.update(over.pop("unit", {}))
     return {"unit": unit, "max_parallel_units": over.pop("max_parallel_units", 2),
             "completion": over.pop("completion", ["checks_pass", "evaluator_pick", "human_approve"])}
@@ -101,8 +118,8 @@ async def services(api, admin, workers, comfy, monkeypatch, tmp_path):  # noqa: 
     monkeypatch.setattr(get_settings(), "image_dir", str(tmp_path))
     comfy_sid = await _service(api, admin, kind="image", adapter="comfyui", endpoint=comfy.url,
                                send_mode="parallel", max_concurrency=4)
-    for name in ("text_to_image", "image_to_image"):
-        await _route(api, admin, comfy_sid, name, comfy_graph_settings=SD, comfy_wait_seconds=60)
+    for name in ("text_to_image", "image_to_image", "inpaint"):
+        await _route(api, admin, comfy_sid, name, comfy_graph_settings=SD_CN, comfy_wait_seconds=60)
     # litellm は送った先のその先が見えないので api として登録し、作品ごとに送ってよい先へ載せる（make_work）
     llm_sid = await _service(api, admin, kind="text", adapter="litellm", location="api", send_mode="parallel",
                              max_concurrency=4)
@@ -153,9 +170,9 @@ async def set_thresholds(api, wid, a, status="verified"):
         assert r.status_code == 200, r.text
 
 
-async def start(api, w, stage="S4", **lim):
+async def start(api, w, stage="S4", drawing=None, **lim):
     r = await api.post(f"/works/{w['wid']}/harness/stages", headers=h(w["a"]), json={
-        "episode_id": w["episode"], "stage": stage, "limits": limits(**lim), "spec": {"drawing": DRAWING}})
+        "episode_id": w["episode"], "stage": stage, "limits": limits(**lim), "spec": {"drawing": drawing or DRAWING}})
     assert r.status_code == 201, r.text
     return r.json()["stage_run_id"]
 
@@ -241,10 +258,13 @@ async def test_1周_候補を採って工程を承認すると次の工程へ進
     r = await api.post(f"/works/{w['wid']}/harness/stages/{run_id}/approve", headers=h(w["a"]))
     assert r.status_code == 200, r.text
     async def next_stage():
-        runs = (await snap(api, w))["stage_runs"]
-        return runs if len(runs) == 2 and runs[1]["status"] == "awaiting_review" else None
-    runs = await wait_for(next_stage, 60)
+        s = await snap(api, w)
+        s5 = [u for u in s["units"] if u["kind"] == "page_finishing"]
+        return (s["stage_runs"], s5[0]) if len(s["stage_runs"]) == 2 and s5 and s5[0]["status"] == "blocked" else None
+    runs, s5 = await wait_for(next_stage, 60)
     assert [x["stage"] for x in runs] == ["S4", "S5"] and runs[0]["status"] == "done"
+    # 仕上げは人が置く工程。作品の寸法が無いので、人が決めるまで止まる（黙って飛ばさない）
+    assert "page_spec" in s5["stop_reason"]
     r = await api.post(f"/works/{w['wid']}/harness/stages/{runs[1]['id']}/control", headers=h(w["a"]),
                        json={"action": "cancel"})
     assert r.status_code == 200, r.text
@@ -293,7 +313,7 @@ async def test_仮の閾値で外れた候補は落とさず指摘だけ(api, se
 
 
 async def test_評価役の答えが割れたら止まる(api, services, harness, script):
-    script.pick = "alternate"
+    script.pair = "flip"  # くり返すたびに好みが逆になる（1回の中では左右を入れ替えても同じ答え）
     w = await make_work(api)
     await start(api, w, unit={"eval_repeats": 2, "disagreement_stop": 1})
     u = await until_unit(api, w, "stopped")

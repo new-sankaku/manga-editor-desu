@@ -7,7 +7,8 @@
   - control：pause（now は今の段を取り消して止める。boundary は段の切れ目で止める）・resume・cancel_step（今の段だけ
     取り消して次の回へ）・cancel_unit（作業を取り消す。今の回の候補を却下にしてから cancelled）
   - review：approve（候補か人が直した絵を採る）・reject（理由つき。理由は次の回の文脈の問いに入る）・edit（人が直した絵
-    から続ける。人の手の範囲は今の仕組みで貼り戻す）
+    から続ける。人の手の範囲は今の仕組みで貼り戻す）・answer（作業役が人へ返した質問に答える。答えはそれまでの答えと
+    一緒に次の回の文脈の問いに入る。却下ではないが、今の回の候補は使わないので却下にする）
   - set_limits：上限を変える（使った分より小さくはできない）
 - 工程の進行役からの知らせ（Signal）：parent_control（工程の一時停止・取り消しを伝える）・upstream_changed（上流が
   変わった。作り直しが要る変化なら、段の切れ目で止めて人に聞く。自動で作り直さない）
@@ -15,7 +16,6 @@
   半端な候補は discard_round で却下にする（候補の一覧に残さない）
 """
 
-import asyncio
 from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Any
@@ -32,7 +32,7 @@ RECORD_TIMEOUT = timedelta(seconds=30)
 HEARTBEAT_TIMEOUT = timedelta(seconds=20)
 NON_RETRYABLE = ["blocked", "refused", "broken_response", "generation_failed", "job_stopped", "job_cancelled"]
 CONTROL_ACTIONS = ("pause", "resume", "cancel_step", "cancel_unit")
-REVIEW_ACTIONS = ("approve", "reject", "edit")
+REVIEW_ACTIONS = ("approve", "reject", "edit", "answer")
 HUMAN_WAITS = frozenset({"awaiting_review", "paused", "stopped", "blocked"})
 
 
@@ -167,6 +167,8 @@ class WorkUnitWorkflow:
             raise ValueError("採用は candidate_id か image_id のどちらか1つを渡す")
         if r.action == "reject" and not (r.reason or "").strip():
             raise ValueError("却下には理由が要る（次の回の問いに入る）")
+        if r.action == "answer" and not (r.reason or "").strip():
+            raise ValueError("答え（reason）が要る（次の回の問いに入る）")
         if r.action == "edit" and not r.image_id:
             raise ValueError("人が直した絵（image_id）を渡す")
 
@@ -296,7 +298,7 @@ class WorkUnitWorkflow:
                 await workflow.wait_condition(lambda: self.decision is not None or self.cancel_unit_by is not None,
                                               timeout=timedelta(seconds=float(self.limits["review_notice_seconds"])))
                 break
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 notices += 1
                 await self._rec({}, "review_notice", {"waited_notices": notices})
         if self.cancel_unit_by:
@@ -320,6 +322,7 @@ class WorkUnitWorkflow:
             await self._step("cut_out", 0, {})
             ctx: dict[str, Any] | None = None
             reject_reason: str | None = None
+            answers: list[str] = []
             edit_image: str | None = None
             while True:
                 reason = stop_reason(self.limits, self.s)
@@ -332,15 +335,28 @@ class WorkUnitWorkflow:
                     if ctx is None or edit_image is None:
                         ctx = await self._step("context", attempt, {
                             "reject_reason": reject_reason, "previous_tags": (ctx or {}).get("tags"),
-                            "restart": self.restart})
+                            "restart": self.restart, "answers": answers})
                     self.restart = False
                     seeds = [workflow.random().randint(0, 2**31 - 1)
                              for _ in range(int(self.limits["candidates_per_attempt"]))]
                     await self._step("generate", attempt, {"context": ctx, "seeds": seeds, "edit_image_id": edit_image})
-                    chk = await self._step("check", attempt, {"context": ctx, "edit_image_id": edit_image})
+                    skip_size = edit_image is not None
+                    chk = await self._step("check", attempt, {"context": ctx, "skip_size": skip_size})
                     edit_image = None
                     self.s["errors_in_row"] = 0
+                    # 直させる：落ちた所が直せる所（文字・顔）だけの候補を囲んで直し、直した候補だけ検査し直す
+                    rounds = 0
+                    while chk.get("fixable") and rounds < int(self.limits["max_fix_rounds"]):
+                        rounds += 1
+                        await self._step("fix", attempt, {"context": ctx, "round": rounds,
+                                                          "candidate_ids": chk["fixable"]})
+                        chk = await self._step("check", attempt, {"context": ctx, "skip_size": skip_size})
                     if chk["passed"] == 0:
+                        # 全部を作り直すのは、決めて記録してから（黙って作り直さない）
+                        why = (f"直す上限（{self.limits['max_fix_rounds']}回）に達しても落ちたまま" if chk.get("fixable")
+                               else chk.get("fix_unavailable") or f"直せる所（文字・顔）でない理由で落ちた（{chk['failure']}）")
+                        await self._rec({}, "fix_fallback", {"attempt": attempt, "fix_rounds": rounds, "reason": why,
+                                                             "decision": "全部を作り直す（文脈から）"})
                         self.restart = note_failure(self.s, chk["failure"], self.limits)
                         continue
                     picked = None
@@ -366,6 +382,10 @@ class WorkUnitWorkflow:
                     if d.action == "reject":
                         reject_reason = d.reason
                         await self._discard(attempt, f"却下: {d.reason}", d.by)
+                        continue
+                    if d.action == "answer":
+                        answers = [*answers, d.reason]
+                        await self._discard(attempt, "人が質問に答えた（次の回で答えを入れて作り直す）", d.by)
                         continue
                     edit_image = d.image_id  # 人が直した絵から生成へ戻る（文脈はそのまま）
                 except _StepCancelled as c:

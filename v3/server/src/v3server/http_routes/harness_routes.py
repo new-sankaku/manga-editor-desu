@@ -14,16 +14,28 @@ from temporalio.client import WorkflowUpdateFailedError
 from temporalio.exceptions import WorkflowAlreadyStartedError
 from temporalio.service import RPCError, RPCStatusCode
 
-from v3server.canonical_tables.harness_tables import HarnessStageRun, HarnessStaleMark, HarnessUnit
+from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessStageRun, HarnessStaleMark, HarnessUnit
 from v3server.canonical_tables.work_tree_tables import Episode
 from v3server.harness import live_stream
+from v3server.harness.export_steps import ExportSpec
+from v3server.harness.harness_activities import STEP_MODULES
 from v3server.harness.harness_limits import StageLimits, check_completion
 from v3server.harness.harness_record import add_event, now, patch_stage
 from v3server.harness.harness_states import STAGES, UNIT_KIND_OF_STAGE
 from v3server.harness.name_draft_steps import NameSpec
 from v3server.harness.panel_drawing_steps import DrawingSpec
+from v3server.harness.plan_interview_steps import PlanSpec
 from v3server.harness.review_list import KINDS, review_items
-from v3server.harness.stage_workflow import HARNESS_QUEUE, Rerun, StageControl, StageInput, StageWorkflow, stage_workflow_id
+from v3server.harness.settings_sheet_steps import SettingsSpec
+from v3server.harness.stage_workflow import (
+    HARNESS_QUEUE,
+    Rerun,
+    StageControl,
+    StageInput,
+    StageWorkflow,
+    stage_workflow_id,
+)
+from v3server.harness.structure_steps import StructureSpec
 from v3server.harness.unit_workflow import Control, LimitChange, Review, WorkUnitWorkflow
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require
 from v3server.operations.operation_base import get_in_work, work_obj
@@ -31,7 +43,10 @@ from v3server.v3_error_types import Invalid, Locked, NotFound
 
 router = APIRouter()
 
-SPEC_MODELS = {"name_draft": ("name", NameSpec), "panel_drawing": ("drawing", DrawingSpec)}
+# 作業の種類ごとの決めごと（spec のキーと形）。仕上げ（S5）と総合（S6）は決めごとを持たない（閾値は作品の閾値で持つ）
+SPEC_MODELS = {"plan_interview": ("plan", PlanSpec), "structure": ("structure", StructureSpec),
+               "settings_sheet": ("settings", SettingsSpec), "name_draft": ("name", NameSpec),
+               "panel_drawing": ("drawing", DrawingSpec), "export": ("export", ExportSpec)}
 
 
 class StartStage(BaseModel):
@@ -48,7 +63,7 @@ class UnitControlBody(BaseModel):
 
 
 class ReviewBody(BaseModel):
-    action: Literal["approve", "reject", "edit"]
+    action: Literal["approve", "reject", "edit", "answer"]
     candidate_id: str | None = None
     image_id: str | None = None
     reason: str | None = None
@@ -62,6 +77,11 @@ class StageControlBody(BaseModel):
     action: Literal["pause", "resume", "cancel"]
 
 
+class SpecBody(BaseModel):
+    # 足す・置き換える決めごと（キーごとに置き換える。書かなかったキーは今のまま）
+    spec: dict[str, Any] = Field(min_length=1)
+
+
 class RerunBody(BaseModel):
     unit_ids: list[str] = Field(min_length=1)
 
@@ -72,7 +92,7 @@ def _check_spec(stage: str, spec: dict[str, Any]) -> None:
         raise Invalid(f"知らない決めごと: {sorted(unknown)}")
     for i, s in enumerate(STAGES):
         kind = UNIT_KIND_OF_STAGE.get(s)
-        if kind is None or i < STAGES.index(stage):
+        if kind not in SPEC_MODELS or i < STAGES.index(stage):
             continue
         key, model = SPEC_MODELS[kind]
         if key not in spec:
@@ -160,6 +180,14 @@ async def unit_review(work_id: str, unit_id: str, body: ReviewBody, session: Ses
     if actor.kind != "human":
         raise Invalid("判断は人がする")
     handle = await _unit_handle(session, temporal, work_id, unit_id)
+    if body.action == "approve" and body.candidate_id is not None:
+        unit = await session.get(HarnessUnit, unit_id)
+        cand = await session.get(HarnessCandidate, body.candidate_id)
+        if cand is None or cand.unit_id != unit_id:
+            raise Invalid("この作業の候補でない")
+        why = getattr(STEP_MODULES[unit.kind], "not_approvable", lambda c: None)(cand)
+        if why:
+            raise Invalid(why)
     return await _call(lambda: handle.execute_update(WorkUnitWorkflow.review, Review(
         body.action, actor.id, body.candidate_id, body.image_id, body.reason)))
 
@@ -204,6 +232,34 @@ async def stage_rerun(work_id: str, stage_run_id: str, body: RerunBody, session:
     await require(authz, actor, "can_manage", work_obj(work_id))
     handle = await _stage_handle(session, temporal, work_id, stage_run_id)
     return await _call(lambda: handle.execute_update(StageWorkflow.rerun, Rerun(actor.id, body.unit_ids)))
+
+
+@router.put("/works/{work_id}/harness/stages/{stage_run_id}/spec")
+async def stage_spec(work_id: str, stage_run_id: str, body: SpecBody, session: SessionDep, authz: AuthzDep,
+                     actor: ActorDep):
+    """工程の決めごとを足す・置き換える（後の工程の決めごとを始めるときに渡さなかった、など）。この工程の終わっていない
+    作業と、この後に作る工程の実行に効く。作業は段ごとに決めごとを読み直すので、決めごとが無くて止まった作業は
+    再開（resume）で続く。"""
+    await require(authz, actor, "can_manage", work_obj(work_id))
+    if actor.kind != "human":
+        raise Invalid("決めごとは人が決める")
+    run = await get_in_work(session, HarnessStageRun, stage_run_id, work_id)
+    if run.status in ("done", "cancelled"):
+        raise Locked(f"終わった工程の実行（{run.status}）")
+    merged = {**run.spec, **body.spec}
+    try:
+        _check_spec(run.stage, merged)
+    except ValueError as e:
+        raise Invalid(str(e)) from e
+    run.spec = merged
+    units = (await session.execute(select(HarnessUnit).where(
+        HarnessUnit.stage_run_id == run.id, HarnessUnit.status.not_in(["done", "cancelled", "failed"])))).scalars().all()
+    for u in units:
+        u.spec = {**u.spec, **body.spec}
+    await add_event(session, work_id, "stage_spec", {"stage_run_id": run.id, "keys": sorted(body.spec), "by": actor.id,
+                                                     "units": [u.id for u in units]}, run.id)
+    await session.commit()
+    return {"stage_run_id": run.id, "keys": sorted(merged), "units": [u.id for u in units]}
 
 
 @router.post("/works/{work_id}/harness/stale/{mark_id}/dismiss")

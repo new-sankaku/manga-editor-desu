@@ -35,6 +35,9 @@ class UnitLimits(BaseModel):
     error_stop: int = Field(ge=1)
     # 同じ失敗がこの回数続いたら、文脈を捨てて出直す（設計 10章の6：2回）
     same_failure_restart: int = Field(ge=1)
+    # 直させる段の回数の上限（1回の生成の中で。0 なら直させず、検査で全部落ちたらすぐ全部を作り直す）。
+    # 上限に達しても落ちたままなら、全部を作り直すことを出来事（fix_fallback）に書いてから作り直す
+    max_fix_rounds: int = Field(ge=0, le=5)
     # 評価役に同じ問いを何回聞くか。答えが割れたら「割れた」として数える
     eval_repeats: int = Field(ge=1, le=5)
     # 評価が割れた回数がこれに達したら止める
