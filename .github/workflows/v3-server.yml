@@ -1,0 +1,87 @@
+# V3 サーバー（v3/server）の lint・型・試験（llm_doc/V3サーバーの土台.md 1.7）
+name: v3-server
+
+on:
+  push:
+    paths: ["v3/**", ".github/workflows/v3-server.yml"]
+  pull_request:
+    paths: ["v3/**", ".github/workflows/v3-server.yml"]
+
+defaults:
+  run:
+    working-directory: v3/server
+
+env:
+  UV_VERSION: "0.11.32"
+  # compose.yaml の展開に要る値。試験では LLM を呼ばない
+  LITELLM_MASTER_KEY: sk-ci-not-used
+  OPENFGA_PRESHARED_KEY: ci-only-preshared-key
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - run: uv sync --frozen
+      - name: ruff
+        run: uv run ruff check .
+      # 型の検査は数を記録するだけ（2026-10-08 に 209 件。直すまで失敗にしない）
+      - name: mypy（記録だけ）
+        run: |
+          uv run mypy > mypy.txt || true
+          tail -1 mypy.txt
+          echo "mypy: $(tail -1 mypy.txt)" >> "$GITHUB_STEP_SUMMARY"
+
+  unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: 書き出しの Node の部品
+        working-directory: v3/psd_writer
+        run: npm install --no-audit --no-fund
+      - run: cp .env.example .env
+      - run: uv sync --frozen
+      - run: uv run pytest -q tests/unit
+
+  integration:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: 書き出しの Node の部品
+        working-directory: v3/psd_writer
+        run: npm install --no-audit --no-fund
+      - run: cp .env.example .env
+      - name: PostgreSQL・Temporal（開発用）・OpenFGA
+        run: docker compose up -d --wait postgres openfga temporal
+      - name: S3互換の置き場（SeaweedFS。test_s3_image_store.py）
+        run: >
+          docker run -d --name seaweedfs -p 127.0.0.1:58333:8333
+          -e AWS_ACCESS_KEY_ID=ci-access -e AWS_SECRET_ACCESS_KEY=ci-secret-key
+          chrislusf/seaweedfs:4.48 server -dir=/data -s3 -s3.port=8333 -master.volumeSizeLimitMB=64 -volume.max=20
+      - run: uv sync --frozen
+      - name: Temporal と置き場が応答するまで待つ
+        run: |
+          for i in $(seq 60); do nc -z 127.0.0.1 57233 && curl -fs http://127.0.0.1:58333/healthz && break; sleep 2; done
+      - name: 試験（本物の ComfyUI と検出器の試験は、住所が無いので飛ぶ）
+        env:
+          V3_TEST_S3_ENDPOINT_URL: http://127.0.0.1:58333
+          V3_TEST_S3_ACCESS_KEY_ID: ci-access
+          V3_TEST_S3_SECRET_ACCESS_KEY: ci-secret-key
+        run: uv run pytest -q tests/integration
+      - if: failure()
+        run: docker compose logs --tail 200

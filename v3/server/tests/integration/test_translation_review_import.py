@@ -12,6 +12,7 @@ from conftest import h, new_work, user, wait_for
 from PIL import Image
 from sqlalchemy import select
 from test_human_ai_interchange import TERMS, ai_op, allow_ai, op, work_json
+from test_human_edit_and_handover import image_dir  # noqa: F401  (fixture)
 from test_human_tools_and_finishing import (  # noqa: F401  (export_env は fixture)
     FRAME_STYLE,
     PRINT,
@@ -19,7 +20,6 @@ from test_human_tools_and_finishing import (  # noqa: F401  (export_env は fixt
     export_env,
     ready_page,
 )
-from test_human_edit_and_handover import image_dir  # noqa: F401  (fixture)
 
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.translation_review_import_tables import ElementGenerationSetting

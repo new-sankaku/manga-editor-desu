@@ -82,7 +82,7 @@ class ReplaceText(OpBase):
                          page_tree=self.page_ids[0])
         # 当たる文字のあるページを全部ロックで確かめる（ほかの人が直している所は置き換えない）
         hit = await find_matches(session, work.id, self.find, set(self.kinds), self.page_ids, replaceable_only=True)
-        pages = sorted({getattr(o, "page_id") for o, _ in hit if getattr(o, "page_id", None)})
+        pages = sorted({o.page_id for o, _ in hit if getattr(o, "page_id", None)})
         return Scope("can_manage", work_obj(work.id), [("page", p) for p in pages])
 
     async def apply(self, ctx):

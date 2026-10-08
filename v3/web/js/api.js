@@ -1,9 +1,31 @@
-// サーバーとのやり取り。利用者は X-V3-User で送る（ログインが入るまでの仮。http_dependencies.py）。
-// 絵も X-V3-User が要るので、<img src> に URL を直接は入れず、取ってきて blob の URL にする。
+// サーバーとのやり取り。ログインの方式はサーバーが決める（GET /auth/mode。request_authentication.py）。
+// - oidc: ログインはクッキーのセッション。書き換えの口には X-V3-Request: 1 を付ける。401 ならログインの画面へ
+// - dev_header: 開発と試験だけ。名前の欄の値を X-V3-User で送る
+// 絵も同じ口から取るので、<img src> に URL を直接は入れず、取ってきて blob の URL にする。
 // blob の URL は絵を読み終えたらすぐ解放する（revokeObjectURL）。取ってきた中身（Blob）は大きさの上限つきで持つ。
 const USER_KEY = "v3.user";
+let authMode = null;
+let me = null;
+
+// 起動時に1回呼ぶ。oidc でログインしていなければログインの画面へ移る
+export async function loadAuth() {
+  const r = await fetch("/auth/mode");
+  if (!r.ok) throw new ApiError(r.status, await r.text());
+  authMode = (await r.json()).mode;
+  if (authMode === "oidc") {
+    const m = await fetch("/auth/me");
+    if (m.status === 401) { toLogin(); return new Promise(() => {}); }
+    if (!m.ok) throw new ApiError(m.status, await m.text());
+    me = await m.json();
+  }
+  return authMode;
+}
+function toLogin() { location.href = `/auth/login?next=${encodeURIComponent(location.pathname + location.search)}`; }
+export function mode() { return authMode; }
+export function myName() { return me ? (me.name || me.id) : ""; }
 
 export function currentUser() {
+  if (authMode === "oidc") return me ? me.id : "";
   try { return localStorage.getItem(USER_KEY) || ""; } catch { return ""; }
 }
 export function setUser(name) {
@@ -11,7 +33,7 @@ export function setUser(name) {
   memoUser = name;
   blobCache.clear(); blobBytes = 0; overlayCache.clear();
 }
-let memoUser = currentUser();
+let memoUser = "";
 
 export class ApiError extends Error {
   constructor(status, detail) {
@@ -22,8 +44,11 @@ export class ApiError extends Error {
 }
 
 async function call(method, path, { json, form, raw } = {}) {
-  if (!memoUser) throw new ApiError(401, "利用者の名前を入れてください");
-  const headers = { "X-V3-User": memoUser };
+  const headers = { "X-V3-Request": "1" };
+  if (authMode === "dev_header") {
+    if (!memoUser) throw new ApiError(401, "利用者の名前を入れてください");
+    headers["X-V3-User"] = memoUser;
+  }
   let body;
   if (json !== undefined) { headers["Content-Type"] = "application/json"; body = JSON.stringify(json); }
   if (form !== undefined) body = form;
@@ -36,6 +61,7 @@ async function call(method, path, { json, form, raw } = {}) {
       ? "オフラインです。回線がつながったら、もう一度してください"
       : "サーバーにつながりません。サーバーが止まっているか、回線が切れています");
   }
+  if (r.status === 401 && authMode === "oidc") { toLogin(); return new Promise(() => {}); }
   if (raw) {
     if (!r.ok) throw new ApiError(r.status, await r.text());
     return r;

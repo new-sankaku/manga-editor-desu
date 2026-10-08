@@ -12,19 +12,34 @@ from PIL import Image
 from shapely.geometry import Polygon
 
 from v3server.name_structure.item_styles import BalloonShape, ToneSpec
-from v3server.name_structure.print_settings import (BilevelSettings, NombreSettings, PrintSettings, TextSpan,
-                                                    check_spans)
+from v3server.name_structure.print_settings import BilevelSettings, NombreSettings, PrintSettings, TextSpan, check_spans
 from v3server.name_structure.reading_direction import PageSpec
-from v3server.print_export.book_layout import (check_spreads, left_page_of_spread, nombre_place, page_sides,
-                                               spread_problem)
+from v3server.print_export.book_layout import (
+    check_spreads,
+    left_page_of_spread,
+    nombre_place,
+    page_sides,
+    spread_problem,
+)
 from v3server.print_export.color_mode_output import ColorModeError, page_image
 from v3server.print_export.export_runner import ExportRefused, check_spread_output, export_units
-from v3server.print_export.page_render import (LAYER_NAME_NOMBRE, Node, PageContent, RenderRefused, SpreadContent,
-                                               _tone_alpha, balloon_geometry, gutter_x_px, mm_to_px_matrix,
-                                               render_page, render_spread, split_spread, spread_size_px,
-                                               tail_polygon)
-from v3server.print_export.preflight_checks import (effective_dpi, has_color, page_count_problem,
-                                                    safe_area_overrun)
+from v3server.print_export.page_render import (
+    LAYER_NAME_NOMBRE,
+    Node,
+    PageContent,
+    RenderRefused,
+    SpreadContent,
+    _tone_alpha,
+    balloon_geometry,
+    gutter_x_px,
+    mm_to_px_matrix,
+    render_page,
+    render_spread,
+    split_spread,
+    spread_size_px,
+    tail_polygon,
+)
+from v3server.print_export.preflight_checks import effective_dpi, has_color, page_count_problem, safe_area_overrun
 from v3server.print_export.print_pdf_export import canvas_size_px, write_print_pdf
 from v3server.print_export.text_render import font_path, render_texts
 

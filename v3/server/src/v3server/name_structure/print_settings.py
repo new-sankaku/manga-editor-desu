@@ -163,6 +163,6 @@ def check_spans(text: str, spans: list[dict] | None) -> None:
     for s, e in rng:
         if e <= s or e > n:
             raise ValueError(f"書式の範囲 {s}〜{e} が文字（{n}文字）の外か、空")
-    for (_, e0), (s1, _) in zip(rng, rng[1:]):
+    for (_, e0), (s1, _) in zip(rng, rng[1:], strict=False):
         if s1 < e0:
             raise ValueError("書式の範囲が重なっている")

@@ -19,7 +19,8 @@
       <span class="slash">/</span>
       <select id="pick-panel" class="field" aria-label="コマ"></select>
     </nav>
-    <label class="who">利用者 <input id="user" class="field" autocomplete="username"></label>
+    <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
+    <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
   </header>
 
   <div class="ws">

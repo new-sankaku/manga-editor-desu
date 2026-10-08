@@ -19,8 +19,9 @@ severity は error（書き出しが止まるか、入稿で戻される）と w
 
 import io
 import math
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
 import numpy as np
 from PIL import Image
@@ -37,8 +38,15 @@ from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_transform import ItemTransform, transform_matrix
 from v3server.name_structure.print_settings import PrintSettings
 from v3server.name_structure.reading_direction import PageSpec
-from v3server.print_export.book_layout import (PagePlan, check_spreads, episode_pages, episode_spreads,
-                                               nombre_settings_of, plan_pages, print_settings_of)
+from v3server.print_export.book_layout import (
+    PagePlan,
+    check_spreads,
+    episode_pages,
+    episode_spreads,
+    nombre_settings_of,
+    plan_pages,
+    print_settings_of,
+)
 from v3server.print_export.page_render import PageContent, RenderRefused, _text_job
 from v3server.print_export.text_render import RenderedText, TextRenderError
 
@@ -134,7 +142,7 @@ def _check_text(session_texts, content: PageContent, plan: PagePlan, spec: PageS
         except (RenderRefused, TextRenderError) as e:
             issues.append(Issue(pid, "font", "error", str(e), loc))
     if jobs:
-        for (t, _), rt in zip(jobs, measure([j for _, j in jobs])):
+        for (t, _), rt in zip(jobs, measure([j for _, j in jobs]), strict=False):
             loc = {"table": "text_items", "id": t.id, "box_mm": t.box_mm}
             if rt.missing_chars:
                 issues.append(Issue(pid, "font", "error",

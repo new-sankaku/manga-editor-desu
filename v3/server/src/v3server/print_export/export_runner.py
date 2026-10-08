@@ -33,12 +33,26 @@ from v3server.canonical_tables.work_tree_tables import Page, Panel, Spread, Work
 from v3server.hand_tools.vector_strokes import refuse_stale_stroke_cache
 from v3server.image_file_storage import read_image, store_image
 from v3server.name_structure.reading_direction import PageSpec
-from v3server.print_export.layered_psd_request import build_psd_request, psd_layers_from_nodes, write_layered_psd
-from v3server.print_export.book_layout import (BookLayoutError, PagePlan, nombre_place, nombre_settings_of,
-                                               plan_pages, print_settings_of)
+from v3server.print_export.book_layout import (
+    BookLayoutError,
+    PagePlan,
+    nombre_place,
+    nombre_settings_of,
+    plan_pages,
+    print_settings_of,
+)
 from v3server.print_export.color_mode_output import ColorModeError, page_image
-from v3server.print_export.page_render import (Node, PageContent, RenderedPage, RenderRefused, SpreadContent,
-                                               render_page, render_spread, split_spread)
+from v3server.print_export.layered_psd_request import build_psd_request, psd_layers_from_nodes, write_layered_psd
+from v3server.print_export.page_render import (
+    Node,
+    PageContent,
+    RenderedPage,
+    RenderRefused,
+    SpreadContent,
+    render_page,
+    render_spread,
+    split_spread,
+)
 from v3server.print_export.print_pdf_export import canvas_size_mm, paper_size_px, write_print_pdf
 from v3server.print_export.text_render import TextRenderError, font_path, render_texts
 from v3server.server_settings import get_settings
@@ -304,7 +318,7 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
                 emit(img, rendered.nodes, stem, dpi, left.color_mode, None,
                      {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id]})
             if run.spread_output in ("split", "both"):
-                halves = dict(zip(("left", "right"), split_spread(img, spec, dpi)))
+                halves = dict(zip(("left", "right"), split_spread(img, spec, dpi), strict=False))
                 for plan in (first, second):
                     emit(halves[plan.spread_half], None, _file_stem(ps.file_code, plan), dpi, plan.color_mode,
                          plan.page.id, {"spread_id": sp.id})

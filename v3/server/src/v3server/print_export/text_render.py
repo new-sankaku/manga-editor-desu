@@ -56,7 +56,7 @@ def _run(items: list[dict], node_executable: str, script: str, timeout_seconds: 
         if done.returncode != 0:
             raise TextRenderError(f"文字を描けなかった（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")
         out = []
-        for it, info in zip(req["items"], json.loads(done.stdout)["items"]):
+        for it, info in zip(req["items"], json.loads(done.stdout)["items"], strict=False):
             image = None
             if not measure_only:
                 if info["missing_chars"]:

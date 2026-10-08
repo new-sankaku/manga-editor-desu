@@ -146,7 +146,7 @@ def check_ruby(text: str, ruby: list[dict] | None) -> None:
     for s, e in spans:
         if e <= s or e > len(text):
             raise ValueError(f"ルビの範囲 {s}〜{e} が文字（{len(text)}文字）の外か、空")
-    for (_, e0), (s1, _) in zip(spans, spans[1:]):
+    for (_, e0), (s1, _) in zip(spans, spans[1:], strict=False):
         if s1 < e0:
             raise ValueError("ルビの範囲が重なっている")
 

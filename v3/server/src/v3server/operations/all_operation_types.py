@@ -1,7 +1,7 @@
 """操作の一覧。正本を変える手段はここに並べた操作だけ。"""
 
 
-from typing import Annotated, Union
+from typing import Annotated
 
 from pydantic import Field, TypeAdapter
 
@@ -85,71 +85,7 @@ from v3server.operations.work_tree_operations import (
 )
 
 Op = Annotated[
-    Union[
-        SetWorkSettings,
-        SetAiInvolvement,
-        SetMember,
-        AllowDestination,
-        SetThreshold,
-        RecordFindingReaction,
-        AddVolume,
-        AddEpisode,
-        UpdateEpisode,
-        AddPage,
-        AssignPage,
-        AddPanel,
-        UpdatePanel,
-        UpdatePage,
-        SetRemoved,
-        SubmitNameProposal,
-        SetNameProposalStatus,
-        ApplyNameProposal,
-        RestoreNameSnapshot,
-        RegisterImage,
-        AddProtectedRegion,
-        SetProtectedRegionRemoved,
-        AddTextItem,
-        UpdateTextItem,
-        AddPanelLayer,
-        UpdatePanelLayer,
-        ResolveHeldChange,
-        UndoWithHeldChanges,
-        RestoreRows,
-        SplitPanel,
-        MergePanels,
-        RandomSplitPanel,
-        AddShapePanel,
-        SavePanelTemplate,
-        ApplyPanelTemplate,
-        AddPageItem,
-        UpdatePageItem,
-        SetFixed,
-        ResetAdjustments,
-        AddPenStrokes,
-        UpdatePenStrokes,
-        RemovePenStrokes,
-        ErasePenStrokes,
-        SetStrokeCache,
-        ErasePixels,
-        AdoptImage,
-        SetImageDiscarded,
-        AddAnnotation,
-        UpdateAnnotation,
-        RecordAnnotationJob,
-        SetWorkPlan,
-        AddMaterialEntry,
-        UpdateMaterialEntry,
-        DecideMaterialProposal,
-        ReplaceText,
-        ApplyPsdImport,
-        ImportCurrentAppProject,
-        SetTextTranslation,
-        SetTextTranslationRemoved,
-        SetReviewStatus,
-        ReorderPages,
-        AddSpread,
-        UpdateSpread,
-    ],
+    SetWorkSettings | SetAiInvolvement | SetMember | AllowDestination | SetThreshold | RecordFindingReaction | AddVolume | AddEpisode | UpdateEpisode | AddPage | AssignPage | AddPanel | UpdatePanel | UpdatePage | SetRemoved | SubmitNameProposal | SetNameProposalStatus | ApplyNameProposal | RestoreNameSnapshot | RegisterImage | AddProtectedRegion | SetProtectedRegionRemoved | AddTextItem | UpdateTextItem | AddPanelLayer | UpdatePanelLayer | ResolveHeldChange | UndoWithHeldChanges | RestoreRows | SplitPanel | MergePanels | RandomSplitPanel | AddShapePanel | SavePanelTemplate | ApplyPanelTemplate | AddPageItem | UpdatePageItem | SetFixed | ResetAdjustments | AddPenStrokes | UpdatePenStrokes | RemovePenStrokes | ErasePenStrokes | SetStrokeCache | ErasePixels | AdoptImage | SetImageDiscarded | AddAnnotation | UpdateAnnotation | RecordAnnotationJob | SetWorkPlan | AddMaterialEntry | UpdateMaterialEntry | DecideMaterialProposal | ReplaceText | ApplyPsdImport | ImportCurrentAppProject | SetTextTranslation | SetTextTranslationRemoved | SetReviewStatus | ReorderPages | AddSpread | UpdateSpread,
     Field(discriminator="type"),
 ]
 

@@ -18,7 +18,6 @@ from typing import Literal
 
 import numpy as np
 import shapely
-
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from v3server.name_structure.item_styles import Color
@@ -63,7 +62,7 @@ class StrokeValues(BaseModel):
             if p is not None and not 0 <= p <= 1:
                 raise ValueError(f"筆圧は 0〜1: {p}")
         times = [p[3] for p in self.points]
-        if any(b < a for a, b in zip(times, times[1:])):
+        if any(b < a for a, b in zip(times, times[1:], strict=False)):
             raise ValueError("点の時刻が描いた順に並んでいない")
         return self
 
@@ -82,13 +81,13 @@ def _seg_point_dist(p, a, b) -> float:
 def _dist_to_path(p, path) -> float:
     if len(path) == 1:
         return math.hypot(p[0] - path[0][0], p[1] - path[0][1])
-    return min(_seg_point_dist(p, a, b) for a, b in zip(path, path[1:]))
+    return min(_seg_point_dist(p, a, b) for a, b in zip(path, path[1:], strict=False))
 
 
 def resample(points: list[StrokePoint], step_mm: float) -> list[StrokePoint]:
     """点の間が step_mm 以下になるよう、間に点を足す（筆圧・時刻も間を取る）。"""
     out = [tuple(points[0])]
-    for a, b in zip(points, points[1:]):
+    for a, b in zip(points, points[1:], strict=False):
         n = max(1, math.ceil(math.hypot(b[0] - a[0], b[1] - a[1]) / step_mm))
         for i in range(1, n + 1):
             t = i / n

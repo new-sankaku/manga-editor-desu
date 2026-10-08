@@ -1,0 +1,9 @@
+# 開発用の compose.yaml の --dynamic-config-value と同じ値（V3サーバーの土台 7章）
+# 待ち行列の分割を1つにする。分割が4つ（既定）だと、人の依頼を先にする優先順位が分割をまたいで守られなかった（2026-10-07 実測）
+matching.numTaskqueueReadPartitions:
+  - value: 1
+matching.numTaskqueueWritePartitions:
+  - value: 1
+# 優先順位が同じ依頼の中で、作品ごとに順に回す（公平さの鍵。2026-10-08 試作 p57）
+matching.enableFairness:
+  - value: true

@@ -10,9 +10,8 @@ import httpx
 import pytest
 from conftest import h, new_work, user, wait_for
 from PIL import Image
-from test_queue import ADMIN, admin, enqueue, until_status  # noqa: F401  (admin は fixture)
-
 from sqlalchemy import select
+from test_queue import ADMIN, admin, enqueue, until_status  # noqa: F401  (admin は fixture)
 
 from v3server.canonical_tables.service_and_job_tables import CallLog
 from v3server.database_engine import get_sessionmaker

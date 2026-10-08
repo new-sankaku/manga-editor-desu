@@ -9,7 +9,8 @@
 """
 import io
 import pathlib
-from typing import Literal, Sequence
+from collections.abc import Sequence
+from typing import Literal
 
 import img2pdf
 import numpy as np
@@ -82,13 +83,13 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float | S
     dpis = list(dpi) if isinstance(dpi, (list, tuple)) else [dpi] * len(pages)
     if len(dpis) != len(pages):
         raise ValueError(f"dpi の数 {len(dpis)} がページの数 {len(pages)} と違います")
-    for i, (page, d) in enumerate(zip(pages, dpis)):
+    for i, (page, d) in enumerate(zip(pages, dpis, strict=False)):
         expected = paper_size_px(paper_mm, d) if paper_mm is not None else canvas_size_px(spec, d)
         if page.size != expected:
             raise ValueError(f"{i + 1}ページ目の画素数 {page.size} が、寸法と dpi から計算した {expected} と違います")
     w_mm, h_mm = paper_mm if paper_mm is not None else canvas_mm
     layout = img2pdf.get_layout_fun((img2pdf.mm_to_pt(w_mm), img2pdf.mm_to_pt(h_mm)))
-    raw = img2pdf.convert([_encode_page(p, bilevel_codec, d) for p, d in zip(pages, dpis)], layout_fun=layout)
+    raw = img2pdf.convert([_encode_page(p, bilevel_codec, d) for p, d in zip(pages, dpis, strict=False)], layout_fun=layout)
 
     reader = pypdf.PdfReader(io.BytesIO(raw))
     writer = pypdf.PdfWriter()

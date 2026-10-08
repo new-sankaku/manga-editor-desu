@@ -255,7 +255,7 @@ def test_all_panels_pinned_moves_nothing():
     """人が全部を決めた割りは、比が無くても何も動かさない（固定した枠をそのまま返す）。"""
     page = p12_page("s1_talk_B_1").model_copy(update={"row_height_ratios": None, "cell_width_ratios": None})
     pins = {n: PanelFrame(polygon_mm=[(x + 0.3, y), (x + 9, y), (x, y + 9)], bleeds=False)
-            for n, (x, y) in zip(range(1, 7), [(0, 0), (20, 0), (40, 0), (0, 30), (20, 30), (40, 30)])}
+            for n, (x, y) in zip(range(1, 7), [(0, 0), (20, 0), (40, 0), (0, 30), (20, 30), (40, 30)], strict=False)}
     d, broken = constrained_layout_draft(draft_of([page]), pins, 20)
     assert broken == []
     assert {p.n: p.frame for p in d.pages[0].panels} == pins

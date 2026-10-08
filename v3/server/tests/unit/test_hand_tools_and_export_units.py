@@ -109,9 +109,9 @@ def test_crossings_use_the_index_and_match_the_plain_rule():
         return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
 
     def plain(points, others):
-        return [i for i, (a, b) in enumerate(zip(points, points[1:]))
+        return [i for i, (a, b) in enumerate(zip(points, points[1:], strict=False))
                 if any((orient(c, d, a) > 0) != (orient(c, d, b) > 0) and (orient(a, b, c) > 0) != (orient(a, b, d) > 0)
-                       for o in others for c, d in zip(o, o[1:]))]
+                       for o in others for c, d in zip(o, o[1:], strict=False))]
 
     rng = np.random.default_rng(3)
     pts = [(x, float(np.sin(x)), .5, x) for x in np.linspace(0, 20, 60)]

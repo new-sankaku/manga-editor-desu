@@ -30,19 +30,19 @@ class Geometry:
     oy: float
 
     @staticmethod
-    def identity() -> "Geometry":
+    def identity() -> Geometry:
         return Geometry(1, 1, 0, 0)
 
     @staticmethod
-    def from_details(g: dict[str, Any]) -> "Geometry":
+    def from_details(g: dict[str, Any]) -> Geometry:
         return Geometry(float(g["scale"][0]), float(g["scale"][1]), float(g["offset"][0]), float(g["offset"][1]))
 
-    def then(self, other: "Geometry") -> "Geometry":
+    def then(self, other: Geometry) -> Geometry:
         """self の後に other を当てる。"""
         return Geometry(self.sx * other.sx, self.sy * other.sy, self.ox * other.sx + other.ox,
                         self.oy * other.sy + other.oy)
 
-    def inverse(self) -> "Geometry":
+    def inverse(self) -> Geometry:
         return Geometry(1 / self.sx, 1 / self.sy, -self.ox / self.sx, -self.oy / self.sy)
 
 

@@ -154,7 +154,7 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
     cells: list[_Cell] = []
     ws_vars: list[Variable] = []
     for i, row in enumerate(page.rows):
-        ratios = dict(zip(row, ws_ratio[i]))
+        ratios = dict(zip(row, ws_ratio[i], strict=False))
         visual = row[::-1] if direction == "right_to_left" else list(row)
         ks = slants[i]
         ws = Variable(f"ws{i}")
@@ -201,7 +201,7 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
         if c.n in pinned:
             want = _clip_to_frame(polygon_bbox(pinned[c.n].polygon_mm), spec)
             got = polygon_bbox(poly)
-            if any(abs(a - g) > _SOLVE_TOL for a, g in zip(want, got)):
+            if any(abs(a - g) > _SOLVE_TOL for a, g in zip(want, got, strict=False)):
                 broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="固定した枠", wanted=_fmt(want), got=_fmt(got)))
             frames[c.n] = pinned[c.n]
             continue
@@ -232,7 +232,7 @@ def constrained_layout_draft(draft: NameDraft, pinned: Mapping[int, PanelFrame],
         raise LayoutInputError(f"固定する枠のコマ {stray} がネームに無い")
     pages = []
     broken: list[BrokenConstraint] = []
-    for page, side in zip(draft.pages, page_sides(draft)):
+    for page, side in zip(draft.pages, page_sides(draft), strict=False):
         here = {n: f for n, f in pinned.items() if n in {p.n for p in page.panels}}
         res = constrained_page_frames(page, draft.page_spec, draft.reading_direction, side, here, min_panel_mm)
         broken += res.broken

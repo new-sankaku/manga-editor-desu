@@ -3,14 +3,14 @@
 
 from typing import Annotated, Any
 
-from fastapi import Depends, Header, HTTPException, Request
+from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from temporalio.client import Client
 
 from v3server.database_engine import session_scope
 from v3server.openfga_permissions import Authz
 from v3server.request_actor import Actor
-from v3server.server_settings import get_settings
+from v3server.request_authentication import current_actor
 from v3server.v3_error_types import Forbidden
 
 # ---------------------------------------------------------------- 依存
@@ -26,15 +26,6 @@ def get_authz(request: Request) -> Authz:
 
 def get_temporal(request: Request) -> Client:
     return request.app.state.temporal
-
-
-async def current_actor(x_v3_user: Annotated[str | None, Header()] = None) -> Actor:
-    """ログインが入るまでの間の仮。V3_DEV_AUTH=1 のときだけ X-V3-User をそのまま利用者にする。"""
-    if get_settings().dev_auth != "1":
-        raise HTTPException(401, "ログインの仕組みがまだ無い。開発では V3_DEV_AUTH=1 と X-V3-User を使う")
-    if not x_v3_user:
-        raise HTTPException(401, "X-V3-User が無い")
-    return Actor(kind="human", id=x_v3_user)
 
 
 SessionDep = Annotated[AsyncSession, Depends(session_scope)]
