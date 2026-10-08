@@ -86,7 +86,8 @@ async def setup(api: httpx.AsyncClient, comfy: FakeComfyServer) -> dict:
                                                               "ai_task": "drawing", "ai_action": "propose"})).raise_for_status()
 
     comfy_sid = await service(kind="image", adapter="comfyui", endpoint=comfy.url, send_mode="parallel", max_concurrency=4)
-    for name in ("text_to_image", "image_to_image"):
+    # 背景の切り出し・3D と、直させる段は inpaint を使う（文脈の段が送り先を確かめる）
+    for name in ("text_to_image", "image_to_image", "inpaint"):
         await route(comfy_sid, name, comfy_graph_settings=SD, comfy_wait_seconds=120)
     # litellm は送った先のその先が見えないので api として登録し、作品の送ってよい先へ載せる（下の ops）
     llm_sid = await service(location="api", kind="text", adapter="litellm", send_mode="parallel", max_concurrency=6)

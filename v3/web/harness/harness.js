@@ -90,7 +90,10 @@ async function main() {
   }
   rememberWork(S.workId);
   graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap, onStepsChanged: refreshDetail });
-  probe.graphNodes = (sel) => graph.cy.nodes(sel).map((n) => n.data());  // 画面の試験（harness_ui.mjs）が図の中を見る
+  // 画面の試験（harness_ui.mjs）が図の中を見る。たたんだノードの data には中の要素（collapsedChildren）が入り、
+  // ブラウザの外へ渡せないので、文字・数・真偽の値だけを渡す
+  probe.graphNodes = (sel) => graph.cy.nodes(sel).map((n) =>
+    Object.fromEntries(Object.entries(n.data()).filter(([, v]) => v === null || typeof v !== "object")));
   probe.toggleStep = (step) => graph.toggleStep(step);  // 同じく、段を押したのと同じ動き
   $("#tab-stage").addEventListener("click", () => openStageView());
   $("#tab-unit").addEventListener("click", () => S.unitId && openUnit(S.unitId));

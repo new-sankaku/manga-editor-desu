@@ -109,7 +109,8 @@ try {
   // 却下は止まるだけ（決めごと 5.3）。止まったのを見てから再開を押すと、理由を入れて作り直す
   await page.waitForSelector(`.pchip[data-unit="${reviewUnit}"][data-status="stopped"]`, { timeout: 15000 });
   check(true, "却下すると止まる（すぐには作り直さない）");
-  await page.click("text=再開");
+  // 止まった理由の文にも「再開」が入るので、ボタンを名前で選ぶ
+  await page.getByRole("button", { name: "再開", exact: true }).first().click();
   await page.waitForFunction(() => window.__harness.lastTraversal && window.__harness.lastTraversal.retry, null, { timeout: 15000 });
   const opToScreen = Date.now() - t0;
   await sleep(450);
