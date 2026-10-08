@@ -6,7 +6,7 @@ import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, p
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { startKeys, km } from "../common/keys.js";
-import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait } from "./harness_graph.js";
+import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait, urgentStatus } from "./harness_graph.js";
 
 const STAGES = ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"];
 const STAGE_JA = { S0: "企画", S1: "構成", S2: "設定資料", S3: "ネーム", S4: "作画", S5: "仕上げ", S6: "総合", S7: "書き出し" };
@@ -88,10 +88,14 @@ async function main() {
     S.workId = works[0].id;
   }
   rememberWork(S.workId);
-  graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap });
+  graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap, onStepsChanged: refreshDetail });
+  probe.graphNodes = (sel) => graph.cy.nodes(sel).map((n) => n.data());  // 画面の試験（harness_ui.mjs）が図の中を見る
+  probe.toggleStep = (step) => graph.toggleStep(step);  // 同じく、段を押したのと同じ動き
   $("#tab-stage").addEventListener("click", () => openStageView());
   $("#tab-unit").addEventListener("click", () => S.unitId && openUnit(S.unitId));
   $("#fit").addEventListener("click", () => graph.cy.fit(undefined, 40));
+  $("#fold").addEventListener("click", () => graph.setAllCollapsed(true));
+  $("#unfold").addEventListener("click", () => graph.setAllCollapsed(false));
   // 絵だけ・Tab でパネルが出入りすると図の箱の大きさが変わる。Cytoscape は箱の大きさを自分では見ないので知らせる
   window.addEventListener("v3-view", () => requestAnimationFrame(() => { graph.cy.resize(); graph.cy.fit(undefined, 40); }));
   setInterval(tick, 500);
@@ -336,11 +340,18 @@ function unitLabel(u) {
   return `${where}${tries}\n${STATUS_JA[u.status] || u.status}${u.stale ? "・古い" : ""}${step}`;
 }
 
+// 工程の図で作業を入れるまとまり（ページ。ページを持たない作業は、作品・話の全体として1つにまとめる）
+function unitGroup(u) {
+  if (WHOLE[u.kind]) return { key: "whole", label: WHOLE[u.kind] };
+  const page = pageOf(u);
+  return { key: u.page_id || "none", label: page ? `p${page.number}` : "ページなし" };
+}
+
 function renderStageGraph() {
   for (const s of STAGES) graph.updateStage(stageInfo(s));
   for (const s of STAGES) {
     const units = unitsOfRun(latestRun(s));
-    if (units.length) graph.setUnits(s, units, unitLabel);
+    if (units.length) graph.setUnits(s, units, unitLabel, unitGroup);
   }
   graph.setProgress([...S.progress.values()].filter((p) => p.state === "running" || p.state === "pending"));
 }
@@ -368,11 +379,60 @@ function renderUnitGraph() {
   if (u.status === "done") states.end = { count: 1, status: "done" };
   if (states.generate) states.generate.note = `候補 ${u.candidates}`;
   const current = u.status === "awaiting_review" ? "review" : u.status === "done" ? "end" : (u.step || S.pos);
+  graph.setStepParts(stepParts(d, u));
   graph.setSteps(states, current, u.status);
   graph.setEdgeCounts(counts);
   // 進み具合は生成の段にいる間だけ出す（終わった後は候補の一覧と判断のパネルで見る）
   const generating = u.step === "generate" && ACTIVE.has(u.status);
   graph.setProgress(generating ? [...S.progress.values()].filter((p) => p.unit_id === d.unit_id && p.attempt === u.attempt) : []);
+}
+
+// 段の中の子（今の回の分）。生成・直させるは送り先ごと、検査は項目ごと、評価はくり返しの回ごと
+// 依頼の段は harness_key（<作業>:a<回>:<種類>…）の種類で分ける：gen・comp は生成、fix は直させる
+function stepParts(d, u) {
+  const att = `a${u.attempt}`;
+  const jobsOf = (re) => (d.jobs || []).filter((j) => {
+    const k = (j.harness_key || "").split(":");
+    return k[1] === att && re.test(k[2] || "");
+  });
+  const byService = (jobs) => {
+    const by = new Map();
+    for (const j of jobs) {
+      if (!by.has(j.service_id)) by.set(j.service_id, { name: j.service_name, list: [] });
+      by.get(j.service_id).list.push(j);
+    }
+    return [...by].map(([id, g]) => {
+      const bad = g.list.filter((j) => j.failure_kind).length;
+      return { id, status: urgentStatus(g.list.map((j) => j.status)),
+               label: `${g.name}\n依頼 ${g.list.length}${bad ? `・失敗 ${bad}` : ""}` };
+    });
+  };
+  const checks = new Map();
+  for (const c of d.cands.filter((x) => `a${x.attempt}` === att && x.check)) {
+    for (const f of c.check.findings || []) {
+      if (!checks.has(f.name)) checks.set(f.name, { ok: 0, ng: 0, none: 0 });
+      const t = checks.get(f.name);
+      if (f.ok === true) t.ok += 1; else if (f.ok === false) t.ng += 1; else t.none += 1;
+    }
+  }
+  const evals = [...d.steps.values()].filter((x) => x.step === "evaluate" && `a${x.attempt}` === att && x.detail?.rounds)
+    .sort((a, b) => Date.parse(a.started_at) - Date.parse(b.started_at));
+  const ev = evals.at(-1)?.detail;
+  const short = (cid) => { const c = d.cands.find((x) => x.id === cid); return c ? `#${c.k_index + 1}` : "?"; };
+  const repeats = ev ? [...new Set(ev.rounds.map((r) => r.repeat))] : [];
+  return {
+    generate: byService(jobsOf(/^(gen|comp)\d/)),
+    fix: byService(jobsOf(/^fix\d/)),
+    check: [...checks].map(([name, t]) => ({ id: name, status: t.ng ? "failed" : t.none ? "waiting_limit" : "done",
+      label: `${name}\n通る ${t.ok}・落ちる ${t.ng}${t.none ? `・測れない ${t.none}` : ""}` })),
+    evaluate: repeats.map((r) => {
+      const rs = ev.rounds.filter((x) => x.repeat === r);
+      const ties = rs.filter((x) => x.verdict === "tie").length;
+      const top = ev.tops[r];
+      return { id: String(r), status: top ? "done" : "stopped",
+               label: `${r + 1}回目 比べた ${rs.length}${ties ? `・同点 ${ties}` : ""}\n1位 ${top ? short(top) : "決まらない"}` };
+    }),
+  };
 }
 
 function tick() {
@@ -770,6 +830,13 @@ function onTap(id, data) {
   if (data.kind === "unit") openUnit(data.unit_id);
   else if (data.kind === "stage") { const r = latestRun(data.stage); if (r) selectStage(r.id); }
   else if (data.kind === "step" && data.step === "review") { $("#side").scrollTop = 0; }
+}
+
+// 段の中を開いた・たたんだ。依頼の行（送り先ごとの子）は SSE で届かないので、作業の中身を取り直してから描く
+async function refreshDetail() {
+  if (S.view !== "unit" || !S.unitId) return;
+  S.detail = normalizeDetail(await get(`/works/${S.workId}/harness/units/${S.unitId}`));
+  renderUnitGraph();
 }
 
 function selectStage(id) {

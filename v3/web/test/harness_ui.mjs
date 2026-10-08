@@ -62,6 +62,17 @@ try {
   check(await page.locator('.pchip[data-status="queued"]').count() >= 1, "同時に回す数（4）を超えた作業は順番待ち");
   await shot("01_stage_view_running", "工程の図。S4 の下に7つの作業、4つが実行中（ComfyUI の段数の細い棒つき）、残りは順番待ち");
 
+  // ---------------------------------------------------------------- 1b. 工程の図：ページごとにたたむ・開く
+  await page.click("#fold");
+  await sleep(300);
+  const folded = await page.evaluate(() => window.__harness.graphNodes("node.group.collapsed"));
+  check(folded.length === 2 && folded.every((d) => /（[34]）/.test(d.label)), "ページごとにたたむと、ページのまとまり2つが作業の数と内訳のノードになる");
+  check((await page.evaluate(() => window.__harness.graphNodes('node[kind="unit"]'))).length === 0, "たたむと作業のノードは見えない");
+  await shot("08_stage_folded", "工程の図。S4 の作業をページごとにたたんだところ（p1 4つ・p2 3つ。状態の内訳と、一番急ぐ状態の色）");
+  await page.click("#unfold");
+  await sleep(300);
+  check((await page.evaluate(() => window.__harness.graphNodes('node[kind="unit"]'))).length === 7, "全部開くと作業のノード7つに戻る");
+
   // ---------------------------------------------------------------- 3. 生成のノード：ComfyUI の段数と途中の絵
   const genUnit = await page.evaluate(() => document.querySelector(".hz-progress.stage").dataset.pnode.slice(5));
   await page.click(`.pchip[data-unit="${genUnit}"]`);
@@ -69,6 +80,17 @@ try {
   await page.waitForFunction(() => [...document.querySelectorAll(".hz-progress.unit em")].some((e) => /\s[4-9]\/10|\s10\/10/.test(e.textContent)), null, { timeout: 30000 });
   check(true, "生成のノードに候補ごとの段数と途中の絵が出る");
   await shot("03_generate_progress_preview", "作業の図。生成のノードの下に候補ごとの ComfyUI の段数（n/10）と途中の絵、下に時間の列");
+
+  // ---------------------------------------------------------------- 3b. 作業の図：生成の段を開く（送り先ごとの子）
+  await page.evaluate(() => window.__harness.toggleStep("generate"));
+  await page.waitForFunction(() => window.__harness.graphNodes('node[kind="part"]').length >= 1, null, { timeout: 10000 });
+  const parts = await page.evaluate(() => window.__harness.graphNodes('node[kind="part"]').map((d) => d.label));
+  check(parts.every((l) => /依頼 \d/.test(l)), `生成の段を開くと送り先ごとの子が出る（${parts.join(" / ").replace(/\n/g, " ")}）`);
+  await sleep(300);
+  await shot("09_unit_generate_open", "作業の図。生成の段を開いたところ（送り先ごとの依頼の数）");
+  await page.evaluate(() => window.__harness.toggleStep("generate"));
+  await sleep(200);
+  check((await page.evaluate(() => window.__harness.graphNodes('node[kind="part"]'))).length === 0, "もう一度押すとたたむ");
 
   // ---------------------------------------------------------------- 4. 人の判断待ち：判断のパネル
   await page.click("#tab-stage");

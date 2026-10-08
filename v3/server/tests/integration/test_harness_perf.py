@@ -1,4 +1,4 @@
-"""ハーネスの量と遅れを測る（perf。既定の試験には入れない。`pytest -m perf -s` で流し、数を出す）。
+"""ハーネスの量と遅れを測る（perf。ふだんの試験からは外す。V3_PERF=1 で流す。-s を付けると数が出る）。
 
 - 今すぐ止める遅れ：人が「今すぐ止める」を押してから、偽の ComfyUI に prompt_id 付きの /interrupt が届くまで。
   生存の知らせの間隔（ハーネスの段と送り手の2か所）を、直す前（2秒・5秒）と直した後（今の値）で比べる
@@ -6,6 +6,7 @@
   今の状態（snapshot）を取る時間・同じ依頼を重ねていないかを見る
 """
 
+import os
 import statistics
 import time
 
@@ -30,7 +31,8 @@ from test_harness import (  # noqa: F401  (fixture)
 from v3server.generation_queue import service_call_activity
 from v3server.harness import harness_activities
 
-pytestmark = pytest.mark.perf
+pytestmark = [pytest.mark.perf,
+              pytest.mark.skipif(os.environ.get("V3_PERF") != "1", reason="時間を測る試験。V3_PERF=1 で流す")]
 
 REPEATS = 3
 
