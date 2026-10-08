@@ -54,6 +54,19 @@ class SafeArea(_Strict):
     outer_mm: float = Field(ge=0)
 
 
+class ColorOutput(_Strict):
+    """カラーのページを CMYK にして入稿するときの決まり（print_export/cmyk_conversion.py）。
+    元の色は sRGB とみなす（画面・生成の絵は RGB で、色の決まりの付いていない絵が多い）。
+    どの決まりで刷るかは入稿先が決める。値は入稿先の規定から人が入れる（印刷の結果は未検証）。"""
+
+    # 入稿先の CMYK の ICC プロファイルのファイル名（サーバー設定 V3_ICC_DIR のフォルダの中）
+    profile: str = Field(min_length=1, pattern=r"^[^/\\]+\.(icc|icm)$")
+    # 色を移す決め方（ICC のレンダリングインテント）
+    intent: Literal["perceptual", "relative_colorimetric", "saturation", "absolute_colorimetric"]
+    # 黒点補正をするか
+    black_point_compensation: bool
+
+
 class PrintSettings(_Strict):
     """作品の入稿の設定。値は入稿先の規定から人が入れる（決めごと 3章：規定の値は未調査）。"""
 
@@ -65,6 +78,8 @@ class PrintSettings(_Strict):
     dpi_by_color_mode: dict[ColorMode, int]
     # 2階調のページがあるときに要る
     bilevel: BilevelSettings | None = None
+    # カラーのページを CMYK にする決まり。無ければ RGB のまま書き出す（今までと同じ）。PDF だけに効く
+    color_output: ColorOutput | None = None
     safe_area: SafeArea
     # 入稿のページ数の決まり（話か巻のページ数がこの倍数）。決まりが無い入稿先（Web など）は None
     page_count_multiple: Literal[4, 8] | None
@@ -134,6 +149,9 @@ class Typesetting(_Strict):
     tate_chu_yoko_marks: bool
     # 行の揃え：start（縦書きは天、横書きは左）・center
     align: Literal["start", "center"]
+    # 行末の句読点（、。など）をぶら下げるか（行の長さを1字だけ越えて行末に残し、箱の外に出す）。
+    # 無い設定は今までと同じ（ぶら下げず、禁則で前の字ごと次の行へ送る）
+    hanging_punctuation: bool = False
 
 
 class TextSpan(_Strict):

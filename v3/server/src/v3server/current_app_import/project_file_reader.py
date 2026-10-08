@@ -15,6 +15,10 @@
 1ページだけの入れ物（ページの一覧で1枚を保存したもの）も受ける。外側の入れ物に state_ が無く lz4_part_ だけがあれば
 プロジェクト、state_ があれば1ページとして読む。どちらでもなければ止める。
 古い zip の形（js/core/compression/project-compression.js の loadZip）は読まない（未対応。止める）。
+
+ほどいた大きさには上限がある（max_unpacked_bytes。設定の V3_CURRENT_APP_IMPORT_MAX_BYTES）。送る本体は
+V3_REQUEST_MAX_BYTES で止まるが、LZ4 は小さな本体から大きな中身にほどけるため。上限は入れ物の入れ子も合わせた合計で数え、
+見出しの大きさの合計で先に断り、ほどくときも上限を1バイトでも超えたところで止める（全部をほどいてから比べない）。
 """
 
 import base64
@@ -59,7 +63,29 @@ class CurrentAppProject:
     single_page: bool
 
 
-def unpack_container(data: bytes) -> list[tuple[str, bytes]]:
+class UnpackBudget:
+    """ほどいてよい残りのバイト数（入れ子の入れ物も合わせて数える）。"""
+
+    def __init__(self, max_bytes: int):
+        self.max_bytes = max_bytes
+        self.left = max_bytes
+
+    def refuse(self, want: int) -> None:
+        if want > self.left:
+            raise ProjectFileError(f"ほどいた中身が上限（{self.max_bytes} バイト。V3_CURRENT_APP_IMPORT_MAX_BYTES）を超える")
+
+    def decompress(self, data: bytes) -> bytes:
+        d = lz4.frame.LZ4FrameDecompressor()
+        # 上限より1バイト多く求め、出てきたら超えている。足りずに終わっていなければ、中身が欠けている
+        out = d.decompress(data, max_length=self.left + 1)
+        self.refuse(len(out))
+        if not d.eof:
+            raise ProjectFileError("LZ4 の中身が途中で切れている")
+        self.left -= len(out)
+        return out
+
+
+def unpack_container(data: bytes, budget: UnpackBudget) -> list[tuple[str, bytes]]:
     """入れ物を (名前, 中身) の並びにほどく。"""
     if len(data) < 4:
         raise ProjectFileError("ファイルが短すぎる（今のアプリのプロジェクトではない）")
@@ -72,8 +98,11 @@ def unpack_container(data: bytes) -> list[tuple[str, bytes]]:
         raise ProjectFileError(f"見出しを読めない: {e}") from e
     if not isinstance(header, list) or not all(isinstance(h, dict) and "name" in h and "size" in h for h in header):
         raise ProjectFileError("見出しの形が正しくない")
+    if not all(isinstance(h["size"], int) and h["size"] >= 0 for h in header):
+        raise ProjectFileError("見出しの大きさが正しくない")
+    budget.refuse(sum(h["size"] for h in header))
     try:
-        body = lz4.frame.decompress(data[4 + header_size:])
+        body = budget.decompress(data[4 + header_size:])
     except RuntimeError as e:
         raise ProjectFileError(f"LZ4 の中身をほどけない: {e}") from e
     if sum(h["size"] for h in header) != len(body):
@@ -120,14 +149,15 @@ def read_page(index: int, entries: list[tuple[str, bytes]]) -> CurrentAppPage:
         history_count=len(states) - 1, other_files=sorted(n for n in files if n not in known))
 
 
-def read_project_file(data: bytes) -> CurrentAppProject:
-    outer = unpack_container(data)
+def read_project_file(data: bytes, max_unpacked_bytes: int) -> CurrentAppProject:
+    budget = UnpackBudget(max_unpacked_bytes)
+    outer = unpack_container(data, budget)
     names = [n for n, _ in outer]
     if any(n.startswith("state_") for n in names):
         return CurrentAppProject(pages=[read_page(0, outer)], single_page=True)
     if names and all(n.startswith("lz4_part_") for n in names):
         # 並びは保存した時のページの順（js/project-management.js が btmProjectsMap の順に包む）
-        return CurrentAppProject(pages=[read_page(i, unpack_container(part)) for i, (_, part) in enumerate(outer)],
+        return CurrentAppProject(pages=[read_page(i, unpack_container(part, budget)) for i, (_, part) in enumerate(outer)],
                                  single_page=False)
     raise ProjectFileError(f"今のアプリのプロジェクトの中身でない: {names[:5]}")
 

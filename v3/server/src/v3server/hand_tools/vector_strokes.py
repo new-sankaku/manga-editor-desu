@@ -187,6 +187,19 @@ async def refuse_stale_stroke_cache(session, image_id: str) -> None:
 
     q = select(PanelLayer).where(PanelLayer.image_id == image_id, PanelLayer.removed.is_(False))
     for layer in (await session.execute(q)).scalars():
-        if layer.stroke_revision > 0 and layer.image_stroke_revision != layer.stroke_revision:
-            raise Invalid(f"層 {layer.id} の絵は古い控え（線の版 {layer.image_stroke_revision}、今は {layer.stroke_revision}）。"
-                          "画面で描き直して上げる")
+        problem = stroke_cache_problem(layer)
+        if problem:
+            raise Invalid(problem)
+
+
+def stroke_cache_problem(layer) -> str | None:
+    """線を持つ層の控えの絵が無い・古いときの理由（書き出し・入稿前の確かめ・AIへ渡すときに、同じ理由で止める）。
+    控えの絵が無いまま書き出すと、線が黙って抜ける（取り込んだ線は、画面で開いて描くまで控えが無い）。"""
+    if layer.stroke_revision <= 0:
+        return None
+    if layer.image_id is None:
+        return f"層 {layer.id} の線の控えの絵が無い（線の版 {layer.stroke_revision}）。画面で開いて線から描いて上げる"
+    if layer.image_stroke_revision != layer.stroke_revision:
+        return (f"層 {layer.id} の絵は古い控え（線の版 {layer.image_stroke_revision}、今は {layer.stroke_revision}）。"
+                "画面で描き直して上げる")
+    return None

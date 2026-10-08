@@ -110,6 +110,20 @@ class ProtectedRegion(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class ProtectedMaskCache(Base):
+    """人の手の範囲を重ねたマスクの絵の控え（generation_queue/protected_mask_cache.py）。
+    key は絵の大きさと、範囲の並び（古い順。id と中身）の sha256。範囲を外すと並びが変わるので別の key になる。
+    消すたびに範囲が1つ増えるので、1つ前の並びの控えに新しい範囲だけを重ねる。"""
+
+    __tablename__ = "protected_mask_cache"
+
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    # 重ねたマスクの絵（置き場の sha256）
+    sha256: Mapped[str] = mapped_column(String(64))
+    region_count: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class HeldAiChange(Base):
     """判断待ち（V3細部の決めごと 5章・10.2）。人が決めるまで正本に入れない変更。
     - field_change：AIの変更が人の手の印の付いた項目に当たった。人が「採る」と、その値が人の判断として入る（人の手の印が付く）

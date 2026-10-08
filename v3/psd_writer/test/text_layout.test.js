@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const { loadDefaultJapaneseParser } = require('budoux');
-const { layoutText } = require('../text_layout.js');
+const { layoutText, placeRuby } = require('../text_layout.js');
 
 const FONT = '/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf';
 const skip = !fs.existsSync(FONT) && '試験の書体が無い';
@@ -99,4 +99,42 @@ test('行間と文字の一部の書式', { skip }, async () => {
 test('書体に無い字を返す', { skip }, async () => {
   const r = await layoutText(item('あ\u{1F600}'), fs.readFileSync);
   assert.deepStrictEqual(r.missing, ['\u{1F600}']);
+});
+
+test('ぶら下げ：行末の句点は箱の外に出し、次の行の頭へ送らない', { skip }, async () => {
+  const text = 'あいうえ。かき';
+  const hangTs = { ...TS, hanging_punctuation: true };
+  const r = await layoutText(item(text, { box_h_px: SIZE * 4, typesetting: hangTs }), fs.readFileSync);
+  const lines = lineTexts(r, text);
+  assert.deepStrictEqual(lines, ['あいうえ。', 'かき']);
+  const dot = r.placed.find((p) => p.cell.text === '。');
+  assert.ok(dot.hanging && dot.oy >= SIZE * 4 - 0.5, JSON.stringify(dot.oy));
+  assert.ok(!r.overflow && r.blockH <= SIZE * 4 + 0.5);
+  // ぶら下げないときは、禁則で「え。」を次の行へ送る（今までどおり）
+  const plain = lineTexts(await layoutText(item(text, { box_h_px: SIZE * 4 }), fs.readFileSync), text);
+  assert.deepStrictEqual(plain, ['あいう', 'え。かき']);
+});
+
+test('ぶら下げ：2字越えるときは送る', { skip }, async () => {
+  const text = 'あいうえお。';
+  const hangTs = { ...TS, hanging_punctuation: true };
+  const lines = lineTexts(await layoutText(item(text, { box_h_px: SIZE * 4, typesetting: hangTs }), fs.readFileSync), text);
+  assert.ok(lines.length === 2 && !lines[1].startsWith('。'), JSON.stringify(lines));
+});
+
+test('ルビ：親の字が2行に分かれたら、ルビの字を行ごとに分けて付ける', { skip }, async () => {
+  const text = 'あい漢字かな';
+  // 3字の列：「あい漢」「字かな」。ルビ「かんじ」の親は2行にまたがる
+  const it = item(text, { box_h_px: SIZE * 3, ruby: [{ start: 2, end: 4, text: 'かんじ' }] });
+  const lay = await layoutText(it, fs.readFileSync);
+  const ruby = await placeRuby(it, lay, fs.readFileSync);
+  const byLine = [0, 1].map((li) => ruby.placed.filter((p) => p.oy < SIZE * 3 && (li === 0
+    ? p.ox > lay.lines[1].center + SIZE : p.ox < lay.lines[0].center)).length);
+  assert.strictEqual(ruby.placed.length, 3);
+  assert.ok(byLine[0] >= 1 && byLine[1] >= 1, JSON.stringify(byLine));
+  // 1行目の分は「漢」の横、2行目の分は「字」の横
+  const kan = lay.placed.find((p) => p.cell.text === '漢');
+  const ji = lay.placed.find((p) => p.cell.text === '字');
+  const near = (p, base) => Math.abs(p.oy - base.oy) < SIZE;
+  assert.ok(ruby.placed.some((p) => near(p, kan)) && ruby.placed.some((p) => near(p, ji)));
 });

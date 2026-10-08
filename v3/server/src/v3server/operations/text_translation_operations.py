@@ -45,7 +45,8 @@ def _source_language(work) -> str:
 
 
 class SetTextTranslation(OpBase):
-    """訳文を置く（無ければ足す、あれば変える）。足すときは text が要る。"""
+    """訳文を置く（無ければ足す、あれば変える）。足すときは text が要る。
+    抜いた訳文のある文字へ足すときは、その行を戻して書き直す（文字1つ×言語1つで1行のため）。"""
 
     type: Literal["set_text_translation"] = "set_text_translation"
     text_item_id: str
@@ -82,7 +83,13 @@ class SetTextTranslation(OpBase):
                 human_hand_fields=marks, removed=False, **changes))
             return {"type": "set_text_translation_removed", "id": self.id, "removed": True}
         if row.removed:
-            raise Invalid("抜いた訳文は set_text_translation_removed で戻してから変える")
+            if self.text is None:
+                raise Invalid("抜いた訳文の文字へ足すときは text が要る")
+            require_actor_may(ctx.actor, ctx.work, ROW_TASK["text_item_translations"], "decide")
+            # 取り消しは抜き直す（抜いてある間の訳文は読まれないので、前の訳文には戻さない。翻訳者も取り消せる形にする）
+            row.removed = False
+            change_with_human_hand(ctx, row, changes, self.human_hand_fields)
+            return {"type": "set_text_translation_removed", "id": row.id, "removed": True}
         if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
         if "text" in changes and changes["text"] is None:

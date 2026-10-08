@@ -4,20 +4,22 @@
 //   文字: { id, text, font_path, font_size_px, vertical: bool, color: "#RRGGBB", box_w_px, box_h_px,
 //           language?: "ja" など（書体の言語ごとの字形を選ぶ。作品の設定の言語）,
 //           typesetting: { line_spacing_ratio, line_break: "none"|"character"|"phrase",
-//                          tate_chu_yoko_max_digits, tate_chu_yoko_marks, align: "start"|"center" },
+//                          tate_chu_yoko_max_digits, tate_chu_yoko_marks, align: "start"|"center",
+//                          hanging_punctuation?: bool（行末の句読点をぶら下げる） },
 //           spans: [{ start, end, font_path?, size_ratio?, embolden_ratio?, color? }]（文字の一部の書式）,
 //           decoration: {fill?, edge?, glow?, shadow?, ghosts[], band?, spacing_ratio},
-//           ruby: [{start, end, text}], output_path?, measure_only?: bool }
+//           ruby: [{start, end, text}], output_path?, measure_only?: bool, layout_detail?: bool }
 //   飾りの比は文字の大きさとの比（name_structure/item_styles.py の TextDecoration）。
 //   文字の番号（ruby・spans の start・end）はコードポイントの番号で、改行も1字に数える。
 // 出力: 各文字の PNG を output_path に書き（measure_only のときは書かない）、
-//   { items: [{ id, width, height, opaque_pixels, overflow, lines, block_w, block_h, missing_chars }] } を標準出力に出す。
+//   { items: [{ id, width, height, opaque_pixels, overflow, lines, block_w, block_h, missing_chars, layout? }] } を標準出力に出す。
+//   layout は layout_detail のときだけ（行の切れ目と字の置き場。layoutDetail を見る）。
 // 文字のブロックは箱の真ん中に置く。縦書きは右の列から左へ。
 // 箱に入らない文字は切らずに、絵を広げて描き、overflow を true にする（呼ぶ側が止めるか印を出す）。
 const fs = require('fs');
 const path = require('path');
 const { createCanvas, Path2D } = require('@napi-rs/canvas');
-const { layoutText } = require('./text_layout');
+const { layoutText, placeRuby } = require('./text_layout');
 
 const pathCache = new Map();
 function glyphPath(f, gid) {
@@ -48,6 +50,26 @@ function glyphDraws(placed) {
   return out;
 }
 
+// 組んだ結果を、画面が字を置ける形にする（layout_detail のとき）。座標は文字のブロックの左上が原点の画素。
+// block_origin は箱の左上からブロックの左上まで（ブロックは箱の真ん中）。縦書きの字の x は列の真ん中・y は字の上端、
+// 横書きの字の x は字の左端・y は基準線。hanging はぶら下げた句読点（箱の外に出る）
+function layoutDetail(it, lay, rubyPlaced) {
+  const chars = Array.from(it.text);
+  const cell = (p) => ({ start: p.cell.start, end: p.cell.end, text: chars.slice(p.cell.start, p.cell.end).join(''),
+    kind: p.cell.kind, line: p.line, x: p.ox, y: p.oy, advance: p.cell.adv, size: p.cell.size });
+  return {
+    block_origin: [(it.box_w_px - lay.blockW) / 2, (it.box_h_px - lay.blockH) / 2],
+    lines: lay.lines.map((l, i) => {
+      const cs = lay.placed.filter((p) => p.line === i);
+      return { center: l.center, thick: l.thick, start: cs.length ? cs[0].cell.start : null,
+        end: cs.length ? cs[cs.length - 1].cell.end : null };
+    }),
+    glyphs: lay.placed.map((p) => ({ ...cell(p), hanging: p.hanging })),
+    ruby: rubyPlaced.map((p) => ({ ruby: p.ruby, text: p.cell.text, x: p.ox, y: p.oy, advance: p.cell.adv,
+      size: p.cell.size })),
+  };
+}
+
 async function render(it) {
   if (!it.typesetting) throw new Error(`文字 ${it.id} の組版の設定（typesetting）がありません`);
   const lay = await layoutText(it, readFile);
@@ -58,41 +80,18 @@ async function render(it) {
   const H = Math.ceil(Math.max(it.box_h_px, lay.blockH + 2 * pad));
   const ox = (W - lay.blockW) / 2;
   const oy = (H - lay.blockH) / 2;
+  const ruby = await placeRuby(it, lay, readFile);
+  const rubyPlaced = ruby.placed;
   const info = { id: it.id, width: W, height: H, overflow: lay.overflow, lines: lay.lines.length,
-    block_w: lay.blockW, block_h: lay.blockH, missing_chars: lay.missing };
+    block_w: lay.blockW, block_h: lay.blockH, missing_chars: [...new Set([...lay.missing, ...ruby.missing])] };
+  if (it.layout_detail) info.layout = layoutDetail(it, lay, rubyPlaced);
   if (it.measure_only) return { ...info, opaque_pixels: null };
 
   const canvas = createCanvas(W, H);
   const ctx = canvas.getContext('2d');
   const draws = glyphDraws(lay.placed);
 
-  // ルビ：親の字の右（縦書き）か上（横書き）に、親の半分の大きさで並べる
-  const rubyPlaced = [];
-  for (const r of it.ruby || []) {
-    // 親の字が2行に分かれたときは、最初の行の分にだけ付ける
-    const inRange = lay.placed.filter((p) => p.cell.start >= r.start && p.cell.end <= r.end);
-    if (inRange.length === 0) continue;
-    const base = inRange.filter((p) => p.line === inRange[0].line);
-    const rubySize = base[0].cell.size / 2;
-    const rubyItem = { ...it, text: r.text, font_size_px: rubySize, spans: [], ruby: [], decoration: {},
-      font_path: base[0].cell.style.font_path, typesetting: { ...it.typesetting, line_break: 'none', align: 'start' },
-      box_w_px: 1e9, box_h_px: 1e9 };
-    const rl = await layoutText(rubyItem, readFile);
-    lay.missing.push(...rl.missing);
-    const first = base[0];
-    const last = base[base.length - 1];
-    const line = lay.lines[first.line];
-    const span = (it.vertical ? last.oy - first.oy : last.ox - first.ox) + last.cell.adv;
-    const cells = rl.placed;
-    const step = Math.max(rubySize, span / cells.length);
-    const start = (span - step * cells.length) / 2 + (step - rubySize) / 2;
-    cells.forEach((p, i) => {
-      if (it.vertical) rubyPlaced.push({ ...p, ox: line.center + line.thick / 2 + rubySize / 2, oy: first.oy + start + i * step });
-      else rubyPlaced.push({ ...p, ox: first.ox + start + i * step, oy: line.center - line.thick / 2 - rubySize * 0.15 });
-    });
-  }
   const rubyDraws = glyphDraws(rubyPlaced);
-  info.missing_chars = [...new Set(lay.missing)];
 
   if (deco.band) {
     ctx.fillStyle = hexToRgba(deco.band.color, deco.band.opacity);

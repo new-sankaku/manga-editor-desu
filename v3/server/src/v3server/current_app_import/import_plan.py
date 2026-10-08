@@ -15,7 +15,9 @@
 - 文字：textbox・i-text・text・vertical-textbox
 - トーン・効果線：今のアプリが付ける名前（TONE_IMAGE_NAMES・EFFECT_IMAGE_NAMES）の image。人が名前を変えた物は普通の絵になる
 - 絵：それ以外の image
-- ペンの線：customType の無い path
+- ペンの線：customType の無い path（今のアプリの PencilBrush・PatternBrush が作る。js/sidebar/pen/pen-tools.js）と、
+  その path だけのグループ（pen-tools.js が線をまとめた物）。線の色が文字の色（CSS の色）の path は鉛筆（pencil）の線として
+  pen_strokes に入れる。線の色が模様（PatternBrush：模様・縦線・横線）の path は、模様の中身が V3 の筆の模様と違うので入れない
 """
 
 from collections.abc import Mapping
@@ -120,6 +122,21 @@ class PlannedLayer(BaseModel):
     placement: dict[str, Any]
 
 
+class PlannedStrokeLayer(BaseModel):
+    """ペンの線を入れる人の手の層（コマごとに1つ）。控えの絵は無い（画面が線から描いて上げる）。"""
+
+    id: str
+    panel_id: str
+    stack_order: int
+
+
+class PlannedStroke(BaseModel):
+    id: str
+    layer_id: str
+    # hand_tools/vector_strokes.py の StrokeValues の形
+    values: dict[str, Any]
+
+
 class PlannedText(BaseModel):
     id: str
     panel_id: str
@@ -144,6 +161,8 @@ class ImportPlan(BaseModel):
     panel_images: list[PlannedPanelImage] = Field(default_factory=list)
     layers: list[PlannedLayer] = Field(default_factory=list)
     texts: list[PlannedText] = Field(default_factory=list)
+    stroke_layers: list[PlannedStrokeLayer] = Field(default_factory=list)
+    strokes: list[PlannedStroke] = Field(default_factory=list)
     settings: list[PlannedSetting] = Field(default_factory=list)
     entries: list[ReportEntry] = Field(default_factory=list)
 
@@ -467,6 +486,65 @@ class _PageBuilder:
                 prompt=settings.get("text2img_prompt"), negative_prompt=settings.get("text2img_negative"),
                 source_values=settings))
 
+    # -------------------------------------------------------- ペンの線
+    def add_pen_strokes(self, i: int, obj: dict[str, Any], paths: list[dict[str, Any]], parent, stack: dict[str, int]
+                        ) -> None:
+        """path（グループのときはその中の path）を、コマの人の手の層のペンの線にする。1つの物は1つの報告の行。"""
+        notes = ["筆は鉛筆（pencil）として入れた（今のアプリの path は筆の種類を持たない）",
+                 "点の時刻は今のアプリに無いので 0 を入れた（筆圧も無いので null）",
+                 "控えの絵は画面が線から描く。画面で開いて描くまで、書き出しと入稿前の確かめは止まる"]
+        strokes: list[tuple[list[Point], dict[str, Any]]] = []
+        for path in paths:
+            if path.get("stroke") is not None and not isinstance(path.get("stroke"), str):
+                self.entry(i, "pen_stroke", obj, "unmapped",
+                           "模様の筆（模様・縦線・横線）の線は、模様が今のアプリの絵で、V3 の筆の模様に直せない")
+                return
+            try:
+                color = css_color(path.get("stroke"))
+                rings = path_rings_px(path, parent)
+            except GeometryError as e:
+                self.entry(i, "pen_stroke", obj, "unmapped", f"ペンの線を読めない: {e}")
+                return
+            if color is None or not rings:
+                self.entry(i, "pen_stroke", obj, "unmapped", "線の色か点が無い（見えない線）")
+                return
+            scale = (abs(float(path.get("scaleX") or 1)) + abs(float(path.get("scaleY") or 1))) / 2
+            if parent is not None:
+                scale *= (abs(float(obj.get("scaleX") or 1)) + abs(float(obj.get("scaleY") or 1))) / 2
+            width_mm = float(path.get("strokeWidth") or 0) * scale * self.ctx.mm_per_px
+            if width_mm <= 0:
+                self.entry(i, "pen_stroke", obj, "unmapped", "線の太さが 0")
+                return
+            opacity = float(path.get("opacity") if path.get("opacity") is not None else 1) * color[1]
+            if parent is not None:
+                opacity *= float(obj.get("opacity") if obj.get("opacity") is not None else 1)
+            if opacity <= 0:
+                self.entry(i, "pen_stroke", obj, "unmapped", "線の不透明度が 0（見えない線）")
+                return
+            if path.get("fill") not in (None, "", "transparent"):
+                notes.append(f"線の中の塗り {path.get('fill')} は移していない")
+            if path.get("eraser"):
+                notes.append("今のアプリの消しゴムで消した所（eraser）は移していない。消した所も線が見える")
+            for ring in rings:
+                strokes.append((ring, {"brush": "pencil", "width_mm": round(width_mm, 4), "color": color[0],
+                                       "opacity": round(min(1.0, opacity), 4), "brush_options": {}}))
+        pts = [p for ring, _ in strokes for p in ring]
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        panel_id = self.panel_at(((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2))
+        if panel_id is None:
+            self.entry(i, "pen_stroke", obj, "unmapped", "コマの外の線は V3 で置く所が無い（層はコマに属する）")
+            return
+        layer = next((la for la in self.plan.stroke_layers if la.panel_id == panel_id), None)
+        if layer is None:
+            order = stack.get(panel_id, 0)
+            stack[panel_id] = order + 1
+            layer = PlannedStrokeLayer(id=new_id(), panel_id=panel_id, stack_order=order)
+            self.plan.stroke_layers.append(layer)
+        for ring, values in strokes:
+            self.plan.strokes.append(PlannedStroke(id=new_id(), layer_id=layer.id, values={
+                **values, "points": [[x, y, None, 0.0] for x, y in self.ctx.mm(ring)]}))
+        self.entry(i, "pen_stroke", obj, "converted", "。".join(dict.fromkeys(notes)), "panel_layers", layer.id)
+
     # -------------------------------------------------------- 全体
     def build(self) -> None:
         self.add_panels()
@@ -485,8 +563,10 @@ class _PageBuilder:
             elif t == "image":
                 self.add_image(i, obj, stack)
             elif t == "path" and not ct:
-                self.entry(i, "pen_stroke", obj, "unmapped",
-                           "ペンの線は今は移せない（画素の座標の線を、V3 のペンの線（mm の点の列と筆）に直す所が無い）")
+                self.add_pen_strokes(i, obj, [obj], None, stack)
+            elif t == "group" and not ct and obj.get("objects") and all(
+                    c.get("type") == "path" and not c.get("customType") for c in obj["objects"]):
+                self.add_pen_strokes(i, obj, obj["objects"], object_matrix(obj), stack)
             elif obj.get("isIcon"):
                 self.entry(i, "icon", obj, "unmapped", "絵記号（アイコンの SVG）は V3 の図形の形に直せない")
             else:

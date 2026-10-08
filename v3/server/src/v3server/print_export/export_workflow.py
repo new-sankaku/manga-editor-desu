@@ -6,6 +6,7 @@
 
 from datetime import timedelta
 
+from sqlalchemy import update
 from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 from temporalio.exceptions import ApplicationError
@@ -19,12 +20,21 @@ async def run_export_activity(run_id: str) -> None:
     from v3server.database_engine import get_sessionmaker
     from v3server.print_export.export_runner import run_export
 
+    done: list[str] = []
+
+    async def pages_done(page_ids: list[str]) -> None:
+        # 進み具合は別の確定で書く（書き出しの読みの途中の状態を確定しないため）
+        done.extend(page_ids)
+        async with get_sessionmaker()() as s:
+            await s.execute(update(ExportRun).where(ExportRun.id == run_id).values(done_page_ids=list(done)))
+            await s.commit()
+
     async with get_sessionmaker()() as session:
         run = await session.get(ExportRun, run_id)
-        run.status, run.detail = "running", None
+        run.status, run.detail, run.done_page_ids = "running", None, []
         await session.commit()
         try:
-            outputs = await run_export(session, run)
+            outputs = await run_export(session, run, pages_done)
         except Exception as e:  # 理由を記録してから、送り直さない失敗として返す
             await session.rollback()
             run = await session.get(ExportRun, run_id)

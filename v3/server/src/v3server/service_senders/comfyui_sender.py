@@ -101,7 +101,7 @@ def _raise_for_poll_status(r: httpx.Response, what: str) -> None:
         raise AdapterError("broken_response", f"{what} が {r.status_code}。ComfyUI の口ではない")
 
 
-def _combo_options(spec: Any) -> list[Any] | None:
+def combo_options(spec: Any) -> list[Any] | None:
     """/object_info の入力の定義から、選べる値の一覧を取る。選択肢の入力でなければ None。"""
     if not isinstance(spec, list) or not spec:
         return None
@@ -134,7 +134,7 @@ async def check_choices(client: httpx.AsyncClient, prompt: dict[str, Any]) -> No
         for name, value in node.get("inputs", {}).items():
             if isinstance(value, list):
                 continue
-            options = _combo_options(defs.get(name))
+            options = combo_options(defs.get(name))
             if options is not None and value not in options:
                 problems.append(f"ノード {node_id} ({cls}) の {name}={value!r} は選べない")
     if problems:

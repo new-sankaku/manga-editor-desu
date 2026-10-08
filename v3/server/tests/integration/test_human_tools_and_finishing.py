@@ -85,6 +85,32 @@ async def test_コマを分ける_合わせるは1つの操作で_1回で取り�
     assert [x["id"] for x in rows] == [p["id"]] and rows[0]["frame"] == p["frame"]
 
 
+async def test_文字が小さい側にあるコマをナイフで分けると文字は新しいコマへ移る(api, authz):
+    """前は、文字の panel_id を新しいコマへ変える値が、新しいコマの行より先に書き出され、外部キーで 500 になった。"""
+    a = user()
+    ids = await framed_page(api, a, texts=("1",))
+    wid = ids["work"]
+    p = await first_panel(api, wid, a, ids["page1"])
+    (t,) = live((await work_json(api, wid, a))["text_items"], page_id=ids["page1"])
+    assert (await op(api, wid, a, {"type": "update_text_item", "id": t["id"],
+                                   "box_mm": [10, 190, 30, 210]})).status_code == 200
+    assert (await op(api, wid, a, {"type": "set_threshold", "key": "panel_short_side_min_mm", "value": {"value": 10},
+                                   "source": "試験", "status": "unverified"})).status_code == 200
+    new_id = uuid.uuid4().hex
+    r = await op(api, wid, a, {"type": "split_panel", "panel_id": p["id"], "through_mm": [75, 170],
+                               "direction": "horizontal", "new_panel_id": new_id})
+    assert r.status_code == 200, r.text
+    w = await work_json(api, wid, a)
+    (t2,) = live(w["text_items"], page_id=ids["page1"])
+    assert len(live(w["panels"], page_id=ids["page1"])) == 2
+    holder = next(x for x in live(w["panels"], page_id=ids["page1"]) if x["id"] == t2["panel_id"])
+    ys = [q[1] for q in holder["frame"]["polygon_mm"]]
+    assert min(ys) <= 190 and max(ys) >= 210
+    await undo(api, wid, a, r.json()["event_id"])
+    (t3,) = live((await work_json(api, wid, a))["text_items"], page_id=ids["page1"])
+    assert t3["panel_id"] == p["id"]
+
+
 # ---------------------------------------------------------------- トーン・図形・動かさない・仕上げ
 
 
@@ -366,6 +392,51 @@ async def test_画素の消しゴムは新しい版と人の手の範囲を作�
     panel = await first_panel(api, wid, a, ids["page1"])
     assert panel["image_id"] == new
 
+    # 消すたびに範囲が1つ増える。重ねたマスクは控え（protected_mask_cache）に残し、次は前の控えに新しい範囲だけを重ねる
+    from sqlalchemy import select
+
+    from v3server.canonical_tables.text_and_layer_tables import ProtectedMaskCache
+    from v3server.comfy_graphs.protected_region_mask import protected_mask_png
+    from v3server.database_engine import get_sessionmaker
+    from v3server.image_file_storage import read_image
+
+    async def mask_of(image_id):
+        r = await api.get(f"/works/{wid}/images/{image_id}/protected-mask", headers=h(a))
+        assert r.status_code == 200, r.text
+        return r
+
+    async def cache_counts():
+        async with get_sessionmaker()() as s:
+            return sorted(row.region_count for row in (await s.execute(select(ProtectedMaskCache))).scalars())
+
+    first = await mask_of(new)
+    before = await cache_counts()
+    r = await api.post(f"/works/{wid}/panels/{p['id']}/erase-pixels", headers=h(a),
+                       data={"strokes": json.dumps([{"points": [[2, 2], [2, 6]], "width_px": 2, "opacity": 0.5}])})
+    assert r.status_code == 200, r.text
+    newer = r.json()["image_id"]
+    second = await mask_of(newer)
+    assert second.headers["X-V3-Region-Count"] == "2"
+    assert await cache_counts() == sorted(before + [2])
+    # 控えから作った物は、全部の範囲を1から重ねた物と同じ画素
+    # （この口は、その版に付いた範囲だけを返す。前の版の範囲は前の版から読む）
+    regions = [x for i in (new, newer)
+               for x in (await api.get(f"/works/{wid}/images/{i}/protected-regions", headers=h(a))).json()]
+    assert len(regions) == 2
+    direct = protected_mask_png(*Image.open(io.BytesIO(second.content)).size, [],
+                                [read_image(x["mask_sha256"]) for x in regions])
+    assert Image.open(io.BytesIO(second.content)).tobytes() == Image.open(io.BytesIO(direct)).tobytes()
+    assert (await mask_of(newer)).content == second.content and await cache_counts() == sorted(before + [2])
+    assert (await mask_of(new)).content == first.content
+    # 範囲を外すと並びが変わり、別の控えになる（外した範囲は白に残らない）
+    r = await op(api, wid, a, {"type": "set_protected_region_removed", "id": regions[0]["id"], "removed": True})
+    assert r.status_code == 200, r.text
+    third = await mask_of(newer)
+    assert third.headers["X-V3-Region-Count"] == "1"
+    only = protected_mask_png(*Image.open(io.BytesIO(third.content)).size, [], [read_image(regions[1]["mask_sha256"])])
+    assert Image.open(io.BytesIO(third.content)).tobytes() == Image.open(io.BytesIO(only)).tobytes()
+    assert Image.open(io.BytesIO(third.content)).tobytes() != Image.open(io.BytesIO(second.content)).tobytes()
+
 
 # ---------------------------------------------------------------- 赤入れ・企画・設定資料・探す・設定
 
@@ -446,6 +517,51 @@ async def ready_page(api, a):
     return ids, p, t
 
 
+def edit_psd(data: bytes, tmp: pathlib.Path, change: tuple[str, ...], add_to_group: str | None = None) -> bytes:
+    """書き出した PSD を人が直したことにする：名前が change のどれかで終わる層の真ん中の1画素を変え、add_to_group で終わる
+    グループに小さな層を描き足す。psd-tools で読み、同じ層を ag-psd（write_layered_psd.js）で書き直す。"""
+    from psd_tools import PSDImage
+
+    from v3server.print_export.layered_psd_request import write_layered_psd
+
+    psd = PSDImage.open(io.BytesIO(data))
+    tmp.mkdir()
+
+    def to_req(layers):
+        res = []
+        for la in layers:
+            if la.is_group():
+                res.append({"name": la.name, "children": to_req(list(la)), "opacity": 1, "blend_mode": "normal",
+                            "hidden": False})
+                continue
+            img = la.topil().convert("RGBA")
+            if la.name.endswith(change):
+                img.putpixel((img.width // 2, img.height // 2), (1, 2, 3, 255))
+            path = tmp / f"{uuid.uuid4().hex}.png"
+            img.save(path)
+            res.append({"name": la.name, "png_path": str(path), "left": la.left, "top": la.top, "opacity": 1,
+                        "blend_mode": "normal", "hidden": False})
+        return res
+
+    layers = to_req(list(psd))
+    if add_to_group is not None:
+        def groups(items):
+            for x in items:
+                if "children" in x:
+                    yield x
+                    yield from groups(x["children"])
+
+        group = next(x for x in groups(layers) if x["name"].endswith(add_to_group))
+        Image.new("RGBA", (5, 5), (9, 9, 9, 255)).save(tmp / "new.png")
+        group["children"].append({"name": "描き足し", "png_path": str(tmp / "new.png"),
+                                  "left": group["children"][0]["left"], "top": group["children"][0]["top"],
+                                  "opacity": 1, "blend_mode": "normal", "hidden": False})
+    write_layered_psd({"width": psd.width, "height": psd.height, "composite_png": None,
+                       "output_path": str(tmp / "edited.psd"), "layers": layers},
+                      "/opt/node22/bin/node", ROOT / "psd_writer" / "write_layered_psd.js", 60)
+    return (tmp / "edited.psd").read_bytes()
+
+
 @pytest.mark.skipif(not pathlib.Path(FONT_DIR, "ipag.ttf").exists(), reason="試験の書体が無い")
 async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, workers, export_env):
     a = user()
@@ -482,41 +598,10 @@ async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, wor
     assert f"{p['id']}-image" in markers and t["id"] in markers and f"{ids['page1']}-paper" in markers
 
     # 直した PSD：コマの絵の画素を変える・文字の層の画素を変える・コマのグループに描き足す
-    from psd_tools import PSDImage  # 読み戻して、同じ層を ag-psd で書き直す
-
     data = (await api.get(f"/works/{wid}/exports/{psd_run['id']}/files/{out['file']}", headers=h(a))).content
-    psd = PSDImage.open(io.BytesIO(data))
-    tmp = export_env / "edit"
-    tmp.mkdir()
-
-    def to_req(layers):
-        res = []
-        for i, la in enumerate(layers):
-            if la.is_group():
-                res.append({"name": la.name, "children": to_req(list(la)), "opacity": 1, "blend_mode": "normal",
-                            "hidden": False})
-                continue
-            img = la.topil().convert("RGBA")
-            if la.name.endswith((f"[{p['id']}-image]", f"[{t['id']}]")):
-                img.putpixel((img.width // 2, img.height // 2), (1, 2, 3, 255))
-            path = tmp / f"{uuid.uuid4().hex}.png"
-            img.save(path)
-            res.append({"name": la.name, "png_path": str(path), "left": la.left, "top": la.top, "opacity": 1,
-                        "blend_mode": "normal", "hidden": False})
-        return res
-
-    layers = to_req(list(psd))
-    group = next(x for x in layers if x["name"].endswith(f"[{p['id']}]"))
-    Image.new("RGBA", (5, 5), (9, 9, 9, 255)).save(tmp / "new.png")
-    group["children"].append({"name": "描き足し", "png_path": str(tmp / "new.png"), "left": group["children"][0]["left"],
-                              "top": group["children"][0]["top"], "opacity": 1, "blend_mode": "normal", "hidden": False})
-    from v3server.print_export.layered_psd_request import write_layered_psd
-
-    write_layered_psd({"width": psd.width, "height": psd.height, "composite_png": None,
-                       "output_path": str(tmp / "edited.psd"), "layers": layers},
-                      "/opt/node22/bin/node", ROOT / "psd_writer" / "write_layered_psd.js", 60)
+    edited = edit_psd(data, export_env / "edit", (f"[{p['id']}-image]", f"[{t['id']}]"), add_to_group=f"[{p['id']}]")
     r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{ids['page1']}/psd", headers=h(a),
-                       files={"psd": ("edited.psd", (tmp / "edited.psd").read_bytes(), "image/vnd.adobe.photoshop")})
+                       files={"psd": ("edited.psd", edited, "image/vnd.adobe.photoshop")})
     assert r.status_code == 200, r.text
     res = r.json()
     assert res["matches"]["changed"] >= 1 and res["matches"]["new"] == 1
@@ -543,3 +628,45 @@ async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, wor
     assert not live(w["panel_layers"], panel_id=p["id"], role="human_hand")
     held = (await api.get(f"/works/{wid}/held-changes", headers=h(a))).json()
     assert not [x for x in held if x["id"] == text_held[0]["id"] and x["status"] == "open"]
+
+
+@pytest.mark.full
+async def test_文字1つを書き出しと同じ組み方で組み_行の切れ目と字の置き場を返す(api, authz, export_env):
+    a = user()
+    ids = await framed_page(api, a)
+    wid = ids["work"]
+    p = await first_panel(api, wid, a, ids["page1"])
+    # 72dpi で 12pt は 12 画素。列の長さはちょうど4字（48 画素 = 16.933mm）
+    col_mm = 48 / 72 * 25.4
+    tid = uuid.uuid4().hex
+    r = await op(api, wid, a, {"type": "add_text_item", "id": tid, "panel_id": p["id"], "item_kind": "balloon",
+                               "order": 5, "text": "あいうえ。漢字", "font_family": "ipag", "font_size_pt": 12,
+                               "writing_direction": "vertical", "box_mm": [10, 10, 40, 10 + col_mm],
+                               "decoration": {"fill": "#000000"}, "ruby": [{"start": 5, "end": 7, "text": "かんじ"}],
+                               "typesetting": {**TYPESETTING, "hanging_punctuation": True}})
+    assert r.status_code == 200, r.text
+    r = await api.post(f"/works/{wid}/text-items/{tid}/typeset", headers=h(a), json={"dpi": 72})
+    assert r.status_code == 200, r.text
+    got = r.json()
+    assert got["vertical"] and not got["overflow"] and got["missing_chars"] == []
+    # ぶら下げ：「。」は1列目の末に残り、箱の外（下）に出る
+    assert [(ln["start"], ln["end"]) for ln in got["lines"]] == [(0, 5), (5, 7)]
+    dot = next(g for g in got["glyphs_mm"] if g["text"] == "。")
+    assert dot["hanging"] and dot["line"] == 0 and dot["at"][1] >= col_mm - 0.01
+    # 縦書きは右の列から：2列目の字は1列目より左
+    first = next(g for g in got["glyphs_mm"] if g["text"] == "あ")
+    kan = next(g for g in got["glyphs_mm"] if g["text"] == "漢")
+    assert kan["at"][0] < first["at"][0]
+    assert len(got["ruby_mm"]) == 3 and all(rb["at"][0] > kan["at"][0] for rb in got["ruby_mm"])
+    # 画素の値は解像度に比例し、ミリの値は解像度によらない
+    r2 = (await api.post(f"/works/{wid}/text-items/{tid}/typeset", headers=h(a), json={"dpi": 144})).json()
+    assert abs(r2["block_px"][1] - 2 * got["block_px"][1]) < 1
+    assert all(abs(x - y) < 0.2 for g1, g2 in zip(got["glyphs_mm"], r2["glyphs_mm"], strict=True)
+               for x, y in zip(g1["at"], g2["at"], strict=True))
+    # 色の無い文字は、書き出しと同じ理由で断る（色を補わない）
+    t2 = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_text_item", "id": t2, "panel_id": p["id"], "item_kind": "balloon",
+                                   "order": 6, "text": "いろなし", "font_family": "ipag", "font_size_pt": 12,
+                                   "box_mm": [10, 40, 40, 80], "typesetting": TYPESETTING})).status_code == 200
+    r = await api.post(f"/works/{wid}/text-items/{t2}/typeset", headers=h(a), json={"dpi": 72})
+    assert r.status_code == 422 and "decoration.fill" in r.text
