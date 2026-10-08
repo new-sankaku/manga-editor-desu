@@ -14,7 +14,7 @@ from v3server.server_settings import get_settings
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS
 from v3server.service_senders.sender_result_types import AdapterError, AdapterResult
 
-TEST_DB = "postgresql+psycopg://v3:v3@localhost:55432/v3_test"
+TEST_DB = os.environ.get("V3_TEST_DATABASE_URL", "postgresql+psycopg://v3:v3@localhost:55432/v3_test")
 os.environ["V3_DATABASE_URL"] = TEST_DB
 os.environ["V3_DEV_AUTH"] = "1"
 

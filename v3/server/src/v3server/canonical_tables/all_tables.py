@@ -3,6 +3,7 @@
 from v3server.canonical_tables import (  # noqa: F401
     check_result_tables,
     event_and_lock_tables,
+    harness_tables,
     image_file_tables,
     material_and_setting_tables,
     name_proposal_tables,

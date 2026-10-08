@@ -17,7 +17,10 @@ request の形
 - 実行時の失敗は refused（detail は execution_error の exception_message）。execution_interrupted は interrupted
 - 待ちにも実行中にも履歴にも無い、または処理ごとの待ちの上限を超えた場合は transport
 
-取り消し: 呼び出しが取り消されたら、待ちの物は /queue の delete、自分の依頼が実行中なら /interrupt を呼んで止める。
+取り消し: 呼び出しが取り消されたら、待ちの物は /queue の delete、自分の依頼が実行中なら /interrupt に prompt_id を付けて呼んで止める。
+
+進み具合: request.progress_key があれば、/prompt に client_id として渡し、WebSocket で段数と途中の絵を受けて
+service_call_progress に書く（comfyui_progress.py）。
 """
 
 import asyncio
@@ -31,6 +34,7 @@ from v3server.canonical_tables.service_and_job_tables import Service, ServicePro
 from v3server.generation_queue.image_process_registry import build_prompt
 from v3server.image_file_storage import read_image
 from v3server.v3_error_types import Invalid
+from v3server.service_senders.comfyui_progress import ProgressListener
 from v3server.service_senders.sender_result_types import (
     AdapterError,
     AdapterResult,
@@ -175,15 +179,15 @@ async def _in_queue(client: httpx.AsyncClient, prompt_id: str) -> str | None:
 
 
 async def cancel_prompt(client: httpx.AsyncClient, prompt_id: str) -> str:
-    """送った物を止める。待ちなら /queue の delete、自分の依頼が実行中なら /interrupt。
-    /interrupt は「いま動いている物」を止めるので、他人の依頼を止めないよう、実行中が自分の依頼のときだけ呼ぶ。
-    確かめてから呼ぶまでの間に終わって次の物が動き出す隙は残る（ComfyUI に依頼の id を指す /interrupt の口が無い）。"""
+    """送った物を止める。待ちなら /queue の delete、自分の依頼が実行中なら /interrupt に prompt_id を付けて呼ぶ。
+    prompt_id を付けると、ComfyUI はそれが今走っているときだけ止める（ソースで確かめた。調査 3.16）ので、
+    確かめてから呼ぶまでの間に次の物が動き出しても、他人の依頼は止めない。"""
     where = await _in_queue(client, prompt_id)
     if where == "pending":
         r = await client.post("/queue", json={"delete": [prompt_id]})
         r.raise_for_status()
     elif where == "running":
-        r = await client.post("/interrupt", json={})
+        r = await client.post("/interrupt", json={"prompt_id": prompt_id})
         r.raise_for_status()
     return where or "none"
 
@@ -285,18 +289,27 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
             prompt[node_id]["inputs"].update(inputs)
 
     prompt_id: str | None = None
+    progress_key = request.get("progress_key")
+    listener = ProgressListener(service.endpoint, progress_key) if progress_key else None
+    final_state = "error"
     try:
         async with httpx.AsyncClient(base_url=service.endpoint, timeout=REQUEST_TIMEOUT) as client:
             try:
                 uploaded = await _upload_inputs(client, prompt, request)
                 if sp.comfy_check_choices:
                     await check_choices(client, prompt)
-                r = await client.post("/prompt", json={"prompt": prompt})
+                if listener is not None:
+                    # /prompt の前につなぐ。後だと最初の段の知らせを取りこぼす
+                    await listener.start()
+                body = {"prompt": prompt, **({"client_id": progress_key} if progress_key else {})}
+                r = await client.post("/prompt", json=body)
                 _raise_for_prompt_status(r)
                 body = _json_object(r, "/prompt")
                 if not isinstance(body.get("prompt_id"), str):
                     raise AdapterError("broken_response", "/prompt の返事に prompt_id が無い")
                 prompt_id = body["prompt_id"]
+                if listener is not None:
+                    listener.prompt_id = prompt_id
                 hist = await _wait_history(client, prompt_id, sp.comfy_wait_seconds)
                 failure = _failure_from_history(hist)
                 if failure is not None:
@@ -308,7 +321,9 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
                 if not images:
                     raise AdapterError("broken_response", "画像が返っていない")
                 files = await _fetch_images(client, images)
+                final_state = "finished"
             except asyncio.CancelledError:
+                final_state = "interrupted"
                 # 取り消された。送った物が残っていれば止める。後始末の失敗は取り消しを妨げない
                 if prompt_id is not None:
                     try:
@@ -318,6 +333,9 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
                 raise
     except (httpx.TimeoutException, httpx.TransportError) as e:
         raise AdapterError("transport", str(e) or type(e).__name__) from e
+    finally:
+        if listener is not None:
+            await listener.stop(final_state)
     return AdapterResult(
         output={"prompt_id": prompt_id, "images": images, "uploaded_inputs": uploaded},
         image_files=files,

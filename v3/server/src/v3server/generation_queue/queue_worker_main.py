@@ -8,6 +8,7 @@
 
 import asyncio
 import logging
+from datetime import timedelta
 
 from sqlalchemy import select
 from temporalio.client import Client
@@ -75,6 +76,10 @@ class WorkerSet:
                     task_queue=service_queue(sid),
                     activities=[call_service],
                     max_concurrent_activities=n,
+                    # 取り消しは生存の知らせの返事で届く。既定の間引き（時間切れ30秒の8割=24秒）だと、人が止めても
+                    # ComfyUI が描き終えるまで届かないことがある（ハーネスの試験で見つけた）。1秒に1回は送る
+                    max_heartbeat_throttle_interval=timedelta(seconds=1),
+                    default_heartbeat_throttle_interval=timedelta(seconds=1),
                 )
                 self.services[sid] = (n, worker, asyncio.create_task(worker.run()))
                 log.info("つなぎ先 %s の作業者を動かした（同時に %d 件）", sid, n)
