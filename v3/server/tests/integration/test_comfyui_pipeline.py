@@ -11,7 +11,7 @@ import pytest
 from conftest import h, new_work, user, wait_for
 from PIL import Image
 from sqlalchemy import select
-from test_queue import ADMIN, admin, enqueue, until_status  # noqa: F401  (admin は fixture)
+from test_queue import ADMIN, admin, enqueue, job, until_status  # noqa: F401  (admin は fixture)
 
 from v3server.canonical_tables.service_and_job_tables import CallLog
 from v3server.database_engine import get_sessionmaker
@@ -204,15 +204,17 @@ def crash_once(monkeypatch, name: str, on_call: int = 1):
     return seen
 
 
-async def run_two_images(api, admin, workers, fake_comfy):
+async def run_two_images(api, admin, skipping, fake_comfy):
+    """作業者が落ちると Temporal が活動をやり直す（間隔 5秒）。時間を飛ばせる Temporal で待たずに通す（conftest の skipping）。"""
     fake = fake_comfy(TwoImageComfy(finish_after=1))
     a = user()
     ids = await new_work(api, a)
     wid = ids["work"]
     _, process = await make_comfy_service(api, admin, resend_limit=2)
-    await workers.reload()
+    await skipping.workers.reload()
     jid = await enqueue(api, wid, a, process, register={"role": "panel_art", "page_id": ids["page1"]})
-    j = await until_status(api, wid, a, jid, "done", "stopped", timeout=60)
+    await skipping.finished(jid)
+    j = await job(api, wid, a, jid)
     assert j["status"] == "done", j
     imgs = (await api.get(f"/works/{wid}/images", headers=h(a))).json()
     events = [e for e in (await api.get(f"/works/{wid}/events", headers=h(a))).json() if e["op_type"] == "register_image"]
@@ -222,9 +224,9 @@ async def run_two_images(api, admin, workers, fake_comfy):
     return fake, j, imgs, events, logs
 
 
-async def test_答えを受け取った後に落ちても送り直さず二重に登録しない(api, admin, workers, fake_comfy, monkeypatch):
+async def test_答えを受け取った後に落ちても送り直さず二重に登録しない(api, admin, skipping, fake_comfy, monkeypatch):
     seen = crash_once(monkeypatch, "_finish")
-    fake, j, imgs, events, logs = await run_two_images(api, admin, workers, fake_comfy)
+    fake, j, imgs, events, logs = await run_two_images(api, admin, skipping, fake_comfy)
     assert seen["n"] == 2
     assert fake.sends() == 1
     assert len(imgs) == 2 and len(events) == 2
@@ -233,19 +235,19 @@ async def test_答えを受け取った後に落ちても送り直さず二重�
     assert (log.outcome, log.attempt) == ("ok", 1) and log.idempotency_key.startswith(j["id"] + ":")
 
 
-async def test_登録の途中で落ちても残らず_次の回で1回だけ登録する(api, admin, workers, fake_comfy, monkeypatch):
+async def test_登録の途中で落ちても残らず_次の回で1回だけ登録する(api, admin, skipping, fake_comfy, monkeypatch):
     seen = crash_once(monkeypatch, "submit", on_call=2)
-    fake, _j, imgs, events, logs = await run_two_images(api, admin, workers, fake_comfy)
+    fake, _j, imgs, events, logs = await run_two_images(api, admin, skipping, fake_comfy)
     assert seen["n"] == 4  # 1回目：1枚目・2枚目（ここで落ちる）。2回目：2枚
     assert fake.sends() == 1
     assert len(imgs) == 2 and len(events) == 2
     assert [x.outcome for x in logs] == ["ok"]
 
 
-async def test_送った後_答えを残す前に落ちたら送ったか分からない記録を残して送り直す(api, admin, workers, fake_comfy,
+async def test_送った後_答えを残す前に落ちたら送ったか分からない記録を残して送り直す(api, admin, skipping, fake_comfy,
                                                                 monkeypatch):
     seen = crash_once(monkeypatch, "take_in_image")
-    fake, _j, imgs, events, logs = await run_two_images(api, admin, workers, fake_comfy)
+    fake, _j, imgs, events, logs = await run_two_images(api, admin, skipping, fake_comfy)
     assert seen["n"] == 3
     # 答えを残していないので、時間切れと同じく送り直す（V3細部の決めごと 4.5）
     assert fake.sends() == 2

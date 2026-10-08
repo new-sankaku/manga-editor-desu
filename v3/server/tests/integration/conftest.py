@@ -69,6 +69,45 @@ async def workers(temporal):
     await ws.shutdown()
 
 
+@pytest.fixture(scope="session")
+async def skipping_env():
+    """時間を飛ばせる Temporal の試験用サーバー（temporalio が初回に取ってくる）。送り直しの間隔（5秒・10秒）を待たない。"""
+    from temporalio.testing import WorkflowEnvironment
+    env = await WorkflowEnvironment.start_time_skipping()
+    yield env
+    await env.shutdown()
+
+
+class SkippingTemporal:
+    """口（app.state.temporal）と作業者を、時間を飛ばせる Temporal に向けた間の道具。"""
+
+    def __init__(self, env, workers: WorkerSet):
+        self.env, self.workers = env, workers
+
+    async def finished(self, job_id: str) -> None:
+        """依頼の流れが終わるまで待つ。待っている間だけ、試験用サーバーは時間を飛ばす（状態を口で見て待つと飛ばない）。"""
+        from temporalio.client import WorkflowFailureError
+        try:
+            await self.env.client.get_workflow_handle(f"job-{job_id}").result()
+        except WorkflowFailureError:
+            pass  # 取り消した流れも「終わった」。どう終わったかは呼んだ試験が口で確かめる
+
+
+@pytest.fixture
+async def skipping(api, skipping_env):
+    """Temporal 自身の送り直し（間隔 5秒・10秒）や待ちに頼る試験で使う。終わったら口を本物の Temporal に戻す。
+    本物の Temporal（優先順位・公平さ・作業者の入れ替え）で確かめる試験は workers を使う。"""
+    real = app.state.temporal
+    ws = WorkerSet(skipping_env.client)
+    await ws.start()
+    app.state.temporal = skipping_env.client
+    try:
+        yield SkippingTemporal(skipping_env, ws)
+    finally:
+        app.state.temporal = real
+        await ws.shutdown()
+
+
 @pytest.fixture
 def fake_adapter(monkeypatch):
     """つなぎ先への送信を差し替える。request["script"] の順に振る舞う（呼ばれた回数で進む）。"""
