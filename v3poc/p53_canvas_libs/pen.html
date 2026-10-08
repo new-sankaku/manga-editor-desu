@@ -1,0 +1,20 @@
+<!doctype html><meta charset="utf-8"><title>p53 pen</title>
+<body style="margin:0"><canvas id="c" width="900" height="400" style="touch-action:none"></canvas>
+<script src="lib/fabric.min.js"></script><script src="lib/perfect-freehand.js"></script>
+<script>
+const canvas = new fabric.Canvas('c',{backgroundColor:'#fff'});
+const up = canvas.upperCanvasEl;
+const events = []; window.events = events; let pts = null; window.strokes = [];
+function toPath(o){ const d=[]; o.forEach((p,i)=>d.push((i?'L':'M')+p[0].toFixed(2)+' '+p[1].toFixed(2))); d.push('Z'); return d.join(' '); }
+function area(o){let a=0;for(let i=0;i<o.length;i++){const[p,q]=[o[i],o[(i+1)%o.length]];a+=p[0]*q[1]-q[0]*p[1];}return Math.abs(a)/2;}
+up.addEventListener('pointerdown',e=>{pts=[[e.offsetX,e.offsetY,e.pressure]];events.push({t:'down',type:e.pointerType,p:e.pressure});});
+up.addEventListener('pointermove',e=>{if(pts){pts.push([e.offsetX,e.offsetY,e.pressure]);events.push({t:'move',type:e.pointerType,p:e.pressure});}});
+up.addEventListener('pointerup',e=>{ if(!pts)return; const usePressure = pts.some(p=>p[2]!==pts[0][2]) || pts[0][2]!==0.5;
+  const opts = window.PEN_OPTS || {size:16, thinning:0.7, smoothing:0.5, streamline:0.5, simulatePressure:false};
+  const outline = PerfectFreehand.getStroke(pts, opts);
+  const path = new fabric.Path(toPath(outline), {fill:'#000', stroke:null, objectCaching:false});
+  canvas.add(path); canvas.renderAll();
+  const len = pts.reduce((s,p,i)=>i?s+Math.hypot(p[0]-pts[i-1][0],p[1]-pts[i-1][1]):0,0);
+  window.strokes.push({n:pts.length, pressures:[...new Set(pts.map(p=>+p[2].toFixed(2)))], outlinePts:outline.length, area:area(outline), len, meanWidth:area(outline)/len, bboxH:path.height, pathType:path.type});
+  pts=null; });
+</script>

@@ -1,0 +1,12 @@
+{
+  "name": "p53_canvas_libs",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@9am/img-halftone": "^1.0.3",
+    "fabric": "^7.4.0",
+    "halftone-webgl": "^1.0.5",
+    "perfect-freehand": "^1.2.3",
+    "pngjs": "^7.0.0"
+  }
+}

@@ -1,0 +1,24 @@
+const { chromium } = require('/opt/node-tools/node_modules/playwright'); const path=require('path'),fs=require('fs');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:900,height:400}});
+await p.goto('file://'+path.join(__dirname,'pen.html'));const cdp=await p.context().newCDPSession(p);
+const stroke=async(y,pf,pointerType='pen',opts)=>{ // 水平線。pf(i,n)→force
+  if(opts) await p.evaluate(o=>window.PEN_OPTS=o,opts);
+  const n=40,x0=100,x1=800; const base={pointerType};
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:x0,y:y});
+  await cdp.send('Input.dispatchMouseEvent',{type:'mousePressed',x:x0,y,button:'left',buttons:1,clickCount:1,force:pf(0,n),...base});
+  for(let i=1;i<=n;i++) await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:x0+(x1-x0)*i/n,y,button:'left',buttons:1,force:pf(i,n),...base});
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseReleased',x:x1,y,button:'left',buttons:0,clickCount:1,force:0,...base});
+};
+const lab=[];
+await stroke(40,()=>0.15);lab.push('pen force 0.15 一定，thinning0.7');
+await stroke(90,()=>0.5);lab.push('pen force 0.5 一定');
+await stroke(140,()=>0.95);lab.push('pen force 0.95 一定');
+await stroke(190,(i,n)=>0.1+0.85*Math.sin(Math.PI*i/n));lab.push('pen force 0.1→0.95→0.1（入り抜き）');
+await stroke(240,()=>0.5,'mouse');lab.push('mouse（pressure 標準値）, simulatePressure=false');
+await stroke(290,()=>0.5,'mouse',{size:16,thinning:0.7,smoothing:0.5,streamline:0.5,simulatePressure:true});lab.push('mouse, simulatePressure=true（速度から推定）');
+await stroke(340,(i,n)=>0.1+0.85*Math.sin(Math.PI*i/n),'pen',{size:16,thinning:0,smoothing:0.5,streamline:0.5,simulatePressure:false});lab.push('pen 入り抜き, thinning=0（筆圧を無視）');
+const s=await p.evaluate(()=>window.strokes);const ev=await p.evaluate(()=>({types:[...new Set(events.map(e=>e.type))],penCount:events.filter(e=>e.type==='pen').length}));console.log(JSON.stringify(ev));
+const rows=s.map((x,i)=>({label:lab[i],...x,meanWidth:+x.meanWidth.toFixed(2),area:+x.area.toFixed(0),len:+x.len.toFixed(0)}));
+console.log(rows.map(r=>`${r.label} | pts ${r.n} | pressures ${JSON.stringify(r.pressures.slice(0,6))} | outline ${r.outlinePts} | meanW ${r.meanWidth} | bboxH ${r.bboxH.toFixed?r.bboxH.toFixed(1):r.bboxH} | ${r.pathType}`).join('\n'));
+fs.writeFileSync('out/pen.json',JSON.stringify(rows,null,1));
+await p.screenshot({path:'out/pen.png'});await b.close();})();

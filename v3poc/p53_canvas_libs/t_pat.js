@@ -1,0 +1,11 @@
+const { chromium } = require('/opt/node-tools/node_modules/playwright'); const { PNG } = require('pngjs'); const path=require('path'),fs=require('fs');
+(async()=>{const b=await chromium.launch();const p=await b.newPage({viewport:{width:600,height:300}});const errs=[];p.on('pageerror',e=>errs.push(String(e)));
+await p.goto('file://'+path.join(__dirname,'pattern.html'));
+const list=[];for(const g of [0.1,0.25,0.5,0.75,0.9]) list.push({pitch:8,gray:g,angle:45,shape:'circle'});
+for(const s of ['square','diamond','line']) list.push({pitch:8,gray:0.5,angle:45,shape:s});
+list.push({pitch:8,gray:0.5,angle:15,shape:'circle'});list.push({pitch:8,gray:0.5,angle:75,shape:'circle'});
+await p.evaluate(l=>window.draw(l),list);
+const buf=await p.screenshot();const png=PNG.sync.read(buf);
+const rows=list.map((it,i)=>{const x0=10+(i%5)*115,y0=10+Math.floor(i/5)*115;let dark=0,tot=0,sum=0;for(let y=y0+8;y<y0+92;y++)for(let x=x0+8;x<x0+92;x++){tot++;sum+=255-png.data[(y*png.width+x)*4];}return {...it,measuredCoverage:+(sum/tot/255).toFixed(3)};});
+console.log(rows.map(r=>JSON.stringify(r)).join('\n'),errs);
+fs.writeFileSync('out/pattern.json',JSON.stringify({rows,errors:errs},null,1));fs.writeFileSync('out/pattern.png',buf);await b.close();})();

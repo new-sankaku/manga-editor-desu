@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8"><title>p53 vertical</title>
+<style>
+body{margin:8px;background:#fff;font-family:IPAGothic,sans-serif}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.cell{width:60px;height:60px;border:0;background:#fff;position:relative;overflow:hidden}
+.dom{writing-mode:vertical-rl;font-size:40px;line-height:60px;font-family:IPAGothic;width:60px;height:60px;text-align:center}
+.col{writing-mode:vertical-rl;font-size:32px;line-height:48px;font-family:IPAGothic;height:520px;width:100px;border:1px solid #ccc}
+</style>
+<body>
+<div id="cells"></div>
+<div class="row" id="demo">
+ <div><div>DOM writing-mode</div><div id="domcol" class="col">「ありがとう！？」ーー、。…ABC12</div></div>
+ <div><div>Fabric IText 1字1行</div><canvas id="c1" width="140" height="560"></canvas></div>
+ <div><div>Fabric 1字ずつ+回転・位置補正</div><canvas id="c2" width="140" height="560"></canvas></div>
+</div>
+<script src="lib/fabric.min.js"></script>
+<script>
+const TEXT = '「ありがとう！？」ーー、。…ABC12';
+const FONT = 'IPAGothic';
+// 1字1行の素朴な方法（Fabric の機能だけ）
+const c1 = new fabric.Canvas('c1', {backgroundColor:'#fff'});
+c1.add(new fabric.IText([...TEXT].join('\n'), {left:50, top:4, originX:'left', originY:'top', fontSize:32, fontFamily:FONT, lineHeight:0.885, textAlign:'center'}));
+// 1字ずつ Text を並べ、向きと位置を補正（自前）
+const RULE = window.RULE = {
+  rot: new Set([...'「」『』（）ー〜…―']), // 90度回す
+  corner: new Set([...'、。，．'])           // 右上へ寄せる
+};
+const c2 = new fabric.Canvas('c2', {backgroundColor:'#fff'});
+function placeChar(canvas, ch, cx, cy, size){
+  const t = new fabric.Text(ch, {fontSize:size, fontFamily:FONT, originX:'center', originY:'center'});
+  let left=cx, top=cy, angle=0;
+  if (RULE.rot.has(ch)) angle = 90;
+  if (RULE.corner.has(ch)) { left += size*0.55; top -= size*0.55; }
+  t.set({left, top, angle}); canvas.add(t); return t;
+}
+window.placeChar = placeChar;
+[...TEXT].forEach((ch,i)=> placeChar(c2, ch, 70, 20+i*30, 28));
+c1.renderAll(); c2.renderAll();
+</script>

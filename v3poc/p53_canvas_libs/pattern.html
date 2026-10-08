@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><title>p53 pattern</title>
+<body style="margin:0"><canvas id="c" width="600" height="300"></canvas>
+<script src="lib/fabric.min.js"></script>
+<script>
+// 既製の機能だけ：オフスクリーン canvas に点1つ描いたタイルを fabric.Pattern（= createPattern）で敷き、patternTransform で回す
+window.tile = function(pitch, gray, shape){ // gray: 0(白)〜1(黒) = 面積率
+  const s=Math.round(pitch*4); // 4倍で描く
+  const t=document.createElement('canvas'); t.width=t.height=s; const g=t.getContext('2d');
+  g.fillStyle='#000'; const c=s/2;
+  if(shape==='circle'){ g.beginPath(); g.arc(c,c,Math.sqrt(gray*s*s/Math.PI),0,7); g.fill(); }
+  else if(shape==='square'){ const w=Math.sqrt(gray)*s; g.fillRect(c-w/2,c-w/2,w,w); }
+  else if(shape==='diamond'){ const r=Math.sqrt(gray*s*s/2); g.beginPath(); g.moveTo(c,c-r);g.lineTo(c+r,c);g.lineTo(c,c+r);g.lineTo(c-r,c);g.fill(); }
+  else if(shape==='line'){ const w=gray*s; g.fillRect(0,c-w/2,s,w); }
+  return t;
+};
+window.fill = function(pitch,gray,angle,shape){
+  const t=window.tile(pitch,gray,shape); const k=1/4, a=angle*Math.PI/180;
+  // patternTransform: 回転×(1/4 縮小)
+  return new fabric.Pattern({source:t, repeat:'repeat', patternTransform:[Math.cos(a)*k, Math.sin(a)*k, -Math.sin(a)*k, Math.cos(a)*k, 0,0]});
+};
+const canvas=new fabric.StaticCanvas('c',{backgroundColor:'#fff'}); window.canvas=canvas;
+window.draw=function(list){canvas.clear();canvas.backgroundColor='#fff';list.forEach((it,i)=>{canvas.add(new fabric.Rect({originX:'left',originY:'top',left:10+(i%5)*115,top:10+Math.floor(i/5)*115,width:100,height:100,fill:window.fill(it.pitch,it.gray,it.angle,it.shape),objectCaching:false}));});canvas.renderAll();};
+</script>

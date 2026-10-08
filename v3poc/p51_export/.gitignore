@@ -1,0 +1,4 @@
+# 作り直せる大きい出力（run.py で作る）
+out/*.pdf
+out/*.tif
+out/page_*.png

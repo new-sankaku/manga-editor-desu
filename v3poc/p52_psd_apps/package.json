@@ -1,0 +1,9 @@
+{
+  "name": "p52_psd_apps",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "ag-psd": "31.0.2",
+    "pngjs": "7.0.0"
+  }
+}

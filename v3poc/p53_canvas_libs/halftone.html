@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>p53 halftone</title>
+<style>body{margin:8px;background:#fff}.h{width:400px;height:400px;display:inline-block}</style>
+<body><div id="grid"></div>
+<script src="lib/halftone-webgl.min.js"></script>
+<script>
+function grayURL(g){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');const v=Math.round(g*255);x.fillStyle=`rgb(${v},${v},${v})`;x.fillRect(0,0,64,64);return c.toDataURL();}
+window.makeOne = async function(gray, opts){
+  const el=document.createElement('div');el.className='h';document.getElementById('grid').appendChild(el);
+  const H = window.HalftoneWebGL || (window.HalftoneWebGLModule && (window.HalftoneWebGLModule.default||window.HalftoneWebGLModule.HalftoneWebGL));
+  const ht=new H({container:el, source:grayURL(gray), colorMode:'mono', color:'#000000', bgColor:'#ffffff', contrast:1, brightness:1, interaction:'none', dpr:1, ...opts});
+  await new Promise(r=>{ht.on('ready',r); setTimeout(r,3000);});
+  await new Promise(r=>setTimeout(r,2500));
+  return {el, snap:()=>ht.snapshot('image/png'), ht};
+};
+window.info = ()=>({keys:Object.keys(window.HalftoneWebGLModule||{}), hasGlobal: typeof window.HalftoneWebGL});
+</script>

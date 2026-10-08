@@ -1,0 +1,153 @@
+{
+ "fabricVersion": "7.4.0",
+ "IText": {
+  "log": [
+   {
+    "step": "start",
+    "text": "",
+    "ta": "",
+    "editing": true,
+    "selStart": 0,
+    "composing": false,
+    "len": 0,
+    "dark": 107
+   },
+   {
+    "step": "ascii typed ab",
+    "text": "ab",
+    "ta": "ab",
+    "editing": true,
+    "selStart": 2,
+    "composing": false,
+    "len": 2,
+    "dark": 692
+   },
+   {
+    "step": "imeSetComposition にほ",
+    "text": "abにほ",
+    "ta": "abにほ",
+    "editing": true,
+    "selStart": 4,
+    "composing": true,
+    "len": 4,
+    "dark": 1752
+   },
+   {
+    "step": "imeSetComposition 日本 (conversion candidate)",
+    "text": "ab日本",
+    "ta": "ab日本",
+    "editing": true,
+    "selStart": 4,
+    "composing": true,
+    "len": 4,
+    "dark": 1863
+   },
+   {
+    "step": "insertText 日本 (commit)",
+    "text": "ab日本",
+    "ta": "ab日本",
+    "editing": true,
+    "selStart": 4,
+    "composing": false,
+    "len": 4,
+    "dark": 1863
+   },
+   {
+    "step": "compose ご -> commit 語",
+    "text": "ab日本語",
+    "ta": "ab日本語",
+    "editing": true,
+    "selStart": 5,
+    "composing": false,
+    "len": 5,
+    "dark": 2673
+   },
+   {
+    "step": "Backspace",
+    "text": "ab日本",
+    "ta": "ab日本",
+    "editing": true,
+    "selStart": 4,
+    "composing": false,
+    "len": 4
+   }
+  ],
+  "finalText": "ab日本",
+  "errors": []
+ },
+ "Textbox": {
+  "log": [
+   {
+    "step": "start",
+    "text": "",
+    "ta": "",
+    "editing": true,
+    "selStart": 0,
+    "composing": false,
+    "len": 0,
+    "dark": 983
+   },
+   {
+    "step": "ascii typed ab",
+    "text": "ab",
+    "ta": "ab",
+    "editing": true,
+    "selStart": 2,
+    "composing": false,
+    "len": 2,
+    "dark": 1135
+   },
+   {
+    "step": "imeSetComposition にほ",
+    "text": "abにほ",
+    "ta": "abにほ",
+    "editing": true,
+    "selStart": 4,
+    "composing": true,
+    "len": 4,
+    "dark": 1873
+   },
+   {
+    "step": "imeSetComposition 日本 (conversion candidate)",
+    "text": "ab日本",
+    "ta": "ab日本",
+    "editing": true,
+    "selStart": 4,
+    "composing": true,
+    "len": 4,
+    "dark": 1915
+   },
+   {
+    "step": "insertText 日本 (commit)",
+    "text": "ab日本",
+    "ta": "ab日本",
+    "editing": true,
+    "selStart": 4,
+    "composing": false,
+    "len": 4,
+    "dark": 1915
+   },
+   {
+    "step": "compose ご -> commit 語",
+    "text": "ab日本語",
+    "ta": "ab日本語",
+    "editing": true,
+    "selStart": 5,
+    "composing": false,
+    "len": 5,
+    "dark": 2378
+   },
+   {
+    "step": "Backspace",
+    "text": "ab日本",
+    "ta": "ab日本",
+    "editing": true,
+    "selStart": 4,
+    "composing": false,
+    "len": 4
+   }
+  ],
+  "finalText": "ab日本",
+  "errors": []
+ }
+}

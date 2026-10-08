@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>p53 perf</title>
+<body style="margin:0"><canvas id="c" width="1200" height="1700"></canvas>
+<script src="lib/fabric.min.js"></script>
+<script>
+window.runPerf = async function(n, cache){
+  const canvas = new fabric.Canvas('c', {renderOnAddRemove:false});
+  fabric.config && 0;
+  const src = document.createElement('canvas'); src.width=64; src.height=64; const g=src.getContext('2d'); g.fillStyle='#888'; g.fillRect(0,0,64,64); g.fillStyle='#000'; g.fillRect(8,8,48,48);
+  let seed=1; const rnd=()=> (seed=(seed*16807)%2147483647)/2147483647;
+  const t0=performance.now();
+  const per=Math.floor(n/3);
+  for(let i=0;i<per;i++){ canvas.add((()=>{const x=rnd()*1100,y=rnd()*1600;return new fabric.Line([x,y,x+rnd()*100,y+rnd()*100],{stroke:'#000',strokeWidth:2,objectCaching:cache});})()); }
+  for(let i=0;i<per;i++){ canvas.add(new fabric.FabricImage(src,{left:rnd()*1100,top:rnd()*1600,scaleX:0.8,scaleY:0.8,objectCaching:cache})); }
+  for(let i=0;i<n-2*per;i++){ canvas.add(new fabric.Text('あいう'+i,{left:rnd()*1100,top:rnd()*1600,fontSize:20,fontFamily:'IPAGothic',objectCaching:cache})); }
+  const t1=performance.now();
+  canvas.renderAll(); const t2=performance.now();
+  const ts=[]; for(let k=0;k<10;k++){const a=performance.now(); canvas.renderAll(); ts.push(performance.now()-a);}
+  // pan
+  const pt=[]; for(let k=0;k<10;k++){canvas.absolutePan(new fabric.Point(k*20,k*20)); const a=performance.now(); canvas.renderAll(); pt.push(performance.now()-a);}
+  // one object moved then render (typical edit)
+  const o=canvas.getObjects()[n-1]; const mt=[]; for(let k=0;k<10;k++){o.set('left',o.left+5); o.setCoords(); const a=performance.now(); canvas.renderAll(); mt.push(performance.now()-a);}
+  const med=a=>a.slice().sort((x,y)=>x-y)[Math.floor(a.length/2)];
+  const r={n,objectCaching:cache,create_ms:+(t1-t0).toFixed(0),firstRender_ms:+(t2-t1).toFixed(0),rerender_median_ms:+med(ts).toFixed(1),pan_median_ms:+med(pt).toFixed(1),moveOne_median_ms:+med(mt).toFixed(1),objects:canvas.getObjects().length};
+  canvas.dispose(); return r;
+};
+</script>

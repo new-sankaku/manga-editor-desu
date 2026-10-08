@@ -1,0 +1,50 @@
+<sub>*Hero made by [@ybouane](https://x.com/ybouane).*</sub>
+<p align="center">
+  <img src="https://crazygl.com/heroes/hero-halftone-field/banner-full.png" alt="Halftone Field" width="640">
+</p>
+
+# @crazygl/hero-halftone-field
+
+A full-bleed AM halftone screen — thousands of ink dots on an aspect-corrected grid whose size is driven by a slow, domain-warped noise field sampled at each cell's centre. Dark zones grow fat dots, light zones shrink to pinpricks, and the field visibly evolves over time so the dot sizes breathe. Dot contrast intensifies toward the frame edges while the centre stays calm so the heading reads. Bold, graphic, editorial.
+
+## Demo
+[Halftone Field](https://crazygl.com/hero/halftone-field)
+
+## Install
+
+```bash
+npm install @crazygl/hero-halftone-field
+```
+
+## Usage
+
+```tsx
+import HalftoneField from '@crazygl/hero-halftone-field';
+
+export default function Hero() {
+  return (
+    <HalftoneField
+      heading="In full relief."
+      cellSize={12}
+      dotColor="#707070"
+    />
+  );
+}
+```
+
+## Customise
+
+- **Halftone** — `cellSize` (grid pitch px), `dotGap`, `dotColor`, `backgroundColor` (paper), `maxDotScale`, `fieldScale`, `fieldSpeed` (drift), `invert`.
+- **Edges** — `edgeIntensity` (boost contrast toward edges) and `centerCalm` (flatten the centre for legibility).
+- **Backdrop** — `transparent` to composite dots over your own page background.
+
+## Best for
+
+- Editorial and magazine-style sites
+- Type-led brand and design-studio pages
+- Print-adjacent products
+- Fashion and culture launches wanting a bold graphic gesture
+
+
+
+This hero is part of [CrazyGL](https://crazygl.com), a collection of production-ready WebGL, canvas, 3D, and typography effects. Every CrazyGL hero ships with an agent-ready `SKILL.md` file that helps developers and coding agents adapt the effect into custom landing pages and interactive experiences.

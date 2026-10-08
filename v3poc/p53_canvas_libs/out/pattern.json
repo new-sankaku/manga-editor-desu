@@ -1,0 +1,75 @@
+{
+ "rows": [
+  {
+   "pitch": 8,
+   "gray": 0.1,
+   "angle": 45,
+   "shape": "circle",
+   "measuredCoverage": 0.098
+  },
+  {
+   "pitch": 8,
+   "gray": 0.25,
+   "angle": 45,
+   "shape": "circle",
+   "measuredCoverage": 0.242
+  },
+  {
+   "pitch": 8,
+   "gray": 0.5,
+   "angle": 45,
+   "shape": "circle",
+   "measuredCoverage": 0.496
+  },
+  {
+   "pitch": 8,
+   "gray": 0.75,
+   "angle": 45,
+   "shape": "circle",
+   "measuredCoverage": 0.75
+  },
+  {
+   "pitch": 8,
+   "gray": 0.9,
+   "angle": 45,
+   "shape": "circle",
+   "measuredCoverage": 0.858
+  },
+  {
+   "pitch": 8,
+   "gray": 0.5,
+   "angle": 45,
+   "shape": "square",
+   "measuredCoverage": 0.501
+  },
+  {
+   "pitch": 8,
+   "gray": 0.5,
+   "angle": 45,
+   "shape": "diamond",
+   "measuredCoverage": 0.499
+  },
+  {
+   "pitch": 8,
+   "gray": 0.5,
+   "angle": 45,
+   "shape": "line",
+   "measuredCoverage": 0.5
+  },
+  {
+   "pitch": 8,
+   "gray": 0.5,
+   "angle": 15,
+   "shape": "circle",
+   "measuredCoverage": 0.499
+  },
+  {
+   "pitch": 8,
+   "gray": 0.5,
+   "angle": 75,
+   "shape": "circle",
+   "measuredCoverage": 0.499
+  }
+ ],
+ "errors": []
+}

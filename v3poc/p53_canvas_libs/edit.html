@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><title>p53 edit</title>
+<body style="margin:0;background:#fff">
+<canvas id="c" width="800" height="400"></canvas>
+<script src="lib/fabric.min.js"></script>
+<script>
+const canvas = new fabric.Canvas('c');
+window.canvas = canvas;
+const it = new fabric.IText('', {left:20, top:20, originX:'left', originY:'top', fontSize:40, fontFamily:'IPAGothic'});
+const tb = new fabric.Textbox('', {left:20, top:150, originX:'left', originY:'top', width:300, fontSize:32, fontFamily:'IPAGothic'});
+canvas.add(it, tb);
+</script>

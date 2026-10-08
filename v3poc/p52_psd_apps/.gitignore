@@ -1,0 +1,6 @@
+node_modules/
+# 作り直せる出力（run.py で作る）。数値は out/result.json
+out/*.png
+out/*.kra
+out/*.psd
+out/*.scm

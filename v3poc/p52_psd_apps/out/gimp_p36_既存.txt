@@ -1,0 +1,8 @@
+("image" 832 1216 "top-level" 6)
+(0 "セリフ" "layer" 1 100.0 "NORMAL" 832 1216)
+(0 "線画" "layer" 1 100.0 "NORMAL" 832 1216)
+(0 "ベタ" "layer" 1 100.0 "NORMAL" 832 1216)
+(0 "トーン" "layer" 1 100.0 "NORMAL" 832 1216)
+(0 "カラー" "group" 0 100.0 "PASS-THROUGH" 832 1216)
+(1 "着彩" "layer" 1 100.0 "MULTIPLY" 832 1216)
+(0 "紙" "layer" 1 100.0 "NORMAL" 832 1216)

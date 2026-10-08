@@ -1,0 +1,418 @@
+{
+ "node_write": [
+  "layers 410978 7",
+  "layers_visible 414802 7"
+ ],
+ "node_err": "",
+ "psd_bytes": {
+  "layers": 410978,
+  "layers_visible": 414802,
+  "p36_既存": 3635026
+ },
+ "GIMP": {
+  "version": "GNU Image Manipulation Program version 2.10.36",
+  "layers": {
+   "rc": 0,
+   "stderr_tail": "batch command executed successfully\n",
+   "dump": [
+    "(\"image\" 600 800 \"top-level\" 6)",
+    "(0 \"セリフ\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"線画\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"ベタ\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"トーン\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"カラー\" \"group\" 0 100.0 \"PASS-THROUGH\" 600 800)",
+    "(1 \"着彩\" \"layer\" 1 100.0 \"MULTIPLY\" 600 800)",
+    "(0 \"紙\" \"layer\" 1 100.0 \"NORMAL\" 600 800)"
+   ],
+   "composite_vs_期待値": {
+    "平均差(0..255)": 0.0,
+    "差が16超の画素の割合": 0.0
+   }
+  },
+  "layers_visible": {
+   "rc": 0,
+   "stderr_tail": "batch command executed successfully\n",
+   "dump": [
+    "(\"image\" 600 800 \"top-level\" 6)",
+    "(0 \"セリフ\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"線画\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"ベタ\" \"layer\" 1 100.0 \"NORMAL\" 600 800)",
+    "(0 \"トーン\" \"layer\" 1 60.0 \"NORMAL\" 600 800)",
+    "(0 \"カラー\" \"group\" 1 100.0 \"PASS-THROUGH\" 600 800)",
+    "(1 \"着彩\" \"layer\" 1 100.0 \"MULTIPLY\" 600 800)",
+    "(0 \"紙\" \"layer\" 1 100.0 \"NORMAL\" 600 800)"
+   ],
+   "composite_vs_期待値": {
+    "平均差(0..255)": 0.0,
+    "差が16超の画素の割合": 0.0
+   }
+  },
+  "p36_既存": {
+   "rc": 0,
+   "stderr_tail": "batch command executed successfully\n",
+   "dump": [
+    "(\"image\" 832 1216 \"top-level\" 6)",
+    "(0 \"セリフ\" \"layer\" 1 100.0 \"NORMAL\" 832 1216)",
+    "(0 \"線画\" \"layer\" 1 100.0 \"NORMAL\" 832 1216)",
+    "(0 \"ベタ\" \"layer\" 1 100.0 \"NORMAL\" 832 1216)",
+    "(0 \"トーン\" \"layer\" 1 100.0 \"NORMAL\" 832 1216)",
+    "(0 \"カラー\" \"group\" 0 100.0 \"PASS-THROUGH\" 832 1216)",
+    "(1 \"着彩\" \"layer\" 1 100.0 \"MULTIPLY\" 832 1216)",
+    "(0 \"紙\" \"layer\" 1 100.0 \"NORMAL\" 832 1216)"
+   ]
+  }
+ },
+ "ImageMagick": {
+  "version": "Version: ImageMagick 6.9.12-98 Q16 x86_64 18038 https://legacy.imagemagick.org",
+  "layers": {
+   "psd:layer.opacityの値(層ごと)": [
+    "65535",
+    "65535",
+    "65535",
+    "65535",
+    "65535",
+    "65535"
+   ],
+   "identifyの層の行数": 7,
+   "identifyの行": [
+    "0||600x800|Over|600x800|sRGB",
+    "1|?|600x800|Over|600x800|sRGB",
+    "2|??|600x800|Multiply|600x800|sRGB",
+    "3|???|600x800|Over|600x800|sRGB",
+    "4|??|600x800|Over|600x800|sRGB",
+    "5|??|600x800|Over|600x800|sRGB",
+    "6|???|600x800|Over|600x800|sRGB"
+   ],
+   "プロパティ名": [
+    "label",
+    "psd:layer.opacity",
+    "psd:layer.x",
+    "psd:layer.y"
+   ],
+   "flatten_vs_期待値": {
+    "平均差(0..255)": 13.221,
+    "差が16超の画素の割合": 0.2469
+   },
+   "stderr": "",
+   "[0]_vs_期待値": {
+    "平均差(0..255)": 0.0,
+    "差が16超の画素の割合": 0.0
+   }
+  },
+  "layers_visible": {
+   "psd:layer.opacityの値(層ごと)": [
+    "65535",
+    "65535",
+    "39321",
+    "65535",
+    "65535",
+    "65535"
+   ],
+   "identifyの層の行数": 7,
+   "identifyの行": [
+    "0||600x800|Over|600x800|sRGB",
+    "1|?|600x800|Over|600x800|sRGB",
+    "2|??|600x800|Multiply|600x800|sRGB",
+    "3|???|600x800|Over|600x800|sRGB",
+    "4|??|600x800|Over|600x800|sRGB",
+    "5|??|600x800|Over|600x800|sRGB",
+    "6|???|600x800|Over|600x800|sRGB"
+   ],
+   "プロパティ名": [
+    "label",
+    "psd:layer.opacity",
+    "psd:layer.x",
+    "psd:layer.y"
+   ],
+   "flatten_vs_期待値": {
+    "平均差(0..255)": 0.001,
+    "差が16超の画素の割合": 0.0
+   },
+   "stderr": "",
+   "[0]_vs_期待値": {
+    "平均差(0..255)": 0.0,
+    "差が16超の画素の割合": 0.0
+   }
+  },
+  "p36_既存": {
+   "psd:layer.opacityの値(層ごと)": [
+    "65535",
+    "65535",
+    "65535",
+    "65535",
+    "65535"
+   ],
+   "identifyの層の行数": 6,
+   "identifyの行": [
+    "0||832x1216|Over|832x1216|sRGB",
+    "1|?|832x1216|Over|832x1216|sRGB",
+    "2|??|832x1216|Multiply|832x1216|sRGB",
+    "3|???|832x1216|Over|832x1216|sRGB",
+    "4|??|832x1216|Over|832x1216|sRGB",
+    "5|??|832x1216|Over|832x1216|sRGB"
+   ],
+   "プロパティ名": [
+    "label",
+    "psd:layer.opacity",
+    "psd:layer.x",
+    "psd:layer.y"
+   ],
+   "flatten_vs_期待値": null,
+   "stderr": "",
+   "[0]_vs_期待値": null
+  }
+ },
+ "Krita": {
+  "version": "1:5.2.2+dfsg-2build8",
+  "起動": "xvfb-run -a krita --export",
+  "layers": {
+   "png_rc": 0,
+   "kra_rc": 0,
+   "stderr_tail": "",
+   "composite_vs_期待値": {
+    "平均差(0..255)": 0.0,
+    "差が16超の画素の割合": 0.0
+   },
+   "kra内のファイル": [
+    "maindoc.xml",
+    "documentinfo.xml",
+    "Unnamed/layers/layer2",
+    "Unnamed/layers/layer2.defaultpixel",
+    "Unnamed/layers/layer2.icc",
+    "Unnamed/layers/layer3",
+    "Unnamed/layers/layer3.defaultpixel",
+    "Unnamed/layers/layer3.icc",
+    "Unnamed/layers/layer4",
+    "Unnamed/layers/layer4.defaultpixel",
+    "Unnamed/layers/layer4.icc",
+    "Unnamed/layers/layer5",
+    "Unnamed/layers/layer5.defaultpixel",
+    "Unnamed/layers/layer5.icc",
+    "Unnamed/layers/layer7",
+    "Unnamed/layers/layer7.defaultpixel",
+    "Unnamed/layers/layer7.icc",
+    "Unnamed/layers/layer8",
+    "Unnamed/layers/layer8.defaultpixel",
+    "Unnamed/layers/layer8.icc"
+   ],
+   "layers": [
+    {
+     "name": "セリフ",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "線画",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "ベタ",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "トーン",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "カラー",
+     "nodetype": "grouplayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "0"
+    },
+    {
+     "name": "着彩",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "multiply",
+     "visible": "1"
+    },
+    {
+     "name": "紙",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    }
+   ],
+   "layers_group_nesting_in_xml": true
+  },
+  "layers_visible": {
+   "png_rc": 0,
+   "kra_rc": 0,
+   "stderr_tail": "",
+   "composite_vs_期待値": {
+    "平均差(0..255)": 0.0,
+    "差が16超の画素の割合": 0.0
+   },
+   "kra内のファイル": [
+    "maindoc.xml",
+    "documentinfo.xml",
+    "Unnamed/layers/layer2",
+    "Unnamed/layers/layer2.defaultpixel",
+    "Unnamed/layers/layer2.icc",
+    "Unnamed/layers/layer3",
+    "Unnamed/layers/layer3.defaultpixel",
+    "Unnamed/layers/layer3.icc",
+    "Unnamed/layers/layer4",
+    "Unnamed/layers/layer4.defaultpixel",
+    "Unnamed/layers/layer4.icc",
+    "Unnamed/layers/layer5",
+    "Unnamed/layers/layer5.defaultpixel",
+    "Unnamed/layers/layer5.icc",
+    "Unnamed/layers/layer7",
+    "Unnamed/layers/layer7.defaultpixel",
+    "Unnamed/layers/layer7.icc",
+    "Unnamed/layers/layer8",
+    "Unnamed/layers/layer8.defaultpixel",
+    "Unnamed/layers/layer8.icc"
+   ],
+   "layers": [
+    {
+     "name": "セリフ",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "線画",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "ベタ",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "トーン",
+     "nodetype": "paintlayer",
+     "opacity": "153",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "カラー",
+     "nodetype": "grouplayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "着彩",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "multiply",
+     "visible": "1"
+    },
+    {
+     "name": "紙",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    }
+   ],
+   "layers_group_nesting_in_xml": true
+  },
+  "p36_既存": {
+   "png_rc": 0,
+   "kra_rc": 0,
+   "stderr_tail": "",
+   "kra内のファイル": [
+    "maindoc.xml",
+    "documentinfo.xml",
+    "Unnamed/layers/layer2",
+    "Unnamed/layers/layer2.defaultpixel",
+    "Unnamed/layers/layer2.icc",
+    "Unnamed/layers/layer3",
+    "Unnamed/layers/layer3.defaultpixel",
+    "Unnamed/layers/layer3.icc",
+    "Unnamed/layers/layer4",
+    "Unnamed/layers/layer4.defaultpixel",
+    "Unnamed/layers/layer4.icc",
+    "Unnamed/layers/layer5",
+    "Unnamed/layers/layer5.defaultpixel",
+    "Unnamed/layers/layer5.icc",
+    "Unnamed/layers/layer7",
+    "Unnamed/layers/layer7.defaultpixel",
+    "Unnamed/layers/layer7.icc",
+    "Unnamed/layers/layer8",
+    "Unnamed/layers/layer8.defaultpixel",
+    "Unnamed/layers/layer8.icc"
+   ],
+   "layers": [
+    {
+     "name": "RGBA",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "RGBA",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "RGBA",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "RGBA",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    },
+    {
+     "name": "layer6",
+     "nodetype": "grouplayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "0"
+    },
+    {
+     "name": "RGBA",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "multiply",
+     "visible": "1"
+    },
+    {
+     "name": "RGBA",
+     "nodetype": "paintlayer",
+     "opacity": "255",
+     "compositeop": "normal",
+     "visible": "1"
+    }
+   ],
+   "layers_group_nesting_in_xml": true
+  }
+ },
+ "未検証": [
+  "Photoshop",
+  "CLIP STUDIO PAINT（この環境に無い）"
+ ]
+}

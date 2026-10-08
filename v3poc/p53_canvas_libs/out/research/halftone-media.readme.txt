@@ -1,0 +1,43 @@
+# halftone-media
+
+Web component that renders images, videos, and animated GIFs as halftone dots.
+
+## CDN
+
+```html
+<script type="module" src="https://unpkg.com/halftone-media/halftone-media.js"></script>
+
+<halftone-media src="photo.jpg"></halftone-media>
+```
+
+## npm
+
+```
+npm i halftone-media
+```
+
+```js
+import "halftone-media/element";
+```
+
+```html
+<halftone-media src="photo.jpg" cell="6" dot-color="#2b1512"></halftone-media>
+```
+
+## Attributes
+
+| Attribute   | Default     | Description                    |
+|-------------|-------------|--------------------------------|
+| `src`       | —           | URL to an image, video, or GIF |
+| `cell`      | `6`         | Grid cell size in px           |
+| `dot-color` | `#2b1512`   | Dot fill color                 |
+
+## Named exports
+
+```js
+import { Halftone, GifSource, HalftoneMedia } from "halftone-media";
+```
+
+## License
+
+MIT

@@ -1,0 +1,1130 @@
+{
+ "env": {
+  "node": "v22.22.0",
+  "playwright": "1.56.1",
+  "chromium": "chromium-1194 (headless)",
+  "protocol": "file://（lib/ の手元ファイルだけ。CDN なし）",
+  "font": "IPAGothic"
+ },
+ "versions": {
+  "fabric": "7.4.0",
+  "perfect_freehand": "1.2.3",
+  "halftone-webgl": "1.0.5",
+  "@9am/img-halftone": "1.0.3"
+ },
+ "fabric": {
+  "ime": {
+   "method": "CDP Input.imeSetComposition → Input.insertText（OS の IME ではなく CDP の再現）",
+   "result": {
+    "IText": {
+     "finalText": "ab日本",
+     "steps": [
+      {
+       "step": "start",
+       "text": "",
+       "inCompositionMode": false
+      },
+      {
+       "step": "ascii typed ab",
+       "text": "ab",
+       "inCompositionMode": false
+      },
+      {
+       "step": "imeSetComposition にほ",
+       "text": "abにほ",
+       "inCompositionMode": true
+      },
+      {
+       "step": "imeSetComposition 日本 (conversion candidate)",
+       "text": "ab日本",
+       "inCompositionMode": true
+      },
+      {
+       "step": "insertText 日本 (commit)",
+       "text": "ab日本",
+       "inCompositionMode": false
+      },
+      {
+       "step": "compose ご -> commit 語",
+       "text": "ab日本語",
+       "inCompositionMode": false
+      },
+      {
+       "step": "Backspace",
+       "text": "ab日本",
+       "inCompositionMode": false
+      }
+     ],
+     "errors": []
+    },
+    "Textbox": {
+     "finalText": "ab日本",
+     "steps": [
+      {
+       "step": "start",
+       "text": "",
+       "inCompositionMode": false
+      },
+      {
+       "step": "ascii typed ab",
+       "text": "ab",
+       "inCompositionMode": false
+      },
+      {
+       "step": "imeSetComposition にほ",
+       "text": "abにほ",
+       "inCompositionMode": true
+      },
+      {
+       "step": "imeSetComposition 日本 (conversion candidate)",
+       "text": "ab日本",
+       "inCompositionMode": true
+      },
+      {
+       "step": "insertText 日本 (commit)",
+       "text": "ab日本",
+       "inCompositionMode": false
+      },
+      {
+       "step": "compose ご -> commit 語",
+       "text": "ab日本語",
+       "inCompositionMode": false
+      },
+      {
+       "step": "Backspace",
+       "text": "ab日本",
+       "inCompositionMode": false
+      }
+     ],
+     "errors": []
+    }
+   },
+   "note": "変換中の文字は text に入り、通常の文字と同じ見た目で描かれる（下線・変換候補の枠なし）。確定後の文字列は正しい。OS の変換候補ウィンドウの位置は未検証。"
+  },
+  "vertical": {
+   "official": false,
+   "evidence": [
+    "fabric 7.4.0 の src/shapes/Text・IText・Textbox に vertical / writing-mode の実装なし（grep）。direction は ltr|rtl のみ",
+    "https://github.com/fabricjs/fabric.js/issues/6683 （Textbox の writingMode を求める問い。返答なし・stale）"
+   ],
+   "npm": "npm 検索（fabric vertical text / fabricjs vertical / fabric tategaki / fabric writing-mode ほか）でプラグインは見つからず",
+   "github_samples": [
+    {
+     "url": "https://github.com/yengAbe/fabricjs_verticalTxt",
+     "what": "IText を継承した VerticalTextbox.js。direction=rtl、英数字は90度回して連続描画、ー・括弧は-90度回す（位置は経験値）。npm 配布なし・LICENSE の有無は未確認"
+    },
+    {
+     "url": "https://github.com/new-sankaku/Fabric.js_vertical_text_html",
+     "what": "fabric 5.3.1。1文字ずつ fabric.Text を並べて Group にする。ー・括弧は90度、、。は半幅右へ。編集は別の textarea（writing-mode: vertical-rl）で行い、確定で作り直す。LICENSE あり（種類は未確認）"
+    },
+    {
+     "url": "https://github.com/sYamaz/nuxt-fabricjs-vertical-textbox",
+     "what": "Text 系クラスを継承して VerticalTextbox を作る方針（README）。実装本文は読めず"
+    }
+   ],
+   "dom_based_libs_not_canvas": [
+    "tategaki（npm）",
+    "@formandcraft/kumihan（npm）"
+   ],
+   "cell_test": {
+    "note": "1文字を 60px 角のセルに描き、黒画素の重心(cx,cy)と外接の幅・高さ(セルに対する比)を、DOM の writing-mode: vertical-rl と比べた",
+    "chars": {
+     "1": {
+      "dom": {
+       "n": 96,
+       "cx": 0.53,
+       "cy": 0.49,
+       "w": 0.47,
+       "h": 0.12
+      },
+      "plain": {
+       "n": 97,
+       "cx": 0.49,
+       "cy": 0.42,
+       "w": 0.12,
+       "h": 0.47
+      },
+      "rule": {
+       "n": 97,
+       "cx": 0.49,
+       "cy": 0.42,
+       "w": 0.12,
+       "h": 0.47
+      }
+     },
+     "あ": {
+      "dom": {
+       "n": 365,
+       "cx": 0.47,
+       "cy": 0.53,
+       "w": 0.53,
+       "h": 0.53
+      },
+      "plain": {
+       "n": 373,
+       "cx": 0.47,
+       "cy": 0.48,
+       "w": 0.53,
+       "h": 0.53
+      },
+      "rule": {
+       "n": 373,
+       "cx": 0.47,
+       "cy": 0.48,
+       "w": 0.53,
+       "h": 0.53
+      }
+     },
+     "「": {
+      "dom": {
+       "n": 110,
+       "cx": 0.6,
+       "cy": 0.65,
+       "w": 0.48,
+       "h": 0.18
+      },
+      "plain": {
+       "n": 110,
+       "cx": 0.64,
+       "cy": 0.35,
+       "w": 0.18,
+       "h": 0.48
+      },
+      "rule": {
+       "n": 110,
+       "cx": 0.63,
+       "cy": 0.64,
+       "w": 0.48,
+       "h": 0.18
+      }
+     },
+     "」": {
+      "dom": {
+       "n": 111,
+       "cx": 0.39,
+       "cy": 0.35,
+       "w": 0.48,
+       "h": 0.18
+      },
+      "plain": {
+       "n": 110,
+       "cx": 0.35,
+       "cy": 0.56,
+       "w": 0.18,
+       "h": 0.48
+      },
+      "rule": {
+       "n": 110,
+       "cx": 0.42,
+       "cy": 0.35,
+       "w": 0.48,
+       "h": 0.18
+      }
+     },
+     "ー": {
+      "dom": {
+       "n": 130,
+       "cx": 0.49,
+       "cy": 0.5,
+       "w": 0.07,
+       "h": 0.55
+      },
+      "plain": {
+       "n": 126,
+       "cx": 0.49,
+       "cy": 0.46,
+       "w": 0.53,
+       "h": 0.07
+      },
+      "rule": {
+       "n": 96,
+       "cx": 0.53,
+       "cy": 0.49,
+       "w": 0.05,
+       "h": 0.53
+      }
+     },
+     "、": {
+      "dom": {
+       "n": 38,
+       "cx": 0.72,
+       "cy": 0.29,
+       "w": 0.15,
+       "h": 0.15
+      },
+      "plain": {
+       "n": 38,
+       "cx": 0.27,
+       "cy": 0.67,
+       "w": 0.15,
+       "h": 0.15
+      },
+      "rule": {
+       "n": 38,
+       "cx": 0.63,
+       "cy": 0.3,
+       "w": 0.15,
+       "h": 0.15
+      }
+     },
+     "。": {
+      "dom": {
+       "n": 55,
+       "cx": 0.7,
+       "cy": 0.29,
+       "w": 0.18,
+       "h": 0.17
+      },
+      "plain": {
+       "n": 57,
+       "cx": 0.28,
+       "cy": 0.67,
+       "w": 0.18,
+       "h": 0.18
+      },
+      "rule": {
+       "n": 57,
+       "cx": 0.64,
+       "cy": 0.3,
+       "w": 0.18,
+       "h": 0.18
+      }
+     },
+     "！": {
+      "dom": {
+       "n": 116,
+       "cx": 0.49,
+       "cy": 0.46,
+       "w": 0.07,
+       "h": 0.55
+      },
+      "plain": {
+       "n": 114,
+       "cx": 0.49,
+       "cy": 0.42,
+       "w": 0.07,
+       "h": 0.55
+      },
+      "rule": {
+       "n": 114,
+       "cx": 0.49,
+       "cy": 0.42,
+       "w": 0.07,
+       "h": 0.55
+      }
+     },
+     "？": {
+      "dom": {
+       "n": 178,
+       "cx": 0.51,
+       "cy": 0.43,
+       "w": 0.35,
+       "h": 0.55
+      },
+      "plain": {
+       "n": 178,
+       "cx": 0.51,
+       "cy": 0.37,
+       "w": 0.35,
+       "h": 0.55
+      },
+      "rule": {
+       "n": 178,
+       "cx": 0.51,
+       "cy": 0.37,
+       "w": 0.35,
+       "h": 0.55
+      }
+     },
+     "…": {
+      "dom": {
+       "n": 56,
+       "cx": 0.49,
+       "cy": 0.49,
+       "w": 0.07,
+       "h": 0.53
+      },
+      "plain": {
+       "n": 65,
+       "cx": 0.49,
+       "cy": 0.45,
+       "w": 0.53,
+       "h": 0.08
+      },
+      "rule": {
+       "n": 66,
+       "cx": 0.53,
+       "cy": 0.49,
+       "w": 0.08,
+       "h": 0.53
+      }
+     },
+     "A": {
+      "dom": {
+       "n": 196,
+       "cx": 0.49,
+       "cy": 0.49,
+       "w": 0.47,
+       "h": 0.3
+      },
+      "plain": {
+       "n": 197,
+       "cx": 0.49,
+       "cy": 0.46,
+       "w": 0.3,
+       "h": 0.47
+      },
+      "rule": {
+       "n": 197,
+       "cx": 0.49,
+       "cy": 0.46,
+       "w": 0.3,
+       "h": 0.47
+      }
+     }
+    }
+   }
+  },
+  "performance": {
+   "note": "headless Chromium・ソフトウェア描画。線(短い)・画像64px・文字を1/3ずつ。1回の測定で、objectCaching の有無で大きく違う",
+   "rows": [
+    {
+     "n": 200,
+     "objectCaching": true,
+     "create_ms": 56,
+     "firstRender_ms": 112,
+     "rerender_median_ms": 35.6,
+     "pan_median_ms": 2.6,
+     "moveOne_median_ms": 1.4,
+     "objects": 200
+    },
+    {
+     "n": 200,
+     "objectCaching": false,
+     "create_ms": 77,
+     "firstRender_ms": 19,
+     "rerender_median_ms": 2.8,
+     "pan_median_ms": 1.7,
+     "moveOne_median_ms": 1.6,
+     "objects": 200
+    },
+    {
+     "n": 2000,
+     "objectCaching": true,
+     "create_ms": 171,
+     "firstRender_ms": 1012,
+     "rerender_median_ms": 379.4,
+     "pan_median_ms": 327.9,
+     "moveOne_median_ms": 314.1,
+     "objects": 2000
+    },
+    {
+     "n": 2000,
+     "objectCaching": false,
+     "create_ms": 314,
+     "firstRender_ms": 41,
+     "rerender_median_ms": 49.9,
+     "pan_median_ms": 18.9,
+     "moveOne_median_ms": 25.7,
+     "objects": 2000
+    },
+    {
+     "n": 4000,
+     "objectCaching": true,
+     "create_ms": 532,
+     "firstRender_ms": 3682,
+     "rerender_median_ms": 871,
+     "pan_median_ms": 749.5,
+     "moveOne_median_ms": 801.4,
+     "objects": 4000
+    },
+    {
+     "n": 4000,
+     "objectCaching": false,
+     "create_ms": 718,
+     "firstRender_ms": 181,
+     "rerender_median_ms": 40.2,
+     "pan_median_ms": 43.2,
+     "moveOne_median_ms": 34.4,
+     "objects": 4000
+    }
+   ]
+  }
+ },
+ "perfect_freehand": {
+  "note": "Pointer Events（CDP Input.dispatchMouseEvent の pointerType=pen・force）→ getStroke → fabric.Path。size=16 thinning=0.7 の水平線",
+  "pointerTypesSeen": [
+   "pen",
+   "mouse"
+  ],
+  "strokes": [
+   {
+    "label": "pen force 0.15 一定，thinning0.7",
+    "n": 41,
+    "pressures": [
+     0.15
+    ],
+    "outlinePts": 122,
+    "area": 5709,
+    "len": 700,
+    "meanWidth": 8.16,
+    "bboxH": 8.159999999999997,
+    "pathType": "path"
+   },
+   {
+    "label": "pen force 0.5 一定",
+    "n": 41,
+    "pressures": [
+     0.5
+    ],
+    "outlinePts": 122,
+    "area": 11389,
+    "len": 700,
+    "meanWidth": 16.27,
+    "bboxH": 16,
+    "pathType": "path"
+   },
+   {
+    "label": "pen force 0.95 一定",
+    "n": 41,
+    "pressures": [
+     0.95
+    ],
+    "outlinePts": 122,
+    "area": 18970,
+    "len": 700,
+    "meanWidth": 27.1,
+    "bboxH": 26.08,
+    "pathType": "path"
+   },
+   {
+    "label": "pen force 0.1→0.95→0.1（入り抜き）",
+    "n": 41,
+    "pressures": [
+     0.1,
+     0.17,
+     0.23,
+     0.3,
+     0.36,
+     0.43,
+     0.49,
+     0.54,
+     0.6,
+     0.65,
+     0.7,
+     0.75,
+     0.79,
+     0.82,
+     0.86,
+     0.89,
+     0.91,
+     0.93,
+     0.94,
+     0.95
+    ],
+    "outlinePts": 122,
+    "area": 13381,
+    "len": 700,
+    "meanWidth": 19.12,
+    "bboxH": 26.079999999999984,
+    "pathType": "path"
+   },
+   {
+    "label": "mouse（pressure 標準値）, simulatePressure=false",
+    "n": 41,
+    "pressures": [
+     0.5
+    ],
+    "outlinePts": 122,
+    "area": 11389,
+    "len": 700,
+    "meanWidth": 16.27,
+    "bboxH": 16,
+    "pathType": "path"
+   },
+   {
+    "label": "mouse, simulatePressure=true（速度から推定）",
+    "n": 41,
+    "pressures": [
+     0.5
+    ],
+    "outlinePts": 122,
+    "area": 3520,
+    "len": 700,
+    "meanWidth": 5.03,
+    "bboxH": 7.759999999999991,
+    "pathType": "path"
+   },
+   {
+    "label": "pen 入り抜き, thinning=0（筆圧を無視）",
+    "n": 41,
+    "pressures": [
+     0.1,
+     0.17,
+     0.23,
+     0.3,
+     0.36,
+     0.43,
+     0.49,
+     0.54,
+     0.6,
+     0.65,
+     0.7,
+     0.75,
+     0.79,
+     0.82,
+     0.86,
+     0.89,
+     0.91,
+     0.93,
+     0.94,
+     0.95
+    ],
+    "outlinePts": 122,
+    "area": 11389,
+    "len": 700,
+    "meanWidth": 16.27,
+    "bboxH": 16,
+    "pathType": "path"
+   }
+  ]
+ },
+ "halftone": {
+  "npm_found": [
+   {
+    "name": "halftone-webgl",
+    "v": "1.0.5",
+    "license": "MIT",
+    "params": "frequency(5-150 = 横の点の数)・angle・shape(circle/square/diamond/line/cross/ellipse)・scale・softness・gap・contrast・invert・colorMode(mono/cmyk ほか)",
+    "url": "https://www.npmjs.com/package/halftone-webgl",
+    "note": "WebGL。元画像1枚に画面全体で1つの網をかける。出力は snapshot() の dataURL。リポジトリ URL は package.json にない"
+   },
+   {
+    "name": "@9am/img-halftone",
+    "v": "1.0.3",
+    "license": "MIT",
+    "params": "cellsize・shape(circle/triangle/rectangle/hexagon)・CMYK 固定。線数・角度の指定なし",
+    "url": "https://www.npmjs.com/package/@9am/img-halftone",
+    "run": "file:// で canvas 描画まで動いた（Web Component）"
+   },
+   {
+    "name": "@visant/print-fx",
+    "v": "0.1.0",
+    "license": "MIT",
+    "params": "CMYK halftone の SVG 文字列（frequency 指定あり）。動かしていない"
+   },
+   {
+    "name": "halftone",
+    "v": "0.1.1",
+    "params": "ImageMagick と paper.js が必要・45度固定・円のみ"
+   },
+   "halftone-media / @anam-ai/halftone-shader / @crazygl/hero-halftone-field：セル幅だけの装飾用（角度・線数の指定なし）。screentone 0.0.1 は本文なし"
+  ],
+  "github_found": [
+   "ZihangDong/silk-screen-halftone（CMYK・角度つき、単体 HTML）",
+   "lukaszkups/havtone",
+   "sensai7/screentone-generator（漫画用のトーン生成の Web ツール）",
+   "dmMaze/sketch2manga（拡散モデル）"
+  ],
+  "conclusion": "「どのライブラリにも無い」は不正確。線数・角度・形を指定できる npm の JS ライブラリ（halftone-webgl）はある。ただし灰色のベタ面を漫画のトーンにする用途の作りではない（画像全体に1つの網・GLの出力を画像として受ける）。",
+  "webgl_run": {
+   "note": "400x400・dpr1・黒点・白地・invert:true。灰色(0〜1)に対する黒の割合を測定",
+   "rows": [
+    {
+     "gray": 0.1,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.636,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.25,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.459,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.222,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.75,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.094,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 20
+    },
+    {
+     "gray": 0.9,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.019,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.1,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.4,
+     "darkRatio": 0.285,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.1,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.5,
+     "darkRatio": 0.366,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.25,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.4,
+     "darkRatio": 0.145,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.25,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.5,
+     "darkRatio": 0.199,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.4,
+     "darkRatio": 0.048,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.5,
+     "darkRatio": 0.069,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.75,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.4,
+     "darkRatio": 0.01,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.75,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.5,
+     "darkRatio": 0.015,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.9,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.4,
+     "darkRatio": 0.001,
+     "components": 216,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.9,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "contrast": 0.5,
+     "darkRatio": 0.002,
+     "components": 312,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.5,
+     "frequency": 10,
+     "angle": 0,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.198,
+     "components": 100,
+     "latticeAngleMedian": 0,
+     "pitchMedianPx": 40
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 0,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.2,
+     "components": 400,
+     "latticeAngleMedian": 0,
+     "pitchMedianPx": 20
+    },
+    {
+     "gray": 0.5,
+     "frequency": 30,
+     "angle": 0,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.217,
+     "components": 900,
+     "latticeAngleMedian": 0,
+     "pitchMedianPx": 13.3
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 0,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.2,
+     "components": 400,
+     "latticeAngleMedian": 0,
+     "pitchMedianPx": 20
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 15,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.203,
+     "components": 420,
+     "latticeAngleMedian": 74.9,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.198,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 75,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.195,
+     "components": 420,
+     "latticeAngleMedian": 15.1,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "circle",
+     "invert": true,
+     "darkRatio": 0.198,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "square",
+     "invert": true,
+     "darkRatio": 0.254,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "diamond",
+     "invert": true,
+     "darkRatio": 0.13,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "line",
+     "invert": true,
+     "darkRatio": 0.5,
+     "components": 28,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.8
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "cross",
+     "invert": true,
+     "darkRatio": 0.746,
+     "components": 1,
+     "latticeAngleMedian": null,
+     "pitchMedianPx": null
+    },
+    {
+     "gray": 0.5,
+     "frequency": 20,
+     "angle": 45,
+     "shape": "ellipse",
+     "invert": true,
+     "darkRatio": 0.119,
+     "components": 420,
+     "latticeAngleMedian": 45,
+     "pitchMedianPx": 19.9
+    }
+   ],
+   "contrast_extra": [
+    {
+     "gray": 0.1,
+     "contrast": 1.5,
+     "dark": 0.734
+    },
+    {
+     "gray": 0.1,
+     "contrast": 2.2,
+     "dark": 0.773
+    },
+    {
+     "gray": 0.1,
+     "contrast": 3,
+     "dark": 0.782
+    },
+    {
+     "gray": 0.25,
+     "contrast": 1.5,
+     "dark": 0.601
+    },
+    {
+     "gray": 0.25,
+     "contrast": 2.2,
+     "dark": 0.712
+    },
+    {
+     "gray": 0.25,
+     "contrast": 3,
+     "dark": 0.76
+    },
+    {
+     "gray": 0.5,
+     "contrast": 1.5,
+     "dark": 0.372
+    },
+    {
+     "gray": 0.5,
+     "contrast": 2.2,
+     "dark": 0.48
+    },
+    {
+     "gray": 0.5,
+     "contrast": 3,
+     "dark": 0.6
+    },
+    {
+     "gray": 0.75,
+     "contrast": 1.5,
+     "dark": 0.1
+    },
+    {
+     "gray": 0.75,
+     "contrast": 2.2,
+     "dark": 0.286
+    },
+    {
+     "gray": 0.75,
+     "contrast": 3,
+     "dark": 0.267
+    },
+    {
+     "gray": 0.9,
+     "contrast": 1.5,
+     "dark": 0.017
+    },
+    {
+     "gray": 0.9,
+     "contrast": 2.2,
+     "dark": 0.034
+    },
+    {
+     "gray": 0.9,
+     "contrast": 3,
+     "dark": 0.058
+    }
+   ]
+  },
+  "canvas_pattern": {
+   "note": "既製の機能だけ（オフスクリーン canvas のタイル + fabric.Pattern の patternTransform）。pitch 8px・面積率を指定",
+   "rows": [
+    {
+     "pitch": 8,
+     "gray": 0.1,
+     "angle": 45,
+     "shape": "circle",
+     "measuredCoverage": 0.098
+    },
+    {
+     "pitch": 8,
+     "gray": 0.25,
+     "angle": 45,
+     "shape": "circle",
+     "measuredCoverage": 0.242
+    },
+    {
+     "pitch": 8,
+     "gray": 0.5,
+     "angle": 45,
+     "shape": "circle",
+     "measuredCoverage": 0.496
+    },
+    {
+     "pitch": 8,
+     "gray": 0.75,
+     "angle": 45,
+     "shape": "circle",
+     "measuredCoverage": 0.75
+    },
+    {
+     "pitch": 8,
+     "gray": 0.9,
+     "angle": 45,
+     "shape": "circle",
+     "measuredCoverage": 0.858
+    },
+    {
+     "pitch": 8,
+     "gray": 0.5,
+     "angle": 45,
+     "shape": "square",
+     "measuredCoverage": 0.501
+    },
+    {
+     "pitch": 8,
+     "gray": 0.5,
+     "angle": 45,
+     "shape": "diamond",
+     "measuredCoverage": 0.499
+    },
+    {
+     "pitch": 8,
+     "gray": 0.5,
+     "angle": 45,
+     "shape": "line",
+     "measuredCoverage": 0.5
+    },
+    {
+     "pitch": 8,
+     "gray": 0.5,
+     "angle": 15,
+     "shape": "circle",
+     "measuredCoverage": 0.499
+    },
+    {
+     "pitch": 8,
+     "gray": 0.5,
+     "angle": 75,
+     "shape": "circle",
+     "measuredCoverage": 0.499
+    }
+   ]
+  }
+ },
+ "licenses": {
+  "fabric": {
+   "spdx": "MIT",
+   "file": "lib/LICENSE.fabric",
+   "holders": "Printio (Juriy Zaytsev, Maxim Chernyak) 2008-2015 / Andrea Bogazzi, Shachar Nen and Fabric.js contributors 2016-present",
+   "deps": "ブラウザ用 UMD は dependencies なし（canvas・jsdom は Node 用の optional）"
+  },
+  "perfect_freehand": {
+   "spdx": "MIT",
+   "file": "lib/LICENSE.perfect-freehand",
+   "holders": "Stephen Ruiz Ltd 2021"
+  },
+  "halftone_webgl": {
+   "spdx": "MIT",
+   "file": "lib/LICENSE.halftone-webgl",
+   "holders": "adar2378 2026",
+   "deps": "ogl 1.0.11（package.json の license は Unlicense。パッケージに LICENSE ファイルなし。min.js に同梱されるかは未確認）"
+  },
+  "img_halftone": {
+   "spdx": "MIT",
+   "file": "lib/LICENSE.img-halftone",
+   "holders": "9am 2023"
+  }
+ }
+}

@@ -1,0 +1,45 @@
+"""操作の一覧。正本を変える手段はここに並べた操作だけ。"""
+
+
+from typing import Annotated, Union
+
+from pydantic import Field, TypeAdapter
+
+from v3server.operations.work_setting_operations import (
+    AllowDestination,
+    RecordFindingReaction,
+    SetMember,
+    SetThreshold,
+    SetWorkSettings,
+)
+from v3server.operations.work_tree_operations import (
+    AddEpisode,
+    AddPage,
+    AddPanel,
+    AddVolume,
+    AssignPage,
+    SetRemoved,
+    UpdateEpisode,
+    UpdatePanel,
+)
+
+Op = Annotated[
+    Union[
+        SetWorkSettings,
+        SetMember,
+        AllowDestination,
+        SetThreshold,
+        RecordFindingReaction,
+        AddVolume,
+        AddEpisode,
+        UpdateEpisode,
+        AddPage,
+        AssignPage,
+        AddPanel,
+        UpdatePanel,
+        SetRemoved,
+    ],
+    Field(discriminator="type"),
+]
+
+op_adapter: TypeAdapter[Op] = TypeAdapter(Op)
