@@ -92,7 +92,7 @@ async function loadWorks() {
   const sel = $("#pick-work");
   sel.replaceChildren(...S.works.map((w) => h("option", { value: w.id, text: w.title })));
   if (!S.works.length) { showEmpty("見てよい作品がありません"); return; }
-  const saved = readPref("work");
+  const saved = wanted("work");
   await selectWork(S.works.some((w) => w.id === saved) ? saved : S.works[0].id);
 }
 
@@ -105,7 +105,7 @@ async function selectWork(id) {
   const pages = S.work.pages.filter((p) => !p.removed).sort((a, b) => a.number - b.number);
   $("#pick-page").replaceChildren(...pages.map((p) => h("option", { value: p.id, text: `${p.number} ページ` })));
   if (!pages.length) { showEmpty("この作品にはページがありません"); return; }
-  const saved = readPref("page");
+  const saved = wanted("page");
   await selectPage(pages.some((p) => p.id === saved) ? saved : pages[0].id);
 }
 
@@ -116,7 +116,7 @@ async function selectPage(id) {
   const panels = livePanels();
   $("#pick-panel").replaceChildren(...panels.map((p) => h("option", { value: p.id, text: `コマ ${p.order}` })));
   if (!panels.length) { showEmpty("このページにはコマがありません"); return; }
-  const saved = readPref("panel");
+  const saved = wanted("panel");
   await selectPanel(panels.some((p) => p.id === saved) ? saved : panels[0].id);
 }
 
@@ -131,6 +131,7 @@ async function selectPanel(id) {
   S.panelId = id;
   $("#pick-panel").value = id;
   writePref("panel", id);
+  $("#to-manuscript").href = `manuscript/index.html?work=${encodeURIComponent(S.workId)}&page=${encodeURIComponent(S.pageId)}`;
   S.selected = []; S.viewing = null;
   $("#viewing").hidden = true;
   S.pollFails = 0; S.link = null;
@@ -1021,6 +1022,13 @@ function showTab(t) {
   for (const p of $$("[data-pane]")) p.hidden = p.dataset.pane !== t;
 }
 function readPref(k) { try { return localStorage.getItem(`v3.gen.${k}`); } catch { return null; } }
+// 原稿の画面から開いたとき（?work=&page=&panel=）は、覚えた選び方より URL を先に使う。使ったら URL から消す
+const asked = new URLSearchParams(location.search);
+function wanted(k) {
+  const v = asked.get(k);
+  if (v) { asked.delete(k); return v; }
+  return readPref(k);
+}
 function writePref(k, v) { try { localStorage.setItem(`v3.gen.${k}`, v); } catch { /* 覚えられない環境では毎回初めから選ぶ */ } }
 
 // ---------------------------------------------------------------- はじめ
