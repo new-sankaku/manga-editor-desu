@@ -500,7 +500,13 @@ def edit_psd(data: bytes, tmp: pathlib.Path, change: tuple[str, ...], add_to_gro
 
     layers = to_req(list(psd))
     if add_to_group is not None:
-        group = next(x for x in layers if x["name"].endswith(add_to_group))
+        def groups(items):
+            for x in items:
+                if "children" in x:
+                    yield x
+                    yield from groups(x["children"])
+
+        group = next(x for x in groups(layers) if x["name"].endswith(add_to_group))
         Image.new("RGBA", (5, 5), (9, 9, 9, 255)).save(tmp / "new.png")
         group["children"].append({"name": "描き足し", "png_path": str(tmp / "new.png"),
                                   "left": group["children"][0]["left"], "top": group["children"][0]["top"],

@@ -12,7 +12,7 @@ from conftest import h, new_work, user, wait_for
 from PIL import Image
 from test_human_ai_interchange import PAGE_SPEC, ai_op, op, work_json
 from test_human_edit_and_handover import image_dir, live, upload  # noqa: F401  (image_dir は fixture)
-from test_human_tools_and_finishing import FRAME_STYLE, TYPESETTING, export_env, undo  # noqa: F401
+from test_human_tools_and_finishing import FRAME_STYLE, TYPESETTING, edit_psd, export_env, undo  # noqa: F401
 
 from v3server.v3_error_types import HumanHandProtected
 
@@ -152,18 +152,58 @@ async def test_見開きと2階調とノンブルの書き出し_入稿前の確
     black = np.asarray(single.convert("L")) == 0
     assert black[-round(20 * k):, -round(30 * k):].any() and not black[:round(20 * k), :].any()
 
-    # PDF は見開きを分けて出す（4ページ）。PSD は見開きを1枚で出し、戻せない
+    # PDF は見開きを分けて出す（4ページ）。PSD は見開きを1枚で出し、直した PSD を2ページ分まとめて戻せる
     pdf_run = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2, p3, p4], "spread_output": "split"})
     assert pdf_run["status"] == "done", pdf_run["detail"]
     pdf = pypdf.PdfReader(io.BytesIO(await _file(api, wid, a, pdf_run, "BK.pdf")))
     assert len(pdf.pages) == 4
     bad = await _export(api, wid, a, {"format": "pdf", "page_ids": [p1, p2], "spread_output": "joined"})
     assert bad["status"] == "failed" and "split" in bad["detail"]
+    # 右のページ（p1。1ページ目が右）に絵の入ったコマを置く
+    panel1 = uuid.uuid4().hex
+    assert (await op(api, wid, a, {"type": "add_panel", "id": panel1, "page_id": p1, "order": 0, "frame": {
+        "polygon_mm": [[10, 10], [60, 10], [60, 60], [10, 60]], "bleeds": False}})).status_code == 200
+    buf = io.BytesIO()
+    Image.new("RGBA", (50, 50), (200, 200, 200, 255)).save(buf, format="PNG")
+    r = await api.post(f"/works/{wid}/panels/{panel1}/image", headers=h(a),
+                       files={"image": ("a.png", buf.getvalue(), "image/png")}, data={"origin": "human_drawn"})
+    assert r.status_code == 201, r.text
+    panel_image = r.json()["id"]
+    assert (await op(api, wid, a, {"type": "update_panel", "id": panel1, "image_placement": {
+        "crop_px": [0, 0, 50, 50], "dest_box_mm": [10, 10, 60, 60]}})).status_code == 200
     psd_run = await _export(api, wid, a, {"format": "psd", "page_ids": [p1, p2], "spread_output": "joined"})
     assert psd_run["status"] == "done", psd_run["detail"]
-    r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{p1}/psd", headers=h(a),
-                       files={"psd": ("a.psd", b"x", "image/vnd.adobe.photoshop")})
-    assert r.status_code == 422 and "見開き" in r.text
+    out = psd_run["outputs"][0]
+    assert out["page_ids"] == [p1, p2] and out["left_page_id"] == p2
+    data = (await _file(api, wid, a, psd_run, out["file"]))
+    # 直した PSD：右のページのコマの絵と、見開きの絵の画素を変え、右のページのコマに描き足す
+    edited = edit_psd(data, export_env / "edit-spread", (f"[{panel1}-image]", f"[{sid}-image]"),
+                      add_to_group=f"[{panel1}]")
+    r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{p2}/psd", headers=h(a),
+                       files={"psd": ("s.psd", edited, "image/vnd.adobe.photoshop")})
+    assert r.status_code == 200, r.text
+    res = r.json()
+    assert res["matches"]["changed"] == 2 and res["matches"]["new"] == 1, res["matches"]
+    w = await work_json(api, wid, a)
+    panel = next(x for x in w["panels"] if x["id"] == panel1)
+    assert panel["image_id"] != panel_image
+    # 右のページの絵は、右のページの基本枠の mm に戻る（見開きの左の端からの mm ではない）
+    box = panel["image_placement"]["dest_box_mm"]
+    assert -1 < box[0] < 15 and box[2] < PAGE_SPEC["frame_width_mm"], box
+    hand = [x for x in w["panel_layers"] if x["panel_id"] == panel1 and x["role"] == "human_hand" and not x["removed"]]
+    assert len(hand) == 1 and hand[0]["page_id"] == p1
+    # 見開きの絵はどちらのページの物でもないので判断待ち（層の真ん中の側のページに付く）
+    (spread_held,) = [x for x in res["held"] if x["kind"] == "psd_unmatched_layer"]
+    assert spread_held["payload"]["marker"] == f"{sid}-image"
+    # 2ページ分を1回で取り消せる
+    await undo(api, wid, a, res["event_id"])
+    w = await work_json(api, wid, a)
+    assert next(x for x in w["panels"] if x["id"] == panel1)["image_id"] == panel_image
+    assert not [x for x in w["panel_layers"] if x["panel_id"] == panel1 and x["role"] == "human_hand"
+                and not x["removed"]]
+    # 見開きを外した後のページ全体の確かめのため、描き足したコマは抜く
+    assert (await op(api, wid, a, {"type": "set_removed", "target_kind": "panel", "id": panel1,
+                                   "removed": True})).status_code == 200
 
     # 入稿前の確かめ：揃っていれば error は無い
     r = await api.post(f"/works/{wid}/preflight", headers=h(a), json={})

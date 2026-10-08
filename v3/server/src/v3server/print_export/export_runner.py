@@ -334,7 +334,8 @@ async def run_export(session: AsyncSession, run: ExportRun,
             if run.spread_output in ("joined", "both"):
                 stem = f"{ps.file_code}_{first.episode.number:02d}_{first.index + 1:03d}-{second.index + 1:03d}"
                 emit(img, rendered.nodes, stem, dpi, left.color_mode, None,
-                     {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id]})
+                     {"spread_id": sp.id, "page_ids": [first.page.id, second.page.id],
+                      "left_page_id": content.left.page_id})
             if run.spread_output in ("split", "both"):
                 halves = dict(zip(("left", "right"), split_spread(img, spec, dpi), strict=False))
                 for plan in (first, second):
