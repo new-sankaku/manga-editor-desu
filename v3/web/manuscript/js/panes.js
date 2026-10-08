@@ -6,6 +6,7 @@ import { newId } from "./model.js";
 import { BALLOON_FORMS, balloonOutline, bbox, r2 } from "./geometry.js";
 import { TONE_KINDS } from "./tone_draw.js";
 import { $, $$, h, icons, note, toast, fail, seg, num, color, range, kv, sec, flag } from "./ui.js";
+import { PRINT_INK, PRINT_PAPER } from "./print_colors.js";
 
 const TABS = [["held", "判断", "scale"], ["tools", "道具", "sliders-horizontal"], ["layers", "層", "layers"], ["check", "確かめ", "list-checks"]];
 const PAGE_KINDS = [["cover", "表紙"], ["color_page", "カラー"], ["body", "本文"], ["blank", "白"]];
@@ -112,7 +113,7 @@ function toolOptions() {
       kv(["コマの間（横）", num(spec.gutter_x_mm, (v) => setSpec({ gutter_x_mm: v }), { min: 0, step: 0.5, unit: "mm", label: "コマの間（横）" })],
          ["コマの間（縦）", num(spec.gutter_y_mm, (v) => setSpec({ gutter_y_mm: v }), { min: 0, step: 0.5, unit: "mm", label: "コマの間（縦）" })],
          ["枠の線の太さ", num(fs ? fs.line_width_mm : null, (v) => setFrameDefault({ line_width_mm: v }), { min: 0, step: 0.05, unit: "mm", label: "枠の線の太さ" })],
-         ["枠の線の色", color(fs ? fs.line_color : "#000000", (v) => setFrameDefault({ line_color: v }), "枠の線の色")]),
+         ["枠の線の色", color(fs ? fs.line_color : PRINT_INK, (v) => setFrameDefault({ line_color: v }), "枠の線の色")]),
       fs ? h("p", { class: "meta", text: "作品の標準の枠です。自分の線を持つコマ（右の欄で変えたコマ）は変わりません" })
          : note("作品の標準の枠の線が決まっていません。書き出しで止まります。太さを入れると決まります", "need"))];
   }
@@ -124,7 +125,9 @@ function toolOptions() {
       kv(k.direction === "slanted" ? ["角度", num(k.angle, (v) => { k.angle = v; }, { min: -89, max: 89, step: 1, unit: "度", label: "角度" })] : [null, ""],
          ["間", h("span", { class: "row" }, num(k.gap ?? auto, (v) => { k.gap = v; render(); }, { min: 0, step: 0.5, unit: "mm", label: "分けた間" }),
            k.gap !== null ? h("button", { class: "btn sm ghost", onclick: () => { k.gap = null; render(); } }, "コマの間に合わせる") : h("span", { class: "meta", text: "コマの間と同じ" }))]),
-      note("コマの上で線の位置を見て、押すと分けます。分けた小さい方が新しいコマです"))];
+      note("コマの上で線の位置を見て、押すと分けます。分けた小さい方が新しいコマです"),
+      S.m.rows("thresholds").some((x) => x.key === "panel_short_side_min_mm" && !x.removed && x.value) ? null
+        : note("コマの最小の大きさ（閾値 panel_short_side_min_mm）が決まっていないので、サーバーは分けません。閾値は作品の設定で決めます", "need"))];
   }
   if (t === "balloon" || t === "text") {
     const b = S.balloon;
@@ -151,7 +154,7 @@ function setSpec(ch) { change("ページの寸法", [{ type: "set_work_settings"
 function setPrefs(ch, label) { change(label, [{ type: "set_work_settings", preferences: { ...(S.m.work.preferences || {}), ...ch } }], { pages: S.m.pages(S.episodeId).map((p) => p.id) }); }
 function setFrameDefault(ch) {
   const fs = (S.m.work.preferences || {}).frame_style;
-  const next = { line_width_mm: 0.5, line_color: "#000000", ...(fs || {}), ...ch };
+  const next = { line_width_mm: 0.5, line_color: PRINT_INK, ...(fs || {}), ...ch };
   if (!fs && ch.line_width_mm === undefined) { toast("先に線の太さを入れてください", "need"); render(); return; }
   setPrefs({ frame_style: next }, "標準の枠の線");
 }
@@ -173,13 +176,13 @@ function common(r, kind) {
 function panelPane(p) {
   const prefs = S.m.work.preferences || {};
   const fs = p.frame_style;
-  const setStyle = (ch) => change("コマの枠の線", [{ type: "update_panel", id: p.id, frame_style: { ...(fs || prefs.frame_style || { line_width_mm: 0.5, line_color: "#000000" }), ...ch } }], { pages: [p.page_id] });
+  const setStyle = (ch) => change("コマの枠の線", [{ type: "update_panel", id: p.id, frame_style: { ...(fs || prefs.frame_style || { line_width_mm: 0.5, line_color: PRINT_INK }), ...ch } }], { pages: [p.page_id] });
   const layers = S.m.layers(p.id);
   return [sec(`コマ ${p.order}`, ...common(p, "panel"),
     kv(["枠の線", h("span", { class: "row" }, num(fs ? fs.line_width_mm : prefs.frame_style ? prefs.frame_style.line_width_mm : null, (v) => setStyle({ line_width_mm: v }), { min: 0, step: 0.05, unit: "mm", label: "このコマの枠の線の太さ" }),
          fs ? h("button", { class: "btn sm ghost", onclick: () => change("コマの枠の線を標準に戻す", [{ type: "update_panel", id: p.id, frame_style: null }], { pages: [p.page_id] }) }, "標準に戻す") : h("span", { class: "meta", text: "作品の標準" }))],
        ["線の色", color((fs || prefs.frame_style || {}).line_color, (v) => setStyle({ line_color: v }), "このコマの枠の線の色")],
-       ["地の色", h("span", { class: "row" }, color((fs || {}).fill_color || "#FFFFFF", (v) => setStyle({ fill_color: v }), "このコマの地の色"),
+       ["地の色", h("span", { class: "row" }, color((fs || {}).fill_color || PRINT_PAPER, (v) => setStyle({ fill_color: v }), "このコマの地の色"),
          fs && fs.fill_color ? h("button", { class: "btn sm ghost", onclick: () => setStyle({ fill_color: null }) }, "塗らない") : h("span", { class: "meta", text: "塗らない" }))])),
   sec("コマの絵",
     p.image_id ? h("div", { class: "row wrap" }, flag(p.image_placement ? "置いてある" : "置き場が決まっていない", p.image_placement ? "mut" : "warn"), h("span", { class: "meta", text: `重ねた層 ${layers.length} 枚` })) : note("このコマには絵がありません"),
@@ -238,6 +241,8 @@ function textPane(t) {
        ["大きさ", num(t.font_size_pt, (v) => up({ font_size_pt: v }, "文字の大きさ"), { min: 1, step: 0.5, unit: "pt", label: "文字の大きさ" })],
        ["書体", h("input", { class: "field", value: t.font_family || "", placeholder: (prefs.fonts_by_kind || {})[t.item_kind] ? `作品の標準：${prefs.fonts_by_kind[t.item_kind]}` : "未設定（書き出しで止まります）", "aria-label": "書体",
          onchange: (e) => up({ font_family: e.target.value.trim() || null }, "書体") })],
+       ["文字の色", h("span", { class: "row" }, color((t.decoration || {}).fill, (v) => up({ decoration: { ...(t.decoration || {}), fill: v } }, "文字の色"), "文字の色"),
+         (t.decoration || {}).fill ? null : flag("未設定（書き出しで止まります）", "warn"))],
        ["不透明度", range(t.opacity ?? 1, null, (v) => up({ opacity: v }, "不透明度"), { label: "不透明度" })]),
     h("p", { class: "meta", text: "画面の縦組みはブラウザの組み方で、書き出し（サーバーの組版）と同じ所で改行するかは未検証です。入りきるかは「確かめ」で測ります" }))];
   if (m.caps.print) {
@@ -255,7 +260,7 @@ function textPane(t) {
       seg(BALLOON_FORMS.map(([v, l, i]) => [v, l, i]), null, (v) => up({ balloon_shape: { ...bs, outline_mm: balloonOutline(v, box, 3) } }, "フキダシの形"), "形を作り直す"),
       kv(["線の太さ", num(bs.line_width_mm, (v) => up({ balloon_shape: { ...bs, line_width_mm: v } }, "フキダシの線"), { min: 0, step: 0.05, unit: "mm", label: "線の太さ" })],
          ["線の色", color(bs.line_color, (v) => up({ balloon_shape: { ...bs, line_color: v } }, "フキダシの線の色"), "線の色")],
-         ["塗り", color(bs.fill_color || "#FFFFFF", (v) => up({ balloon_shape: { ...bs, fill_color: v } }, "フキダシの塗り"), "塗り")],
+         ["塗り", color(bs.fill_color || PRINT_PAPER, (v) => up({ balloon_shape: { ...bs, fill_color: v } }, "フキダシの塗り"), "塗り")],
          ...(m.caps.print ? [["しっぽの根元", num(bs.tail_base_width_mm, (v) => up({ balloon_shape: { ...bs, tail_base_width_mm: v, tail_bend_ratio: bs.tail_bend_ratio ?? 0 } }, "しっぽ"), { min: 0.1, step: 0.5, unit: "mm", label: "しっぽの根元の幅" })],
            ["しっぽの曲がり", num(bs.tail_bend_ratio, (v) => up({ balloon_shape: { ...bs, tail_bend_ratio: v, tail_base_width_mm: bs.tail_base_width_mm ?? 4 } }, "しっぽ"), { min: -1, max: 1, step: 0.1, label: "しっぽの曲がり" })]] : []),
          ["しっぽ", t.tail_target_mm ? h("button", { class: "btn sm ghost", onclick: () => up({ tail_target_mm: null }, "しっぽを消す") }, "しっぽを消す") : h("span", { class: "meta", text: "白い丸の掴みを引くと出ます" })],
@@ -445,12 +450,24 @@ export function jump(x) {
   if (kind === "tone" && S.tool !== "tone") setTool("tone");
   if (kind !== "tone" && !["select", "frame"].includes(S.tool) && kind === "panel") setTool("select");
   S.sel = { kind, id: owner.id, pageId };
-  if (!S.view.select(kind, owner.id, false)) S.view.flash(pageId, box);
-  else S.view.flash(pageId, box);
+  // 選ぶと右の欄は「道具」に替わる（onSelect）。一覧（判断・確かめ）から飛んだときは一覧のまま、次の項目へ進めるようにする
+  const tab = S.tab;
+  S.view.select(kind, owner.id, false);
+  S.view.flash(pageId, box);
+  if (S.tab !== tab) { S.tab = tab; render(); }
 }
 
 // ---------------------------------------------------------------- 下のページの一覧
 let sortable = null;
+// 並べ替えたあと、見開きの2ページが隣り合わなくなる組を返す（無ければ null）
+function spreadBroken(m, episodeId, ids) {
+  for (const sp of m.spreads(episodeId)) {
+    const a = ids.indexOf(sp.first_page_id), b = ids.indexOf(sp.second_page_id);
+    if (Math.abs(a - b) !== 1) return `${a + 1}ページ目と${b + 1}ページ目`;
+  }
+  return null;
+}
+
 export function renderDock() {
   const host = $("#pages");
   if (!S.m || !S.episodeId) { host.replaceChildren(); return; }
@@ -481,7 +498,7 @@ export function renderDock() {
     }
     const side = sides ? sides[i] : null;
     return h("div", { class: `pcard${p.id === S.pageId ? " cur" : ""}${shown.has(p.id) ? " shown" : ""}${sp ? ` spread ${sp.first_page_id === p.id ? "sp-a" : "sp-b"}` : ""}`, "data-id": p.id, role: "listitem" },
-      h("button", { class: "pthumb", style: `aspect-ratio:${spec.trim_width_mm}/${spec.trim_height_mm}`, title: `${p.number} ページを出す`, onclick: () => selectPage(p.id) }, svg),
+      h("button", { class: "pthumb paper", style: `aspect-ratio:${spec.trim_width_mm}/${spec.trim_height_mm}`, title: `${p.number} ページを出す`, onclick: () => selectPage(p.id) }, svg),
       h("div", { class: "pmeta" },
         h("span", { class: "pnum num", text: String(p.number) }),
         side ? h("span", { class: "meta", text: side === "left" ? "左" : "右" }) : null,
@@ -502,6 +519,13 @@ export function renderDock() {
       onEnd: (e) => {
         if (e.oldIndex === e.newIndex) return;
         const ids = $$(".pcard", host).map((c) => c.dataset.id);
+        const broken = spreadBroken(m, S.episodeId, ids);
+        if (broken) {
+          // サーバーも同じ理由で断る。送らずに並びを戻す
+          toast(`並べ替えられません：見開きの組が崩れます（${broken}）。先に見開きを解いてください`, "bad");
+          renderDock();
+          return;
+        }
         change("ページの並べ替え", [{ type: "reorder_pages", episode_id: S.episodeId, page_ids: ids }], { pages: ids, reload: true });
       },
     });

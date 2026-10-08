@@ -67,6 +67,8 @@ export async function seed(call, title = "原稿の画面の試験") {
   await op({ type: "set_work_settings", page_spec: PAGE_SPEC, first_page_is_left: false,
             preferences: { fonts_by_kind: { balloon: "IPAMincho", caption: "IPAMincho", drawn_sfx: "IPAMincho" },
                            frame_style: { line_width_mm: 0.5, line_color: "#000000" }, typesetting: TYPESETTING, print: PRINT, nombre: NOMBRE } });
+  // ナイフはコマの最小の大きさ（閾値）が無いと分けない（サーバーの決まり）。試験のための値
+  await op({ type: "set_threshold", key: "panel_short_side_min_mm", value: { value: 10 }, source: "原稿の画面の試験", status: "unverified" });
   let order = 0;
   const panels = [];
   for (const poly of P1) {
@@ -91,7 +93,7 @@ export async function seed(call, title = "原稿の画面の試験") {
     const box = [x - lines * 3.3, y, x + lines * 3.3, y + 22];
     const tid = id();
     const joined = i === 5;
-    await op({ type: "add_text_item", id: tid, panel_id: panels[k].id, item_kind: "balloon", order: i + 1, text: LINES[i], writing_direction: "vertical", font_size_pt: 9,
+    await op({ type: "add_text_item", id: tid, panel_id: panels[k].id, item_kind: "balloon", order: i + 1, text: LINES[i], writing_direction: "vertical", font_size_pt: 9, decoration: { fill: "#000000" },
                box_mm: box, tail_target_mm: joined ? null : [x - 8, y + 34], joined_to_previous: joined,
                balloon_shape: { kind: "custom", outline_mm: ellipse(box), line_width_mm: 0.3, line_color: "#000000", fill_color: "#FFFFFF", tail_base_width_mm: 4, tail_bend_ratio: 0.15 } });
     texts.push(tid);

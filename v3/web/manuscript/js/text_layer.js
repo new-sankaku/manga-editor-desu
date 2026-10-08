@@ -65,7 +65,7 @@ function tcyNodes(seg, ts, vertical) {
 export class TextLayer {
   constructor(host, hooks) {
     this.el = document.createElement("div");
-    this.el.className = "tx-layer";
+    this.el.className = "tx-layer paper"; // 紙の上の文字：色は紙の組（common/theme.css の .paper）
     host.append(this.el);
     this.hooks = hooks;
     this.nodes = new Map();

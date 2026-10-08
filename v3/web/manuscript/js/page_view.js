@@ -5,11 +5,10 @@ import { apply, bbox, chordThrough, lineNormal, pointInPolygon, tailPolygon } fr
 import { drawTone } from "./tone_draw.js";
 import { TextLayer } from "./text_layer.js";
 import * as api from "../../js/api.js";
+import { C, alpha, readTheme } from "./theme_colors.js";
 
 const { Canvas, FabricObject, FabricImage, Point, Control, util } = window.fabric;
 
-const AI = "#4A6386"; // common/theme.css の --ai
-const NEED = "#A86A16"; // common/theme.css の --need
 const MIN_Z = 0.3, MAX_Z = 120;
 const COMMIT_MS = 140;
 
@@ -55,11 +54,11 @@ export class PageView {
     this.pv = document.createElement("div");
     this.pv.className = "pv";
     host.append(this.pv);
+    readTheme(this.pv);
     const el = document.createElement("canvas");
     this.pv.append(el);
     this.c = new PageCanvas(el, { selection: false, preserveObjectStacking: true, fireRightClick: false, stopContextMenu: true,
-                                  enableRetinaScaling: true, enablePointerEvents: true, uniformScaling: false,
-                                  backgroundColor: "rgba(0,0,0,0)" });
+                                  enableRetinaScaling: true, enablePointerEvents: true, uniformScaling: false });
     this.text = new TextLayer(this.pv, {
       onEditDone: (id, text) => hooks.onEditDone(id, text),
       onEditing: (id, text) => hooks.onEditing && hooks.onEditing(id, text),
@@ -201,14 +200,21 @@ export class PageView {
     c.on("mouse:dblclick", (o) => this.onDbl(o));
     c.on("selection:created", (o) => this.onSel(o));
     c.on("selection:updated", (o) => this.onSel(o));
-    c.on("selection:cleared", () => { this.selectedId = null; this.touch(); this.hooks.onSelect(null); });
+    c.on("selection:cleared", () => { this.selectedId = null; this.touch(); if (!this.quiet) this.hooks.onSelect(null); });
     c.on("object:moving", (o) => this.onMoving(o));
     c.on("object:scaling", (o) => this.onMoving(o));
-    c.on("object:modified", (o) => this.onModified(o));
+    // fabric が手の動きを終えてから送る（送ると描き直すので、終える前に描き直すと同じ通知がまた来る）
+    c.on("object:modified", (o) => setTimeout(() => this.onModified(o), 0));
   }
 
   // ---------------------------------------------------------------- 物を作る
   // slots：[{ page, ox, oy, x, trimW, trimH, bleed }]。data：{ model, opts }
+  // 色の組を差し替えたあと：色を読み直して作り直す
+  retheme() {
+    readTheme(this.pv);
+    this.rebuild();
+  }
+
   setScene(slots, model, opts) {
     const keepView = this.slots.length && slots.length === this.slots.length && slots.every((s, i) => s.page.id === this.slots[i].page.id);
     this.slots = slots;
@@ -221,7 +227,9 @@ export class PageView {
   rebuild() {
     const active = this.c.getActiveObject();
     const keep = active && active.v3 ? { kind: active.v3.kind, id: active.v3.id } : null;
+    this.quiet = true;
     this.c.discardActiveObject();
+    this.quiet = false;
     this.c.remove(...this.c.getObjects());
     this.text.clear();
     this.knifeObj = null;
@@ -248,28 +256,28 @@ export class PageView {
     paper.paint = (ctx, z) => {
       ctx.save();
       ctx.translate(-W / 2, -H / 2);
-      ctx.fillStyle = "#EFEADB";
+      ctx.fillStyle = C.pasteboard;
       ctx.fillRect(-b, -b, W + b * 2, H + b * 2);
-      ctx.fillStyle = "#FFFFFF";
+      ctx.fillStyle = C.paper;
       ctx.fillRect(0, 0, W, H);
       ctx.lineWidth = 1 / z;
-      ctx.strokeStyle = "#CFC6AA";
+      ctx.strokeStyle = C.edge;
       ctx.strokeRect(0, 0, W, H);
       if (o.show.guide) {
         ctx.setLineDash([4 / z, 3 / z]);
-        ctx.strokeStyle = "#8FA3BD";
+        ctx.strokeStyle = C.aiLine;
         ctx.strokeRect(fx, fy, spec.frame_width_mm, spec.frame_height_mm);
       }
       if (o.show.safe && safe) {
         const leftPage = s.side === "left";
         const l = leftPage ? safe.outer_mm : safe.gutter_mm, r = leftPage ? safe.gutter_mm : safe.outer_mm;
         ctx.setLineDash([2 / z, 2 / z]);
-        ctx.strokeStyle = "#C89884";
+        ctx.strokeStyle = C.badLine;
         ctx.strokeRect(l, safe.top_mm, W - l - r, H - safe.top_mm - safe.bottom_mm);
       }
       if (o.show.grid) {
         ctx.setLineDash([]);
-        ctx.strokeStyle = "rgba(74,99,134,0.14)";
+        ctx.strokeStyle = alpha(C.ai, 0.14);
         ctx.beginPath();
         for (let x = 10; x < W; x += 10) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
         for (let y = 10; y < H; y += 10) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
@@ -404,7 +412,7 @@ export class PageView {
     const lw = style ? style.line_width_mm : 0;
     const g = localize([poly], lw / 2 + 0.3);
     const it = new Item({ left: g.cx, top: g.cy, width: g.w, height: g.h, originX: "center", originY: "center",
-                          lockRotation: true, hasBorders: true, borderColor: AI, cornerColor: AI, cornerSize: 9, transparentCorners: false });
+                          lockRotation: true, hasBorders: true, borderColor: C.ai, cornerColor: C.ai, cornerSize: 9, transparentCorners: false });
     it.hit = g.loc;
     it.v3 = { kind: "panel", id: p.id, pageId: p.page_id, ox, oy, loc: g.loc[0], held: false };
     it.setControlsVisibility({ mtr: false });
@@ -415,12 +423,12 @@ export class PageView {
         ctx.lineJoin = "miter"; ctx.lineWidth = lw; ctx.strokeStyle = style.line_color; ctx.stroke();
       } else {
         // 枠の線が決まっていない：書き出しで止まる。画面では細い破線の目安で見せる
-        ctx.setLineDash([3 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = AI; ctx.stroke(); ctx.setLineDash([]);
+        ctx.setLineDash([3 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = C.ai; ctx.stroke(); ctx.setLineDash([]);
       }
       if (view.selectedId === p.id || view.pickA === p.id) {
         trace(ctx, it.v3.loc);
-        ctx.fillStyle = "rgba(74,99,134,0.10)"; ctx.fill();
-        ctx.lineWidth = 2 / z; ctx.strokeStyle = AI; ctx.stroke();
+        ctx.fillStyle = alpha(C.ai, 0.10); ctx.fill();
+        ctx.lineWidth = 2 / z; ctx.strokeStyle = C.ai; ctx.stroke();
       }
     };
     return it;
@@ -437,7 +445,7 @@ export class PageView {
     const lw = bs && bs.line_width_mm != null ? bs.line_width_mm : 0;
     const g = localize(polys, lw / 2 + 0.3);
     const it = new Item({ left: g.cx, top: g.cy, width: g.w, height: g.h, originX: "center", originY: "center",
-                          lockRotation: true, borderColor: AI, cornerColor: AI, cornerSize: 9, transparentCorners: false });
+                          lockRotation: true, borderColor: C.ai, cornerColor: C.ai, cornerSize: 9, transparentCorners: false });
     const [locOutline, locTail, locBox] = outline ? [g.loc[0], tail ? g.loc[1] : null, g.loc[g.loc.length - 1]] : [null, null, g.loc[0]];
     it.hit = [locOutline || locBox, ...(locTail ? [locTail] : [])];
     it.v3 = { kind: "text", id: t.id, pageId: t.page_id, ox, oy, outline: !!outline, locOutline, locTail, locBox, target, bs, row: t };
@@ -449,7 +457,7 @@ export class PageView {
         const decided = bs.line_width_mm != null && bs.line_color;
         ctx.lineJoin = "round";
         ctx.lineWidth = decided ? bs.line_width_mm : 1 / z;
-        ctx.strokeStyle = decided ? bs.line_color : AI;
+        ctx.strokeStyle = decided ? bs.line_color : C.ai;
         if (!decided) ctx.setLineDash([3 / z, 2 / z]);
         if (v.locTail) { trace(ctx, v.locTail); ctx.stroke(); }
         trace(ctx, v.locOutline); ctx.stroke();
@@ -460,11 +468,11 @@ export class PageView {
           trace(ctx, v.locOutline); ctx.fill();
         }
       } else if (view.opts.show.boxes) {
-        ctx.setLineDash([2 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = "rgba(74,99,134,0.55)";
+        ctx.setLineDash([2 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = alpha(C.ai, 0.55);
         trace(ctx, v.locBox); ctx.stroke(); ctx.setLineDash([]);
       }
       if (view.selectedId === t.id && v.locOutline) {
-        ctx.setLineDash([2 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = AI; trace(ctx, v.locBox); ctx.stroke(); ctx.setLineDash([]);
+        ctx.setLineDash([2 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = C.ai; trace(ctx, v.locBox); ctx.stroke(); ctx.setLineDash([]);
       }
     };
     if (outline) {
@@ -486,7 +494,7 @@ export class PageView {
           return true;
         },
         render: (ctx, left, top) => {
-          ctx.save(); ctx.fillStyle = "#fff"; ctx.strokeStyle = AI; ctx.lineWidth = 2;
+          ctx.save(); ctx.fillStyle = C.on; ctx.strokeStyle = C.ai; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.arc(left, top, 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.restore();
         },
         actionName: "tail",
@@ -518,7 +526,7 @@ export class PageView {
     const boxPoly = [[box[0], box[1]], [box[2], box[1]], [box[2], box[3]], [box[0], box[3]]];
     const g = localize([shift(boxPoly, ox, oy), shift(clipPoly || boxPoly, ox, oy)], 0);
     const it = new Item({ left: g.cx, top: g.cy, width: g.w, height: g.h, originX: "center", originY: "center", opacity: t.opacity,
-                          lockRotation: true, borderColor: AI, cornerColor: AI, cornerSize: 9, transparentCorners: false });
+                          lockRotation: true, borderColor: C.ai, cornerColor: C.ai, cornerSize: 9, transparentCorners: false });
     it.hit = [g.loc[1]];
     it.v3 = { kind: "tone", id: t.id, pageId: t.page_id, ox, oy, row: t };
     it.setControlsVisibility({ mtr: false });
@@ -532,10 +540,10 @@ export class PageView {
         drawTone(ctx, spec, lbox, z);
       } else {
         // 図形（絵記号）の中身を描くのは、まだ作っていない。置いた範囲だけ見せる
-        ctx.setLineDash([3 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = NEED; trace(ctx, g.loc[0]); ctx.stroke();
+        ctx.setLineDash([3 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = C.need; trace(ctx, g.loc[0]); ctx.stroke();
       }
       ctx.restore();
-      if (view.selectedId === t.id) { ctx.lineWidth = 2 / z; ctx.strokeStyle = AI; trace(ctx, g.loc[1]); ctx.stroke(); }
+      if (view.selectedId === t.id) { ctx.lineWidth = 2 / z; ctx.strokeStyle = C.ai; trace(ctx, g.loc[1]); ctx.stroke(); }
     };
     return it;
   }
@@ -603,7 +611,7 @@ export class PageView {
           o.v3.vertexMoved = true;
           return true;
         },
-        render: (ctx, left, top) => { ctx.save(); ctx.fillStyle = "#fff"; ctx.strokeStyle = AI; ctx.lineWidth = 2; ctx.fillRect(left - 4, top - 4, 8, 8); ctx.strokeRect(left - 4, top - 4, 8, 8); ctx.restore(); },
+        render: (ctx, left, top) => { ctx.save(); ctx.fillStyle = C.on; ctx.strokeStyle = C.ai; ctx.lineWidth = 2; ctx.fillRect(left - 4, top - 4, 8, 8); ctx.strokeRect(left - 4, top - 4, 8, 8); ctx.restore(); },
       });
     });
     o.controls = ctl;
@@ -647,7 +655,7 @@ export class PageView {
         ctx.beginPath();
         ctx.moveTo(a[0] - cx + n[0] * s * gap / 2, a[1] - cy + n[1] * s * gap / 2);
         ctx.lineTo(b[0] - cx + n[0] * s * gap / 2, b[1] - cy + n[1] * s * gap / 2);
-        ctx.lineWidth = 1.5 / z; ctx.strokeStyle = AI; ctx.setLineDash([5 / z, 3 / z]); ctx.stroke();
+        ctx.lineWidth = 1.5 / z; ctx.strokeStyle = C.ai; ctx.setLineDash([5 / z, 3 / z]); ctx.stroke();
       }
       ctx.restore();
     };
@@ -777,7 +785,7 @@ export class PageView {
     const it = new Item({ left: (x0 + x1) / 2, top: (y0 + y1) / 2, width: x1 - x0 + 2, height: y1 - y0 + 2, originX: "center", originY: "center",
                           selectable: false, evented: false, objectCaching: false });
     it.v3 = { kind: "ui" };
-    it.paint = (ctx, z) => { ctx.lineWidth = 3 / z; ctx.strokeStyle = NEED; ctx.strokeRect(x0 - it.left, y0 - it.top, x1 - x0, y1 - y0); };
+    it.paint = (ctx, z) => { ctx.lineWidth = 3 / z; ctx.strokeStyle = C.need; ctx.strokeRect(x0 - it.left, y0 - it.top, x1 - x0, y1 - y0); };
     this.c.add(it);
     this.c.requestRenderAll();
     setTimeout(() => { this.c.remove(it); this.c.requestRenderAll(); }, 1600);
@@ -792,7 +800,6 @@ export class PageView {
     if (!o) return false;
     this.c.setActiveObject(o);
     this.selectedId = id;
-    this.hooks.onSelect({ kind, id, pageId: o.v3.pageId });
     void pan;
     this.c.requestRenderAll();
     return true;

@@ -1,5 +1,6 @@
 // トーンを画面に描く（目安）。正本は値（ToneSpec）で、書き出しの網点はサーバー（print_export/page_render.py）が描く。
 // 画面で網点の1周期が 3 画素より細かくなる倍率では、点を描くと干渉の縞が出るので、同じ濃さの灰色で見せる。
+import { PRINT_INK } from "./print_colors.js";
 const MIN_PERIOD_PX = 3;
 
 function rng(seed) {
@@ -27,7 +28,7 @@ function rgba(hex, a) {
 export function drawTone(ctx, spec, box, zoom) {
   const [x0, y0, x1, y1] = box;
   const w = x1 - x0, h = y1 - y0;
-  const color = spec.color || "#000000";
+  const color = spec.color || PRINT_INK;
   const d = spec.density;
   ctx.save();
   if (spec.kind === "dots" || spec.kind === "lines") {

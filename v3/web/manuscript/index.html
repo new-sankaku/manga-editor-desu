@@ -27,7 +27,8 @@
       <span class="meta" id="reading"></span>
     </nav>
     <a class="btn sm" id="to-workbench" href="../index.html" title="選んだコマの絵を画像生成の画面で頼む (L)"><i data-lucide="sparkles"></i>コマの絵を頼む</a>
-    <label class="who">利用者 <input id="user" class="field" autocomplete="username"></label>
+    <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
+    <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
   </header>
   <nav class="v3-nav" data-v3-nav="manuscript"></nav>
 

@@ -23,7 +23,7 @@ export class MockServer {
   empty(id, body) {
     return { work: { id, title: body.title, reading_direction: body.reading_direction, text_direction: body.text_direction, medium: body.medium,
                      trim_size: null, default_page_count: null, page_spec: null, first_page_is_left: null, preferences: {}, head_seq: 0 },
-             volumes: [], episodes: [], pages: [], panels: [], text_items: [], panel_layers: [], page_items: [], spreads: [] };
+             volumes: [], episodes: [], pages: [], panels: [], text_items: [], panel_layers: [], page_items: [], spreads: [], thresholds: [] };
   }
 
   // 取り消していない出来事を初めから当てる
@@ -108,6 +108,7 @@ export class MockServer {
     const parts = u.pathname.split("/").filter(Boolean);
     const ok = (json, status = 200) => ({ status, json });
     try {
+      if (method === "GET" && u.pathname === "/auth/mode") return ok({ mode: "dev_header" });
       if (method === "GET" && u.pathname === "/works") return ok([...this.works.entries()].map(([id, w]) => ({ id, title: w.base.work.title })));
       if (method === "POST" && u.pathname === "/works") { const id = hex(); this.works.set(id, { base: this.empty(id, body), events: [], images: new Map(), held: [] }); return ok({ id }, 201); }
       const wid = parts[1];
@@ -168,6 +169,7 @@ export class MockServer {
 function apply(m, op) {
   const d = m.data;
   switch (op.type) {
+    case "set_threshold": d.thresholds = (d.thresholds || []).filter((t) => t.key !== op.key).concat(op.value ? [{ key: op.key, value: op.value, source: op.source, status: op.status }] : []); return;
     case "add_volume": d.volumes.push({ id: op.id, number: op.number, removed: false }); return;
     case "add_episode": d.episodes.push({ id: op.id, volume_id: op.volume_id, number: op.number, title: op.title || null, removed: false }); return;
     case "add_page": d.pages.push({ id: op.id, episode_id: op.episode_id, number: op.number, layout: null, page_kind: null, color_mode: null, dpi: null, nombre_display: null, human_hand_fields: [], removed: false }); return;
@@ -181,6 +183,9 @@ function apply(m, op) {
     case "reorder_pages": {
       const live = m.pages(op.episode_id).map((p) => p.id).sort();
       if (JSON.stringify([...op.page_ids].sort()) !== JSON.stringify(live)) throw new Error("話のページの全部を渡してください");
+      for (const sp of m.spreads(op.episode_id)) {
+        if (Math.abs(op.page_ids.indexOf(sp.first_page_id) - op.page_ids.indexOf(sp.second_page_id)) !== 1) throw new Error("見開きの組が崩れる。先に見開きを解く");
+      }
       break;
     }
     case "add_spread": {

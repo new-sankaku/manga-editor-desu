@@ -9,12 +9,13 @@ import { balloonOutline, bbox, r2, roundPts } from "./geometry.js";
 import { $, $$, h, icons, note, toast, fail } from "./ui.js";
 import * as panes from "./panes.js";
 import { rememberWork, storedWork } from "../../common/nav.js";
+import { PRINT_INK, PRINT_PAPER } from "./print_colors.js";
 
 export const S = {
   works: [], workId: null, m: null, episodeId: null, pageId: null, spread: false,
   tool: "select", frameMode: "move", sel: null, tab: "tools", held: [], preflight: null, imageEdit: null,
   knife: { direction: "horizontal", angle: 12, gap: null },
-  balloon: { form: "ellipse", line_width_mm: 0.3, line_color: "#000000", fill_color: "#FFFFFF", font_size_pt: 9, tail_base_width_mm: 4, tail_bend_ratio: 0 },
+  balloon: { form: "ellipse", line_width_mm: 0.3, line_color: PRINT_INK, fill_color: PRINT_PAPER, text_color: PRINT_INK, font_size_pt: 9, tail_base_width_mm: 4, tail_bend_ratio: 0 },
   tone: { kind: "dots", density: 0.3, lines_per_inch: 60 },
   show: { guide: true, safe: true, grid: false, hand: true, held: true, boxes: true,
           cat: { art: true, frame: true, tone: true, balloon: true, type: true, sfx: true } },
@@ -85,7 +86,9 @@ export async function reload() {
   if (S.view && S.view.c._currentTransform) {
     await new Promise((r) => S.view.c.once("mouse:up", r));
   }
-  const [data, held] = await Promise.all([api.get(`/works/${S.workId}`), api.get(`/works/${S.workId}/held-changes?status=open`)]);
+  S.reloading = true;
+  let data, held;
+  try { [data, held] = await Promise.all([api.get(`/works/${S.workId}`), api.get(`/works/${S.workId}/held-changes?status=open`)]); } finally { S.reloading = false; }
   S.m = new Model(data);
   S.held = held;
   if (S.pageId && !S.m.find("pages", S.pageId)) S.pageId = null;
@@ -206,11 +209,13 @@ function syncUndo() {
 export async function step(dir) {
   if (!S.saver.can(S.pageId, dir)) return;
   S.view.text.finishEdit();
+  S.stepping = true;
   try {
     const e = await S.saver.step(S.pageId, dir);
     if (e) toast(`${dir === "undo" ? "取り消しました" : "やり直しました"}：${e.label}`);
   } catch (e) { fail(e, dir === "undo" ? "取り消し" : "やり直し"); }
   await reload().catch((e) => fail(e, "読み直し"));
+  S.stepping = false;
 }
 
 // ---------------------------------------------------------------- ページの上の手の動き → 操作
@@ -337,7 +342,8 @@ function addAt(tool, hit) {
     const order = Math.max(0, ...m.rows("text_items").filter((t) => t.panel_id === panel.id && !t.removed).map((t) => t.order)) + 1;
     const b = S.balloon;
     const op = { type: "add_text_item", id: newId(), panel_id: panel.id, item_kind: tool === "balloon" ? "balloon" : "caption", order, text: "",
-                 writing_direction: vertical ? "vertical" : "horizontal", font_size_pt: b.font_size_pt, box_mm: box };
+                 writing_direction: vertical ? "vertical" : "horizontal", font_size_pt: b.font_size_pt, box_mm: box,
+                 decoration: { fill: b.text_color } };
     if (tool === "balloon") {
       const shape = { kind: "custom", outline_mm: balloonOutline(b.form, box, 3), line_width_mm: b.line_width_mm, line_color: b.line_color, fill_color: b.fill_color };
       if (m.caps.print) { shape.tail_base_width_mm = b.tail_base_width_mm; shape.tail_bend_ratio = b.tail_bend_ratio; op.tail_target_mm = [r2(q[0] - 6), r2(box[3] + 9)]; }
@@ -352,7 +358,7 @@ function addAt(tool, hit) {
   if (tool === "tone") {
     const box = bbox(panel.frame.polygon_mm).map(r2);
     const t = S.tone;
-    const spec = { kind: t.kind, target: { kind: "panel", panel_id: panel.id }, color: "#000000", density: t.density, angle_deg: 45 };
+    const spec = { kind: t.kind, target: { kind: "panel", panel_id: panel.id }, color: PRINT_INK, density: t.density, angle_deg: 45 };
     if (["dots", "lines", "gradient"].includes(t.kind)) spec.lines_per_inch = t.lines_per_inch;
     if (t.kind === "gradient") Object.assign(spec, { density_end: 0, screen_angle_deg: 45, dot_shape: "round", angle_deg: 90 });
     if (t.kind === "sand" || t.kind === "snow") Object.assign(spec, { grain_mm: 0.3, seed: Math.floor(Math.random() * 1e6) });
@@ -498,9 +504,21 @@ function readPref(k) { try { return localStorage.getItem(`v3.ms.${k}`); } catch 
 function writePref(k, v) { try { localStorage.setItem(`v3.ms.${k}`, v); } catch { /* 覚えられない環境では毎回初めから選ぶ */ } }
 
 // ---------------------------------------------------------------- はじめ
-function boot() {
+// ログインの方式で右上を変える（画像生成の画面 js/app.js の showWho と同じ）
+async function showWho() {
+  const mode = await api.loadAuth();
+  if (mode === "oidc") {
+    $("#who-dev").hidden = true;
+    $("#who-name").textContent = api.myName();
+    $("#who-login").hidden = false;
+  } else {
+    $("#user").value = api.currentUser();
+    api.setUser($("#user").value);
+  }
+}
+
+async function boot() {
   const user = $("#user");
-  user.value = api.currentUser();
   user.addEventListener("change", () => { api.setUser(user.value.trim()); location.reload(); });
   S.spread = readPref("spread") === "1";
   S.view = new PageView($("#stage"), hooks);
@@ -526,6 +544,7 @@ function boot() {
   });
   panes.init();
   icons();
+  try { await showWho(); } catch (e) { fail(e, "ログインの方式を読むこと"); return; }
   if (!api.currentUser()) { showEmpty("右上の「利用者」に名前を入れてください"); return; }
   loadWorks().catch((e) => { fail(e, "作品を読むこと"); showEmpty(`作品を読めませんでした：${api.errorText(e)}`); });
 }

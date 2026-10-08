@@ -12,7 +12,7 @@
 /* ページの絵と文字を重ねる所。拡大・移動の途中はここを CSS で動かす */
 .pv{position:absolute;inset:0;transform-origin:0 0;will-change:transform}
 .tx-layer{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;pointer-events:none;--inv:1}
-.tx{position:absolute;display:flex;align-items:center;justify-content:center;overflow:visible;color:#000}
+.tx{position:absolute;display:flex;align-items:center;justify-content:center;overflow:visible;color:var(--ink)}
 .tx-in{font-family:serif;line-height:1.2;color:inherit;white-space:pre-wrap;line-break:strict;overflow-wrap:anywhere;font-feature-settings:normal}
 .tx.v .tx-in{writing-mode:vertical-rl;height:100%;max-width:none}
 .tx:not(.v) .tx-in{width:100%}
@@ -20,13 +20,13 @@
 .tx ruby rt{font-size:.5em}
 .tx.sfx .tx-in{font-weight:700}
 .tx.over{outline:calc(2px * var(--inv)) dashed var(--bad)}
-.tx.editing{pointer-events:auto;outline:calc(2px * var(--inv)) solid var(--ai);background:rgba(255,255,255,.6);z-index:2}
+.tx.editing{pointer-events:auto;outline:calc(2px * var(--inv)) solid var(--ai);background:color-mix(in srgb,var(--surface) 60%,transparent);z-index:2}
 .tx.editing .tx-in{outline:none;cursor:text;min-width:1em;min-height:1em}
 .tx-in:empty::before{content:"（文字を入れる）";color:var(--ink-4)}
 .tx.v .tx-in:empty::before{content:"（文字）"}
-.mk{position:absolute;pointer-events:auto;opacity:.8;font:600 calc(9px * var(--inv))/1.5 var(--font);padding:0 .5em;border-radius:.5em;white-space:nowrap;transform:translate(-100%,-50%);box-shadow:0 0 0 calc(1px * var(--inv)) rgba(255,255,255,.9)}
+.mk{position:absolute;pointer-events:auto;opacity:.8;font:600 calc(9px * var(--inv))/1.5 var(--font);padding:0 .5em;border-radius:.5em;white-space:nowrap;transform:translate(-100%,-50%);box-shadow:0 0 0 calc(1px * var(--inv)) color-mix(in srgb,var(--on) 90%,transparent)}
 .mk-hand{background:var(--need-tint);color:var(--need-ink);border:calc(1px * var(--inv)) solid var(--need-line)}
-.mk-held{background:var(--need);color:#fff;transform:translate(-100%,60%)}
+.mk-held{background:var(--need);color:var(--on);transform:translate(-100%,60%)}
 
 /* 右の欄 */
 .ms .insp-b{gap:14px}
@@ -66,10 +66,10 @@
 .pcard.spread.sp-a{margin-right:-6px}
 .pcard.spread{box-shadow:inset 0 -3px 0 var(--ai-line)}
 .pcard.ghost{opacity:.4}
-.pthumb{display:block;height:clamp(64px,10vh,104px);background:#fff;box-shadow:0 0 0 1px var(--line-2);border-radius:3px;padding:4px}
+.pthumb{display:block;height:clamp(64px,10vh,104px);background:var(--surface);box-shadow:0 0 0 1px var(--line-2);border-radius:3px;padding:4px}
 .pthumb svg{width:100%;height:100%;display:block}
 .pthumb polygon{fill:none;stroke:var(--ink-2);stroke-width:1.2}
-.pthumb ellipse.b{fill:#fff;stroke:var(--ink-3);stroke-width:.8}
+.pthumb ellipse.b{fill:var(--surface);stroke:var(--ink-3);stroke-width:.8}
 .pmeta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .pmeta.meta{font-size:10.5px;gap:2px 6px}
 .pnum{font-weight:700;font-size:12px}

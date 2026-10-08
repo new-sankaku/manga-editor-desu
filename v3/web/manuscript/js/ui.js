@@ -1,5 +1,6 @@
 // 画面の部品を作る小さな道具（画像生成の画面 js/app.js と同じ形・同じ言い方）
 import * as api from "../../js/api.js";
+import { PRINT_INK } from "./print_colors.js";
 
 export const $ = (s, root = document) => root.querySelector(s);
 export const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -65,7 +66,7 @@ export function num(value, onSet, { min, max, step = "any", unit, label, disable
 }
 
 export function color(value, onSet, label) {
-  const i = h("input", { class: "swatch", type: "color", value: value || "#000000", "aria-label": label });
+  const i = h("input", { class: "swatch", type: "color", value: value || PRINT_INK, "aria-label": label });
   i.addEventListener("change", () => onSet(i.value.toUpperCase()));
   return i;
 }
