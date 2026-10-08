@@ -1735,7 +1735,8 @@ function vExport() {
     <aside class="insp" aria-label="書き出し"><div class="insp-b">
       <section class="sec"><span class="lbl">形式</span>
         <div class="setrow"><span class="k">ファイル</span>${seg('fmt', [['psd', 'PSD'], ['png', 'PNG'], ['pdf', 'PDF'], ['svg', 'SVG'], ['strip', '分けた画像']], S.fmt)}</div>${S.fmt === 'strip' ? `
-        <div class="setrow"><span class="k">分け方</span>${fld('st-w', STRIP_W, '幅', 'sm num', 'style="max-width:6em"')}<span class="suf">px 幅</span>${fld('st-h', STRIP_CUT, '分ける長さ', 'sm num', 'style="max-width:6em"')}<span class="suf">px ごと</span></div>` : ''}
+        <div class="setrow"><span class="k">分け方</span>${fld('st-w', STRIP_W, '幅', 'sm num', 'style="max-width:6em"')}<span class="suf">px 幅</span>${fld('st-h', STRIP_CUT, '分ける長さ', 'sm num', 'style="max-width:6em"')}<span class="suf">px ごと</span></div>` : ''}${S.fmt === 'psd' ? `
+        <div class="setrow"><span class="k"></span><span class="meta">ペンの線は、PSD では画素の層になります（線のデータはアプリに残ります。PSD から線には戻りません）</span></div>` : ''}
         <div class="setrow"><span class="k">解像度</span>${seg('dpi', [[350, '350'], [600, '600'], [1200, '1200']], S.dpi)}<span class="suf">dpi</span><span class="suf num">${Math.round(182 / 25.4 * S.dpi)}×${Math.round(257 / 25.4 * S.dpi)} 画素</span></div>
         <div class="setrow"><span class="k">色</span>${seg('color', [['mono', 'モノクロ2階調'], ['gray', 'グレー'], ['color', 'カラー']], S.color)}</div>
         <div class="setrow"><span class="k">裁ち落とし</span>${seg('bleed', [['on', 'あり'], ['off', 'なし']], S.bleed)}</div>
