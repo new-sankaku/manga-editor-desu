@@ -16,6 +16,7 @@ from v3server.canonical_tables.harness_tables import (
     HarnessStep,
     HarnessUnit,
 )
+from v3server.harness import harness_notify
 
 UNIT_FIELDS = ("status", "current_step", "attempt", "cost_used", "seconds_used", "stop_reason", "review", "result",
                "live", "limits", "upstream_used", "finished_at")
@@ -45,7 +46,11 @@ async def unit_counters(session: AsyncSession, unit: HarnessUnit) -> dict[str, A
 
 async def add_event(session: AsyncSession, work_id: str, kind: str, payload: dict[str, Any],
                     stage_run_id: str | None = None, unit_id: str | None = None) -> None:
-    session.add(HarnessEvent(work_id=work_id, stage_run_id=stage_run_id, unit_id=unit_id, kind=kind, payload=payload))
+    event = HarnessEvent(work_id=work_id, stage_run_id=stage_run_id, unit_id=unit_id, kind=kind, payload=payload)
+    session.add(event)
+    await session.flush()
+    # 知らせはここ1か所で出来事から作る（決めごと 17章。harness_notify.py）
+    await harness_notify.on_event(session, event)
 
 
 async def patch_unit(session: AsyncSession, unit_id: str, patch: dict[str, Any], event: str = "unit",

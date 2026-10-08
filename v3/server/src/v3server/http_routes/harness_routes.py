@@ -14,13 +14,23 @@ from temporalio.client import WorkflowUpdateFailedError
 from temporalio.exceptions import WorkflowAlreadyStartedError
 from temporalio.service import RPCError, RPCStatusCode
 
-from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessStageRun, HarnessStaleMark, HarnessUnit
+from v3server.canonical_tables.harness_tables import (
+    HarnessCandidate,
+    HarnessNotification,
+    HarnessNotificationDelivery,
+    HarnessNotificationSetting,
+    HarnessStageRun,
+    HarnessStaleMark,
+    HarnessUnit,
+)
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import Episode
 from v3server.harness import live_stream
 from v3server.harness.export_steps import ExportSpec
 from v3server.harness.harness_activities import STEP_MODULES
 from v3server.harness.harness_limits import StageLimits, check_completion
+from v3server.harness.harness_notify import KINDS as NOTIFY_KINDS
+from v3server.harness.harness_notify import NotificationSettings
 from v3server.harness.harness_record import add_event, now, patch_stage
 from v3server.harness.harness_states import STAGES, UNIT_KIND_OF_STAGE
 from v3server.harness.name_draft_steps import NameSpec
@@ -322,3 +332,81 @@ async def harness_thresholds(work_id: str, session: SessionDep, authz: AuthzDep,
     current = {t.key: {"value": t.value.get("value"), "source": t.source, "status": t.status, "note": t.note}
                for t in rows}
     return {"thresholds": threshold_rows(current)}
+
+
+
+NOTIFY_FIELDS = ("id", "kind", "level", "title", "stage_run_id", "unit_id", "event_id", "read_at", "read_by",
+                 "created_at")
+
+
+@router.get("/works/{work_id}/harness/notifications")
+async def list_notifications(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
+                             unread: bool = False, limit: int = Query(default=50, ge=1, le=500)):
+    """アプリの中の知らせの一覧（新しい順）。外へ届けた記録も添える。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    q = select(HarnessNotification).where(HarnessNotification.work_id == work_id)
+    if unread:
+        q = q.where(HarnessNotification.read_at.is_(None))
+    rows = (await session.execute(q.order_by(HarnessNotification.created_at.desc()).limit(limit))).scalars().all()
+    deliveries = (await session.execute(select(HarnessNotificationDelivery).where(
+        HarnessNotificationDelivery.notification_id.in_([n.id for n in rows])))).scalars().all() if rows else []
+    by_n: dict[str, list[dict[str, Any]]] = {}
+    for d in deliveries:
+        by_n.setdefault(d.notification_id, []).append(
+            {"channel": d.channel, "target": d.target, "status": d.status, "attempts": d.attempts,
+             "last_error": d.last_error})
+    return {"notifications": [{**live_stream.row_of(n, NOTIFY_FIELDS), "deliveries": by_n.get(n.id, [])}
+                              for n in rows]}
+
+
+@router.post("/works/{work_id}/harness/notifications/{notification_id}/read")
+async def read_notification(work_id: str, notification_id: str, session: SessionDep, authz: AuthzDep,
+                            actor: ActorDep):
+    await require(authz, actor, "can_view", work_obj(work_id))
+    n = await get_in_work(session, HarnessNotification, notification_id, work_id)
+    if n.read_at is None:
+        n.read_at, n.read_by = now(), actor.id
+        await session.commit()
+    return live_stream.row_of(n, NOTIFY_FIELDS)
+
+
+@router.get("/works/{work_id}/harness/notification-settings")
+async def get_notification_settings(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """作品の知らせの決まり。行が無ければ、全部の種類をアプリの中の一覧にだけ出す（外へは送らない）。"""
+    await require(authz, actor, "can_view", work_obj(work_id))
+    row = await session.get(HarnessNotificationSetting, work_id)
+    current = None if row is None else {
+        "kinds": row.kinds, "escalate_after_notices": row.escalate_after_notices,
+        "budget_near_ratio": row.budget_near_ratio, "updated_by": row.updated_by,
+        # 署名の鍵は返さない（入っているかだけ）
+        "webhooks": [{"url": w["url"], "kinds": w.get("kinds"), "signed": bool(w.get("secret"))} for w in row.webhooks]}
+    return {"kinds": NOTIFY_KINDS, "settings": current}
+
+
+@router.put("/works/{work_id}/harness/notification-settings")
+async def put_notification_settings(work_id: str, body: NotificationSettings, session: SessionDep, authz: AuthzDep,
+                                    actor: ActorDep):
+    await require(authz, actor, "can_manage", work_obj(work_id))
+    if actor.kind != "human":
+        raise Invalid("知らせの決まりは人が決める")
+    data = body.model_dump(mode="json")
+    row = await session.get(HarnessNotificationSetting, work_id)
+    # 鍵は読み出しの口で返さないので、画面は鍵を送らずに保存する。secret を書かなかった送り先は同じ URL の今の鍵を
+    # 使い、空の文字（""）を書いたら鍵を外す
+    old = {w["url"]: w.get("secret") for w in (row.webhooks if row is not None else [])}
+    for given, w in zip(body.webhooks, data["webhooks"], strict=True):
+        if "secret" not in given.model_fields_set:
+            w["secret"] = old.get(w["url"])
+        elif not w["secret"]:
+            w["secret"] = None
+    if row is None:
+        row = HarnessNotificationSetting(work_id=work_id, updated_by=actor.id, **data)
+        session.add(row)
+    else:
+        for k, v in data.items():
+            setattr(row, k, v)
+        row.updated_by = actor.id
+    await add_event(session, work_id, "notification_settings",
+                    {"by": actor.id, "kinds": data["kinds"], "webhooks": len(data["webhooks"])})
+    await session.commit()
+    return {"kinds": data["kinds"], "webhooks": len(data["webhooks"])}

@@ -2,7 +2,7 @@
 // 状態の正本はサーバー（harness_* の表）。この画面は snapshot を取り、その last_event_id の続きを SSE で受けて当てる。
 // 切れたら「切断中」を出し、つなぎ直すときに snapshot を取り直す（取りこぼしも重なりも無い。live_stream.py）。
 // 口は全部 ../js/api.js の authFetch を通す（名乗りの見出しと X-V3-Request を付ける所は api.js の1か所）。
-import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost, op } from "../js/api.js";
+import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, post as apiPost, put, op } from "../js/api.js";
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, statusClass, isHumanWait } from "./harness_graph.js";
@@ -54,7 +54,7 @@ const S = {
   runs: new Map(), units: new Map(), stale: new Map(), progress: new Map(),
   view: "stage", unitId: null, stageSel: null, detail: null, pos: null,
   conn: "connecting", retries: 0, lastEventId: 0, abort: null,
-  reviewItems: [], toast: null, thresholds: null,
+  reviewItems: [], toast: null, thresholds: null, notes: [], notify: null,
 };
 // 確かめのための値（Playwright で読む。画面の動きには使わない）
 const probe = window.__harness = { latencies: [], events: 0, lastTraversal: null, conn: "connecting", reconnects: 0 };
@@ -183,6 +183,7 @@ function onEvent({ id, event, data }) {
     if (kind === "unit_created" && u.page_id && !panelOf(u)) loadWork().then(render);
   }
   scheduleRender(Number.isFinite(at) ? { kind, at } : null);
+  if (kind === "notification") browserNotify(data);
   if (kind !== "progress" && kind !== "step") scheduleReviewItems();
 }
 
@@ -442,6 +443,7 @@ function sideKey() {
   }
   const run = S.stageSel ? S.runs.get(S.stageSel) : runsOfEpisode().at(-1);
   return JSON.stringify(["stage", run && [run.id, run.status, run.stop_reason, run.stage_check], S.reviewItems.length, S.thresholds,
+                         S.notes.map((n) => n.id), S.notify,
                          S.reviewItems.map((i) => i.kind + (i.unit_id || i.stage_run_id || ""))]);
 }
 
@@ -596,8 +598,61 @@ function stagePanel() {
   }
   out.push(h("section", { cls: "box" }, h("h3", { text: `判断待ちの一覧（${S.reviewItems.length}）` }),
     S.reviewItems.length ? h("ul", { cls: "items" }, S.reviewItems.map(itemRow)) : h("p", { cls: "muted", text: "ありません" })));
+  out.push(noteBox());
   if (S.thresholds) out.push(thresholdBox(S.thresholds));
+  if (S.notify) out.push(notifySettingsBox(S.notify));
   return out;
+}
+
+const LEVEL_JA = { info: "知らせ", warn: "注意", escalated: "急ぎ" };
+
+// アプリの中の知らせ（未読）。出来事から作るのはサーバーの1か所（harness_notify.py）
+function noteBox() {
+  return h("section", { cls: "box notes" }, h("h3", { text: `知らせ（未読 ${S.notes.length}）` }),
+    S.notes.length ? h("ul", { cls: "items" }, S.notes.map((n) => h("li", { cls: `item note lv-${n.level}` },
+      h("span", { cls: "label", text: `${LEVEL_JA[n.level] || n.level} ${ago(n.created_at)}` }),
+      h("span", { text: n.title, onclick: () => n.unit_id && openUnit(n.unit_id) }),
+      n.deliveries.length ? h("span", { cls: "muted", text: n.deliveries.map((d) => `${d.channel}:${d.status}`).join(" ") }) : null,
+      act("既読", () => post(`/works/${S.workId}/harness/notifications/${n.id}/read`).then(refreshReviewItems)))))
+      : h("p", { cls: "muted", text: "ありません" }),
+    "Notification" in window && Notification.permission === "default"
+      ? h("div", { cls: "actions" }, act("ブラウザの知らせを使う", () => Notification.requestPermission())) : null);
+}
+
+function browserNotify(data) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  new Notification(`AIハーネス：${LEVEL_JA[data.level] || data.level}`, { body: data.title, tag: data.id });
+}
+
+// 作品の知らせの決まり。外（Webhook）へは、ここで入れた先にだけ送る（既定は送らない）
+function notifySettingsBox(n) {
+  const cur = n.settings || { kinds: Object.keys(n.kinds), webhooks: [], escalate_after_notices: null, budget_near_ratio: null };
+  const checks = Object.entries(n.kinds).map(([k, ja]) => h("label", { cls: "chk" },
+    h("input", { type: "checkbox", name: k, checked: cur.kinds.includes(k) }), h("span", { text: ja })));
+  const hooks = h("textarea", { rows: 2, placeholder: "Webhook の URL（1行に1つ。後ろに空白で区切って送る種類を書けます）",
+    "aria-label": "Webhook の URL" });
+  hooks.value = cur.webhooks.map((w) => [w.url, ...(w.kinds || [])].join(" ")).join("\n");
+  const esc = h("input", { type: "number", min: 1, step: 1, value: cur.escalate_after_notices ?? "", "aria-label": "急ぎに上げる回数" });
+  const ratio = h("input", { type: "number", min: 0.01, max: 0.99, step: 0.01, value: cur.budget_near_ratio ?? "", "aria-label": "予算の割合" });
+  const save = () => {
+    const kinds = checks.map((c) => c.querySelector("input")).filter((i) => i.checked).map((i) => i.name);
+    const webhooks = hooks.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+      const [url, ...ks] = l.split(/\s+/);
+      return ks.length ? { url, kinds: ks } : { url };
+    });
+    return put(`/works/${S.workId}/harness/notification-settings`, {
+      kinds, webhooks, escalate_after_notices: esc.value === "" ? null : Number(esc.value),
+      budget_near_ratio: ratio.value === "" ? null : Number(ratio.value) }).then(refreshReviewItems);
+  };
+  return h("section", { cls: "box notify-settings" }, h("h3", { text: n.settings ? "知らせの決まり" : "知らせの決まり（未設定：一覧にだけ出す）" }),
+    h("p", { cls: "muted", text: "チェックした種類を上の一覧に出します。Webhook は入れた先にだけ送ります（既定は送りません）。"
+      + "判断待ちの知らせが決めた回数に達すると「急ぎ」に上げ、種類の絞り込みに関係なく全部の送り先へ送ります。"
+      + "予算の割合は空なら出しません。署名の鍵は画面では変えません（今の鍵をそのまま使います）。" }),
+    h("div", { cls: "chks" }, checks), hooks,
+    h("div", { cls: "lim-grid" },
+      h("label", { cls: "lim" }, h("span", { cls: "label key", text: "急ぎに上げる回数" }), esc),
+      h("label", { cls: "lim" }, h("span", { cls: "label key", text: "予算の割合（0〜1）" }), ratio)),
+    h("div", { cls: "actions" }, act("決まりを保存", save, "primary")));
 }
 
 // 閾値は作品ごとに人が置く。案は出典つきで並べるだけで、押すまで入れない（黙って決めない）
@@ -658,6 +713,8 @@ async function refreshReviewItems() {
   try {
     S.reviewItems = (await get(`/works/${S.workId}/harness/review-items`)).items;
     S.thresholds = (await get(`/works/${S.workId}/harness/thresholds`)).thresholds;
+    S.notes = (await get(`/works/${S.workId}/harness/notifications?unread=true&limit=30`)).notifications;
+    S.notify = await get(`/works/${S.workId}/harness/notification-settings`);
     renderSide();
   } catch (e) { console.warn("判断待ちの一覧を取れない", e); }
 }

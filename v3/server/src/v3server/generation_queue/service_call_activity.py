@@ -32,7 +32,9 @@ from v3server.v3_error_types import V3Error
 NON_RETRYABLE = ["rate_limited", "refused", "broken_response", "interrupted", "budget", "destination_not_allowed"]
 
 # 活動の生存を Temporal に知らせる間隔（秒）。取り消しは、この知らせの返事で活動に届く
-HEARTBEAT_SECONDS = 5
+# 1秒：5秒だと「今すぐ止める」が ComfyUI に届くまで最大5秒遅れた（tests/integration/test_harness_perf.py で測った）。
+# 作業者の間引き（queue_worker_main の heartbeat_throttle）も1秒なので、これより短くしても速くならない
+HEARTBEAT_SECONDS = 1
 
 _authz: Authz | None = None
 

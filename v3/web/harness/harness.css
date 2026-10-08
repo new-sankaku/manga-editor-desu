@@ -176,3 +176,9 @@ table{border-collapse:collapse;width:100%}
 .th-inputs{display:grid;grid-template-columns:minmax(60px,1fr) minmax(0,3fr);gap:6px}
 .th-inputs input{min-width:0}
 .cand .content-lines{display:block;aspect-ratio:auto;max-height:14em;overflow:auto;color:var(--ink-2);margin:0;padding:4px 6px 4px 18px;font-size:11.5px;text-align:left;overflow-wrap:anywhere}
+.notes .note{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center}
+.notes .note .label{grid-column:1/-1}
+.notes .note.lv-escalated{border-left:3px solid var(--bad)}
+.notes .note.lv-warn{border-left:3px solid var(--pause)}
+.notify-settings .chks{display:flex;flex-wrap:wrap;gap:4px 12px;margin-bottom:6px;font-size:12px}
+.notify-settings textarea{width:100%;min-width:0;box-sizing:border-box}

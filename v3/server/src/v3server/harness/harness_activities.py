@@ -44,7 +44,8 @@ from v3server.harness.harness_states import HUMAN_APPROVE_STAGES, STAGES, UNIT_K
 from v3server.harness.upstream_versions import upstream_of
 from v3server.v3_error_types import V3Error
 
-HEARTBEAT_SECONDS = 2
+# 段の活動の生存の知らせ（秒）。取り消しはこの返事で届く。2秒から1秒にした（test_harness_perf.py で測った）
+HEARTBEAT_SECONDS = 1
 STEP_MODULES = {"plan_interview": plan_interview_steps, "structure": structure_steps,
                 "settings_sheet": settings_sheet_steps, "name_draft": name_draft_steps,
                 "panel_drawing": panel_drawing_steps, "page_finishing": page_finishing_steps,
