@@ -11,6 +11,7 @@ import logging
 from datetime import timedelta
 
 from sqlalchemy import select
+from sqlalchemy.exc import DBAPIError
 from temporalio.client import Client
 from temporalio.worker import Worker
 
@@ -101,12 +102,25 @@ class WorkerSet:
             await self.export.shutdown()
             await self._export_task
 
+    async def keep_reloading(self) -> None:
+        """つなぎ先の一覧を RELOAD_SECONDS ごとに読み直す。
+
+        PostgreSQL に届かない間（再起動・compose の down と up）は、今動いている作業者のまま続け、次の回に読み直す。
+        前は読み直しの失敗でプロセスごと終わり、PostgreSQL が戻っても生成・書き出し・ハーネスが進まなかった
+        （2026-10-08 保存と再起動の確かめで見つけた。V3サーバーの土台「保存と再起動の確かめ」）。
+        """
+        while True:
+            await asyncio.sleep(RELOAD_SECONDS)
+            try:
+                await self.reload()
+            except DBAPIError as e:
+                log.warning("つなぎ先の一覧を読めなかった（%s）。今の作業者のまま続け、%d 秒後に読み直す",
+                            type(e.orig).__name__ if e.orig else type(e).__name__, RELOAD_SECONDS)
+
     async def run_forever(self) -> None:
         await self.start()
         try:
-            while True:
-                await asyncio.sleep(RELOAD_SECONDS)
-                await self.reload()
+            await self.keep_reloading()
         finally:
             await self.shutdown()
 

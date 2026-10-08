@@ -26,10 +26,12 @@ export class Saver {
   submit({ label, pages, ops = [], reload = false, send = null }) {
     const started = performance.now();
     const ids = new Promise((resolve, reject) => {
+      // 通った操作の出来事は done に残し、もう一度送るときは続きから送る（途中で通らなかった変更を送り直しても、
+      // 通った操作を2回送らない。取り消しはこの id で戻すので、全部の出来事が入る）
+      const done = [];
       this.jobs.push({ label, reload, resolve, reject, run: send || (async () => {
-        const out = [];
-        for (const op of ops) out.push((await api.op(this.workId, op)).event_id);
-        return out;
+        for (const op of ops.slice(done.length)) done.push((await api.op(this.workId, op)).event_id);
+        return done;
       }), started });
       this.pump();
     });

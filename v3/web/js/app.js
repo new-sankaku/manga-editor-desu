@@ -34,6 +34,8 @@ const S = {
   hist: new Map(), undoing: false,
   // 画面に出ている囲みがどのコマの物か。コマを替えるときに外へ出して masks に持つ
   shownPanel: null, shownViewing: false, masks: new Map(), showSeq: 0,
+  // 囲みを塗ってから、まだ頼んでいない（囲みは保存しないので、閉じると消える。閉じる前に聞く）
+  maskUnsent: false,
   // 描いている人の手の層（コマごと1つ）
   hand: null,
   sending: false,
@@ -102,7 +104,7 @@ async function selectWork(id) {
   S.workId = id;
   $("#pick-work").value = id;
   writePref("work", id);
-  S.hist = new Map(); S.masks = new Map(); S.shownPanel = null; S.hand = null; syncUndo();
+  S.hist = new Map(); S.masks = new Map(); S.maskUnsent = false; S.shownPanel = null; S.hand = null; syncUndo();
   [S.work, S.processes] = await Promise.all([api.get(`/works/${id}`), api.get(`/works/${id}/image-processes`)]);
   const pages = S.work.pages.filter((p) => !p.removed).sort((a, b) => a.number - b.number);
   $("#pick-page").replaceChildren(...pages.map((p) => h("option", { value: p.id, text: `${p.number} ページ` })));
@@ -418,7 +420,7 @@ async function send(over) {
   if (over.source_image_id) body.source_image_id = over.source_image_id;
   if (!over.proc && spec.mask !== "none") {
     const m = stage.maskPngBase64();
-    if (m) body.mask = { png_base64: m };
+    if (m) { body.mask = { png_base64: m }; S.maskUnsent = false; }
     else if (spec.mask === "required") { toast("描き直す所を塗ってください（囲んで頼む）", "need"); setTool("mask"); return; }
   }
   if (params.control && params.control !== "none") {
@@ -939,14 +941,17 @@ function onPenStroke(points, pointerType) {
     makeLayer = { type: "add_panel_layer", id: hand.layerId, panel_id: hand.panelId, role: "human_hand", stack_order: top + 1 };
   }
   const workId = S.workId;
+  // 層を作る操作が通った後で線が通らなかったときは、もう一度送るときに層を作り直さない
+  let layerEvent = null;
   const ids = enqueue("ペンの線", async () => {
     const out = [];
-    if (makeLayer) {
-      out.push((await api.op(workId, makeLayer)).event_id);
+    if (makeLayer && !layerEvent) {
+      layerEvent = (await api.op(workId, makeLayer)).event_id;
       hand.layerNew = false;
       S.layers.push({ ...makeLayer, image_id: null, visible: true, opacity: 1, placement: null, removed: false,
                       stroke_revision: 0, image_stroke_revision: 0 });
     }
+    if (layerEvent) out.push(layerEvent);
     out.push((await api.op(workId, { type: "add_pen_strokes", layer_id: hand.layerId, strokes: [stroke] })).event_id);
     return out;
   }, "pen");
@@ -1078,9 +1083,9 @@ function bindUi() {
   $("#keys-open").addEventListener("click", () => openHelp());
   window.addEventListener("online", () => { if (S.link) loadCandidates(); if (Q.failed) retrySaves(); });
   window.addEventListener("offline", () => { S.link = { text: "ネットにつながっていません", at: Date.now() + POLL_MAX_MS }; renderStatus(); });
-  // 保存していない線・消した所があるときは、閉じる前に聞く
+  // 保存していない線・消した所・まだ頼んでいない囲みがあるときは、閉じる前に聞く
   window.addEventListener("beforeunload", (e) => {
-    if (Q.jobs.length || (S.hand && (S.hand.dirty || S.hand.uploading))) e.preventDefault();
+    if (Q.jobs.length || (S.hand && (S.hand.dirty || S.hand.uploading)) || S.maskUnsent) e.preventDefault();
   });
 }
 
@@ -1152,11 +1157,12 @@ async function start() {
 stage = new Stage($("#stage"), {
   onExtend: onExtendFromStage, penBegin, onPenStroke, eraseBegin, onErase,
   maskBegin,
-  onMaskEdit: (edit) => pushUndo({ kind: "mask", edit }),
+  onMaskEdit: (edit) => { S.maskUnsent = true; pushUndo({ kind: "mask", edit }); },
   onRefuse: (msg) => toast(msg, "need"),
 });
-// 開発者ツールと画面の試験（test/image_generation_ui.mjs）から絵の画素の位置を調べるため
+// 開発者ツールと画面の試験（test/image_generation_ui.mjs・persistence_e2e.mjs）から絵の画素の位置と保存の待ち行列を調べるため
 window.v3Stage = stage;
+window.__wb = { S, Q };
 bindUi();
 await showWho().catch(fail);
 bindKeys();

@@ -136,7 +136,10 @@ async def seed(api: str, comfy: str, admin: str, author: str) -> dict:
         # 話1：ページ 2 枚。1ページ目にコマ 2（上のコマに小さい絵と文字 2）。ページを足す・見開き・コマ・文字は画面で
         await op({"type": "add_page", "id": p1, "episode_id": ep1, "number": 1})
         await op({"type": "add_page", "id": p2, "episode_id": ep1, "number": 2})
-        await op({"type": "update_page", "id": p1, "page_kind": "body"})
+        for pid in (p1, p2):
+            await op({"type": "update_page", "id": pid, "page_kind": "body"})
+        # 2ページ目は書き出しで1ページ目と見開きの組になる。組の2ページは色と解像度をそろえる（1ページ目は画面で変える）
+        await op({"type": "update_page", "id": p2, "color_mode": "color", "dpi": 150})
         top, low = nid(), nid()
         await op({"type": "add_panel", "id": top, "page_id": p1, "order": 1, "frame": {"polygon_mm": rect(0, 0, 150, 100),
                                                                                        "bleeds": False}})
@@ -147,6 +150,18 @@ async def seed(api: str, comfy: str, admin: str, author: str) -> dict:
         await op({"type": "update_panel", "id": top, "image_placement": {
             "crop_px": [0, 0, 160, 120], "dest_box_mm": [0, 0, 150, 112.5], "rotation_deg": 0, "skew_x_deg": 0,
             "skew_y_deg": 0, "flip_h": False, "flip_v": False}})
+        # 上のコマに重ねる層 2 枚（層の順・見せるか・不透明度・固定は画面で変える。層は画像生成の画面で作る物なので種で入れる）
+        layers = []
+        for order, shade in ((1, 120), (2, 60)):
+            buf = io.BytesIO()
+            Image.new("L", (16, 16), shade).save(buf, format="PNG")
+            lim = await call("POST", f"/works/{wid}/images", author, files={"image": ("layer.png", buf.getvalue(), "image/png")},
+                             data={"role": "tone", "origin": "human_drawn", "panel_id": top})
+            lid = nid()
+            await op({"type": "add_panel_layer", "id": lid, "panel_id": top, "role": "tone", "image_id": lim["id"],
+                      "stack_order": order, "placement": {"crop_px": [0, 0, 16, 16],
+                                                          "dest_box_mm": [10 + 40 * order, 40, 40 + 40 * order, 70]}})
+            layers.append(lid)
         texts = []
         for i, (x, words) in enumerate([(130, "ここが\n入口か"), (100, "誰も\nいない")]):
             tid = nid()
@@ -168,7 +183,7 @@ async def seed(api: str, comfy: str, admin: str, author: str) -> dict:
         stage = await call("POST", f"/works/{wid}/harness/stages", author, json={
             "episode_id": ep2, "stage": "S4", "limits": LIMITS, "spec": {"drawing": DRAWING}})
         return {"workId": wid, "episodes": [ep1, ep2, ep3], "pages": [p1, p2], "panels": [top, low],
-                "image": img["id"], "texts": texts, "harnessPanels": hp, "stageRun": stage["stage_run_id"],
+                "image": img["id"], "texts": texts, "layers": layers, "harnessPanels": hp, "stageRun": stage["stage_run_id"],
                 "limits": LIMITS, "drawing": DRAWING}
 
 

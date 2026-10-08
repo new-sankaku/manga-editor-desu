@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "integration"))
 from harness_fakes import Script, fake_detector, fake_llm  # noqa: E402
 from temporalio.client import Client  # noqa: E402
 
-from v3server.generation_queue.queue_worker_main import RELOAD_SECONDS, WorkerSet  # noqa: E402
+from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
 from v3server.harness.harness_worker_main import HarnessWorker  # noqa: E402
 from v3server.image_file_storage import image_store  # noqa: E402
 from v3server.server_settings import get_settings  # noqa: E402
@@ -40,9 +40,7 @@ async def main() -> None:
     await harness.start()
     print("WORKERS READY", flush=True)
     try:
-        while True:
-            await asyncio.sleep(RELOAD_SECONDS)
-            await workers.reload()
+        await workers.keep_reloading()
     finally:
         await harness.shutdown()
         await workers.shutdown()

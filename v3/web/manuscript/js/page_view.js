@@ -704,7 +704,9 @@ export class PageView {
     if (!t) return;
     if (t.fixed) { this.hooks.onRefuse("動かさない印の付いた文字は直せません"); return; }
     this.c.discardActiveObject();
-    this.text.edit(t);
+    // 文字の道具で押したとき（mouse:down の中）に欄へフォーカスを移しても、そのあとのブラウザの既定の動き
+    // （押した所へフォーカスを移す）で欄から外れ、打つ前に終わっていた。押す出来事が終わってから打てる状態にする
+    setTimeout(() => { const cur = this.model.find("text_items", id); if (cur) this.text.edit(cur); }, 0);
   }
 
   onSel(o) {
