@@ -1,0 +1,7 @@
+node_modules/
+# 作り直せる出力（run.py で作る）。数値は out/result.json、一覧の画像は out/sheet_*.png（これは残す）
+out/*.psd
+out/*.png
+!out/sheet_*.png
+out/layers/
+out/work/

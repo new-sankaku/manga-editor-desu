@@ -1,0 +1,3020 @@
+{
+ "versions": {
+  "psd_tools": "1.21.0",
+  "gimp": "GNU Image Manipulation Program version 2.10.36",
+  "krita": "1:5.2.2+dfsg-2build8",
+  "node": "v22.22.0"
+ },
+ "page_size_px": [
+  1240,
+  1754
+ ],
+ "未検証": [
+  "Photoshop・CLIP STUDIO PAINT で開いたとき（この環境に無い）",
+  "手順の数は人で測っていない（層の構造から数えた見積り）",
+  "入稿の解像度（600dpi 程度）での開く時間とファイルの大きさ（ここは 150dpi）"
+ ],
+ "production_write": {
+  "page1": {
+   "bytes": 2359428,
+   "layers_readback": 31
+  },
+  "page2": {
+   "bytes": 2454238,
+   "layers_readback": 36
+  }
+ },
+ "text_without_pixels_agpsd": [
+  {
+   "name": "コマ1 台詞1",
+   "bounds": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "pixels": null,
+   "text": "ここが\n新しい部屋？"
+  },
+  {
+   "name": "コマ1 台詞2",
+   "bounds": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "pixels": null,
+   "text": "ひろいね"
+  },
+  {
+   "name": "コマ2 台詞1",
+   "bounds": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "pixels": null,
+   "text": "荷物は\nどこに置く？"
+  }
+ ],
+ "tagged_write_xmp_kept_by_agpsd": true,
+ "usability_measured": {
+  "page1": {
+   "bytes": 2359428,
+   "psd_tools_open_sec": 0.043,
+   "psd_tools": {
+    "groups": 6,
+    "layers": 25,
+    "kinds": {
+     "group": 6,
+     "pixel": 20,
+     "type": 5
+    },
+    "type_layers_with_text": 5,
+    "duplicate_names": [
+     "トーン",
+     "線画",
+     "背景",
+     "色"
+    ],
+    "names_with_replacement_char": []
+   },
+   "agpsd_read_ms": 406,
+   "agpsd_text_layers": 5,
+   "gimp_open_sec": 0.92,
+   "gimp_startup_sec": 0.91,
+   "gimp": {
+    "rc": 0,
+    "groups": 6,
+    "layers": 25,
+    "text_layers": 0,
+    "renamed_duplicates": [
+     "線画 #3",
+     "トーン #3",
+     "色 #3",
+     "背景 #3",
+     "線画 #2",
+     "トーン #2",
+     "色 #2",
+     "背景 #2",
+     "線画 #1",
+     "トーン #1",
+     "色 #1",
+     "背景 #1"
+    ],
+    "names_sample": [
+     "描き文字",
+     "写植",
+     "コマ4 台詞1",
+     "コマ3 台詞1",
+     "コマ2 台詞1",
+     "コマ1 台詞2",
+     "コマ1 台詞1",
+     "フキダシ",
+     "人の手",
+     "AIの絵",
+     "コマ4",
+     "線画 #3"
+    ],
+    "modes": [
+     "MULTIPLY",
+     "NORMAL"
+    ],
+    "hidden": [
+     "色 #3",
+     "色 #1"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2307
+    },
+    "stderr_tail": "batch command executed successfully\n",
+    "resave": {
+     "bytes": 2295241,
+     "kinds": {
+      "group": 6,
+      "pixel": 25
+     },
+     "groups": 6,
+     "layers": 25,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      2593,
+      1105,
+      2751,
+      2528,
+      1933
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "krita": {
+    "open_sec": 1.93,
+    "groups": 6,
+    "layers": 25,
+    "types": [
+     "grouplayer",
+     "paintlayer"
+    ],
+    "names_sample": [
+     "コマ枠",
+     "AIの絵",
+     "コマ1",
+     "背景",
+     "色",
+     "トーン",
+     "線画",
+     "コマ2",
+     "背景",
+     "色",
+     "トーン",
+     "線画"
+    ],
+    "blends": [
+     "multiply",
+     "normal"
+    ],
+    "hidden": [
+     "色",
+     "色"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2307
+    },
+    "error": null,
+    "resave": {
+     "bytes": 1627469,
+     "kinds": {
+      "group": 6,
+      "pixel": 25
+     },
+     "groups": 6,
+     "layers": 25,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      2593,
+      1105,
+      2751,
+      2528,
+      1933
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "text_layer_opaque_px_original": [
+    2593,
+    1105,
+    2751,
+    2528,
+    1933
+   ],
+   "frame_separable": {
+    "frame_is_own_layer": true,
+    "frame_opaque_px": 63048,
+    "frame_px_covered_by_panel_art": 31380,
+    "frame_order": "コマ枠は一番下（V3細部の決めごと 10.3 の順）"
+   }
+  },
+  "page2": {
+   "bytes": 2454238,
+   "psd_tools_open_sec": 0.036,
+   "psd_tools": {
+    "groups": 7,
+    "layers": 29,
+    "kinds": {
+     "group": 7,
+     "pixel": 24,
+     "type": 5
+    },
+    "type_layers_with_text": 5,
+    "duplicate_names": [
+     "トーン",
+     "線画",
+     "背景",
+     "色"
+    ],
+    "names_with_replacement_char": []
+   },
+   "agpsd_read_ms": 371,
+   "agpsd_text_layers": 5,
+   "gimp_open_sec": 1.01,
+   "gimp_startup_sec": 0.91,
+   "gimp": {
+    "rc": 0,
+    "groups": 7,
+    "layers": 29,
+    "text_layers": 0,
+    "renamed_duplicates": [
+     "線画 #4",
+     "トーン #4",
+     "色 #4",
+     "背景 #4",
+     "線画 #3",
+     "トーン #3",
+     "色 #3",
+     "背景 #3",
+     "線画 #2",
+     "トーン #2",
+     "色 #2",
+     "背景 #2",
+     "線画 #1",
+     "トーン #1",
+     "色 #1",
+     "背景 #1"
+    ],
+    "names_sample": [
+     "描き文字",
+     "写植",
+     "コマ5 台詞1",
+     "コマ4 台詞1",
+     "コマ3 台詞1",
+     "コマ2 台詞1",
+     "コマ1 台詞1",
+     "フキダシ",
+     "人の手",
+     "AIの絵",
+     "コマ5",
+     "線画 #4"
+    ],
+    "modes": [
+     "MULTIPLY",
+     "NORMAL"
+    ],
+    "hidden": [
+     "色 #3",
+     "色 #1"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2367
+    },
+    "stderr_tail": "batch command executed successfully\n",
+    "resave": {
+     "bytes": 2374210,
+     "kinds": {
+      "group": 7,
+      "pixel": 29
+     },
+     "groups": 7,
+     "layers": 29,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      1690,
+      1820,
+      1696,
+      1874,
+      533
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "krita": {
+    "open_sec": 1.839,
+    "groups": 7,
+    "layers": 29,
+    "types": [
+     "grouplayer",
+     "paintlayer"
+    ],
+    "names_sample": [
+     "コマ枠",
+     "AIの絵",
+     "コマ1",
+     "背景",
+     "色",
+     "トーン",
+     "線画",
+     "コマ2",
+     "背景",
+     "色",
+     "トーン",
+     "線画"
+    ],
+    "blends": [
+     "multiply",
+     "normal"
+    ],
+    "hidden": [
+     "色",
+     "色"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2367
+    },
+    "error": null,
+    "resave": {
+     "bytes": 1667445,
+     "kinds": {
+      "group": 7,
+      "pixel": 29
+     },
+     "groups": 7,
+     "layers": 29,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      1690,
+      1820,
+      1696,
+      1874,
+      533
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "text_layer_opaque_px_original": [
+    1690,
+    1820,
+    1696,
+    1874,
+    533
+   ],
+   "frame_separable": {
+    "frame_is_own_layer": true,
+    "frame_opaque_px": 69096,
+    "frame_px_covered_by_panel_art": 34368,
+    "frame_order": "コマ枠は一番下（V3細部の決めごと 10.3 の順）"
+   }
+  },
+  "page1_tagged": {
+   "bytes": 2364028,
+   "psd_tools_open_sec": 0.037,
+   "psd_tools": {
+    "groups": 6,
+    "layers": 25,
+    "kinds": {
+     "group": 6,
+     "pixel": 20,
+     "type": 5
+    },
+    "type_layers_with_text": 5,
+    "duplicate_names": [],
+    "names_with_replacement_char": []
+   },
+   "agpsd_read_ms": 376,
+   "agpsd_text_layers": 5,
+   "gimp_open_sec": 0.95,
+   "gimp_startup_sec": 0.91,
+   "gimp": {
+    "rc": 0,
+    "groups": 6,
+    "layers": 25,
+    "text_layers": 0,
+    "renamed_duplicates": [],
+    "names_sample": [
+     "描き文字 [p1sfx]",
+     "写植 [p1gtext]",
+     "コマ4 台詞1 [p1k4s1]",
+     "コマ3 台詞1 [p1k3s1]",
+     "コマ2 台詞1 [p1k2s1]",
+     "コマ1 台詞2 [p1k1s2]",
+     "コマ1 台詞1 [p1k1s1]",
+     "フキダシ [p1balloon]",
+     "人の手 [p1hand]",
+     "AIの絵 [p1gart]",
+     "コマ4 [p1g4]",
+     "線画 [p1k4L]"
+    ],
+    "modes": [
+     "MULTIPLY",
+     "NORMAL"
+    ],
+    "hidden": [
+     "色 [p1k4C]",
+     "色 [p1k2C]"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2307
+    },
+    "stderr_tail": "gimp: (null)-WARNING: No namespace info available for XMP prefix `v3'\ngimp: (null)-WARNING: No namespace info available for XMP prefix `v3'\nbatch command executed successfully\n",
+    "resave": {
+     "bytes": 2295897,
+     "kinds": {
+      "group": 6,
+      "pixel": 25
+     },
+     "groups": 6,
+     "layers": 25,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      2593,
+      1105,
+      2751,
+      2528,
+      1933
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "krita": {
+    "open_sec": 1.85,
+    "groups": 6,
+    "layers": 25,
+    "types": [
+     "grouplayer",
+     "paintlayer"
+    ],
+    "names_sample": [
+     "コマ枠 [p1frame]",
+     "AIの絵 [p1gart]",
+     "コマ1 [p1g1]",
+     "背景 [p1k1B]",
+     "色 [p1k1C]",
+     "トーン [p1k1T]",
+     "線画 [p1k1L]",
+     "コマ2 [p1g2]",
+     "背景 [p1k2B]",
+     "色 [p1k2C]",
+     "トーン [p1k2T]",
+     "線画 [p1k2L]"
+    ],
+    "blends": [
+     "multiply",
+     "normal"
+    ],
+    "hidden": [
+     "色 [p1k2C]",
+     "色 [p1k4C]"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2307
+    },
+    "error": null,
+    "resave": {
+     "bytes": 1628987,
+     "kinds": {
+      "group": 6,
+      "pixel": 25
+     },
+     "groups": 6,
+     "layers": 25,
+     "text_layer_kinds": [],
+     "text_layer_opaque_px": [],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "text_layer_opaque_px_original": [
+    2593,
+    1105,
+    2751,
+    2528,
+    1933
+   ],
+   "frame_separable": {
+    "frame_is_own_layer": true,
+    "frame_opaque_px": 63048,
+    "frame_px_covered_by_panel_art": 31380,
+    "frame_order": "コマ枠は一番下（V3細部の決めごと 10.3 の順）"
+   }
+  },
+  "page1_text_no_pixels": {
+   "bytes": 2326524,
+   "psd_tools_open_sec": 0.036,
+   "psd_tools": {
+    "groups": 6,
+    "layers": 25,
+    "kinds": {
+     "group": 6,
+     "pixel": 20,
+     "type": 5
+    },
+    "type_layers_with_text": 5,
+    "duplicate_names": [
+     "トーン",
+     "線画",
+     "背景",
+     "色"
+    ],
+    "names_with_replacement_char": []
+   },
+   "agpsd_read_ms": 332,
+   "agpsd_text_layers": 5,
+   "gimp_open_sec": 1.07,
+   "gimp_startup_sec": 0.91,
+   "gimp": {
+    "rc": 0,
+    "groups": 6,
+    "layers": 25,
+    "text_layers": 0,
+    "renamed_duplicates": [
+     "線画 #3",
+     "トーン #3",
+     "色 #3",
+     "背景 #3",
+     "線画 #2",
+     "トーン #2",
+     "色 #2",
+     "背景 #2",
+     "線画 #1",
+     "トーン #1",
+     "色 #1",
+     "背景 #1"
+    ],
+    "names_sample": [
+     "描き文字",
+     "写植",
+     "コマ4 台詞1",
+     "コマ3 台詞1",
+     "コマ2 台詞1",
+     "コマ1 台詞2",
+     "コマ1 台詞1",
+     "フキダシ",
+     "人の手",
+     "AIの絵",
+     "コマ4",
+     "線画 #3"
+    ],
+    "modes": [
+     "MULTIPLY",
+     "NORMAL"
+    ],
+    "hidden": [
+     "色 #3",
+     "色 #1"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.896,
+     "差が16超の画素の割合": 0.00464,
+     "透明な画素の割合": 0.2307
+    },
+    "stderr_tail": "batch command executed successfully\n",
+    "resave": {
+     "bytes": 2991391,
+     "kinds": {
+      "group": 6,
+      "pixel": 25
+     },
+     "groups": 6,
+     "layers": 25,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "krita": {
+    "open_sec": 2.034,
+    "groups": 6,
+    "layers": 25,
+    "types": [
+     "grouplayer",
+     "paintlayer"
+    ],
+    "names_sample": [
+     "コマ枠",
+     "AIの絵",
+     "コマ1",
+     "背景",
+     "色",
+     "トーン",
+     "線画",
+     "コマ2",
+     "背景",
+     "色",
+     "トーン",
+     "線画"
+    ],
+    "blends": [
+     "multiply",
+     "normal"
+    ],
+    "hidden": [
+     "色",
+     "色"
+    ],
+    "composite_vs_expected": {
+     "平均差(0..255)": 0.896,
+     "差が16超の画素の割合": 0.00464,
+     "透明な画素の割合": 0.2307
+    },
+    "error": null,
+    "resave": {
+     "bytes": 1553530,
+     "kinds": {
+      "group": 6,
+      "pixel": 25
+     },
+     "groups": 6,
+     "layers": 25,
+     "text_layer_kinds": [
+      "pixel"
+     ],
+     "text_layer_opaque_px": [
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "lyid_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ]
+    }
+   },
+   "text_layer_opaque_px_original": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "frame_separable": {
+    "frame_is_own_layer": true,
+    "frame_opaque_px": 63048,
+    "frame_px_covered_by_panel_art": 31380,
+    "frame_order": "コマ枠は一番下（V3細部の決めごと 10.3 の順）"
+   }
+  }
+ },
+ "roundtrip": {
+  "plan": {
+   "line_name": "線画 [p1k2L]",
+   "rename_from": "背景 [p1k3B]",
+   "rename_to": "背景（直し）",
+   "toggle_name": "色 [p1k1C]",
+   "group_name": "コマ2 [p1g2]",
+   "delete_name": "トーン [p1k4T]",
+   "text_name": "コマ1 台詞1 [p1k1s1]",
+   "text_group_name": "写植 [p1gtext]",
+   "paint_rect": [
+    700,
+    700,
+    160,
+    120
+   ],
+   "add_rect": [
+    900,
+    820,
+    90,
+    70
+   ]
+  },
+  "gimp_edit": {
+   "rc": 0,
+   "ops": [
+    {
+     "op": "paint_line_art",
+     "result": "ok"
+    },
+    {
+     "op": "rename",
+     "result": "ok"
+    },
+    {
+     "op": "toggle_visible",
+     "result": "ok"
+    },
+    {
+     "op": "add_layer_in_group",
+     "result": "ok"
+    },
+    {
+     "op": "delete_layer",
+     "result": "ok"
+    },
+    {
+     "op": "set_text_of_imported_text_layer",
+     "result": "failed"
+    },
+    {
+     "op": "add_gimp_text_layer",
+     "result": "ok"
+    }
+   ],
+   "stderr_tail": "gimp: (null)-WARNING: No namespace info available for XMP prefix `v3'\ngimp: (null)-WARNING: No namespace info available for XMP prefix `v3'\nusing gegl copy\nusing gegl copy\nGIMP-Error: Calling error for procedure 'gimp-text-layer-set-text':\nLayer 'コマ1 台詞1 [p1k1s1]' (27) cannot be used because it is not a text layer\n\nbatch command executed successfully\n"
+  },
+  "krita_edit": {
+   "ops": [
+    {
+     "op": "paint_line_art",
+     "result": "ok",
+     "detail": null
+    },
+    {
+     "op": "rename",
+     "result": "ok",
+     "detail": null
+    },
+    {
+     "op": "toggle_visible",
+     "result": "ok",
+     "detail": false
+    },
+    {
+     "op": "add_layer_in_group",
+     "result": "ok",
+     "detail": "paintlayer"
+    },
+    {
+     "op": "delete_layer",
+     "result": "ok",
+     "detail": true
+    },
+    {
+     "op": "set_text_of_imported_text_layer",
+     "result": "failed",
+     "error": "RuntimeError('文字の層として読めていません。type=paintlayer')"
+    },
+    {
+     "op": "add_krita_text_layer",
+     "result": "ok",
+     "detail": {
+      "type": "vectorlayer",
+      "shapes": 1
+     }
+    }
+   ],
+   "error": null,
+   "export_psd_ok": true
+  },
+  "no_edit": {
+   "identifiers": {
+    "total": 31,
+    "lyid_hits": 31,
+    "tag_hits": 31,
+    "timestamp_hits": 31,
+    "lyid_values_sample": [
+     101,
+     901,
+     902,
+     102,
+     103,
+     104,
+     105,
+     903
+    ],
+    "lyid_conflict_with_tag": 0
+   },
+   "matched_by": "lyid",
+   "xmp_kept": true,
+   "agpsd_read_error": null,
+   "changed": [
+    {
+     "item": "p1frame",
+     "back_name": "コマ枠 [p1frame]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1B",
+     "back_name": "背景 [p1k1B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1C",
+     "back_name": "色 [p1k1C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k1T",
+     "back_name": "トーン [p1k1T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1L",
+     "back_name": "線画 [p1k1L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2B",
+     "back_name": "背景 [p1k2B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2C",
+     "back_name": "色 [p1k2C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": false,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k2T",
+     "back_name": "トーン [p1k2T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2L",
+     "back_name": "線画 [p1k2L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k3B",
+     "back_name": "背景 [p1k3B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k3C",
+     "back_name": "色 [p1k3C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k3T",
+     "back_name": "トーン [p1k3T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k3L",
+     "back_name": "線画 [p1k3L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4B",
+     "back_name": "背景 [p1k4B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4C",
+     "back_name": "色 [p1k4C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": false,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k4T",
+     "back_name": "トーン [p1k4T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4L",
+     "back_name": "線画 [p1k4L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1hand",
+     "back_name": "人の手 [p1hand]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1balloon",
+     "back_name": "フキダシ [p1balloon]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1s1",
+     "back_name": "コマ1 台詞1 [p1k1s1]",
+     "kind": "type",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": true,
+     "text_back": "ここが\r新しい部屋？"
+    },
+    {
+     "item": "p1k1s2",
+     "back_name": "コマ1 台詞2 [p1k1s2]",
+     "kind": "type",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": true,
+     "text_back": "ひろいね"
+    },
+    {
+     "item": "p1k2s1",
+     "back_name": "コマ2 台詞1 [p1k2s1]",
+     "kind": "type",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": true,
+     "text_back": "荷物は\rどこに置く？"
+    },
+    {
+     "item": "p1k3s1",
+     "back_name": "コマ3 台詞1 [p1k3s1]",
+     "kind": "type",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": true,
+     "text_back": "窓のそばが\rいいな"
+    },
+    {
+     "item": "p1k4s1",
+     "back_name": "コマ4 台詞1 [p1k4s1]",
+     "kind": "type",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": true,
+     "text_back": "よし、\rはじめよう！"
+    },
+    {
+     "item": "p1sfx",
+     "back_name": "描き文字 [p1sfx]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    }
+   ],
+   "blend_lost": [],
+   "text_layers": [
+    {
+     "item": "p1k1s1",
+     "kept_as_text": true,
+     "text": "ここが\r新しい部屋？"
+    },
+    {
+     "item": "p1k1s2",
+     "kept_as_text": true,
+     "text": "ひろいね"
+    },
+    {
+     "item": "p1k2s1",
+     "kept_as_text": true,
+     "text": "荷物は\rどこに置く？"
+    },
+    {
+     "item": "p1k3s1",
+     "kept_as_text": true,
+     "text": "窓のそばが\rいいな"
+    },
+    {
+     "item": "p1k4s1",
+     "kept_as_text": true,
+     "text": "よし、\rはじめよう！"
+    }
+   ],
+   "added": [],
+   "groups": [
+    "AIの絵 [p1gart]",
+    "コマ1 [p1g1]",
+    "コマ2 [p1g2]",
+    "コマ3 [p1g3]",
+    "コマ4 [p1g4]",
+    "写植 [p1gtext]"
+   ],
+   "unchanged_layers": 25,
+   "names_with_nul": 0,
+   "agpsd_text_layers": [
+    {
+     "name": "コマ1 台詞1 [p1k1s1]",
+     "text": "ここが\n新しい部屋？"
+    },
+    {
+     "name": "コマ1 台詞2 [p1k1s2]",
+     "text": "ひろいね"
+    },
+    {
+     "name": "コマ2 台詞1 [p1k2s1]",
+     "text": "荷物は\nどこに置く？"
+    }
+   ],
+   "reattach_line_art": {
+    "new_image_size": [
+     530,
+     510
+    ],
+    "placement_left_top": [
+     630,
+     590
+    ],
+    "changed_px_in_panel": 0,
+    "changed_bbox_in_panel": null,
+    "expected_bbox_in_panel": [
+     70,
+     110,
+     230,
+     230
+    ],
+    "bbox_matches_edit": false,
+    "opaque_px_outside_panel": 0,
+    "server_ops": [
+     "register_image(role=line_art, origin=human_edited, based_on_image_id=元の絵, panel_id=コマ)",
+     "update_panel_layer(id=線画の層, image_id=新しい絵, placement=元と同じ)"
+    ]
+   }
+  },
+  "gimp": {
+   "identifiers": {
+    "total": 31,
+    "lyid_hits": 0,
+    "tag_hits": 29,
+    "timestamp_hits": 0,
+    "lyid_values_sample": [
+     -1,
+     -1,
+     -1,
+     -1,
+     -1,
+     -1,
+     -1,
+     -1
+    ],
+    "lyid_conflict_with_tag": 0
+   },
+   "matched_by": "name_tag",
+   "xmp_kept": false,
+   "agpsd_read_error": null,
+   "changed": [
+    {
+     "item": "p1frame",
+     "back_name": "コマ枠 [p1frame]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1B",
+     "back_name": "背景 [p1k1B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1C",
+     "back_name": "色 [p1k1C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k1T",
+     "back_name": "トーン [p1k1T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1L",
+     "back_name": "線画 [p1k1L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2B",
+     "back_name": "背景 [p1k2B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2C",
+     "back_name": "色 [p1k2C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": false,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k2T",
+     "back_name": "トーン [p1k2T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2L",
+     "back_name": "線画 [p1k2L]",
+     "kind": "pixel",
+     "changed_px": 19200,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "changed_bbox_page": [
+      700,
+      700,
+      860,
+      820
+     ]
+    },
+    {
+     "item": "p1k3B",
+     "name": "背景",
+     "status": "removed_or_unmatched"
+    },
+    {
+     "item": "p1k3C",
+     "back_name": "色 [p1k3C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k3T",
+     "back_name": "トーン [p1k3T]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k3L",
+     "back_name": "線画 [p1k3L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4B",
+     "back_name": "背景 [p1k4B]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4C",
+     "back_name": "色 [p1k4C]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": false,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k4T",
+     "name": "トーン",
+     "status": "removed_or_unmatched"
+    },
+    {
+     "item": "p1k4L",
+     "back_name": "線画 [p1k4L]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1hand",
+     "back_name": "人の手 [p1hand]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1balloon",
+     "back_name": "フキダシ [p1balloon]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1s1",
+     "back_name": "コマ1 台詞1 [p1k1s1]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k1s2",
+     "back_name": "コマ1 台詞2 [p1k1s2]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k2s1",
+     "back_name": "コマ2 台詞1 [p1k2s1]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k3s1",
+     "back_name": "コマ3 台詞1 [p1k3s1]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k4s1",
+     "back_name": "コマ4 台詞1 [p1k4s1]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1sfx",
+     "back_name": "描き文字 [p1sfx]",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    }
+   ],
+   "blend_lost": [],
+   "text_layers": [
+    {
+     "item": "p1k1s1",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k1s2",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k2s1",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k3s1",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k4s1",
+     "kept_as_text": false,
+     "text": null
+    }
+   ],
+   "added": [
+    {
+     "name": "手の描き直し",
+     "kind": "pixel",
+     "path": [
+      "AIの絵 [p1gart]",
+      "コマ2 [p1g2]",
+      "手の描き直し"
+     ],
+     "bbox": [
+      0,
+      0,
+      1240,
+      1754
+     ],
+     "opaque_px": 5056,
+     "same_pixels_as_missing_item": [],
+     "parent_panel_key": "p1g2",
+     "name_has_nul": false
+    },
+    {
+     "name": "背景（直し）",
+     "kind": "pixel",
+     "path": [
+      "AIの絵 [p1gart]",
+      "コマ3 [p1g3]",
+      "背景（直し）"
+     ],
+     "bbox": [
+      80,
+      590,
+      600,
+      1100
+     ],
+     "opaque_px": 265200,
+     "same_pixels_as_missing_item": [
+      "p1k3B"
+     ],
+     "parent_panel_key": "p1g3",
+     "name_has_nul": false
+    },
+    {
+     "name": "打ち直した台詞",
+     "kind": "pixel",
+     "path": [
+      "写植 [p1gtext]",
+      "打ち直した台詞"
+     ],
+     "bbox": [
+      200,
+      200,
+      237,
+      452
+     ],
+     "opaque_px": 2700,
+     "same_pixels_as_missing_item": [],
+     "parent_panel_key": "p1gtext",
+     "name_has_nul": false
+    }
+   ],
+   "groups": [
+    "AIの絵 [p1gart]",
+    "コマ1 [p1g1]",
+    "コマ2 [p1g2]",
+    "コマ3 [p1g3]",
+    "コマ4 [p1g4]",
+    "写植 [p1gtext]"
+   ],
+   "unchanged_layers": 22,
+   "names_with_nul": 0,
+   "agpsd_text_layers": [],
+   "reattach_line_art": {
+    "new_image_size": [
+     530,
+     510
+    ],
+    "placement_left_top": [
+     630,
+     590
+    ],
+    "changed_px_in_panel": 19200,
+    "changed_bbox_in_panel": [
+     70,
+     110,
+     230,
+     230
+    ],
+    "expected_bbox_in_panel": [
+     70,
+     110,
+     230,
+     230
+    ],
+    "bbox_matches_edit": true,
+    "opaque_px_outside_panel": 0,
+    "server_ops": [
+     "register_image(role=line_art, origin=human_edited, based_on_image_id=元の絵, panel_id=コマ)",
+     "update_panel_layer(id=線画の層, image_id=新しい絵, placement=元と同じ)"
+    ]
+   }
+  },
+  "krita": {
+   "identifiers": {
+    "total": 31,
+    "lyid_hits": 0,
+    "tag_hits": 29,
+    "timestamp_hits": 0,
+    "lyid_values_sample": [
+     -1,
+     -1,
+     -1,
+     -1,
+     -1,
+     -1,
+     -1,
+     -1
+    ],
+    "lyid_conflict_with_tag": 0
+   },
+   "matched_by": "name_tag",
+   "xmp_kept": true,
+   "agpsd_read_error": null,
+   "changed": [
+    {
+     "item": "p1frame",
+     "back_name": "コマ枠 [p1frame]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1B",
+     "back_name": "背景 [p1k1B]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1C",
+     "back_name": "色 [p1k1C]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k1T",
+     "back_name": "トーン [p1k1T]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1L",
+     "back_name": "線画 [p1k1L]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2B",
+     "back_name": "背景 [p1k2B]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2C",
+     "back_name": "色 [p1k2C]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": false,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k2T",
+     "back_name": "トーン [p1k2T]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k2L",
+     "back_name": "線画 [p1k2L]\u0000",
+     "kind": "pixel",
+     "changed_px": 19200,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "changed_bbox_page": [
+      700,
+      700,
+      860,
+      820
+     ]
+    },
+    {
+     "item": "p1k3B",
+     "name": "背景",
+     "status": "removed_or_unmatched"
+    },
+    {
+     "item": "p1k3C",
+     "back_name": "色 [p1k3C]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k3T",
+     "back_name": "トーン [p1k3T]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k3L",
+     "back_name": "線画 [p1k3L]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4B",
+     "back_name": "背景 [p1k4B]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k4C",
+     "back_name": "色 [p1k4C]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": false,
+     "visible_after": false,
+     "blend_before": "multiply",
+     "blend_after": "MULTIPLY"
+    },
+    {
+     "item": "p1k4T",
+     "name": "トーン",
+     "status": "removed_or_unmatched"
+    },
+    {
+     "item": "p1k4L",
+     "back_name": "線画 [p1k4L]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1hand",
+     "back_name": "人の手 [p1hand]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1balloon",
+     "back_name": "フキダシ [p1balloon]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    },
+    {
+     "item": "p1k1s1",
+     "back_name": "コマ1 台詞1 [p1k1s1]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k1s2",
+     "back_name": "コマ1 台詞2 [p1k1s2]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k2s1",
+     "back_name": "コマ2 台詞1 [p1k2s1]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k3s1",
+     "back_name": "コマ3 台詞1 [p1k3s1]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1k4s1",
+     "back_name": "コマ4 台詞1 [p1k4s1]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL",
+     "text_kept_as_text": false,
+     "text_back": null
+    },
+    {
+     "item": "p1sfx",
+     "back_name": "描き文字 [p1sfx]\u0000",
+     "kind": "pixel",
+     "changed_px": 0,
+     "visible_before": true,
+     "visible_after": true,
+     "blend_before": "normal",
+     "blend_after": "NORMAL"
+    }
+   ],
+   "blend_lost": [],
+   "text_layers": [
+    {
+     "item": "p1k1s1",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k1s2",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k2s1",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k3s1",
+     "kept_as_text": false,
+     "text": null
+    },
+    {
+     "item": "p1k4s1",
+     "kept_as_text": false,
+     "text": null
+    }
+   ],
+   "added": [
+    {
+     "name": "手の描き直し\u0000",
+     "kind": "pixel",
+     "path": [
+      "AIの絵 [p1gart]\u0000",
+      "コマ2 [p1g2]\u0000",
+      "手の描き直し\u0000"
+     ],
+     "bbox": [
+      900,
+      820,
+      990,
+      890
+     ],
+     "opaque_px": 6300,
+     "same_pixels_as_missing_item": [],
+     "parent_panel_key": "p1g2",
+     "name_has_nul": true
+    },
+    {
+     "name": "背景（直し）\u0000",
+     "kind": "pixel",
+     "path": [
+      "AIの絵 [p1gart]\u0000",
+      "コマ3 [p1g3]\u0000",
+      "背景（直し）\u0000"
+     ],
+     "bbox": [
+      80,
+      590,
+      600,
+      1100
+     ],
+     "opaque_px": 265200,
+     "same_pixels_as_missing_item": [
+      "p1k3B"
+     ],
+     "parent_panel_key": "p1g3",
+     "name_has_nul": true
+    },
+    {
+     "name": "打ち直した台詞\u0000",
+     "kind": "pixel",
+     "path": [
+      "写植 [p1gtext]\u0000",
+      "打ち直した台詞\u0000"
+     ],
+     "bbox": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "opaque_px": 0,
+     "same_pixels_as_missing_item": [],
+     "parent_panel_key": "p1gtext",
+     "name_has_nul": true
+    }
+   ],
+   "groups": [
+    "AIの絵 [p1gart]\u0000",
+    "コマ1 [p1g1]\u0000",
+    "コマ2 [p1g2]\u0000",
+    "コマ3 [p1g3]\u0000",
+    "コマ4 [p1g4]\u0000",
+    "写植 [p1gtext]\u0000"
+   ],
+   "unchanged_layers": 22,
+   "names_with_nul": 32,
+   "agpsd_text_layers": [],
+   "reattach_line_art": {
+    "new_image_size": [
+     530,
+     510
+    ],
+    "placement_left_top": [
+     630,
+     590
+    ],
+    "changed_px_in_panel": 19200,
+    "changed_bbox_in_panel": [
+     70,
+     110,
+     230,
+     230
+    ],
+    "expected_bbox_in_panel": [
+     70,
+     110,
+     230,
+     230
+    ],
+    "bbox_matches_edit": true,
+    "opaque_px_outside_panel": 0,
+    "server_ops": [
+     "register_image(role=line_art, origin=human_edited, based_on_image_id=元の絵, panel_id=コマ)",
+     "update_panel_layer(id=線画の層, image_id=新しい絵, placement=元と同じ)"
+    ]
+   }
+  }
+ },
+ "sheets_bytes": {
+  "sheet_open.png": 130906,
+  "sheet_text_no_pixels.png": 72849,
+  "sheet_roundtrip.png": 66538
+ },
+ "summary": {
+  "page1": {
+   "bytes": 2359428,
+   "psd_tools": {
+    "groups": 6,
+    "layers": 25,
+    "kinds": {
+     "group": 6,
+     "pixel": 20,
+     "type": 5
+    },
+    "duplicate_names": [
+     "トーン",
+     "線画",
+     "背景",
+     "色"
+    ]
+   },
+   "gimp": {
+    "open_sec": 0.92,
+    "groups": 6,
+    "layers": 25,
+    "text_layers": 0,
+    "renamed_duplicates": 12,
+    "composite": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2307
+    }
+   },
+   "krita": {
+    "open_sec": 1.93,
+    "groups": 6,
+    "layers": 25,
+    "types": [
+     "grouplayer",
+     "paintlayer"
+    ],
+    "composite": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2307
+    }
+   },
+   "resave_text_kinds": {
+    "gimp": [
+     "pixel"
+    ],
+    "krita": [
+     "pixel"
+    ]
+   },
+   "frame": {
+    "frame_is_own_layer": true,
+    "frame_opaque_px": 63048,
+    "frame_px_covered_by_panel_art": 31380,
+    "frame_order": "コマ枠は一番下（V3細部の決めごと 10.3 の順）"
+   }
+  },
+  "page2": {
+   "bytes": 2454238,
+   "psd_tools": {
+    "groups": 7,
+    "layers": 29,
+    "kinds": {
+     "group": 7,
+     "pixel": 24,
+     "type": 5
+    },
+    "duplicate_names": [
+     "トーン",
+     "線画",
+     "背景",
+     "色"
+    ]
+   },
+   "gimp": {
+    "open_sec": 1.01,
+    "groups": 7,
+    "layers": 29,
+    "text_layers": 0,
+    "renamed_duplicates": 16,
+    "composite": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2367
+    }
+   },
+   "krita": {
+    "open_sec": 1.839,
+    "groups": 7,
+    "layers": 29,
+    "types": [
+     "grouplayer",
+     "paintlayer"
+    ],
+    "composite": {
+     "平均差(0..255)": 0.0,
+     "差が16超の画素の割合": 0.0,
+     "透明な画素の割合": 0.2367
+    }
+   },
+   "resave_text_kinds": {
+    "gimp": [
+     "pixel"
+    ],
+    "krita": [
+     "pixel"
+    ]
+   },
+   "frame": {
+    "frame_is_own_layer": true,
+    "frame_opaque_px": 69096,
+    "frame_px_covered_by_panel_art": 34368,
+    "frame_order": "コマ枠は一番下（V3細部の決めごと 10.3 の順）"
+   }
+  },
+  "text_without_pixels": {
+   "agpsd": [
+    {
+     "name": "コマ1 台詞1",
+     "bounds": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "pixels": null,
+     "text": "ここが\n新しい部屋？"
+    }
+   ],
+   "gimp_resave_text_opaque_px": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "krita_resave_text_opaque_px": [
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "original_with_pixels_opaque_px": [
+    2593,
+    1105,
+    2751,
+    2528,
+    1933
+   ]
+  },
+  "roundtrip": {
+   "no_edit": {
+    "identifiers": {
+     "total": 31,
+     "lyid_hits": 31,
+     "tag_hits": 31,
+     "timestamp_hits": 31,
+     "lyid_values_sample": [
+      101,
+      901,
+      902,
+      102,
+      103,
+      104,
+      105,
+      903
+     ],
+     "lyid_conflict_with_tag": 0
+    },
+    "xmp_kept": true,
+    "matched_by": "lyid",
+    "changed_items": [
+     [
+      "p1frame",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1C",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2C",
+      0,
+      null,
+      false,
+      false
+     ],
+     [
+      "p1k2T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3C",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4C",
+      0,
+      null,
+      false,
+      false
+     ],
+     [
+      "p1k4T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1hand",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1balloon",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1s2",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1sfx",
+      0,
+      null,
+      true,
+      true
+     ]
+    ],
+    "added": [],
+    "names_with_nul": 0,
+    "blend_lost": [],
+    "text_kept_as_text": 5,
+    "text_layers": 5,
+    "reattach_line_art": {
+     "bbox_matches_edit": false,
+     "changed_px_in_panel": 0,
+     "opaque_px_outside_panel": 0,
+     "error": null
+    }
+   },
+   "gimp": {
+    "identifiers": {
+     "total": 31,
+     "lyid_hits": 0,
+     "tag_hits": 29,
+     "timestamp_hits": 0,
+     "lyid_values_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ],
+     "lyid_conflict_with_tag": 0
+    },
+    "xmp_kept": false,
+    "matched_by": "name_tag",
+    "changed_items": [
+     [
+      "p1frame",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1C",
+      0,
+      null,
+      true,
+      false
+     ],
+     [
+      "p1k1T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2C",
+      0,
+      null,
+      false,
+      false
+     ],
+     [
+      "p1k2T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2L",
+      19200,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3B",
+      null,
+      "removed_or_unmatched",
+      null,
+      null
+     ],
+     [
+      "p1k3C",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4C",
+      0,
+      null,
+      false,
+      false
+     ],
+     [
+      "p1k4T",
+      null,
+      "removed_or_unmatched",
+      null,
+      null
+     ],
+     [
+      "p1k4L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1hand",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1balloon",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1s2",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1sfx",
+      0,
+      null,
+      true,
+      true
+     ]
+    ],
+    "added": [
+     [
+      "手の描き直し",
+      "p1g2",
+      [
+       0,
+       0,
+       1240,
+       1754
+      ],
+      5056,
+      []
+     ],
+     [
+      "背景（直し）",
+      "p1g3",
+      [
+       80,
+       590,
+       600,
+       1100
+      ],
+      265200,
+      [
+       "p1k3B"
+      ]
+     ],
+     [
+      "打ち直した台詞",
+      "p1gtext",
+      [
+       200,
+       200,
+       237,
+       452
+      ],
+      2700,
+      []
+     ]
+    ],
+    "names_with_nul": 0,
+    "blend_lost": [],
+    "text_kept_as_text": 0,
+    "text_layers": 5,
+    "reattach_line_art": {
+     "bbox_matches_edit": true,
+     "changed_px_in_panel": 19200,
+     "opaque_px_outside_panel": 0,
+     "error": null
+    }
+   },
+   "krita": {
+    "identifiers": {
+     "total": 31,
+     "lyid_hits": 0,
+     "tag_hits": 29,
+     "timestamp_hits": 0,
+     "lyid_values_sample": [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1
+     ],
+     "lyid_conflict_with_tag": 0
+    },
+    "xmp_kept": true,
+    "matched_by": "name_tag",
+    "changed_items": [
+     [
+      "p1frame",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1C",
+      0,
+      null,
+      true,
+      false
+     ],
+     [
+      "p1k1T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2C",
+      0,
+      null,
+      false,
+      false
+     ],
+     [
+      "p1k2T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2L",
+      19200,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3B",
+      null,
+      "removed_or_unmatched",
+      null,
+      null
+     ],
+     [
+      "p1k3C",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3T",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4B",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4C",
+      0,
+      null,
+      false,
+      false
+     ],
+     [
+      "p1k4T",
+      null,
+      "removed_or_unmatched",
+      null,
+      null
+     ],
+     [
+      "p1k4L",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1hand",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1balloon",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k1s2",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k2s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k3s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1k4s1",
+      0,
+      null,
+      true,
+      true
+     ],
+     [
+      "p1sfx",
+      0,
+      null,
+      true,
+      true
+     ]
+    ],
+    "added": [
+     [
+      "手の描き直し",
+      "p1g2",
+      [
+       900,
+       820,
+       990,
+       890
+      ],
+      6300,
+      []
+     ],
+     [
+      "背景（直し）",
+      "p1g3",
+      [
+       80,
+       590,
+       600,
+       1100
+      ],
+      265200,
+      [
+       "p1k3B"
+      ]
+     ],
+     [
+      "打ち直した台詞",
+      "p1gtext",
+      [
+       0,
+       0,
+       0,
+       0
+      ],
+      0,
+      []
+     ]
+    ],
+    "names_with_nul": 32,
+    "blend_lost": [],
+    "text_kept_as_text": 0,
+    "text_layers": 5,
+    "reattach_line_art": {
+     "bbox_matches_edit": true,
+     "changed_px_in_panel": 19200,
+     "opaque_px_outside_panel": 0,
+     "error": null
+    }
+   }
+  },
+  "corrections_estimate": {
+   "台詞を1行直す": {
+    "PSD": [
+     "写植のグループを開いて該当の層を探す",
+     "文字の層が画素の層になっているので、層の画素を消す",
+     "文字の道具で縦書き・書体・大きさを元に合わせて打ち直す",
+     "吹き出しの中に位置を合わせる",
+     "PSD で保存してアプリに戻す"
+    ],
+    "PSD_戻るもの": "GIMP は画素の層（文字の情報なし）、Krita で足した文字は画素0の層になった。サーバーの文字（text）は変わらない",
+    "アプリ": [
+     "台詞を選ぶ",
+     "文字を直して確定（update_text_item の text だけ）"
+    ],
+    "PSDで足りるか": "いいえ"
+   },
+   "フキダシを1つ動かす": {
+    "PSD": [
+     "フキダシの層（1ページの全部の吹き出しが1層）で吹き出し1つを範囲選択",
+     "動かす",
+     "写植の層の該当の文字も同じだけ動かす",
+     "重なりを確かめる",
+     "保存して戻す"
+    ],
+    "PSD_戻るもの": "フキダシの層と写植の層の画素の差。どの吹き出しを何mm動かしたかは差から推し量るしかない（box_mm に戻す処理は作っていない・未検証）",
+    "アプリ": [
+     "吹き出しをドラッグ（update_text_item の box_mm）"
+    ],
+    "PSDで足りるか": "いいえ"
+   },
+   "コマの手を描き直す": {
+    "PSD": [
+     "コマのグループを開く",
+     "線画の層を選ぶ（GIMP では同じ名前の2つ目以降が「線画 #3」のように変わる）",
+     "描く・消す",
+     "保存して戻す"
+    ],
+    "PSD_戻るもの": "線画の層の画素の差。GIMP・Krita とも 19200 画素の差が塗った範囲と一致し、元の層と同じ大きさ・置き場で新しい版にできた",
+    "アプリ": [
+     "コマを開く",
+     "人が直接描く道具で描く（register_image origin=human_drawn・add_panel_layer role=human_hand）",
+     "または範囲を決めて作り直す"
+    ],
+    "PSDで足りるか": "はい（PSD のほうが道具がそろう）"
+   },
+   "コマの絵を1枚差し替える": {
+    "PSD": [
+     "コマのグループの背景・色・トーン・線画の4層を隠すか消す",
+     "新しい絵をレイヤーとして開く",
+     "グループの中へ入れる",
+     "コマの範囲に位置と大きさを合わせる",
+     "保存して戻す"
+    ],
+    "PSD_戻るもの": "目印の無い新しい層。親のグループの目印でコマは分かるが、線画か背景かなどの役は分からない。消した4層は「消えた」として出る",
+    "アプリ": [
+     "コマを選ぶ",
+     "候補か画像を選ぶ（update_panel_layer の image_id）"
+    ],
+    "PSDで足りるか": "一部（絵は戻るが、層の役は人が選び直す）"
+   }
+  },
+  "verdict": "ほぼ完璧ではない。絵の層（名前・グループ・乗算・隠す・合成）は GIMP と Krita で崩れずに開け、絵の直しは名前の目印で正しいコマ・正しい位置に戻せた。しかし文字は両方で画素になり、文字として直せず、直した文字はサーバーの文字に戻らない。PSD の層の id（lyid）・層の時刻は両方で消えた。",
+  "edit_ops": {
+   "gimp": [
+    {
+     "op": "paint_line_art",
+     "result": "ok"
+    },
+    {
+     "op": "rename",
+     "result": "ok"
+    },
+    {
+     "op": "toggle_visible",
+     "result": "ok"
+    },
+    {
+     "op": "add_layer_in_group",
+     "result": "ok"
+    },
+    {
+     "op": "delete_layer",
+     "result": "ok"
+    },
+    {
+     "op": "set_text_of_imported_text_layer",
+     "result": "failed"
+    },
+    {
+     "op": "add_gimp_text_layer",
+     "result": "ok"
+    }
+   ],
+   "krita": [
+    [
+     "paint_line_art",
+     "ok"
+    ],
+    [
+     "rename",
+     "ok"
+    ],
+    [
+     "toggle_visible",
+     "ok"
+    ],
+    [
+     "add_layer_in_group",
+     "ok"
+    ],
+    [
+     "delete_layer",
+     "ok"
+    ],
+    [
+     "set_text_of_imported_text_layer",
+     "failed"
+    ],
+    [
+     "add_krita_text_layer",
+     "ok"
+    ]
+   ]
+  }
+ }
+}
