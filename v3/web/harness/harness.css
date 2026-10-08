@@ -1,11 +1,19 @@
 /* AIハーネスの画面。色は common/theme.css（明るい砂の組だけ。暗い色の組は持たない）。細い線と、等幅の小さいラベル。
    幅は決め打ちしない（図と横のパネルは grid の割合で分け、狭い画面では縦に積む）。 */
 :root{
-  /* 色は common/theme.css の組から取る。ここで足すのはハーネスの状態の色の呼び名だけ */
+  /* 色は common/theme.css の変数だけから作る（色の値をここに書かない。組を替えれば図も画面も替わる）。
+     ハーネスの状態の色の呼び名はここ1か所。図（harness_graph.js）もこの呼び名を getComputedStyle で読む。
+     theme.css にまだ無い状態の色（古い・動いている作業の下地・やり直しの線）は、近い変数から作っている */
   --bg-2:var(--surface-2);
-  --run:var(--ok); --run-bg:#D9DCC2; --wait:var(--ink-4); --review:var(--need); --review-bg:var(--need-tint);
+  --h-node:var(--raise); --h-line:var(--line-2); --h-ink:var(--ink); --h-ink-2:var(--ink-3); --h-bg:var(--surface);
+  --h-group-bg:var(--surface-2); --h-edge:var(--line-2);
+  --run:var(--ok); --run-bg:color-mix(in srgb,var(--ok) 22%,var(--surface)); --wait:var(--ink-4);
+  --review:var(--need); --review-bg:var(--need-tint);
   --bad-bg:var(--bad-tint); --pause:var(--ai); --pause-bg:var(--ai-tint); --done:var(--ink-3); --done-bg:var(--surface-3);
-  --stale:#7D6690; --hot:var(--need);
+  --stale:var(--ink-2); --stale-tint:color-mix(in srgb,var(--ink-2) 10%,transparent);
+  --retry:var(--need-ink); --hot:var(--need);
+  --hot-glow:color-mix(in srgb,var(--need) 25%,transparent); --hot-glow-2:color-mix(in srgb,var(--need) 60%,transparent);
+  --bad-stripe:color-mix(in srgb,var(--bad) 6%,transparent);
   --mono:"SFMono-Regular","Cascadia Mono",Consolas,"Noto Sans Mono CJK JP","Noto Sans Mono",monospace;
   --sans:"Noto Sans JP","Hiragino Sans","Yu Gothic UI",system-ui,sans-serif;
 }
@@ -54,13 +62,13 @@ input,textarea{font:12px var(--sans);color:var(--ink);background:var(--surface);
 .lg.st-review{border:2px solid var(--review);background:var(--review-bg)}
 .lg.st-blocked{border:2px solid var(--bad);background:var(--bad-bg)}
 .lg.st-paused{border:2px solid var(--pause);background:var(--pause-bg)}
-.lg.stale{background:rgba(139,110,154,.35);border-color:var(--stale)}
+.lg.stale{background:color-mix(in srgb,var(--stale) 35%,transparent);border-color:var(--stale)}
 #fit{margin-left:auto}
 .graph-wrap{position:relative;height:clamp(320px,52vh,640px)}
 .graph{position:absolute;inset:0}
 .graph-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .hz-marker{position:absolute;left:-7px;top:-7px;width:14px;height:14px;border-radius:50%;background:var(--hot);
-  box-shadow:0 0 0 4px rgba(194,122,44,.25),0 0 14px rgba(194,122,44,.6);transition:opacity .4s}
+  box-shadow:0 0 0 4px var(--hot-glow),0 0 14px var(--hot-glow-2);transition:opacity .4s}
 .hz-marker.retry{background:var(--bad)}
 .hz-marker.arrived{opacity:0}
 .hz-progress{position:absolute;left:0;top:0;display:flex;flex-direction:column;gap:2px}
@@ -73,7 +81,7 @@ input,textarea{font:12px var(--sans);color:var(--ink);background:var(--surface);
 .hz-previews{display:flex;gap:3px;margin-top:3px}
 .hz-previews img{width:72px;height:auto;border:1px solid var(--line-2);image-rendering:auto;background:var(--bg-2)}
 .disconnected-veil{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;pointer-events:none;
-  background:repeating-linear-gradient(135deg,rgba(165,69,47,.06) 0 10px,transparent 10px 20px)}
+  background:repeating-linear-gradient(135deg,var(--bad-stripe) 0 10px,transparent 10px 20px)}
 .disconnected-veil span{margin-top:12px;font:11px var(--mono);color:var(--bad);background:var(--bad-bg);border:1px solid var(--bad);padding:4px 10px}
 body.is-disconnected .disconnected-veil{display:flex}
 body.is-disconnected .graph{filter:grayscale(.6) opacity(.7)}
@@ -107,9 +115,9 @@ body[data-view="stage"] .timeline-box{display:none}
 .btn:disabled{opacity:.5}
 .box{border:1px solid var(--line);padding:8px 10px;background:var(--surface)}
 .review-box{border:1px solid var(--review);background:var(--review-bg);animation:breathe 1.6s ease-in-out infinite}
-@keyframes breathe{50%{box-shadow:0 0 0 3px rgba(194,122,44,.18)}}
+@keyframes breathe{50%{box-shadow:0 0 0 3px var(--hot-glow)}}
 .since{font:10.5px var(--mono);color:var(--review)}
-.stale-box{border-color:var(--stale);background:rgba(139,110,154,.08)}
+.stale-box{border-color:var(--stale);background:var(--stale-tint)}
 .stale-row p{margin:0 0 4px}
 .cands{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-bottom:8px}
 .cand{border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column}
@@ -153,7 +161,7 @@ table{border-collapse:collapse;width:100%}
 .pchip i{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--ink-2)}
 .pchip.sel{outline:2px solid var(--ink);outline-offset:1px}
 .pchip.st-review{animation:breathe 1.6s ease-in-out infinite}
-.pchip.stale{box-shadow:inset 0 -3px 0 rgba(139,110,154,.6)}
+.pchip.stale{box-shadow:inset 0 -3px 0 var(--stale)}
 .stale-tag{color:var(--stale)!important}
 .sum{display:flex;flex-wrap:wrap;gap:4px}
 

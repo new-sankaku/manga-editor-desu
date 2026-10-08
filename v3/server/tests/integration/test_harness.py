@@ -103,8 +103,11 @@ async def services(api, admin, workers, comfy, monkeypatch, tmp_path):  # noqa: 
                                send_mode="parallel", max_concurrency=4)
     for name in ("text_to_image", "image_to_image"):
         await _route(api, admin, comfy_sid, name, comfy_graph_settings=SD, comfy_wait_seconds=60)
-    llm_sid = await _service(api, admin, kind="text", adapter="litellm", send_mode="parallel", max_concurrency=4)
-    det_sid = await _service(api, admin, kind="image", adapter="detector", endpoint="http://detector.invalid",
+    # litellm は送った先のその先が見えないので api として登録し、作品ごとに送ってよい先へ載せる（make_work）
+    llm_sid = await _service(api, admin, kind="text", adapter="litellm", location="api", send_mode="parallel",
+                             max_concurrency=4)
+    det_sid = await _service(api, admin, kind="image", adapter="detector", endpoint="http://127.0.0.1:1",  # 偽物の検出器は送らない
+
                              send_mode="parallel", max_concurrency=4)
     for key, process in HARNESS_PROCESSES.items():
         if key.startswith("detect"):
@@ -112,13 +115,22 @@ async def services(api, admin, workers, comfy, monkeypatch, tmp_path):  # noqa: 
         else:
             await _route(api, admin, llm_sid, process, model="fake", cost_per_call=1)
     await workers.reload()
-    return {"comfy": comfy_sid, "llm": llm_sid, "detector": det_sid}
+    API_DESTINATIONS[:] = [llm_sid]
+    yield {"comfy": comfy_sid, "llm": llm_sid, "detector": det_sid}
+    API_DESTINATIONS.clear()
+
+
+# 試験の services が登録した api の先。make_work が作品ごとに送ってよい先へ載せる
+API_DESTINATIONS: list[str] = []
 
 
 async def make_work(api, panels=1, thresholds=True, status="verified"):
     a = user()
     ids = await new_work(api, a)
     wid = ids["work"]
+    for sid in API_DESTINATIONS:
+        r = await op(api, wid, a, {"type": "allow_destination", "service_id": sid, "allowed": True})
+        assert r.status_code == 200, r.text
     pids = []
     for i in range(panels):
         pid = uuid.uuid4().hex

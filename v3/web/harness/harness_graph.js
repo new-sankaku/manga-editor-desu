@@ -44,16 +44,29 @@ export function statusClass(s) {
 }
 export const isHumanWait = (s) => HUMAN.has(s);
 
-// 図の色も common/theme.css の組から取る（Cytoscape は CSS の変数を読めないので、読み込んだときに値にする）
-const css = getComputedStyle(document.documentElement);
-const v = (name) => css.getPropertyValue(name).trim();
-const C = {
-  bg: v("--surface"), node: v("--raise"), line: v("--line-2"), ink: v("--ink"), ink2: v("--ink-3"),
-  run: v("--ok"), runBg: "#D9DCC2", wait: v("--ink-4"), review: v("--need"), reviewBg: v("--need-tint"),
-  bad: v("--bad"), badBg: v("--bad-tint"), pause: v("--ai"), pauseBg: v("--ai-tint"), done: v("--ink-3"),
-  doneBg: v("--surface-3"), stale: "#7D6690", edge: v("--line-2"), retry: "#9A6A3F", hot: v("--need"),
-  groupBg: v("--surface-2"),
-};
+// 図の色は harness.css の状態の色の呼び名（theme.css の変数から作る）を読む。色の値はここに書かない。
+// Cytoscape は CSS の変数も color-mix() も読めないので、要素の color に当ててブラウザに解かせ、1画素の canvas で rgb にする
+const probe = document.createElement("i");
+probe.style.display = "none";
+document.documentElement.append(probe);
+const px = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+function token(name) {
+  if (!getComputedStyle(document.documentElement).getPropertyValue(name).trim()) throw new Error(`色の変数 ${name} がありません`);
+  probe.style.color = `var(${name})`;
+  px.clearRect(0, 0, 1, 1);
+  px.fillStyle = getComputedStyle(probe).color;
+  px.fillRect(0, 0, 1, 1);
+  const [r, g, b] = px.getImageData(0, 0, 1, 1).data;
+  return `rgb(${r},${g},${b})`;
+}
+const C = Object.fromEntries(Object.entries({
+  bg: "--h-bg", node: "--h-node", line: "--h-line", ink: "--h-ink", ink2: "--h-ink-2",
+  run: "--run", runBg: "--run-bg", wait: "--wait", review: "--review", reviewBg: "--review-bg",
+  bad: "--bad", badBg: "--bad-bg", pause: "--pause", pauseBg: "--pause-bg", done: "--done",
+  doneBg: "--done-bg", stale: "--stale", edge: "--h-edge", retry: "--retry", hot: "--hot",
+  groupBg: "--h-group-bg",
+}).map(([k, name]) => [k, token(name)]));
+probe.remove();
 const MONO = '"SFMono-Regular", "Cascadia Mono", Consolas, "Noto Sans Mono CJK JP", "Noto Sans Mono", monospace';
 
 const STYLE = [

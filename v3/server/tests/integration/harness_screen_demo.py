@@ -2,9 +2,9 @@
 
 本物のサーバー（uvicorn で /web も出す）・Temporal・PostgreSQL・OpenFGA と、今の作業者（WorkerSet）・ハーネスの作業者を
 動かす。ComfyUI・LLM・検出器は偽物（harness_fakes.py。どれも偽物だと画面の文書にも書く）。
+データベースは .env の V3_DATABASE_URL と同じサーバーの v3_harness_demo（試験の v3_test とは分ける。V3_DEMO_DATABASE_URL で替える）。
 
-  V3_TEST_DATABASE_URL=postgresql+psycopg://v3:v3@localhost:55632/v3_test \\
-    uv run python tests/integration/harness_screen_demo.py --port 8790
+  uv run python tests/integration/harness_screen_demo.py --port 8790
 
 操作の口（--port + 1）：
   GET  /info               画面の URL・利用者・作品の id・コマの id
@@ -25,9 +25,15 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-DB = os.environ.get("V3_TEST_DATABASE_URL", "postgresql+psycopg://v3:v3@localhost:55432/v3_test")
+from sqlalchemy.engine import make_url  # noqa: E402
+
+from v3server.server_settings import Settings  # noqa: E402
+
+DB = os.environ.get("V3_DEMO_DATABASE_URL") or make_url(Settings().database_url).set(
+    database="v3_harness_demo").render_as_string(hide_password=False)
 os.environ["V3_DATABASE_URL"] = DB
-os.environ["V3_DEV_AUTH"] = "1"
+os.environ["V3_AUTH_MODE"] = "dev_header"
+os.environ["V3_IMAGE_STORE"] = "local"
 
 import httpx  # noqa: E402
 import uvicorn  # noqa: E402
@@ -47,6 +53,10 @@ from v3server.openfga_permissions import open_authz  # noqa: E402
 from v3server.server_settings import get_settings  # noqa: E402
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E402
 
+# test_harness が読む conftest は V3_DATABASE_URL を v3_test にするので、見本のデータベースに戻す
+os.environ["V3_DATABASE_URL"] = DB
+get_settings.cache_clear()
+
 ADMIN = "demo-admin"
 AUTHOR = "demo-author"
 PANELS = [4, 3]  # ページごとのコマの数
@@ -64,8 +74,9 @@ async def serve(a: FastAPI, port: int) -> uvicorn.Server:
 async def setup(api: httpx.AsyncClient, comfy: FakeComfyServer) -> dict:
     hs = {"X-V3-User": ADMIN}
 
-    async def service(**body):
-        r = await api.post("/services", headers=hs, json={"name": f"demo-{uuid.uuid4().hex[:6]}", "location": "local", **body})
+    async def service(location="local", **body):
+        r = await api.post("/services", headers=hs, json={"name": f"demo-{uuid.uuid4().hex[:6]}", "location": location,
+                                                          **body})
         r.raise_for_status()
         return r.json()["id"]
 
@@ -77,8 +88,10 @@ async def setup(api: httpx.AsyncClient, comfy: FakeComfyServer) -> dict:
     comfy_sid = await service(kind="image", adapter="comfyui", endpoint=comfy.url, send_mode="parallel", max_concurrency=4)
     for name in ("text_to_image", "image_to_image"):
         await route(comfy_sid, name, comfy_graph_settings=SD, comfy_wait_seconds=120)
-    llm_sid = await service(kind="text", adapter="litellm", send_mode="parallel", max_concurrency=6)
-    det_sid = await service(kind="image", adapter="detector", endpoint="http://detector.invalid", send_mode="parallel",
+    # litellm は送った先のその先が見えないので api として登録し、作品の送ってよい先へ載せる（下の ops）
+    llm_sid = await service(location="api", kind="text", adapter="litellm", send_mode="parallel", max_concurrency=6)
+    # 偽物の検出器は送らない。local と言える住所にする
+    det_sid = await service(kind="image", adapter="detector", endpoint="http://127.0.0.1:1", send_mode="parallel",
                             max_concurrency=6)
     for key, process in HARNESS_PROCESSES.items():
         if key.startswith("detect"):
@@ -92,7 +105,8 @@ async def setup(api: httpx.AsyncClient, comfy: FakeComfyServer) -> dict:
     r.raise_for_status()
     wid = r.json()["id"]
     ids = {"volume": uuid.uuid4().hex, "episode": uuid.uuid4().hex}
-    ops = [{"type": "add_volume", "id": ids["volume"], "number": 1},
+    ops = [{"type": "allow_destination", "service_id": llm_sid, "allowed": True},
+           {"type": "add_volume", "id": ids["volume"], "number": 1},
            {"type": "add_episode", "id": ids["episode"], "volume_id": ids["volume"], "number": 1}]
     pids = []
     for n, count in enumerate(PANELS, start=1):
