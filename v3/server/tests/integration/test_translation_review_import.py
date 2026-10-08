@@ -71,8 +71,10 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     # 元の物は1つずつ、ちょうど1回、報告に出る（黙って落とさない）
     seen = sorted((e["page_index"], e["object_index"]) for e in rep["entries"] if e["object_index"] is not None)
     assert seen == sorted((p.index, i) for p in src.pages for i in range(len(p.canvas["objects"])))
-    unmapped = [e for e in rep["entries"] if e["status"] == "unmapped"]
-    assert [e["source_kind"] for e in unmapped] == ["pen_stroke"] and unmapped[0]["note"]
+    assert [e for e in rep["entries"] if e["status"] == "unmapped"] == []
+    # ペンの線（今のアプリの PencilBrush の path）は、コマの人の手の層の線（pen_strokes）に
+    (pen,) = [e for e in rep["entries"] if e["source_kind"] == "pen_stroke"]
+    assert pen["status"] == "converted" and pen["target_table"] == "panel_layers" and "pencil" in pen["note"]
     assert rep["source_sha256"] == hashlib.sha256(FIXTURE.read_bytes()).hexdigest()
 
     w = await work_json(api, wid, a)
@@ -93,7 +95,21 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     # 枠の線は今のアプリのコマの線から
     assert all(p["frame_style"] and p["frame_style"]["line_width_mm"] > 0 for p in panels)
     layers = [la for la in live(w["panel_layers"]) if la["page_id"] in new_pages]
-    assert [la["role"] for la in layers] == ["tone"]
+    assert sorted(la["role"] for la in layers) == ["human_hand", "tone"]
+    hand = next(la for la in layers if la["role"] == "human_hand")
+    assert hand["id"] == pen["target_id"] and hand["image_id"] is None and hand["stroke_revision"] == 1
+    (src_path,) = [o for o in objects if o.get("type") == "path" and not o.get("customType")]
+    mm_per_px = A4_SPEC["trim_width_mm"] / src.pages[1].canvas_width_px
+    strokes = (await api.get(f"/works/{wid}/layers/{hand['id']}/pen-strokes", headers=h(a))).json()["strokes"]
+    (st,) = strokes
+    assert st["brush"] == "pencil" and st["color"] == "#000000" and st["opacity"] == 1
+    assert abs(st["width_mm"] - src_path["strokeWidth"] * mm_per_px) < 1e-3
+    # 点は元の線の範囲（画素）を mm に直した所にある（基本枠の原点は仕上がりの左上から余白の分ずれる）
+    ox = (A4_SPEC["trim_width_mm"] - A4_SPEC["frame_width_mm"]) / 2
+    xs = [p_[0] for p_ in st["points"]]
+    x0 = src_path["path"][0][1] * mm_per_px - ox
+    assert abs(min(xs) - x0) < 1 and all(p_[2] is None for p_ in st["points"])
+    # 控えの絵が無いので、入稿前の確かめは止める（線が黙って抜けない）
 
     async with get_sessionmaker()() as s:
         imgs = (await s.execute(select(ImageFile).where(ImageFile.work_id == wid))).scalars().all()
@@ -113,6 +129,11 @@ async def test_今のアプリのプロジェクトを取り込み_元と突き�
     assert ("image", "image prompt: sunset") in prompts
     assert ("project_base", src.pages[0].base_prompt["text2img_prompt"]) in prompts
     assert all(s_.source_values for s_ in settings)
+
+    assert (await op(api, wid, a, {"type": "set_work_settings", "preferences": {"print": PRINT}})).status_code == 200
+    r = await api.post(f"/works/{wid}/preflight", headers=h(a), json={"page_ids": [hand["page_id"]]})
+    assert r.status_code == 200, r.text
+    assert any(i["kind"] == "stroke_cache" and i["location"]["id"] == hand["id"] for i in r.json()["issues"])
 
     got = await api.get(f"/works/{wid}/current-app-imports/{rep['id']}", headers=h(b))
     assert got.status_code == 200 and got.json()["counts"] == rep["counts"]

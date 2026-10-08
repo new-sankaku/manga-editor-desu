@@ -33,6 +33,7 @@ from v3server.canonical_tables.page_item_tables import PageItem
 from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Work
+from v3server.hand_tools.vector_strokes import stroke_cache_problem
 from v3server.image_file_storage import read_image
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_transform import ItemTransform, transform_matrix
@@ -281,6 +282,11 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
         if sp is not None and sp.image_id and sp.first_page_id == pid:
             placed.append(("spreads", sp.id, sp.image_id, sp.image_placement))
         issues += await _check_images(session, plan, placed)
+        for la in layers:
+            problem = stroke_cache_problem(la)
+            if problem:
+                issues.append(Issue(pid, "stroke_cache", "error", problem,
+                                    {"table": "panel_layers", "id": la.id, "panel_id": la.panel_id}))
         content = PageContent(page_id=pid, spec=spec, text_direction=work.text_direction,
                               preferences=work.preferences or {}, panels=panels, layers=layers, texts=texts,
                               page_items=items, images={})

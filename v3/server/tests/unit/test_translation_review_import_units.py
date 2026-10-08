@@ -150,7 +150,11 @@ def test_本物のファイルの物はどれも1回だけ報告に出る(tmp_pa
     assert sorted(keys) == sorted((p.index, i) for p in proj.pages for i in range(len(p.canvas["objects"])))
     counts = plan.counts()
     assert counts["source_objects"] == 12 and counts["pages"] == 4
-    assert {e.source_kind for e in plan.entries if e.status == "unmapped"} == {"pen_stroke"}
+    assert {e.source_kind for e in plan.entries if e.status == "unmapped"} == set()
+    # ペンの線は人の手の層の線に（筆は鉛筆。点は mm、筆圧は null）
+    assert len(plan.stroke_layers) == 1 and len(plan.strokes) == 1
+    st = plan.strokes[0].values
+    assert st["brush"] == "pencil" and st["color"] == "#000000" and all(p[2] is None for p in st["points"])
     assert all(e.note for e in plan.entries if e.status in ("unmapped", "converted"))
     assert len(plan.panels) == 3 and len(plan.texts) == 4 and len(plan.panel_images) == 1 and len(plan.layers) == 1
 

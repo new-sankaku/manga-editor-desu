@@ -14,7 +14,15 @@ from pydantic import ValidationError
 
 from v3server.generation_queue.known_processes import KNOWN_PROCESSES, check_process_task
 from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke, erase_pixels
-from v3server.hand_tools.vector_strokes import StrokeValues, crossing_indices, erase, moved, resample, stroke_box
+from v3server.hand_tools.vector_strokes import (
+    StrokeValues,
+    crossing_indices,
+    erase,
+    moved,
+    resample,
+    stroke_box,
+    stroke_cache_problem,
+)
 from v3server.llm_questions.extract_characters_question import (
     build_extract_characters_question,
     parse_extract_characters_answer,
@@ -153,7 +161,7 @@ def _content(**over):
                             adjustments=[])
     hand = SimpleNamespace(id=L1, panel_id=P1, role="human_hand", image_id="img2", stack_order=0, opacity=1.0,
                            visible=True, placement={"crop_px": [0, 0, 4, 4], "dest_box_mm": [2, 2, 6, 6]},
-                           adjustments=[])
+                           adjustments=[], stroke_revision=0, image_stroke_revision=None)
     text = SimpleNamespace(id=T1, order=0, item_kind="dialogue", text="あい", speaker=None, box_mm=[5, 25, 15, 40],
                            font_size_pt=12, font_family="ipag", writing_direction="vertical",
                            decoration={"fill": "#000000"}, ruby=[], transform=None, opacity=1.0, adjustments=[],
@@ -344,3 +352,14 @@ def test_read_prompt_and_extract_questions():
     assert "既にいる人" in q and "あらすじ" in q
     got = parse_extract_characters_answer('{"characters":[{"name":"A","traits":null,"notes":"1行目"}]}')
     assert got[0].name == "A"
+
+
+def test_線の控えの絵が無い_古い層は理由を返す():
+    layer = SimpleNamespace(id="L", stroke_revision=0, image_id=None, image_stroke_revision=None)
+    assert stroke_cache_problem(layer) is None
+    layer.stroke_revision = 1
+    assert "無い" in stroke_cache_problem(layer)
+    layer.image_id, layer.image_stroke_revision = "I", 0
+    assert "古い" in stroke_cache_problem(layer)
+    layer.image_stroke_revision = 1
+    assert stroke_cache_problem(layer) is None

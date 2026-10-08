@@ -21,6 +21,7 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
+from v3server.hand_tools.vector_strokes import stroke_cache_problem
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import (
     BalloonShape,
@@ -576,6 +577,9 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
                 children.append(Node(LAYER_NAME_PANEL_IMAGE, f"{panel.id}-image", _clip(img, left, top, [poly_px]),
                                      left, top, blend_mode_of(panel.adjustments), table="panels"))
         for la in sorted((x for x in content.layers if x.panel_id == panel.id), key=lambda x: x.stack_order):
+            problem = stroke_cache_problem(la)
+            if problem:
+                raise RenderRefused(problem)
             if la.image_id is None:
                 continue
             if la.placement is None:
