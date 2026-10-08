@@ -72,6 +72,11 @@ def all_columns(obj) -> dict:
     return {c.key: getattr(obj, c.key) for c in obj.__table__.columns}
 
 
+# GET /works/{id} の表ごとの並び（無い表は主キーの順）
+NATURAL_ORDER = {Volume: ("number",), Episode: ("volume_id", "number"), Page: ("episode_id", "number"),
+                 Panel: ("page_id", "order"), TextItem: ("panel_id", "order"), PanelLayer: ("panel_id", "stack_order")}
+
+
 @router.get("/works/{work_id}")
 async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     await require(authz, actor, "can_view", work_obj(work_id))
@@ -80,7 +85,10 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
         raise NotFound(f"works:{work_id}")
 
     async def all_of(model):
-        return (await session.execute(select(model).where(model.work_id == work_id))).scalars().all()
+        # 並びを決めて返す。ORDER BY が無いと、行を直した後（取り消しなど）に PostgreSQL の返す順が変わり、
+        # 読む側が並びに頼ると時々違って見えた（取り込みの試験が3回に1回落ちた。2026-10-08）
+        keys = [getattr(model, c) for c in NATURAL_ORDER.get(model, ())] + list(model.__mapper__.primary_key)
+        return (await session.execute(select(model).where(model.work_id == work_id).order_by(*keys))).scalars().all()
 
     return {
         "work": row(work, "id", "title", "reading_direction", "text_direction", "medium", "trim_size",
