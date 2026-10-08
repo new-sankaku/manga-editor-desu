@@ -270,8 +270,9 @@ await page.click("#v3-ks-take");
 await page.waitForFunction(() => !document.querySelector("#v3-keys .v3-conflict"));
 check(await stored((m) => JSON.stringify(m["workbench.erase"]) === JSON.stringify(["e", "k"]) && !m["workbench.pen"]), "「相手から外して割り当てる」で消しゴムが K、ペンは初めに戻る");
 await page.keyboard.press("Escape");
+await page.waitForFunction(() => !document.querySelector("#v3-keys")?.open);
 await page.keyboard.press("k");
-check(await tool() === "erase", "変えたキー K で消しゴムになる");
+check(await page.waitForFunction(() => document.querySelector(".ftb .tool[aria-pressed=true]")?.dataset.tool === "erase", null, { timeout: 3000 }).then(() => true, () => false), "変えたキー K で消しゴムになる");
 // 開き直しても（サーバーから読み直して）変えたキーが効く
 await page.reload();
 await page.waitForSelector(".cand[data-image=c1] img[src]", { state: "attached" });
