@@ -1,20 +1,16 @@
 // 画像生成の画面を Playwright で通す。サーバー（/web を出す）と ComfyUI と作業者が動いていること。
 // 使い方：
-//   V3_WEB=http://127.0.0.1:8765/web/ V3_USER=ui-author SHOTS=/tmp/shots \
+//   V3_WEB=http://127.0.0.1:8765/web/ V3_USER=ui-author \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/image_generation_ui.mjs
 // 作品・ページ・コマは、その利用者が見てよい最初の物を使う（コマには絵と人の手の範囲が要る）。
-import { createRequire } from "node:module";
-import { mkdirSync } from "node:fs";
-const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
+// 画面の写しは SHOTS=<フォルダ> を付けたときだけ撮る（ui_common.mjs）
+import { openBrowser, SHOTS } from "./ui_common.mjs";
 
 const WEB = process.env.V3_WEB;
 const USER = process.env.V3_USER;
-const SHOTS = process.env.SHOTS;
-if (!WEB || !USER || !SHOTS) throw new Error("V3_WEB・V3_USER・SHOTS を決めてください");
-mkdirSync(SHOTS, { recursive: true });
+if (!WEB || !USER) throw new Error("V3_WEB・V3_USER を決めてください");
 
-const browser = await chromium.launch();
+const browser = await openBrowser();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
@@ -24,6 +20,7 @@ await page.addInitScript((u) => localStorage.setItem("v3.user", u), USER);
 let n = 0;
 async function shot(name) {
   n += 1;
+  if (!SHOTS) return;
   const path = `${SHOTS}/${String(n).padStart(2, "0")}_${name}.png`;
   await page.screenshot({ path });
   console.log("shot", path);

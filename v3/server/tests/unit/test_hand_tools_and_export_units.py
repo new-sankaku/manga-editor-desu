@@ -47,13 +47,14 @@ from v3server.print_export.psd_import_matching import (
     read_psd,
 )
 from v3server.print_export.text_render import TextRenderError, font_path, render_texts
+from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 WRITER = ROOT / "psd_writer" / "write_layered_psd.js"
 TEXT_SCRIPT = str(ROOT / "psd_writer" / "render_text.js")
 FONT_DIR = "/usr/share/fonts/opentype/ipafont-gothic"
-NODE = "/opt/node22/bin/node"
+NODE = get_settings().node_executable  # .env の V3_NODE_EXECUTABLE（サーバーと同じ node）
 needs_font = pytest.mark.skipif(not pathlib.Path(FONT_DIR, "ipag.ttf").exists(), reason="試験の書体が無い")
 
 SPEC = PageSpec(frame_width_mm=30, frame_height_mm=44, trim_width_mm=36, trim_height_mm=51, bleed_mm=3,
