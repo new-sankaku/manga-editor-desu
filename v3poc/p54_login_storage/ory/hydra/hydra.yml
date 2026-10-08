@@ -1,0 +1,11 @@
+dsn: memory
+urls:
+  self: { issuer: "http://127.0.0.1:61102" }
+  login: http://127.0.0.1:61104/login
+  consent: http://127.0.0.1:61104/consent
+  logout: http://127.0.0.1:61104/logout
+secrets: { system: ["p54-throwaway-hydra-system-secret"] }
+strategies: { access_token: jwt }
+oauth2: { pkce: { enforced_for_public_clients: true } }
+ttl: { access_token: 5m }
+log: { level: warn }

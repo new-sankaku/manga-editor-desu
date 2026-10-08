@@ -14,9 +14,9 @@ from temporalio.worker import Worker
 
 from v3server.canonical_tables.service_and_job_tables import Service
 from v3server.database_engine import get_sessionmaker
-from v3server.generation_queue.generation_workflow import (
+from v3server.generation_queue.generation_workflow import GenerationJob
+from v3server.generation_queue.queue_names_and_priority import (
     CONTROL_QUEUE,
-    GenerationJob,
     service_queue,
 )
 from v3server.generation_queue.service_call_activity import call_service, set_job_status

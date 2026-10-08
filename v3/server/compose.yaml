@@ -36,6 +36,9 @@ services:
       - matching.numTaskqueueReadPartitions=1
       - --dynamic-config-value
       - matching.numTaskqueueWritePartitions=1
+      # 優先順位が同じ依頼の中で、作品ごとに順に回す（公平さの鍵。2026-10-08 試作 p57 で確かめた）
+      - --dynamic-config-value
+      - matching.enableFairness=true
     ports:
       - "57233:7233"
       - "58233:8233"

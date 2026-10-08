@@ -1,0 +1,74 @@
+{
+  "product": "MinIO（ソースビルド）",
+  "tests": {
+    "basic_crud_list_delete": {
+      "ok": true,
+      "content_type": "image/png",
+      "listed": [
+        "work1/page001.png",
+        "work1/page002.png"
+      ]
+    },
+    "presigned_url": {
+      "get_ok": true,
+      "tampered_url_rejected": true,
+      "cors_put": "NotImplemented: A header you provided implies functionality that is not implemented",
+      "browser_img_load": {
+        "w": 512
+      },
+      "browser_fetch_get": {
+        "status": 200,
+        "bytes": 788083
+      },
+      "browser_fetch_put": {
+        "status": 200
+      },
+      "browser_put_arrived": true,
+      "expired_status": 403,
+      "expired_rejected": true,
+      "ok": true
+    },
+    "versioning": {
+      "ok": true,
+      "status": "Enabled",
+      "versions": 3,
+      "delete_markers": 1,
+      "current_after_delete": "NoSuchKey"
+    },
+    "multipart_50mb": {
+      "size_ok": true,
+      "etag": "\"b3bf086652fa66a8a1c6d797f02ac733-7\"",
+      "multipart_etag": true,
+      "sha_match": true,
+      "upload_seconds": 0.25,
+      "download_seconds": 0.18,
+      "parts": 2,
+      "in_progress_listed": true,
+      "gone_after_abort": true,
+      "aborted_object_exists": false,
+      "ok": true
+    }
+  },
+  "startup_seconds_to_ready": 1.5,
+  "memory_mib_idle": {
+    "p54-minio-1": 75.3
+  },
+  "image_mb": {
+    "p54-minio-src:latest": 327.8
+  },
+  "config_files": {
+    "files": 1,
+    "lines": 11,
+    "names": [
+      "compose.yaml"
+    ]
+  },
+  "create_bucket": true,
+  "memory_mib_after_50mb": {
+    "p54-minio-1": 110.1
+  },
+  "memory_mib_after_tests": {
+    "p54-minio-1": 109.8
+  },
+  "logs_tail": null
+}

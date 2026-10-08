@@ -1,0 +1,8 @@
+name: p54
+services:
+  rustfs:
+    image: rustfs/rustfs:1.0.1
+    environment: { RUSTFS_ACCESS_KEY: p54accesskey, RUSTFS_SECRET_KEY: p54secretkey-throwaway, RUSTFS_VOLUMES: /data }
+    ports: ["127.0.0.1:61230:9000"]
+    volumes: ["data:/data"]
+volumes: { data: }

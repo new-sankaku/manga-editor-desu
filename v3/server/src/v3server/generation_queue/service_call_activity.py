@@ -1,5 +1,6 @@
 """Temporal の活動。正本（PostgreSQL）を読み書きするのはここだけ。"""
 
+import asyncio
 import time
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -16,11 +17,55 @@ from v3server.canonical_tables.service_and_job_tables import (
     ServiceProcess,
 )
 from v3server.database_engine import get_sessionmaker
+from v3server.image_file_storage import store_image
+from v3server.openfga_permissions import Authz, open_authz
+from v3server.operations.image_file_operations import RegisterImage
+from v3server.operations.operation_submit_and_undo import submit
+from v3server.request_actor import Actor
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS
 from v3server.service_senders.sender_result_types import AdapterError
+from v3server.v3_error_types import V3Error
 
 # ここに載った種類は、活動の中では送り直さない（workflows.py が種類ごとに扱う）
-NON_RETRYABLE = ["rate_limited", "refused", "broken_response", "budget", "destination_not_allowed"]
+NON_RETRYABLE = ["rate_limited", "refused", "broken_response", "interrupted", "budget", "destination_not_allowed"]
+
+# 活動の生存を Temporal に知らせる間隔（秒）。取り消しは、この知らせの返事で活動に届く
+HEARTBEAT_SECONDS = 5
+
+_authz: Authz | None = None
+
+
+async def _get_authz() -> Authz:
+    global _authz
+    if _authz is None:
+        async with get_sessionmaker()() as session:
+            _authz = await open_authz(session)
+    return _authz
+
+
+async def _heartbeat_forever() -> None:
+    while True:
+        activity.heartbeat()
+        await asyncio.sleep(HEARTBEAT_SECONDS)
+
+
+async def _register_images(session, job: Job, service: Service, result) -> list[dict]:
+    """受け取った絵を置き場に置き、AI の操作として登録する（操作の窓口 submit を通す）。
+    依頼した人の権限で動く。登録の引数は job.request["register"]（comfyui_sender.py の docstring）。"""
+    register = job.request["register"]
+    actor = Actor(kind="ai", id=f"service:{service.id}", on_behalf_of=job.requested_by)
+    authz = await _get_authz()
+    registered = []
+    for data in result.image_files:
+        stored = store_image(data)
+        op = RegisterImage(
+            role=register["role"], origin="generated", page_id=register.get("page_id"),
+            panel_id=register.get("panel_id"), job_id=job.id, sha256=stored.sha256, media_type=stored.media_type,
+            width=stored.width, height=stored.height, dpi=stored.dpi,
+        )
+        await submit(session, authz, actor, job.work_id, op)
+        registered.append({"image_id": op.id, "sha256": stored.sha256})
+    return registered
 
 
 async def _month_cost(session, service_id: str) -> Decimal:
@@ -70,10 +115,15 @@ async def call_service(job_id: str) -> None:
         await session.commit()
 
         started = time.monotonic()
+        # 送っている間も生存を知らせる。人が取り消すと、その返事で CancelledError がここに届き、
+        # 送り手（comfyui_sender.py）が送り先の物を止める
+        heartbeat = asyncio.create_task(_heartbeat_forever())
         try:
             result = await ADAPTERS[service.adapter](service, sp, job.request)
         except AdapterError as e:
             await stop(e.kind, e.detail, e.retry_after)
+        finally:
+            heartbeat.cancel()
         duration_ms = int((time.monotonic() - started) * 1000)
 
         log(
@@ -86,7 +136,18 @@ async def call_service(job_id: str) -> None:
             cost=sp.cost_per_call,
             duration_ms=duration_ms,
         )
-        job.result = result.output
+        await session.commit()
+
+        output = dict(result.output)
+        if result.image_files:
+            # 呼び出しは成功している。絵の登録を断られたら（ロック・権限・置き場）、依頼は止める
+            try:
+                output["registered"] = await _register_images(session, job, service, result)
+            except (V3Error, RuntimeError) as e:
+                await session.rollback()
+                raise ApplicationError(f"絵の登録を断られた: {e}", {"retry_after": None}, type="refused",
+                                       non_retryable=True) from e
+        job.result = output
         job.status = "done"
         job.failure_kind = job.failure_detail = None
         await session.commit()

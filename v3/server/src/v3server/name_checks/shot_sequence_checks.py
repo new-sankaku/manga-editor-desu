@@ -108,19 +108,38 @@ def check_shot_classes_per_scene(draft: NameDraft, thresholds: Thresholds) -> Ch
                         value, measured)
 
 
+def _place_runs(draft: NameDraft) -> list[tuple[str, list[tuple[int, NamePanel]]]] | None:
+    """読む順に、場所が変わるところで区切る。全部のコマに location があれば場所の名前で、どのコマにも無ければ場面の番号で区切る。
+    一部のコマにだけあるときは、どちらで区切っても誤るので None を返す。"""
+    seq = _reading_panels(draft)
+    has = [p.location is not None for _, p in seq]
+    if any(has) and not all(has):
+        return None
+    out: list[tuple[str, list[tuple[int, NamePanel]]]] = []
+    for page, p in seq:
+        key = p.location if p.location is not None else f"場面{p.scene}"
+        if not out or out[-1][0] != key:
+            out.append((key, []))
+        out[-1][1].append((page, p))
+    return out
+
+
 def check_place_shown(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
-    """場面が変わった後に、場所を見せるコマ（遠景か引きで、背景を描き込むか簡略に描く）があるか（課題76・168）。
-    前に同じ場面の番号で場所を見せていれば省いてよい（課題76）。形には「場所」の項目が無いので、場面の番号を場所とみなす。"""
-    shown: set[int] = set()
+    """場所が変わった後に、場所を見せるコマ（遠景か引きで、背景を描き込むか簡略に描く）があるか（課題76・168）。
+    前に同じ場所で場所を見せていれば省いてよい（課題76）。場所は NamePanel.location、無ければ場面の番号を場所とみなす。"""
+    title = "場所を見せるコマ"
+    runs = _place_runs(draft)
+    if runs is None:
+        return no_data_result("place_shown", title, "場所（location）が一部のコマにしか無い")
+    shown: set[str] = set()
     findings = []
-    for scene, ps in _scenes(draft):
+    for place, ps in runs:
         has = any(p.shot in _PLACE_SHOTS and p.background in _PLACE_BACKGROUNDS for _, p in ps)
         if has:
-            shown.add(scene)
-        elif scene not in shown:
-            findings.append(Finding(page=ps[0][0], panel=ps[0][1].n, value=f"場面{scene}",
-                                    note="場面が変わったのに場所を見せるコマが無い"))
-    return fixed_rule_result("place_shown", "場所を見せるコマ", findings)
+            shown.add(place)
+        elif place not in shown:
+            findings.append(Finding(page=ps[0][0], panel=ps[0][1].n, value=place, note="場所が変わったのに場所を見せるコマが無い"))
+    return fixed_rule_result("place_shown", title, findings)
 
 
 def check_unusual_angle_ratio(draft: NameDraft, thresholds: Thresholds) -> CheckResult:

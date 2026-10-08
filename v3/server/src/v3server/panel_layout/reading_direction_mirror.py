@@ -11,29 +11,37 @@ from v3server.panel_layout.panel_geometry import Box, Point, Polygon
 PageSide = Literal["左", "右"]
 
 
-def mirror_x(x: float, spec: PageSpec) -> float:
-    """基本枠の左右の反転。基本枠の外（断ち切り）の点も同じ式で移る。"""
-    return spec.frame_width_mm - x
+def frame_span_width(page: NamePage, spec: PageSpec) -> float:
+    """ページの座標で、コマを置く範囲の左端（x=0）から右端までの幅。2ページ分の見開きは右のページの基本枠の右端まで。"""
+    if occupies_two_pages(page):
+        ox, _ = spec.frame_origin_in_trim()
+        return 2 * spec.frame_width_mm + 2 * ox
+    return spec.frame_width_mm
 
 
-def mirror_polygon(poly: Polygon, spec: PageSpec) -> list[Point]:
+def mirror_x(x: float, width: float) -> float:
+    """コマを置く範囲（幅 width）の左右の反転。範囲の外（断ち切り）の点も同じ式で移る。"""
+    return width - x
+
+
+def mirror_polygon(poly: Polygon, width: float) -> list[Point]:
     """左右を反転する。頂点の回る向きは変わるが、面積・重なりの計算には影響しない。"""
-    return [(mirror_x(x, spec), y) for x, y in poly]
+    return [(mirror_x(x, width), y) for x, y in poly]
 
 
-def mirror_box(box: Box, spec: PageSpec) -> Box:
+def mirror_box(box: Box, width: float) -> Box:
     x0, y0, x1, y1 = box
-    return mirror_x(x1, spec), y0, mirror_x(x0, spec), y1
+    return mirror_x(x1, width), y0, mirror_x(x0, width), y1
 
 
-def to_right_to_left_polygon(poly: Polygon, direction: ReadingDirection, spec: PageSpec) -> list[Point]:
-    """右から読む検査にかけるための写し。右から読む作品はそのまま、左から読む作品は反転する。
+def to_right_to_left_polygon(poly: Polygon, direction: ReadingDirection, width: float) -> list[Point]:
+    """右から読む検査にかけるための写し。右から読む作品はそのまま、左から読む作品は反転する。width は frame_span_width。
     試作 p34：48の割りを反転して「左から」で検査すると48/48で元と同じ結果。誤って「右から」で検査すると48/48で崩れとして出た。"""
-    return list(poly) if direction == "right_to_left" else mirror_polygon(poly, spec)
+    return list(poly) if direction == "right_to_left" else mirror_polygon(poly, width)
 
 
-def to_right_to_left_box(box: Box, direction: ReadingDirection, spec: PageSpec) -> Box:
-    return box if direction == "right_to_left" else mirror_box(box, spec)
+def to_right_to_left_box(box: Box, direction: ReadingDirection, width: float) -> Box:
+    return box if direction == "right_to_left" else mirror_box(box, width)
 
 
 def before_turn_side(direction: ReadingDirection) -> PageSide:
@@ -45,25 +53,51 @@ def opposite_side(side: PageSide) -> PageSide:
     return "右" if side == "左" else "左"
 
 
-def page_sides(draft: NameDraft) -> list[PageSide]:
-    """draft.pages の並びの順に、各ページが左右どちらに置かれるか。1ページ目の側は draft が持つ。
-    見開きのページ（spread）も1ページとして数える（形に、見開きが2ページ分かの決まりが無い）。"""
+def occupies_two_pages(page: NamePage) -> bool:
+    """見開きのページが左右の2ページ分を占めると決まっているか。決めていなければ1ページとして数える。"""
+    return page.spread and page.spread_occupies_two_pages is True
+
+
+def _page_slots(draft: NameDraft) -> list[tuple[PageSide, PageSide]]:
+    """各ページの（最初の側, 最後の側）。2ページ分を占める見開きは、左右の2つの側を続けて使う。"""
     first: PageSide = "左" if draft.first_page_is_left else "右"
-    return [first if i % 2 == 0 else opposite_side(first) for i in range(len(draft.pages))]
+    out = []
+    slot = 0
+    for pg in draft.pages:
+        n = 2 if occupies_two_pages(pg) else 1
+        sides = [first if (slot + k) % 2 == 0 else opposite_side(first) for k in range(n)]
+        out.append((sides[0], sides[-1]))
+        slot += n
+    return out
+
+
+def page_sides(draft: NameDraft) -> list[PageSide]:
+    """draft.pages の並びの順に、各ページが左右どちらに置かれるか（2ページ分の見開きは最初の側）。1ページ目の側は draft が持つ。
+    spread_occupies_two_pages が無い見開きは1ページとして数える。"""
+    return [a for a, _ in _page_slots(draft)]
 
 
 def before_turn_page_indices(draft: NameDraft) -> list[int]:
-    """めくりの前のページ（draft.pages の添字）。最後のページの後にはめくりが無いので入れない。"""
+    """めくりの前のページ（draft.pages の添字）。2ページ分の見開きは最後の側で見る。最後のページの後にはめくりが無いので入れない。"""
     side = before_turn_side(draft.reading_direction)
-    sides = page_sides(draft)
-    return [i for i, s in enumerate(sides) if s == side and i < len(sides) - 1]
+    slots = _page_slots(draft)
+    return [i for i, (_, last) in enumerate(slots) if last == side and i < len(slots) - 1]
 
 
 def facing_page_pairs(draft: NameDraft) -> list[tuple[int, int]]:
-    """同時に目に入る2ページ（先に読む方, 後に読む方）の添字。めくりの後のページと、めくりの前のページの組。"""
+    """同時に目に入る2ページ（先に読む方, 後に読む方）の添字。めくりの後のページと、めくりの前のページの組。
+    2ページ分を占める見開きは、それだけで1組なので入れない。"""
     side = before_turn_side(draft.reading_direction)
-    sides = page_sides(draft)
-    return [(i, i + 1) for i in range(len(sides) - 1) if sides[i] != side and sides[i + 1] == side]
+    slots = _page_slots(draft)
+    two = [occupies_two_pages(pg) for pg in draft.pages]
+    return [(i, i + 1) for i in range(len(slots) - 1)
+            if not two[i] and not two[i + 1] and slots[i][0] != side and slots[i + 1][0] == side]
+
+
+def spread_gutter_x(spec: PageSpec) -> float:
+    """2ページ分を占める見開きのノドの x（左のページの基本枠の左上が原点）。"""
+    ox, _ = spec.frame_origin_in_trim()
+    return spec.frame_width_mm + ox
 
 
 def gutter_edge_x(side: PageSide, spec: PageSpec) -> float:

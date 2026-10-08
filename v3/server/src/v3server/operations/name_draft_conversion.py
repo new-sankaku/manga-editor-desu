@@ -57,12 +57,21 @@ async def episode_rows(session: AsyncSession, episode_id: str) -> tuple[list[Pag
     return list(pages), panels
 
 
-async def name_draft_of_episode(session: AsyncSession, work: Work, episode_id: str) -> NameDraft:
-    """今のページとコマの行から、1話のネームを組む。寸法と1ページ目の位置が作品に無ければ止める（既定の値で補わない）。"""
+def _name_draft(work: Work, pages: list[NamePage]) -> NameDraft:
+    """寸法と1ページ目の位置が作品に無ければ止める（既定の値で補わない）。"""
     if work.page_spec is None or work.first_page_is_left is None:
         raise Invalid("作品の page_spec と first_page_is_left がまだ決まっていない")
-    pages, panels = await episode_rows(session, episode_id)
     return NameDraft(reading_direction=READING_DIRECTION[work.reading_direction],
                      page_spec=PageSpec.model_validate(work.page_spec),
-                     first_page_is_left=work.first_page_is_left,
-                     pages=[name_page_from_rows(p, panels[p.id]) for p in pages])
+                     first_page_is_left=work.first_page_is_left, pages=pages)
+
+
+async def name_draft_of_episode(session: AsyncSession, work: Work, episode_id: str) -> NameDraft:
+    """今のページとコマの行から、1話のネームを組む。"""
+    pages, panels = await episode_rows(session, episode_id)
+    return _name_draft(work, [name_page_from_rows(p, panels[p.id]) for p in pages])
+
+
+def name_draft_of_proposal(work: Work, proposal_pages: list[Any]) -> NameDraft:
+    """ネームの案を、今のページとコマと同じ形にする（採用する前に検査するため）。"""
+    return _name_draft(work, [NamePage.model_validate(p) for p in proposal_pages])

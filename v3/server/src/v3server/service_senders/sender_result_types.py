@@ -5,6 +5,8 @@
 - transport: 時間切れ・通信の失敗。同じ先に送り直す（回数は処理ごとの resend_limit）
 - refused: 内容で断られた。送り直さない
 - broken_response: 返ってきた形が崩れている。使わない
+- interrupted: 送り先で誰かが途中で止めた（ComfyUI の /interrupt）。送り直さない。人の取り消し（/cancel）は
+  この種類ではなく、依頼の状態が cancelled になる
 """
 
 from dataclasses import dataclass, field
@@ -26,6 +28,8 @@ class AdapterError(Exception):
 @dataclass
 class AdapterResult:
     output: dict[str, Any]
+    # 受け取った絵のファイルの中身。output（JSON で保存する）には入れず、活動が置き場に置いて登録する
+    image_files: list[bytes] = field(default_factory=list)
     model: str | None = None
     settings: dict[str, Any] = field(default_factory=dict)
     seed: int | None = None

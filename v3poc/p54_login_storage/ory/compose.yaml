@@ -1,0 +1,39 @@
+# Ory 推奨構成（OSS）: Kratos（利用者の登録・ログイン）＋ Hydra（OAuth2/OIDC）＋ Ory 参照UI（login/registration/consent の画面）
+# 試作用: Kratos は SQLite、Hydra はメモリ（dsn: memory）。本番は PostgreSQL を付ける。
+name: p54
+services:
+  kratos-migrate:
+    image: oryd/kratos:v26.2.0
+    user: root
+    command: migrate sql -e --yes -c /etc/config/kratos/kratos.yml
+    environment: { DSN: "sqlite:///var/lib/sqlite/db.sqlite?_fk=true&mode=rwc" }
+    volumes: ["kratos-sqlite:/var/lib/sqlite", "./kratos:/etc/config/kratos:ro"]
+  kratos:
+    image: oryd/kratos:v26.2.0
+    user: root
+    depends_on: { kratos-migrate: { condition: service_completed_successfully } }
+    command: serve -c /etc/config/kratos/kratos.yml --dev --sqa-opt-out --watch-courier
+    environment: { DSN: "sqlite:///var/lib/sqlite/db.sqlite?_fk=true&mode=rwc" }
+    ports: ["127.0.0.1:61100:4433", "127.0.0.1:61101:4434"]
+    volumes: ["kratos-sqlite:/var/lib/sqlite", "./kratos:/etc/config/kratos:ro"]
+  hydra:
+    image: oryd/hydra:v26.2.0
+    command: serve all --dev --sqa-opt-out -c /etc/config/hydra/hydra.yml
+    ports: ["127.0.0.1:61102:4444", "127.0.0.1:61103:4445"]
+    volumes: ["./hydra:/etc/config/hydra:ro"]
+  ui:
+    image: oryd/kratos-selfservice-ui-node:latest
+    depends_on: [kratos, hydra]
+    ports: ["127.0.0.1:61104:3000"]
+    environment:
+      PORT: "3000"
+      KRATOS_PUBLIC_URL: http://kratos:4433/
+      KRATOS_ADMIN_URL: http://kratos:4434/
+      KRATOS_BROWSER_URL: http://127.0.0.1:61100/
+      HYDRA_ADMIN_URL: http://hydra:4445
+      COOKIE_SECRET: p54-throwaway-cookie-secret
+      CSRF_COOKIE_NAME: p54-csrf
+      CSRF_COOKIE_SECRET: p54-throwaway-csrf-secret
+      DANGEROUSLY_DISABLE_SECURE_CSRF_COOKIES: "true"
+volumes:
+  kratos-sqlite:

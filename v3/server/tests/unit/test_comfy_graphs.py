@@ -2,14 +2,35 @@
 import numpy as np
 import pytest
 
-from v3server.comfy_graphs.character_prompt_words import CharacterSheetWords, ShotTarget, character_words, shot_negative, shot_prompt
+from v3server.comfy_graphs.character_prompt_words import (
+    CharacterSheetWords,
+    ShotTarget,
+    character_words,
+    shot_negative,
+    shot_prompt,
+)
 from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, NodeOutput
-from v3server.comfy_graphs.controlnet_nodes import ControlKind, ControlSettings, insert_control
+from v3server.comfy_graphs.controlnet_nodes import (
+    ControlKind,
+    ControlSettings,
+    insert_control,
+)
 from v3server.comfy_graphs.line_extract_graph import build_line_extract
-from v3server.comfy_graphs.pose_skeleton_image import FigureBox, draw_standing_pose, figure_box_pixels
+from v3server.comfy_graphs.pose_skeleton_image import (
+    FigureBox,
+    draw_standing_pose,
+    figure_box_pixels,
+)
 from v3server.comfy_graphs.protected_redraw_graph import build_protected_redraw
-from v3server.comfy_graphs.regional_prompt_nodes import RegionPrompt, apply_regional_prompts, left_right_regions
-from v3server.comfy_graphs.text_to_image_graph import SamplerSettings, build_text_to_image
+from v3server.comfy_graphs.regional_prompt_nodes import (
+    RegionPrompt,
+    apply_regional_prompts,
+    left_right_regions,
+)
+from v3server.comfy_graphs.text_to_image_graph import (
+    SamplerSettings,
+    build_text_to_image,
+)
 from v3server.comfy_graphs.upscale_graph import build_upscale
 
 SETTINGS = SamplerSettings(checkpoint_name='ckpt-a', steps=10, cfg=4.0, sampler_name='s-a', scheduler='sch-a')

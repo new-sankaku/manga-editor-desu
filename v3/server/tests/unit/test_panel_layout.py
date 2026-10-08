@@ -2,16 +2,38 @@
 import math
 
 import pytest
-
 from name_draft_samples import P12_ANSWERS, SPEC, draft_of, p12_page, simple_pages
+
 from v3server.name_checks import frame_shape_checks as fsc
 from v3server.name_structure.reading_direction import PageSpec
-from v3server.panel_layout.layout_rough_image import RoughStyle, draw_page_rough, draw_polygons
-from v3server.panel_layout.panel_geometry import (box_iou, ellipse_box_coverage, polygon_area, polygon_bbox, polygon_centroid,
-                                                  polygon_distance, polygon_overlap_area, rect_polygon, shrink_polygon)
-from v3server.panel_layout.reading_direction_mirror import (before_turn_page_indices, facing_page_pairs, mirror_polygon,
-                                                           page_sides)
-from v3server.panel_layout.tier_ratio_layout import LayoutInputError, layout_draft, page_frames, tier_boxes
+from v3server.panel_layout.layout_rough_image import (
+    RoughStyle,
+    draw_page_rough,
+    draw_polygons,
+)
+from v3server.panel_layout.panel_geometry import (
+    box_iou,
+    ellipse_box_coverage,
+    polygon_area,
+    polygon_bbox,
+    polygon_centroid,
+    polygon_distance,
+    polygon_overlap_area,
+    rect_polygon,
+    shrink_polygon,
+)
+from v3server.panel_layout.reading_direction_mirror import (
+    before_turn_page_indices,
+    facing_page_pairs,
+    mirror_polygon,
+    page_sides,
+)
+from v3server.panel_layout.tier_ratio_layout import (
+    LayoutInputError,
+    layout_draft,
+    page_frames,
+    tier_boxes,
+)
 
 # p12 の s1_talk_B_1 の計算結果（x, y, w, h）。p12 `rows_to_panels` の出力を写した
 P12_S1_B1 = {1: (0.0, 0.0, 150.0, 37.273), 2: (61.2, 42.273, 88.8, 55.909), 3: (0.0, 42.273, 59.2, 55.909),
@@ -41,7 +63,7 @@ def test_left_to_right_layout_is_mirror_of_right_to_left():
     page = p12_page("s1_talk_B_1")
     rtl, ltr = tier_boxes(page, SPEC, "right_to_left"), tier_boxes(page, SPEC, "left_to_right")
     for n in rtl:
-        assert polygon_bbox(mirror_polygon(rect_polygon(rtl[n]), SPEC)) == pytest.approx(ltr[n])
+        assert polygon_bbox(mirror_polygon(rect_polygon(rtl[n]), SPEC.frame_width_mm)) == pytest.approx(ltr[n])
 
 
 @pytest.mark.parametrize("answer_id", list(P12_ANSWERS))
@@ -137,3 +159,133 @@ def test_rough_image():
     plain = RoughStyle(px_per_mm=2, line_px=2, show_numbers=False, font_px=12, font_path=None, shrink_mm=2,
                        show_figures=False, show_balloons=False, show_balloon_text=False)
     assert draw_polygons(tri, SPEC, plain).size == img.size
+
+
+# ---- 制約で解く割り（kiwisolver。試作 p50）。人が決めた枠を固定し、残りが比を保って追従する ----
+
+from v3server.name_structure.name_draft_schema import PanelFrame  # noqa: E402
+from v3server.panel_layout.constrained_tier_layout import (  # noqa: E402
+    LayoutConflictError,
+    constrained_layout_draft,
+    constrained_page_frames,
+)
+
+
+def _bboxes(frames):
+    return {n: polygon_bbox(f.polygon_mm) for n, f in frames.items()}
+
+
+def _pin(box):
+    return PanelFrame(polygon_mm=rect_polygon(box), bleeds=False)
+
+
+def test_constrained_without_pins_equals_tier_layout():
+    page = p12_page("s1_talk_B_1")
+    want = _bboxes(page_frames(page, SPEC, "right_to_left", "左"))
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", {}, 20)
+    assert res.broken == []
+    for n, b in _bboxes(res.frames).items():
+        assert b == pytest.approx(want[n], abs=1e-6)
+
+
+def test_human_pins_one_panel_and_others_follow():
+    """人がコマ2の左の辺を40mmへ動かす。同じ段のコマ3が縮み、ほかの段は動かない。"""
+    page = p12_page("s1_talk_B_1")
+    base = tier_boxes(page, SPEC, "right_to_left")
+    x0, y0, x1, y1 = base[2]
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", {2: _pin((40.0, y0, x1, y1))}, 20)
+    got = _bboxes(res.frames)
+    assert res.broken == []
+    assert got[2] == pytest.approx((40.0, y0, x1, y1))
+    assert got[3] == pytest.approx((0.0, y0, 40.0 - SPEC.gutter_x_mm, y1))
+    for n in (1, 4, 5, 6):
+        assert got[n] == pytest.approx(base[n], abs=1e-6)
+
+
+def test_human_pins_row_height_and_other_rows_keep_ratio():
+    """AIの段と比と、人の固定が混ざる：人がコマ5（最後の段）の上の辺を動かすと、残りの3段は比 2:3:2 を保つ。"""
+    page = p12_page("s1_talk_B_1")
+    base = tier_boxes(page, SPEC, "right_to_left")
+    x0, _, x1, y1 = base[5]
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", {5: _pin((x0, 120.0, x1, y1))}, 20)
+    got = _bboxes(res.frames)
+    assert res.broken == []
+    h = [got[n][3] - got[n][1] for n in (1, 2, 4)]
+    assert h[1] / h[0] == pytest.approx(1.5) and h[2] / h[0] == pytest.approx(1.0)
+    assert got[6][1] == pytest.approx(120.0)  # 同じ段のコマ6も追従する
+
+
+def test_pin_that_loses_is_reported():
+    """p50：強い固定が必須（最小の大きさ）に負けると、例外にならず静かに崩れる。崩れたコマを必ず返す。"""
+    page = p12_page("s1_talk_B_1")
+    _, y0, x1, y1 = tier_boxes(page, SPEC, "right_to_left")[2]
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", {2: _pin((10.0, y0, x1, y1))}, 20)
+    assert [(b.panel, b.kind) for b in res.broken] == [(2, "固定した枠")]
+    got = _bboxes(res.frames)
+    # 人の枠は出力でも動かさない。隣のコマ3は最小の20mmで止まる
+    assert got[2] == pytest.approx((10.0, y0, x1, y1))
+    assert got[3][2] - got[3][0] == pytest.approx(20.0)
+
+
+def test_two_pins_in_one_row_one_loses():
+    """p50：強い固定を2つ（100+100）置くと、両立せず片方が崩れる。"""
+    page = p12_page("s1_talk_B_1")
+    base = tier_boxes(page, SPEC, "right_to_left")
+    _, y0, _, y1 = base[5]
+    pins = {5: _pin((50.0, y0, 150.0, y1)), 6: _pin((0.0, y0, 100.0, y1))}
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", pins, 20)
+    assert len(res.broken) == 1 and res.broken[0].kind == "固定した枠"
+
+
+def test_required_conflict_raises():
+    """p50：必須どうしが両立しなければ例外（UnsatisfiableConstraint）。4段は最小60mmに収まらない。"""
+    with pytest.raises(LayoutConflictError):
+        constrained_page_frames(p12_page("s1_talk_B_1"), SPEC, "right_to_left", "左", {}, 60)
+
+
+def test_ratio_that_loses_to_minimum_is_reported():
+    """p50：中の比 1:0.01 は最小の大きさに負けて崩れる。"""
+    page = p12_page("s1_talk_B_1").model_copy(update={"row_height_ratios": [2.0, 3.0, 0.01, 4.0]})
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", {}, 20)
+    assert {b.kind for b in res.broken} == {"高さの比"}
+    assert 4 in {b.panel for b in res.broken}
+
+
+def test_all_panels_pinned_moves_nothing():
+    """人が全部を決めた割りは、比が無くても何も動かさない（固定した枠をそのまま返す）。"""
+    page = p12_page("s1_talk_B_1").model_copy(update={"row_height_ratios": None, "cell_width_ratios": None})
+    pins = {n: PanelFrame(polygon_mm=[(x + 0.3, y), (x + 9, y), (x, y + 9)], bleeds=False)
+            for n, (x, y) in zip(range(1, 7), [(0, 0), (20, 0), (40, 0), (0, 30), (20, 30), (40, 30)])}
+    d, broken = constrained_layout_draft(draft_of([page]), pins, 20)
+    assert broken == []
+    assert {p.n: p.frame for p in d.pages[0].panels} == pins
+
+
+def test_slanted_cut_keeps_perpendicular_gutter():
+    """p50：傾きを定数にすれば斜めの区切りは線形制約で書ける。垂直に測った隙間は規格どおり。"""
+    page = p12_page("s1_talk_B_1").model_copy(update={"cut_slants": [[], [0.2], [], [0.0]]})
+    res = constrained_page_frames(page, SPEC, "right_to_left", "左", {}, 20)
+    assert res.broken == []
+    p2, p3 = res.frames[2].polygon_mm, res.frames[3].polygon_mm
+    assert polygon_distance(p2, p3) == pytest.approx(SPEC.gutter_x_mm, abs=1e-6)
+    # 高さの真ん中で測った幅の比は 3:2
+    mid = lambda poly: (polygon_area(poly) / (poly[3][1] - poly[0][1]))  # noqa: E731
+    assert mid(p2) / mid(p3) == pytest.approx(1.5)
+    with pytest.raises(LayoutInputError):
+        tier_boxes(page, SPEC, "right_to_left")
+
+
+def test_constrained_left_to_right_is_mirror():
+    page = p12_page("s1_talk_B_1")
+    rtl = _bboxes(constrained_page_frames(page, SPEC, "right_to_left", "左", {}, 20).frames)
+    ltr = constrained_page_frames(page, SPEC, "left_to_right", "左", {}, 20).frames
+    for n, f in ltr.items():
+        assert polygon_bbox(mirror_polygon(f.polygon_mm, SPEC.frame_width_mm)) == pytest.approx(rtl[n], abs=1e-6)
+
+
+def test_constrained_bleed_not_toward_gutter():
+    page = p12_page("s1_talk_B_1")
+    page.panels[0] = page.panels[0].model_copy(update={"shape": "断ち切り"})
+    a = constrained_page_frames(page, SPEC, "right_to_left", "左", {}, 20).frames[1]
+    b = page_frames(page, SPEC, "right_to_left", "左")[1]
+    assert a.bleeds and polygon_bbox(a.polygon_mm) == pytest.approx(polygon_bbox(b.polygon_mm), abs=1e-6)

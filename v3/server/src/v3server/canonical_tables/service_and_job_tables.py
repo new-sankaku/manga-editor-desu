@@ -65,6 +65,10 @@ class ServiceProcess(Base):
     model: Mapped[str | None] = mapped_column(Text)
     # ComfyUI の手順（API形式のJSON）
     comfy_workflow: Mapped[dict[str, Any] | None] = mapped_column()
+    # ComfyUI で /history を待つ上限（秒）。既定は置かない。無ければ送らず止める（comfyui_sender.py）
+    comfy_wait_seconds: Mapped[int | None] = mapped_column(Integer)
+    # 送る前に /object_info で、手順の選択肢（モデル名など）が ComfyUI に入っているか確かめる
+    comfy_check_choices: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
 
 class ProcessRoute(Base):
@@ -107,7 +111,7 @@ class Job(Base):
     requested_via: Mapped[str] = mapped_column(String(8))
     # queued / running / waiting_limit / waiting_budget / stopped / done / cancelled
     status: Mapped[str] = mapped_column(String(16), default="queued")
-    # rate_limited / transport / refused / broken_response / budget / destination_not_allowed
+    # rate_limited / transport / refused / broken_response / interrupted / budget / destination_not_allowed
     failure_kind: Mapped[str | None] = mapped_column(String(32))
     failure_detail: Mapped[str | None] = mapped_column(Text)
     request: Mapped[dict[str, Any]] = mapped_column()

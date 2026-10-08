@@ -2,7 +2,13 @@
 import numpy as np
 import pytest
 
-from v3server.background_scene3d.box_scene_depth_render import Box, Camera, LineSettings, camera_rays, render_depth_and_line
+from v3server.background_scene3d.box_scene_depth_render import (
+    Box,
+    Camera,
+    LineSettings,
+    camera_rays,
+    render_depth_and_line,
+)
 
 LINE = LineSettings(depth_jump_log=0.05, thickness_px=2)
 

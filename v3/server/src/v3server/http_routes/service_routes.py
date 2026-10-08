@@ -32,7 +32,7 @@ class NewService(BaseModel):
     name: str
     kind: Literal["image", "text"]
     location: Literal["local", "api"]
-    adapter: Literal["comfyui", "litellm"]
+    adapter: Literal["comfyui", "litellm", "detector"]
     endpoint: str | None = None
     send_mode: Literal["serial", "parallel"]
     max_concurrency: int = Field(default=1, ge=1)
@@ -53,6 +53,8 @@ class ServiceProcessBody(BaseModel):
     cost_per_call: float | None = None
     model: str | None = None
     comfy_workflow: dict[str, Any] | None = None
+    comfy_wait_seconds: int | None = Field(default=None, ge=1)
+    comfy_check_choices: bool = False
 
 
 class RouteBody(BaseModel):
@@ -72,7 +74,8 @@ async def list_services(session: SessionDep, actor: ActorDep):
     routes = (await session.execute(select(ProcessRoute))).scalars().all()
     return {
         "services": [row(s, *SERVICE_FIELDS) for s in services],
-        "processes": [row(sp, "service_id", "process", "aptitude", "cost_per_call", "model") for sp in sps],
+        "processes": [row(sp, "service_id", "process", "aptitude", "cost_per_call", "model",
+                                        "comfy_wait_seconds", "comfy_check_choices") for sp in sps],
         "routes": [row(r, "process", "service_id", "resend_limit", "regenerate_limit") for r in routes],
     }
 
@@ -117,7 +120,8 @@ async def put_service_process(service_id: str, process: str, body: ServiceProces
     for k, v in body.model_dump().items():
         setattr(sp, k, v)
     await session.commit()
-    return row(sp, "service_id", "process", "aptitude", "cost_per_call", "model")
+    return row(sp, "service_id", "process", "aptitude", "cost_per_call", "model",
+                                        "comfy_wait_seconds", "comfy_check_choices")
 
 
 @router.put("/routes/{process}")

@@ -3,7 +3,11 @@ import json
 
 import pytest
 
-from v3server.llm_questions.answer_json_reader import BROKEN_RESPONSE_KIND, BrokenAnswerError, extract_json_object
+from v3server.llm_questions.answer_json_reader import (
+    BROKEN_RESPONSE_KIND,
+    BrokenAnswerError,
+    extract_json_object,
+)
 from v3server.llm_questions.contradiction_question import (
     CONTRADICTION_VIEWS,
     ScriptLine,
@@ -27,7 +31,10 @@ from v3server.llm_questions.layout_tier_question import (
     build_layout_tier_question,
     parse_layout_tier_answer,
 )
-from v3server.llm_questions.name_draft_question import build_name_draft_question, parse_name_draft_answer
+from v3server.llm_questions.name_draft_question import (
+    build_name_draft_question,
+    parse_name_draft_answer,
+)
 from v3server.llm_questions.reading_order_question import (
     assign_points_to_panels,
     build_reading_order_question,
@@ -38,7 +45,10 @@ from v3server.llm_questions.redo_instruction_question import (
     build_redo_tags_question,
     parse_tags_answer,
 )
-from v3server.llm_questions.shot_angle_question import build_shot_angle_question, parse_shot_angle_answer
+from v3server.llm_questions.shot_angle_question import (
+    build_shot_angle_question,
+    parse_shot_angle_answer,
+)
 from v3server.name_structure.reading_direction import PageSpec
 
 SPEC = PageSpec(frame_width_mm=150, frame_height_mm=220, trim_width_mm=182, trim_height_mm=257, bleed_mm=3,

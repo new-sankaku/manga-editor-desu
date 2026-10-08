@@ -1,0 +1,4 @@
+{
+  "product": "garage",
+  "fatal": "IndexError: list index out of range"
+}

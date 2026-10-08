@@ -11,7 +11,10 @@ from v3server.name_checks.check_report_types import (
 )
 from v3server.name_structure.name_draft_schema import NameDraft
 from v3server.panel_layout.panel_geometry import FLOAT_EPS, ellipse_overlap_area
-from v3server.panel_layout.reading_direction_mirror import to_right_to_left_box
+from v3server.panel_layout.reading_direction_mirror import (
+    frame_span_width,
+    to_right_to_left_box,
+)
 
 THRESHOLD_KEYS = {
     "balloon_chars_max": "吹き出し1つの文字数の上限（改行と空白は数えない）",
@@ -80,8 +83,9 @@ def check_balloon_order(draft: NameDraft, thresholds: Thresholds) -> CheckResult
     findings = []
     looked = 0
     for pg in draft.pages:
+        width = frame_span_width(pg, draft.page_spec)
         for p in pg.panels:
-            placed = [(k, to_right_to_left_box(b.box_mm, draft.reading_direction, draft.page_spec))
+            placed = [(k, to_right_to_left_box(b.box_mm, draft.reading_direction, width))
                       for k, b in enumerate(p.balloons) if b.box_mm is not None]
             for (_, a), (kb, b) in zip(placed, placed[1:]):
                 looked += 1
@@ -98,15 +102,19 @@ def check_balloon_order(draft: NameDraft, thresholds: Thresholds) -> CheckResult
 
 def check_balloon_crossing(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """同じページの吹き出しの楕円どうしが重なっていないか（課題153）。
-    つなげた吹き出し（わざと重ねる書き方）を表す項目は形に無いので、それも指摘になる。"""
+    同じコマの1つ前の吹き出しとわざとつなげたもの（Balloon.joined_to_previous が True）の組は指摘しない。"""
     title = "吹き出しの交差"
     findings = []
     looked = 0
     for pg in draft.pages:
         placed = [(p.n, k, b.box_mm) for p in pg.panels for k, b in enumerate(p.balloons) if b.box_mm is not None]
+        joined = {(p.n, k) for p in pg.panels for k, b in enumerate(p.balloons) if k > 0 and b.joined_to_previous is True}
         for i, (na, ka, a) in enumerate(placed):
             for nb, kb, b in placed[i + 1:]:
                 looked += 1
+                # つなげた組も見た数に入れる。見たうえで指摘しない
+                if na == nb and kb == ka + 1 and (nb, kb) in joined:
+                    continue
                 ov = ellipse_overlap_area(a, b)
                 if ov > FLOAT_EPS:
                     findings.append(Finding(page=pg.page, panel=na, balloon=ka, value=rounded(ov),

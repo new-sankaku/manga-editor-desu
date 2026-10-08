@@ -1,0 +1,20 @@
+{
+  "$id": "https://schemas.p54.test/identity.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Person",
+  "type": "object",
+  "properties": {
+    "traits": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string", "format": "email", "title": "E-Mail", "minLength": 3,
+          "ory.sh/kratos": { "credentials": { "password": { "identifier": true } } }
+        },
+        "name": { "type": "string", "title": "Name" }
+      },
+      "required": ["email"],
+      "additionalProperties": false
+    }
+  }
+}

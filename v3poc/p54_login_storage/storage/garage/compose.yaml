@@ -1,0 +1,7 @@
+name: p54
+services:
+  garage:
+    image: dxflrs/garage:v2.4.1
+    ports: ["127.0.0.1:61220:3900"]
+    volumes: ["./garage.toml:/etc/garage.toml:ro", "meta:/var/lib/garage/meta", "data:/var/lib/garage/data"]
+volumes: { meta: , data: }

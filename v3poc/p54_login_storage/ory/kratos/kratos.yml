@@ -1,0 +1,30 @@
+serve:
+  public: { base_url: http://127.0.0.1:61100/, cors: { enabled: true, allowed_origins: ["http://127.0.0.1:61104"], allow_credentials: true } }
+  admin: { base_url: http://kratos:4434/ }
+selfservice:
+  default_browser_return_url: http://127.0.0.1:61104/
+  allowed_return_urls: ["http://127.0.0.1:61104", "http://127.0.0.1:61102"]
+  methods:
+    password: { enabled: true }
+  flows:
+    error: { ui_url: "http://127.0.0.1:61104/error" }
+    login: { ui_url: "http://127.0.0.1:61104/login" }
+    registration:
+      ui_url: http://127.0.0.1:61104/registration
+      after: { password: { hooks: [ { hook: session } ] } }
+    settings: { ui_url: "http://127.0.0.1:61104/settings" }
+    logout: { after: { default_browser_return_url: "http://127.0.0.1:61104/login" } }
+identity:
+  default_schema_id: default
+  schemas: [ { id: default, url: file:///etc/config/kratos/identity.schema.json } ]
+oauth2_provider:
+  url: http://hydra:4445
+secrets:
+  cookie: ["p54-throwaway-cookie-secret-0123456789"]
+  cipher: ["p54-throwaway-cipher-secret-32ch"]
+hashers:
+  algorithm: argon2
+  argon2: { memory: 16MB, iterations: 1, parallelism: 1, salt_length: 16, key_length: 16 }
+courier:
+  smtp: { connection_uri: "smtps://test:test@localhost:1025/?skip_ssl_verify=true" }
+log: { level: warning }

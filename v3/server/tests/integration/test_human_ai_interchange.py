@@ -178,3 +178,39 @@ async def test_人が描いた絵と持ち込んだ絵を登録してコマに�
         await ai_op(authz, wid, a, {"type": "register_image", "role": "panel_art", "origin": "generated",
                                     "panel_id": pid, "sha256": "0" * 64, "media_type": "image/png", "width": 1,
                                     "height": 1})
+
+
+async def test_今のネームも案も同じ検査にかかり_使った閾値が残る(api, authz):
+    a = user()
+    ids = await new_work(api, a)
+    wid, ep = ids["work"], ids["episode"]
+    assert (await op(api, wid, a, {"type": "set_work_settings", "page_spec": PAGE_SPEC,
+                                   "first_page_is_left": True})).status_code == 200
+    assert (await op(api, wid, a, {"type": "set_threshold", "key": "panels_per_page_max", "value": {"value": 1},
+                                   "source": "試験", "status": "unverified"})).status_code == 200
+    prop = uuid.uuid4().hex
+    await ai_op(authz, wid, a, {"type": "submit_name_proposal", "id": prop, "episode_id": ep, "made_by": "ai",
+                                "pages": [name_page(1, ["1", "2"]), name_page(2, ["3"], 3)]})
+
+    def panel_count(run):
+        return next(r for r in run["report"]["results"] if r["threshold_key"] == "panels_per_page_max")
+
+    # 採用する前の案を検査する。1ページ目が2コマなので上限1を超える
+    r = await api.post(f"/works/{wid}/episodes/{ep}/name-checks", headers=h(a), json={"proposal_id": prop})
+    assert r.status_code == 201, r.text
+    run = r.json()
+    assert panel_count(run)["status"] == "不合格"
+    assert run["thresholds_used"]["panels_per_page_max"]["status"] == "unverified"
+
+    # 採用した後の今のページとコマを検査しても、同じ結果になる
+    assert (await op(api, wid, a, {"type": "apply_name_proposal", "id": prop})).status_code == 200
+    r = await api.post(f"/works/{wid}/episodes/{ep}/name-checks", headers=h(a), json={})
+    assert r.status_code == 201, r.text
+    assert panel_count(r.json())["status"] == "不合格"
+
+    # 閾値を rejected にすると使わず、値だけ返す
+    assert (await op(api, wid, a, {"type": "set_threshold", "key": "panels_per_page_max", "value": {"value": 1},
+                                   "source": "試験", "status": "rejected"})).status_code == 200
+    r = await api.post(f"/works/{wid}/episodes/{ep}/name-checks", headers=h(a), json={})
+    assert panel_count(r.json())["status"] == "閾値未設定"
+    assert len((await api.get(f"/works/{wid}/episodes/{ep}/name-checks", headers=h(a))).json()) == 3

@@ -1,0 +1,8 @@
+name: p54
+services:
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    command: server -dir=/data -s3 -s3.port=8333 -s3.config=/config/s3.json -master.volumeSizeLimitMB=512 -volume.max=8 -volume.minFreeSpace=100MiB
+    ports: ["127.0.0.1:61210:8333"]
+    volumes: ["data:/data", "./s3.json:/config/s3.json:ro"]
+volumes: { data: }

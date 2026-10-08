@@ -1,0 +1,78 @@
+{
+  "product": "Ory (Kratos + Hydra + 参照UI)",
+  "checks": {
+    "register_and_code_pkce_token": true,
+    "code_reuse_rejected": true,
+    "wrong_pkce_verifier_rejected": true,
+    "login_second_context_same_sub": true,
+    "sso_second_auth_without_password_screen": true,
+    "sub_equals_kratos_identity_id": true,
+    "wrong_password_rejected": true,
+    "verifier_returns_sub": true,
+    "forged_signature_rejected": true,
+    "tampered_payload_rejected": true,
+    "no_token_rejected": true,
+    "id_token_wrong_audience_rejected": true,
+    "expired_forged_rejected": true,
+    "refreshed_token_accepted": true
+  },
+  "startup_seconds_to_ready": 11.0,
+  "memory_mib_idle": {
+    "p54-ui-1": 73.8,
+    "p54-kratos-1": 56.1,
+    "p54-hydra-1": 21.1
+  },
+  "image_mb": {
+    "oryd/kratos:v26.2.0": 105.1,
+    "oryd/hydra:v26.2.0": 73.7,
+    "oryd/kratos-selfservice-ui-node:latest": 412.2
+  },
+  "config_files": {
+    "files": 4,
+    "lines": 100,
+    "note": "別に Hydra のクライアント登録（管理APIへの POST 1回、下の client_body）が要る"
+  },
+  "client_registered": 201,
+  "token_claims": {
+    "access": {
+      "iss": "http://127.0.0.1:61102",
+      "sub": "1889433b-9451-468e-b396-7e9a2b07e873",
+      "aud": [
+        "v3-api"
+      ],
+      "client_id": "v3-web",
+      "scp": [
+        "openid",
+        "offline_access"
+      ],
+      "exp": 1791420055,
+      "iat": 1791419754
+    },
+    "id": {
+      "sub": "1889433b-9451-468e-b396-7e9a2b07e873",
+      "iss": "http://127.0.0.1:61102",
+      "aud": [
+        "v3-web"
+      ]
+    },
+    "expires_in": 300,
+    "has_refresh_token": true,
+    "access_token_is_jwt": true
+  },
+  "verifier_ok_response": {
+    "kind": "human",
+    "id": "1889433b-9451-468e-b396-7e9a2b07e873",
+    "openfga_user": "user:1889433b-9451-468e-b396-7e9a2b07e873"
+  },
+  "note_expiry": "期限切れの実トークンでの検査は未実施（偽造鍵のため鍵の検査で先に断られる）",
+  "memory_mib_after_use": {
+    "p54-ui-1": 82.2,
+    "p54-kratos-1": 88.4,
+    "p54-hydra-1": 23.7
+  },
+  "license": {
+    "kratos": "Apache-2.0",
+    "hydra": "Apache-2.0",
+    "ui-node": "Apache-2.0（イメージ内 package.json）"
+  }
+}

@@ -36,6 +36,8 @@ class Balloon(BaseModel):
     text: str
     # 吹き出しの楕円を囲む四角（基本枠の座標・mm）。仕上げで置いた後にだけ入る
     box_mm: tuple[float, float, float, float] | None = None
+    # 同じコマの1つ前の吹き出しと、わざとつなげて（重ねて）描くか。無ければ決めていない（つなげない扱い）
+    joined_to_previous: bool | None = None
 
 
 class PanelFrame(BaseModel):
@@ -63,6 +65,10 @@ class NamePanel(BaseModel):
     sfx: list[str]
     # コマ割りの計算（panel_layout）の後にだけ入る
     frame: PanelFrame | None = None
+    # 場所の名前。同じ名前なら同じ場所。無ければ場面の番号を場所とみなす
+    location: str | None = None
+    # わざと重ねて置くコマの番号（重ねたコマ）。ここに挙げた組の重なりは指摘しない。無ければ重ねない
+    overlaps: list[int] | None = None
 
 
 class NamePage(BaseModel):
@@ -75,6 +81,12 @@ class NamePage(BaseModel):
     # 段の高さの比と、段ごとのコマの幅の比（読む順）。決めていなければ無い
     row_height_ratios: list[float] | None = None
     cell_width_ratios: list[list[float]] | None = None
+    # 段ごとの区切りの傾き（読む順の隣り合うコマの間ごと）。区切りの下端の x − 上端の x を段の高さで割った値（基本枠の座標）。
+    # 0 なら縦の区切り。無ければ全部縦。角度は定数として扱う（制約の計算が線形で済む範囲）
+    cut_slants: list[list[float]] | None = None
+    # 見開き（spread）のページが2ページ分を占めるか。True なら左右の2ページとして数え、座標は左のページの基本枠の左上を原点に
+    # 右のページまで続く（ノドは x = 基本枠の幅 + 基本枠の左右の余白）。無ければ1ページとして数える（ノドの検査の対象外）
+    spread_occupies_two_pages: bool | None = None
 
 
 class NameDraft(BaseModel):

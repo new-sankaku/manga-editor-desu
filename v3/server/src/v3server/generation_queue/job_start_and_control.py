@@ -4,16 +4,14 @@ from typing import Any, Literal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from temporalio.client import Client
-from temporalio.common import Priority
 
 from v3server.allowed_destinations import is_allowed
 from v3server.canonical_tables.service_and_job_tables import Job, ProcessRoute, Service
 from v3server.canonical_tables.work_tree_tables import Page
-from v3server.generation_queue.generation_workflow import (
+from v3server.generation_queue.generation_workflow import GenerationJob, JobInput
+from v3server.generation_queue.queue_names_and_priority import (
     CONTROL_QUEUE,
-    PRIORITY_KEY,
-    GenerationJob,
-    JobInput,
+    job_priority,
 )
 from v3server.openfga_permissions import Authz
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
@@ -70,10 +68,10 @@ async def enqueue(
 
     await temporal.start_workflow(
         GenerationJob.run,
-        JobInput(job.id, service.id, requested_via, route.resend_limit),
+        JobInput(job.id, work_id, service.id, requested_via, route.resend_limit),
         id=job.workflow_id,
         task_queue=CONTROL_QUEUE,
-        priority=Priority(priority_key=PRIORITY_KEY[requested_via]),
+        priority=job_priority(requested_via, work_id),
     )
     return job
 

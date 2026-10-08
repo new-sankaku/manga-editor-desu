@@ -213,3 +213,31 @@ async def test_人の依頼をAIの依頼より先に送る(api, admin, workers,
 
 async def _done_count(state, n):
     return sum(1 for _, t in state["calls"] if t and (t.startswith("ai") or t.startswith("human"))) >= n
+
+
+async def test_同じ優先順位の中では作品ごとに順に送る(api, admin, workers, fake_adapter):
+    """Temporal の公平さの鍵（fairness_key=作品ID）。先に多く頼んだ作品が、後の作品を待たせないか。"""
+
+    a = user()
+    w1 = (await new_work(api, a))["work"]
+    w2 = (await new_work(api, a))["work"]
+    sid, p = await make_service(api, admin)
+    await api.patch(f"/services/{sid}", headers=h(admin), json={"paused": True})
+    await workers.reload()
+    for i in range(8):
+        await enqueue(api, w1, a, p, tag=f"fairA{i}")
+    for i in range(3):
+        await enqueue(api, w2, a, p, tag=f"fairB{i}")
+    await asyncio.sleep(1)
+
+    await api.patch(f"/services/{sid}", headers=h(admin), json={"paused": False})
+    await workers.reload()
+
+    async def done():
+        return sum(1 for _, t in fake_adapter["calls"] if t and t.startswith("fair")) >= 11
+
+    await wait_for(done, 40)
+    order = [t for _, t in fake_adapter["calls"] if t and t.startswith("fair")]
+    b_pos = [i + 1 for i, t in enumerate(order) if t.startswith("fairB")]
+    # 公平さが無ければ B は 9〜11 番目。作品ごとに回れば、最初の6件の中に B が3件とも入る
+    assert b_pos[-1] <= 6, order

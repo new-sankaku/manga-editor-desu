@@ -1,0 +1,63 @@
+{
+  "product": "Keycloak",
+  "checks": {
+    "register_and_code_pkce_token": true,
+    "code_reuse_rejected": true,
+    "wrong_pkce_verifier_rejected": true,
+    "login_second_context_same_sub": true,
+    "sso_second_auth_without_password_screen": true,
+    "wrong_password_rejected": true,
+    "verifier_returns_sub": true,
+    "forged_signature_rejected": true,
+    "tampered_payload_rejected": true,
+    "no_token_rejected": true,
+    "id_token_wrong_audience_rejected": true,
+    "expired_forged_rejected": true,
+    "refreshed_token_accepted": true
+  },
+  "startup_seconds_to_ready": 68.3,
+  "memory_mib_idle": {
+    "p54-keycloak-1": 650.4
+  },
+  "image_mb": {
+    "quay.io/keycloak/keycloak:26.8.0": 750.7
+  },
+  "config_files": {
+    "files": 2,
+    "lines": 38
+  },
+  "token_claims": {
+    "access": {
+      "iss": "http://127.0.0.1:61080/realms/manga",
+      "sub": "abb96797-7aee-448f-9b39-7274b241211f",
+      "aud": [
+        "v3-api",
+        "account"
+      ],
+      "azp": "v3-web",
+      "exp": 1791419735,
+      "iat": 1791419435,
+      "preferred_username": "p54user383e1c",
+      "typ": "Bearer"
+    },
+    "id": {
+      "sub": "abb96797-7aee-448f-9b39-7274b241211f",
+      "preferred_username": "p54user383e1c",
+      "email": "p54user383e1c@example.test"
+    },
+    "expires_in": 300,
+    "has_refresh_token": true
+  },
+  "verifier_ok_response": {
+    "kind": "human",
+    "id": "abb96797-7aee-448f-9b39-7274b241211f",
+    "openfga_user": "user:abb96797-7aee-448f-9b39-7274b241211f"
+  },
+  "note_expiry": "期限切れの実トークンでの検査は未実施（偽造鍵のため鍵の検査で先に断られる）。PyJWT の exp 検査は require で必須化している",
+  "memory_mib_after_use": {
+    "p54-keycloak-1": 684.5
+  },
+  "license": {
+    "keycloak": "Apache-2.0（keycloak/keycloak の LICENSE.txt 冒頭で確認）"
+  }
+}

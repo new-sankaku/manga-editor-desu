@@ -1,0 +1,11 @@
+# MinIO コミュニティ版は公式にソース配布のみ（イメージ・バイナリの更新なし）。
+# p54-minio-src は `go install github.com/minio/minio@latest` で作った試作用イメージ（build/Dockerfile）。
+name: p54
+services:
+  minio:
+    image: p54-minio-src:latest
+    command: server /data --address :9000 --console-address :9001
+    environment: { MINIO_ROOT_USER: p54accesskey, MINIO_ROOT_PASSWORD: p54secretkey-throwaway }
+    ports: ["127.0.0.1:61200:9000"]
+    volumes: ["data:/data"]
+volumes: { data: }

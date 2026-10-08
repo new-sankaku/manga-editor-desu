@@ -3,7 +3,12 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from v3server.layer_split.line_solid_tone_split import SplitThresholds, grey_array, mean_difference, split_line_solid_tone
+from v3server.layer_split.line_solid_tone_split import (
+    SplitThresholds,
+    grey_array,
+    mean_difference,
+    split_line_solid_tone,
+)
 
 TH = SplitThresholds(solid_below=50, paper_white_from=215, line_on_from=128, line_value_ceiling=80)
 

@@ -16,7 +16,8 @@ from v3server.name_checks.check_report_types import (
     no_data_result,
     rounded,
 )
-from v3server.name_structure.name_draft_schema import NameDraft, NamePage
+from v3server.name_structure.name_draft_schema import NameDraft, NamePage, NamePanel
+from v3server.name_structure.reading_direction import PageSpec
 from v3server.panel_layout.panel_geometry import (
     FLOAT_EPS,
     Box,
@@ -31,8 +32,11 @@ from v3server.panel_layout.panel_geometry import (
 from v3server.panel_layout.reading_direction_mirror import (
     crosses_gutter_edge,
     facing_page_pairs,
+    frame_span_width,
+    occupies_two_pages,
     page_reading_sequence,
     page_sides,
+    spread_gutter_x,
     to_right_to_left_polygon,
 )
 
@@ -56,7 +60,8 @@ def _has_frames(draft: NameDraft) -> bool:
 
 def rtl_polygons(page: NamePage, draft: NameDraft) -> dict[int, list[tuple[float, float]]]:
     """右から読む前提の検査にかける写し。左から読む作品は左右を反転する。"""
-    return {p.n: to_right_to_left_polygon(p.frame.polygon_mm, draft.reading_direction, draft.page_spec) for p in page.panels}
+    width = frame_span_width(page, draft.page_spec)
+    return {p.n: to_right_to_left_polygon(p.frame.polygon_mm, draft.reading_direction, width) for p in page.panels}
 
 
 def rtl_bboxes(page: NamePage, draft: NameDraft) -> dict[int, Box]:
@@ -64,6 +69,20 @@ def rtl_bboxes(page: NamePage, draft: NameDraft) -> dict[int, Box]:
 
 
 # ---- 番号と段（枠が無くても見られる） ----
+
+def page_frame_regions(page: NamePage, spec: PageSpec) -> list[Box]:
+    """ページの基本枠（ページの座標）。2ページ分の見開きは左右のページの基本枠の2つ。"""
+    W, H = spec.frame_width_mm, spec.frame_height_mm
+    if occupies_two_pages(page):
+        ox, _ = spec.frame_origin_in_trim()
+        return [(0.0, 0.0, W, H), (W + 2 * ox, 0.0, 2 * W + 2 * ox, H)]
+    return [(0.0, 0.0, W, H)]
+
+
+def intended_overlap(a: NamePanel, b: NamePanel) -> bool:
+    """どちらかが、もう一方をわざと重ねるコマとして挙げているか（NamePanel.overlaps）。"""
+    return (a.overlaps is not None and b.n in a.overlaps) or (b.overlaps is not None and a.n in b.overlaps)
+
 
 def check_rows_order(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """段に並べた番号が、作品の通し番号どおりに1ずつ増えるか。ページのコマと段の番号が一致するか。
@@ -90,12 +109,14 @@ def check_frame_bounds(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     if not _has_frames(draft):
         return no_data_result("frame_bounds", title, _NO_FRAME)
     spec = draft.page_spec
-    W, H = spec.frame_width_mm, spec.frame_height_mm
+    H = spec.frame_height_mm
     ox, oy = spec.frame_origin_in_trim()
-    inner: Box = (0.0, 0.0, W, H)
-    outer: Box = (-ox - spec.bleed_mm, -oy - spec.bleed_mm, W + ox + spec.bleed_mm, H + oy + spec.bleed_mm)
     findings = []
     for pg in draft.pages:
+        # 2ページ分の見開きは、左のページの基本枠の左端から右のページの基本枠の右端まで（ノドをまたぐコマを許す）
+        span = frame_span_width(pg, spec)
+        inner: Box = (0.0, 0.0, span, H)
+        outer: Box = (-ox - spec.bleed_mm, -oy - spec.bleed_mm, span + ox + spec.bleed_mm, H + oy + spec.bleed_mm)
         for p in pg.panels:
             b = polygon_bbox(p.frame.polygon_mm)
             limit = outer if p.frame.bleeds else inner
@@ -122,7 +143,7 @@ def check_bleed_matches_shape(draft: NameDraft, thresholds: Thresholds) -> Check
 
 
 def check_overlap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
-    """コマどうしが重なっていないか。重ねたコマを意図して置く書き方は形にまだ無いので、重なりは全部指摘になる。"""
+    """コマどうしが重なっていないか。わざと重ねるコマ（NamePanel.overlaps に挙げた組）は指摘しない。"""
     title = "コマの重なり"
     if not _has_frames(draft):
         return no_data_result("overlap", title, _NO_FRAME)
@@ -131,6 +152,8 @@ def check_overlap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
         ps = pg.panels
         for i, a in enumerate(ps):
             for b in ps[i + 1:]:
+                if intended_overlap(a, b):
+                    continue
                 ov = polygon_overlap_area(a.frame.polygon_mm, b.frame.polygon_mm)
                 if ov > FLOAT_EPS:
                     findings.append(Finding(page=pg.page, panel=a.n, value=rounded(ov), note=f"コマ{b.n}と重なる（mm²）"))
@@ -138,7 +161,7 @@ def check_overlap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
 
 
 def check_panel_gap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
-    """重なっていないコマどうしの最短の隙間。接している（0mm）ものも入る。"""
+    """重なっていないコマどうしの最短の隙間。接している（0mm）ものも入る。わざと重ねる組は見ない。"""
     title = "コマどうしの隙間"
     if not _has_frames(draft):
         return no_data_result("panel_gap", title, _NO_FRAME)
@@ -147,7 +170,7 @@ def check_panel_gap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
         ps = pg.panels
         for i, a in enumerate(ps):
             for b in ps[i + 1:]:
-                if polygon_overlap_area(a.frame.polygon_mm, b.frame.polygon_mm) > FLOAT_EPS:
+                if intended_overlap(a, b) or polygon_overlap_area(a.frame.polygon_mm, b.frame.polygon_mm) > FLOAT_EPS:
                     continue  # 重なりは check_overlap が出す
                 d = polygon_distance(a.frame.polygon_mm, b.frame.polygon_mm)
                 measured.append((d, Finding(page=pg.page, panel=a.n, value=rounded(d), note=f"コマ{b.n}との隙間（mm）")))
@@ -185,17 +208,23 @@ def _dilate(mask: np.ndarray, rx: int, ry: int) -> np.ndarray:
 
 def page_empty_area_mm2(page: NamePage, draft: NameDraft) -> float:
     """基本枠の中で、どのコマにも、コマの周りの隙間（規格の左右・上下の隙間）にも入らない面積（試作 p12 `recheck.py`）。
-    コマを画素に塗り、規格の隙間の幅だけ膨らませて、塗られなかった画素を数える。"""
+    コマを画素に塗り、規格の隙間の幅だけ膨らませて、塗られなかった画素を数える。2ページ分の見開きは左右の基本枠の中だけを数える。"""
     spec = draft.page_spec
     s = _RASTER_PX_PER_MM
-    w, h = math.ceil(spec.frame_width_mm * s), math.ceil(spec.frame_height_mm * s)
+    w, h = math.ceil(frame_span_width(page, spec) * s), math.ceil(spec.frame_height_mm * s)
     img = Image.new("L", (w, h), 0)
     d = ImageDraw.Draw(img)
     for p in page.panels:
         d.polygon([(x * s, y * s) for x, y in p.frame.polygon_mm], fill=255)
     mask = np.asarray(img) > 0
     covered = _dilate(mask, math.ceil(spec.gutter_x_mm * s), math.ceil(spec.gutter_y_mm * s))
-    return float((~covered).sum()) / (s * s)
+    region = Image.new("L", (w, h), 0)
+    rd = ImageDraw.Draw(region)
+    for x0, y0, x1, y1 in page_frame_regions(page, spec):
+        # 右端と下端の画素を含めないよう、1画素手前までを塗る
+        rd.rectangle((x0 * s, y0 * s, x1 * s - 1, y1 * s - 1), fill=255)
+    inside = np.asarray(region) > 0
+    return float((inside & ~covered).sum()) / (s * s)
 
 
 def check_empty_space(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
@@ -338,14 +367,29 @@ def check_facing_row_line_offset(draft: NameDraft, thresholds: Thresholds) -> Ch
 def check_gutter_side_contents(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """ノドに、断ち切り・顔・セリフが入っていないか（課題29）。基本枠のノドの辺を越えてノドの側へ出ていれば指摘。
     断ち切りは枠、顔は人物の顔の範囲、セリフは吹き出しの範囲で見る。まだ無い範囲は見ない。
-    見開きのページはノドがページの真ん中に来るが、形にその決まりが無いので対象外にする（値に書く）。"""
+    2ページ分を占める見開き（spread_occupies_two_pages）は、顔と吹き出しがノドの線をまたいでいれば指摘（コマはまたいでよい）。
+    2ページ分かを決めていない見開きはノドの位置が分からないので対象外にする（値に書く）。"""
     title = "ノドの断ち切り・顔・セリフ"
     spec = draft.page_spec
     sides = page_sides(draft)
     findings = []
     looked = 0
-    skipped = [pg.page for pg in draft.pages if pg.spread]
+    skipped = [pg.page for pg in draft.pages if pg.spread and not occupies_two_pages(pg)]
     for pg, side in zip(draft.pages, sides):
+        if occupies_two_pages(pg):
+            g = spread_gutter_x(spec)
+            for p in pg.panels:
+                for f in p.people:
+                    if f.face_box_mm is not None:
+                        looked += 1
+                        if f.face_box_mm[0] < g - FLOAT_EPS and f.face_box_mm[2] > g + FLOAT_EPS:
+                            findings.append(Finding(page=pg.page, panel=p.n, value=f.name, note="顔が見開きのノドをまたぐ"))
+                for k, b in enumerate(p.balloons):
+                    if b.box_mm is not None:
+                        looked += 1
+                        if b.box_mm[0] < g - FLOAT_EPS and b.box_mm[2] > g + FLOAT_EPS:
+                            findings.append(Finding(page=pg.page, panel=p.n, balloon=k, note="吹き出しが見開きのノドをまたぐ"))
+            continue
         if pg.spread:
             continue
         for p in pg.panels:
@@ -370,19 +414,20 @@ def check_gutter_side_contents(draft: NameDraft, thresholds: Thresholds) -> Chec
 
 
 def check_balloon_inside_frame(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
-    """吹き出しが内側の枠（基本枠）に収まるか（課題30・158）。断ち切りのコマでも同じ。"""
+    """吹き出しが内側の枠（基本枠）に収まるか（課題30・158）。断ち切りのコマでも同じ。
+    2ページ分の見開きは、左右どちらかの基本枠に収まれば合格。"""
     title = "吹き出しが内側の枠に収まるか"
     spec = draft.page_spec
-    frame: Box = (0.0, 0.0, spec.frame_width_mm, spec.frame_height_mm)
     findings = []
     looked = 0
     for pg in draft.pages:
+        regions = page_frame_regions(pg, spec)
         for p in pg.panels:
             for k, b in enumerate(p.balloons):
                 if b.box_mm is None:
                     continue
                 looked += 1
-                if not box_inside(b.box_mm, frame):
+                if not any(box_inside(b.box_mm, r) for r in regions):
                     findings.append(Finding(page=pg.page, panel=p.n, balloon=k, value=str(tuple(rounded(v) for v in b.box_mm)),
                                             note="内側の枠から出ている"))
     if looked == 0:

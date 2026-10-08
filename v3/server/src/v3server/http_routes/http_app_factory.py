@@ -15,6 +15,7 @@ from v3server.http_routes import (
     image_file_routes,
     job_routes,
     lock_routes,
+    name_check_routes,
     name_proposal_routes,
     service_routes,
     work_routes,
@@ -50,7 +51,8 @@ async def v3_error(request: Request, exc: V3Error):
     return JSONResponse(status_code=_STATUS.get(type(exc), 400), content={"code": exc.code, "detail": str(exc)})
 
 
-for _routes in (work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes):
+for _routes in (work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,
+                name_check_routes):
     app.include_router(_routes.router)
 
 

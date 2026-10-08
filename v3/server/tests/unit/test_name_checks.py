@@ -2,14 +2,18 @@
 import math
 
 import pytest
-
 from name_draft_samples import SPEC, draft_of, p12_page, panel, simple_pages
+
 from v3server.name_checks import frame_shape_checks as fsc
 from v3server.name_checks import page_rhythm_checks as prc
 from v3server.name_checks import shot_sequence_checks as ssc
 from v3server.name_checks.balloon_face_overlap import check_balloon_face_overlap
-from v3server.name_checks.balloon_text_checks import (check_balloon_chars, check_balloon_crossing, check_balloon_order,
-                                                      check_page_chars)
+from v3server.name_checks.balloon_text_checks import (
+    check_balloon_chars,
+    check_balloon_crossing,
+    check_balloon_order,
+    check_page_chars,
+)
 from v3server.name_checks.name_check_runner import ALL_THRESHOLD_KEYS, run_name_checks
 from v3server.name_checks.page_monotony_metrics import run_monotony_checks
 from v3server.name_structure.name_draft_schema import Balloon, FigureInPanel, NamePage
@@ -245,3 +249,63 @@ def test_monotony_metrics():
     one = {r.check_id: r for r in run_monotony_checks(laid("s1_talk_B_1"), {})}
     assert one["full_width_ratio_median"].value == pytest.approx(2 / 6, abs=1e-3)
     assert SPEC.frame_width_mm == 150
+
+
+# ---- 省略可の項目（無ければ今の振る舞い） ----
+
+def test_intended_overlap_not_reported():
+    d = laid("s1_talk_B_1")
+    pg = d.pages[0]
+    moved = [(x + 5, y) for x, y in pg.panels[2].frame.polygon_mm]
+    p3 = pg.panels[2].model_copy(update={"frame": pg.panels[2].frame.model_copy(update={"polygon_mm": moved})})
+    bad = d.model_copy(update={"pages": [pg.model_copy(update={"panels": pg.panels[:2] + [p3] + pg.panels[3:]})]})
+    assert fsc.check_overlap(bad, {}).status == "不合格"
+    p3b = p3.model_copy(update={"overlaps": [2]})
+    ok = d.model_copy(update={"pages": [pg.model_copy(update={"panels": pg.panels[:2] + [p3b] + pg.panels[3:]})]})
+    assert fsc.check_overlap(ok, {}).status == "合格"
+
+
+def test_joined_balloons_not_crossing():
+    boxes = [(0, 0, 20, 20), (10, 0, 30, 20)]
+    bl = [Balloon(speaker="A", kind="台詞", text="あ", box_mm=boxes[0]),
+          Balloon(speaker="A", kind="台詞", text="い", box_mm=boxes[1], joined_to_previous=True)]
+    d = draft_of([NamePage(page=1, spread=False, rows=[[1]], panels=[panel(1, balloons=bl)])])
+    assert check_balloon_crossing(d, {}).status == "合格"
+
+
+def test_place_shown_by_location():
+    """場所の名前があれば場所で区切る。場面の番号が変わっても同じ場所なら、場所を見せ直さなくてよい。"""
+    ps = [panel(1, shot="引き", background="描き込む", scene=1, location="教室"),
+          panel(2, shot="顔", scene=2, location="教室"),
+          panel(3, shot="顔", scene=3, location="廊下")]
+    d = draft_of([NamePage(page=1, spread=False, rows=[[1, 2, 3]], panels=ps)])
+    r = ssc.check_place_shown(d, {})
+    assert r.status == "不合格" and [f.panel for f in r.findings] == [3]
+    mixed = [ps[0], ps[1].model_copy(update={"location": None}), ps[2]]
+    d2 = draft_of([NamePage(page=1, spread=False, rows=[[1, 2, 3]], panels=mixed)])
+    assert ssc.check_place_shown(d2, {}).status == "データなし"
+
+
+def test_two_page_spread():
+    """2ページ分の見開きは左右の2ページとして数える。右から読む本で、めくりの後の側（右）から始まれば合う。"""
+    from v3server.panel_layout.reading_direction_mirror import before_turn_page_indices, page_sides
+    pages = simple_pages(3)
+    pages[1] = pages[1].model_copy(update={"spread": True, "spread_occupies_two_pages": True})
+    d = draft_of(pages)
+    # 1ページ目は左、見開きは右と左、3つ目は右
+    assert page_sides(d) == ["左", "右", "右"]
+    assert before_turn_page_indices(d) == [0, 1]
+    assert prc.check_spread_position(d, {}).status == "合格"
+    late = simple_pages(4)
+    late[2] = late[2].model_copy(update={"spread": True, "spread_occupies_two_pages": True})
+    assert prc.check_spread_position(draft_of(late), {}).status == "不合格"
+    undecided = simple_pages(3)
+    undecided[1] = undecided[1].model_copy(update={"spread": True})
+    assert prc.check_spread_position(draft_of(undecided), {}).status == "データなし"
+    # 見開きのノド（x = 150 + 16）をまたぐ吹き出しは指摘、またぐコマはよい
+    bl = Balloon(speaker="A", kind="台詞", text="あ", box_mm=(160, 10, 175, 30))
+    sp = NamePage(page=2, spread=True, spread_occupies_two_pages=True, rows=[[3]],
+                  panels=[panel(3, balloons=[bl], frame={"polygon_mm": [(0, 0), (316, 0), (316, 220), (0, 220)], "bleeds": False})])
+    d3 = draft_of([pages[0], sp])
+    assert fsc.check_gutter_side_contents(d3, {}).findings[0].note.startswith("吹き出し")
+    assert fsc.check_frame_bounds(d3.model_copy(update={"pages": [sp]}), {}).status == "合格"

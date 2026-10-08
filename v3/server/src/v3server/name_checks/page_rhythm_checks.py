@@ -11,6 +11,7 @@ from v3server.name_checks.check_report_types import (
     count_limit_result,
     fixed_rule_result,
     limit_result,
+    no_data_result,
 )
 from v3server.name_structure.name_draft_schema import (
     NameDraft,
@@ -21,6 +22,7 @@ from v3server.name_structure.name_draft_schema import (
 from v3server.panel_layout.reading_direction_mirror import (
     before_turn_page_indices,
     before_turn_side,
+    occupies_two_pages,
     page_reading_sequence,
     page_sides,
 )
@@ -150,6 +152,22 @@ def check_spreads(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     return count_limit_result("spreads", "見開きの数", thresholds, "spreads_max", items)
 
 
+def check_spread_position(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
+    """2ページ分を占める見開きが、めくりの後の側から始まるか（課題58の位置のうち、閾値の要らない所）。
+    めくりの前の側から始まると、見開きの途中でめくることになる。2ページ分かを決めていない見開きは見られない。"""
+    title = "見開きの置き場"
+    turn_side = before_turn_side(draft.reading_direction)
+    decided = [(i, pg) for i, pg in enumerate(draft.pages) if occupies_two_pages(pg)]
+    undecided = [pg.page for pg in draft.pages if pg.spread and pg.spread_occupies_two_pages is None]
+    if undecided and not decided:
+        return no_data_result("spread_position", title, f"見開きの{undecided}ページが2ページ分を占めるか決まっていない")
+    sides = page_sides(draft)
+    findings = [Finding(page=pg.page, value=sides[i], note=f"見開きがめくりの前の側（{turn_side}）から始まる")
+                for i, pg in decided if sides[i] == turn_side]
+    value = f"見開きの{undecided}ページは2ページ分か決まっていないので対象外" if undecided else None
+    return fixed_rule_result("spread_position", title, findings, value)
+
+
 def check_first_page_side(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """1ページ目が、めくりの前の側（右から読む本は左、左から読む本は右）にあるか（課題57。p34 で向きにより入れ替わる）。"""
     want = before_turn_side(draft.reading_direction)
@@ -216,6 +234,7 @@ def run_page_rhythm_checks(draft: NameDraft, thresholds: Thresholds) -> list[Che
     out += check_special_panel_counts(draft, thresholds)
     out.append(check_talk_panel_deformed(draft, thresholds))
     out.append(check_spreads(draft, thresholds))
+    out.append(check_spread_position(draft, thresholds))
     out.append(check_first_page_side(draft, thresholds))
     out.append(check_hook_at_turn(draft, thresholds))
     out.append(check_hook_position(draft, thresholds))

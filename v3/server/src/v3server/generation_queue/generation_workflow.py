@@ -11,28 +11,22 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from temporalio import workflow
-from temporalio.common import Priority, RetryPolicy
+from temporalio.common import RetryPolicy
 from temporalio.exceptions import ActivityError, ApplicationError, CancelledError
 
 with workflow.unsafe.imports_passed_through():
+    from v3server.generation_queue.queue_names_and_priority import (
+        CONTROL_QUEUE,
+        RATE_LIMIT_WAIT,
+        job_priority,
+        service_queue,
+    )
     from v3server.generation_queue.service_call_activity import NON_RETRYABLE
-
-CONTROL_QUEUE = "v3-control"
-
-# 人が画面で頼んだものを先にする（V3細部の決めごと 4.4）。Temporal は数が小さいほど先
-PRIORITY_KEY = {"human": 1, "ai": 3}
-
-# 制限に当たったとき、提供元が待ち時間を返さなかった場合に待つ時間
-RATE_LIMIT_WAIT = timedelta(seconds=30)
-
-
-def service_queue(service_id: str) -> str:
-    return f"v3-service-{service_id}"
-
 
 @dataclass
 class JobInput:
     job_id: str
+    work_id: str
     service_id: str
     requested_via: str
     resend_limit: int
@@ -69,13 +63,15 @@ class GenerationJob:
                         # 待ち行列に入ってから終わるまで。休ませている間は待ち続ける
                         schedule_to_start_timeout=None,
                         start_to_close_timeout=timedelta(minutes=30),
+                        # 活動が生存を知らせる間隔の数倍。取り消しは、この知らせの返事で活動に届く
+                        heartbeat_timeout=timedelta(seconds=30),
                         retry_policy=RetryPolicy(
                             initial_interval=timedelta(seconds=5),
                             backoff_coefficient=2,
                             maximum_attempts=inp.resend_limit + 1,
                             non_retryable_error_types=NON_RETRYABLE,
                         ),
-                        priority=Priority(priority_key=PRIORITY_KEY[inp.requested_via]),
+                        priority=job_priority(inp.requested_via, inp.work_id),
                     )
                     return "done"
                 except ActivityError as e:
