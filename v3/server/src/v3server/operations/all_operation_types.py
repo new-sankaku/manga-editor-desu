@@ -5,6 +5,13 @@ from typing import Annotated, Union
 
 from pydantic import Field, TypeAdapter
 
+from v3server.operations.image_file_operations import RegisterImage
+from v3server.operations.name_proposal_operations import (
+    ApplyNameProposal,
+    RestoreNameSnapshot,
+    SetNameProposalStatus,
+    SubmitNameProposal,
+)
 from v3server.operations.work_setting_operations import (
     AllowDestination,
     RecordFindingReaction,
@@ -20,6 +27,7 @@ from v3server.operations.work_tree_operations import (
     AssignPage,
     SetRemoved,
     UpdateEpisode,
+    UpdatePage,
     UpdatePanel,
 )
 
@@ -37,7 +45,13 @@ Op = Annotated[
         AssignPage,
         AddPanel,
         UpdatePanel,
+        UpdatePage,
         SetRemoved,
+        SubmitNameProposal,
+        SetNameProposalStatus,
+        ApplyNameProposal,
+        RestoreNameSnapshot,
+        RegisterImage,
     ],
     Field(discriminator="type"),
 ]

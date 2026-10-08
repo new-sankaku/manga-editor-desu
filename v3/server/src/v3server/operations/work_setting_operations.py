@@ -10,6 +10,7 @@ from v3server.canonical_tables.threshold_and_finding_tables import (
     FindingReaction,
     Threshold,
 )
+from v3server.name_structure.reading_direction import PageSpec
 from v3server.openfga_permissions import WORK_ROLES, Tuple
 from v3server.operations.operation_base import OpBase, Scope, _changed, work_obj
 from v3server.v3_error_types import Invalid, NotFound
@@ -23,6 +24,9 @@ class SetWorkSettings(OpBase):
     medium: Literal["paper", "web_page", "vertical_scroll"] | None = None
     trim_size: str | None = None
     default_page_count: int | None = None
+    # ページの寸法（name_structure の PageSpec）と、1ページ目を左に置くか
+    page_spec: PageSpec | None = None
+    first_page_is_left: bool | None = None
 
     async def scope(self, session, work):
         return Scope("can_manage", work_obj(work.id))

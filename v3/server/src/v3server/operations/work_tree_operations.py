@@ -6,9 +6,11 @@ from typing import Any, Literal
 
 from pydantic import Field
 
+from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Volume
 from v3server.openfga_permissions import Tuple
+from v3server.operations.human_hand_guard import change_with_human_hand
 from v3server.operations.operation_base import (
     OpBase,
     Scope,
@@ -17,7 +19,7 @@ from v3server.operations.operation_base import (
     page_obj,
     work_obj,
 )
-from v3server.v3_error_types import Invalid
+from v3server.v3_error_types import HumanHandProtected, Invalid
 
 
 class AddVolume(OpBase):
@@ -146,13 +148,18 @@ class AddPanel(OpBase):
 
 
 class UpdatePanel(OpBase):
+    """コマを変える。人が変えた項目には人の手の印が付く。AIは人の手の所を変えられない（human_hand_guard.py）。"""
+
     type: Literal["update_panel"] = "update_panel"
     id: str
     order: int | None = None
     frame: dict[str, Any] | None = None
     role: str | None = None
     content: dict[str, Any] | None = None
+    image_id: str | None = None
     human_confirmed: bool | None = None
+    # 人の手の印をこの値にする。人だけが渡せる（取り消しで元に戻すときと、人が印を外すとき）
+    human_hand_fields: list[str] | None = None
 
     async def scope(self, session, work):
         panel = await get_in_work(session, Panel, self.id, work.id)
@@ -160,10 +167,35 @@ class UpdatePanel(OpBase):
 
     async def apply(self, ctx):
         panel = await ctx.session.get(Panel, self.id)
-        changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True)
-        if not changes:
+        changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
+        if not changes and self.human_hand_fields is None:
             raise Invalid("変える項目がない")
-        before = _changed(panel, changes)
+        if "human_confirmed" in changes and ctx.actor.kind == "ai":
+            raise HumanHandProtected("人の確定印を変えられるのは人だけ")
+        if "image_id" in changes and changes["image_id"] is not None:
+            await get_in_work(ctx.session, ImageFile, changes["image_id"], ctx.work.id)
+        before = change_with_human_hand(ctx.actor, panel, changes, self.human_hand_fields)
+        return {"type": self.type, "id": self.id, **before}
+
+
+class UpdatePage(OpBase):
+    """ページの段の割りを変える。人が引いた割りも、AIが決めた割りも同じ形（name_structure の NamePage の rows など）。"""
+
+    type: Literal["update_page"] = "update_page"
+    id: str
+    layout: dict[str, Any] | None = None
+    human_hand_fields: list[str] | None = None
+
+    async def scope(self, session, work):
+        await get_in_work(session, Page, self.id, work.id)
+        return Scope("can_draw", page_obj(self.id), [("page", self.id)])
+
+    async def apply(self, ctx):
+        page = await ctx.session.get(Page, self.id)
+        changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
+        if not changes and self.human_hand_fields is None:
+            raise Invalid("変える項目がない")
+        before = change_with_human_hand(ctx.actor, page, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}
 
 
@@ -191,6 +223,10 @@ class SetRemoved(OpBase):
 
     async def apply(self, ctx):
         obj = await ctx.session.get(_REMOVABLE[self.target_kind], self.id)
+        if self.target_kind in ("page", "panel"):
+            # 人の手の印か確定印の付いたページ・コマを、AIは抜けない
+            if ctx.actor.kind == "ai" and (obj.human_hand_fields or getattr(obj, "human_confirmed", False)):
+                raise HumanHandProtected(f"{self.target_kind}:{self.id} は人の手の印が付いている")
         if obj.removed == self.removed:
             raise Invalid("すでにその状態")
         obj.removed = self.removed

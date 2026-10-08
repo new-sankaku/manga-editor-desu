@@ -1,0 +1,11 @@
+# P55 回帰の判定関数が「答えが変わった」「記録が無い」で落ちることを、費用なしで確かめる(echo は渡した文字をそのまま返す呼び先)。
+prompts:
+  - "{{ans}}"
+providers: [echo]
+tests:
+  - vars: {id: 読む順, ans: B}
+    assert: [{type: javascript, value: file://check_golden.js}]
+  - vars: {id: 読む順, ans: A}
+    assert: [{type: javascript, value: file://check_golden.js}]
+  - vars: {id: 記録に無い問い, ans: A}
+    assert: [{type: javascript, value: file://check_golden.js}]

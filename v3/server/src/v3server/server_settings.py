@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     dev_auth: str = "0"
     # ロックの期限（秒）
     lock_ttl_seconds: int = 900
+    # 絵のファイルを置くフォルダ。絵を扱う口は、これが無ければ止まる（S3互換の置き場は製品を選んでから足す）
+    image_dir: str | None = None
 
 
 @lru_cache

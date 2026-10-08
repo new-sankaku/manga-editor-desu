@@ -1,0 +1,629 @@
+{
+  "evalId": "eval-zm9-2026-10-08T00:36:19",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-10-08T00:36:19.682Z",
+    "prompts": [
+      {
+        "id": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "raw": "{{question}}",
+        "label": "{{question}}",
+        "provider": "exec:./claude_exec.sh",
+        "metrics": {
+          "score": 5,
+          "testPassCount": 5,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 5,
+          "assertFailCount": 0,
+          "totalLatencyMs": 30675,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 5,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+              }
+            }
+          ]
+        },
+        "id": "d5b58da4-21d5-45ed-a5d5-fc00d1fac9e6",
+        "latencyMs": 5876,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": ""
+        },
+        "response": {
+          "output": "A"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "A と答える割合",
+          "vars": {
+            "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+              }
+            }
+          ]
+        },
+        "id": "4ee3eec1-a2a3-4222-88ae-b69dea24e06c",
+        "latencyMs": 6454,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": ""
+        },
+        "response": {
+          "output": "A"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "A と答える割合",
+          "vars": {
+            "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+              }
+            }
+          ]
+        },
+        "id": "c5bf3f56-8464-4645-9407-70fb6892a5af",
+        "latencyMs": 6835,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": ""
+        },
+        "response": {
+          "output": "A"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "A と答える割合",
+          "vars": {
+            "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+              }
+            }
+          ]
+        },
+        "id": "8c582899-904a-4e09-bdd2-aaab087570a2",
+        "latencyMs": 6864,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": ""
+        },
+        "response": {
+          "output": "A"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "A と答える割合",
+          "vars": {
+            "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 3,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+              }
+            }
+          ]
+        },
+        "id": "75eb4b85-dd45-4418-a616-b71212559ea6",
+        "latencyMs": 4646,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": ""
+        },
+        "response": {
+          "output": "A"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "A と答える割合",
+          "vars": {
+            "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 4,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 5,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 5,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 10606,
+      "evaluationDurationMs": 10606
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "答えの割合(claude CLI)",
+    "prompts": [
+      "{{question}}"
+    ],
+    "providers": [
+      {
+        "id": "exec:./claude_exec.sh",
+        "config": {
+          "timeout": 180000
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "A と答える割合",
+        "vars": {
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "assert": [
+          {
+            "type": "javascript",
+            "value": "output.trim().replace(/[。.]/g, '') === 'A'"
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "../out/pf_claude_rate.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "basePath": "/home/user/manga-editor-desu/v3poc/p55_trace_eval/pf"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.124.0",
+    "nodeVersion": "v22.22.0",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-10-08T00:36:30.399Z",
+    "evaluationCreatedAt": "2026-10-08T00:36:19.682Z"
+  },
+  "vars": [
+    "question"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 5,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

@@ -1,0 +1,81 @@
+{
+ "media_create": [
+  201,
+  {
+   "uploadUrl": "http://localhost:62090/langfuse/media/p55proj/gY3PoGo64BZxvGKTm1Q2em.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minio%2F20261008%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20261008T002804Z&X-Amz-Expires=3600&X-Amz-Signature=eb42a77d73cb56115c0e974d6cd5451200d0d016476c02f4c69e5801a7a83631&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&x-id=PutObject",
+   "mediaId": "gY3PoGo64BZxvGKTm1Q2em"
+  }
+ ],
+ "put": 200,
+ "patch": [
+  200,
+  {
+   "message": "OK"
+  }
+ ],
+ "get": [
+  200,
+  {
+   "mediaId": "gY3PoGo64BZxvGKTm1Q2em",
+   "contentType": "image/png",
+   "contentLength": 1218,
+   "uploadedAt": "2026-10-08T00:28:04.000Z",
+   "url": "http://localhost:62090/langfuse/media/p55proj/gY3PoGo64BZxvGKTm1Q2em.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minio%2F20261008%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20261008T002804Z&X-Amz-Expires=3600&X-Amz-Signature=18cfe250655701a72abb3850ad9107d06c1e9b591290e09a37acd91c2fcbf6f7&X-Amz-SignedHeaders=host&x-id=GetObject",
+   "urlExpiry": "2026-10-08T01:28:04.682Z"
+  }
+ ],
+ "download": [
+  200,
+  1218
+ ],
+ "otlp_post": [
+  200,
+  {
+   "name": "otel-ingestion-job",
+   "data": {
+    "id": "15d6dd0b-9afd-4da8-950e-e147db375fcd",
+    "timestamp": "2026-10-08T00:28:04.735Z",
+    "name": "otel-ingestion-job",
+    "payload": {
+     "data": {
+      "fileKey": "events/otel/p55proj/2026/10/08/00/28/a5c4c262-7b51-4bb5-aad6-02be39287cc4.json",
+      "publicKey": "pk-lf-p55"
+     },
+     "authCheck": {
+      "validKey": true,
+      "scope": {
+       "projectId": "p55proj",
+       "accessLevel": "project",
+       "orgId": "p55org"
+      }
+     },
+     "sdkName": "unknown",
+     "sdkVersion": "unknown",
+     "ingestionVersion": ""
+    }
+   },
+   "opts": {
+    "attempts": 6,
+    "removeOnComplete": true,
+    "removeOnFail": 100000,
+    "backoff": {
+     "type": "exponential",
+     "delay": 5000
+    },
+    "traceparent": "00-d2823fa7fea81f4a99c8f16b7fb81231-8ab667d5af3f046d-01",
+    "baggage": "langfuse.clickhouse.surface=publicapi,langfuse.clickhouse.route=POST%20%2Fapi%2Fpublic%2Fotel%2Fv1%2Ftraces,langfuse.clickhouse.user_agent=Python-urllib%2F3.13,langfuse.project.id=p55proj,langfuse.api_key.id=cmuysl2l10001n707a11rc3ol"
+   },
+   "id": "6",
+   "progress": 0,
+   "returnvalue": null,
+   "stacktrace": null,
+   "priority": 0,
+   "attemptsStarted": 0,
+   "attemptsMade": 0,
+   "stalledCounter": 0,
+   "timestamp": 1791419284735,
+   "queueQualifiedName": "bull:otel-ingestion-queue"
+  }
+ ],
+ "readback_input": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"この絵\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"@@@langfuseMedia:type=image/png|id=gY3PoGo64BZxvGKTm1Q2em|source=bytes@@@\"}}]}]"
+}

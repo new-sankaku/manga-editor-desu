@@ -1,0 +1,337 @@
+{
+ "langfuse": {
+  "version_tag": "docker.langfuse.com/langfuse/langfuse:4 (v4, events_only)",
+  "litellm_image": "ghcr.io/berriai/litellm:v1.104.1",
+  "recorded_success": {
+   "model": "mock-vlm",
+   "usage": {
+    "input": 10,
+    "output": 20,
+    "total": 30
+   },
+   "cost": {
+    "total": 0.00033
+   },
+   "latency_s": 0.002,
+   "level": "DEFAULT"
+  },
+  "recorded_400_from_upstream": {
+   "level": "ERROR",
+   "model": "stub-bad",
+   "usage": {},
+   "latency_s": 0.016,
+   "statusMessage": "",
+   "has_stack_trace_in_metadata": true
+  },
+  "recorded_400_unknown_model": {
+   "level": "ERROR",
+   "model": "no-such-model"
+  },
+  "trace_grouping": {
+   "metadata.trace_id": {
+    "sent_id": "30f86837bd944c1ba99320e6c7f57314",
+    "traces_in_langfuse": 3,
+    "honored": false
+   },
+   "header langfuse_trace_id": {
+    "sent_id": "037a26bb30654cebb19bd7e7cadfcc42",
+    "honored": false
+   },
+   "header traceparent": {
+    "sent_id": "617177504d014356a17f3c8a985b9b51",
+    "honored": true,
+    "calls_in_that_trace": [
+     "tp0",
+     "tp1",
+     "tp2"
+    ]
+   }
+  },
+  "session_id_and_user_id": {
+   "sessionId": "req-b8267667",
+   "userId": "u1"
+  },
+  "image_via_litellm_data_uri": {
+   "input_kept_inline_as_text": true,
+   "media_table_rows": 0
+  },
+  "media_api": {
+   "media_create": [
+    201,
+    {
+     "uploadUrl": "http://localhost:62090/langfuse/media/p55proj/gY3PoGo64BZxvGKTm1Q2em.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minio%2F20261008%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20261008T002804Z&X-Amz-Expires=3600&X-Amz-Signature=eb42a77d73cb56115c0e974d6cd5451200d0d016476c02f4c69e5801a7a83631&X-Amz-SignedHeaders=content-length%3Bcontent-type%3Bhost%3Bx-amz-checksum-sha256&x-id=PutObject",
+     "mediaId": "gY3PoGo64BZxvGKTm1Q2em"
+    }
+   ],
+   "put": 200,
+   "patch": [
+    200,
+    {
+     "message": "OK"
+    }
+   ],
+   "get": [
+    200,
+    {
+     "mediaId": "gY3PoGo64BZxvGKTm1Q2em",
+     "contentType": "image/png",
+     "contentLength": 1218,
+     "uploadedAt": "2026-10-08T00:28:04.000Z",
+     "url": "http://localhost:62090/langfuse/media/p55proj/gY3PoGo64BZxvGKTm1Q2em.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=minio%2F20261008%2Fauto%2Fs3%2Faws4_request&X-Amz-Date=20261008T002804Z&X-Amz-Expires=3600&X-Amz-Signature=18cfe250655701a72abb3850ad9107d06c1e9b591290e09a37acd91c2fcbf6f7&X-Amz-SignedHeaders=host&x-id=GetObject",
+     "urlExpiry": "2026-10-08T01:28:04.682Z"
+    }
+   ],
+   "download": [
+    200,
+    1218
+   ],
+   "otlp_post": [
+    200,
+    {
+     "name": "otel-ingestion-job",
+     "data": {
+      "id": "15d6dd0b-9afd-4da8-950e-e147db375fcd",
+      "timestamp": "2026-10-08T00:28:04.735Z",
+      "name": "otel-ingestion-job",
+      "payload": {
+       "data": {
+        "fileKey": "events/otel/p55proj/2026/10/08/00/28/a5c4c262-7b51-4bb5-aad6-02be39287cc4.json",
+        "publicKey": "pk-lf-p55"
+       },
+       "authCheck": {
+        "validKey": true,
+        "scope": {
+         "projectId": "p55proj",
+         "accessLevel": "project",
+         "orgId": "p55org"
+        }
+       },
+       "sdkName": "unknown",
+       "sdkVersion": "unknown",
+       "ingestionVersion": ""
+      }
+     },
+     "opts": {
+      "attempts": 6,
+      "removeOnComplete": true,
+      "removeOnFail": 100000,
+      "backoff": {
+       "type": "exponential",
+       "delay": 5000
+      },
+      "traceparent": "00-d2823fa7fea81f4a99c8f16b7fb81231-8ab667d5af3f046d-01",
+      "baggage": "langfuse.clickhouse.surface=publicapi,langfuse.clickhouse.route=POST%20%2Fapi%2Fpublic%2Fotel%2Fv1%2Ftraces,langfuse.clickhouse.user_agent=Python-urllib%2F3.13,langfuse.project.id=p55proj,langfuse.api_key.id=cmuysl2l10001n707a11rc3ol"
+     },
+     "id": "6",
+     "progress": 0,
+     "returnvalue": null,
+     "stacktrace": null,
+     "priority": 0,
+     "attemptsStarted": 0,
+     "attemptsMade": 0,
+     "stalledCounter": 0,
+     "timestamp": 1791419284735,
+     "queueQualifiedName": "bull:otel-ingestion-queue"
+    }
+   ],
+   "readback_input": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"この絵\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"@@@langfuseMedia:type=image/png|id=gY3PoGo64BZxvGKTm1Q2em|source=bytes@@@\"}}]}]"
+  },
+  "first_request_sec": 0.048107147216796875,
+  "promptfoo_vlm_image_calls": 4
+ },
+ "promptfoo": {
+  "litellm_regression": {
+   "stats": {
+    "successes": 1,
+    "failures": 1,
+    "errors": 0
+   },
+   "by_provider": {
+    "評価役v2(答えが変わった想定)": false,
+    "評価役v1": true
+   }
+  },
+  "rate_flaky_repeat10": {
+   "pass_rate_threshold_70_exit": 0,
+   "pass_rate_threshold_90_exit": 100,
+   "passes": "8/10"
+  },
+  "pf_claude_record": {
+   "stats": {
+    "successes": 3,
+    "failures": 0,
+    "errors": 0
+   },
+   "outputs": {
+    "読む順": "A",
+    "縦書きの列": "右から左",
+    "画像の十字": "はい"
+   }
+  },
+  "pf_claude_compare": {
+   "stats": {
+    "successes": 3,
+    "failures": 0,
+    "errors": 0
+   },
+   "outputs": {
+    "読む順": "A",
+    "縦書きの列": "右から左",
+    "画像の十字": "はい"
+   }
+  },
+  "claude_rate_repeat5": {
+   "stats": {
+    "successes": 5,
+    "failures": 0,
+    "errors": 0
+   }
+  },
+  "select_best": {
+   "候補bad": false,
+   "候補good": true
+  },
+  "golden_negative": [
+   false,
+   true,
+   false
+  ],
+  "claude_calls_logged": 12,
+  "claude_cost_usd_logged": 0.1284
+ },
+ "label_studio": {
+  "project_create": 201,
+  "bad_config": [
+   400,
+   "{\"id\":\"2bbc1540-0497-4b2a-a675-17f39d36a653\",\"status_code\":400,\"version\":\"1.23.0\",\"detail\":\"Validation error\",\"exc_info\":null,\"validation_errors\":{\"non_field_errors\":[\"toName=\\\"nonexist\\\" not found in names: ['image', 'p']\"]}}"
+  ],
+  "import_upload": [
+   201,
+   {
+    "task_count": 1,
+    "annotation_count": 0,
+    "prediction_count": 0,
+    "duration": 0.12610244750976562,
+    "file_upload_ids": [
+     2
+    ],
+    "could_be_tasks_list": false,
+    "found_formats": {
+     ".png": 1
+    },
+    "data_columns": [
+     "$undefined$"
+    ]
+   }
+  ],
+  "tasks": 200,
+  "task_data": {
+   "image": "/data/upload/2/c93621ba-page1.png"
+  },
+  "annotation_create": [
+   201,
+   {
+    "id": 2
+   }
+  ],
+  "prediction_create": [
+   201,
+   {
+    "id": 2
+   }
+  ],
+  "export_json_status": 200,
+  "export_json_min_status": 200,
+  "export_coco_files": [
+   "images/",
+   "result.json"
+  ],
+  "formats": [
+   "JSON",
+   "JSON_MIN",
+   "CSV",
+   "TSV",
+   "COCO",
+   "COCO_WITH_IMAGES",
+   "VOC",
+   "YOLO",
+   "YOLO_WITH_IMAGES",
+   "YOLO_OBB",
+   "YOLO_OBB_WITH_IMAGES",
+   "CONLL2003",
+   "BRUSH_TO_NUMPY",
+   "BRUSH_TO_PNG",
+   "ASR_MANIFEST",
+   "BRUSH_TO_COCO",
+   "DOCLANG"
+  ],
+  "pixel_from_percent": [
+   [
+    16.0,
+    12.0
+   ],
+   [
+    153.6,
+    12.0
+   ],
+   [
+    153.6,
+    115.2
+   ],
+   [
+    16.0,
+    115.2
+   ]
+  ],
+  "export_coco_polygon_segmentation": [
+   [
+    16.0,
+    12.0,
+    153.6,
+    12.0,
+    153.6,
+    115.19999999999999,
+    16.0,
+    115.19999999999999
+   ]
+  ]
+ },
+ "resources": {
+  "langfuse_containers": 6,
+  "langfuse_containers_names": [
+   "langfuse-web",
+   "langfuse-worker",
+   "clickhouse",
+   "minio",
+   "redis",
+   "postgres"
+  ],
+  "langfuse_mem_mib_idle": {
+   "web": 1416,
+   "worker": 775,
+   "clickhouse": 760,
+   "postgres": 80,
+   "minio": 119,
+   "redis": 14,
+   "sum": 3164
+  },
+  "langfuse_cold_ready_s": 69,
+  "langfuse_warm_restart_web_worker_ready_s": 35,
+  "images_gb": {
+   "langfuse": 1.79,
+   "langfuse-worker": 1.83,
+   "clickhouse": 1.13,
+   "postgres17": 0.65,
+   "minio": 0.24,
+   "redis": 0.18,
+   "label-studio": 1.5,
+   "litellm": 1.7
+  },
+  "label_studio": {
+   "containers": 1,
+   "mem_mib_idle": 263,
+   "ready_s_after_up": 86
+  },
+  "note": "起動は画像を先に取得済みの状態。取得そのものの時間は計っていない"
+ }
+}

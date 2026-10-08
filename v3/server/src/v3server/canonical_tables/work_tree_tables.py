@@ -16,7 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from v3server.canonical_tables.table_base import Base, new_id
+from v3server.canonical_tables.table_base import Base, JsonType, new_id
 
 # ---------------------------------------------------------------- 作品の階層（作品 ＞ 巻 ＞ 話 ＞ ページ ＞ コマ）
 
@@ -33,6 +33,10 @@ class Work(Base):
     # 媒体（同 3章）: paper / web_page / vertical_scroll
     medium: Mapped[str] = mapped_column(String(32))
     trim_size: Mapped[str | None] = mapped_column(String(32))
+    # ページの寸法（name_structure の PageSpec の形）。コマ割りの計算と検査が使う。決めるまでは無い
+    page_spec: Mapped[dict[str, Any] | None] = mapped_column(JsonType)
+    # 1ページ目を左のページに置くか（V3ハーネス設計 6章）。決めるまでは無い
+    first_page_is_left: Mapped[bool | None] = mapped_column(Boolean)
     default_page_count: Mapped[int | None] = mapped_column(Integer)
     # 出来事の列の最後の番号。書き込みは作品ごとに1本（V3ハーネス設計 9.3）にするため、この行を FOR UPDATE で取る
     head_seq: Mapped[int] = mapped_column(BigInteger, default=0)
@@ -68,6 +72,10 @@ class Page(Base):
     work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
     episode_id: Mapped[str] = mapped_column(ForeignKey("episodes.id"), index=True)
     number: Mapped[int] = mapped_column(Integer)
+    # 段の割り（見開きか・段ごとのコマの番号・段の高さの比・コマの幅の比）。人が引いても、AIが決めても同じ形
+    layout: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    # 人の手の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
+    human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     # 抜いたページは消さずに残す（V3細部の決めごと 15章）
     removed: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -86,6 +94,10 @@ class Panel(Base):
     role: Mapped[str | None] = mapped_column(String(32))
     # 中身（場所・登場人物・セリフ・擬音など）。形は工程を作るときに決める
     content: Mapped[dict[str, Any]] = mapped_column(default=dict)
-    # 人の確定印（V3ハーネス設計 9.2）
+    # コマに使う絵（image_files の行）。生成した絵・人が描いた絵・取り込んだ絵のどれでもよい
+    image_id: Mapped[str | None] = mapped_column(ForeignKey("image_files.id"))
+    # 人の手の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
+    human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
+    # 人の確定印（V3ハーネス設計 9.2）。付いたコマはAIが何も変えられない
     human_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
     removed: Mapped[bool] = mapped_column(Boolean, default=False)

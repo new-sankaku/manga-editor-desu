@@ -1,0 +1,27 @@
+# P55 その2b 比較の判定(2つのうちどちらが良いか)。select-best は、同じ問いへの複数の提供元の答えを比べる。
+# 比べる役(grader)に claude(exec 型)を使う。candidates は LiteLLM のモックの固定文。
+description: 2つのうちどちらが良いか(select-best)
+prompts:
+  - file://prompt_text.txt
+providers:
+  - id: openai:chat:mock-cand-good
+    label: 候補good
+    config: &cfg
+      apiBaseUrl: http://127.0.0.1:62400/v1
+      apiKeyEnvar: P55_LITELLM_KEY
+  - id: openai:chat:mock-cand-bad
+    label: 候補bad
+    config: *cfg
+defaultTest:
+  options:
+    provider:
+      id: exec:./claude_exec.sh
+      config:
+        timeout: 180000
+tests:
+  - description: 右開きの漫画として自然な読む順のほうを選べるか
+    vars:
+      question: 右開きの漫画のコマ割りの案を、一文で説明してください。
+    assert:
+      - type: select-best
+        value: 右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ

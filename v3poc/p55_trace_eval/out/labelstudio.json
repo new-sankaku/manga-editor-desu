@@ -1,0 +1,364 @@
+{
+ "project_create": 201,
+ "bad_config": [
+  400,
+  "{\"id\":\"2bbc1540-0497-4b2a-a675-17f39d36a653\",\"status_code\":400,\"version\":\"1.23.0\",\"detail\":\"Validation error\",\"exc_info\":null,\"validation_errors\":{\"non_field_errors\":[\"toName=\\\"nonexist\\\" not found in names: ['image', 'p']\"]}}"
+ ],
+ "import_upload": [
+  201,
+  {
+   "task_count": 1,
+   "annotation_count": 0,
+   "prediction_count": 0,
+   "duration": 0.12610244750976562,
+   "file_upload_ids": [
+    2
+   ],
+   "could_be_tasks_list": false,
+   "found_formats": {
+    ".png": 1
+   },
+   "data_columns": [
+    "$undefined$"
+   ]
+  }
+ ],
+ "tasks": 200,
+ "task_data": {
+  "image": "/data/upload/2/c93621ba-page1.png"
+ },
+ "annotation_create": [
+  201,
+  {
+   "id": 2
+  }
+ ],
+ "prediction_create": [
+  201,
+  {
+   "id": 2
+  }
+ ],
+ "export_json_status": 200,
+ "export_json": [
+  {
+   "id": 2,
+   "annotations": [
+    {
+     "id": 2,
+     "completed_by": 1,
+     "result": [
+      {
+       "id": "r1",
+       "type": "polygonlabels",
+       "from_name": "panel",
+       "to_name": "image",
+       "original_width": 320,
+       "original_height": 240,
+       "image_rotation": 0,
+       "value": {
+        "points": [
+         [
+          5,
+          5
+         ],
+         [
+          48,
+          5
+         ],
+         [
+          48,
+          48
+         ],
+         [
+          5,
+          48
+         ]
+        ],
+        "polygonlabels": [
+         "コマ"
+        ],
+        "closed": true
+       }
+      },
+      {
+       "id": "r2",
+       "type": "rectanglelabels",
+       "from_name": "box",
+       "to_name": "image",
+       "original_width": 320,
+       "original_height": 240,
+       "image_rotation": 0,
+       "value": {
+        "x": 10,
+        "y": 10,
+        "width": 20,
+        "height": 30,
+        "rotation": 0,
+        "rectanglelabels": [
+         "人物"
+        ]
+       }
+      },
+      {
+       "id": "r3",
+       "type": "rectanglelabels",
+       "from_name": "box",
+       "to_name": "image",
+       "original_width": 320,
+       "original_height": 240,
+       "image_rotation": 0,
+       "value": {
+        "x": 30,
+        "y": 8,
+        "width": 15,
+        "height": 10,
+        "rotation": 0,
+        "rectanglelabels": [
+         "吹き出し"
+        ]
+       }
+      }
+     ],
+     "was_cancelled": false,
+     "ground_truth": false,
+     "created_at": "2026-10-08T00:30:12.366217Z",
+     "updated_at": "2026-10-08T00:30:12.366251Z",
+     "draft_created_at": null,
+     "lead_time": null,
+     "prediction": {},
+     "result_count": 3,
+     "unique_id": "8a4b82eb-41dd-4ca3-ac51-e2dea0bef671",
+     "import_id": null,
+     "last_action": null,
+     "bulk_created": false,
+     "task": 2,
+     "project": 2,
+     "updated_by": 1,
+     "parent_prediction": null,
+     "parent_annotation": null,
+     "last_created_by": null
+    }
+   ],
+   "file_upload": "c93621ba-page1.png",
+   "drafts": [],
+   "predictions": [
+    2
+   ],
+   "data": {
+    "image": "/data/upload/2/c93621ba-page1.png"
+   },
+   "meta": {},
+   "created_at": "2026-10-08T00:30:12.102191Z",
+   "updated_at": "2026-10-08T00:30:12.643738Z",
+   "allow_skip": true,
+   "inner_id": 1,
+   "total_annotations": 1,
+   "cancelled_annotations": 0,
+   "total_predictions": 1,
+   "comment_count": 0,
+   "unresolved_comment_count": 0,
+   "last_comment_updated_at": null,
+   "project": 2,
+   "updated_by": 1,
+   "comment_authors": []
+  }
+ ],
+ "export_json_min_status": 200,
+ "export_json_min": [
+  {
+   "image": "/data/upload/2/c93621ba-page1.png",
+   "id": 2,
+   "panel": [
+    {
+     "points": [
+      [
+       5,
+       5
+      ],
+      [
+       48,
+       5
+      ],
+      [
+       48,
+       48
+      ],
+      [
+       5,
+       48
+      ]
+     ],
+     "polygonlabels": [
+      "コマ"
+     ],
+     "closed": true,
+     "original_width": 320,
+     "original_height": 240
+    }
+   ],
+   "box": [
+    {
+     "x": 10,
+     "y": 10,
+     "width": 20,
+     "height": 30,
+     "rotation": 0,
+     "rectanglelabels": [
+      "人物"
+     ],
+     "original_width": 320,
+     "original_height": 240
+    },
+    {
+     "x": 30,
+     "y": 8,
+     "width": 15,
+     "height": 10,
+     "rotation": 0,
+     "rectanglelabels": [
+      "吹き出し"
+     ],
+     "original_width": 320,
+     "original_height": 240
+    }
+   ],
+   "annotator": 1,
+   "annotation_id": 2,
+   "created_at": "2026-10-08T00:30:12.366217Z",
+   "updated_at": "2026-10-08T00:30:12.366251Z",
+   "lead_time": null
+  }
+ ],
+ "export_coco_files": [
+  "images/",
+  "result.json"
+ ],
+ "export_coco": {
+  "images": [
+   {
+    "width": 320,
+    "height": 240,
+    "id": 0,
+    "file_name": "../../label-studio/data/media/upload/2/c93621ba-page1.png"
+   }
+  ],
+  "categories": [
+   {
+    "id": 0,
+    "name": "コマ"
+   },
+   {
+    "id": 1,
+    "name": "人物"
+   },
+   {
+    "id": 2,
+    "name": "吹き出し"
+   }
+  ],
+  "annotations": [
+   {
+    "id": 0,
+    "image_id": 0,
+    "category_id": 0,
+    "segmentation": [
+     [
+      16.0,
+      12.0,
+      153.6,
+      12.0,
+      153.6,
+      115.19999999999999,
+      16.0,
+      115.19999999999999
+     ]
+    ],
+    "bbox": [
+     16.0,
+     12.0,
+     137.6,
+     103.19999999999999
+    ],
+    "ignore": 0,
+    "iscrowd": 0,
+    "area": 14200.319999999998
+   },
+   {
+    "id": 1,
+    "image_id": 0,
+    "category_id": 1,
+    "segmentation": [],
+    "bbox": [
+     32.0,
+     24.0,
+     64.0,
+     72.0
+    ],
+    "ignore": 0,
+    "iscrowd": 0,
+    "area": 4608.0
+   },
+   {
+    "id": 2,
+    "image_id": 0,
+    "category_id": 2,
+    "segmentation": [],
+    "bbox": [
+     96.0,
+     19.2,
+     48.0,
+     24.0
+    ],
+    "ignore": 0,
+    "iscrowd": 0,
+    "area": 1152.0
+   }
+  ],
+  "info": {
+   "year": 2026,
+   "version": "1.0",
+   "description": "",
+   "contributor": "Label Studio",
+   "url": "",
+   "date_created": "2026-10-08 00:30:12.969720"
+  }
+ },
+ "formats": [
+  "JSON",
+  "JSON_MIN",
+  "CSV",
+  "TSV",
+  "COCO",
+  "COCO_WITH_IMAGES",
+  "VOC",
+  "YOLO",
+  "YOLO_WITH_IMAGES",
+  "YOLO_OBB",
+  "YOLO_OBB_WITH_IMAGES",
+  "CONLL2003",
+  "BRUSH_TO_NUMPY",
+  "BRUSH_TO_PNG",
+  "ASR_MANIFEST",
+  "BRUSH_TO_COCO",
+  "DOCLANG"
+ ],
+ "pixel_from_percent": [
+  [
+   16.0,
+   12.0
+  ],
+  [
+   153.6,
+   12.0
+  ],
+  [
+   153.6,
+   115.2
+  ],
+  [
+   16.0,
+   115.2
+  ]
+ ]
+}

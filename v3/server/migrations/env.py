@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from v3server.canonical_tables.table_base import Base
+from v3server.canonical_tables.all_tables import Base
 from v3server.server_settings import get_settings
 
 # this is the Alembic Config object, which provides

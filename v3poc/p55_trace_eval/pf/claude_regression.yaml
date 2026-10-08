@@ -1,0 +1,25 @@
+# P55 その2d 呼び先を claude CLI(exec 型)にした回帰の試験。P55_MODE=record で記録、compare で前回との一致を見る。
+# 画像つきの問いは、CLI が Read で画像ファイルを読む形(exec 型は文字しか渡せない)。
+description: 評価役の回帰(claude CLI・exec 型)
+prompts:
+  - "{{question}}"
+providers:
+  - id: exec:./claude_exec.sh
+    label: claude-sonnet(exec)
+    config:
+      timeout: 180000
+tests:
+  - vars:
+      id: 読む順
+      question: 右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。
+    assert: &chk
+      - type: javascript
+        value: file://check_golden.js
+  - vars:
+      id: 縦書きの列
+      question: 縦書きの日本語の文章で、複数の列は右から左・左から右のどちらの順に並びますか。「右から左」か「左から右」だけで答えてください。
+    assert: *chk
+  - vars:
+      id: 画像の十字
+      question: 画像ファイル /home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png を見て、画像の中央に十字の線があるかを「はい」か「いいえ」だけで答えてください。
+    assert: *chk

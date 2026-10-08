@@ -1,0 +1,768 @@
+{
+  "evalId": "eval-Qnb-2026-10-08T00:34:22",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-10-08T00:34:22.116Z",
+    "prompts": [
+      {
+        "raw": "[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"{{question}}\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,{{image}}\"}}]}]",
+        "label": "prompt_vlm.json: [{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"{{question}}\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,{{image}}\"}}]}]",
+        "id": "6162af5432129baa121a0fa4d7f2a9b75ea9083e969886480a32a31f0b2752e2",
+        "provider": "評価役v1",
+        "metrics": {
+          "score": 1,
+          "testPassCount": 1,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 4,
+          "assertFailCount": 0,
+          "totalLatencyMs": 257,
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {
+            "答えの一致": 1
+          },
+          "namedScoresCount": {
+            "答えの一致": 1
+          },
+          "namedScoreWeights": {
+            "答えの一致": 1
+          },
+          "cost": 0.00009
+        }
+      },
+      {
+        "raw": "[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"{{question}}\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,{{image}}\"}}]}]",
+        "label": "prompt_vlm.json: [{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"{{question}}\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,{{image}}\"}}]}]",
+        "id": "6162af5432129baa121a0fa4d7f2a9b75ea9083e969886480a32a31f0b2752e2",
+        "provider": "評価役v2(答えが変わった想定)",
+        "metrics": {
+          "score": 0.75,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "assertPassCount": 3,
+          "assertFailCount": 1,
+          "totalLatencyMs": 70,
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {
+            "答えの一致": 0
+          },
+          "namedScoresCount": {
+            "答えの一致": 1
+          },
+          "namedScoreWeights": {
+            "答えの一致": 1
+          },
+          "cost": 0.00009
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0.00009,
+        "error": "Custom function returned false\nJSON.parse(output).answer === 'A'",
+        "gradingResult": {
+          "pass": false,
+          "score": 0.75,
+          "reason": "Custom function returned false\nJSON.parse(output).answer === 'A'",
+          "namedScores": {
+            "答えの一致": 0
+          },
+          "namedScoreWeights": {
+            "答えの一致": 1
+          },
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "is-json",
+                "value": {
+                  "type": "object",
+                  "required": [
+                    "answer",
+                    "reason"
+                  ]
+                }
+              }
+            },
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Custom function returned false\nJSON.parse(output).answer === 'A'",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).answer === 'A'",
+                "metric": "答えの一致"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            }
+          ]
+        },
+        "id": "5e1e4193-f22b-4ecb-a82c-6e70a072d30e",
+        "latencyMs": 70,
+        "namedScores": {
+          "答えの一致": 0
+        },
+        "prompt": {
+          "raw": "[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAADwCAIAAAD+Tyo8AAAEiUlEQVR4nO3UgQ0AIAzDsP3/NFyB0CL7haidAVY7dOkbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hA6z3+0d4SN8wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3bIDVLlBILfn6V+eGAAAAAElFTkSuQmCC\"}}]}]",
+          "label": "prompt_vlm.json: [{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"{{question}}\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,{{image}}\"}}]}]",
+          "config": {}
+        },
+        "promptId": "6162af5432129baa121a0fa4d7f2a9b75ea9083e969886480a32a31f0b2752e2",
+        "promptIdx": 1,
+        "provider": {
+          "id": "openai:chat:mock-vlm-b",
+          "label": "評価役v2(答えが変わった想定)"
+        },
+        "response": {
+          "output": "{\"answer\": \"B\", \"reason\": \"mock\"}",
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "cached": false,
+          "latencyMs": 70,
+          "finishReason": "stop",
+          "cost": 0.00009,
+          "guardrails": {
+            "flagged": false
+          },
+          "metadata": {
+            "http": {
+              "status": 200,
+              "statusText": "OK",
+              "headers": {
+                "content-length": "325",
+                "content-security-policy": "frame-ancestors 'none'",
+                "content-type": "application/json",
+                "date": "Thu, 08 Oct 2026 00:34:21 GMT",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-litellm-attempted-fallbacks": "0",
+                "x-litellm-attempted-retries": "0",
+                "x-litellm-call-id": "5eea9ce1-e0c2-40ed-ac38-e06a12d2c96b",
+                "x-litellm-callback-duration-ms": "0.0",
+                "x-litellm-key-spend": "0.0",
+                "x-litellm-model-api-base": "https://api.openai.com",
+                "x-litellm-model-group": "mock-vlm-b",
+                "x-litellm-model-id": "53e511e6a7b5be9e66052ab4af4e2b9dabe022bc319e20be65316f9467e0127b",
+                "x-litellm-model-name": "openai/mock-vlm-b",
+                "x-litellm-response-cost-discount-amount": "0.0",
+                "x-litellm-response-cost-input": "0.0",
+                "x-litellm-response-cost-margin-amount": "0.0",
+                "x-litellm-response-cost-margin-percent": "0.0",
+                "x-litellm-response-cost-original": "0.0",
+                "x-litellm-response-cost-output": "0.0",
+                "x-litellm-response-cost-tool-usage": "0.0",
+                "x-litellm-response-duration-ms": "35.21299362182617",
+                "x-litellm-version": "1.104.1"
+              }
+            }
+          }
+        },
+        "score": 0.75,
+        "success": false,
+        "testCase": {
+          "description": "回帰 同じ絵と問いで答えが A のまま",
+          "vars": {
+            "image": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+            "question": "どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。"
+          },
+          "assert": [
+            {
+              "type": "is-json",
+              "value": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reason"
+                ]
+              }
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).answer === 'A'",
+              "metric": "答えの一致"
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 10,
+          "completion": 20,
+          "cached": 0,
+          "total": 30,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "image": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+          "question": "どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。"
+        },
+        "metadata": {
+          "http": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-length": "325",
+              "content-security-policy": "frame-ancestors 'none'",
+              "content-type": "application/json",
+              "date": "Thu, 08 Oct 2026 00:34:21 GMT",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "DENY",
+              "x-litellm-attempted-fallbacks": "0",
+              "x-litellm-attempted-retries": "0",
+              "x-litellm-call-id": "5eea9ce1-e0c2-40ed-ac38-e06a12d2c96b",
+              "x-litellm-callback-duration-ms": "0.0",
+              "x-litellm-key-spend": "0.0",
+              "x-litellm-model-api-base": "https://api.openai.com",
+              "x-litellm-model-group": "mock-vlm-b",
+              "x-litellm-model-id": "53e511e6a7b5be9e66052ab4af4e2b9dabe022bc319e20be65316f9467e0127b",
+              "x-litellm-model-name": "openai/mock-vlm-b",
+              "x-litellm-response-cost-discount-amount": "0.0",
+              "x-litellm-response-cost-input": "0.0",
+              "x-litellm-response-cost-margin-amount": "0.0",
+              "x-litellm-response-cost-margin-percent": "0.0",
+              "x-litellm-response-cost-original": "0.0",
+              "x-litellm-response-cost-output": "0.0",
+              "x-litellm-response-cost-tool-usage": "0.0",
+              "x-litellm-response-duration-ms": "35.21299362182617",
+              "x-litellm-version": "1.104.1"
+            }
+          },
+          "_promptfooFileMetadata": {
+            "image": {
+              "path": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+              "type": "image",
+              "format": "png"
+            }
+          }
+        },
+        "failureReason": 1
+      },
+      {
+        "cost": 0.00009,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {
+            "答えの一致": 1
+          },
+          "namedScoreWeights": {
+            "答えの一致": 1
+          },
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "is-json",
+                "value": {
+                  "type": "object",
+                  "required": [
+                    "answer",
+                    "reason"
+                  ]
+                }
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "JSON.parse(output).answer === 'A'",
+                "metric": "答えの一致"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "cost",
+                "threshold": 0.01
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "latency",
+                "threshold": 5000
+              }
+            }
+          ]
+        },
+        "id": "03aaa7b0-4eb0-4c94-b713-a218e1f5ccd8",
+        "latencyMs": 257,
+        "namedScores": {
+          "答えの一致": 1
+        },
+        "prompt": {
+          "raw": "[{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAADwCAIAAAD+Tyo8AAAEiUlEQVR4nO3UgQ0AIAzDsP3/NFyB0CL7haidAVY7dOkbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hBtynb5gB9+kbZsB9+oYZcJ++YQbcp2+YAffpG2bAffqGGXCfvmEG3KdvmAH36RtmwH36hhlwn75hA6z3+0d4SN8wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3zID79A0z4D59wwy4T98wA+7TN8yA+/QNM+A+fcMMuE/fMAPu0zfMgPv0DTPgPn3DDLhP3zAD7tM3bIDVLlBILfn6V+eGAAAAAElFTkSuQmCC\"}}]}]",
+          "label": "prompt_vlm.json: [{\"role\":\"user\",\"content\":[{\"type\":\"text\",\"text\":\"{{question}}\"},{\"type\":\"image_url\",\"image_url\":{\"url\":\"data:image/png;base64,{{image}}\"}}]}]",
+          "config": {}
+        },
+        "promptId": "6162af5432129baa121a0fa4d7f2a9b75ea9083e969886480a32a31f0b2752e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:chat:mock-vlm",
+          "label": "評価役v1"
+        },
+        "response": {
+          "output": "{\"answer\": \"A\", \"reason\": \"mock\"}",
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "cached": false,
+          "latencyMs": 257,
+          "finishReason": "stop",
+          "cost": 0.00009,
+          "guardrails": {
+            "flagged": false
+          },
+          "metadata": {
+            "http": {
+              "status": 200,
+              "statusText": "OK",
+              "headers": {
+                "content-length": "323",
+                "content-security-policy": "frame-ancestors 'none'",
+                "content-type": "application/json",
+                "date": "Thu, 08 Oct 2026 00:34:21 GMT",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-litellm-attempted-fallbacks": "0",
+                "x-litellm-attempted-retries": "0",
+                "x-litellm-call-id": "bb9dbc16-1dd2-4f12-a068-5a045a4b3786",
+                "x-litellm-callback-duration-ms": "0.0",
+                "x-litellm-key-spend": "0.00033000000000000005",
+                "x-litellm-model-api-base": "https://api.openai.com",
+                "x-litellm-model-group": "mock-vlm",
+                "x-litellm-model-id": "8bbcd52ab45fa7bcee3e06948bce98d802c82263c133c0deec8d613404780fab",
+                "x-litellm-model-name": "openai/mock-vlm",
+                "x-litellm-response-cost": "0.00033000000000000005",
+                "x-litellm-response-cost-discount-amount": "0.0",
+                "x-litellm-response-cost-input": "3e-05",
+                "x-litellm-response-cost-margin-amount": "0.0",
+                "x-litellm-response-cost-margin-percent": "0.0",
+                "x-litellm-response-cost-original": "0.00033000000000000005",
+                "x-litellm-response-cost-output": "0.00030000000000000003",
+                "x-litellm-response-cost-tool-usage": "0.0",
+                "x-litellm-response-duration-ms": "48.10500144958496",
+                "x-litellm-version": "1.104.1"
+              }
+            }
+          }
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "回帰 同じ絵と問いで答えが A のまま",
+          "vars": {
+            "image": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+            "question": "どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。"
+          },
+          "assert": [
+            {
+              "type": "is-json",
+              "value": {
+                "type": "object",
+                "required": [
+                  "answer",
+                  "reason"
+                ]
+              }
+            },
+            {
+              "type": "javascript",
+              "value": "JSON.parse(output).answer === 'A'",
+              "metric": "答えの一致"
+            },
+            {
+              "type": "cost",
+              "threshold": 0.01
+            },
+            {
+              "type": "latency",
+              "threshold": 5000
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 10,
+          "completion": 20,
+          "cached": 0,
+          "total": 30,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "image": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+          "question": "どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。"
+        },
+        "metadata": {
+          "http": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-length": "323",
+              "content-security-policy": "frame-ancestors 'none'",
+              "content-type": "application/json",
+              "date": "Thu, 08 Oct 2026 00:34:21 GMT",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "DENY",
+              "x-litellm-attempted-fallbacks": "0",
+              "x-litellm-attempted-retries": "0",
+              "x-litellm-call-id": "bb9dbc16-1dd2-4f12-a068-5a045a4b3786",
+              "x-litellm-callback-duration-ms": "0.0",
+              "x-litellm-key-spend": "0.00033000000000000005",
+              "x-litellm-model-api-base": "https://api.openai.com",
+              "x-litellm-model-group": "mock-vlm",
+              "x-litellm-model-id": "8bbcd52ab45fa7bcee3e06948bce98d802c82263c133c0deec8d613404780fab",
+              "x-litellm-model-name": "openai/mock-vlm",
+              "x-litellm-response-cost": "0.00033000000000000005",
+              "x-litellm-response-cost-discount-amount": "0.0",
+              "x-litellm-response-cost-input": "3e-05",
+              "x-litellm-response-cost-margin-amount": "0.0",
+              "x-litellm-response-cost-margin-percent": "0.0",
+              "x-litellm-response-cost-original": "0.00033000000000000005",
+              "x-litellm-response-cost-output": "0.00030000000000000003",
+              "x-litellm-response-cost-tool-usage": "0.0",
+              "x-litellm-response-duration-ms": "48.10500144958496",
+              "x-litellm-version": "1.104.1"
+            }
+          },
+          "_promptfooFileMetadata": {
+            "image": {
+              "path": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+              "type": "image",
+              "format": "png"
+            }
+          }
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 1,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 20,
+        "completion": 40,
+        "cached": 0,
+        "total": 60,
+        "numRequests": 2,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 345,
+      "evaluationDurationMs": 345
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "評価役の回帰(LiteLLM 経由・画像つき)",
+    "prompts": [
+      "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/pf/prompt_vlm.json"
+    ],
+    "providers": [
+      {
+        "id": "openai:chat:mock-vlm",
+        "label": "評価役v1",
+        "config": {
+          "apiBaseUrl": "http://127.0.0.1:62400/v1",
+          "apiKeyEnvar": "[REDACTED]",
+          "temperature": 0,
+          "cost": 0.000003
+        }
+      },
+      {
+        "id": "openai:chat:mock-vlm-b",
+        "label": "評価役v2(答えが変わった想定)",
+        "config": {
+          "apiBaseUrl": "http://127.0.0.1:62400/v1",
+          "apiKeyEnvar": "[REDACTED]",
+          "temperature": 0,
+          "cost": 0.000003
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "回帰 同じ絵と問いで答えが A のまま",
+        "vars": {
+          "image": "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png",
+          "question": "どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。"
+        },
+        "assert": [
+          {
+            "type": "is-json",
+            "value": {
+              "type": "object",
+              "required": [
+                "answer",
+                "reason"
+              ]
+            }
+          },
+          {
+            "type": "javascript",
+            "value": "JSON.parse(output).answer === 'A'",
+            "metric": "答えの一致"
+          },
+          {
+            "type": "cost",
+            "threshold": 0.01
+          },
+          {
+            "type": "latency",
+            "threshold": 5000
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "../out/pf_litellm_regression.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "basePath": "/home/user/manga-editor-desu/v3poc/p55_trace_eval/pf"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.124.0",
+    "nodeVersion": "v22.22.0",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-10-08T00:34:22.633Z",
+    "evaluationCreatedAt": "2026-10-08T00:34:22.116Z"
+  },
+  "vars": [
+    "image",
+    "question"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

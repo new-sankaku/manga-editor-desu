@@ -1,0 +1,36 @@
+# P55 用。v3/server/docker/litellm.yaml と同じ版の LiteLLM に、記録の連携だけ足したもの。
+model_list:
+  - model_name: mock-vlm
+    litellm_params:
+      model: openai/mock-vlm
+      api_key: dummy
+      mock_response: '{"answer": "A", "reason": "mock"}'
+    model_info:
+      input_cost_per_token: 0.000003
+      output_cost_per_token: 0.000015
+  - model_name: mock-vlm-b
+    litellm_params:
+      model: openai/mock-vlm-b
+      api_key: dummy
+      mock_response: '{"answer": "B", "reason": "mock"}'
+  - model_name: mock-cand-good
+    litellm_params:
+      model: openai/mock-cand-good
+      api_key: dummy
+      mock_response: "右上のコマから始めて、右から左、上から下の順に視線が流れる配置です。"
+  - model_name: mock-cand-bad
+    litellm_params:
+      model: openai/mock-cand-bad
+      api_key: dummy
+      mock_response: "左上のコマから始めて、左から右へ読む配置です。"
+  - model_name: mock-bad
+    litellm_params:
+      model: openai/stub-bad
+      api_base: http://stub400:8000/v1
+      api_key: dummy
+router_settings:
+  num_retries: 0
+  fallbacks: []
+litellm_settings:
+  drop_params: false
+  callbacks: ["langfuse_otel"]

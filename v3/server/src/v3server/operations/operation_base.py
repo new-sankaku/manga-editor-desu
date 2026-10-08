@@ -70,6 +70,3 @@ def _changed(obj, changes: dict[str, Any]) -> dict[str, Any]:
     for k, v in changes.items():
         setattr(obj, k, v)
     return before
-
-
-# ---------------------------------------------------------------- 作品

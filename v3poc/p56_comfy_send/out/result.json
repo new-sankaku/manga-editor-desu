@@ -1,0 +1,1578 @@
+{
+ "1_一覧": {
+  "/system_stats": {
+   "status": 200,
+   "body": {
+    "system": {
+     "comfyui_version": "0.39.2",
+     "python_version": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+     "pytorch_version": "2.14.1+cpu",
+     "ram_total": 14345031680
+    },
+    "devices": [
+     {
+      "name": "cpu",
+      "type": "cpu",
+      "index": null,
+      "vram_total": 14345031680,
+      "vram_free": 5732503552,
+      "torch_vram_total": 14345031680,
+      "torch_vram_free": 5732503552
+     }
+    ]
+   }
+  },
+  "/models": {
+   "status": 200,
+   "body": [
+    "checkpoints",
+    "configs",
+    "loras",
+    "vae",
+    "text_encoders",
+    "diffusion_models",
+    "clip_vision",
+    "style_models",
+    "embeddings",
+    "diffusers",
+    "vae_approx",
+    "controlnet",
+    "gligen",
+    "upscale_models",
+    "latent_upscale_models",
+    "custom_nodes",
+    "datasets",
+    "hypernetworks",
+    "photomaker",
+    "classifiers",
+    "model_patches",
+    "audio_encoders",
+    "background_removal",
+    "frame_interpolation",
+    "geometry_estimation",
+    "optical_flow",
+    "detection"
+   ]
+  },
+  "/models/unet": {
+   "status": 404,
+   "body": ""
+  },
+  "/models/vae": {
+   "status": 200,
+   "body": [
+    "sd15_vae_fp16.safetensors"
+   ]
+  },
+  "/models/text_encoders": {
+   "status": 200,
+   "body": [
+    "sd15_te_fp16.safetensors"
+   ]
+  },
+  "/models/clip": {
+   "status": 404,
+   "body": ""
+  },
+  "/models/checkpoints": {
+   "status": 200,
+   "body": []
+  },
+  "/models/loras": {
+   "status": 200,
+   "body": []
+  },
+  "/embeddings": {
+   "status": 200,
+   "body": []
+  },
+  "/queue": {
+   "status": 200,
+   "body": {
+    "queue_running": [],
+    "queue_pending": []
+   }
+  },
+  "/history": {
+   "status": 200,
+   "body": {
+    "19a6a7e8-4781-48f7-9c47-1af940250c2f": {
+     "prompt": [
+      0,
+      "19a6a7e8-4781-48f7-9c47-1af940250c2f",
+      {
+       "1": {
+        "class_type": "UNETLoader",
+        "inputs": {
+         "unet_name": "bk-sdm-tiny_unet_fp16.safetensors",
+         "weight_dtype": "default"
+        }
+       },
+       "2": {
+        "class_type": "CLIPLoader",
+        "inputs": {
+         "clip_name": "bk-sdm-tiny_te_fp16.safetensors",
+         "type": "stable_diffusion"
+        }
+       },
+       "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+         "vae_name": "bk-sdm-tiny_vae_fp16.safetensors"
+        }
+       },
+       "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "a red apple on a table",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "5": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "6": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+         "width": 256,
+         "height": 256,
+         "batch_size": 1
+        }
+       },
+       "7": {
+        "class_type": "KSampler",
+        "inputs": {
+         "model": [
+          "1",
+          0
+         ],
+         "positive": [
+          "4",
+          0
+         ],
+         "negative": [
+          "5",
+          0
+         ],
+         "latent_image": [
+          "6",
+          0
+         ],
+         "seed": 1,
+         "steps": 4,
+         "cfg": 5.0,
+         "sampler_name": "euler",
+         "scheduler": "normal",
+         "denoise": 1.0
+        }
+       },
+       "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+         "samples": [
+          "7",
+          0
+         ],
+         "vae": [
+          "3",
+          0
+         ]
+        }
+       },
+       "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+         "images": [
+          "8",
+          0
+         ],
+         "filename_prefix": "p56"
+        }
+       }
+      },
+      {
+       "create_time": 1791419002639
+      },
+      [
+       "9"
+      ]
+     ],
+     "outputs": {},
+     "status": {
+      "status_str": "error",
+      "completed": false,
+      "messages": [
+       [
+        "execution_start",
+        {
+         "prompt_id": "19a6a7e8-4781-48f7-9c47-1af940250c2f",
+         "timestamp": 1791419002641
+        }
+       ],
+       [
+        "execution_cached",
+        {
+         "nodes": [],
+         "prompt_id": "19a6a7e8-4781-48f7-9c47-1af940250c2f",
+         "timestamp": 1791419002643
+        }
+       ],
+       [
+        "execution_error",
+        {
+         "prompt_id": "19a6a7e8-4781-48f7-9c47-1af940250c2f",
+         "node_id": "1",
+         "node_type": "UNETLoader",
+         "executed": [
+          "6",
+          "5",
+          "3",
+          "2",
+          "4"
+         ],
+         "exception_message": "ERROR: Could not detect model type of: /tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/models/unet/bk-sdm-tiny_unet_fp16.safetensors\n\n",
+         "exception_type": "RuntimeError",
+         "traceback": [
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 547, in execute\n    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 352, in get_output_data\n    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 326, in _async_map_node_over_list\n    await process_inputs(input_dict, i)\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 314, in process_inputs\n    result = f(**inputs)\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/nodes.py\", line 1013, in load_unet\n    model = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/comfy/sd.py\", line 2431, in load_diffusion_model\n    raise RuntimeError(\"ERROR: Could not detect model type of: {}\\n{}\".format(unet_path, model_detection_error_hint(unet_path, sd)))\n"
+         ],
+         "current_inputs": {
+          "unet_name": [
+           "bk-sdm-tiny_unet_fp16.safetensors"
+          ],
+          "weight_dtype": [
+           "default"
+          ]
+         },
+         "current_outputs": [
+          "6",
+          "9",
+          "8",
+          "7",
+          "5",
+          "3",
+          "1",
+          "2",
+          "4"
+         ],
+         "timestamp": 1791419015320
+        }
+       ]
+      ]
+     },
+     "meta": {}
+    },
+    "cf51aabb-d41c-4a08-a539-a9226a84f61e": {
+     "prompt": [
+      1,
+      "cf51aabb-d41c-4a08-a539-a9226a84f61e",
+      {
+       "1": {
+        "class_type": "UNETLoader",
+        "inputs": {
+         "unet_name": "ofa-small-sd_unet_fp16.safetensors",
+         "weight_dtype": "default"
+        }
+       },
+       "2": {
+        "class_type": "CLIPLoader",
+        "inputs": {
+         "clip_name": "bk-sdm-tiny_te_fp16.safetensors",
+         "type": "stable_diffusion"
+        }
+       },
+       "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+         "vae_name": "bk-sdm-tiny_vae_fp16.safetensors"
+        }
+       },
+       "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "a red apple on a table",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "5": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "6": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+         "width": 256,
+         "height": 256,
+         "batch_size": 1
+        }
+       },
+       "7": {
+        "class_type": "KSampler",
+        "inputs": {
+         "model": [
+          "1",
+          0
+         ],
+         "positive": [
+          "4",
+          0
+         ],
+         "negative": [
+          "5",
+          0
+         ],
+         "latent_image": [
+          "6",
+          0
+         ],
+         "seed": 1,
+         "steps": 4,
+         "cfg": 5.0,
+         "sampler_name": "euler",
+         "scheduler": "normal",
+         "denoise": 1.0
+        }
+       },
+       "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+         "samples": [
+          "7",
+          0
+         ],
+         "vae": [
+          "3",
+          0
+         ]
+        }
+       },
+       "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+         "images": [
+          "8",
+          0
+         ],
+         "filename_prefix": "p56"
+        }
+       }
+      },
+      {
+       "create_time": 1791419161812
+      },
+      [
+       "9"
+      ]
+     ],
+     "outputs": {},
+     "status": {
+      "status_str": "error",
+      "completed": false,
+      "messages": [
+       [
+        "execution_start",
+        {
+         "prompt_id": "cf51aabb-d41c-4a08-a539-a9226a84f61e",
+         "timestamp": 1791419161815
+        }
+       ],
+       [
+        "execution_cached",
+        {
+         "nodes": [
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+         ],
+         "prompt_id": "cf51aabb-d41c-4a08-a539-a9226a84f61e",
+         "timestamp": 1791419161817
+        }
+       ],
+       [
+        "execution_error",
+        {
+         "prompt_id": "cf51aabb-d41c-4a08-a539-a9226a84f61e",
+         "node_id": "1",
+         "node_type": "UNETLoader",
+         "executed": [],
+         "exception_message": "ERROR: Could not detect model type of: /tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/models/unet/ofa-small-sd_unet_fp16.safetensors\n\n",
+         "exception_type": "RuntimeError",
+         "traceback": [
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 547, in execute\n    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 352, in get_output_data\n    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 326, in _async_map_node_over_list\n    await process_inputs(input_dict, i)\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/execution.py\", line 314, in process_inputs\n    result = f(**inputs)\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/nodes.py\", line 1013, in load_unet\n    model = comfy.sd.load_diffusion_model(unet_path, model_options=model_options)\n",
+          "  File \"/tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d28-a8d6-2b724e85a763/scratchpad/comfy/ComfyUI/comfy/sd.py\", line 2431, in load_diffusion_model\n    raise RuntimeError(\"ERROR: Could not detect model type of: {}\\n{}\".format(unet_path, model_detection_error_hint(unet_path, sd)))\n"
+         ],
+         "current_inputs": {
+          "unet_name": [
+           "ofa-small-sd_unet_fp16.safetensors"
+          ],
+          "weight_dtype": [
+           "default"
+          ]
+         },
+         "current_outputs": [
+          "6",
+          "9",
+          "8",
+          "7",
+          "5",
+          "3",
+          "1",
+          "2",
+          "4"
+         ],
+         "timestamp": 1791419161843
+        }
+       ]
+      ]
+     },
+     "meta": {}
+    },
+    "10220d00-c172-4084-8498-09132d41abbc": {
+     "prompt": [
+      2,
+      "10220d00-c172-4084-8498-09132d41abbc",
+      {
+       "1": {
+        "class_type": "UNETLoader",
+        "inputs": {
+         "unet_name": "sd15_unet_fp16.safetensors",
+         "weight_dtype": "default"
+        }
+       },
+       "2": {
+        "class_type": "CLIPLoader",
+        "inputs": {
+         "clip_name": "sd15_te_fp16.safetensors",
+         "type": "stable_diffusion"
+        }
+       },
+       "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+         "vae_name": "sd15_vae_fp16.safetensors"
+        }
+       },
+       "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "a red apple on a table",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "5": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "6": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+         "width": 256,
+         "height": 256,
+         "batch_size": 1
+        }
+       },
+       "7": {
+        "class_type": "KSampler",
+        "inputs": {
+         "model": [
+          "1",
+          0
+         ],
+         "positive": [
+          "4",
+          0
+         ],
+         "negative": [
+          "5",
+          0
+         ],
+         "latent_image": [
+          "6",
+          0
+         ],
+         "seed": 1,
+         "steps": 4,
+         "cfg": 5.0,
+         "sampler_name": "euler",
+         "scheduler": "normal",
+         "denoise": 1.0
+        }
+       },
+       "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+         "samples": [
+          "7",
+          0
+         ],
+         "vae": [
+          "3",
+          0
+         ]
+        }
+       },
+       "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+         "images": [
+          "8",
+          0
+         ],
+         "filename_prefix": "p56"
+        }
+       }
+      },
+      {
+       "create_time": 1791419198584
+      },
+      [
+       "9"
+      ]
+     ],
+     "outputs": {
+      "9": {
+       "images": [
+        {
+         "filename": "p56_00001_.png",
+         "subfolder": "",
+         "type": "output"
+        }
+       ]
+      }
+     },
+     "status": {
+      "status_str": "success",
+      "completed": true,
+      "messages": [
+       [
+        "execution_start",
+        {
+         "prompt_id": "10220d00-c172-4084-8498-09132d41abbc",
+         "timestamp": 1791419198585
+        }
+       ],
+       [
+        "execution_cached",
+        {
+         "nodes": [
+          "6"
+         ],
+         "prompt_id": "10220d00-c172-4084-8498-09132d41abbc",
+         "timestamp": 1791419198586
+        }
+       ],
+       [
+        "execution_success",
+        {
+         "prompt_id": "10220d00-c172-4084-8498-09132d41abbc",
+         "timestamp": 1791419528523
+        }
+       ]
+      ]
+     },
+     "meta": {
+      "9": {
+       "node_id": "9",
+       "display_node": "9",
+       "parent_node": null,
+       "real_node_id": "9"
+      }
+     }
+    },
+    "8c960961-0d7f-498e-a64e-1503a5141704": {
+     "prompt": [
+      3,
+      "8c960961-0d7f-498e-a64e-1503a5141704",
+      {
+       "1": {
+        "class_type": "UNETLoader",
+        "inputs": {
+         "unet_name": "sd15_unet_fp16.safetensors",
+         "weight_dtype": "default"
+        }
+       },
+       "2": {
+        "class_type": "CLIPLoader",
+        "inputs": {
+         "clip_name": "sd15_te_fp16.safetensors",
+         "type": "stable_diffusion"
+        }
+       },
+       "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+         "vae_name": "sd15_vae_fp16.safetensors"
+        }
+       },
+       "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "a red apple on a table",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "5": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "6": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+         "width": 256,
+         "height": 256,
+         "batch_size": 1
+        }
+       },
+       "7": {
+        "class_type": "KSampler",
+        "inputs": {
+         "model": [
+          "1",
+          0
+         ],
+         "positive": [
+          "4",
+          0
+         ],
+         "negative": [
+          "5",
+          0
+         ],
+         "latent_image": [
+          "6",
+          0
+         ],
+         "seed": 1,
+         "steps": 4,
+         "cfg": 5.0,
+         "sampler_name": "euler",
+         "scheduler": "normal",
+         "denoise": 1.0
+        }
+       },
+       "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+         "samples": [
+          "7",
+          0
+         ],
+         "vae": [
+          "3",
+          0
+         ]
+        }
+       },
+       "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+         "images": [
+          "8",
+          0
+         ],
+         "filename_prefix": "p56"
+        }
+       }
+      },
+      {
+       "create_time": 1791419534071
+      },
+      [
+       "9"
+      ]
+     ],
+     "outputs": {
+      "9": {
+       "images": [
+        {
+         "filename": "p56_00001_.png",
+         "subfolder": "",
+         "type": "output"
+        }
+       ]
+      }
+     },
+     "status": {
+      "status_str": "success",
+      "completed": true,
+      "messages": [
+       [
+        "execution_start",
+        {
+         "prompt_id": "8c960961-0d7f-498e-a64e-1503a5141704",
+         "timestamp": 1791419534072
+        }
+       ],
+       [
+        "execution_cached",
+        {
+         "nodes": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
+         ],
+         "prompt_id": "8c960961-0d7f-498e-a64e-1503a5141704",
+         "timestamp": 1791419534074
+        }
+       ],
+       [
+        "execution_success",
+        {
+         "prompt_id": "8c960961-0d7f-498e-a64e-1503a5141704",
+         "timestamp": 1791419534075
+        }
+       ]
+      ]
+     },
+     "meta": {
+      "9": {
+       "node_id": "9",
+       "display_node": "9",
+       "parent_node": null,
+       "real_node_id": "9"
+      }
+     }
+    },
+    "6653ee9a-c51c-4d90-b222-bf2f00f28c0f": {
+     "prompt": [
+      4,
+      "6653ee9a-c51c-4d90-b222-bf2f00f28c0f",
+      {
+       "1": {
+        "class_type": "UNETLoader",
+        "inputs": {
+         "unet_name": "sd15_unet_fp16.safetensors",
+         "weight_dtype": "default"
+        }
+       },
+       "2": {
+        "class_type": "CLIPLoader",
+        "inputs": {
+         "clip_name": "sd15_te_fp16.safetensors",
+         "type": "stable_diffusion"
+        }
+       },
+       "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+         "vae_name": "sd15_vae_fp16.safetensors"
+        }
+       },
+       "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "a red apple on a table",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "5": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "6": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+         "width": 256,
+         "height": 256,
+         "batch_size": 1
+        }
+       },
+       "7": {
+        "class_type": "KSampler",
+        "inputs": {
+         "model": [
+          "1",
+          0
+         ],
+         "positive": [
+          "4",
+          0
+         ],
+         "negative": [
+          "5",
+          0
+         ],
+         "latent_image": [
+          "6",
+          0
+         ],
+         "seed": 2,
+         "steps": 8,
+         "cfg": 5.0,
+         "sampler_name": "euler",
+         "scheduler": "normal",
+         "denoise": 1.0
+        }
+       },
+       "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+         "samples": [
+          "7",
+          0
+         ],
+         "vae": [
+          "3",
+          0
+         ]
+        }
+       },
+       "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+         "images": [
+          "8",
+          0
+         ],
+         "filename_prefix": "p56"
+        }
+       }
+      },
+      {
+       "create_time": 1791419555981
+      },
+      [
+       "9"
+      ]
+     ],
+     "outputs": {
+      "9": {
+       "images": [
+        {
+         "filename": "p56_00002_.png",
+         "subfolder": "",
+         "type": "output"
+        }
+       ]
+      }
+     },
+     "status": {
+      "status_str": "success",
+      "completed": true,
+      "messages": [
+       [
+        "execution_start",
+        {
+         "prompt_id": "6653ee9a-c51c-4d90-b222-bf2f00f28c0f",
+         "timestamp": 1791419555986
+        }
+       ],
+       [
+        "execution_cached",
+        {
+         "nodes": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+         ],
+         "prompt_id": "6653ee9a-c51c-4d90-b222-bf2f00f28c0f",
+         "timestamp": 1791419555987
+        }
+       ],
+       [
+        "execution_success",
+        {
+         "prompt_id": "6653ee9a-c51c-4d90-b222-bf2f00f28c0f",
+         "timestamp": 1791419921587
+        }
+       ]
+      ]
+     },
+     "meta": {
+      "9": {
+       "node_id": "9",
+       "display_node": "9",
+       "parent_node": null,
+       "real_node_id": "9"
+      }
+     }
+    },
+    "1da9ef63-3897-45e7-9795-b3cc028d3621": {
+     "prompt": [
+      5,
+      "1da9ef63-3897-45e7-9795-b3cc028d3621",
+      {
+       "1": {
+        "class_type": "UNETLoader",
+        "inputs": {
+         "unet_name": "sd15_unet_fp16.safetensors",
+         "weight_dtype": "default"
+        }
+       },
+       "2": {
+        "class_type": "CLIPLoader",
+        "inputs": {
+         "clip_name": "sd15_te_fp16.safetensors",
+         "type": "stable_diffusion"
+        }
+       },
+       "3": {
+        "class_type": "VAELoader",
+        "inputs": {
+         "vae_name": "sd15_vae_fp16.safetensors"
+        }
+       },
+       "4": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "a red apple on a table",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "5": {
+        "class_type": "CLIPTextEncode",
+        "inputs": {
+         "text": "",
+         "clip": [
+          "2",
+          0
+         ]
+        }
+       },
+       "6": {
+        "class_type": "EmptyLatentImage",
+        "inputs": {
+         "width": 256,
+         "height": 256,
+         "batch_size": 1
+        }
+       },
+       "7": {
+        "class_type": "KSampler",
+        "inputs": {
+         "model": [
+          "1",
+          0
+         ],
+         "positive": [
+          "4",
+          0
+         ],
+         "negative": [
+          "5",
+          0
+         ],
+         "latent_image": [
+          "6",
+          0
+         ],
+         "seed": 3,
+         "steps": 4,
+         "cfg": 5.0,
+         "sampler_name": "euler",
+         "scheduler": "normal",
+         "denoise": 1.0
+        }
+       },
+       "8": {
+        "class_type": "VAEDecode",
+        "inputs": {
+         "samples": [
+          "7",
+          0
+         ],
+         "vae": [
+          "3",
+          0
+         ]
+        }
+       },
+       "9": {
+        "class_type": "SaveImage",
+        "inputs": {
+         "images": [
+          "8",
+          0
+         ],
+         "filename_prefix": "p56"
+        }
+       }
+      },
+      {
+       "create_time": 1791419931240
+      },
+      [
+       "9"
+      ]
+     ],
+     "outputs": {
+      "9": {
+       "images": [
+        {
+         "filename": "p56_00003_.png",
+         "subfolder": "",
+         "type": "output"
+        }
+       ]
+      }
+     },
+     "status": {
+      "status_str": "success",
+      "completed": true,
+      "messages": [
+       [
+        "execution_start",
+        {
+         "prompt_id": "1da9ef63-3897-45e7-9795-b3cc028d3621",
+         "timestamp": 1791419931241
+        }
+       ],
+       [
+        "execution_cached",
+        {
+         "nodes": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+         ],
+         "prompt_id": "1da9ef63-3897-45e7-9795-b3cc028d3621",
+         "timestamp": 1791419931243
+        }
+       ],
+       [
+        "execution_success",
+        {
+         "prompt_id": "1da9ef63-3897-45e7-9795-b3cc028d3621",
+         "timestamp": 1791420009198
+        }
+       ]
+      ]
+     },
+     "meta": {
+      "9": {
+       "node_id": "9",
+       "display_node": "9",
+       "parent_node": null,
+       "real_node_id": "9"
+      }
+     }
+    }
+   }
+  },
+  "/object_info": {
+   "status": 200,
+   "bytes": 1951170,
+   "nodes": 976,
+   "has": [
+    "KSampler",
+    "UNETLoader",
+    "CheckpointLoaderSimple",
+    "LoraLoader",
+    "SaveImage"
+   ]
+  },
+  "/object_info/UNETLoader": {
+   "status": 200,
+   "inputs": {
+    "unet_name": [
+     [
+      "sd15_unet_fp16.safetensors"
+     ]
+    ],
+    "weight_dtype": [
+     [
+      "default",
+      "fp8_e4m3fn",
+      "fp8_e4m3fn_fast",
+      "fp8_e5m2"
+     ],
+     {
+      "advanced": true
+     }
+    ]
+   }
+  },
+  "/object_info/CheckpointLoaderSimple": {
+   "status": 200,
+   "inputs": {
+    "ckpt_name": [
+     [],
+     {
+      "tooltip": "The name of the checkpoint (model) to load."
+     }
+    ]
+   }
+  },
+  "/object_info/LoraLoader": {
+   "status": 200,
+   "inputs": {
+    "model": [
+     "MODEL",
+     {
+      "tooltip": "The diffusion model the LoRA will be applied to."
+     }
+    ],
+    "clip": [
+     "CLIP",
+     {
+      "tooltip": "The CLIP model the LoRA will be applied to."
+     }
+    ],
+    "lora_name": [
+     [],
+     {
+      "tooltip": "The name of the LoRA."
+     }
+    ],
+    "strength_model": [
+     "FLOAT",
+     {
+      "default": 1.0,
+      "min": -100.0,
+      "max": 100.0,
+      "step": 0.01,
+      "tooltip": "How strongly to modify the diffusion model. This value can be negative."
+     }
+    ],
+    "strength_clip": [
+     "FLOAT",
+     {
+      "default": 1.0,
+      "min": -100.0,
+      "max": 100.0,
+      "step": 0.01,
+      "tooltip": "How strongly to modify the CLIP model. This value can be negative."
+     }
+    ]
+   }
+  }
+ },
+ "2_送信と受け取りとseed": {
+  "初回(seed11)": {
+   "ok": true,
+   "seconds": 22.4,
+   "output": {
+    "prompt_id": "f51d8e7e-9e31-447d-a30f-cf39484671ca",
+    "images": [
+     {
+      "filename": "p56a_00002_.png",
+      "subfolder": "",
+      "type": "output"
+     }
+    ]
+   },
+   "model": null,
+   "settings": {},
+   "seed": null
+  },
+  "view": {
+   "status": 200,
+   "content_type": "image/png",
+   "bytes": 29840
+  },
+  "sha256_a": "66c02840e51c2a0404139fb7df0e64feb722893b5945d3b292eb4ac454b879f6",
+  "pixels_a": "2c17d8f974c38c474a84bc346888668b4e939fb3745ab79269e1bf4d4df8f882",
+  "call_comfyui_の戻りに画像の中身": "images は {filename, subfolder, type} の一覧だけで、中身(bytes)は無い",
+  "同じ手順の再送(再利用あり)": {
+   "ok": true,
+   "seconds": 1.1,
+   "output": {
+    "prompt_id": "ba89caeb-6c39-441b-b3a5-7867d4c49601",
+    "images": [
+     {
+      "filename": "p56a_00002_.png",
+      "subfolder": "",
+      "type": "output"
+     }
+    ]
+   },
+   "kind": null,
+   "detail": null
+  },
+  "再利用を消して再送(seed11)": {
+   "ok": true,
+   "seconds": 37.5,
+   "output": {
+    "prompt_id": "d19cb65b-0ac1-4cd8-baad-89fb1db1c733",
+    "images": [
+     {
+      "filename": "p56b_00002_.png",
+      "subfolder": "",
+      "type": "output"
+     }
+    ]
+   },
+   "model": null,
+   "settings": {},
+   "seed": null
+  },
+  "sha256_b": "456753c3a6c74d34fe4b12ee36ef517ed648522a12a478a927df4c7ed2be5381",
+  "pixels_b": "2c17d8f974c38c474a84bc346888668b4e939fb3745ab79269e1bf4d4df8f882",
+  "ファイル全体が同じか": false,
+  "画素が同じか(seed固定2回)": true,
+  "別seed(seed12)": {
+   "ok": true,
+   "seconds": 35.6,
+   "output": {
+    "prompt_id": "7e6d254a-b0d1-43b6-85e1-26303c6579d9",
+    "images": [
+     {
+      "filename": "p56c_00002_.png",
+      "subfolder": "",
+      "type": "output"
+     }
+    ]
+   },
+   "model": null,
+   "settings": {},
+   "seed": null
+  },
+  "pixels_seed12": "50f90e38f1c921b4e735157a02184631b45455fc9decb525dd2b3c870278ed8f",
+  "別seedで違う絵か": true,
+  "history1件の形": {
+   "keys": [
+    "prompt",
+    "outputs",
+    "status",
+    "meta"
+   ],
+   "status": "success",
+   "message種別": [
+    "execution_start",
+    "execution_cached",
+    "execution_success"
+   ]
+  }
+ },
+ "3_取り消し": {
+  "実行中が見えるまで": true,
+  "状態(A実行中,B・C待ち)": {
+   "running": true,
+   "pending": 2
+  },
+  "待ちのBを消す": {
+   "status": 200,
+   "text": "",
+   "queue_after": 1
+  },
+  "消したBのhistory": {},
+  "実行中のAを /queue の delete で消す": {
+   "status": 200,
+   "まだ実行中": true
+  },
+  "interrupt": {
+   "status": 200
+  },
+  "interrupt後にhistoryへ出るまで(秒)": 0.5,
+  "Aのhistory": {
+   "status_str": "error",
+   "completed": false,
+   "messages種別": [
+    "execution_start",
+    "execution_cached",
+    "execution_interrupted"
+   ],
+   "interrupted詳細": [
+    {
+     "prompt_id": "a5063446-c71c-44f5-9a22-d1cdfa63e61e",
+     "node_id": "7",
+     "node_type": "KSampler",
+     "executed": [],
+     "timestamp": 1791420283109
+    }
+   ],
+   "outputs": {}
+  },
+  "interrupt後に後ろのCは動くか": "success",
+  "何も実行していないときの/interrupt": {
+   "status": 200
+  },
+  "call_comfyui越し: 待ちから消された依頼": {
+   "ok": false,
+   "kind": "(戻らない)",
+   "detail": "待ちから消されたあと25秒たっても call_comfyui が戻らない（/history に出ないので1秒ごとに見続ける）"
+  },
+  "call_comfyui越し: 実行中に/interrupt された依頼": {
+   "ok": false,
+   "kind": "refused",
+   "detail": "[['execution_start', {'prompt_id': '3ac72aa8-e50d-4827-995b-2860fd45978d', 'timestamp': 1791420304796}], ['execution_cached', {'nodes': ['1', '2', '3', '4', '5', '6'], 'prompt_id': '3ac72aa8-e50d-4827-995b-2860fd45978d', 'timestamp': 1791420304797}], ['execution_interrupted', {'prompt_id': '3ac72aa8-e50d-4827-995b-2860fd45978d', 'node_id': '7', 'node_type': 'KSampler', 'executed': [], 'timestamp': 1791420330869}]]",
+   "seconds": 26.5
+  },
+  "Y後始末": "戻らないので asyncio で取り消した（call_comfyui 側に上限の時間が無い）"
+ },
+ "4_壊れた手順": {
+  "存在しないノード": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"missing_node_type\", \"message\": \"Node 'NoSuchSamplerNode' not found. The custom node may not be installed.\", \"details\": \"Node ID '#7'\", \"extra_info\": {\"node_id\": \"7\", \"class_type\": \"NoSuchSamplerNode\", \"node_title\": \"NoSuchSamplerNode\"}}, \"node_errors\": {}}"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"missing_node_type\", \"message\": \"Node 'NoSuchSamplerNode' not found. The custom node may not be installed.\", \"details\": \"Node ID '#7'\", \"extra_info\": {\"node_id\": \"7\", \"class_type\": \"NoSuchSamplerNode\", \"node_title\": \"NoSuchSamplerNode\"}}, \"node_errors\": {}}",
+    "seconds": 0.0
+   }
+  },
+  "足りない入力(KSamplerのmodel)": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"7\": {\"errors\": [{\"type\": \"required_input_missing\", \"message\": \"Required input is missing\", \"details\": \"model\", \"extra_info\": {\"input_name\": \"model\"}}], \"dependent_outputs\": [\"9\"], \"class_type\": \"KSampler\"}}}"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"7\": {\"errors\": [{\"type\": \"required_input_missing\", \"message\": \"Required input is missing\", \"details\": \"model\", \"extra_info\": {\"input_name\": \"model\"}}], \"dependent_outputs\": [\"9\"], \"class_type\": \"KSampler\"}}}",
+    "seconds": 0.0
+   }
+  },
+  "選べない値(sampler_name)": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"7\": {\"errors\": [{\"type\": \"value_not_in_list\", \"message\": \"Value not in list\", \"details\": \"sampler_name: 'no_such_sampler' not in (list of length 45)\", \"extra_info\": {\"input_name\": \"sampler_name\", \"input_config\": null, \"received_value\": \"no_such_sampler\"}}], \"dependent_outputs\": [\"9\"], \"class_type\": \"KSampler\"}}}"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"7\": {\"errors\": [{\"type\": \"value_not_in_list\", \"message\": \"Value not in list\", \"details\": \"sampler_name: 'no_such_sampler' not in (list of length 45)\", \"extra_info\": {\"input_name\": \"sampler_name\", \"input_config\": null, \"received_value\": \"no_such_sampler\"}}], \"dependent_outputs\": [\"9\"], \"class_type\": \"KSampler\"}}}",
+    "seconds": 0.0
+   }
+  },
+  "存在しないモデル名": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"1\": {\"errors\": [{\"type\": \"value_not_in_list\", \"message\": \"Value not in list\", \"details\": \"unet_name: 'nothing.safetensors' not in ['bogus_not_a_unet.safetensors', 'sd15_unet_fp16.safetensors']\", \"extra_info\": {\"input_name\": \"unet_name\", \"input_config\": [[\"bogus_not_a_unet.safetensors\", \"sd15_unet_fp16.safetensors\"], {}], \"received_value\": \"nothi"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"1\": {\"errors\": [{\"type\": \"value_not_in_list\", \"message\": \"Value not in list\", \"details\": \"unet_name: 'nothing.safetensors' not in ['bogus_not_a_unet.safetensors', 'sd15_unet_fp16.safetensors']\", \"extra_info\": {\"input_name\": \"unet_name\", \"input_config\": [[\"bogus_not_a_unet.safetensors\", \"sd15_unet_fp16.safetensors\"], {}], \"received_value\": \"nothi",
+    "seconds": 0.0
+   }
+  },
+  "つなぎ先のノード番号が無い": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"7\": {\"errors\": [{\"type\": \"exception_during_inner_validation\", \"message\": \"Exception when validating inner node\", \"details\": \"'99'\", \"extra_info\": {\"input_name\": \"samples\", \"input_config\": [\"LATENT\", {\"tooltip\": \"The latent to be decoded.\"}], \"exception_message\": \"'99'\", \"exception_type\": \"KeyError\", \"traceback\": [\"  File \\\"/tmp/claude-0/-home-us"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"7\": {\"errors\": [{\"type\": \"exception_during_inner_validation\", \"message\": \"Exception when validating inner node\", \"details\": \"'99'\", \"extra_info\": {\"input_name\": \"samples\", \"input_config\": [\"LATENT\", {\"tooltip\": \"The latent to be decoded.\"}], \"exception_message\": \"'99'\", \"exception_type\": \"KeyError\", \"traceback\": [\"  File \\\"/tmp/claude-0/-home-us",
+    "seconds": 0.0
+   }
+  },
+  "範囲外の値(width=0)": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"6\": {\"errors\": [{\"type\": \"value_smaller_than_min\", \"message\": \"Value 0 smaller than min of 16\", \"details\": \"width\", \"extra_info\": {\"input_name\": \"width\", \"input_config\": [\"INT\", {\"default\": 1024, \"min\": 16, \"max\": 16384, \"step\": 8, \"tooltip\": \"The width of the latent images in pixels.\"}], \"received_value\": 0}}], \"dependent_outputs\": [\"9\"], \"clas"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"prompt_outputs_failed_validation\", \"message\": \"Prompt outputs failed validation\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {\"6\": {\"errors\": [{\"type\": \"value_smaller_than_min\", \"message\": \"Value 0 smaller than min of 16\", \"details\": \"width\", \"extra_info\": {\"input_name\": \"width\", \"input_config\": [\"INT\", {\"default\": 1024, \"min\": 16, \"max\": 16384, \"step\": 8, \"tooltip\": \"The width of the latent images in pixels.\"}], \"received_value\": 0}}], \"dependent_outputs\": [\"9\"], \"clas",
+    "seconds": 0.0
+   }
+  },
+  "出力ノードが無い": {
+   "生のPOST/prompt": {
+    "status": 400,
+    "body": "{\"error\": {\"type\": \"prompt_no_outputs\", \"message\": \"Prompt has no outputs\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {}}"
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "400 {\"error\": {\"type\": \"prompt_no_outputs\", \"message\": \"Prompt has no outputs\", \"details\": \"\", \"extra_info\": {}}, \"node_errors\": {}}",
+    "seconds": 0.0
+   }
+  },
+  "実行時の失敗(型を判別できないモデル)": {
+   "生のPOST/prompt": {
+    "status": 200,
+    "body": "{\"prompt_id\": \"e446a8b5-6df8-4f20-b820-14c5e5fec747\", \"number\": 33, \"node_errors\": {}}"
+   },
+   "生のhistory": {
+    "status_str": "error",
+    "messages種別": [
+     "execution_start",
+     "execution_cached",
+     "execution_error"
+    ]
+   },
+   "call_comfyui": {
+    "ok": false,
+    "kind": "refused",
+    "detail": "[['execution_start', {'prompt_id': '9b6757d3-183a-4559-a4bc-f5fc3a34245e', 'timestamp': 1791420337776}], ['execution_cached', {'nodes': ['2', '3', '4', '5', '6'], 'prompt_id': '9b6757d3-183a-4559-a4bc-f5fc3a34245e', 'timestamp': 1791420337779}], ['execution_error', {'prompt_id': '9b6757d3-183a-4559-a4bc-f5fc3a34245e', 'node_id': '1', 'node_type': 'UNETLoader', 'executed': [], 'exception_message': 'ERROR: Could not detect model type of: /tmp/claude-0/-home-user-manga-editor-desu/fa704f96-c74d-4d2",
+    "seconds": 1.1
+   }
+  },
+  "overridesが手順に無いノード": {
+   "ok": false,
+   "kind": "refused",
+   "detail": "手順にノード 99 が無い",
+   "seconds": 0.0
+  }
+ },
+ "5_偽のサーバー": {
+  "html200": {
+   "ok": false,
+   "kind": "broken_response",
+   "detail": "Expecting value: line 1 column 1 (char 0)",
+   "seconds": 0.0
+  },
+  "no_prompt_id": {
+   "ok": false,
+   "kind": "broken_response",
+   "detail": "'prompt_id'",
+   "seconds": 0.0
+  },
+  "500": {
+   "ok": false,
+   "kind": "refused",
+   "detail": "500 boom",
+   "seconds": 0.0
+  },
+  "503": {
+   "ok": false,
+   "kind": "refused",
+   "detail": "503 unavailable",
+   "seconds": 0.0
+  },
+  "429": {
+   "ok": false,
+   "kind": "refused",
+   "detail": "429 ",
+   "seconds": 0.0
+  },
+  "history_html": {
+   "ok": false,
+   "kind": "broken_response",
+   "detail": "Expecting value: line 1 column 1 (char 0)",
+   "seconds": 0.1
+  },
+  "history_noimg": {
+   "ok": false,
+   "kind": "broken_response",
+   "detail": "画像が返っていない",
+   "seconds": 0.0
+  },
+  "history_list": {
+   "ok": false,
+   "kind": "(分類されない例外)",
+   "detail": "AttributeError: 'list' object has no attribute 'get'",
+   "seconds": 0.0
+  },
+  "history_500": {
+   "ok": false,
+   "kind": "transport",
+   "detail": "Server error '500 Internal Server Error' for url 'http://127.0.0.1:45435/history/abc'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
+   "seconds": 0.0
+  },
+  "history_nostatus_error": {
+   "ok": false,
+   "kind": "refused",
+   "detail": "[]",
+   "seconds": 0.0
+  },
+  "住所に誰もいない(接続拒否)": {
+   "ok": false,
+   "kind": "transport",
+   "detail": "All connection attempts failed",
+   "seconds": 0.0
+  }
+ },
+ "6_プロセスを落とす": {
+  "実行中にkill -9した依頼": {
+   "ok": false,
+   "kind": "transport",
+   "detail": "All connection attempts failed",
+   "seconds": 4.1,
+   "落ちてから戻るまで": 0.5
+  },
+  "落ちている間に送る": {
+   "ok": false,
+   "kind": "transport",
+   "detail": "All connection attempts failed",
+   "seconds": 0.0
+  },
+  "再起動して応答するまで(秒)": 11.1,
+  "再起動後に、落ちた時の依頼のhistory": {},
+  "再起動後の送信": {
+   "ok": true,
+   "seconds": 36.3,
+   "output": {
+    "prompt_id": "24fc0601-8109-4508-8706-2cdde330767b",
+    "images": [
+     {
+      "filename": "p56R_00001_.png",
+      "subfolder": "",
+      "type": "output"
+     }
+    ]
+   },
+   "model": null,
+   "settings": {},
+   "seed": null
+  }
+ }
+}

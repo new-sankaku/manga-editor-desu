@@ -1,0 +1,466 @@
+{
+  "evalId": "eval-ZXQ-2026-10-08T00:36:06",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-10-08T00:36:06.946Z",
+    "prompts": [
+      {
+        "id": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "raw": "{{question}}",
+        "label": "{{question}}",
+        "provider": "claude-sonnet(exec)",
+        "metrics": {
+          "score": 3,
+          "testPassCount": 3,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 3,
+          "assertFailCount": 0,
+          "totalLatencyMs": 20436,
+          "tokenUsage": {
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "total": 0,
+            "numRequests": 3,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "記録=A 今回=A",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://check_golden.js"
+              }
+            }
+          ]
+        },
+        "id": "070dc1bd-50ce-453c-bd42-ac05ac59b042",
+        "latencyMs": 5569,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": "claude-sonnet(exec)"
+        },
+        "response": {
+          "output": "A"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "vars": {
+            "id": "読む順",
+            "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "file://check_golden.js"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "id": "読む順",
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "記録=右から左 今回=右から左",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://check_golden.js"
+              }
+            }
+          ]
+        },
+        "id": "30ba9066-482f-40c5-ad77-75974b81b338",
+        "latencyMs": 6454,
+        "namedScores": {},
+        "prompt": {
+          "raw": "縦書きの日本語の文章で、複数の列は右から左・左から右のどちらの順に並びますか。「右から左」か「左から右」だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": "claude-sonnet(exec)"
+        },
+        "response": {
+          "output": "右から左"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "vars": {
+            "id": "縦書きの列",
+            "question": "縦書きの日本語の文章で、複数の列は右から左・左から右のどちらの順に並びますか。「右から左」か「左から右」だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "file://check_golden.js"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 1,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "id": "縦書きの列",
+          "question": "縦書きの日本語の文章で、複数の列は右から左・左から右のどちらの順に並びますか。「右から左」か「左から右」だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "記録=はい 今回=はい",
+              "assertion": {
+                "type": "javascript",
+                "value": "file://check_golden.js"
+              }
+            }
+          ]
+        },
+        "id": "067ae27a-9edf-485f-8e1d-295a1dfa8b66",
+        "latencyMs": 8413,
+        "namedScores": {},
+        "prompt": {
+          "raw": "画像ファイル /home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png を見て、画像の中央に十字の線があるかを「はい」か「いいえ」だけで答えてください。",
+          "label": "{{question}}",
+          "config": {}
+        },
+        "promptId": "d3bcaf71c11c2678899be04d872718325f0916b3b0705e805ee29930663a42e2",
+        "promptIdx": 0,
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "label": "claude-sonnet(exec)"
+        },
+        "response": {
+          "output": "はい"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "vars": {
+            "id": "画像の十字",
+            "question": "画像ファイル /home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png を見て、画像の中央に十字の線があるかを「はい」か「いいえ」だけで答えてください。"
+          },
+          "assert": [
+            {
+              "type": "javascript",
+              "value": "file://check_golden.js"
+            }
+          ],
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 2,
+        "tokenUsage": {
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "total": 0,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "id": "画像の十字",
+          "question": "画像ファイル /home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png を見て、画像の中央に十字の線があるかを「はい」か「いいえ」だけで答えてください。"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 3,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 0,
+        "completion": 0,
+        "cached": 0,
+        "total": 0,
+        "numRequests": 3,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 8470,
+      "evaluationDurationMs": 8470
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "評価役の回帰(claude CLI・exec 型)",
+    "prompts": [
+      "{{question}}"
+    ],
+    "providers": [
+      {
+        "id": "exec:./claude_exec.sh",
+        "label": "claude-sonnet(exec)",
+        "config": {
+          "timeout": 180000
+        }
+      }
+    ],
+    "tests": [
+      {
+        "vars": {
+          "id": "読む順",
+          "question": "右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。"
+        },
+        "assert": [
+          {
+            "type": "javascript",
+            "value": "file://check_golden.js"
+          }
+        ]
+      },
+      {
+        "vars": {
+          "id": "縦書きの列",
+          "question": "縦書きの日本語の文章で、複数の列は右から左・左から右のどちらの順に並びますか。「右から左」か「左から右」だけで答えてください。"
+        },
+        "assert": [
+          {
+            "type": "javascript",
+            "value": "file://check_golden.js"
+          }
+        ]
+      },
+      {
+        "vars": {
+          "id": "画像の十字",
+          "question": "画像ファイル /home/user/manga-editor-desu/v3poc/p55_trace_eval/out/page1.png を見て、画像の中央に十字の線があるかを「はい」か「いいえ」だけで答えてください。"
+        },
+        "assert": [
+          {
+            "type": "javascript",
+            "value": "file://check_golden.js"
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "../out/pf_claude_compare.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "basePath": "/home/user/manga-editor-desu/v3poc/p55_trace_eval/pf"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.124.0",
+    "nodeVersion": "v22.22.0",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-10-08T00:36:15.536Z",
+    "evaluationCreatedAt": "2026-10-08T00:36:06.946Z"
+  },
+  "vars": [
+    "id",
+    "question"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

@@ -1,0 +1,30 @@
+[project]
+name = "v3detector"
+version = "0.1.0"
+description = "V3 検出器のプロセス（dghs-imgutils、CPU）。HTTP で画像を受け取り枠と値を JSON で返す"
+# Python 3.13（3.13.16）で dghs-imgutils 0.19.0・onnxruntime・fastapi が入ることを確認済み。
+# 検証していない 3.14 以降は入るか未確認なので上限を 3.14 未満に固定する。
+requires-python = ">=3.13,<3.14"
+dependencies = [
+  "dghs-imgutils",
+  "onnxruntime",
+  "fastapi",
+  "uvicorn",
+  "python-multipart",
+  "pillow",
+  "numpy",
+]
+
+[dependency-groups]
+dev = ["pytest", "httpx"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/v3detector"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

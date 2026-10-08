@@ -1,0 +1,33 @@
+# P55 その2a promptfoo → LiteLLM(OpenAI 互換)。評価役の回帰の試験と、画像つきの問い(VLM)。
+# 評価役の答えは mock_response の固定値なので、「答えが前と変わっていない」の試験の形(書き方と、変わったときに落ちること)だけを確かめる。
+description: 評価役の回帰(LiteLLM 経由・画像つき)
+prompts:
+  - file://prompt_vlm.json
+providers:
+  - id: openai:chat:mock-vlm
+    label: 評価役v1
+    config: &cfg
+      apiBaseUrl: http://127.0.0.1:62400/v1
+      apiKeyEnvar: P55_LITELLM_KEY
+      temperature: 0
+      cost: 0.000003
+  - id: openai:chat:mock-vlm-b
+    label: 評価役v2(答えが変わった想定)
+    config: *cfg
+tests:
+  - description: 回帰 同じ絵と問いで答えが A のまま
+    vars:
+      image: file://../out/page1.png
+      question: 'どちらのコマが先に読まれるか。JSON で answer と reason の2つの項目で答えてください。' 
+    assert:
+      - type: is-json
+        value:
+          type: object
+          required: [answer, reason]
+      - type: javascript
+        value: JSON.parse(output).answer === 'A'
+        metric: 答えの一致
+      - type: cost
+        threshold: 0.01
+      - type: latency
+        threshold: 5000

@@ -23,3 +23,9 @@ class Invalid(V3Error):
 
 class NotUndoable(V3Error):
     code = "not_undoable"
+
+
+class HumanHandProtected(V3Error):
+    """AIが、人の手の印か人の確定印の付いた所を変えようとした（V3細部の決めごと 10.2）。"""
+
+    code = "human_hand_protected"

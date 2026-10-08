@@ -1,0 +1,670 @@
+{
+  "evalId": "eval-6JI-2026-10-08T00:36:49",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-10-08T00:36:49.557Z",
+    "prompts": [
+      {
+        "raw": "{{question}}",
+        "label": "prompt_text.txt: {{question}}",
+        "id": "ea45446a8e6f98bfaa4cffdca77dac53121eeb88064a75905ad50558d441b05d",
+        "provider": "候補good",
+        "metrics": {
+          "score": 0,
+          "testPassCount": 1,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 1,
+          "assertFailCount": 0,
+          "totalLatencyMs": 53,
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      },
+      {
+        "raw": "{{question}}",
+        "label": "prompt_text.txt: {{question}}",
+        "id": "ea45446a8e6f98bfaa4cffdca77dac53121eeb88064a75905ad50558d441b05d",
+        "provider": "候補bad",
+        "metrics": {
+          "score": 0,
+          "testPassCount": 0,
+          "testFailCount": 1,
+          "testErrorCount": 0,
+          "assertPassCount": 0,
+          "assertFailCount": 1,
+          "totalLatencyMs": 100,
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0,
+        "error": "Output not selected: 右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ",
+        "gradingResult": {
+          "pass": false,
+          "score": 0,
+          "reason": "Output not selected: 右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          },
+          "componentResults": [
+            {
+              "pass": false,
+              "score": 0,
+              "reason": "Output not selected: 右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ",
+              "tokensUsed": {
+                "total": 0,
+                "prompt": 0,
+                "completion": 0,
+                "cached": 0,
+                "numRequests": 0,
+                "completionDetails": {
+                  "reasoning": 0,
+                  "acceptedPrediction": 0,
+                  "rejectedPrediction": 0
+                }
+              },
+              "assertion": {
+                "type": "select-best",
+                "value": "右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ"
+              }
+            }
+          ]
+        },
+        "id": "ed61f929-d79a-4e68-ad17-8ff62e23905e",
+        "latencyMs": 100,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開きの漫画のコマ割りの案を、一文で説明してください。",
+          "label": "prompt_text.txt: {{question}}",
+          "config": {
+            "provider": {
+              "id": "exec:./claude_exec.sh",
+              "config": {
+                "timeout": 180000
+              }
+            }
+          }
+        },
+        "promptId": "ea45446a8e6f98bfaa4cffdca77dac53121eeb88064a75905ad50558d441b05d",
+        "promptIdx": 1,
+        "provider": {
+          "id": "openai:chat:mock-cand-bad",
+          "label": "候補bad"
+        },
+        "response": {
+          "output": "左上のコマから始めて、左から右へ読む配置です。",
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "cached": false,
+          "latencyMs": 100,
+          "finishReason": "stop",
+          "guardrails": {
+            "flagged": false
+          },
+          "metadata": {
+            "http": {
+              "status": 200,
+              "statusText": "OK",
+              "headers": {
+                "content-length": "356",
+                "content-security-policy": "frame-ancestors 'none'",
+                "content-type": "application/json",
+                "date": "Thu, 08 Oct 2026 00:36:49 GMT",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-litellm-attempted-fallbacks": "0",
+                "x-litellm-attempted-retries": "0",
+                "x-litellm-call-id": "2beabbb7-768d-4ed9-8948-6e63c1fa8fcb",
+                "x-litellm-callback-duration-ms": "0.0",
+                "x-litellm-key-spend": "0.0",
+                "x-litellm-model-api-base": "https://api.openai.com",
+                "x-litellm-model-group": "mock-cand-bad",
+                "x-litellm-model-id": "86da333b8756a8d274d08d5fe621410129f02d8a80503fa092b97b351fd0f578",
+                "x-litellm-model-name": "openai/mock-cand-bad",
+                "x-litellm-response-cost-discount-amount": "0.0",
+                "x-litellm-response-cost-input": "0.0",
+                "x-litellm-response-cost-margin-amount": "0.0",
+                "x-litellm-response-cost-margin-percent": "0.0",
+                "x-litellm-response-cost-original": "0.0",
+                "x-litellm-response-cost-output": "0.0",
+                "x-litellm-response-cost-tool-usage": "0.0",
+                "x-litellm-response-duration-ms": "10.615110397338867",
+                "x-litellm-version": "1.104.1"
+              }
+            }
+          }
+        },
+        "score": 0,
+        "success": false,
+        "testCase": {
+          "description": "右開きの漫画として自然な読む順のほうを選べるか",
+          "vars": {
+            "question": "右開きの漫画のコマ割りの案を、一文で説明してください。"
+          },
+          "assert": [
+            {
+              "type": "select-best",
+              "value": "右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ"
+            }
+          ],
+          "options": {
+            "provider": {
+              "id": "exec:./claude_exec.sh",
+              "config": {
+                "timeout": 180000
+              }
+            }
+          },
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 10,
+          "completion": 20,
+          "cached": 0,
+          "total": 30,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開きの漫画のコマ割りの案を、一文で説明してください。"
+        },
+        "metadata": {
+          "http": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-length": "356",
+              "content-security-policy": "frame-ancestors 'none'",
+              "content-type": "application/json",
+              "date": "Thu, 08 Oct 2026 00:36:49 GMT",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "DENY",
+              "x-litellm-attempted-fallbacks": "0",
+              "x-litellm-attempted-retries": "0",
+              "x-litellm-call-id": "2beabbb7-768d-4ed9-8948-6e63c1fa8fcb",
+              "x-litellm-callback-duration-ms": "0.0",
+              "x-litellm-key-spend": "0.0",
+              "x-litellm-model-api-base": "https://api.openai.com",
+              "x-litellm-model-group": "mock-cand-bad",
+              "x-litellm-model-id": "86da333b8756a8d274d08d5fe621410129f02d8a80503fa092b97b351fd0f578",
+              "x-litellm-model-name": "openai/mock-cand-bad",
+              "x-litellm-response-cost-discount-amount": "0.0",
+              "x-litellm-response-cost-input": "0.0",
+              "x-litellm-response-cost-margin-amount": "0.0",
+              "x-litellm-response-cost-margin-percent": "0.0",
+              "x-litellm-response-cost-original": "0.0",
+              "x-litellm-response-cost-output": "0.0",
+              "x-litellm-response-cost-tool-usage": "0.0",
+              "x-litellm-response-duration-ms": "10.615110397338867",
+              "x-litellm-version": "1.104.1"
+            }
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 1
+      },
+      {
+        "cost": 0,
+        "gradingResult": {
+          "pass": true,
+          "score": 0,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Output selected as the best: 右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ",
+              "tokensUsed": {
+                "total": 0,
+                "prompt": 0,
+                "completion": 0,
+                "cached": 0,
+                "numRequests": 0,
+                "completionDetails": {
+                  "reasoning": 0,
+                  "acceptedPrediction": 0,
+                  "rejectedPrediction": 0
+                }
+              },
+              "assertion": {
+                "type": "select-best",
+                "value": "右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ"
+              }
+            }
+          ]
+        },
+        "id": "c64194cf-9897-4d7c-a85b-d43304f3ea85",
+        "latencyMs": 53,
+        "namedScores": {},
+        "prompt": {
+          "raw": "右開きの漫画のコマ割りの案を、一文で説明してください。",
+          "label": "prompt_text.txt: {{question}}",
+          "config": {
+            "provider": {
+              "id": "exec:./claude_exec.sh",
+              "config": {
+                "timeout": 180000
+              }
+            }
+          }
+        },
+        "promptId": "ea45446a8e6f98bfaa4cffdca77dac53121eeb88064a75905ad50558d441b05d",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:chat:mock-cand-good",
+          "label": "候補good"
+        },
+        "response": {
+          "output": "右上のコマから始めて、右から左、上から下の順に視線が流れる配置です。",
+          "tokenUsage": {
+            "prompt": 10,
+            "completion": 20,
+            "cached": 0,
+            "total": 30,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "cached": false,
+          "latencyMs": 53,
+          "finishReason": "stop",
+          "guardrails": {
+            "flagged": false
+          },
+          "metadata": {
+            "http": {
+              "status": 200,
+              "statusText": "OK",
+              "headers": {
+                "content-length": "390",
+                "content-security-policy": "frame-ancestors 'none'",
+                "content-type": "application/json",
+                "date": "Thu, 08 Oct 2026 00:36:49 GMT",
+                "x-content-type-options": "nosniff",
+                "x-frame-options": "DENY",
+                "x-litellm-attempted-fallbacks": "0",
+                "x-litellm-attempted-retries": "0",
+                "x-litellm-call-id": "fe0db283-b8f2-493f-b13b-f4fdf1787209",
+                "x-litellm-callback-duration-ms": "0.0",
+                "x-litellm-key-spend": "0.0",
+                "x-litellm-model-api-base": "https://api.openai.com",
+                "x-litellm-model-group": "mock-cand-good",
+                "x-litellm-model-id": "c1e4549cfac744d4934b65eef7e108d265c4cd63f9c501c42a92483d769a3390",
+                "x-litellm-model-name": "openai/mock-cand-good",
+                "x-litellm-response-cost-discount-amount": "0.0",
+                "x-litellm-response-cost-input": "0.0",
+                "x-litellm-response-cost-margin-amount": "0.0",
+                "x-litellm-response-cost-margin-percent": "0.0",
+                "x-litellm-response-cost-original": "0.0",
+                "x-litellm-response-cost-output": "0.0",
+                "x-litellm-response-cost-tool-usage": "0.0",
+                "x-litellm-response-duration-ms": "20.919084548950195",
+                "x-litellm-version": "1.104.1"
+              }
+            }
+          }
+        },
+        "score": 0,
+        "success": true,
+        "testCase": {
+          "description": "右開きの漫画として自然な読む順のほうを選べるか",
+          "vars": {
+            "question": "右開きの漫画のコマ割りの案を、一文で説明してください。"
+          },
+          "assert": [
+            {
+              "type": "select-best",
+              "value": "右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ"
+            }
+          ],
+          "options": {
+            "provider": {
+              "id": "exec:./claude_exec.sh",
+              "config": {
+                "timeout": 180000
+              }
+            }
+          },
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "tokenUsage": {
+          "prompt": 10,
+          "completion": 20,
+          "cached": 0,
+          "total": 30,
+          "numRequests": 1,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          },
+          "assertions": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0,
+            "completionDetails": {
+              "reasoning": 0,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            }
+          }
+        },
+        "vars": {
+          "question": "右開きの漫画のコマ割りの案を、一文で説明してください。"
+        },
+        "metadata": {
+          "http": {
+            "status": 200,
+            "statusText": "OK",
+            "headers": {
+              "content-length": "390",
+              "content-security-policy": "frame-ancestors 'none'",
+              "content-type": "application/json",
+              "date": "Thu, 08 Oct 2026 00:36:49 GMT",
+              "x-content-type-options": "nosniff",
+              "x-frame-options": "DENY",
+              "x-litellm-attempted-fallbacks": "0",
+              "x-litellm-attempted-retries": "0",
+              "x-litellm-call-id": "fe0db283-b8f2-493f-b13b-f4fdf1787209",
+              "x-litellm-callback-duration-ms": "0.0",
+              "x-litellm-key-spend": "0.0",
+              "x-litellm-model-api-base": "https://api.openai.com",
+              "x-litellm-model-group": "mock-cand-good",
+              "x-litellm-model-id": "c1e4549cfac744d4934b65eef7e108d265c4cd63f9c501c42a92483d769a3390",
+              "x-litellm-model-name": "openai/mock-cand-good",
+              "x-litellm-response-cost-discount-amount": "0.0",
+              "x-litellm-response-cost-input": "0.0",
+              "x-litellm-response-cost-margin-amount": "0.0",
+              "x-litellm-response-cost-margin-percent": "0.0",
+              "x-litellm-response-cost-original": "0.0",
+              "x-litellm-response-cost-output": "0.0",
+              "x-litellm-response-cost-tool-usage": "0.0",
+              "x-litellm-response-duration-ms": "20.919084548950195",
+              "x-litellm-version": "1.104.1"
+            }
+          },
+          "_promptfooFileMetadata": {}
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 1,
+      "failures": 1,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 20,
+        "completion": 40,
+        "cached": 0,
+        "total": 60,
+        "numRequests": 2,
+        "completionDetails": {
+          "reasoning": 0,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 9418,
+      "evaluationDurationMs": 9418
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "2つのうちどちらが良いか(select-best)",
+    "prompts": [
+      "file:///home/user/manga-editor-desu/v3poc/p55_trace_eval/pf/prompt_text.txt"
+    ],
+    "providers": [
+      {
+        "id": "openai:chat:mock-cand-good",
+        "label": "候補good",
+        "config": {
+          "apiBaseUrl": "http://127.0.0.1:62400/v1",
+          "apiKeyEnvar": "[REDACTED]"
+        }
+      },
+      {
+        "id": "openai:chat:mock-cand-bad",
+        "label": "候補bad",
+        "config": {
+          "apiBaseUrl": "http://127.0.0.1:62400/v1",
+          "apiKeyEnvar": "[REDACTED]"
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "右開きの漫画として自然な読む順のほうを選べるか",
+        "vars": {
+          "question": "右開きの漫画のコマ割りの案を、一文で説明してください。"
+        },
+        "assert": [
+          {
+            "type": "select-best",
+            "value": "右開き(右から左)の漫画として、自然な読む順を説明しているほうを選ぶ"
+          }
+        ]
+      }
+    ],
+    "env": {},
+    "outputPath": [
+      "../out/pf_pairwise.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {},
+    "defaultTest": {
+      "options": {
+        "provider": {
+          "id": "exec:./claude_exec.sh",
+          "config": {
+            "timeout": 180000
+          }
+        }
+      },
+      "vars": {},
+      "assert": [],
+      "metadata": {}
+    },
+    "basePath": "/home/user/manga-editor-desu/v3poc/p55_trace_eval/pf"
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.124.0",
+    "nodeVersion": "v22.22.0",
+    "platform": "linux",
+    "arch": "x64",
+    "exportedAt": "2026-10-08T00:36:59.099Z",
+    "evaluationCreatedAt": "2026-10-08T00:36:49.557Z"
+  },
+  "vars": [
+    "question"
+  ],
+  "runtimeOptions": {
+    "eventSource": "cli",
+    "showProgressBar": false,
+    "repeat": 1,
+    "maxConcurrency": 4,
+    "cache": false
+  }
+}

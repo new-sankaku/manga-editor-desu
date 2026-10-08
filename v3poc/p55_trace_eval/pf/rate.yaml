@@ -1,0 +1,14 @@
+# P55 その2c 答えの割合(N回中何回)を試験にする。--repeat N で同じ問いを N 回送り、
+# 環境変数 PROMPTFOO_PASS_RATE_THRESHOLD(合格率の下限)で全体の合否を決める。
+description: 答えの割合
+prompts:
+  - "{{question}}"
+providers:
+  - file://flaky_provider.js
+tests:
+  - description: A と答えること
+    vars:
+      question: どちらが先に読まれるか
+    assert:
+      - type: javascript
+        value: JSON.parse(output).answer === 'A'

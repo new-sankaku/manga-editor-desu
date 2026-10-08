@@ -74,12 +74,13 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
 
     return {
         "work": row(work, "id", "title", "reading_direction", "text_direction", "medium", "trim_size",
-                    "default_page_count", "head_seq"),
+                    "default_page_count", "page_spec", "first_page_is_left", "head_seq"),
         "volumes": [row(v, "id", "number", "title", "removed") for v in await all_of(Volume)],
         "episodes": [row(e, "id", "volume_id", "number", "title", "deadline", "removed") for e in await all_of(Episode)],
-        "pages": [row(p, "id", "episode_id", "number", "removed") for p in await all_of(Page)],
+        "pages": [row(p, "id", "episode_id", "number", "layout", "human_hand_fields", "removed") for p in await all_of(Page)],
         "panels": [
-            row(p, "id", "page_id", "order", "frame", "role", "content", "human_confirmed", "removed")
+            row(p, "id", "page_id", "order", "frame", "role", "content", "image_id", "human_hand_fields",
+                "human_confirmed", "removed")
             for p in await all_of(Panel)
         ],
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],

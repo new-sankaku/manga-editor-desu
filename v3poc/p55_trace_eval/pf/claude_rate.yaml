@@ -1,0 +1,15 @@
+# P55 その2e claude CLI で同じ問いを N 回送り、答えの割合を試験にする(--repeat 5)。
+description: 答えの割合(claude CLI)
+prompts:
+  - "{{question}}"
+providers:
+  - id: exec:./claude_exec.sh
+    config:
+      timeout: 180000
+tests:
+  - description: A と答える割合
+    vars:
+      question: 右開き(右から左)の漫画で、コマAは右上、コマBは左上にあります。先に読むのはどちらですか。A か B の1文字だけで答えてください。
+    assert:
+      - type: javascript
+        value: output.trim().replace(/[。.]/g, '') === 'A'
