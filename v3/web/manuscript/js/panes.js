@@ -56,6 +56,7 @@ export function renderHeldCount() {
 }
 
 export function renderZoom() {
+  if (!S.view) return;
   const z = S.view.zoom();
   // 100% は、96dpi の画面で紙と同じ大きさ
   $("#zoom-v").textContent = `${Math.round((z / (96 / 25.4)) * 100)}%`;

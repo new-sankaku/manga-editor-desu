@@ -8,6 +8,7 @@ import { PageView } from "./page_view.js";
 import { balloonOutline, bbox, r2, roundPts } from "./geometry.js";
 import { $, $$, h, icons, note, toast, fail } from "./ui.js";
 import * as panes from "./panes.js";
+import { rememberWork, storedWork } from "../../common/nav.js";
 
 export const S = {
   works: [], workId: null, m: null, episodeId: null, pageId: null, spread: false,
@@ -27,7 +28,7 @@ async function loadWorks() {
   const sel = $("#pick-work");
   sel.replaceChildren(...S.works.map((w) => h("option", { value: w.id, text: w.title })));
   if (!S.works.length) { showEmpty("見てよい作品がありません"); return; }
-  const want = asked.get("work") || readPref("work");
+  const want = storedWork() || readPref("work");
   await selectWork(S.works.some((w) => w.id === want) ? want : S.works[0].id);
 }
 
@@ -36,6 +37,7 @@ async function selectWork(id) {
   S.workId = id;
   $("#pick-work").value = id;
   writePref("work", id);
+  rememberWork(id);
   S.saver = new Saver({ workId: id, onState: renderStatus, onSaved, onError: fail });
   S.preflight = null;
   await reload();
@@ -64,6 +66,7 @@ export function selectPage(id) {
   S.view.text.finishEdit();
   S.pageId = id;
   writePref("page", id);
+  setUrl({ page: id, episode: S.episodeId });
   S.sel = null;
   S.imageEdit = null;
   showEmpty(null);
@@ -322,7 +325,7 @@ function addAt(tool, hit) {
   if (tool === "frame") {
     const box = [q[0] - 25, q[1] - 18, q[0] + 25, q[1] + 18].map(r2);
     const op = { type: "add_panel", id: newId(), page_id: page.id, order: nextPanelOrder(page.id),
-                 frame: { polygon_mm: [[box[0], box[1]], [box[2], box[1]], [box[2], box[3]], [box[0], box[3]]], bleeds: [] } };
+                 frame: { polygon_mm: [[box[0], box[1]], [box[2], box[1]], [box[2], box[3]], [box[0], box[3]]], bleeds: false } };
     change("コマを足す", [op], { pages: [page.id], reload: true });
     return;
   }
@@ -484,6 +487,12 @@ function onKey(e) {
 }
 
 // ---------------------------------------------------------------- 覚えておく
+// 開くページは ?work=<作品>&page=<ページ>（&episode=<話> は page が無いときだけ使う）。選び直すと URL も替える（共有・戻るのため）
+function setUrl(ch) {
+  const u = new URL(location.href);
+  for (const [k, v] of Object.entries(ch)) if (v) u.searchParams.set(k, v); else u.searchParams.delete(k);
+  history.replaceState(null, "", u);
+}
 const asked = new URLSearchParams(location.search);
 function readPref(k) { try { return localStorage.getItem(`v3.ms.${k}`); } catch { return null; } }
 function writePref(k, v) { try { localStorage.setItem(`v3.ms.${k}`, v); } catch { /* 覚えられない環境では毎回初めから選ぶ */ } }

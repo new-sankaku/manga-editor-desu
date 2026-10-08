@@ -8,8 +8,8 @@ import * as api from "../../js/api.js";
 
 const { Canvas, FabricObject, FabricImage, Point, Control, util } = window.fabric;
 
-const AI = "#3D5AD6";
-const NEED = "#C46A00";
+const AI = "#4A6386"; // common/theme.css の --ai
+const NEED = "#A86A16"; // common/theme.css の --need
 const MIN_Z = 0.3, MAX_Z = 120;
 const COMMIT_MS = 140;
 
@@ -86,7 +86,8 @@ export class PageView {
     const r = this.host.getBoundingClientRect();
     if (r.width < 1 || r.height < 1) return;
     this.c.setDimensions({ width: r.width, height: r.height });
-    if (!this.fitted && this.slots.length) this.fit();
+    // 合わせたまま手で動かしていなければ、大きさが変わったら合わせ直す
+    if ((!this.fitted || this.autoFit) && this.slots.length) this.fit();
     else this.commit();
   }
 
@@ -101,21 +102,24 @@ export class PageView {
   fit() {
     const e = this.extent();
     if (!e) return;
-    const W = this.c.width, H = this.c.height, pad = 48;
-    const z = Math.max(MIN_Z, Math.min((W - pad * 2) / (e[2] - e[0]), (H - pad * 2 - 40) / (e[3] - e[1])));
-    this.vpt = [z, 0, 0, z, (W - (e[2] - e[0]) * z) / 2 - e[0] * z, (H - (e[3] - e[1]) * z) / 2 - e[1] * z + 20];
+    // 上の道具の帯（約 56px）の下に収める
+    const W = this.c.width, H = this.c.height, pad = 24, top = 60;
+    const z = Math.max(MIN_Z, Math.min((W - pad * 2) / (e[2] - e[0]), (H - pad - top) / (e[3] - e[1])));
+    this.vpt = [z, 0, 0, z, (W - (e[2] - e[0]) * z) / 2 - e[0] * z, top + (H - pad - top - (e[3] - e[1]) * z) / 2 - e[1] * z];
     this.fitted = true;
+    this.autoFit = true;
     this.commit();
   }
 
   zoomTo(z, cx = this.c.width / 2, cy = this.c.height / 2, now = false) {
     z = Math.max(MIN_Z, Math.min(MAX_Z, z));
+    this.autoFit = false;
     const k = z / this.vpt[0];
     this.vpt = [z, 0, 0, z, cx - (cx - this.vpt[4]) * k, cy - (cy - this.vpt[5]) * k];
     if (now) this.commit(); else this.preview();
   }
   zoomBy(f) { this.zoomTo(this.vpt[0] * f, undefined, undefined, true); }
-  panBy(dx, dy) { this.vpt[4] += dx; this.vpt[5] += dy; this.preview(); }
+  panBy(dx, dy) { this.autoFit = false; this.vpt[4] += dx; this.vpt[5] += dy; this.preview(); }
 
   // 描いた物を CSS で動かして見せ、止まってから描き直す
   preview() {
@@ -149,6 +153,7 @@ export class PageView {
     const W = this.c.width, H = this.c.height;
     const z = Math.max(MIN_Z, Math.min(MAX_Z, Math.min(W / ((x1 - x0) * 3 + 20), H / ((y1 - y0) * 3 + 20))));
     this.vpt = [z, 0, 0, z, W / 2 - ((x0 + x1) / 2) * z, H / 2 - ((y0 + y1) / 2) * z];
+    this.autoFit = false;
     this.commit();
   }
 
@@ -243,28 +248,28 @@ export class PageView {
     paper.paint = (ctx, z) => {
       ctx.save();
       ctx.translate(-W / 2, -H / 2);
-      ctx.fillStyle = "#F3F4F6";
+      ctx.fillStyle = "#EFEADB";
       ctx.fillRect(-b, -b, W + b * 2, H + b * 2);
       ctx.fillStyle = "#FFFFFF";
       ctx.fillRect(0, 0, W, H);
       ctx.lineWidth = 1 / z;
-      ctx.strokeStyle = "#C9CED6";
+      ctx.strokeStyle = "#CFC6AA";
       ctx.strokeRect(0, 0, W, H);
       if (o.show.guide) {
         ctx.setLineDash([4 / z, 3 / z]);
-        ctx.strokeStyle = "#9DB0F0";
+        ctx.strokeStyle = "#8FA3BD";
         ctx.strokeRect(fx, fy, spec.frame_width_mm, spec.frame_height_mm);
       }
       if (o.show.safe && safe) {
         const leftPage = s.side === "left";
         const l = leftPage ? safe.outer_mm : safe.gutter_mm, r = leftPage ? safe.gutter_mm : safe.outer_mm;
         ctx.setLineDash([2 / z, 2 / z]);
-        ctx.strokeStyle = "#E39A9A";
+        ctx.strokeStyle = "#C89884";
         ctx.strokeRect(l, safe.top_mm, W - l - r, H - safe.top_mm - safe.bottom_mm);
       }
       if (o.show.grid) {
         ctx.setLineDash([]);
-        ctx.strokeStyle = "rgba(61,90,214,0.12)";
+        ctx.strokeStyle = "rgba(74,99,134,0.14)";
         ctx.beginPath();
         for (let x = 10; x < W; x += 10) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
         for (let y = 10; y < H; y += 10) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
@@ -414,7 +419,7 @@ export class PageView {
       }
       if (view.selectedId === p.id || view.pickA === p.id) {
         trace(ctx, it.v3.loc);
-        ctx.fillStyle = "rgba(61,90,214,0.08)"; ctx.fill();
+        ctx.fillStyle = "rgba(74,99,134,0.10)"; ctx.fill();
         ctx.lineWidth = 2 / z; ctx.strokeStyle = AI; ctx.stroke();
       }
     };
@@ -455,7 +460,7 @@ export class PageView {
           trace(ctx, v.locOutline); ctx.fill();
         }
       } else if (view.opts.show.boxes) {
-        ctx.setLineDash([2 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = "rgba(61,90,214,0.55)";
+        ctx.setLineDash([2 / z, 2 / z]); ctx.lineWidth = 1 / z; ctx.strokeStyle = "rgba(74,99,134,0.55)";
         trace(ctx, v.locBox); ctx.stroke(); ctx.setLineDash([]);
       }
       if (view.selectedId === t.id && v.locOutline) {

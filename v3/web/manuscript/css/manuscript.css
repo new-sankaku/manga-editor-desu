@@ -20,11 +20,11 @@
 .tx ruby rt{font-size:.5em}
 .tx.sfx .tx-in{font-weight:700}
 .tx.over{outline:calc(2px * var(--inv)) dashed var(--bad)}
-.tx.editing{pointer-events:auto;outline:calc(2px * var(--inv)) solid var(--ai);background:rgba(238,241,253,.55);z-index:2}
+.tx.editing{pointer-events:auto;outline:calc(2px * var(--inv)) solid var(--ai);background:rgba(255,255,255,.6);z-index:2}
 .tx.editing .tx-in{outline:none;cursor:text;min-width:1em;min-height:1em}
 .tx-in:empty::before{content:"（文字を入れる）";color:var(--ink-4)}
 .tx.v .tx-in:empty::before{content:"（文字）"}
-.mk{position:absolute;pointer-events:auto;font:600 calc(10px * var(--inv))/1.6 var(--font);padding:0 .5em;border-radius:.5em;white-space:nowrap;transform:translate(-100%,-50%);box-shadow:0 0 0 calc(1px * var(--inv)) rgba(255,255,255,.9)}
+.mk{position:absolute;pointer-events:auto;opacity:.8;font:600 calc(9px * var(--inv))/1.5 var(--font);padding:0 .5em;border-radius:.5em;white-space:nowrap;transform:translate(-100%,-50%);box-shadow:0 0 0 calc(1px * var(--inv)) rgba(255,255,255,.9)}
 .mk-hand{background:var(--need-tint);color:var(--need-ink);border:calc(1px * var(--inv)) solid var(--need-line)}
 .mk-held{background:var(--need);color:#fff;transform:translate(-100%,60%)}
 
@@ -60,7 +60,7 @@
 .dock{background:var(--surface);border-top:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
 .dock-h{display:flex;align-items:center;gap:10px;padding:6px 14px 0;flex-wrap:wrap}
 .pages{display:flex;gap:10px;overflow-x:auto;padding:8px 14px 10px;min-height:0;scrollbar-width:thin}
-.pcard{flex:0 0 auto;display:flex;flex-direction:column;gap:3px;padding:5px;border-radius:var(--r);border:1px solid transparent;cursor:grab;background:var(--surface)}
+.pcard{flex:0 0 auto;width:min-content;display:flex;flex-direction:column;gap:3px;padding:5px;border-radius:var(--r);border:1px solid transparent;cursor:grab;background:var(--surface)}
 .pcard.shown{background:var(--surface-2);border-color:var(--line)}
 .pcard.cur{border-color:var(--ink);background:var(--surface)}
 .pcard.spread.sp-a{margin-right:-6px}
@@ -70,7 +70,7 @@
 .pthumb svg{width:100%;height:100%;display:block}
 .pthumb polygon{fill:none;stroke:var(--ink-2);stroke-width:1.2}
 .pthumb ellipse.b{fill:#fff;stroke:var(--ink-3);stroke-width:.8}
-.pmeta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;max-width:min(14em,28vw)}
+.pmeta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .pmeta.meta{font-size:10.5px;gap:2px 6px}
 .pnum{font-weight:700;font-size:12px}
 .pmeta svg.lucide{width:13px;height:13px;color:var(--ai-ink)}

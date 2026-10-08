@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V3 原稿</title>
 <link rel="stylesheet" href="../css/app.css">
+<link rel="stylesheet" href="../common/nav.css">
 <link rel="stylesheet" href="css/manuscript.css">
 <script src="../vendor/fabric-7.4.0/fabric.min.js"></script>
 <script src="../vendor/lucide-0.468.0/lucide.min.js"></script>
@@ -28,6 +29,7 @@
     <a class="btn sm" id="to-workbench" href="../index.html" title="選んだコマの絵を画像生成の画面で頼む (L)"><i data-lucide="sparkles"></i>コマの絵を頼む</a>
     <label class="who">利用者 <input id="user" class="field" autocomplete="username"></label>
   </header>
+  <nav class="v3-nav" data-v3-nav="manuscript"></nav>
 
   <div class="ws">
     <div class="ms-main">
@@ -95,6 +97,7 @@
   </table>
   <p class="meta">R（赤入れ）・B（ペン）・E（消しゴム）・U（図形）・O（読む順）・Q（順番待ち）は、この画面にまだありません。L の囲んで頼むは画像生成の画面で使います。</p>
 </dialog>
+<script type="module" src="../common/nav.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

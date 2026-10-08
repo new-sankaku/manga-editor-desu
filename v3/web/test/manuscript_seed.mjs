@@ -71,7 +71,7 @@ export async function seed(call, title = "原稿の画面の試験") {
   const panels = [];
   for (const poly of P1) {
     const pid = id();
-    await op({ type: "add_panel", id: pid, page_id: pages[0], order: ++order, frame: { polygon_mm: poly, bleeds: [] } });
+    await op({ type: "add_panel", id: pid, page_id: pages[0], order: ++order, frame: { polygon_mm: poly, bleeds: false } });
     panels.push({ id: pid, poly });
   }
   // コマの絵：1 と 3 に置く（600dpi で置いたときの大きさに近い画素数）
@@ -105,7 +105,7 @@ export async function seed(call, title = "原稿の画面の試験") {
             spec: { kind: "focus_lines", target: { kind: "panel", panel_id: panels[4].id }, color: "#000000", density: 0.6, line_count: 90, center_mm: [72, 185], inner_ratio: 0.4, seed: 7, angle_deg: 0 } });
   // 2〜4ページ
   const more = [[rect(0, 0, 150, 100), rect(78, 106, 150, 220), rect(0, 106, 75, 220)], [rect(0, 0, 150, 220)], [rect(0, 0, 150, 120), rect(0, 126, 150, 220)]];
-  for (let i = 0; i < more.length; i++) for (const poly of more[i]) await op({ type: "add_panel", id: id(), page_id: pages[i + 1], order: ++order, frame: { polygon_mm: poly, bleeds: [] } });
+  for (let i = 0; i < more.length; i++) for (const poly of more[i]) await op({ type: "add_panel", id: id(), page_id: pages[i + 1], order: ++order, frame: { polygon_mm: poly, bleeds: false } });
   await op({ type: "add_spread", id: id(), first_page_id: pages[2], second_page_id: pages[3] });
   await op({ type: "update_page", id: pages[0], page_kind: "body", color_mode: "bilevel", dpi: 600, nombre_display: "visible" });
   return { workId: wid, episodeId: ep, pages, panels: panels.map((p) => p.id), texts };
