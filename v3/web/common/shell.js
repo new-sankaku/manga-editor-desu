@@ -8,8 +8,9 @@ import { live } from "../vendor/lit-html-3.2.1/directives/live.js";
 import { repeat } from "../vendor/lit-html-3.2.1/directives/repeat.js";
 import * as api from "../js/api.js";
 import { SCREENS, storedWork, rememberWork, screenHref } from "./nav.js";
+import { startKeys, km } from "./keys.js";
 
-export { html, render, nothing, live, repeat, api, screenHref };
+export { html, render, nothing, live, repeat, api, screenHref, km };
 
 // lucide の印を1つ作る（lit-html の中に置く）。名前は lucide の名前（file-text など）
 export function icon(name, cls = "") {
@@ -86,6 +87,8 @@ export async function startShell({ screen, needsWork = true, onWork }) {
   const top = document.getElementById("top");
   const state = { works: [], workId: null, error: null };
   await api.loadAuth();
+  // キー・絵だけ・全画面（common/keys.js）。画面ごとのキーは、画面が km.bind で結ぶ
+  await startKeys(screen);
   const drawTop = () => render(html`
     <div class="brand"><span class="mark">${icon(s.icon)}</span><span>${s.label}</span></div>
     ${needsWork ? html`<nav class="pickers" aria-label="作品">
@@ -97,7 +100,7 @@ export async function startShell({ screen, needsWork = true, onWork }) {
     ${api.mode() === "oidc"
       ? html`<span class="who">${api.myName()} <a href="/auth/logout">ログアウト</a></span>`
       : html`<label class="who">利用者（開発用） <input id="user" class="field" autocomplete="username"
-          .value=${live(api.currentUser())} @change=${(e) => { api.setUser(e.target.value.trim()); load(); }}></label>`}`, top);
+          .value=${live(api.currentUser())} @change=${(e) => { api.setUser(e.target.value.trim()); km.loadUserKeys(); load(); }}></label>`}`, top);
 
   async function pick(id) {
     state.workId = id || null;

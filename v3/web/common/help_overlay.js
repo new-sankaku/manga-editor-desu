@@ -35,7 +35,7 @@ function draw() {
       ${groups.length ? groups.map(([s, r]) => html`<section class="v3-keys-g" data-scope=${s}>
         <div class="lbl">${km.SCOPES[s] ?? s}${s.includes(":") ? "（選んでいる道具）" : ""}</div>
         <table class="keys-t">${r.map((k) => html`<tr data-id=${k.id}><th>${kbds(k.id)}</th>
-          <td>${k.label}${k.hold ? html` <span class="flag mut">押している間</span>` : nothing}${km.isCustom(k.id) ? html` <span class="flag ai">変えた</span>` : nothing}</td></tr>`)}</table>
+          <td>${k.label}${k.hold ? html` <span class="flag mut">押している間</span>` : nothing}${km.isMissing(k.id) ? html` <span class="flag warn">この画面にまだ無い</span>` : nothing}${km.isCustom(k.id) ? html` <span class="flag ai">変えた</span>` : nothing}</td></tr>`)}</table>
       </section>`) : html`<p class="meta">「${query}」に合うキーはありません</p>`}
       <p class="meta">${km.IS_MAC ? "⌘ は Cmd、⌥ は Option です。" : "Mac では Ctrl の所が ⌘（Cmd）になります。"}文字を打っている間は、Esc と Ctrl+Enter のような印の付いた物だけが効きます。</p>
     </div>`, dlg);

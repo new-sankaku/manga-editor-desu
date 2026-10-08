@@ -174,9 +174,15 @@ details.more>.kv{margin-top:10px}
 .btn kbd{font:11px var(--font);opacity:.7;margin-left:6px}
 .btn[aria-busy="true"]{cursor:progress}
 .stage-msg .note{flex-wrap:wrap}
-.keys{border:1px solid var(--line);border-radius:8px;padding:0;background:var(--surface);color:inherit;max-width:min(560px,calc(100vw - 32px))}
-.keys::backdrop{background:var(--backdrop)}
 .keys-t{border-collapse:collapse;margin:8px 12px;width:calc(100% - 24px)}
 .keys-t th{text-align:left;white-space:nowrap;padding:4px 12px 4px 0;font-weight:normal;vertical-align:top}
 .keys-t td{padding:4px 0}
-.keys .meta{margin:4px 12px 12px}
+
+/* ---------- 絵だけ（common/fullscreen.js。V3細部の決めごと 22.5）：絵と候補の帯だけを残す。Tab の間（data-peek）はふつうに戻す ---------- */
+html[data-focus]:not([data-peek]) .ws{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]{border-left:0;border-top:1px solid var(--line);max-height:34vh}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]>.itabs,
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]>[data-pane]:not([data-pane="cands"]),
+html[data-focus]:not([data-peek]) #cand-help{display:none !important}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip]>.insp-b[data-pane="cands"]{display:flex !important;padding:8px 12px 10px;gap:10px}
+html[data-focus]:not([data-peek]) .insp[data-v3-strip] .cands{grid-auto-flow:column;grid-template-columns:none;grid-auto-columns:minmax(8em,11em);overflow-x:auto;padding-bottom:4px}

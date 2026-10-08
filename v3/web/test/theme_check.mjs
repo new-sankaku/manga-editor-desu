@@ -15,6 +15,10 @@ const WEB = fileURLToPath(new URL("..", import.meta.url));
 const THEMES = join(WEB, "common", "themes");
 const SKIP = new Set([join(WEB, "vendor"), join(WEB, "test"), join(WEB, "screenshots"), THEMES]);
 const ALLOW = "色の決め打ちを許す：";
+// ファイルごと許す物と理由（画面の色ではなく、原稿のデータとして刷る色。色の組を替えても変えない）
+const ALLOW_FILES = new Map([
+  [join(WEB, "manuscript", "js", "print_colors.js"), "原稿のデータとして刷る黒と紙の白（書き出しにそのまま入る）"],
+]);
 const NAMES = "white|black|red|green|blue|gray|grey|orange|yellow|purple|pink|brown|silver|navy|teal|maroon|olive|cyan|magenta";
 
 const HEX = /#[0-9a-fA-F]{3,8}\b/;
@@ -26,7 +30,7 @@ const JS_NAMED = new RegExp(`["'\`](${NAMES})["'\`]`, "i");
 function walk(dir, out = []) {
   for (const n of readdirSync(dir)) {
     const p = join(dir, n);
-    if (SKIP.has(p)) continue;
+    if (SKIP.has(p) || ALLOW_FILES.has(p)) continue;
     if (statSync(p).isDirectory()) walk(p, out);
     else if (/\.(css|js|mjs|html)$/.test(n)) out.push(p);
   }

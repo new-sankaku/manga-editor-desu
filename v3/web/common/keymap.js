@@ -53,8 +53,12 @@ export function start(screenId) {
   window.addEventListener("keyup", onKeyUp);
   window.addEventListener("blur", releaseAll);
 }
-export function bind(id, fn) {
+// opts.missing：その画面にまだ機能が無く、押すと「まだ無い」と知らせるだけの物（キーの一覧に「まだ無い」と出す）
+const missing = new Set();
+export function isMissing(id) { return missing.has(id); }
+export function bind(id, fn, opts = {}) {
   const k = entry(id);
+  if (opts.missing) missing.add(id);
   if (k.hold && (typeof fn.down !== "function" || typeof fn.up !== "function")) throw new Error(`${id} は押している間の物なので { down, up } で結ぶ`);
   handlers.set(id, fn);
   applyHints();
@@ -92,7 +96,17 @@ export function keyLabel(str) {
     return [...mods.map(modName), shown].join("+");
   }).join(" のあと ");
 }
-export function keyLabels(id) { return keysOf(id).map(keyLabel); }
+// 見せ方が同じキー（"+" と "Shift++" など、配列で Shift が要るかどうかの違い）は1つにまとめる
+export function keyGroups(id) {
+  const groups = new Map();
+  for (const k of keysOf(id)) {
+    const label = keyLabel(k);
+    if (!groups.has(label)) groups.set(label, { label, keys: [] });
+    groups.get(label).keys.push(k);
+  }
+  return [...groups.values()];
+}
+export function keyLabels(id) { return keyGroups(id).map((g) => g.label); }
 
 // 押したキーを書き方にする（キーを変える画面）。修飾キーだけのときは、押している間の項目のためにそのまま返す
 export function keyFromEvent(e, allowModifierOnly = false) {

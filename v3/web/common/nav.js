@@ -56,6 +56,7 @@ function fill(nav) {
     a.append(i, document.createTextNode(s.label));
     return a;
   }));
+  if (tools) nav.append(tools(nav));
   // 印は lucide の絵に替える（lucide が読み込まれていない画面では文字だけ）
   if (window.lucide) {
     for (const i of nav.querySelectorAll("i[data-lucide]")) {
@@ -65,6 +66,13 @@ function fill(nav) {
       i.replaceWith(svg);
     }
   }
+}
+
+// 帯の右に置くボタン（絵だけ・全画面・キー）。common/keys.js の startKeys が入れる（キーを始めていない画面には出さない）
+let tools = null;
+export function setNavTools(make) {
+  tools = make;
+  for (const nav of document.querySelectorAll("[data-v3-nav]")) fill(nav);
 }
 
 for (const nav of document.querySelectorAll("[data-v3-nav]")) fill(nav);

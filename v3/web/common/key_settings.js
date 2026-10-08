@@ -36,7 +36,8 @@ function startRec(id) {
   S.rec = { id }; S.conflict = null; km.suspend(true); draw();
   dlg.querySelector(`[data-id="${id}"] .v3-rec`)?.focus();
 }
-function stopRec() { if (S.rec) km.suspend(false); S.rec = null; draw(); }
+// 録る欄は描き直しで消えると blur が来る。録っていないときに描き直すと、lit の描き直しの途中に描き直しが重なるので何もしない
+function stopRec() { if (!S.rec) return; km.suspend(false); S.rec = null; draw(); }
 
 function onRecKey(e) {
   if (!S.rec) return;
@@ -96,8 +97,8 @@ function row(k) {
         ${cf.others.map((o, i) => html`${i ? "・" : ""}「${o.label}」（${km.SCOPES[o.scope]}）`)} と重なります。
         <span class="acts"><button class="btn sm" id="v3-ks-take" @click=${takeOver}>相手から外して割り当てる</button>
         <button class="btn ghost sm" @click=${() => { S.conflict = null; draw(); }}>やめる</button></span></span></div>` : nothing}</td>
-    <td class="v3-ks-k">${keys.map((x) => html`<span class="v3-chip"><kbd>${km.keyLabel(x)}</kbd><button class="ibtn" title="外す" aria-label="${km.keyLabel(x)} を外す"
-        ?disabled=${S.busy} @click=${() => act(() => km.setKeys(k.id, keys.filter((y) => y !== x)))}>${icon("x")}</button></span>`)}
+    <td class="v3-ks-k">${km.keyGroups(k.id).map((g) => html`<span class="v3-chip"><kbd>${g.label}</kbd><button class="ibtn" title="外す" aria-label="${g.label} を外す"
+        ?disabled=${S.busy} @click=${() => act(() => km.setKeys(k.id, keys.filter((y) => !g.keys.includes(y))))}>${icon("x")}</button></span>`)}
       ${rec ? html`<button class="btn sm ai v3-rec" @keydown=${onRecKey} @keyup=${onRecKeyUp} @blur=${stopRec}>キーを押してください（Esc でやめる）</button>`
         : html`<button class="btn ghost sm" data-add ?disabled=${S.busy} @click=${() => startRec(k.id)}>${icon("plus")}足す</button>`}
       ${km.isCustom(k.id) ? html`<button class="btn ghost sm" data-reset ?disabled=${S.busy} @click=${() => act(() => km.setKeys(k.id, km.entry(k.id).keys))}>${icon("rotate-ccw")}初めに戻す</button>` : nothing}</td></tr>`;

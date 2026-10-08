@@ -1,0 +1,45 @@
+/* キーの一覧・キーを変える窓・絵だけ・全画面（common/keys.js）。色は common/theme.css の名前だけを使う。幅は決め打ちにしない */
+
+/* 絵だけ：[data-v3-panel] を隠す。Tab（data-peek）の間は出す。画面ごとの残し方は、その画面の CSS が html[data-focus] を見て決める */
+html[data-focus]:not([data-peek]) [data-v3-panel]{display:none !important}
+
+/* 絵だけ・全画面の間の小さい帯（右下） */
+.v3-viewbar{position:fixed;right:12px;bottom:12px;z-index:30;display:flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-2);font:12px/1.4 var(--font);color:var(--ink-2)}
+.v3-viewbar-b{min-height:30px;padding:0 9px;border-radius:var(--r-sm);display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
+.v3-viewbar-b:hover{background:var(--surface-2);color:var(--ink)}
+.v3-viewbar-b[aria-pressed="true"]{background:var(--raise);color:var(--ink);font-weight:600;box-shadow:var(--sh-1)}
+.v3-viewbar-b kbd{font:11px var(--font);color:var(--ink-4)}
+
+/* 帯（common/nav.js）の右の、絵だけ・全画面・キーのボタン */
+.v3-nav-tools{margin-left:auto;display:inline-flex;align-items:center;gap:2px}
+.v3-nav-b{min-height:30px;padding:0 8px;display:inline-flex;align-items:center;gap:5px;color:var(--ink-3);font-weight:500;border-radius:var(--r-sm);white-space:nowrap}
+.v3-nav-b:hover{color:var(--ink);background:var(--surface-3)}
+.v3-nav-b svg.lucide{width:15px;height:15px}
+.v3-nav-b kbd{display:none}
+
+/* 窓（キーの一覧・キーを変える） */
+.v3-dlg{border:1px solid var(--line);border-radius:var(--r-lg);padding:0;background:var(--surface);color:var(--ink);box-shadow:var(--sh-2);
+  width:min(40em,calc(100vw - 32px));max-height:min(85vh,calc(100vh - 32px));font:13px/1.5 var(--font)}
+.v3-dlg.wide{width:min(60em,calc(100vw - 32px))}
+.v3-dlg[open]{display:flex;flex-direction:column}
+.v3-dlg::backdrop{background:var(--backdrop)}
+.v3-dlg-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line)}
+.v3-dlg-b{overflow:auto;padding:12px 14px 16px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.v3-search{display:flex;align-items:center;gap:6px;min-width:min(100%,14em);flex:1 1 14em;color:var(--ink-3)}
+.v3-search .field{flex:1 1 auto;min-width:0}
+.v3-keys-g{display:flex;flex-direction:column;gap:4px}
+.v3-keys-g .keys-t{margin:0;width:100%}
+.v3-keys-g .keys-t th,.v3-keys-g .keys-t td{padding:4px 12px 4px 0;vertical-align:top;border-bottom:1px solid var(--line)}
+.v3-keys-g .keys-t th{white-space:normal;text-align:left;font-weight:normal;width:1%;min-width:7em}
+.v3-dlg kbd{display:inline-block;min-width:1.6em;padding:0 5px;border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;background:var(--raise);
+  font:12px/1.5 var(--font);text-align:center;white-space:nowrap;color:var(--ink)}
+.v3-ks td{vertical-align:top}
+.v3-ks-l{min-width:10em;width:50%}
+.v3-ks-k{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.v3-ks tr.rec td{background:var(--ai-tint)}
+.v3-chip{display:inline-flex;align-items:center;gap:2px}
+.v3-chip .ibtn{width:22px;height:22px}
+.v3-chip .ibtn svg.lucide{width:12px;height:12px}
+.v3-conflict{margin-top:6px}
+.v3-conflict .acts{margin-top:6px}
+.v3-import{gap:8px}
