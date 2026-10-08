@@ -472,6 +472,45 @@ async def ready_page(api, a):
     return ids, p, t
 
 
+def edit_psd(data: bytes, tmp: pathlib.Path, change: tuple[str, ...], add_to_group: str | None = None) -> bytes:
+    """書き出した PSD を人が直したことにする：名前が change のどれかで終わる層の真ん中の1画素を変え、add_to_group で終わる
+    グループに小さな層を描き足す。psd-tools で読み、同じ層を ag-psd（write_layered_psd.js）で書き直す。"""
+    from psd_tools import PSDImage
+
+    from v3server.print_export.layered_psd_request import write_layered_psd
+
+    psd = PSDImage.open(io.BytesIO(data))
+    tmp.mkdir()
+
+    def to_req(layers):
+        res = []
+        for la in layers:
+            if la.is_group():
+                res.append({"name": la.name, "children": to_req(list(la)), "opacity": 1, "blend_mode": "normal",
+                            "hidden": False})
+                continue
+            img = la.topil().convert("RGBA")
+            if la.name.endswith(change):
+                img.putpixel((img.width // 2, img.height // 2), (1, 2, 3, 255))
+            path = tmp / f"{uuid.uuid4().hex}.png"
+            img.save(path)
+            res.append({"name": la.name, "png_path": str(path), "left": la.left, "top": la.top, "opacity": 1,
+                        "blend_mode": "normal", "hidden": False})
+        return res
+
+    layers = to_req(list(psd))
+    if add_to_group is not None:
+        group = next(x for x in layers if x["name"].endswith(add_to_group))
+        Image.new("RGBA", (5, 5), (9, 9, 9, 255)).save(tmp / "new.png")
+        group["children"].append({"name": "描き足し", "png_path": str(tmp / "new.png"),
+                                  "left": group["children"][0]["left"], "top": group["children"][0]["top"],
+                                  "opacity": 1, "blend_mode": "normal", "hidden": False})
+    write_layered_psd({"width": psd.width, "height": psd.height, "composite_png": None,
+                       "output_path": str(tmp / "edited.psd"), "layers": layers},
+                      "/opt/node22/bin/node", ROOT / "psd_writer" / "write_layered_psd.js", 60)
+    return (tmp / "edited.psd").read_bytes()
+
+
 @pytest.mark.skipif(not pathlib.Path(FONT_DIR, "ipag.ttf").exists(), reason="試験の書体が無い")
 async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, workers, export_env):
     a = user()
@@ -508,41 +547,10 @@ async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, wor
     assert f"{p['id']}-image" in markers and t["id"] in markers and f"{ids['page1']}-paper" in markers
 
     # 直した PSD：コマの絵の画素を変える・文字の層の画素を変える・コマのグループに描き足す
-    from psd_tools import PSDImage  # 読み戻して、同じ層を ag-psd で書き直す
-
     data = (await api.get(f"/works/{wid}/exports/{psd_run['id']}/files/{out['file']}", headers=h(a))).content
-    psd = PSDImage.open(io.BytesIO(data))
-    tmp = export_env / "edit"
-    tmp.mkdir()
-
-    def to_req(layers):
-        res = []
-        for i, la in enumerate(layers):
-            if la.is_group():
-                res.append({"name": la.name, "children": to_req(list(la)), "opacity": 1, "blend_mode": "normal",
-                            "hidden": False})
-                continue
-            img = la.topil().convert("RGBA")
-            if la.name.endswith((f"[{p['id']}-image]", f"[{t['id']}]")):
-                img.putpixel((img.width // 2, img.height // 2), (1, 2, 3, 255))
-            path = tmp / f"{uuid.uuid4().hex}.png"
-            img.save(path)
-            res.append({"name": la.name, "png_path": str(path), "left": la.left, "top": la.top, "opacity": 1,
-                        "blend_mode": "normal", "hidden": False})
-        return res
-
-    layers = to_req(list(psd))
-    group = next(x for x in layers if x["name"].endswith(f"[{p['id']}]"))
-    Image.new("RGBA", (5, 5), (9, 9, 9, 255)).save(tmp / "new.png")
-    group["children"].append({"name": "描き足し", "png_path": str(tmp / "new.png"), "left": group["children"][0]["left"],
-                              "top": group["children"][0]["top"], "opacity": 1, "blend_mode": "normal", "hidden": False})
-    from v3server.print_export.layered_psd_request import write_layered_psd
-
-    write_layered_psd({"width": psd.width, "height": psd.height, "composite_png": None,
-                       "output_path": str(tmp / "edited.psd"), "layers": layers},
-                      "/opt/node22/bin/node", ROOT / "psd_writer" / "write_layered_psd.js", 60)
+    edited = edit_psd(data, export_env / "edit", (f"[{p['id']}-image]", f"[{t['id']}]"), add_to_group=f"[{p['id']}]")
     r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{ids['page1']}/psd", headers=h(a),
-                       files={"psd": ("edited.psd", (tmp / "edited.psd").read_bytes(), "image/vnd.adobe.photoshop")})
+                       files={"psd": ("edited.psd", edited, "image/vnd.adobe.photoshop")})
     assert r.status_code == 200, r.text
     res = r.json()
     assert res["matches"]["changed"] >= 1 and res["matches"]["new"] == 1

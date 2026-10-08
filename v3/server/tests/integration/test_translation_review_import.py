@@ -17,6 +17,7 @@ from test_human_tools_and_finishing import (  # noqa: F401  (export_env は fixt
     FRAME_STYLE,
     PRINT,
     TYPESETTING,
+    edit_psd,
     export_env,
     ready_page,
 )
@@ -262,6 +263,16 @@ async def test_言語ごとに書き出す_訳文が足りなければ止める(
 
     r = await export(language="en")
     assert r.status_code == 422 and t["id"] in r.text
+
+    async def text_issues(**kw):
+        r = await api.post(f"/works/{wid}/preflight", headers=h(a), json={"page_ids": [ids["page1"]]} | kw)
+        assert r.status_code == 200, r.text
+        return [i for i in r.json()["issues"] if (i["location"] or {}).get("table") == "text_items"]
+
+    # 言語の確かめ：訳文の無い文字を、どの文字かを付けて出す
+    (miss,) = await text_issues(language="en")
+    assert miss["kind"] == "translation" and miss["location"]["id"] == t["id"]
+    # PSD も言語ごとに書き出せる（訳文が足りなければ同じく止める）
     assert (await export(language="en", format="psd")).status_code == 422
     r = await op(api, wid, a, {"type": "set_text_translation", "text_item_id": t["id"], "language": "en",
                                "text": "WOW", "writing_direction": "horizontal"})
@@ -288,6 +299,42 @@ async def test_言語ごとに書き出す_訳文が足りなければ止める(
     en = Image.open(io.BytesIO((await pixels(runs["en"])).content))
     assert ja.size == en.size and ja.tobytes() != en.tobytes()
     # 元の文字の行は変わっていない
+    (row,) = [x for x in live((await work_json(api, wid, a))["text_items"]) if x["id"] == t["id"]]
+    assert row["text"] == "あ"
+    assert await text_issues(language="en") == []
+    # 訳文が箱からはみ出すと、その言語の確かめでだけ text_overflow を出す
+    r = await op(api, wid, a, {"type": "set_text_translation", "text_item_id": t["id"], "language": "en",
+                               "text": "WOW " * 60})
+    assert r.status_code == 200, r.text
+    (over,) = await text_issues(language="en")
+    assert over["kind"] == "text_overflow" and over["location"]["id"] == t["id"]
+    assert await text_issues() == [] and await text_issues(language="ja") == []
+    r = await op(api, wid, a, {"type": "set_text_translation", "text_item_id": t["id"], "language": "en",
+                               "text": "WOW", "writing_direction": "horizontal"})
+    assert r.status_code == 200, r.text
+
+    # 言語ごとの PSD：文字の層は訳文。直した PSD を戻すと、文字の層の判断待ちは訳文の行へ付き、打ち直すと訳文だけが変わる
+    r = await export(language="en", format="psd")
+    assert r.status_code == 201, r.text
+    psd_run = await finished(r.json()["id"])
+    assert psd_run["status"] == "done", psd_run["detail"]
+    out = psd_run["outputs"][0]
+    data = (await api.get(f"/works/{wid}/exports/{psd_run['id']}/files/{out['file']}", headers=h(a))).content
+    edited = edit_psd(data, export_env / "edit-en", (f"[{t['id']}]",))
+    r = await api.post(f"/works/{wid}/exports/{psd_run['id']}/pages/{ids['page1']}/psd", headers=h(a),
+                       files={"psd": ("edited.psd", edited, "image/vnd.adobe.photoshop")})
+    assert r.status_code == 200, r.text
+    (held,) = [x for x in r.json()["held"] if x["kind"] == "psd_text_pixels"]
+    assert held["target_table"] == "text_item_translations" and held["payload"]["language"] == "en"
+    assert held["choices"] == ["retype", "discard"]
+    r = await op(api, wid, a, {"type": "resolve_held_change", "id": held["id"], "decision": "choose",
+                               "choice": "adopt_as_image"})
+    assert r.status_code == 422
+    r = await op(api, wid, a, {"type": "resolve_held_change", "id": held["id"], "decision": "choose",
+                               "choice": "retype", "params": {"text": "WOW!"}})
+    assert r.status_code == 200, r.text
+    got = (await api.get(f"/works/{wid}/translations", params={"language": "en"}, headers=h(a))).json()
+    assert [x["text"] for x in got["translations"] if x["text_item_id"] == t["id"]] == ["WOW!"]
     (row,) = [x for x in live((await work_json(api, wid, a))["text_items"]) if x["id"] == t["id"]]
     assert row["text"] == "あ"
 

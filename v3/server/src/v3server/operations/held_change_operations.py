@@ -155,8 +155,9 @@ class ResolveHeldChange(OpBase):
         if held.status != "open":
             raise Invalid(f"判断待ちは {held.status}。決められるのは open だけ")
         choice = {"accept": "accept", "reject": "reject"}.get(self.decision) if self.decision != "choose" else self.choice
-        if choice not in CHOICES[held.kind]:
-            raise Invalid(f"{held.kind} で選べる手は {CHOICES[held.kind]}")
+        # 選べる手は判断待ちの行ごと（言語の版の PSD では絵として採る手が無い。psd_import_operations.py）
+        if held.choices is None or choice not in held.choices:
+            raise Invalid(f"{held.kind} で選べる手は {held.choices}")
         params = self.params or {}
         payload = held.payload or {}
         undo: dict[str, Any] | None = None

@@ -9,6 +9,10 @@ http_routes/psd_import_routes.py が PSD を読み、書き出したときの層
   - 線を持つ人の手の層・コマ枠・コマの地・フキダシ・トーン・図形・紙：線や形の値には戻せないので判断待ち（psd_vector_changed）
   - 文字の層：文字の値は変えず、判断待ち（psd_text_pixels。打ち直す・絵（描き文字）として採る・捨てる）
   - 人が「動かさない」にした行：当てずに判断待ち（psd_unmatched_layer）
+  - 言語ごとに書き出した PSD（書き出しの記録の language が作品の言語と違う）の文字の層：判断待ちの先を、その言語の訳文の行
+    （text_item_translations）にする。打ち直す（retype）は訳文を変え、元の言語の文字は変えない。
+    絵として採る（adopt_as_image）は選べない（コマの絵はどの言語の版にも出るので、1つの言語の直しを絵にできない）。
+    層が無くなったときの remove_item は訳文を抜く。書き出した後に訳文が抜かれていたら、discard だけの判断待ちにする
 - 新しい層：親のグループがコマなら、そのコマの人の手の層として一番上に置く。それ以外は判断待ち（psd_unmatched_layer）
 - 無くなった層：判断待ち（psd_layer_missing）。書き出しで作った層（紙・グループ・コマの絵など）は抜く物が無いので keep だけ
 
@@ -17,12 +21,14 @@ http_routes/psd_import_routes.py が PSD を読み、書き出したときの層
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
+from sqlalchemy import select
 
 from v3server.canonical_tables.material_and_setting_tables import ExportRun
 from v3server.canonical_tables.page_item_tables import PageItem
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, PanelLayer, TextItem
+from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
 from v3server.operations.held_change_operations import CHOICES
 from v3server.operations.image_file_operations import RegisterImage
@@ -59,6 +65,7 @@ class ApplyPsdImport(OpBase):
     export_run_id: str
     page_id: str
     entries: list[PsdImportEntry]
+    _language: str | None = PrivateAttr(default=None)
 
     async def scope(self, session, work):
         await get_in_work(session, Page, self.page_id, work.id)
@@ -71,6 +78,9 @@ class ApplyPsdImport(OpBase):
         if run.format != "psd" or run.status != "done" or self.page_id not in run.page_ids:
             raise Invalid("このページを PSD に書き出し終えた記録ではない")
         rc = RowChanges(ctx)
+        # 訳文に差し替えて書き出した PSD なら、その言語（文字の層は訳文へ当てる）
+        own = (ctx.work.preferences or {}).get("language")
+        self._language = run.language if run.language is not None and run.language != own else None
         for e in self.entries:
             if e.kind in ("changed", "new") and (e.image is None or e.box_mm is None):
                 raise Invalid(f"{e.kind} の層には絵（image）と置き場（box_mm）が要る")
@@ -102,14 +112,28 @@ class ApplyPsdImport(OpBase):
 
     async def _hold(self, ctx, rc, kind: str, table: str, target_id: str, e: PsdImportEntry,
                     panel_id: str | None, synthetic: bool, reason: str) -> None:
+        choices = list(CHOICES[kind])
+        if table == "text_items" and self._language is not None and kind in ("psd_text_pixels", "psd_layer_missing"):
+            # 言語の版の文字の層：判断待ちの先を訳文の行にする（元の言語の文字を変えない・抜かない）
+            tr = await ctx.session.scalar(select(TextItemTranslation).where(
+                TextItemTranslation.text_item_id == target_id, TextItemTranslation.language == self._language,
+                TextItemTranslation.removed.is_(False)))
+            if tr is None:
+                choices = ["discard"] if kind == "psd_text_pixels" else ["keep"]
+                reason = f"{reason}（{self._language} の訳文は書き出した後に抜かれた）"
+            else:
+                table, target_id = "text_item_translations", tr.id
+                if kind == "psd_text_pixels":
+                    choices = [c for c in choices if c != "adopt_as_image"]
         payload: dict[str, Any] = {"export_run_id": self.export_run_id, "marker": e.marker, "layer_name": e.layer_name,
-                                   "panel_id": panel_id, "synthetic": synthetic, "reason": reason}
+                                   "panel_id": panel_id, "synthetic": synthetic, "reason": reason,
+                                   "language": self._language}
         if e.image is not None:
             payload["image_id"] = await self._register(ctx, e, role="human_hand", origin="human_drawn")
             payload["box_mm"] = list(e.box_mm)
         row = HeldAiChange(id=new_id(), work_id=ctx.work.id, target_table=table, target_id=target_id,
                            page_id=self.page_id, field=kind, proposed_value=None, current_value=None, proposal_id=None,
-                           status="open", kind=kind, choices=list(CHOICES[kind]), payload=payload)
+                           status="open", kind=kind, choices=choices, payload=payload)
         ctx.session.add(row)
         # 取り消すと、置いた判断待ちは下げる
         rc.before.setdefault("held_ai_changes", {})[row.id] = {"status": "withdrawn"}

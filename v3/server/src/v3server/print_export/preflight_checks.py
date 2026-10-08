@@ -47,6 +47,7 @@ from v3server.print_export.book_layout import (
     plan_pages,
     print_settings_of,
 )
+from v3server.print_export.export_runner import translate_texts
 from v3server.print_export.page_render import PageContent, RenderRefused, _text_job, text_fill
 from v3server.print_export.text_render import RenderedText, TextRenderError
 
@@ -208,9 +209,13 @@ async def _check_ai(session: AsyncSession, pid: str, in_use: set[str]) -> list[I
 
 
 async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] | None,
-                        measure: Callable[[list[dict]], list[RenderedText]], font_path: Callable[[str], str]
-                        ) -> list[Issue]:
+                        measure: Callable[[list[dict]], list[RenderedText]], font_path: Callable[[str], str],
+                        language: str | None = None) -> list[Issue]:
+    """language を渡すと、文字をその言語の訳文に差し替えて確かめる（言語ごとの書き出しと同じ差し替え。
+    訳文が箱からはみ出す・書体に無い字・訳文が無い文字を、どの文字かを付けて出す）。"""
     issues: list[Issue] = []
+    if language is not None and not (work.preferences or {}).get("language"):
+        return [Issue(None, "settings", "error", "作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない")]
     if work.page_spec is None:
         return [Issue(None, "settings", "error", "作品のページの寸法（page_spec）が決まっていない")]
     spec = PageSpec.model_validate(work.page_spec)
@@ -279,6 +284,11 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
         content = PageContent(page_id=pid, spec=spec, text_direction=work.text_direction,
                               preferences=work.preferences or {}, panels=panels, layers=layers, texts=texts,
                               page_items=items, images={})
+        if language is not None:
+            texts, missing = await translate_texts(session, work, texts, language)
+            content.texts = texts
+            issues += [Issue(pid, "translation", "error", f"文字「{t.text[:12]}」に {language} の訳文が無い",
+                             {"table": "text_items", "id": t.id, "box_mm": t.box_mm}) for t in missing]
         issues += _check_text(texts, content, plan, spec, ps, measure, font_path)
         issues += await _check_ai(session, pid, {x[2] for x in placed})
     return issues

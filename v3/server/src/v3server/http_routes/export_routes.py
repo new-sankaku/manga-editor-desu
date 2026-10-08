@@ -65,6 +65,8 @@ class ExportRequest(BaseModel):
 class PreflightRequest(BaseModel):
     # 確かめるページ。無ければ作品の抜いていない全ページ
     page_ids: list[str] | None = None
+    # 言語ごとの書き出しの前の確かめ（訳文に差し替えて、はみ出し・書体に無い字・訳文の無い文字を見る）。無ければ元の文字
+    language: str | None = Field(default=None, pattern=LANGUAGE_PATTERN)
 
 
 async def _require_export(session, authz, actor, work_id: str, fmt: str, page_ids: list[str]) -> None:
@@ -77,9 +79,6 @@ async def _require_export(session, authz, actor, work_id: str, fmt: str, page_id
 
 async def _check_language(session, work_id: str, req: ExportRequest) -> None:
     """言語の書き出しは、始める前に訳文の揃いを確かめる（足りなければ、足りない文字を挙げて止める）。"""
-    if req.format == "psd":
-        # 直した PSD を戻すとき、文字の層を元の言語の文字と突き合わせるため（psd_import_matching.py）。未対応
-        raise Invalid("PSD は言語ごとに書き出さない（直した PSD を戻す突き合わせが元の言語の文字で動くため。未対応）")
     work = await session.get(Work, work_id)
     if not (work.preferences or {}).get("language"):
         raise Invalid("作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない")
@@ -143,7 +142,7 @@ async def preflight(work_id: str, req: PreflightRequest, session: SessionDep, au
         raise Invalid("V3_TEXT_RENDER_SCRIPT が無い。文字の組み方を確かめられない")
     issues = await run_preflight(session, work, req.page_ids,
                                  lambda items: measure_texts(items, s.node_executable, s.text_render_script),
-                                 lambda family: font_path(s.font_dir, family))
+                                 lambda family: font_path(s.font_dir, family), req.language)
     return issues_json(issues)
 
 

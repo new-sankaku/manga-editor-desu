@@ -69,16 +69,25 @@ class ExportRefused(ValueError):
 async def translated_texts(session: AsyncSession, work: Work, texts: list[TextItem], language: str) -> list[TextItem]:
     """文字を言語 language の訳文に差し替えた写し（行そのものは変えない）。訳文の無い文字があれば止める。
     元の文字で埋めない（どの言語の版か分からなくなる）。ルビと文字の一部の書式（spans）は元の文字の位置に付くので、訳文では外す。"""
+    out, missing = await translate_texts(session, work, texts, language)
+    if missing:
+        raise ExportRefused(f"{language} の訳文が無い文字がある: {', '.join(t.id for t in missing)}")
+    return out
+
+
+async def translate_texts(session: AsyncSession, work: Work, texts: list[TextItem], language: str
+                          ) -> tuple[list[TextItem], list[TextItem]]:
+    """訳文のある文字の写しと、訳文の無い文字（元の行）を分けて返す（入稿前の確かめは、無い文字をどれか付けて出す）。"""
     if language == (work.preferences or {}).get("language"):
-        return texts
+        return texts, []
     rows = {t.text_item_id: t for t in (await session.execute(select(TextItemTranslation).where(
         TextItemTranslation.text_item_id.in_([t.id for t in texts]), TextItemTranslation.language == language,
         TextItemTranslation.removed.is_(False)))).scalars()}
-    missing = [t.id for t in texts if t.id not in rows]
-    if missing:
-        raise ExportRefused(f"{language} の訳文が無い文字がある: {', '.join(missing)}")
+    missing = [t for t in texts if t.id not in rows]
     out = []
     for t in texts:
+        if t.id not in rows:
+            continue
         tr = rows[t.id]
         values = {c.key: getattr(t, c.key) for c in TextItem.__table__.columns}
         values.update(text=tr.text, ruby=[], spans=[])
@@ -87,7 +96,7 @@ async def translated_texts(session: AsyncSession, work: Work, texts: list[TextIt
         if tr.font_size_pt is not None:
             values["font_size_pt"] = tr.font_size_pt
         out.append(TextItem(**values))
-    return out
+    return out, missing
 
 
 async def load_page_content(session: AsyncSession, work: Work, page_id: str,
