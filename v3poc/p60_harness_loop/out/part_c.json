@@ -1,0 +1,390 @@
+{
+ "c1_idempotent": {
+  "steps": {
+   "generate": {
+    "down_seconds": 4.5,
+    "recovered_after_s": 12.7
+   },
+   "check": {
+    "down_seconds": 3.0,
+    "recovered_after_s": 18.0
+   },
+   "evaluate": {
+    "down_seconds": 3.0,
+    "recovered_after_s": 32.8
+   },
+   "review_wait_restart": {
+    "before": {
+     "status": "awaiting_review",
+     "review_reason": "上限回数（4回）",
+     "candidates": 4
+    },
+    "after": {
+     "status": "awaiting_review",
+     "review_reason": "上限回数（4回）",
+     "candidates": 4,
+     "restart_seconds": 6.2
+    }
+   }
+  },
+  "approve": null,
+  "result": {
+   "approved": {
+    "activity_attempt": 1,
+    "attempt": 4,
+    "cand": 0,
+    "check": {
+     "h_ratios": [
+      1.0
+     ],
+     "passed": true,
+     "persons": 1,
+     "results": [
+      {
+       "id": "size",
+       "status": "合格",
+       "title": "大きさ",
+       "value": "320x320"
+      },
+      {
+       "detail": null,
+       "id": "persons",
+       "status": "合格",
+       "title": "人数",
+       "value": 1
+      }
+     ],
+     "seconds": 2.36,
+     "touch": "BT"
+    },
+    "eval": {
+     "calls": 2,
+     "cost_usd": 0.1032,
+     "median": 2.5,
+     "scores": [
+      3,
+      2
+     ],
+     "seconds": 24.46,
+     "spread": 1,
+     "whys": [
+      "写っているのは少女1人で、口が開いていて驚きとして読める。ただ、目は縞模様のレンズのようなもので隠れていて表情ははっきりしない。範囲も顔のアップで、胸から上にはなっていない。ずれはあるが、驚いた少女のコマとして使える。",
+      "少女は1人で、顔のアップです。ただし、目の部分が縞模様の帯のように崩れていて、驚いた表情には読み取れません。口は少し開いていますが、驚きよりも歯を食いしばった表情に見えます。画面は顔が大半を占めていて、胸から上という範囲にも足りません。そのため、狙いのうち表情と範囲が合っていません。"
+     ]
+    },
+    "gen_seconds": 24.39,
+    "id": "a4c0",
+    "image": "c0aee02f-b10b-5c79-a01c-278f29c5b24c.png",
+    "mode": "t2i",
+    "pid": "c0aee02f-b10b-5c79-a01c-278f29c5b24c",
+    "round": 1,
+    "seed": 3601,
+    "source": "ai",
+    "spec_version": 1
+   },
+   "attempts": 4,
+   "budget": {
+    "seconds": 229.1,
+    "usd": 0.401
+   },
+   "image": "c0aee02f-b10b-5c79-a01c-278f29c5b24c.png",
+   "persons": 1,
+   "reason": "人が採用した",
+   "status": "done",
+   "unit_id": "c1-070734",
+   "version": {
+    "new": true,
+    "version_image": "versions/c1-070734_v1.png"
+   }
+  },
+  "status": "COMPLETED",
+  "state": {
+   "status": "done",
+   "stop_reason": "人が採用した",
+   "attempt": 4,
+   "round": 1,
+   "budget": {
+    "seconds": 229.1,
+    "usd": 0.401
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 601,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": {
+      "scores": [
+       1,
+       1
+      ],
+      "median": 1.0
+     },
+     "stale": false,
+     "image": "ad76ca8a-6dbc-5f8c-b9ee-0e8fcf06532e.png",
+     "gen_seconds": 0.16
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1601,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": ""
+     },
+     "eval": {
+      "scores": [
+       1,
+       1
+      ],
+      "median": 1.0
+     },
+     "stale": false,
+     "image": "5b562e70-7ce2-5a95-9438-05c3da2a7e0c.png",
+     "gen_seconds": 24.46
+    },
+    {
+     "id": "a3c0",
+     "source": "ai",
+     "seed": 2601,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": ""
+     },
+     "eval": {
+      "scores": [
+       2,
+       2
+      ],
+      "median": 2.0
+     },
+     "stale": false,
+     "image": "9aa9cb1a-7ef7-562f-b02e-f862d2d9c894.png",
+     "gen_seconds": 24.35
+    },
+    {
+     "id": "a4c0",
+     "source": "ai",
+     "seed": 3601,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": {
+      "scores": [
+       3,
+       2
+      ],
+      "median": 2.5
+     },
+     "stale": false,
+     "image": "c0aee02f-b10b-5c79-a01c-278f29c5b24c.png",
+     "gen_seconds": 24.39
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 4,
+     "total_s": 28.06
+    },
+    "context": {
+     "count": 4,
+     "total_s": 0.19
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 1,
+     "total_s": 0.09
+    },
+    "evaluate": {
+     "count": 4,
+     "total_s": 98.18
+    },
+    "generate": {
+     "count": 4,
+     "total_s": 102.67
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [
+    {
+     "attempt": 1,
+     "ids": [
+      "a1c0"
+     ],
+     "scores": [
+      [
+       1,
+       1
+      ]
+     ]
+    },
+    {
+     "attempt": 2,
+     "ids": [
+      "a2c0"
+     ],
+     "scores": [
+      [
+       1,
+       1
+      ]
+     ]
+    },
+    {
+     "attempt": 3,
+     "ids": [
+      "a3c0"
+     ],
+     "scores": [
+      [
+       2,
+       2
+      ]
+     ]
+    },
+    {
+     "attempt": 4,
+     "ids": [
+      "a4c0"
+     ],
+     "scores": [
+      [
+       3,
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  "counts": {
+   "prompt_posts": 4,
+   "duplicate_posts": 0,
+   "registrations": 4,
+   "duplicate_registrations": 0,
+   "withdrawn": 0,
+   "already_registered_skips": 0,
+   "versions": 1,
+   "duplicate_versions": 0,
+   "claude_calls": 8,
+   "claude_killed": 0,
+   "claude_usd": 0.401
+  }
+ },
+ "c2_not_idempotent": {
+  "kill": {
+   "down_seconds": 3.0
+  },
+  "result": {
+   "attempts": 1,
+   "budget": {
+    "seconds": 57.18,
+    "usd": 0.0
+   },
+   "image": "cd960766-7119-409b-97cf-5835759e8c8e.png",
+   "persons": 1,
+   "reason": "合格",
+   "status": "done",
+   "unit_id": "c2-070734"
+  },
+  "status": "COMPLETED",
+  "state": {
+   "status": "done",
+   "stop_reason": "合格",
+   "attempt": 1,
+   "round": 1,
+   "budget": {
+    "seconds": 57.18,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 602,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "cd960766-7119-409b-97cf-5835759e8c8e.png",
+     "gen_seconds": 24.49
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 1,
+     "total_s": 3.39
+    },
+    "context": {
+     "count": 1,
+     "total_s": 0.05
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 1,
+     "total_s": 53.74
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": []
+  },
+  "counts": {
+   "prompt_posts": 2,
+   "duplicate_posts": 0,
+   "registrations": 1,
+   "duplicate_registrations": 0,
+   "withdrawn": 0,
+   "already_registered_skips": 0,
+   "versions": 0,
+   "duplicate_versions": 0,
+   "claude_calls": 0,
+   "claude_killed": 0,
+   "claude_usd": 0
+  }
+ },
+ "comfy_history_delta_c1_c2": 6,
+ "orphans_after": {
+  "comfy_orphans": 0,
+  "comfy_queue": {
+   "running": [],
+   "pending": []
+  }
+ }
+}

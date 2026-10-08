@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/user/manga-editor-desu/v3poc/p60_harness_loop/run.py", line 225, in main
+    await getattr(scenarios, f"scenario_{n}")()
+  File "/home/user/manga-editor-desu/v3poc/p60_harness_loop/scenarios.py", line 325, in scenario_i
+    r = await interrupt_at(h, node, lambda h: h.signal("pause", "now"), node_is(node, "paused"), comfy)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/manga-editor-desu/v3poc/p60_harness_loop/scenarios.py", line 301, in interrupt_at
+    s2, d2 = await wait_for(h, lambda s, d: until(s, d, n_ev), timeout=600, what=f"{node} の割り込みの後")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/user/manga-editor-desu/v3poc/p60_harness_loop/run.py", line 72, in wait_for
+    raise TimeoutError(f"{h.id}：{what} を待ちきれなかった")
+TimeoutError: ip-070734：check の割り込みの後 を待ちきれなかった

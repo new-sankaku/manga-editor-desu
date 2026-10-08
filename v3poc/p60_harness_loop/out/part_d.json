@@ -1,0 +1,515 @@
+{
+ "d2_reject_with_reason": {
+  "stop_reason_1": "上限回数（4回）",
+  "overdue_events": 1,
+  "reject": null,
+  "reason_words": [
+   {
+    "add": "night city background, city lights, street at night",
+    "reason": "背景を夜の街にしてほしい",
+    "remove": "",
+    "why": "理由は「足りない物（夜の街の背景）」を言っているので、足す語句だけを短く加えた。人数と胸から上という元の狙いを保つため語句は最小限にし、外すべき余計な物は指摘されていないので空にした。"
+   }
+  ],
+  "before": {
+   "image": "44255509-fb47-5af9-a61c-6227076cd0da.png",
+   "measure": {
+    "answer": "いいえ",
+    "why": "背景は、明るい白や水色の窓ガラスが並ぶ格子窓です。人物は黒いマントを着て、窓に向かって後ろ向きに立っています。街並みや夜空、街灯のような夜の街を示すものは見当たりません。",
+    "cost": 0.048196600000000006
+   }
+  },
+  "after": {
+   "image": "5f2281df-d362-526a-80da-be529433cb02.png",
+   "eval": {
+    "calls": 1,
+    "cost_usd": 0.0498,
+    "median": 2,
+    "scores": [
+     2
+    ],
+    "seconds": 8.97,
+    "spread": 0,
+    "whys": [
+     "絵には顔が2つ並んでいて、少女1人という人数が合いません。右の顔は目を見開いた驚き顔で、胸から上に近い構図です。左の顔は崩れています。背景は縞模様と色の乱れで、夜の街には見えません。人数と背景の2点が狙いに合っていません。"
+    ]
+   },
+   "measure": {
+    "answer": "判断できない",
+    "why": "絵は強く歪んだ低解像度の人物像で、背景は横縞や暗い帯状の模様になっています。建物、窓の明かり、空、街灯といった街だと分かるものは見えません。暗い色調ではありますが、夜の街だと言える根拠はなく、夜の街ではないとも言い切れません。",
+    "cost": 0.048430799999999996
+   }
+  }
+ },
+ "d2_reject_empty_refused": "却下には理由が要る",
+ "d3_human_edit": {
+  "edit": null,
+  "human_candidate": {
+   "check": {
+    "h_ratios": [],
+    "passed": false,
+    "persons": 0,
+    "results": [
+     {
+      "id": "size",
+      "status": "合格",
+      "title": "大きさ",
+      "value": "320x320"
+     },
+     {
+      "detail": "1人のはずが0人",
+      "id": "persons",
+      "status": "不合格",
+      "title": "人数",
+      "value": 0
+     }
+    ],
+    "seconds": 3.35,
+    "touch": ""
+   },
+   "eval": null
+  },
+  "reject_after_edit": null,
+  "i2i_candidates": 4,
+  "protected_diff": [
+   {
+    "id": "a9c0",
+    "inside_changed": 0,
+    "inside_total": 21025,
+    "outside_changed": 79464,
+    "outside_total": 81375
+   },
+   {
+    "id": "a10c0",
+    "inside_changed": 0,
+    "inside_total": 21025,
+    "outside_changed": 77558,
+    "outside_total": 81375
+   },
+   {
+    "id": "a11c0",
+    "inside_changed": 0,
+    "inside_total": 21025,
+    "outside_changed": 77840,
+    "outside_total": 81375
+   },
+   {
+    "id": "a12c0",
+    "inside_changed": 0,
+    "inside_total": 21025,
+    "outside_changed": 77405,
+    "outside_total": 81375
+   }
+  ],
+  "edited": "human_edit_d2-070734.png",
+  "mask": "human_mask_d2-070734.png"
+ },
+ "d_approve": null,
+ "d2_state": {
+  "status": "done",
+  "stop_reason": "人が採用した",
+  "attempt": 12,
+  "round": 3,
+  "budget": {
+   "seconds": 437.69,
+   "usd": 0.8825
+  },
+  "resets": 0,
+  "candidates": [
+   {
+    "id": "a1c0",
+    "source": "ai",
+    "seed": 701,
+    "mode": "t2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "T"
+    },
+    "eval": {
+     "scores": [
+      2
+     ],
+     "median": 2
+    },
+    "stale": false,
+    "image": "d0d96360-803a-50b0-8616-971e20bd42ac.png",
+    "gen_seconds": 24.42
+   },
+   {
+    "id": "a2c0",
+    "source": "ai",
+    "seed": 1701,
+    "mode": "t2i",
+    "check": {
+     "passed": false,
+     "persons": 0,
+     "touch": ""
+    },
+    "eval": null,
+    "stale": false,
+    "image": "fb609cb1-c58b-5b3e-a180-701e83d53d4e.png",
+    "gen_seconds": 24.47
+   },
+   {
+    "id": "a3c0",
+    "source": "ai",
+    "seed": 2701,
+    "mode": "t2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "BT"
+    },
+    "eval": {
+     "scores": [
+      1
+     ],
+     "median": 1
+    },
+    "stale": false,
+    "image": "966148ef-68bc-5d21-bec6-fc52d7a9f9f8.png",
+    "gen_seconds": 24.33
+   },
+   {
+    "id": "a4c0",
+    "source": "ai",
+    "seed": 3701,
+    "mode": "t2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "BT"
+    },
+    "eval": {
+     "scores": [
+      1
+     ],
+     "median": 1
+    },
+    "stale": false,
+    "image": "44255509-fb47-5af9-a61c-6227076cd0da.png",
+    "gen_seconds": 24.41
+   },
+   {
+    "id": "a5c0",
+    "source": "ai",
+    "seed": 4701,
+    "mode": "t2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "T"
+    },
+    "eval": {
+     "scores": [
+      2
+     ],
+     "median": 2
+    },
+    "stale": false,
+    "image": "eb909181-58f3-5187-a969-9e0f980039b7.png",
+    "gen_seconds": 24.36
+   },
+   {
+    "id": "a6c0",
+    "source": "ai",
+    "seed": 5701,
+    "mode": "t2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "BT"
+    },
+    "eval": {
+     "scores": [
+      1
+     ],
+     "median": 1
+    },
+    "stale": false,
+    "image": "53477879-3cba-59bd-bd4e-05b60ddc2bf4.png",
+    "gen_seconds": 24.42
+   },
+   {
+    "id": "a7c0",
+    "source": "ai",
+    "seed": 6701,
+    "mode": "t2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": ""
+    },
+    "eval": {
+     "scores": [
+      2
+     ],
+     "median": 2
+    },
+    "stale": false,
+    "image": "5f2281df-d362-526a-80da-be529433cb02.png",
+    "gen_seconds": 24.46
+   },
+   {
+    "id": "a8c0",
+    "source": "ai",
+    "seed": 7701,
+    "mode": "t2i",
+    "check": {
+     "passed": false,
+     "persons": 2,
+     "touch": "BT"
+    },
+    "eval": null,
+    "stale": false,
+    "image": "3f66f04b-9301-5e58-a650-1efc44bc9ef6.png",
+    "gen_seconds": 24.4
+   },
+   {
+    "id": "h9",
+    "source": "human",
+    "seed": null,
+    "mode": null,
+    "check": {
+     "passed": false,
+     "persons": 0,
+     "touch": ""
+    },
+    "eval": null,
+    "stale": false,
+    "image": "human_edit_d2-070734.png",
+    "gen_seconds": null
+   },
+   {
+    "id": "a9c0",
+    "source": "ai",
+    "seed": 8701,
+    "mode": "i2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "BT"
+    },
+    "eval": {
+     "scores": [
+      2
+     ],
+     "median": 2
+    },
+    "stale": false,
+    "image": "4e3e5f2a-9f3f-5309-84aa-af175bed4a8b.png",
+    "gen_seconds": 24.52
+   },
+   {
+    "id": "a10c0",
+    "source": "ai",
+    "seed": 9701,
+    "mode": "i2i",
+    "check": {
+     "passed": true,
+     "persons": 1,
+     "touch": "B"
+    },
+    "eval": {
+     "scores": [
+      2
+     ],
+     "median": 2
+    },
+    "stale": false,
+    "image": "d606b69c-a2fe-5c2b-bb54-5227b649e364.png",
+    "gen_seconds": 24.53
+   },
+   {
+    "id": "a11c0",
+    "source": "ai",
+    "seed": 10701,
+    "mode": "i2i",
+    "check": {
+     "passed": false,
+     "persons": 0,
+     "touch": ""
+    },
+    "eval": null,
+    "stale": false,
+    "image": "0784ca86-5cd3-5a58-951a-bc09a854b2c3.png",
+    "gen_seconds": 24.51
+   },
+   {
+    "id": "a12c0",
+    "source": "ai",
+    "seed": 11701,
+    "mode": "i2i",
+    "check": {
+     "passed": false,
+     "persons": 2,
+     "touch": "B"
+    },
+    "eval": null,
+    "stale": false,
+    "image": "e2611f75-48c3-51f2-9bdc-2e0e708e7fab.png",
+    "gen_seconds": 24.58
+   }
+  ],
+  "nodes": {
+   "check": {
+    "count": 13,
+    "total_s": 41.16
+   },
+   "context": {
+    "count": 12,
+    "total_s": 14.18
+   },
+   "cut_out": {
+    "count": 1,
+    "total_s": 0.0
+   },
+   "done": {
+    "count": 1,
+    "total_s": 0.06
+   },
+   "evaluate": {
+    "count": 8,
+    "total_s": 88.26
+   },
+   "generate": {
+    "count": 12,
+    "total_s": 294.09
+   },
+   "review": {
+    "count": 0,
+    "total_s": 0.0
+   }
+  },
+  "disagreements": [
+   {
+    "attempt": 1,
+    "ids": [
+     "a1c0"
+    ],
+    "scores": [
+     [
+      2
+     ]
+    ]
+   },
+   {
+    "attempt": 3,
+    "ids": [
+     "a3c0"
+    ],
+    "scores": [
+     [
+      1
+     ]
+    ]
+   },
+   {
+    "attempt": 4,
+    "ids": [
+     "a4c0"
+    ],
+    "scores": [
+     [
+      1
+     ]
+    ]
+   },
+   {
+    "attempt": 5,
+    "ids": [
+     "a5c0"
+    ],
+    "scores": [
+     [
+      2
+     ]
+    ]
+   },
+   {
+    "attempt": 6,
+    "ids": [
+     "a6c0"
+    ],
+    "scores": [
+     [
+      1
+     ]
+    ]
+   },
+   {
+    "attempt": 7,
+    "ids": [
+     "a7c0"
+    ],
+    "scores": [
+     [
+      2
+     ]
+    ]
+   },
+   {
+    "attempt": 9,
+    "ids": [
+     "a9c0"
+    ],
+    "scores": [
+     [
+      2
+     ]
+    ]
+   },
+   {
+    "attempt": 10,
+    "ids": [
+     "a10c0"
+    ],
+    "scores": [
+     [
+      2
+     ]
+    ]
+   }
+  ]
+ },
+ "d2_status": "COMPLETED",
+ "d4_upstream_while_waiting": {
+  "stale_after_signal": [
+   "a1c0",
+   "a2c0",
+   "a3c0",
+   "a4c0"
+  ],
+  "approve_refused": "候補が古い（上流が変わった）。却下して作り直すか、上流を戻す",
+  "reject": null,
+  "fresh_after": [
+   "a5c0",
+   "a6c0",
+   "a7c0",
+   "a8c0"
+  ],
+  "approve_after": null,
+  "status": "COMPLETED"
+ },
+ "counts": {
+  "prompt_posts": 20,
+  "duplicate_posts": 0,
+  "registrations": 20,
+  "duplicate_registrations": 0,
+  "withdrawn": 0,
+  "already_registered_skips": 0,
+  "versions": 2,
+  "duplicate_versions": 0,
+  "claude_calls": 16,
+  "claude_killed": 0,
+  "claude_usd": 0.7744
+ },
+ "orphans_after": {
+  "comfy_orphans": 0,
+  "comfy_queue": {
+   "running": [],
+   "pending": []
+  }
+ }
+}

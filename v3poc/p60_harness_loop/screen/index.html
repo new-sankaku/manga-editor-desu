@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ハーネスの進行</title>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dagre@0.8.5/dist/dagre.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.js"></script>
+<style>
+:root {
+  --sand-0: #f3eedf; --sand-1: #e9e1cc; --sand-2: #dcd2b8; --sand-3: #c9bc99;
+  --ink: #4a4536; --ink-soft: #7b7460; --line: #a89c7c;
+  --run: #b07a2a; --wait-svc: #6f7f8f; --wait-human: #c0702a; --done: #5d7a4c;
+  --fail: #a8433a; --cancel: #8a8270; --pause: #6b6aa0; --stale: #9a8a3a;
+  --mono: "DejaVu Sans Mono", "Noto Sans Mono CJK JP", "IPAGothic", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--sand-1); color: var(--ink); font-family: var(--mono); font-size: 13px; }
+body { background-image: linear-gradient(var(--sand-2) 1px, transparent 1px), linear-gradient(90deg, var(--sand-2) 1px, transparent 1px);
+       background-size: 24px 24px; min-height: 100vh; }
+header { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: baseline; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--sand-0); }
+header h1 { font-size: 15px; font-weight: normal; letter-spacing: .2em; margin: 0; }
+header .sub { color: var(--ink-soft); font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11px; color: var(--ink-soft); }
+.legend span b { font-weight: normal; color: var(--ink); }
+main { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; padding: 12px 16px; }
+@media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+section.box { background: var(--sand-0); border: 1px solid var(--line); padding: 8px 10px; min-width: 0; }
+section.box > h2 { font-size: 12px; font-weight: normal; letter-spacing: .15em; margin: 0 0 6px; color: var(--ink-soft); border-bottom: 1px solid var(--sand-3); padding-bottom: 4px; }
+#cy-stage { height: 130px; width: 100%; }
+#cy-loop { height: 40vh; min-height: 320px; width: 100%; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tabs button { font-size: 11px; }
+.tabs button.on { background: var(--sand-2); border-color: var(--ink-soft); }
+.cards { display: flex; flex-direction: column; gap: 10px; }
+.card { border: 1px solid var(--line); background: #faf7ee; padding: 8px; }
+.card h3 { margin: 0 0 4px; font-size: 13px; font-weight: normal; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { display: inline-flex; align-items: center; gap: 4px; border: 1px solid currentColor; padding: 0 6px; font-size: 11px; }
+.st-running, .st-retrying { color: var(--run); } .st-waiting_service, .st-queued { color: var(--wait-svc); }
+.st-awaiting_review { color: var(--wait-human); } .st-done { color: var(--done); } .st-failed, .st-stopped { color: var(--fail); }
+.st-cancelled, .st-cancelling, .st-skipped { color: var(--cancel); } .st-paused { color: var(--pause); } .st-stale { color: var(--stale); }
+.row { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; margin: 3px 0; }
+.bar { flex: 1 1 120px; height: 8px; border: 1px solid var(--line); background: var(--sand-1); position: relative; min-width: 80px; }
+.bar > i { position: absolute; inset: 0 auto 0 0; background: var(--sand-3); }
+.bar.live > i { background: var(--run); }
+.thumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.thumb { width: 84px; border: 1px solid var(--line); font-size: 10px; position: relative; background: var(--sand-1); }
+.thumb img { width: 100%; display: block; }
+.thumb.best { outline: 2px solid var(--done); }
+.thumb .tag { display: block; padding: 1px 3px; }
+.thumb.fail .tag { color: var(--fail); } .thumb.stale::after { content: "≈ 古い"; position: absolute; top: 2px; left: 2px; background: var(--stale); color: #fff; padding: 0 3px; }
+.preview { display: flex; gap: 8px; align-items: center; }
+.preview img { width: 72px; height: 72px; object-fit: cover; border: 1px dashed var(--run); }
+.btns { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+button { font-family: var(--mono); font-size: 12px; background: var(--sand-0); border: 1px solid var(--line); color: var(--ink); padding: 3px 8px; cursor: pointer; }
+button:hover { background: var(--sand-2); }
+button.primary { border-color: var(--done); color: var(--done); }
+button.danger { border-color: var(--fail); color: var(--fail); }
+input[type=text] { font-family: var(--mono); font-size: 12px; border: 1px solid var(--line); background: #fffdf6; padding: 3px 6px; flex: 1 1 140px; min-width: 0; }
+.review { border: 1px solid var(--wait-human); padding: 6px; margin-top: 6px; background: #fbf1e4; }
+.msg { font-size: 11px; color: var(--fail); min-height: 1em; }
+#detail pre { white-space: pre-wrap; word-break: break-all; font-size: 11px; max-height: 260px; overflow: auto; margin: 0; }
+.timeline { display: flex; flex-direction: column; gap: 2px; }
+.tl-row { display: grid; grid-template-columns: minmax(70px, 9em) minmax(0, 1fr); gap: 6px; align-items: center; font-size: 11px; }
+.tl-track { position: relative; height: 12px; border-bottom: 1px dotted var(--sand-3); }
+.tl-track i { position: absolute; top: 1px; height: 10px; border: 1px solid var(--ink-soft); background: var(--sand-3); min-width: 2px; }
+.tl-track i.k-done { background: #c9d4b8; } .tl-track i.k-failed, .tl-track i.k-stopped { background: #e3b7ad; }
+.tl-track i.k-cancelled, .tl-track i.k-stale { background: #e2dcc6; border-style: dashed; } .tl-track i.k-paused { background: #cfcde3; }
+.tl-track i.k-awaiting_review { background: #efcfa9; } .tl-track i.k-running { background: #e7c88f; }
+table.grid { border-collapse: collapse; width: 100%; font-size: 12px; }
+table.grid td, table.grid th { border: 1px solid var(--sand-3); padding: 3px 6px; text-align: left; font-weight: normal; }
+.wide { grid-column: 1 / -1; }
+.muted { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+<header>
+  <h1>HARNESS // 進行役</h1>
+  <span class="sub" id="sub">読み込み中</span>
+  <div class="legend" id="legend"></div>
+</header>
+<main>
+  <section class="box wide"><h2>工程 S0〜S7</h2><div id="cy-stage"></div></section>
+  <section class="box wide"><h2>作業の流れ（1つの作業）　点線の矢印は作り直し・人の操作　上のタブで作業を切り替える</h2><div class="tabs" id="unit-tabs"></div><div id="cy-loop"></div></section>
+  <section class="box"><h2>作業と判断待ち</h2>
+    <div id="stage-card"></div>
+    <div class="cards" id="cards"></div>
+  </section>
+  <section class="box"><h2>ページ×コマ</h2><div id="table"></div></section>
+  <section class="box" id="detail"><h2>ノードの詳細</h2><div class="muted">グラフのノードを押すと、ここに出ます。</div></section>
+  <section class="box wide"><h2>時間の流れ（作業ごと）</h2><div id="timelines"></div></section>
+</main>
+<script>
+const STATES = {
+  queued: ["○", "順番待ち"], waiting_service: ["⧗", "生成の順番待ち"], running: ["▶", "実行中"], retrying: ["↻", "再試行中"],
+  awaiting_review: ["◆", "判断待ち"], paused: ["Ⅱ", "一時停止"], cancelling: ["⊘…", "取り消し中"], stopped: ["■", "止まった"],
+  failed: ["✕", "失敗"], cancelled: ["⊘", "取り消し済み"], done: ["✓", "完了"], stale: ["≈", "古い"], skipped: ["－", "対象外"],
+  not_started: ["·", "未開始"]
+};
+const STAGE_JA = [["S0", "企画"], ["S1", "構成"], ["S2", "設定資料"], ["S3", "ネーム"], ["S4", "作画"], ["S5", "仕上げ"], ["S6", "総合"], ["S7", "書き出し"]];
+const COLORS = { queued: "#6f7f8f", waiting_service: "#6f7f8f", running: "#b07a2a", retrying: "#b07a2a", awaiting_review: "#c0702a",
+  paused: "#6b6aa0", cancelling: "#8a8270", stopped: "#a8433a", failed: "#a8433a", cancelled: "#8a8270", done: "#5d7a4c", stale: "#9a8a3a", skipped: "#a89c7c", not_started: "#b8ad8e" };
+const SHAPES = { awaiting_review: "diamond", failed: "octagon", stopped: "octagon", paused: "barrel", cancelled: "cut-rectangle",
+  cancelling: "cut-rectangle", waiting_service: "hexagon", queued: "round-rectangle", done: "round-rectangle", running: "round-rectangle",
+  retrying: "round-rectangle", stale: "tag", skipped: "rectangle", not_started: "ellipse" };
+const LOOP = ["cut_out", "context", "generate", "check", "evaluate", "review", "done"];
+const LOOP_JA = { cut_out: "切り出し", context: "文脈を組む", generate: "生成", check: "検査", evaluate: "評価", review: "確認待ち", done: "確定" };
+const RETRY = [["check", "context", "不合格→作り直し"], ["evaluate", "context", "低い点→作り直し"], ["review", "context", "却下（理由）"],
+  ["review", "check", "人の直し"], ["generate", "generate", "候補k枚・送り直し"]];
+document.getElementById("legend").innerHTML = Object.entries(STATES).map(([k, [ic, ja]]) =>
+  `<span class="st-${k}"><b>${ic}</b> ${ja}</span>`).join("");
+
+cytoscape.use(cytoscapeDagre);
+const style = [
+  { selector: "node", style: { "font-family": "DejaVu Sans Mono, monospace", "font-size": 10, color: "#4a4536", label: "data(label)",
+    "text-wrap": "wrap", "text-valign": "center", "text-halign": "center", "background-color": "#faf7ee", "border-width": 1,
+    "border-color": "#a89c7c", shape: "round-rectangle", width: 92, height: 38 } },
+  { selector: "$node > node", style: { "text-valign": "top", "text-halign": "center", "background-color": "#f3eedf",
+    "background-opacity": .6, "border-style": "dashed", "font-size": 11, padding: 10 } },
+  { selector: "edge", style: { width: 1, "line-color": "#a89c7c", "target-arrow-color": "#a89c7c", "target-arrow-shape": "triangle",
+    "curve-style": "bezier", "arrow-scale": .7, label: "data(label)", "font-size": 8, color: "#7b7460", "text-background-color": "#f3eedf",
+    "text-background-opacity": 1, "font-family": "DejaVu Sans Mono, monospace" } },
+  { selector: "edge.retry", style: { "line-style": "dashed", "curve-style": "unbundled-bezier", "control-point-distances": [-40], "control-point-weights": [.5] } },
+  { selector: "edge.loopself", style: { "curve-style": "bezier", "loop-direction": "-45deg", "loop-sweep": "-60deg" } },
+  { selector: "node.sel", style: { "border-width": 3 } },
+  ...Object.keys(STATES).map(k => ({ selector: `node.s-${k}`, style: { "border-color": COLORS[k], shape: SHAPES[k],
+    "border-width": k === "queued" ? 1 : 2, "border-style": k === "queued" || k === "stale" ? "dashed" : "solid",
+    "background-color": k === "done" ? "#e8eedd" : k === "awaiting_review" ? "#f6e3cc" : k === "failed" || k === "stopped" ? "#f2dcd6" : "#faf7ee" } })),
+  { selector: "node.mark-stale", style: { "border-style": "double", "border-width": 4, "border-color": "#9a8a3a" } },
+];
+const cyStage = cytoscape({ container: document.getElementById("cy-stage"), style, userZoomingEnabled: false, userPanningEnabled: false, autoungrabify: true });
+const cyLoop = cytoscape({ container: document.getElementById("cy-loop"), style, autoungrabify: true });
+window.__cyLoop = cyLoop;
+let focusUnit = null;  // 作業の流れのグラフに出す作業（タブで選ぶ）
+function fitAll() { for (const c of [cyStage, cyLoop]) { c.resize(); if (c.elements().length) c.fit(undefined, 14); } }
+let resizeTimer = null;
+window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(fitAll, 120); });
+window.__focusUnit = id => { focusUnit = id; built.loop = ""; refresh(); };
+let DATA = null, DATA_LIVE = { executing: null, progress: {} }, selected = null, built = { stage: "", loop: "" };
+
+function icon(k) { return (STATES[k] || ["?", k])[0]; }
+function ja(k) { return (STATES[k] || ["?", k])[1]; }
+function chip(k, extra = "") { return `<span class="chip st-${k}">${icon(k)} ${ja(k)}${extra}</span>`; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function secs(a, b) { return Math.max(0, (b - a) / 1000); }
+function fmt(s) { return s >= 60 ? `${Math.floor(s / 60)}分${Math.round(s % 60)}秒` : `${s.toFixed(0)}秒`; }
+
+function nodeState(item, node) {
+  const st = item.state, n = st.nodes[node], pend = item.describe.pending || [];
+  let k = n.status;
+  if (k === "running" && node === "generate") {
+    // ComfyUI の websocket で今実行している依頼でなければ、生成の順番待ち
+    const pid = st.inflight && st.inflight.pids && st.inflight.pids[0];
+    const hb = pend.find(p => p.type === "generate_candidate");
+    if (pid && DATA_LIVE.executing !== pid && !(DATA_LIVE.progress[pid] && hb && hb.heartbeat && hb.heartbeat.comfy === "running"))
+      k = "waiting_service";
+  }
+  // 活動が作業者に渡る前（state 1 = SCHEDULED）は順番待ち
+  if (k === "running" && st.current_node === node && pend.length && pend.every(p => p.state === 1)) k = "queued";
+  if (k === "running" && pend.some(p => p.attempt > 1)) k = "retrying";
+  if (st.paused && st.current_node === node && k !== "done") k = "paused";
+  if (item.describe.status === "CANCELED" && st.current_node === node) k = "cancelled";
+  return k;
+}
+function unitStatus(item) {
+  const st = item.state, d = item.describe.status;
+  if (d === "CANCELED") return "cancelled";
+  if (d === "FAILED" || d === "TERMINATED") return "failed";
+  if (st.paused) return "paused";
+  if (st.status === "running") return nodeState(item, st.current_node);
+  return st.status;
+}
+
+function buildLoop(units) {
+  const sig = units.map(u => u.id).join(",");
+  if (sig === built.loop) return;
+  built.loop = sig;
+  cyLoop.elements().remove();
+  const els = [];
+  for (const u of units) {
+    els.push({ data: { id: u.id, label: `${u.id}　${u.state.spec.target_ja}` } });
+    for (const n of LOOP) els.push({ data: { id: `${u.id}:${n}`, parent: u.id, label: LOOP_JA[n], unit: u.id, node: n } });
+    for (let i = 0; i < LOOP.length - 1; i++) els.push({ data: { id: `${u.id}:e${i}`, source: `${u.id}:${LOOP[i]}`, target: `${u.id}:${LOOP[i + 1]}`, label: "" } });
+    RETRY.forEach(([a, b, l], i) => els.push({ data: { id: `${u.id}:r${i}`, source: `${u.id}:${a}`, target: `${u.id}:${b}`, label: l },
+      classes: a === b ? "retry loopself" : "retry" }));
+  }
+  cyLoop.add(els);
+  const lay = cyLoop.layout({ name: "dagre", rankDir: "LR", nodeSep: 30, rankSep: 46, edgeSep: 10, fit: true, padding: 14 });
+  lay.one("layoutstop", () => { cyLoop.resize(); cyLoop.fit(undefined, 14); });
+  lay.run();
+}
+function buildStage(stage) {
+  const sig = stage ? stage.id : "（工程なし）";
+  if (sig === built.stage) return;
+  built.stage = sig;
+  cyStage.elements().remove();
+  // 工程が無くても S0〜S7 の並びは出す（未開始）
+  const keys = STAGE_JA.map(x => x[0]);
+  cyStage.add(STAGE_JA.map(([k, name]) => ({ data: { id: `st:${k}`, label: `${icon("not_started")} ${k}\n${name}`, stage: k }, classes: "s-not_started" })));
+  cyStage.add(keys.slice(1).map((k, i) => ({ data: { id: `st:e${i}`, source: `st:${keys[i]}`, target: `st:${k}`, label: "" } })));
+  const lay = cyStage.layout({ name: "dagre", rankDir: "LR", rankSep: 30, fit: true, padding: 10 });
+  lay.one("layoutstop", () => { cyStage.resize(); cyStage.fit(undefined, 10); });
+  lay.run();
+}
+
+function paint(units, stage) {
+  const now = Date.now();
+  for (const u of units) {
+    for (const n of LOOP) {
+      const el = cyLoop.getElementById(`${u.id}:${n}`); if (!el.length) continue;
+      const k = nodeState(u, n), nd = u.state.nodes[n];
+      el.classes(`s-${k}` + (n === "review" && u.state.candidates.some(c => c.stale) && k === "awaiting_review" ? " mark-stale" : "") + (selected === el.id() ? " sel" : ""));
+      let extra = nd.count ? ` ×${nd.count}` : "";
+      if ((k === "running" || k === "waiting_service" || k === "retrying" || k === "cancelling") && nd.started) extra += `\n${fmt(secs(Date.parse(nd.started), now))}`;
+      el.data("label", `${icon(k)} ${LOOP_JA[n]}${extra}`);
+      el.data("running", ["running", "retrying", "cancelling"].includes(k));
+    }
+  }
+  if (stage) for (const [k, s] of Object.entries(stage.state.stages)) {
+    const el = cyStage.getElementById(`st:${k}`);
+    let st = s.status; if (stage.describe.status === "CANCELED" && st !== "done") st = "cancelled";
+    el.classes(`s-${st}`); el.data("label", `${icon(st)} ${k}\n${s.name}`); el.data("running", st === "running");
+  }
+}
+// 走っているノードは枠の太さを波打たせる
+let phase = 0;
+setInterval(() => { phase = (phase + 1) % 20; const w = 2 + Math.abs(10 - phase) / 3;
+  cyLoop.nodes().filter(n => n.data("running")).style("border-width", w);
+  cyStage.nodes().filter(n => n.data("running")).style("border-width", w); }, 80);
+
+async function act(wf, action, args, msgEl) {
+  const r = await fetch("/api/act", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ wf, action, args }) });
+  const t = await r.json();
+  if (msgEl) msgEl.textContent = r.ok ? "送った" : `断られた：${t.detail}`;
+  refresh();
+}
+window.act = act;
+
+function card(u, live) {
+  const st = u.state, lim = st.limits, k = unitStatus(u), now = Date.now();
+  const cur = st.nodes[st.current_node];
+  const elapsed = cur && cur.started && ["running", "cancelling"].includes(cur.status) ? fmt(secs(Date.parse(cur.started), now)) : "";
+  const pid = st.inflight && st.inflight.pids && st.inflight.pids[0];
+  const prog = pid && live.progress[pid];
+  const pend = (u.describe.pending || [])[0];
+  const best = st.best;
+  const thumbs = st.candidates.map(c => {
+    const ok = c.check ? c.check.passed : null;
+    const ev = c.eval ? ` 評価${c.eval.median}（${c.eval.scores.join("・")}）` : "";
+    return `<div class="thumb ${ok === false ? "fail" : ""} ${c.stale ? "stale" : ""} ${c.id === best ? "best" : ""}" title="${esc(c.id)}">
+      <img src="/img/${esc(c.image)}" alt="${esc(c.id)}" loading="lazy">
+      <span class="tag">${esc(c.id)}${c.source === "human" ? " 人" : ""} ${ok === null ? "…" : ok ? "✓検査" : "✕検査"}${ev}</span></div>`;
+  }).join("");
+  const review = st.status === "awaiting_review" ? `<div class="review"><div>${chip("awaiting_review")} ${esc(st.review_reason)}</div>
+      <div class="btns"><button class="primary" data-a="approve">採用</button><input type="text" placeholder="却下の理由" data-r>
+      <button class="danger" data-a="reject">却下して作り直す</button><button data-a="raise">上限回数を+1</button></div></div>` : "";
+  return `<div class="card" data-wf="${esc(u.id)}">
+    <h3>${chip(k)} <span>${esc(u.id)}</span><span class="muted">${esc(st.spec.target_ja)}</span></h3>
+    <div class="row"><span>今：${esc(LOOP_JA[st.current_node] || st.current_node)} ${elapsed}</span>
+      <span>回 ${st.round_attempts}/${lim.max_attempts}（通算 ${st.attempt}・却下後 ${st.round - 1}回）</span>
+      ${pend ? `<span>活動 ${esc(pend.type)} 試行${pend.attempt}${pend.heartbeat ? " " + esc(JSON.stringify(pend.heartbeat)) : ""}</span>` : ""}</div>
+    <div class="row"><span>費用</span><div class="bar"><i style="width:${Math.min(100, 100 * st.budget.usd / lim.budget_usd)}%"></i></div>
+      <span>${st.budget.usd.toFixed(3)}/${lim.budget_usd} ドル</span></div>
+    <div class="row"><span>時間</span><div class="bar"><i style="width:${Math.min(100, 100 * st.budget.seconds / lim.budget_seconds)}%"></i></div>
+      <span>${fmt(st.budget.seconds)}/${fmt(lim.budget_seconds)}</span></div>
+    ${pid ? `<div class="preview">${live.previews.includes(pid) ? `<img src="/api/preview/${pid}?t=${now}" alt="途中の絵">` : ""}
+      <div class="row" style="flex:1"><span>ComfyUI</span><div class="bar live"><i style="width:${prog ? 100 * prog.value / prog.max : 0}%"></i></div>
+      <span>${prog ? `${prog.value}/${prog.max}段` : "順番待ち"}</span></div></div>` : ""}
+    ${st.stop_reason ? `<div class="row">止まった理由：${esc(st.stop_reason)}</div>` : ""}
+    <div class="thumbs">${thumbs}</div>
+    ${review}
+    <div class="btns"><button data-a="pause">一時停止</button><button data-a="resume">再開</button>
+      <button data-a="cancel_step">この段を取り消す</button><button class="danger" data-a="cancel">作業を取り消す</button></div>
+    <div class="msg"></div></div>`;
+}
+
+function timeline(u) {
+  const ev = u.state.events, t0 = Date.parse(u.state.started), tEnd = Math.max(Date.now() * (u.describe.status === "RUNNING" ? 1 : 0),
+    ...ev.map(e => Date.parse(e.t))), span = Math.max(1, tEnd - t0);
+  const rows = LOOP.map(n => {
+    let open = null; const bars = [];
+    for (const e of ev.filter(e => e.node === n)) {
+      if (e.kind === "running" || e.kind === "awaiting_review") open = e;
+      else if (open && ["done", "failed", "cancelled", "stale", "paused", "stopped"].includes(e.kind)) {
+        bars.push([open, e]); open = null; }
+    }
+    if (open) bars.push([open, { t: new Date(tEnd).toISOString(), kind: open.kind }]);
+    const html = bars.map(([a, b]) => { const l = 100 * (Date.parse(a.t) - t0) / span, w = 100 * (Date.parse(b.t) - Date.parse(a.t)) / span;
+      return `<i class="k-${b.kind}" style="left:${l}%;width:${w}%" title="${esc(LOOP_JA[n])} ${esc(b.kind)} ${fmt((Date.parse(b.t) - Date.parse(a.t)) / 1000)}"></i>`; }).join("");
+    return `<div class="tl-row"><span>${LOOP_JA[n]}</span><div class="tl-track">${html}</div></div>`;
+  }).join("");
+  return `<div style="margin-bottom:8px"><div class="muted">${esc(u.id)}　${fmt(span / 1000)}</div><div class="timeline">${rows}</div></div>`;
+}
+
+function table(units) {
+  return `<table class="grid"><tr><th>コマ</th><th>状態</th><th>今の段</th><th>回</th><th>検査</th><th>評価</th></tr>` + units.map(u => {
+    const st = u.state, b = st.candidates.find(c => c.id === st.best);
+    return `<tr><td>${esc(st.spec.panel)}</td><td>${chip(unitStatus(u))}</td><td>${esc(LOOP_JA[st.current_node])}</td><td>${st.attempt}</td>
+      <td>${b && b.check ? (b.check.passed ? "✓" : "✕") + " 人数" + b.check.persons : "－"}</td><td>${b && b.eval ? b.eval.median : "－"}</td></tr>`;
+  }).join("") + `</table>`;
+}
+
+function showDetail(u, n) {
+  const nd = u.state.nodes[n];
+  const evs = u.state.events.filter(e => e.node === n).slice(-30);
+  document.getElementById("detail").innerHTML = `<h2>ノードの詳細　${esc(u.id)} / ${LOOP_JA[n]}</h2>
+    <div class="row">${chip(nodeState(u, n))}<span>回数 ${nd.count}</span><span>使った時間 ${fmt(nd.total_s)}</span></div>
+    <pre>${esc(JSON.stringify(nd.detail, null, 1))}</pre>
+    <div class="muted" style="margin-top:6px">出来事（新しい30件）</div>
+    <pre>${evs.map(e => `${e.t.slice(11, 19)} 回${e.attempt} ${e.kind} ${e.detail == null ? "" : JSON.stringify(e.detail).slice(0, 160)}`).join("\n")}</pre>`;
+}
+cyLoop.on("tap", "node", e => { const d = e.target.data(); if (!d.node) return; selected = e.target.id();
+  const u = DATA.units.find(x => x.id === d.unit); if (u) showDetail(u, d.node); });
+
+function pick(items) {
+  const params = new URLSearchParams(location.search);
+  const stageId = params.get("stage");
+  const stages = items.filter(i => i.type === "StageWorkflow" && i.state);
+  const stage = stageId ? stages.find(s => s.id === stageId) : stages[0];
+  let units = items.filter(i => i.type === "WorkUnitWorkflow" && i.state);
+  if (stage) units = units.filter(u => stage.state.children.includes(u.id));
+  else if (params.get("unit")) units = units.filter(u => u.id.startsWith(params.get("unit")));
+  else units = units.slice(0, 3);
+  units.sort((a, b) => a.id.localeCompare(b.id));
+  return { stage, units };
+}
+
+async function refresh() {
+  let r;
+  try { r = await (await fetch("/api/state")).json(); } catch (e) { document.getElementById("sub").textContent = "口に繋がらない"; return; }
+  const { stage, units } = pick(r.items);
+  DATA = { units, stage, live: r.live, previews: r.previews }; DATA_LIVE = r.live;
+  document.getElementById("sub").textContent = `${stage ? stage.id : "工程なし"}　作業 ${units.length}件　ComfyUI の進み具合：${r.live.ws}　${new Date().toLocaleTimeString()}`;
+  if (!units.some(u => u.id === focusUnit)) {
+    const pri = ["awaiting_review", "running", "waiting_service", "retrying", "cancelling", "paused", "queued"];
+    focusUnit = (units.find(u => pri.includes(unitStatus(u))) || units[0] || {}).id || null;
+  }
+  document.getElementById("unit-tabs").innerHTML = units.map(u =>
+    `<button class="${u.id === focusUnit ? "on" : ""}" data-focus="${esc(u.id)}">${icon(unitStatus(u))} コマ${esc(u.state.spec.panel)}　${esc(u.id)}</button>`).join("");
+  buildStage(stage); buildLoop(units.filter(u => u.id === focusUnit)); paint(units, stage);
+  const live = { progress: r.live.progress, previews: r.previews };
+  const focus = document.activeElement && document.activeElement.matches("input[data-r]");
+  if (!focus) {
+    document.getElementById("cards").innerHTML = units.map(u => card(u, live)).join("");
+    document.getElementById("stage-card").innerHTML = stage ? `<div class="card" data-wf="${esc(stage.id)}"><h3>${chip(stage.describe.status === "CANCELED" ? "cancelled" :
+      stage.describe.status === "RUNNING" ? (stage.state.paused ? "paused" : "running") : "done")} 工程 ${esc(stage.id)}</h3>
+      ${stage.state.page ? `<div class="row">ページの検査：${stage.state.page.passed ? "✓ 合格" : "✕ 不合格"} ${esc((stage.state.page.failed_lines || []).join(" "))}</div>
+      <img src="/img/${esc(stage.state.page.page_image)}" style="max-width:160px;border:1px solid #a89c7c" alt="ページ">` : ""}
+      <div class="btns"><button data-a="pause">工程を一時停止</button><button data-a="resume">工程を再開</button><button class="danger" data-a="cancel">工程を取り消す</button></div><div class="msg"></div></div>` : "";
+  }
+  document.getElementById("table").innerHTML = table(units);
+  document.getElementById("timelines").innerHTML = units.map(timeline).join("");
+  if (selected) { const [uid, n] = selected.split(":"); const u = units.find(x => x.id === uid); if (u) showDetail(u, n); }
+}
+document.addEventListener("click", e => {
+  const f = e.target.closest("button[data-focus]"); if (f) { window.__focusUnit(f.dataset.focus); return; }
+  const b = e.target.closest("button[data-a]"); if (!b) return;
+  const cardEl = b.closest("[data-wf]"), wf = cardEl.dataset.wf, msg = cardEl.querySelector(".msg"), a = b.dataset.a;
+  if (a === "reject") { const reason = cardEl.querySelector("input[data-r]").value; act(wf, "reject", { reason }, msg); }
+  else if (a === "raise") { const u = DATA.units.find(x => x.id === wf); act(wf, "set_limits", { max_attempts: u.state.limits.max_attempts + 1 }, msg); }
+  else act(wf, a, a === "pause" ? { mode: "now" } : {}, msg);
+});
+refresh(); setInterval(refresh, 1500);
+</script>
+</body>
+</html>

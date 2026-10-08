@@ -1,0 +1,1559 @@
+{
+ "summary": {
+  "guided": {
+   "units": 8,
+   "first_attempt_fail": 7,
+   "regenerations": 7,
+   "regeneration_fail": 6,
+   "regeneration_pass": 1,
+   "passed_within_3": 2,
+   "by_panel": {
+    "1": {
+     "passed_within_3": 1,
+     "units": 4
+    },
+    "2": {
+     "passed_within_3": 1,
+     "units": 4
+    }
+   }
+  },
+  "blind": {
+   "units": 8,
+   "first_attempt_fail": 7,
+   "regenerations": 8,
+   "regeneration_fail": 6,
+   "regeneration_pass": 2,
+   "passed_within_3": 3,
+   "by_panel": {
+    "1": {
+     "passed_within_3": 0,
+     "units": 4
+    },
+    "2": {
+     "passed_within_3": 3,
+     "units": 4
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "unit": "a-055040-p1-s11-guided",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2398.78,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2399/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s11-guided"
+   },
+   "stop_reason": "予算（時間 2399/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2398.78,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 11,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "7d03a72a-92d4-59aa-865c-e8d8eb5812f4.png",
+     "gen_seconds": 504.78
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1011,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "2debfa69-b034-537d-b791-48fe835e5690.png",
+     "gen_seconds": 817.24
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 58.75
+    },
+    "context": {
+     "count": 2,
+     "total_s": 137.43
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 2202.6
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(1girl:1.4)",
+     "(one person clearly visible:1.2)",
+     "(full body:1.4)",
+     "(wide shot:1.3)",
+     "feet visible",
+     "small figure in distance"
+    ],
+    "neg": [
+     "no humans",
+     "empty scenery",
+     "close-up",
+     "cropped",
+     "out of frame"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p1-s11-blind",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2310.72,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2311/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s11-blind"
+   },
+   "stop_reason": "予算（時間 2311/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2310.72,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 11,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "dcb30fc6-6015-5654-a921-dafb268f2017.png",
+     "gen_seconds": 530.34
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1011,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "T"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "94e25778-9e7f-5d68-ab19-ade9d5a9d938.png",
+     "gen_seconds": 822.27
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 74.69
+    },
+    "context": {
+     "count": 2,
+     "total_s": 185.78
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 2050.25
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p1-s22-guided",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2482.35,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2482/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s22-guided"
+   },
+   "stop_reason": "予算（時間 2482/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2482.35,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 22,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "14ca08ed-b11b-59a6-9f1f-9c0be3d72613.png",
+     "gen_seconds": 508.24
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1022,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "452d3713-dc34-5040-923f-61e51230a52a.png",
+     "gen_seconds": 817.27
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 117.47
+    },
+    "context": {
+     "count": 2,
+     "total_s": 221.63
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 2143.25
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(full body:1.4)",
+     "(wide shot:1.3)",
+     "feet visible",
+     "small figure in distance",
+     "(1girl:1.4)",
+     "(one person clearly visible:1.2)"
+    ],
+    "neg": [
+     "close-up",
+     "cropped",
+     "out of frame",
+     "no humans",
+     "empty scenery"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p1-s22-blind",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 1908.89,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 1909/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s22-blind"
+   },
+   "stop_reason": "予算（時間 1909/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 1908.89,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 22,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "c54f18b6-b258-5c8c-b7e6-7e16b82352e4.png",
+     "gen_seconds": 294.01
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1022,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "cf97ad36-f659-5ce7-bad3-390201a309b2.png",
+     "gen_seconds": 510.99
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 769.98
+    },
+    "context": {
+     "count": 2,
+     "total_s": 205.47
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 933.44
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p1-s33-guided",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2161.99,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2162/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s33-guided"
+   },
+   "stop_reason": "予算（時間 2162/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2161.99,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 33,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "2308fd9d-968b-5230-87b4-ee8c88d4adb8.png",
+     "gen_seconds": 649.38
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1033,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "T"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "9878ea32-10bc-5e5f-a06a-b8c8d2cab7d1.png",
+     "gen_seconds": 789.56
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 211.46
+    },
+    "context": {
+     "count": 2,
+     "total_s": 53.71
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1896.82
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(full body:1.4)",
+     "(wide shot:1.3)",
+     "feet visible",
+     "small figure in distance"
+    ],
+    "neg": [
+     "close-up",
+     "cropped",
+     "out of frame"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p1-s33-blind",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2153.15,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2153/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s33-blind"
+   },
+   "stop_reason": "予算（時間 2153/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2153.15,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 33,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "15d2e96c-d0ef-56b6-b279-acd19278aa51.png",
+     "gen_seconds": 787.28
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1033,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "016afc36-2e0b-568f-9b75-1b85a423728d.png",
+     "gen_seconds": 602.2
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 439.11
+    },
+    "context": {
+     "count": 2,
+     "total_s": 6.19
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1707.85
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p1-s44-guided",
+   "status": "done",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 1576.56,
+     "usd": 0.0
+    },
+    "image": "0e749742-4df5-56f0-965f-da92f46b5e0d.png",
+    "persons": 1,
+    "reason": "合格",
+    "status": "done",
+    "unit_id": "a-055040-p1-s44-guided"
+   },
+   "stop_reason": "合格",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 1576.56,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 44,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "1412c17c-34be-53c4-a2f7-eddc93293673.png",
+     "gen_seconds": 396.93
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1044,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "0e749742-4df5-56f0-965f-da92f46b5e0d.png",
+     "gen_seconds": 519.19
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 461.66
+    },
+    "context": {
+     "count": 2,
+     "total_s": 68.8
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1046.1
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(full body:1.4)",
+     "(wide shot:1.3)",
+     "feet visible",
+     "small figure in distance"
+    ],
+    "neg": [
+     "close-up",
+     "cropped",
+     "out of frame"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p1-s44-blind",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2159.05,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2159/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p1-s44-blind"
+   },
+   "stop_reason": "予算（時間 2159/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2159.05,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 44,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "3a376b1e-3e60-5760-bc93-4a3d4fd369a5.png",
+     "gen_seconds": 676.72
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1044,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "a43b397f-c141-5e85-a1be-46b88dc0da97.png",
+     "gen_seconds": 752.94
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 245.84
+    },
+    "context": {
+     "count": 2,
+     "total_s": 134.1
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1779.11
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p2-s11-guided",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2590.66,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2591/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p2-s11-guided"
+   },
+   "stop_reason": "予算（時間 2591/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2590.66,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 11,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "3bed96b7-9642-5b13-b1d3-19d9b3ec8714.png",
+     "gen_seconds": 844.89
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1011,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "T"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "77f6f238-f4df-59b6-bfc9-f23318e77100.png",
+     "gen_seconds": 812.68
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 512.37
+    },
+    "context": {
+     "count": 2,
+     "total_s": 222.43
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1855.86
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(2girls:1.5)",
+     "(two girls side by side:1.3)"
+    ],
+    "neg": [
+     "solo"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p2-s11-blind",
+   "status": "done",
+   "result": {
+    "attempts": 3,
+    "budget": {
+     "seconds": 2782.36,
+     "usd": 0.0
+    },
+    "image": "9a617336-c872-5ad6-bbc3-cb10ebb03e83.png",
+    "persons": 2,
+    "reason": "合格",
+    "status": "done",
+    "unit_id": "a-055040-p2-s11-blind"
+   },
+   "stop_reason": "合格",
+   "attempt": 3,
+   "round": 1,
+   "budget": {
+    "seconds": 2782.36,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 11,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "8725ac39-ec6f-562f-b5ca-526c8144947d.png",
+     "gen_seconds": 149.78
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1011,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "T"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "c2879e3a-9360-55e6-8d30-6b391ffc594d.png",
+     "gen_seconds": 508.12
+    },
+    {
+     "id": "a3c0",
+     "source": "ai",
+     "seed": 2011,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 2,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "9a617336-c872-5ad6-bbc3-cb10ebb03e83.png",
+     "gen_seconds": 733.2
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 3,
+     "total_s": 300.96
+    },
+    "context": {
+     "count": 3,
+     "total_s": 878.44
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 3,
+     "total_s": 1602.96
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p2-s22-guided",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2149.18,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2149/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p2-s22-guided"
+   },
+   "stop_reason": "予算（時間 2149/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2149.18,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 22,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "1a778f1b-0b86-5f52-8546-b069d775fea5.png",
+     "gen_seconds": 770.23
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1022,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "dacfdb40-67b7-5a3a-8d95-d18ff3696b93.png",
+     "gen_seconds": 658.33
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 373.65
+    },
+    "context": {
+     "count": 2,
+     "total_s": 59.97
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1715.56
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(2girls:1.5)",
+     "(two girls side by side:1.3)"
+    ],
+    "neg": [
+     "solo"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p2-s22-blind",
+   "status": "done",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2228.2,
+     "usd": 0.0
+    },
+    "image": "47059c4e-fc4e-5cef-9313-3b42a279524d.png",
+    "persons": 2,
+    "reason": "合格",
+    "status": "done",
+    "unit_id": "a-055040-p2-s22-blind"
+   },
+   "stop_reason": "合格",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2228.2,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 22,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "0e6aadb5-ee7f-540d-867d-159007d44649.png",
+     "gen_seconds": 611.03
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1022,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 2,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "47059c4e-fc4e-5cef-9313-3b42a279524d.png",
+     "gen_seconds": 796.68
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 144.58
+    },
+    "context": {
+     "count": 2,
+     "total_s": 104.6
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1979.02
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p2-s33-guided",
+   "status": "done",
+   "result": {
+    "attempts": 1,
+    "budget": {
+     "seconds": 730.56,
+     "usd": 0.0
+    },
+    "image": "51955a7e-2097-5d57-8d24-85f6c67f085f.png",
+    "persons": 2,
+    "reason": "合格",
+    "status": "done",
+    "unit_id": "a-055040-p2-s33-guided"
+   },
+   "stop_reason": "合格",
+   "attempt": 1,
+   "round": 1,
+   "budget": {
+    "seconds": 730.56,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 33,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 2,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "51955a7e-2097-5d57-8d24-85f6c67f085f.png",
+     "gen_seconds": 492.76
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 1,
+     "total_s": 236.62
+    },
+    "context": {
+     "count": 1,
+     "total_s": 0.26
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 1,
+     "total_s": 493.68
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p2-s33-blind",
+   "status": "done",
+   "result": {
+    "attempts": 1,
+    "budget": {
+     "seconds": 854.07,
+     "usd": 0.0
+    },
+    "image": "5e3b7ad6-4b5e-5ef1-b817-4d0f326e6f08.png",
+    "persons": 2,
+    "reason": "合格",
+    "status": "done",
+    "unit_id": "a-055040-p2-s33-blind"
+   },
+   "stop_reason": "合格",
+   "attempt": 1,
+   "round": 1,
+   "budget": {
+    "seconds": 854.07,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 33,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 2,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "5e3b7ad6-4b5e-5ef1-b817-4d0f326e6f08.png",
+     "gen_seconds": 723.72
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 1,
+     "total_s": 128.89
+    },
+    "context": {
+     "count": 1,
+     "total_s": 0.89
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 1,
+     "total_s": 724.29
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  },
+  {
+   "unit": "a-055040-p2-s44-guided",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2702.66,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2703/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p2-s44-guided"
+   },
+   "stop_reason": "予算（時間 2703/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2702.66,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 44,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "0a5d6180-1219-5390-ba8d-cba349ab36d8.png",
+     "gen_seconds": 493.32
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1044,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 3,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "05213f75-c11c-5ad1-ae0a-f83edf6266a0.png",
+     "gen_seconds": 788.44
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 230.99
+    },
+    "context": {
+     "count": 2,
+     "total_s": 153.16
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 2318.51
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [
+     "(2girls:1.5)",
+     "(two girls side by side:1.3)",
+     "(exactly 2 people:1.3)"
+    ],
+    "neg": [
+     "solo",
+     "crowd",
+     "group",
+     "3girls"
+    ]
+   }
+  },
+  {
+   "unit": "a-055040-p2-s44-blind",
+   "status": "stopped",
+   "result": {
+    "attempts": 2,
+    "budget": {
+     "seconds": 2156.43,
+     "usd": 0.0
+    },
+    "image": null,
+    "persons": null,
+    "reason": "予算（時間 2156/1800 秒）",
+    "status": "stopped",
+    "unit_id": "a-055040-p2-s44-blind"
+   },
+   "stop_reason": "予算（時間 2156/1800 秒）",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 2156.43,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 44,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "5dda35b2-fb81-5fa8-a85b-ae85ef4a4877.png",
+     "gen_seconds": 636.64
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1044,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 1,
+      "touch": "B"
+     },
+     "eval": null,
+     "stale": false,
+     "image": "b22f34a8-2b93-532c-ae65-e84317f2680e.png",
+     "gen_seconds": 552.9
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 584.44
+    },
+    "context": {
+     "count": 2,
+     "total_s": 193.64
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 1378.35
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [],
+   "adjust": {
+    "add": [],
+    "neg": []
+   }
+  }
+ ],
+ "counts": {
+  "prompt_posts": 31,
+  "duplicate_posts": 0,
+  "registrations": 31,
+  "duplicate_registrations": 0,
+  "withdrawn": 0,
+  "already_registered_skips": 0,
+  "versions": 0,
+  "duplicate_versions": 0,
+  "claude_calls": 0,
+  "claude_killed": 0,
+  "claude_usd": 0
+ }
+}

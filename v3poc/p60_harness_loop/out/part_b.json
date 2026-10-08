@@ -1,0 +1,490 @@
+{
+ "b1_attempt_cap_and_limits": {
+  "first_stop": "上限回数（1回）",
+  "round_attempts": 1,
+  "raise_to_2": null,
+  "second_stop": "上限回数（2回）",
+  "lower_to_1_refused": "回数の上限 1 は、もう使った 2 より小さい",
+  "budget_below_used_refused": "費用の上限 0.0 は、もう使った 0.0496 より小さい",
+  "unknown_limit_refused": "知らない上限 ['no_such']",
+  "history_len": {
+   "before_raise": 22,
+   "after_second_stop": 51,
+   "after_3_refused": 51
+  },
+  "approve": null,
+  "result": {
+   "approved": {
+    "activity_attempt": 1,
+    "attempt": 2,
+    "cand": 0,
+    "check": {
+     "h_ratios": [
+      1.0
+     ],
+     "passed": true,
+     "persons": 1,
+     "results": [
+      {
+       "id": "size",
+       "status": "合格",
+       "title": "大きさ",
+       "value": "320x320"
+      },
+      {
+       "detail": null,
+       "id": "persons",
+       "status": "合格",
+       "title": "人数",
+       "value": 1
+      }
+     ],
+     "seconds": 10.83,
+     "touch": "BT"
+    },
+    "eval": {
+     "calls": 1,
+     "cost_usd": 0.0496,
+     "median": 1,
+     "scores": [
+      1
+     ],
+     "seconds": 14.18,
+     "spread": 0,
+     "whys": [
+      "絵に写っているのは、窓の前に立つ人物を後ろから、ほぼ全身で捉えた構図です。顔が見えないので、驚いた表情はありません。胸から上という範囲も合っていません。人数は1人ですが、表情と範囲の両方が狙いと合わないので、このコマには使えません。"
+     ]
+    },
+    "gen_seconds": 24.46,
+    "id": "a2c0",
+    "image": "579e5744-2c01-55b7-8a44-2aaf2dcea02a.png",
+    "mode": "t2i",
+    "pid": "579e5744-2c01-55b7-8a44-2aaf2dcea02a",
+    "round": 1,
+    "seed": 1501,
+    "source": "ai",
+    "spec_version": 1
+   },
+   "attempts": 2,
+   "budget": {
+    "seconds": 77.87,
+    "usd": 0.0496
+   },
+   "image": "579e5744-2c01-55b7-8a44-2aaf2dcea02a.png",
+   "persons": 1,
+   "reason": "人が採用した",
+   "status": "done",
+   "unit_id": "b1-070734",
+   "version": {
+    "new": true,
+    "version_image": "versions/b1-070734_v1.png"
+   }
+  },
+  "status": "COMPLETED",
+  "state": {
+   "status": "done",
+   "stop_reason": "人が採用した",
+   "attempt": 2,
+   "round": 1,
+   "budget": {
+    "seconds": 77.87,
+    "usd": 0.0496
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 501,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "0f67c4b8-33c4-5af3-b4a0-df2cbecd1bb2.png",
+     "gen_seconds": 24.61
+    },
+    {
+     "id": "a2c0",
+     "source": "ai",
+     "seed": 1501,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": {
+      "scores": [
+       1
+      ],
+      "median": 1
+     },
+     "stale": false,
+     "image": "579e5744-2c01-55b7-8a44-2aaf2dcea02a.png",
+     "gen_seconds": 24.46
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 2,
+     "total_s": 14.32
+    },
+    "context": {
+     "count": 2,
+     "total_s": 0.1
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 1,
+     "total_s": 0.13
+    },
+    "evaluate": {
+     "count": 1,
+     "total_s": 14.26
+    },
+    "generate": {
+     "count": 2,
+     "total_s": 49.19
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [
+    {
+     "attempt": 2,
+     "ids": [
+      "a2c0"
+     ],
+     "scores": [
+      [
+       1
+      ]
+     ]
+    }
+   ]
+  }
+ },
+ "b2_budget_usd": {
+  "result": {
+   "attempts": 1,
+   "budget": {
+    "seconds": 40.03,
+    "usd": 0.0493
+   },
+   "image": "fd0a70d5-7452-517a-8b07-e73b0aa303eb.png",
+   "persons": 1,
+   "reason": "予算（費用 0.049/0.03 ドル）",
+   "status": "stopped",
+   "unit_id": "b2-070734"
+  },
+  "status": "COMPLETED",
+  "seconds": 40.2,
+  "state": {
+   "status": "stopped",
+   "stop_reason": "予算（費用 0.049/0.03 ドル）",
+   "attempt": 1,
+   "round": 1,
+   "budget": {
+    "seconds": 40.03,
+    "usd": 0.0493
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 502,
+     "mode": "t2i",
+     "check": {
+      "passed": true,
+      "persons": 1,
+      "touch": "BT"
+     },
+     "eval": {
+      "scores": [
+       2
+      ],
+      "median": 2
+     },
+     "stale": false,
+     "image": "fd0a70d5-7452-517a-8b07-e73b0aa303eb.png",
+     "gen_seconds": 24.4
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 1,
+     "total_s": 5.36
+    },
+    "context": {
+     "count": 1,
+     "total_s": 0.25
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 1,
+     "total_s": 9.58
+    },
+    "generate": {
+     "count": 1,
+     "total_s": 24.84
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": [
+    {
+     "attempt": 1,
+     "ids": [
+      "a1c0"
+     ],
+     "scores": [
+      [
+       2
+      ]
+     ]
+    }
+   ]
+  },
+  "errors_in_row": 0,
+  "last_error": null
+ },
+ "b3_budget_seconds": {
+  "result": {
+   "attempts": 1,
+   "budget": {
+    "seconds": 50.68,
+    "usd": 0.0
+   },
+   "image": null,
+   "persons": null,
+   "reason": "予算（時間 51/5 秒）",
+   "status": "stopped",
+   "unit_id": "b3-070734"
+  },
+  "status": "COMPLETED",
+  "seconds": 50.8,
+  "state": {
+   "status": "stopped",
+   "stop_reason": "予算（時間 51/5 秒）",
+   "attempt": 1,
+   "round": 1,
+   "budget": {
+    "seconds": 50.68,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [
+    {
+     "id": "a1c0",
+     "source": "ai",
+     "seed": 503,
+     "mode": "t2i",
+     "check": {
+      "passed": false,
+      "persons": 0,
+      "touch": ""
+     },
+     "eval": null,
+     "stale": false,
+     "image": "65dea572-60c1-5604-89f6-44b2d4dd3138.png",
+     "gen_seconds": 48.37
+    }
+   ],
+   "nodes": {
+    "check": {
+     "count": 1,
+     "total_s": 1.31
+    },
+    "context": {
+     "count": 1,
+     "total_s": 0.57
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 1,
+     "total_s": 48.8
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": []
+  },
+  "errors_in_row": 0,
+  "last_error": null
+ },
+ "b4_transport_errors": {
+  "result": {
+   "attempts": 3,
+   "budget": {
+    "seconds": 9.2,
+    "usd": 0.0
+   },
+   "image": null,
+   "persons": null,
+   "reason": "エラーが3回続いた",
+   "status": "stopped",
+   "unit_id": "b4-070734"
+  },
+  "status": "COMPLETED",
+  "seconds": 50.8,
+  "state": {
+   "status": "stopped",
+   "stop_reason": "エラーが3回続いた",
+   "attempt": 3,
+   "round": 1,
+   "budget": {
+    "seconds": 9.2,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [],
+   "nodes": {
+    "check": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "context": {
+     "count": 3,
+     "total_s": 0.91
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 3,
+     "total_s": 8.29
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": []
+  },
+  "errors_in_row": 3,
+  "last_error": {
+   "kind": "transport",
+   "message": "/queue: All connection attempts failed",
+   "node": "generate"
+  }
+ },
+ "b5_refused": {
+  "result": {
+   "attempts": 1,
+   "budget": {
+    "seconds": 0.93,
+    "usd": 0.0
+   },
+   "image": null,
+   "persons": null,
+   "reason": "内容で断られた（送り直さない）",
+   "status": "stopped",
+   "unit_id": "b5-070734"
+  },
+  "status": "COMPLETED",
+  "seconds": 50.4,
+  "state": {
+   "status": "stopped",
+   "stop_reason": "内容で断られた（送り直さない）",
+   "attempt": 1,
+   "round": 1,
+   "budget": {
+    "seconds": 0.93,
+    "usd": 0.0
+   },
+   "resets": 0,
+   "candidates": [],
+   "nodes": {
+    "check": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "context": {
+     "count": 1,
+     "total_s": 0.42
+    },
+    "cut_out": {
+     "count": 1,
+     "total_s": 0.0
+    },
+    "done": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "evaluate": {
+     "count": 0,
+     "total_s": 0.0
+    },
+    "generate": {
+     "count": 1,
+     "total_s": 0.51
+    },
+    "review": {
+     "count": 0,
+     "total_s": 0.0
+    }
+   },
+   "disagreements": []
+  },
+  "errors_in_row": 1,
+  "last_error": {
+   "kind": "refused",
+   "message": "/prompt 400: {\"error\":{\"type\":\"prompt_outputs_failed_validation\"},\"node_errors\":{\"1\":{\"errors\":[{\"type\":\"value_not_in_list\",\"message\":\"unet_name: no_such_unet.safetensors\"}]}}}",
+   "node": "generate"
+  }
+ },
+ "counts": {
+  "prompt_posts": 4,
+  "duplicate_posts": 0,
+  "registrations": 4,
+  "duplicate_registrations": 0,
+  "withdrawn": 0,
+  "already_registered_skips": 0,
+  "versions": 1,
+  "duplicate_versions": 0,
+  "claude_calls": 2,
+  "claude_killed": 0,
+  "claude_usd": 0.099
+ }
+}
