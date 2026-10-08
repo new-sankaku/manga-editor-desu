@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.text_and_layer_tables import ProtectedMaskCache, ProtectedRegion
 from v3server.comfy_graphs.protected_region_mask import protected_mask_png
-from v3server.image_file_storage import read_image, store_image
+from v3server.image_file_storage import image_exists, read_image, store_image
 
 
 def _prefix_keys(width: int, height: int, regions: list[ProtectedRegion]) -> list[str]:
@@ -31,8 +31,10 @@ async def protected_mask_sha256(session: AsyncSession, width: int, height: int,
     """範囲（古い順。input_image_preparation.protected_regions_for の並び）を重ねたマスク（PNG）の置き場の sha256。"""
     keys = _prefix_keys(width, height, regions)
     rows = (await session.execute(select(ProtectedMaskCache).where(ProtectedMaskCache.key.in_(keys)))).scalars()
-    hit = {row.key: row.sha256 for row in rows}
-    done = max((i for i, k in enumerate(keys) if k in hit), default=None)
+    # 控えの絵が置き場から消えていれば、その控えは使わない（置き場を替えた・片付けたとき）。
+    # 範囲が無いとき（i = 0）は控えを引かない（全部黒の絵を作るだけ）
+    hit = {row.key: row.sha256 for row in rows if image_exists(row.sha256)}
+    done = max((i for i, k in enumerate(keys) if i > 0 and k in hit), default=None)
     if done == len(regions):
         return hit[keys[done]]
     rest = regions[done:] if done else regions
@@ -40,7 +42,7 @@ async def protected_mask_sha256(session: AsyncSession, width: int, height: int,
     data = protected_mask_png(width, height, [r.polygon_px for r in rest if r.polygon_px is not None],
                               start + [read_image(r.mask_sha256) for r in rest if r.mask_sha256])
     stored = store_image(data)
-    await session.execute(insert(ProtectedMaskCache)
-                          .values(key=keys[-1], sha256=stored.sha256, region_count=len(regions))
-                          .on_conflict_do_nothing(index_elements=["key"]))
+    if regions:
+        stmt = insert(ProtectedMaskCache).values(key=keys[-1], sha256=stored.sha256, region_count=len(regions))
+        await session.execute(stmt.on_conflict_do_update(index_elements=["key"], set_={"sha256": stored.sha256}))
     return stored.sha256

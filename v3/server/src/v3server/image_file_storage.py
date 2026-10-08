@@ -193,5 +193,9 @@ def store_image(data: bytes) -> StoredImage:
         return store_image_file(path)
 
 
+def image_exists(sha256: str) -> bool:
+    return image_store().exists(_key(sha256))
+
+
 def read_image(sha256: str) -> bytes:
     return image_store().get(_key(sha256))
