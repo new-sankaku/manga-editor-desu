@@ -30,8 +30,8 @@ export function init() {
   const tb = $("#tools");
   const undo = $("#undo");
   for (const [k, label, icon, key] of TOOLS) {
-    tb.insertBefore(h("button", { class: "tool", "data-tool": k, "aria-pressed": String(k === "select"), title: `${label} (${key})` },
-      h("i", { "data-lucide": icon }), label, h("kbd", { text: key })), undo.previousElementSibling);
+    tb.insertBefore(h("button", { class: "tool", "data-tool": k, "aria-pressed": String(k === "select"), "data-key": key, title: label },
+      h("i", { "data-lucide": icon }), label, h("kbd", { text: "" })), undo.previousElementSibling);
   }
   $("#page-add").addEventListener("click", addPage);
   icons();

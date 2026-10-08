@@ -2,7 +2,8 @@
 // 口：GET /works/{id}、GET /works/{id}/review-records、操作 set_review_status（取り消しは reverts_record_id）
 // 移り方と出せる人はサーバー（operations/review_operations.py）が決める。画面は今の状態から移れる先だけボタンにする
 import { html, render, nothing, live, api, icon, toast, fail, op, startShell, emptyNote, screenHref, fmtDate,
-         REVIEW, REVIEW_FLAG, reviewStates, episodePages, storedEpisode, rememberEpisode, episodePicker } from "../common/shell.js";
+         REVIEW, REVIEW_FLAG, reviewStates, episodePages, storedEpisode, rememberEpisode, episodePicker, km, READING } from "../common/shell.js";
+import * as view from "../common/fullscreen.js";
 
 const main = document.getElementById("main");
 main.className = "screen side-r";
@@ -66,7 +67,8 @@ function pageGrid() {
   const shown = S.filter === "all" ? pages : pages.filter((p) => S.status("page", p.id) === S.filter);
   return html`<section class="card" aria-label="ページ">
     <div class="card-h"><span class="h2">ページ</span>
-      ${episodePicker(S.work, S.episodeId, (id) => { S.episodeId = id; rememberEpisode(id); draw(); })}</div>
+      ${episodePicker(S.work, S.episodeId, (id) => { S.episodeId = id; rememberEpisode(id); draw(); })}
+      <button class="btn sm" id="read-through" data-key="view.focus" title="読み通す" ?disabled=${!pages.length} @click=${() => view.setFocus(true)}>${icon("book-open")}読み通す<kbd></kbd></button></div>
     <div class="acts" role="group" aria-label="状態で絞る">
       <button class="chip" data-filter="all" aria-pressed=${String(S.filter === "all")} @click=${() => { S.filter = "all"; draw(); }}>全部 ${pages.length}</button>
       ${Object.entries(REVIEW).map(([k, l]) => html`<button class="chip" data-filter=${k} aria-pressed=${String(S.filter === k)} @click=${() => { S.filter = k; draw(); }}>
@@ -114,10 +116,60 @@ function sidePanel() {
   </section>`;
 }
 
+// ---------------------------------------------------------------- 読み通す（絵だけのとき。V3細部の決めごと 22.5）
+// ページを1枚ずつ大きく出す。← → は作品の読む向きに合わせる（右から左の作品では ← が次）。PageDown・PageUp は向きによらず次・前
+function readPages() { return S.work && S.episodeId ? episodePages(S.work, S.episodeId) : []; }
+function readIndex() {
+  const pages = readPages();
+  const i = S.sel?.kind === "page" ? pages.findIndex((p) => p.id === S.sel.id) : -1;
+  return i < 0 ? 0 : i;
+}
+function step(d) {
+  if (!view.viewState().focus) return false;
+  const pages = readPages();
+  const p = pages[readIndex() + d];
+  if (p) select("page", p.id);
+  return true;
+}
+const rtl = () => S.work?.work.reading_direction === "rtl";
+km.bind("review.next", () => step(1));
+km.bind("review.prev", () => step(-1));
+km.bind("review.left", () => step(rtl() ? 1 : -1));
+km.bind("review.right", () => step(rtl() ? -1 : 1));
+window.addEventListener("v3-view", () => draw());
+
+function reader() {
+  const pages = readPages();
+  if (!pages.length) return emptyNote("この話にページがありません");
+  const i = readIndex(), p = pages[i];
+  const st = S.status("page", p.id);
+  const recs = S.records.filter((r) => r.target_kind === "page" && r.target_id === p.id && r.comment);
+  const ep = S.work.episodes.find((e) => e.id === p.episode_id);
+  const leftD = rtl() ? 1 : -1;
+  const side = (d, ic, key) => html`<button class="ibtn reader-go" data-key=${key} title=${d > 0 ? "次のページ" : "前のページ"} aria-label=${d > 0 ? "次のページ" : "前のページ"}
+    ?disabled=${!pages[i + d]} @click=${() => step(d)}>${icon(ic)}</button>`;
+  return html`<section class="reader" aria-label="読み通す">
+    <div class="reader-h"><span class="h2">第${ep?.number ?? "?"}話 ${p.number} ページ</span><span class="meta">${i + 1} / ${pages.length}・${READING[S.work.work.reading_direction]}</span></div>
+    <div class="reader-b">
+      ${side(leftD, "chevron-left", "review.left")}
+      <div class="reader-page paper" data-page=${p.id}>
+        <span class="reader-n">${p.number}</span>
+        <span class="flag ${REVIEW_FLAG[st]}">${REVIEW[st]}</span>
+        ${recs.length ? html`<div class="list">${recs.map((r) => html`<div class="issue"><span class="flag ${REVIEW_FLAG[r.to_status]}">${REVIEW[r.to_status]}</span><div class="v"><span>${r.comment}</span><span class="meta">${r.actor_id}・${fmtDate(r.created_at)}</span></div></div>`)}</div>` : html`<span class="meta">コメントはありません</span>`}
+      </div>
+      ${side(-leftD, "chevron-right", "review.right")}
+    </div>
+    <span class="meta">ページの絵を返す口がまだ無いので、番号・状態・コメントを出しています。</span>
+  </section>`;
+}
+
 function draw() {
   if (!S.work) { render(emptyNote(S.why || "作品を選んでください", S.why ? "need" : ""), main); return; }
+  if (view.viewState().focus) { main.className = "screen"; render(reader(), main); km.applyHints(main); return; }
+  main.className = "screen side-r";
   render(html`<div class="col">${workCard()}${S.episodeId ? pageGrid() : emptyNote("話がまだありません。「作品と話」で足してください")}</div>
     <div class="col">${sidePanel()}</div>`, main);
+  km.applyHints(main);
 }
 
 await startShell({ screen: "review", onWork: loadWork });

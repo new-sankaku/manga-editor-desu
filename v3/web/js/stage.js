@@ -7,14 +7,14 @@
 // 塗るときに触るのは、線が当たった所の画素だけ（全画素を読まない）。1回の変更はタイルの差分で覚える（mask_tiles.js）。
 import { MaskEdit } from "./mask_tiles.js";
 import { drawSegment } from "./pen_render.js";
+import { canvasColors } from "../common/theme_colors.js";
 
 const { Canvas, FabricImage, Rect, Polyline, Circle, Point } = window.fabric;
-
-const MASK_RGB = "rgb(61,90,214)";       // --ai
 
 export class Stage {
   constructor(host, hooks) {
     this.host = host;
+    this.col = canvasColors();   // 絵の上に描く色（色の組から読む）
     // { onExtend(e), penBegin() → {canvas, widthPx, color}, onPenStroke(points, pointerType), eraseBegin(),
     //   onErase(points, widthPx), onMaskEdit(edit), maskBegin() → 塗ってよいか, onRefuse(message) }
     this.hooks = hooks;
@@ -33,7 +33,7 @@ export class Stage {
     this.protCanvas = null; this.protObj = null;
     this.extendRect = null; this.extend = null;
     this.drag = null; this.poly = null;
-    this.cursor = new Circle({ radius: 10, fill: "rgba(0,0,0,0)", stroke: "#14171C", strokeWidth: 1,
+    this.cursor = new Circle({ radius: 10, fill: null, stroke: this.col.pointer, strokeWidth: 1,
                                originX: "center", originY: "center", selectable: false, evented: false,
                                visible: false, strokeUniform: true, excludeFromExport: true });
     this.c.add(this.cursor);
@@ -110,6 +110,12 @@ export class Stage {
     this.c.setViewportTransform([zz, 0, 0, zz, (this.c.width - w * zz) / 2 + e.left * zz,
                                  (this.c.height - h * zz) / 2 + e.top * zz + 16]);
     this.syncCursor();
+  }
+
+  panBy(dx, dy) {
+    const v = this.c.viewportTransform.slice();
+    v[4] += dx; v[5] += dy;
+    this.c.setViewportTransform(v);
   }
 
   zoomBy(f) {
@@ -218,7 +224,7 @@ export class Stage {
     this.beginEdit();
     this.touch(this.whole());
     const x = this.maskCtx();
-    x.fillStyle = MASK_RGB; x.fillRect(0, 0, this.size.w, this.size.h);
+    x.fillStyle = this.col.mask; x.fillRect(0, 0, this.size.w, this.size.h);
     this.painted(this.whole());
     this.endEdit();
   }
@@ -230,7 +236,7 @@ export class Stage {
     const t = document.createElement("canvas");
     t.width = this.size.w; t.height = this.size.h;
     const tx = t.getContext("2d");
-    tx.fillStyle = MASK_RGB; tx.fillRect(0, 0, t.width, t.height);
+    tx.fillStyle = this.col.mask; tx.fillRect(0, 0, t.width, t.height);
     tx.globalCompositeOperation = "destination-out";
     tx.drawImage(this.maskCanvas, 0, 0);
     const x = this.maskCtx();
@@ -259,7 +265,7 @@ export class Stage {
     const x = c.getContext("2d");
     x.drawImage(this.maskCanvas, 0, 0);
     x.globalCompositeOperation = "source-in";
-    x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+    x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);   // 色の決め打ちを許す：送るマスクは白と決まっている（絵の中身で、画面の色ではない）
     return c.toDataURL("image/png").split(",")[1];
   }
 
@@ -298,7 +304,7 @@ export class Stage {
     const x = this.maskCtx();
     x.save();
     x.globalCompositeOperation = erase ? "destination-out" : "source-over";
-    x.strokeStyle = MASK_RGB;
+    x.strokeStyle = this.col.mask;
     x.lineWidth = this.brushPx; x.lineCap = "round"; x.lineJoin = "round";
     x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(a === b ? b.x + 0.01 : b.x, b.y); x.stroke();
     x.restore();
@@ -315,7 +321,7 @@ export class Stage {
     this.touch(rect);
     const x = this.maskCtx();
     x.save();
-    x.fillStyle = MASK_RGB;
+    x.fillStyle = this.col.mask;
     x.beginPath(); x.moveTo(points[0].x, points[0].y);
     for (const p of points.slice(1)) x.lineTo(p.x, p.y);
     x.closePath(); x.fill();
@@ -331,11 +337,11 @@ export class Stage {
     const geo = { left: -e.left, top: -e.top, width: this.size.w + e.left + e.right, height: this.size.h + e.top + e.bottom,
                   scaleX: 1, scaleY: 1 };
     if (!this.extendRect) {
-      this.extendRect = new Rect({ ...geo, originX: "left", originY: "top", fill: "rgba(61,90,214,0.06)",
-        stroke: "#3D5AD6", strokeWidth: 1.5, strokeDashArray: [6, 4], strokeUniform: true,
+      this.extendRect = new Rect({ ...geo, originX: "left", originY: "top", fill: this.col.extendFill,
+        stroke: this.col.maskLine, strokeWidth: 1.5, strokeDashArray: [6, 4], strokeUniform: true,
         lockMovementX: true, lockMovementY: true, lockRotation: true, lockScalingFlip: true,
-        cornerColor: "#3D5AD6", cornerStrokeColor: "#fff", transparentCorners: false, cornerSize: 11,
-        borderColor: "#3D5AD6", visible: this.tool === "extend", selectable: this.tool === "extend",
+        cornerColor: this.col.maskLine, cornerStrokeColor: this.col.handle, transparentCorners: false, cornerSize: 11,
+        borderColor: this.col.maskLine, visible: this.tool === "extend", selectable: this.tool === "extend",
         evented: this.tool === "extend", hoverCursor: "default" });
       this.extendRect.setControlsVisibility({ mtr: false });
       this.extendRect.on("modified", () => this.extendFromRect());
@@ -390,9 +396,15 @@ export class Stage {
   // ---------------------------------------------------------------- 手の動き
   bind() {
     const c = this.c;
+    // ホイール（V3細部の決めごと 22.6）：Ctrl（Mac は Cmd）を押しながらで拡大・縮小、そのままで上下、Shift で左右に動かす。
+    // タッチパッドの2本指でつまむ動きは、ブラウザが Ctrl 付きのホイールとして送ると言われている（未検証）
     c.on("mouse:wheel", (o) => {
       const e = o.e;
-      c.zoomToPoint(new Point(e.offsetX, e.offsetY), Math.min(32, Math.max(0.02, c.getZoom() * (0.999 ** e.deltaY))));
+      if (e.ctrlKey || e.metaKey) {
+        c.zoomToPoint(new Point(e.offsetX, e.offsetY), Math.min(32, Math.max(0.02, c.getZoom() * (0.999 ** e.deltaY))));
+        this.syncCursor();
+      } else if (e.shiftKey) this.panBy(-(e.deltaX || e.deltaY), 0);
+      else this.panBy(-e.deltaX, -e.deltaY);
       e.preventDefault(); e.stopPropagation();
     });
     c.on("mouse:move", (o) => {
@@ -439,7 +451,7 @@ export class Stage {
           if (near && this.poly.length >= 3) { this.closePolygon(); return; }
           this.poly.push(p);
         }
-        this.setPreview(this.polyline([...this.poly, p], "#3D5AD6", 1.5));
+        this.setPreview(this.polyline([...this.poly, p], this.col.maskLine, 1.5));
       }
       return;
     }
@@ -497,13 +509,11 @@ export class Stage {
 
   onMove(p, e) {
     const d = this.drag;
-    if (this.poly && !d) { this.setPreview(this.polyline([...this.poly, p], "#3D5AD6", 1.5)); return; }
+    if (this.poly && !d) { this.setPreview(this.polyline([...this.poly, p], this.col.maskLine, 1.5)); return; }
     if (!d) return;
     if (d.kind === "pan") {
-      const v = this.c.viewportTransform.slice();
-      v[4] += e.clientX - d.x; v[5] += e.clientY - d.y;
+      this.panBy(e.clientX - d.x, e.clientY - d.y);
       d.x = e.clientX; d.y = e.clientY;
-      this.c.setViewportTransform(v);
     } else if (d.kind === "brush" || d.kind === "eraser") {
       for (const ev of this.events(e)) {
         const q = this.c.getScenePoint(ev);
@@ -512,11 +522,11 @@ export class Stage {
       }
     } else if (d.kind === "lasso") {
       d.points.push(p);
-      this.setPreview(this.polyline(d.points, "#3D5AD6", 1.5, "rgba(61,90,214,0.15)"));
+      this.setPreview(this.polyline(d.points, this.col.maskLine, 1.5, this.col.maskFill));
     } else if (d.kind === "rect") {
       const x0 = Math.min(d.from.x, p.x), y0 = Math.min(d.from.y, p.y);
       this.setPreview(new Rect({ left: x0, top: y0, width: Math.abs(p.x - d.from.x), height: Math.abs(p.y - d.from.y),
-        originX: "left", originY: "top", fill: "rgba(61,90,214,0.15)", stroke: "#3D5AD6", strokeWidth: 1.5,
+        originX: "left", originY: "top", fill: this.col.maskFill, stroke: this.col.maskLine, strokeWidth: 1.5,
         strokeUniform: true }));
     } else if (d.kind === "pen") {
       const x = d.target.canvas.getContext("2d");

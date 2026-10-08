@@ -109,6 +109,11 @@ export class MockServer {
     const ok = (json, status = 200) => ({ status, json });
     try {
       if (method === "GET" && u.pathname === "/auth/mode") return ok({ mode: "dev_header" });
+      // 利用者ごとの設定（キーの割り当てを入れる。本物と同じく PUT は全部を書き換える）
+      if (u.pathname === "/me/settings") {
+        if (method === "PUT") this.settings = { ...body, updated_at: new Date().toISOString() };
+        return ok(this.settings ?? { language: null, autosave: null, autosave_interval_seconds: null, other: {}, updated_at: null });
+      }
       if (method === "GET" && u.pathname === "/works") return ok([...this.works.entries()].map(([id, w]) => ({ id, title: w.base.work.title })));
       if (method === "POST" && u.pathname === "/works") { const id = hex(); this.works.set(id, { base: this.empty(id, body), events: [], images: new Map(), held: [] }); return ok({ id }, 201); }
       const wid = parts[1];

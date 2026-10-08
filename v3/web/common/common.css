@@ -71,10 +71,10 @@ table.t td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:to
 .dot.stopped,.dot.key_rejected{background:var(--bad)}
 .dot.unchecked{background:var(--need)}
 .dot.paused{background:var(--ink-4)}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;overflow-wrap:anywhere}
+.mono{font-family:var(--font-mono);font-size:12px;overflow-wrap:anywhere}
 .progress{height:6px;border-radius:3px;background:var(--surface-3);overflow:hidden}
-.progress>span{display:block;height:100%;background:var(--ai)}
-img.mini{width:20px;height:20px;object-fit:contain;background:#fff;border-radius:3px}
+.progress>span{display:block;height:100%;background:var(--st-run)}
+img.mini{width:20px;height:20px;object-fit:contain;background:var(--paper);border-radius:3px}
 .col{display:flex;flex-direction:column;gap:16px;min-width:0}
 .seg-r{position:relative;display:inline-flex}
 .seg-r input{position:absolute;opacity:0;pointer-events:none}
@@ -87,3 +87,12 @@ details.more>.form{margin-top:10px}
 .field.short{width:auto;flex:0 1 7em}
 .field.auto{width:auto;flex:0 0 auto}
 .issue>.v{display:flex;flex-direction:column;gap:2px;min-width:0}
+/* 確認の「読み通す」（絵だけのとき。review/review.js）。ページは紙（.paper）で、画面の高さに合わせて大きく出す */
+.reader{display:flex;flex-direction:column;gap:10px;align-items:center;min-height:calc(100vh - 80px)}
+.reader-h{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;justify-content:center}
+.reader-b{display:flex;align-items:center;gap:12px;width:100%;justify-content:center;flex:1 1 auto}
+.reader-page{height:min(78vh,calc((100vw - 120px) * 257 / 182));aspect-ratio:182/257;background:var(--surface);border:1px solid var(--line-2);border-radius:4px;box-shadow:var(--sh-2);
+  display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:clamp(10px,3vh,28px);overflow:auto;min-width:0}
+.reader-page>.list{align-self:stretch}
+.reader-n{font-size:clamp(28px,6vh,56px);font-weight:700;line-height:1}
+.reader-go{flex:0 0 auto}
