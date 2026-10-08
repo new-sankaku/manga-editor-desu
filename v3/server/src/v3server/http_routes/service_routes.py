@@ -13,6 +13,8 @@ from v3server.canonical_tables.service_and_job_tables import (
     Service,
     ServiceProcess,
 )
+from v3server.generation_queue.image_process_registry import SPECS, parse_settings
+from v3server.generation_queue.known_processes import check_process_task
 from v3server.http_routes.http_dependencies import (
     SYSTEM_OBJ,
     ActorDep,
@@ -21,8 +23,6 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
-from v3server.generation_queue.image_process_registry import SPECS, parse_settings
-from v3server.generation_queue.known_processes import check_process_task
 from v3server.operations.ai_involvement import Task
 from v3server.operations.operation_base import work_obj
 from v3server.usage_terms_schema import UsageTerms

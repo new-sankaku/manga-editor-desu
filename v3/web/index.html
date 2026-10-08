@@ -21,7 +21,8 @@
       <select id="pick-panel" class="field" aria-label="コマ"></select>
     </nav>
     <a class="btn sm" id="to-manuscript" href="manuscript/index.html" title="このページを原稿の画面で開く"><i data-lucide="book-open"></i>原稿の画面</a>
-    <label class="who">利用者 <input id="user" class="field" autocomplete="username"></label>
+    <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
+    <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
   </header>
   <nav class="v3-nav" data-v3-nav="workbench"></nav>
 

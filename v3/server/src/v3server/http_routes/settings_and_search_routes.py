@@ -55,7 +55,7 @@ async def put_my_settings(values: UserSettingValues, session: SessionDep, actor:
 
 @router.get("/works/{work_id}/search")
 async def search(work_id: str, q: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
-                 kinds: Annotated[list[str], Query()] = ["text", "name", "setting", "annotation"],
+                 kinds: Annotated[list[str], Query()] = ["text", "name", "setting", "annotation"],  # noqa: B006  FastAPI の既定値。書き換えない
                  page_ids: Annotated[list[str] | None, Query()] = None):
     await require(authz, actor, "can_view", work_obj(work_id))
     return [match_view(obj, field) for obj, field in await find_matches(session, work_id, q, set(kinds), page_ids)]

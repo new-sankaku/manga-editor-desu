@@ -11,11 +11,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
-
-from typing import TYPE_CHECKING
 
 from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, NodeOutput
 
@@ -73,7 +71,7 @@ class DiffusionSettings(_Strict):
 class Extras:
     """処理の引数から決まる、手順に足す物。control は形の指定（ControlNet。controlnet_nodes.py）。"""
 
-    control: "ControlSettings | None"
+    control: ControlSettings | None
 
 
 def add_text_and_extras(g: ComfyNodeGraph, m: LoadedModel, positive_text: str, negative_text: str,

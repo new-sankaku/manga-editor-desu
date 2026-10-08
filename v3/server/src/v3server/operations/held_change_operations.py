@@ -17,6 +17,7 @@ UndoWithHeldChanges：AIの変更で判断待ちを置いた操作の取り消�
 from typing import Any, Literal
 
 from pydantic import Field
+from sqlalchemy import select
 
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
@@ -29,8 +30,6 @@ from v3server.canonical_tables.text_and_layer_tables import (
 )
 from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from sqlalchemy import select
-
 from v3server.operations.human_hand_guard import change_with_human_hand
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
 from v3server.v3_error_types import HumanHandProtected, Invalid

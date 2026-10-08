@@ -2,10 +2,14 @@
 
 - POST /works/{id}/exports：書き出しの依頼（ExportRun）を作り、書き出しの待ち行列に入れる（print_export/export_workflow.py）
   - 権限：PNG・PDF は作品を見られる人、PSD は書き出すページをどれも描ける人（PSD は直して戻すための書き出し）
-  - 解像度（dpi）は必ず渡す。紙の大きさ（paper_mm）は任意（無ければ塗り足し込みのページの大きさ）
+  - 解像度（dpi）は任意。渡すと全ページをその解像度で出す（下見など）。無ければページごとの解像度（ページの dpi か作品の
+    preferences.print）。紙の大きさ（paper_mm）は任意（無ければ塗り足し込みのページの大きさ）
+  - 見開きのページを含むときは spread_output（split・joined・both）が要る（print_export/export_runner.py）
 - GET /works/{id}/exports/{run_id}：状態と出力の一覧。PSD はペンの線が画素になることを note で返す（画面に出す文）
 - GET /works/{id}/exports/{run_id}/files/{name}：書き出したファイル
-- POST /works/{id}/exports/{run_id}/pages/{page_id}/psd：直した PSD を戻す（operations/psd_import_operations.py）
+- POST /works/{id}/exports/{run_id}/pages/{page_id}/psd：直した PSD を戻す（operations/psd_import_operations.py）。
+  見開きを1枚にした PSD は戻せない（未対応）
+- POST /works/{id}/preflight：入稿前の確かめ（print_export/preflight_checks.py）。ページごとの問題と場所を返す
 """
 
 import io
@@ -13,9 +17,9 @@ import pathlib
 from typing import Annotated, Literal
 
 import numpy as np
-from PIL import Image
 from fastapi import APIRouter, File, UploadFile
 from fastapi.responses import FileResponse
+from PIL import Image
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from temporalio.common import Priority
@@ -30,28 +34,36 @@ from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.operations.pen_stroke_operations import StoredResult
-from v3server.operations.text_translation_operations import LANGUAGE_PATTERN
 from v3server.operations.psd_import_operations import ApplyPsdImport, PsdImportEntry
+from v3server.operations.text_translation_operations import LANGUAGE_PATTERN
 from v3server.print_export.export_runner import PSD_STROKE_NOTE, ExportRefused, translated_texts
 from v3server.print_export.export_workflow import EXPORT_QUEUE, ExportRunWorkflow
 from v3server.print_export.page_render import mm_to_px_matrix
+from v3server.print_export.preflight_checks import issues_json, run_preflight
 from v3server.print_export.psd_import_matching import ExportedLayer, import_actions, match_layers, read_psd
+from v3server.print_export.text_render import font_path, measure_texts
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid, NotFound
 
 router = APIRouter()
 
-RUN_FIELDS = ("id", "work_id", "requested_by", "format", "page_ids", "dpi", "paper_mm", "language", "status", "detail",
-              "outputs", "created_at", "updated_at")
+RUN_FIELDS = ("id", "work_id", "requested_by", "format", "page_ids", "dpi", "spread_output", "paper_mm", "language",
+              "status", "detail", "outputs", "created_at", "updated_at")
 
 
 class ExportRequest(BaseModel):
     format: Literal["png", "pdf", "psd"]
     page_ids: list[str] = Field(min_length=1)
-    dpi: int = Field(gt=0, le=2400)
+    dpi: int | None = Field(default=None, gt=0, le=2400)
+    spread_output: Literal["split", "joined", "both"] | None = None
     paper_mm: tuple[float, float] | None = None
     # 言語ごとの書き出し（訳文に差し替える。print_export/export_runner.py の translated_texts）。無ければ元の文字
     language: str | None = Field(default=None, pattern=LANGUAGE_PATTERN)
+
+
+class PreflightRequest(BaseModel):
+    # 確かめるページ。無ければ作品の抜いていない全ページ
+    page_ids: list[str] | None = None
 
 
 async def _require_export(session, authz, actor, work_id: str, fmt: str, page_ids: list[str]) -> None:
@@ -95,7 +107,9 @@ async def start_export(work_id: str, req: ExportRequest, session: SessionDep, au
     if req.language is not None:
         await _check_language(session, work_id, req)
     run = ExportRun(work_id=work_id, requested_by=actor.id, format=req.format, page_ids=req.page_ids, dpi=req.dpi,
-                    paper_mm=list(req.paper_mm) if req.paper_mm else None, language=req.language, status="queued", outputs=[])
+                    spread_output=req.spread_output,
+                    paper_mm=list(req.paper_mm) if req.paper_mm else None, language=req.language, status="queued",
+                    outputs=[])
     session.add(run)
     await session.flush()
     run.workflow_id = f"export-{run.id}"
@@ -107,6 +121,29 @@ async def start_export(work_id: str, req: ExportRequest, session: SessionDep, au
     if req.format == "psd":
         out["note"] = PSD_STROKE_NOTE
     return out
+
+
+@router.post("/works/{work_id}/preflight")
+async def preflight(work_id: str, req: PreflightRequest, session: SessionDep, authz: AuthzDep, actor: ActorDep):
+    """入稿前の確かめ。ページごとの問題（種類・重さ・場所）を返す。正本は変えない。"""
+    work = await session.get(Work, work_id)
+    if work is None:
+        raise NotFound(f"作品 {work_id}")
+    await require(authz, actor, "can_view", work_obj(work_id))
+    if req.page_ids is not None:
+        if len(set(req.page_ids)) != len(req.page_ids):
+            raise Invalid("同じページが2回ある")
+        for pid in req.page_ids:
+            page = await get_in_work(session, Page, pid, work_id)
+            if page.removed:
+                raise Invalid(f"ページ {pid} は抜かれている")
+    s = get_settings()
+    if not s.text_render_script:
+        raise Invalid("V3_TEXT_RENDER_SCRIPT が無い。文字の組み方を確かめられない")
+    issues = await run_preflight(session, work, req.page_ids,
+                                 lambda items: measure_texts(items, s.node_executable, s.text_render_script),
+                                 lambda family: font_path(s.font_dir, family))
+    return issues_json(issues)
 
 
 @router.get("/works/{work_id}/exports/{run_id}")
@@ -140,6 +177,8 @@ async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[Upl
     await operation_submit_and_undo.check_may_submit(
         session, authz, actor, work, ApplyPsdImport(export_run_id=run_id, page_id=page_id, entries=[]))
     run = await get_in_work(session, ExportRun, run_id, work_id)
+    if any(page_id in (o.get("page_ids") or []) for o in run.outputs):
+        raise Invalid("見開きを1枚にした PSD は戻せない（戻す口は1ページずつ。未対応）")
     out = next((o for o in run.outputs if o.get("page_id") == page_id), None)
     if run.format != "psd" or run.status != "done" or out is None:
         raise Invalid("このページを PSD に書き出し終えた記録ではない")
@@ -150,7 +189,7 @@ async def import_psd(work_id: str, run_id: str, page_id: str, psd: Annotated[Upl
     with staged_file(psd.file) as path:
         read = read_psd(path, max_pixels=settings.image_max_pixels, max_layers=settings.psd_max_layers)
     matches = match_layers(read, exported)
-    inv = np.linalg.inv(mm_to_px_matrix(PageSpec.model_validate(work.page_spec), run.dpi))
+    inv = np.linalg.inv(mm_to_px_matrix(PageSpec.model_validate(work.page_spec), out["dpi"]))
     ox, oy = out["offset_px"]
 
     def px_to_mm(x, y):

@@ -41,6 +41,10 @@ class TextItem(Base):
     decoration: Mapped[dict[str, Any] | None] = mapped_column()
     # ルビ（item_styles.py の Ruby の並び）
     ruby: Mapped[list[Any]] = mapped_column(default=list)
+    # 文字の一部の書式（name_structure/print_settings.py の TextSpan の並び：書体・大きさ・太らせる・色）
+    spans: Mapped[list[Any]] = mapped_column(default=list)
+    # 組版（print_settings.py の Typesetting）。無ければ作品の preferences.typesetting
+    typesetting: Mapped[dict[str, Any] | None] = mapped_column()
     # フキダシの形（item_styles.py の BalloonShape）。描き文字・決めていない文字は無い
     balloon_shape: Mapped[dict[str, Any] | None] = mapped_column()
     # 回転（文字の角度）・傾き・反転（name_structure/item_transform.py の ItemTransform）

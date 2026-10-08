@@ -3,24 +3,23 @@
 import asyncio
 from typing import Any, Literal
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from temporalio.client import Client, WithStartWorkflowOperation, WorkflowUpdateRPCTimeoutOrCancelledError
 from temporalio.common import WorkflowIDConflictPolicy
 from temporalio.service import RPCError, RPCStatusCode
 
 from v3server.allowed_destinations import is_allowed
-from sqlalchemy import select
-
 from v3server.canonical_tables.service_and_job_tables import Job, ProcessRoute, Service, ServiceProcess
 from v3server.canonical_tables.work_tree_tables import Page, Work
 from v3server.generation_queue.generation_workflow import GenerationJob, JobInput
+from v3server.generation_queue.input_image_preparation import prepare_input_images
+from v3server.generation_queue.known_processes import check_process_task
 from v3server.generation_queue.queue_names_and_priority import (
     CONTROL_QUEUE,
     QUEUE_ENTRY_WAIT,
     job_priority,
 )
-from v3server.generation_queue.input_image_preparation import prepare_input_images
-from v3server.generation_queue.known_processes import check_process_task
 from v3server.openfga_permissions import Authz
 from v3server.operations.ai_involvement import require_ai_may
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj

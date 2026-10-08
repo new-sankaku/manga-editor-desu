@@ -12,7 +12,7 @@
 import hashlib
 import json
 import re
-from datetime import UTC, datetime, timezone
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, File, Form, UploadFile

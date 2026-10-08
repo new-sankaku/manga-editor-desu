@@ -146,7 +146,7 @@ def check_ruby(text: str, ruby: list[dict] | None) -> None:
     for s, e in spans:
         if e <= s or e > len(text):
             raise ValueError(f"ルビの範囲 {s}〜{e} が文字（{len(text)}文字）の外か、空")
-    for (_, e0), (s1, _) in zip(spans, spans[1:]):
+    for (_, e0), (s1, _) in zip(spans, spans[1:], strict=False):
         if s1 < e0:
             raise ValueError("ルビの範囲が重なっている")
 
@@ -161,12 +161,16 @@ class BalloonShape(_Strict):
     line_width_mm: float | None = Field(default=None, ge=0)
     line_color: Color | None = None
     fill_color: Color | None = None
+    # しっぽ（先は文字の tail_target_mm）。根元の幅と曲がり（しっぽの長さとの比。正は進む向きの左へ、負は右へ膨らむ）。
+    # しっぽの先があるのにどちらかが無ければ、書き出しは止める
+    tail_base_width_mm: float | None = Field(default=None, gt=0)
+    tail_bend_ratio: float | None = Field(default=None, ge=-1, le=1)
 
     @model_validator(mode="after")
     def _kind(self):
         if self.kind == "none":
-            if self.preset or self.outline_mm:
-                raise ValueError("線を描かないフキダシには型も外形も無い")
+            if self.preset or self.outline_mm or self.tail_base_width_mm is not None or self.tail_bend_ratio is not None:
+                raise ValueError("線を描かないフキダシには型も外形もしっぽも無い")
             return self
         if self.outline_mm is None:
             raise ValueError("フキダシの外形（outline_mm）が要る")
@@ -230,12 +234,18 @@ class ToneSpec(_Strict):
     grain_mm: float | None = Field(default=None, gt=0)
     # 絵の乱れを決める種。同じ種なら同じ絵になる
     seed: int | None = None
+    # グラデの終わりの濃さ（0〜1）。始まりは density。グラデは網点にする（白黒の原稿で灰色のまま印刷へ行かないように）
+    density_end: float | None = Field(default=None, ge=0, le=1)
+    # グラデの網点の角度（angle_deg はグラデの向き）と形
+    screen_angle_deg: float | None = None
+    dot_shape: Literal["round", "line", "square"] | None = None
 
     @model_validator(mode="after")
     def _needs(self):
         need = {"dots": ("lines_per_inch",), "lines": ("lines_per_inch",), "sand": ("grain_mm", "seed"),
-                "gradient": (), "snow": ("grain_mm", "seed"), "focus_lines": ("line_count", "center_mm", "inner_ratio",
-                                                                            "seed"),
+                "gradient": ("lines_per_inch", "density_end", "screen_angle_deg", "dot_shape"),
+                "snow": ("grain_mm", "seed"),
+                "focus_lines": ("line_count", "center_mm", "inner_ratio", "seed"),
                 "speed_lines": ("line_count", "seed")}[self.kind]
         missing = [k for k in need if getattr(self, k) is None]
         if missing:

@@ -9,13 +9,13 @@
 
 from typing import Any, Literal
 
+from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import (
     AnnotationItem,
     PageItem,
     PanelTemplate,
     PenStroke,
 )
-from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.text_and_layer_tables import (
     HeldAiChange,
     PanelLayer,

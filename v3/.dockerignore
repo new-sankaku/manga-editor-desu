@@ -1,0 +1,12 @@
+# server/deploy/Dockerfile の文脈（v3/）から外す物
+**/.env
+**/.env.*
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/node_modules
+server/tests
+web/test
+detector_server

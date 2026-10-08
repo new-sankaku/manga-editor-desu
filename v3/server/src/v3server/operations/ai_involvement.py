@@ -56,7 +56,8 @@ ABOUT_TASK = "@about_task"
 # 人が直せる項目と、その項目がどの作業に入るか。表の名前 → {項目: 作業}。
 # 人の手の印を付ける項目も、AIの関与で止める項目も、ここの1か所で決める（human_hand_guard.py もここを読む）
 HUMAN_EDITABLE_FIELDS: dict[str, dict[str, str]] = {
-    "pages": {"layout": "panel_layout"},
+    "pages": {"layout": "panel_layout", "page_kind": "finishing", "color_mode": "finishing", "dpi": "finishing",
+              "nombre_display": "finishing"},
     "panels": {"order": "panel_layout", "frame": "panel_layout", "frame_style": "panel_layout", "role": "name",
                "content": "name", "image_id": "drawing", "image_placement": "drawing", "adjustments": "finishing"},
     "text_items": {"item_kind": "name", "panel_id": "name", "order": "name", "text": "name", "speaker": "name",
@@ -64,7 +65,7 @@ HUMAN_EDITABLE_FIELDS: dict[str, dict[str, str]] = {
                    "box_mm": "finishing", "tail_target_mm": "finishing", "joined_to_previous": "finishing",
                    "font_family": "finishing", "decoration": "finishing", "ruby": "finishing",
                    "balloon_shape": "finishing", "transform": "finishing", "opacity": "finishing",
-                   "adjustments": "finishing"},
+                   "adjustments": "finishing", "spans": "finishing", "typesetting": "finishing"},
     "panel_layers": {"role": "drawing", "image_id": "drawing", "stack_order": "drawing", "visible": "drawing",
                      "opacity": "drawing", "placement": "drawing", "adjustments": "finishing"},
     "page_items": {"panel_id": "finishing", "spec": "finishing", "box_mm": "finishing", "transform": "finishing",
