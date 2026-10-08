@@ -47,8 +47,9 @@ from v3server.v3_error_types import Invalid, NotFound
 
 router = APIRouter()
 
+# done_page_ids：描き終えたページ（進み具合。page_ids の数と比べる）
 RUN_FIELDS = ("id", "work_id", "requested_by", "format", "page_ids", "dpi", "spread_output", "paper_mm", "language",
-              "status", "detail", "outputs", "created_at", "updated_at")
+              "status", "detail", "outputs", "done_page_ids", "created_at", "updated_at")
 
 
 class ExportRequest(BaseModel):

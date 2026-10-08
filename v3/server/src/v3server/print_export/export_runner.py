@@ -18,6 +18,7 @@ Temporal の書き出しの待ち行列（print_export/export_workflow.py）の�
 import io
 import pathlib
 import tempfile
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from PIL import Image
@@ -130,9 +131,14 @@ def _text_renderer():
     return texts, (lambda family: font_path(s.font_dir, family))
 
 
-def _render(content: PageContent, dpi: int) -> RenderedPage:
+def _render(content: PageContent, dpi: float) -> RenderedPage:
     texts, fonts = _text_renderer()
     return render_page(content, dpi, lambda iid: read_image(content.images[iid]), texts, fonts)
+
+
+def render_page_image(content: PageContent, dpi: float) -> Image.Image:
+    """ページ1枚を、層を重ねた RGBA の絵にする（確認の画面の下見。http_routes/page_assignment_and_preview_routes.py）。"""
+    return _render(content, dpi).composite
 
 
 def _render_spread(content: SpreadContent, dpi: int) -> RenderedPage:
@@ -224,7 +230,9 @@ def check_spread_output(fmt: str, spread_output: str | None, has_spread: bool) -
         raise ExportRefused("PSD は見開きを joined（1枚）でしか出せない（層をノドで切らずに渡すため）")
 
 
-async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, Any]]:
+async def run_export(session: AsyncSession, run: ExportRun,
+                     pages_done: Callable[[list[str]], Awaitable[None]]) -> list[dict[str, Any]]:
+    """pages_done には、描き終えたページの id を、ページ（見開きは2ページ）ごとに渡す（進み具合。PDF はファイルを最後に書く）。"""
     s = get_settings()
     if not s.export_dir:
         raise ExportRefused("V3_EXPORT_DIR が無い。書き出したファイルを置く所が無い")
@@ -302,6 +310,7 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
                 rendered = _render(await content_of(plan), dpi)
                 emit(as_output(rendered, plan.color_mode, dpi), rendered.nodes, _file_stem(ps.file_code, plan), dpi,
                      plan.color_mode, plan.page.id, {})
+                await pages_done([plan.page.id])
                 continue
             left, right = unit
             if left.color_mode != right.color_mode:
@@ -322,6 +331,7 @@ async def run_export(session: AsyncSession, run: ExportRun) -> list[dict[str, An
                 for plan in (first, second):
                     emit(halves[plan.spread_half], None, _file_stem(ps.file_code, plan), dpi, plan.color_mode,
                          plan.page.id, {"spread_id": sp.id})
+            await pages_done([first.page.id, second.page.id])
     except (RenderRefused, ColorModeError, TextRenderError) as e:
         raise ExportRefused(str(e)) from e
     if run.format == "pdf":
