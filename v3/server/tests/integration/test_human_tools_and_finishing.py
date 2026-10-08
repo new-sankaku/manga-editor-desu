@@ -392,6 +392,51 @@ async def test_画素の消しゴムは新しい版と人の手の範囲を作�
     panel = await first_panel(api, wid, a, ids["page1"])
     assert panel["image_id"] == new
 
+    # 消すたびに範囲が1つ増える。重ねたマスクは控え（protected_mask_cache）に残し、次は前の控えに新しい範囲だけを重ねる
+    from sqlalchemy import select
+
+    from v3server.canonical_tables.text_and_layer_tables import ProtectedMaskCache
+    from v3server.comfy_graphs.protected_region_mask import protected_mask_png
+    from v3server.database_engine import get_sessionmaker
+    from v3server.image_file_storage import read_image
+
+    async def mask_of(image_id):
+        r = await api.get(f"/works/{wid}/images/{image_id}/protected-mask", headers=h(a))
+        assert r.status_code == 200, r.text
+        return r
+
+    async def cache_counts():
+        async with get_sessionmaker()() as s:
+            return sorted(row.region_count for row in (await s.execute(select(ProtectedMaskCache))).scalars())
+
+    first = await mask_of(new)
+    before = await cache_counts()
+    r = await api.post(f"/works/{wid}/panels/{p['id']}/erase-pixels", headers=h(a),
+                       data={"strokes": json.dumps([{"points": [[2, 2], [2, 6]], "width_px": 2, "opacity": 0.5}])})
+    assert r.status_code == 200, r.text
+    newer = r.json()["image_id"]
+    second = await mask_of(newer)
+    assert second.headers["X-V3-Region-Count"] == "2"
+    assert await cache_counts() == sorted(before + [2])
+    # 控えから作った物は、全部の範囲を1から重ねた物と同じ画素
+    # （この口は、その版に付いた範囲だけを返す。前の版の範囲は前の版から読む）
+    regions = [x for i in (new, newer)
+               for x in (await api.get(f"/works/{wid}/images/{i}/protected-regions", headers=h(a))).json()]
+    assert len(regions) == 2
+    direct = protected_mask_png(*Image.open(io.BytesIO(second.content)).size, [],
+                                [read_image(x["mask_sha256"]) for x in regions])
+    assert Image.open(io.BytesIO(second.content)).tobytes() == Image.open(io.BytesIO(direct)).tobytes()
+    assert (await mask_of(newer)).content == second.content and await cache_counts() == sorted(before + [2])
+    assert (await mask_of(new)).content == first.content
+    # 範囲を外すと並びが変わり、別の控えになる（外した範囲は白に残らない）
+    r = await op(api, wid, a, {"type": "set_protected_region_removed", "id": regions[0]["id"], "removed": True})
+    assert r.status_code == 200, r.text
+    third = await mask_of(newer)
+    assert third.headers["X-V3-Region-Count"] == "1"
+    only = protected_mask_png(*Image.open(io.BytesIO(third.content)).size, [], [read_image(regions[1]["mask_sha256"])])
+    assert Image.open(io.BytesIO(third.content)).tobytes() == Image.open(io.BytesIO(only)).tobytes()
+    assert Image.open(io.BytesIO(third.content)).tobytes() != Image.open(io.BytesIO(second.content)).tobytes()
+
 
 # ---------------------------------------------------------------- 赤入れ・企画・設定資料・探す・設定
 

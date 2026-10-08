@@ -139,6 +139,38 @@ def test_pixel_eraser_makes_mask():
     assert m.getpixel((10, 10)) == 255 and m.getpixel((0, 0)) == 0
 
 
+def test_pixel_eraser_box_matches_whole_image_drawing():
+    """線の範囲だけで計算しても、絵全体に線を描いて引いた（前の作り方）のと同じ画素になる。"""
+    from PIL import ImageChops, ImageDraw
+
+    def whole(base_png, strokes):
+        im = Image.open(io.BytesIO(base_png)).convert("RGBA")
+        alpha, erased = im.getchannel("A"), Image.new("L", im.size, 0)
+        for s in strokes:
+            m = Image.new("L", im.size, 0)
+            d, r = ImageDraw.Draw(m), s.width_px / 2
+            if len(s.points) > 1:
+                d.line(s.points, fill=255, width=max(1, round(s.width_px)), joint="curve")
+            for x, y in s.points:
+                d.ellipse((x - r, y - r, x + r, y + r), fill=255)
+            alpha = ImageChops.subtract(alpha, m.point(lambda v, o=s.opacity: round(v * o)))
+            erased = ImageChops.lighter(erased, m)
+        return np.asarray(alpha), np.asarray(erased.point(lambda v: 255 if v else 0))
+
+    rng = np.random.default_rng(5)
+    a = rng.integers(0, 256, size=(90, 120, 4), dtype=np.uint8)
+    base = _png_bytes(Image.fromarray(a, "RGBA"))
+    for _ in range(25):
+        strokes = [PixelEraserStroke(points=[tuple(map(float, p)) for p in rng.uniform(-20, 140, size=(int(rng.integers(1, 6)), 2))],
+                                     width_px=float(rng.uniform(0.5, 30)), opacity=float(rng.choice([1, .5, .33, .7])))
+                   for _ in range(int(rng.integers(1, 4)))]
+        out, mask = erase_pixels(base, strokes)
+        alpha, erased = whole(base, strokes)
+        assert (np.asarray(Image.open(io.BytesIO(out)))[..., 3] == alpha).all()
+        assert (np.asarray(Image.open(io.BytesIO(out)))[..., :3] == a[..., :3]).all()
+        assert (np.asarray(Image.open(io.BytesIO(mask))) == erased).all()
+
+
 # ---------------------------------------------------------------- ページの層
 
 
