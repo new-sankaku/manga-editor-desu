@@ -685,7 +685,6 @@ function bindUi() {
   $("#pick-page").addEventListener("change", (e) => selectPage(e.target.value).catch(fail));
   $("#pick-panel").addEventListener("change", (e) => selectPanel(e.target.value).catch(fail));
   const user = $("#user");
-  user.value = api.currentUser();
   user.addEventListener("change", () => { api.setUser(user.value.trim()); start(); });
   for (const b of $$(".ftb .tool[data-tool]")) b.addEventListener("click", () => setTool(b.dataset.tool));
   for (const b of $$("#mask-tools button")) b.addEventListener("click", () => { pressed($("#mask-tools"), b); stage.setMaskTool(b.dataset.mask); });
@@ -732,6 +731,19 @@ function bindUi() {
   });
 }
 
+// ログインの方式で右上を変える。oidc はログインした名前とログアウト、dev_header は名前の欄（開発用と出す）
+async function showWho() {
+  const mode = await api.loadAuth();
+  if (mode === "oidc") {
+    $("#who-dev").hidden = true;
+    $("#who-name").textContent = api.myName();
+    $("#who-login").hidden = false;
+  } else {
+    $("#user").value = api.currentUser();
+    api.setUser($("#user").value);
+  }
+}
+
 async function start() {
   if (!api.currentUser()) { showEmpty("右上の「利用者」に名前を入れてください"); return; }
   try { await loadWorks(); } catch (e) { fail(e); }
@@ -744,6 +756,7 @@ stage = new Stage($("#stage"), {
 // 開発者ツールと画面の試験（test/image_generation_ui.mjs）から絵の画素の位置を調べるため
 window.v3Stage = stage;
 bindUi();
+await showWho().catch(fail);
 icons();
 setTool("select");
 start();

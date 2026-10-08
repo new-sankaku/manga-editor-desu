@@ -1,0 +1,298 @@
+# V3 サーバーの本番の形（V3サーバーの土台 1.5）。開発用の compose.yaml とは別に、これだけで全部が立つ。
+#   cp deploy/.env.prod.example .env.prod   # 値を全部入れる。既定値は無い（足りなければ compose が止まる）
+#   docker compose --env-file .env.prod -f compose.prod.yaml up -d --build
+# 外に開くのは Caddy（TLS）だけ。Keycloak の管理画面は 127.0.0.1 の口だけに出す（SSH の転送で使う）。
+# 版は固定する。上げるときは llm_doc/V3サーバーの土台.md 1.5 の表も直す。
+name: v3prod
+
+x-app: &app
+  image: v3-app:${V3_APP_IMAGE_TAG:?}
+  build:
+    context: ..
+    dockerfile: server/deploy/Dockerfile
+  restart: unless-stopped
+  environment: &app-env
+    V3_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@postgres:5432/v3
+    V3_TEMPORAL_ADDRESS: temporal:7233
+    V3_OPENFGA_URL: http://openfga:8080
+    V3_LITELLM_URL: http://litellm:4000
+    LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?}
+    # ログインは Keycloak だけ。開発用の名乗り方はイメージが断る（V3_FORBID_DEV_HEADER=1）
+    V3_AUTH_MODE: oidc
+    V3_OIDC_ISSUER: ${V3_PUBLIC_URL:?}/kc/realms/v3
+    V3_OIDC_DISCOVERY_URL: http://keycloak:8080/kc/realms/v3/.well-known/openid-configuration
+    V3_OIDC_CLIENT_ID: v3-server
+    V3_OIDC_CLIENT_SECRET: ${V3_OIDC_CLIENT_SECRET:?}
+    V3_PUBLIC_URL: ${V3_PUBLIC_URL:?}
+    V3_SESSION_SECRET: ${V3_SESSION_SECRET:?}
+    V3_SESSION_MAX_AGE_SECONDS: ${V3_SESSION_MAX_AGE_SECONDS:?}
+    V3_LOCK_TTL_SECONDS: ${V3_LOCK_TTL_SECONDS:?}
+    V3_IMAGE_STORE: s3
+    V3_S3_ENDPOINT_URL: http://seaweedfs:8333
+    V3_S3_BUCKET: ${V3_S3_BUCKET:?}
+    V3_S3_REGION: ${V3_S3_REGION:?}
+    V3_S3_ACCESS_KEY_ID: ${V3_S3_ACCESS_KEY_ID:?}
+    V3_S3_SECRET_ACCESS_KEY: ${V3_S3_SECRET_ACCESS_KEY:?}
+    V3_NODE_EXECUTABLE: /usr/local/bin/node
+    V3_PSD_WRITER_SCRIPT: /app/psd_writer/write_layered_psd.js
+    V3_TEXT_RENDER_SCRIPT: /app/psd_writer/render_text.js
+    V3_FONT_DIR: /data/fonts
+    V3_EXPORT_DIR: /data/exports
+  volumes:
+    - exports:/data/exports
+    - ${V3_FONT_HOST_DIR:?}:/data/fonts:ro
+
+x-rclone-env: &rclone-env
+  RCLONE_CONFIG_IMAGES_TYPE: s3
+  RCLONE_CONFIG_IMAGES_PROVIDER: SeaweedFS
+  RCLONE_CONFIG_IMAGES_ENDPOINT: http://seaweedfs:8333
+  RCLONE_CONFIG_IMAGES_REGION: ${V3_S3_REGION:?}
+  RCLONE_CONFIG_IMAGES_ACCESS_KEY_ID: ${V3_S3_ACCESS_KEY_ID:?}
+  RCLONE_CONFIG_IMAGES_SECRET_ACCESS_KEY: ${V3_S3_SECRET_ACCESS_KEY:?}
+
+services:
+  # ---- 入口（TLS）
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    environment:
+      V3_SITE_ADDRESS: ${V3_SITE_ADDRESS:?}
+      # 公開の名前なら ACME の連絡先のメール。手元の試験では internal（Caddy の内部の CA）
+      V3_TLS: ${V3_TLS:?}
+    ports:
+      - "${V3_HTTPS_BIND:?}:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+    depends_on:
+      app:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  # ---- アプリ
+  migrate:
+    <<: *app
+    restart: "no"
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    <<: *app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      openfga:
+        condition: service_healthy
+      temporal-namespace:
+        condition: service_completed_successfully
+      bucket:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-m", "v3server.health_checks", "api"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  worker:
+    <<: *app
+    command: ["python", "-m", "v3server.generation_queue.queue_worker_main"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      temporal-namespace:
+        condition: service_completed_successfully
+      bucket:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-m", "v3server.health_checks", "worker"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+
+  # ---- 正本・権限・ログイン・Temporal の保存先（データベースは1つのサーバーにまとめ、控えを1回で取る）
+  postgres:
+    image: postgres:16.15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: v3
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./deploy/postgres-init-prod.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d v3"]
+      interval: 5s
+      retries: 30
+
+  # ---- 順番待ち。本番の形（保存先は PostgreSQL。開発用の start-dev は使わない）
+  temporal-schema:
+    image: temporalio/admin-tools:1.32.0
+    restart: "no"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      SQL_PASSWORD: ${POSTGRES_PASSWORD:?}
+    entrypoint: ["sh", "/deploy/temporal-schema.sh"]
+    volumes:
+      - ./deploy/temporal-schema.sh:/deploy/temporal-schema.sh:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  temporal:
+    image: temporalio/server:1.32.0
+    restart: unless-stopped
+    environment:
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_SEEDS: postgres
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PWD: ${POSTGRES_PASSWORD:?}
+      DBNAME: temporal
+      VISIBILITY_DBNAME: temporal_visibility
+      # 待ち行列の分割1つと、作品ごとの公平さ（開発用の compose と同じ値。V3サーバーの土台 7章）
+      DYNAMIC_CONFIG_FILE_PATH: /etc/temporal/dynamicconfig/v3.yaml
+    volumes:
+      - ./deploy/temporal-dynamicconfig.yaml:/etc/temporal/dynamicconfig/v3.yaml:ro
+    depends_on:
+      temporal-schema:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z $$(hostname -i) 7233"]
+      interval: 5s
+      retries: 30
+
+  temporal-namespace:
+    image: temporalio/admin-tools:1.32.0
+    restart: "no"
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      V3_TEMPORAL_RETENTION: ${V3_TEMPORAL_RETENTION:?}
+    entrypoint: ["sh", "/deploy/temporal-namespace.sh"]
+    volumes:
+      - ./deploy/temporal-namespace.sh:/deploy/temporal-namespace.sh:ro
+    depends_on:
+      temporal:
+        condition: service_healthy
+
+  # ---- 権限
+  openfga-migrate:
+    image: openfga/openfga:v1.22.0
+    restart: "no"
+    command: ["migrate"]
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@postgres:5432/openfga?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  openfga:
+    image: openfga/openfga:v1.22.0
+    restart: unless-stopped
+    command: ["run"]
+    environment:
+      OPENFGA_DATASTORE_ENGINE: postgres
+      OPENFGA_DATASTORE_URI: postgres://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@postgres:5432/openfga?sslmode=disable
+      OPENFGA_PLAYGROUND_ENABLED: "false"
+    depends_on:
+      openfga-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=localhost:8081"]
+      interval: 5s
+      retries: 30
+
+  # ---- ログイン（Keycloak。保存先は同じ PostgreSQL の keycloak）
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.0
+    restart: unless-stopped
+    command: ["start", "--import-realm"]
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:?}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?}
+      # 利用者は Caddy の後ろの /kc を開く。サーバーどうしは http://keycloak:8080/kc で話す
+      KC_HOSTNAME: ${V3_PUBLIC_URL:?}/kc
+      KC_HOSTNAME_ADMIN: http://127.0.0.1:${V3_KEYCLOAK_ADMIN_PORT:?}/kc
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HTTP_RELATIVE_PATH: /kc
+      KC_HTTP_ENABLED: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:?}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?}
+      # realm-v3.json の中の ${...} を埋める
+      V3_PUBLIC_URL: ${V3_PUBLIC_URL:?}
+      V3_OIDC_CLIENT_SECRET: ${V3_OIDC_CLIENT_SECRET:?}
+    ports:
+      - "127.0.0.1:${V3_KEYCLOAK_ADMIN_PORT:?}:8080"
+    volumes:
+      - ./deploy/keycloak/realm-v3.json:/opt/keycloak/data/import/realm-v3.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /kc/health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+      interval: 10s
+      retries: 30
+      start_period: 60s
+
+  # ---- 絵の置き場（S3互換。SeaweedFS）
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48
+    restart: unless-stopped
+    # 1つの volume の大きさ（MB）と、volume の数の上限。上限を自動（0）にすると空きの容量から決まり、
+    # 空きが少ないと最初の書き込みで「書ける volume が無い」になった（2026-10-08 実測）
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333",
+              "-master.volumeSizeLimitMB=${V3_SEAWEEDFS_VOLUME_SIZE_MB:?}", "-volume.max=${V3_SEAWEEDFS_VOLUME_MAX:?}"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${V3_S3_ACCESS_KEY_ID:?}
+      AWS_SECRET_ACCESS_KEY: ${V3_S3_SECRET_ACCESS_KEY:?}
+    volumes:
+      - seaweeddata:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      retries: 30
+
+  # バケットを作る（あれば何もしない）。アプリは無いバケットを作らずに止まる
+  bucket:
+    image: rclone/rclone:1.75.1
+    restart: "no"
+    environment: *rclone-env
+    command: ["mkdir", "images:${V3_S3_BUCKET:?}"]
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+
+  # 控えと戻しで使う道具（deploy/backup.sh・restore.sh から docker compose run で呼ぶ。常には動かさない）
+  rclone:
+    image: rclone/rclone:1.75.1
+    profiles: ["tools"]
+    environment: *rclone-env
+    volumes:
+      - ${V3_BACKUP_HOST_DIR:?}:/backup
+
+  # ---- LLM・VLM の呼び出し口
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.104.1
+    restart: unless-stopped
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?}
+      LITELLM_LOCAL_MODEL_COST_MAP: "True"
+    volumes:
+      - ./docker/litellm.yaml:/app/config.yaml:ro
+
+volumes:
+  pgdata:
+  seaweeddata:
+  caddydata:
+  exports:

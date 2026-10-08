@@ -4,9 +4,12 @@ version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
     "alembic>=1.20.0",
+    "authlib>=1.8.0",
+    "boto3>=1.43.109",
     "fastapi>=0.142.4",
     "httpx>=0.28.1",
     "img2pdf>=0.6.3",
+    "itsdangerous>=2.2.0",
     "kiwisolver>=1.5.1",
     "numpy>=2.5.3",
     "pillow>=12.3.0",
@@ -14,6 +17,7 @@ dependencies = [
     "psycopg[binary]>=3.3.6",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
+    "pyjwt[crypto]>=2.15.1",
     "pypdf>=6.19.0",
     "python-multipart>=0.0.32",
     "sqlalchemy[asyncio]>=2",
@@ -23,8 +27,11 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "boto3-stubs[s3]>=1.43.109",
+    "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.10",
 ]
 
 [build-system]
@@ -39,3 +46,23 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
+
+# lint と型の検査（.github/workflows/v3-server.yml でも流す。V3サーバーの土台 1.7）
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+# 既定（E4・E7・E9・F）に、import の並び（I）・よくある誤り（B）・新しい書き方（UP）・時差の無い時刻（DTZ）を足す
+select = ["E4", "E7", "E9", "F", "I", "B", "UP", "DTZ"]
+
+[tool.ruff.lint.per-file-ignores]
+# 試験は fixture を import して引数の名前で受ける（F811）。conftest は環境変数を決めてから import する（E402）
+"tests/**" = ["F811", "E402"]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "src"
+packages = ["v3server"]
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]

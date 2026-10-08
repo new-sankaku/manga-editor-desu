@@ -6,17 +6,22 @@ import subprocess
 import time
 import uuid
 
-from v3server.database_engine import get_sessionmaker
-from v3server.generation_queue.queue_worker_main import WorkerSet
-from v3server.http_routes.http_app_factory import app
-from v3server.openfga_permissions import open_authz
-from v3server.server_settings import get_settings
-from v3server.service_senders.sender_by_adapter_name import ADAPTERS
-from v3server.service_senders.sender_result_types import AdapterError, AdapterResult
+from sqlalchemy.engine import make_url
 
-TEST_DB = "postgresql+psycopg://v3:v3@localhost:55432/v3_test"
+from v3server.server_settings import Settings, get_settings
+
+# 試験の DB は、.env の V3_DATABASE_URL と同じサーバーの v3_test。利用者は開発用の見出し（X-V3-User）で名乗る
+TEST_DB = make_url(Settings().database_url).set(database="v3_test").render_as_string(hide_password=False)
 os.environ["V3_DATABASE_URL"] = TEST_DB
-os.environ["V3_DEV_AUTH"] = "1"
+os.environ["V3_AUTH_MODE"] = "dev_header"
+get_settings.cache_clear()
+
+from v3server.database_engine import get_sessionmaker  # noqa: E402
+from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
+from v3server.http_routes.http_app_factory import app  # noqa: E402
+from v3server.openfga_permissions import open_authz  # noqa: E402
+from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E402
+from v3server.service_senders.sender_result_types import AdapterError, AdapterResult  # noqa: E402
 
 import httpx  # noqa: E402
 import pytest  # noqa: E402
