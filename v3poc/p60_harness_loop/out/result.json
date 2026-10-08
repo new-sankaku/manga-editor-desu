@@ -16,7 +16,7 @@
   "model": "SD1.5（UNet・文の符号化・VAE を分けた fp16）CPU",
   "evaluator": "Claude CLI sonnet",
   "comfy_for_a": "本物の ComfyUI 0.39.2（CPU）",
-  "comfy_for_b_to_s": "【模型】mock_comfy.py（口だけ ComfyUI と同じ。絵は (a) の本物の絵から選ぶ。1段 3 秒×8段）。絵の良し悪しに関わる数は未検証"
+  "comfy_for_b_to_s": "【モック】mock_comfy.py（口だけ ComfyUI と同じ。絵は (a) の本物の絵から選ぶ。1段 3 秒×8段）。絵の良し悪しに関わる数は未検証"
  },
  "parts": {
   "a": {
@@ -3282,11 +3282,1169 @@
      "exec_seconds": 24.07,
      "status": "success",
      "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "5211d8eb-a02a-566e-b8a8-52c0e3d3ad15",
+     "unit": "ip-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "fffa7a33-8ef0-5b3c-a7f9-6c2c275417bb",
+     "unit": "ip-075013",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "0b7b6637-2e99-599d-9bf1-1b28f52a8394",
+     "unit": "ip-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d2ad8e0b-d9aa-5c0f-9185-2baa6abb7c43",
+     "unit": "ip-075013",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "15e20b70-6aaf-5315-8b5c-17bbdd66c71d",
+     "unit": "is-075013",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e926dc8e-02f1-567c-ae5d-bc989b45db90",
+     "unit": "is-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d5af36de-3b71-5023-9e06-f961a3b18164",
+     "unit": "is-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d9196fc7-695d-5e81-bc91-ce8506bc64c2",
+     "unit": "is-075013",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e94f24fc-8d59-5254-8575-58f2577fe1d8",
+     "unit": "iu-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "f00f538c-b467-5e6c-805b-f34bd24153c3",
+     "unit": "iu-075013",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "b2111eab-78b2-57af-a5d4-34d271019356",
+     "unit": "iu-075013",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e20578ad-50be-5a36-9833-d2f59b17ec13",
+     "unit": "iu-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e9c3b668-8c11-5f13-98f3-27ea661ec524",
+     "unit": "ic-generate-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "733de423-3086-5976-805e-2d630b3577d8",
+     "unit": "ic-check-075013",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "7b4b30e8-c162-51ce-9c0b-2af80a6314ae",
+     "unit": "ic-check-075013",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "163904bb-e7ea-5a43-9376-258541d9ffde",
+     "unit": "ic-check-075013",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e85fb0ab-a6cb-54ac-b74a-ea4874a13898",
+     "unit": "ic-check-075013",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "dc205c59-57c4-5fd5-b2ed-ef3ecfed8e83",
+     "unit": "ip-081056",
+     "exec_seconds": 24.15,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "2c59e300-ff3c-52c4-9876-ccd4b85bf960",
+     "unit": "ip-081056",
+     "exec_seconds": 24.14,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "3c9f49d8-6606-519d-aafd-563c41f408c5",
+     "unit": "ip-081056",
+     "exec_seconds": 24.17,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "63c20a2c-6183-5ddb-859e-73b63e2f0955",
+     "unit": "ip-081056",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "7b0fc036-9769-5b82-bc46-724bb931532c",
+     "unit": "is-081056",
+     "exec_seconds": 24.11,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "168c703f-8748-524d-8462-03505ba0be14",
+     "unit": "is-081056",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "5b76d3a4-13e8-5d82-983a-ace2b84e2a39",
+     "unit": "is-081056",
+     "exec_seconds": 24.15,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "6cf50d85-e9e1-53b6-8281-e07853aea42f",
+     "unit": "is-081056",
+     "exec_seconds": 26.79,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e829ac8c-e0c6-513c-a5ae-f7c0f5eddd22",
+     "unit": "iu-081056",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "77f9235c-e201-5d8f-baee-b953debecf96",
+     "unit": "iu-081056",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d8e884b0-8aee-5f89-91e2-f48cdab99b5d",
+     "unit": "iu-081056",
+     "exec_seconds": 25.65,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "5acbc13b-c437-5b8b-b561-7cff2dc92d18",
+     "unit": "iu-081056",
+     "exec_seconds": 24.22,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "48cfbb38-fc3a-5625-85bc-51febc5d6ff9",
+     "unit": "iu-081056",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "bfafa6b6-ddf2-51ed-bfa9-42d17a63253f",
+     "unit": "iu-081056",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "31a182e0-16a7-5d70-bff5-f4d2c0c597c6",
+     "unit": "iu-081056",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "90a77b19-8e48-5607-948c-0a5a97a60060",
+     "unit": "iu-081056",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "7d479e01-a18b-5e48-b088-f7c581275b28",
+     "unit": "ic-generate-081056",
+     "exec_seconds": 24.11,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "676331de-d48d-587b-8c4d-d7dc351e3407",
+     "unit": "ic-check-081056",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "8654f93e-47ad-515f-8a9c-42634f17fde0",
+     "unit": "ic-evaluate-081056",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "9353da10-09bb-573a-9105-6c6042d69c4c",
+     "unit": "ic-review-081056",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "39f646ef-f712-5e7f-b491-66ecd202024b",
+     "unit": "ic-review-081056",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "96322561-e71f-54f6-93b1-94567931e520",
+     "unit": "ic-review-081056",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "ab358377-ac9e-5155-8ad5-53d03d4faac8",
+     "unit": "ic-review-081056",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "9dd7470f-b4ae-5eb8-8ed4-245bb7f7bb37",
+     "unit": "istage-081056-p1",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "4d9b3857-ec4b-5e01-b64d-f6d5563819a0",
+     "unit": "istage-081056-p2",
+     "exec_seconds": 3.01,
+     "status": "error",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "a7d442b4-a896-5955-9e16-5d64a4e009ea",
+     "unit": "stage-081056-p1",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "6767d283-5cc8-5bec-858b-8d547a939954",
+     "unit": "stage-081056-p2",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "34479ef0-8729-50c7-8c7d-e5d9bce9ff54",
+     "unit": "stage-081056-p3",
+     "exec_seconds": 24.11,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "6767d283-5cc8-5bec-858b-8d547a939954",
+     "unit": "stage-081056-p2",
+     "exec_seconds": 24.06,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "eda76927-9b0f-5ae6-a2d6-fc7829ddde92",
+     "unit": "stage-081056-p1",
+     "exec_seconds": 24.08,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "34479ef0-8729-50c7-8c7d-e5d9bce9ff54",
+     "unit": "stage-081056-p3",
+     "exec_seconds": 24.11,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "13127fcf-6335-527b-9592-76c727c69ef6",
+     "unit": "stage-081056-p2",
+     "exec_seconds": 24.11,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "d9b896bd-3525-5299-b54e-27f607ac8701",
+     "unit": "stage-081056-p3",
+     "exec_seconds": 24.16,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "fe09a384-855b-5379-9619-ccf29e0bcb51",
+     "unit": "stage-081056-p2",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "bbf27413-545c-5add-a9b8-29230c3d9651",
+     "unit": "stage-081056-p2",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "83c62b89-c4e3-54ff-8868-ce6c26bcfb3a",
+     "unit": "stage-081056-p3",
+     "exec_seconds": 24.1,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "e9f72faf-b8ef-58ab-af1a-e03a1074571f",
+     "unit": "stage-081056-p3",
+     "exec_seconds": 24.07,
+     "status": "success",
+     "cached_nodes_msgs": 0
+    },
+    {
+     "pid": "2f85009a-465f-5910-84ac-693760db1ab4",
+     "unit": "stage-081056-p3",
+     "exec_seconds": 24.09,
+     "status": "success",
+     "cached_nodes_msgs": 0
     }
    ]
   },
+  "i": {
+   "pause_resume": {
+    "steps": {
+     "generate": {
+      "node": "generate",
+      "settled_seconds": 12.5,
+      "node_status": "paused",
+      "unit_status": "paused",
+      "comfy_prompt_left": false,
+      "pids": [
+       "dc205c59-57c4-5fd5-b2ed-ef3ecfed8e83"
+      ],
+      "events_after": [
+       "generate:pause_requested",
+       "generate:paused",
+       "generate:paused"
+      ],
+      "resumed_done_after_s": 0.7,
+      "resume_sent_at": 1791447085.3978045
+     },
+     "check": {
+      "node": "check",
+      "settled_seconds": 5.54,
+      "node_status": "done",
+      "unit_status": "paused",
+      "comfy_prompt_left": false,
+      "pids": [],
+      "events_after": [
+       "check:pause_requested",
+       "check:done",
+       "evaluate:paused"
+      ],
+      "resumed_done_after_s": 0.1,
+      "resume_sent_at": 1791447095.2417917
+     },
+     "evaluate": {
+      "node": "evaluate",
+      "settled_seconds": 12.26,
+      "node_status": "paused",
+      "unit_status": "paused",
+      "comfy_prompt_left": false,
+      "pids": [],
+      "events_after": [
+       "evaluate:pause_requested",
+       "evaluate:paused",
+       "evaluate:paused"
+      ],
+      "resumed_done_after_s": 10.7,
+      "resume_sent_at": 1791447111.2304118
+     },
+     "review": {
+      "paused_flag": true,
+      "status": "awaiting_review",
+      "approve_while_paused": null
+     }
+    },
+    "status": "COMPLETED",
+    "state": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 4,
+     "round": 1,
+     "budget": {
+      "seconds": 156.87,
+      "usd": 0.1982
+     },
+     "resets": 1,
+     "candidates": [
+      {
+       "id": "a1c0",
+       "source": "ai",
+       "seed": 801,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "T"
+       },
+       "eval": {
+        "scores": [
+         2,
+         2
+        ],
+        "median": 2.0
+       },
+       "stale": false,
+       "image": "dc205c59-57c4-5fd5-b2ed-ef3ecfed8e83.png",
+       "gen_seconds": 0.11
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1801,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "2c59e300-ff3c-52c4-9876-ccd4b85bf960.png",
+       "gen_seconds": 24.44
+      },
+      {
+       "id": "a3c0",
+       "source": "ai",
+       "seed": 2801,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         1,
+         1
+        ],
+        "median": 1.0
+       },
+       "stale": false,
+       "image": "3c9f49d8-6606-519d-aafd-563c41f408c5.png",
+       "gen_seconds": 24.43
+      },
+      {
+       "id": "a4c0",
+       "source": "ai",
+       "seed": 3801,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "63c20a2c-6183-5ddb-859e-73b63e2f0955.png",
+       "gen_seconds": 24.36
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 4,
+       "total_s": 14.71
+      },
+      "context": {
+       "count": 4,
+       "total_s": 0.29
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.05
+      },
+      "evaluate": {
+       "count": 3,
+       "total_s": 43.68
+      },
+      "generate": {
+       "count": 5,
+       "total_s": 98.19
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": [
+      {
+       "attempt": 1,
+       "ids": [
+        "a1c0"
+       ],
+       "scores": [
+        [
+         2,
+         2
+        ]
+       ]
+      },
+      {
+       "attempt": 3,
+       "ids": [
+        "a3c0"
+       ],
+       "scores": [
+        [
+         1,
+         1
+        ]
+       ]
+      }
+     ]
+    },
+    "counts": {
+     "prompt_posts": 4,
+     "duplicate_posts": 0,
+     "registrations": 4,
+     "duplicate_registrations": 0,
+     "withdrawn": 0,
+     "already_registered_skips": 0,
+     "versions": 1,
+     "duplicate_versions": 0,
+     "claude_calls": 5,
+     "claude_killed": 1,
+     "claude_usd": 0.1983
+    }
+   },
+   "cancel_step": {
+    "steps": {
+     "generate": {
+      "node": "generate",
+      "settled_seconds": 12.06,
+      "node_status": "running",
+      "unit_status": "running",
+      "comfy_prompt_left": false,
+      "pids": [
+       "7b0fc036-9769-5b82-bc46-724bb931532c"
+      ],
+      "events_after": [
+       "generate:cancelled",
+       "generate:running"
+      ]
+     },
+     "limits_k_to_1": null,
+     "check": {
+      "node": "check",
+      "settled_seconds": 3.31,
+      "node_status": "done",
+      "unit_status": "running",
+      "comfy_prompt_left": false,
+      "pids": [],
+      "events_after": [
+       "check:done",
+       "check:regenerate",
+       "context:running"
+      ]
+     },
+     "evaluate": {
+      "node": "evaluate",
+      "settled_seconds": 11.89,
+      "node_status": "cancelled",
+      "unit_status": "awaiting_review",
+      "comfy_prompt_left": false,
+      "pids": [],
+      "events_after": [
+       "evaluate:cancelled",
+       "review:awaiting_review"
+      ]
+     },
+     "review_reason": "判定できない観点がある（評価が終わらなかった）",
+     "approve": null
+    },
+    "status": "COMPLETED",
+    "state": {
+     "status": "done",
+     "stop_reason": "人が採用した",
+     "attempt": 3,
+     "round": 1,
+     "budget": {
+      "seconds": 130.66,
+      "usd": 0.0
+     },
+     "resets": 1,
+     "candidates": [
+      {
+       "id": "a1c1",
+       "source": "ai",
+       "seed": 803,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "168c703f-8748-524d-8462-03505ba0be14.png",
+       "gen_seconds": 24.42
+      },
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1802,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "5b76d3a4-13e8-5d82-983a-ace2b84e2a39.png",
+       "gen_seconds": 24.5
+      },
+      {
+       "id": "a3c0",
+       "source": "ai",
+       "seed": 2802,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "6cf50d85-e9e1-53b6-8281-e07853aea42f.png",
+       "gen_seconds": 30.67
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 3,
+       "total_s": 13.7
+      },
+      "context": {
+       "count": 3,
+       "total_s": 0.23
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 1,
+       "total_s": 0.07
+      },
+      "evaluate": {
+       "count": 1,
+       "total_s": 12.09
+      },
+      "generate": {
+       "count": 4,
+       "total_s": 104.64
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": []
+    },
+    "counts": {
+     "prompt_posts": 4,
+     "duplicate_posts": 0,
+     "registrations": 3,
+     "duplicate_registrations": 0,
+     "withdrawn": 0,
+     "already_registered_skips": 0,
+     "versions": 1,
+     "duplicate_versions": 0,
+     "claude_calls": 1,
+     "claude_killed": 1,
+     "claude_usd": 0
+    }
+   },
+   "upstream_each_step": {
+    "steps": {
+     "generate": {
+      "node": "generate",
+      "settled_seconds": 11.81,
+      "node_status": "stale",
+      "unit_status": "awaiting_review",
+      "comfy_prompt_left": false,
+      "pids": [
+       "e829ac8c-e0c6-513c-a5ae-f7c0f5eddd22"
+      ],
+      "events_after": [
+       "generate:upstream_changed",
+       "generate:stale",
+       "review:awaiting_review"
+      ],
+      "review_reason": "上流が変わった（作り直しは人が頼む）",
+      "stale_candidates": [],
+      "approve_refused": "採用できる候補が無い",
+      "reject": null
+     },
+     "check": {
+      "node": "check",
+      "settled_seconds": 5.42,
+      "node_status": "done",
+      "unit_status": "awaiting_review",
+      "comfy_prompt_left": false,
+      "pids": [],
+      "events_after": [
+       "check:upstream_changed",
+       "check:done",
+       "review:awaiting_review"
+      ],
+      "review_reason": "上流が変わった（作り直しは人が頼む）",
+      "stale_candidates": [
+       "a2c0"
+      ],
+      "approve_refused": "採用できる候補が無い",
+      "reject": null
+     },
+     "evaluate": {
+      "node": "evaluate",
+      "settled_seconds": 12.26,
+      "node_status": "done",
+      "unit_status": "awaiting_review",
+      "comfy_prompt_left": false,
+      "pids": [],
+      "events_after": [
+       "evaluate:upstream_changed",
+       "evaluate:done",
+       "review:awaiting_review"
+      ],
+      "review_reason": "上流が変わった（作り直しは人が頼む）",
+      "stale_candidates": [
+       "a2c0",
+       "a4c0"
+      ],
+      "approve_refused": "採用できる候補が無い",
+      "reject": null
+     },
+     "final_approve": "採用できる候補が無い"
+    },
+    "status": "CANCELED",
+    "state": {
+     "status": "cancelled",
+     "stop_reason": "作業ごと取り消した",
+     "attempt": 8,
+     "round": 4,
+     "budget": {
+      "seconds": 254.2,
+      "usd": 0.7529
+     },
+     "resets": 1,
+     "candidates": [
+      {
+       "id": "a2c0",
+       "source": "ai",
+       "seed": 1803,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 2,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": true,
+       "image": "77f9235c-e201-5d8f-baee-b953debecf96.png",
+       "gen_seconds": 24.5
+      },
+      {
+       "id": "a4c0",
+       "source": "ai",
+       "seed": 3803,
+       "mode": "t2i",
+       "check": {
+        "passed": true,
+        "persons": 1,
+        "touch": "BT"
+       },
+       "eval": {
+        "scores": [
+         1
+        ],
+        "median": 1
+       },
+       "stale": true,
+       "image": "5acbc13b-c437-5b8b-b561-7cff2dc92d18.png",
+       "gen_seconds": 24.55
+      },
+      {
+       "id": "a5c0",
+       "source": "ai",
+       "seed": 4803,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 2,
+        "touch": "B"
+       },
+       "eval": null,
+       "stale": false,
+       "image": "48cfbb38-fc3a-5625-85bc-51febc5d6ff9.png",
+       "gen_seconds": 24.44
+      },
+      {
+       "id": "a6c0",
+       "source": "ai",
+       "seed": 5803,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "bfafa6b6-ddf2-51ed-bfa9-42d17a63253f.png",
+       "gen_seconds": 24.44
+      },
+      {
+       "id": "a7c0",
+       "source": "ai",
+       "seed": 6803,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "31a182e0-16a7-5d70-bff5-f4d2c0c597c6.png",
+       "gen_seconds": 24.37
+      },
+      {
+       "id": "a8c0",
+       "source": "ai",
+       "seed": 7803,
+       "mode": "t2i",
+       "check": {
+        "passed": false,
+        "persons": 0,
+        "touch": ""
+       },
+       "eval": null,
+       "stale": false,
+       "image": "90a77b19-8e48-5607-948c-0a5a97a60060.png",
+       "gen_seconds": 24.51
+      }
+     ],
+     "nodes": {
+      "check": {
+       "count": 6,
+       "total_s": 32.86
+      },
+      "context": {
+       "count": 8,
+       "total_s": 11.34
+      },
+      "cut_out": {
+       "count": 1,
+       "total_s": 0.0
+      },
+      "done": {
+       "count": 0,
+       "total_s": 0.0
+      },
+      "evaluate": {
+       "count": 1,
+       "total_s": 12.13
+      },
+      "generate": {
+       "count": 8,
+       "total_s": 197.87
+      },
+      "review": {
+       "count": 0,
+       "total_s": 0.0
+      }
+     },
+     "disagreements": []
+    },
+    "counts": {
+     "prompt_posts": 8,
+     "duplicate_posts": 0,
+     "registrations": 6,
+     "duplicate_registrations": 0,
+     "withdrawn": 0,
+     "already_registered_skips": 0,
+     "versions": 0,
+     "duplicate_versions": 0,
+     "claude_calls": 2,
+     "claude_killed": 0,
+     "claude_usd": 0.0911
+    }
+   },
+   "cancel_unit_each_step": {
+    "generate": {
+     "node": "generate",
+     "settled_seconds": 12.29,
+     "node_status": "cancelled",
+     "unit_status": "cancelled",
+     "comfy_prompt_left": false,
+     "pids": [
+      "7d479e01-a18b-5e48-b088-f7c581275b28"
+     ],
+     "events_after": [
+      "generate:cancelled",
+      "generate:unit_cancel_requested",
+      "generate:cleanup"
+     ],
+     "status": "CANCELED",
+     "cleanup": [
+      {
+       "interrupted": 0,
+       "removed": 0,
+       "withdrawn": 0
+      }
+     ],
+     "store_orphans": 0,
+     "counts": {
+      "prompt_posts": 1,
+      "duplicate_posts": 0,
+      "registrations": 0,
+      "duplicate_registrations": 0,
+      "withdrawn": 0,
+      "already_registered_skips": 0,
+      "versions": 0,
+      "duplicate_versions": 0,
+      "claude_calls": 0,
+      "claude_killed": 0,
+      "claude_usd": 0
+     }
+    },
+    "check": {
+     "node": "check",
+     "settled_seconds": 2.81,
+     "node_status": "cancelled",
+     "unit_status": "cancelled",
+     "comfy_prompt_left": false,
+     "pids": [],
+     "events_after": [
+      "check:cancelled",
+      "check:unit_cancel_requested",
+      "check:cleanup"
+     ],
+     "status": "CANCELED",
+     "cleanup": [
+      {
+       "interrupted": 0,
+       "removed": 0,
+       "withdrawn": 0
+      }
+     ],
+     "store_orphans": 0,
+     "counts": {
+      "prompt_posts": 1,
+      "duplicate_posts": 0,
+      "registrations": 1,
+      "duplicate_registrations": 0,
+      "withdrawn": 0,
+      "already_registered_skips": 0,
+      "versions": 0,
+      "duplicate_versions": 0,
+      "claude_calls": 0,
+      "claude_killed": 0,
+      "claude_usd": 0
+     }
+    },
+    "evaluate": {
+     "node": "evaluate",
+     "settled_seconds": 12.32,
+     "node_status": "cancelled",
+     "unit_status": "cancelled",
+     "comfy_prompt_left": false,
+     "pids": [],
+     "events_after": [
+      "evaluate:cancelled",
+      "evaluate:unit_cancel_requested",
+      "evaluate:cleanup"
+     ],
+     "status": "CANCELED",
+     "cleanup": [
+      {
+       "interrupted": 0,
+       "removed": 0,
+       "withdrawn": 0
+      }
+     ],
+     "store_orphans": 0,
+     "counts": {
+      "prompt_posts": 1,
+      "duplicate_posts": 0,
+      "registrations": 1,
+      "duplicate_registrations": 0,
+      "withdrawn": 0,
+      "already_registered_skips": 0,
+      "versions": 0,
+      "duplicate_versions": 0,
+      "claude_calls": 2,
+      "claude_killed": 1,
+      "claude_usd": 0.0497
+     }
+    },
+    "review": {
+     "settled_seconds": 0.21,
+     "status": "CANCELED",
+     "cleanup": [
+      {
+       "interrupted": 0,
+       "removed": 0,
+       "withdrawn": 0
+      }
+     ],
+     "store_orphans": 0,
+     "counts": {
+      "prompt_posts": 4,
+      "duplicate_posts": 0,
+      "registrations": 4,
+      "duplicate_registrations": 0,
+      "withdrawn": 0,
+      "already_registered_skips": 0,
+      "versions": 0,
+      "duplicate_versions": 0,
+      "claude_calls": 4,
+      "claude_killed": 0,
+      "claude_usd": 0.1986
+     }
+    }
+   },
+   "cancel_stage": {
+    "stage_status": "CANCELED",
+    "settled_seconds": 14.42,
+    "children": {
+     "istage-081056-p1": {
+      "status": "CANCELED",
+      "cleanup": [
+       {
+        "interrupted": 0,
+        "removed": 0,
+        "withdrawn": 0
+       }
+      ],
+      "store_orphans": 0
+     },
+     "istage-081056-p2": {
+      "status": "CANCELED",
+      "cleanup": [
+       {
+        "interrupted": 1,
+        "removed": 0,
+        "withdrawn": 0
+       }
+      ],
+      "store_orphans": 0
+     },
+     "istage-081056-p3": {
+      "status": "CANCELED",
+      "cleanup": [
+       {
+        "interrupted": 0,
+        "removed": 0,
+        "withdrawn": 0
+       }
+      ],
+      "store_orphans": 0
+     }
+    },
+    "orphans": {
+     "comfy_orphans": 1,
+     "comfy_queue": {
+      "running": [
+       "4d9b3857-ec4b-5e01-b64d-f6d5563819a0"
+      ],
+      "pending": []
+     }
+    },
+    "counts": {
+     "prompt_posts": 3,
+     "duplicate_posts": 0,
+     "registrations": 0,
+     "duplicate_registrations": 0,
+     "withdrawn": 0,
+     "already_registered_skips": 0,
+     "versions": 0,
+     "duplicate_versions": 0,
+     "claude_calls": 0,
+     "claude_killed": 0,
+     "claude_usd": 0
+    }
+   }
+  },
   "s": {
-   "stage": "stage-070734",
+   "stage": "stage-081056",
    "status": "COMPLETED",
    "result": {
     "page": {
@@ -3301,28 +4459,28 @@
       "2": 2,
       "3": 1
      },
-     "page_image": "pages/stage-070734.png",
+     "page_image": "pages/stage-081056.png",
      "passed": true
     },
     "status": "done"
    },
-   "seconds": 357.7,
+   "seconds": 348.6,
    "stage_state": {
     "S0": {
      "detail": "試作では固定の入力（harness_config.py）",
-     "ended": "2026-10-08T07:37:42.031305+00:00",
+     "ended": "2026-10-08T08:37:04.735422+00:00",
      "name": "企画",
      "status": "done"
     },
     "S1": {
      "detail": "試作では固定の入力（harness_config.py）",
-     "ended": "2026-10-08T07:37:42.031305+00:00",
+     "ended": "2026-10-08T08:37:04.735422+00:00",
      "name": "構成",
      "status": "done"
     },
     "S2": {
      "detail": "試作では固定の入力（harness_config.py）",
-     "ended": "2026-10-08T07:37:42.031305+00:00",
+     "ended": "2026-10-08T08:37:04.735422+00:00",
      "name": "設定資料",
      "status": "done"
     },
@@ -3337,9 +4495,9 @@
       "measured": null,
       "passed": true
      },
-     "ended": "2026-10-08T07:37:42.146668+00:00",
+     "ended": "2026-10-08T08:37:04.783391+00:00",
      "name": "ネーム",
-     "started": "2026-10-08T07:37:42.031305+00:00",
+     "started": "2026-10-08T08:37:04.735422+00:00",
      "status": "done"
     },
     "S4": {
@@ -3347,27 +4505,27 @@
       {
        "reason": "人が採用した",
        "status": "done",
-       "unit_id": "stage-070734-p1"
+       "unit_id": "stage-081056-p1"
       },
       {
        "reason": "人が採用した",
        "status": "done",
-       "unit_id": "stage-070734-p2"
+       "unit_id": "stage-081056-p2"
       },
       {
        "reason": "人が採用した",
        "status": "done",
-       "unit_id": "stage-070734-p3"
+       "unit_id": "stage-081056-p3"
       }
      ],
-     "ended": "2026-10-08T07:43:23.810686+00:00",
+     "ended": "2026-10-08T08:42:36.795991+00:00",
      "name": "作画",
-     "started": "2026-10-08T07:37:42.146668+00:00",
+     "started": "2026-10-08T08:37:04.783391+00:00",
      "status": "done"
     },
     "S5": {
      "detail": "試作の対象外（吹き出し・文字は置かない）",
-     "ended": "2026-10-08T07:43:23.810686+00:00",
+     "ended": "2026-10-08T08:42:36.795991+00:00",
      "name": "仕上げ",
      "status": "skipped"
     },
@@ -3384,19 +4542,19 @@
        "2": 2,
        "3": 1
       },
-      "page_image": "pages/stage-070734.png",
+      "page_image": "pages/stage-081056.png",
       "passed": true
      },
-     "ended": "2026-10-08T07:43:24.113282+00:00",
+     "ended": "2026-10-08T08:42:37.049155+00:00",
      "name": "総合",
-     "started": "2026-10-08T07:43:23.810686+00:00",
+     "started": "2026-10-08T08:42:36.795991+00:00",
      "status": "done"
     },
     "S7": {
      "detail": {
-      "page_image": "pages/stage-070734.png"
+      "page_image": "pages/stage-081056.png"
      },
-     "ended": "2026-10-08T07:43:24.113282+00:00",
+     "ended": "2026-10-08T08:42:37.049155+00:00",
      "name": "書き出し",
      "status": "done"
     }
@@ -3405,7 +4563,7 @@
     "all_children_paused": true,
     "comfy_queue_while_paused": {
      "running": [
-      "be178993-30f7-5ba0-9a03-611b8503dc09"
+      "6767d283-5cc8-5bec-858b-8d547a939954"
      ],
      "pending": []
     }
@@ -3413,7 +4571,7 @@
    "approved_via_screen": [
     {
      "waiting": [
-      "stage-070734-p1"
+      "stage-081056-p1"
      ],
      "shot": {
       "name": "approve_0",
@@ -3429,7 +4587,7 @@
     },
     {
      "waiting": [
-      "stage-070734-p2"
+      "stage-081056-p2"
      ],
      "shot": {
       "name": "approve_1",
@@ -3445,7 +4603,7 @@
     },
     {
      "waiting": [
-      "stage-070734-p3"
+      "stage-081056-p3"
      ],
      "shot": {
       "name": "approve_2",
@@ -3461,14 +4619,14 @@
     }
    ],
    "units": {
-    "stage-070734-p1": {
+    "stage-081056-p1": {
      "status": "done",
      "stop_reason": "人が採用した",
      "attempt": 1,
      "round": 1,
      "budget": {
-      "seconds": 129.96,
-      "usd": 0.0997
+      "seconds": 105.51,
+      "usd": 0.1012
      },
      "resets": 0,
      "candidates": [
@@ -3484,14 +4642,14 @@
        },
        "eval": {
         "scores": [
-         3,
-         3
+         4,
+         4
         ],
-        "median": 3.0
+        "median": 4.0
        },
        "stale": false,
-       "image": "49925ad1-cf03-590c-84e0-7ce00ffc47f3.png",
-       "gen_seconds": 0.16
+       "image": "a7d442b4-a896-5955-9e16-5d64a4e009ea.png",
+       "gen_seconds": 0.13
       },
       {
        "id": "a1c1",
@@ -3505,18 +4663,18 @@
        },
        "eval": null,
        "stale": false,
-       "image": "e599177d-5e9b-56dd-b8a1-75a553ab2fde.png",
-       "gen_seconds": 72.07
+       "image": "eda76927-9b0f-5ae6-a2d6-fc7829ddde92.png",
+       "gen_seconds": 48.9
       }
      ],
      "nodes": {
       "check": {
        "count": 2,
-       "total_s": 8.55
+       "total_s": 9.72
       },
       "context": {
        "count": 1,
-       "total_s": 0.09
+       "total_s": 0.06
       },
       "cut_out": {
        "count": 1,
@@ -3524,15 +4682,15 @@
       },
       "done": {
        "count": 1,
-       "total_s": 0.3
+       "total_s": 0.15
       },
       "evaluate": {
        "count": 1,
-       "total_s": 24.51
+       "total_s": 22.05
       },
       "generate": {
        "count": 3,
-       "total_s": 96.81
+       "total_s": 73.68
       },
       "review": {
        "count": 0,
@@ -3542,14 +4700,14 @@
      "disagreements": [],
      "history_length": 67
     },
-    "stage-070734-p2": {
+    "stage-081056-p2": {
      "status": "done",
      "stop_reason": "人が採用した",
      "attempt": 2,
      "round": 1,
      "budget": {
-      "seconds": 226.38,
-      "usd": 0.1008
+      "seconds": 224.78,
+      "usd": 0.1018
      },
      "resets": 0,
      "candidates": [
@@ -3565,8 +4723,8 @@
        },
        "eval": null,
        "stale": false,
-       "image": "be178993-30f7-5ba0-9a03-611b8503dc09.png",
-       "gen_seconds": 24.39
+       "image": "6767d283-5cc8-5bec-858b-8d547a939954.png",
+       "gen_seconds": 24.43
       },
       {
        "id": "a1c1",
@@ -3580,8 +4738,8 @@
        },
        "eval": null,
        "stale": false,
-       "image": "4e90d51c-5f1b-55a8-92df-dafc695e261d.png",
-       "gen_seconds": 72.26
+       "image": "13127fcf-6335-527b-9592-76c727c69ef6.png",
+       "gen_seconds": 72.16
       },
       {
        "id": "a2c0",
@@ -3595,8 +4753,8 @@
        },
        "eval": null,
        "stale": false,
-       "image": "d429a2d3-d90a-57dc-a9dd-90836e377c4d.png",
-       "gen_seconds": 42.89
+       "image": "fe09a384-855b-5379-9619-ccf29e0bcb51.png",
+       "gen_seconds": 33.15
       },
       {
        "id": "a2c1",
@@ -3616,18 +4774,18 @@
         "median": 3.0
        },
        "stale": false,
-       "image": "2d6f01ad-294a-5b69-8c2a-1fbeccff2dcb.png",
-       "gen_seconds": 24.45
+       "image": "bbf27413-545c-5add-a9b8-29230c3d9651.png",
+       "gen_seconds": 24.43
       }
      ],
      "nodes": {
       "check": {
        "count": 4,
-       "total_s": 10.15
+       "total_s": 23.26
       },
       "context": {
        "count": 2,
-       "total_s": 0.32
+       "total_s": 0.49
       },
       "cut_out": {
        "count": 1,
@@ -3635,15 +4793,15 @@
       },
       "done": {
        "count": 1,
-       "total_s": 0.11
+       "total_s": 0.12
       },
       "evaluate": {
        "count": 1,
-       "total_s": 27.3
+       "total_s": 22.14
       },
       "generate": {
        "count": 5,
-       "total_s": 188.61
+       "total_s": 178.89
       },
       "review": {
        "count": 0,
@@ -3653,14 +4811,14 @@
      "disagreements": [],
      "history_length": 97
     },
-    "stage-070734-p3": {
+    "stage-081056-p3": {
      "status": "done",
      "stop_reason": "人が採用した",
      "attempt": 3,
      "round": 1,
      "budget": {
-      "seconds": 327.69,
-      "usd": 0.2968
+      "seconds": 320.53,
+      "usd": 0.297
      },
      "resets": 0,
      "candidates": [
@@ -3676,8 +4834,8 @@
        },
        "eval": null,
        "stale": false,
-       "image": "cbe9029b-c351-5334-844f-94b054cc6858.png",
-       "gen_seconds": 48.78
+       "image": "34479ef0-8729-50c7-8c7d-e5d9bce9ff54.png",
+       "gen_seconds": 72.22
       },
       {
        "id": "a1c1",
@@ -3697,8 +4855,8 @@
         "median": 1.0
        },
        "stale": false,
-       "image": "dfc2780c-565f-5c24-89c5-638cde1b463c.png",
-       "gen_seconds": 72.09
+       "image": "d9b896bd-3525-5299-b54e-27f607ac8701.png",
+       "gen_seconds": 47.99
       },
       {
        "id": "a2c0",
@@ -3718,8 +4876,8 @@
         "median": 1.0
        },
        "stale": false,
-       "image": "ac14896d-0160-5ffe-922d-e464d47f92a3.png",
-       "gen_seconds": 39.68
+       "image": "83c62b89-c4e3-54ff-8868-ce6c26bcfb3a.png",
+       "gen_seconds": 37.74
       },
       {
        "id": "a2c1",
@@ -3733,8 +4891,8 @@
        },
        "eval": null,
        "stale": false,
-       "image": "08e87251-3e9d-5185-87c7-379415f1615b.png",
-       "gen_seconds": 24.43
+       "image": "e9f72faf-b8ef-58ab-af1a-e03a1074571f.png",
+       "gen_seconds": 24.42
       },
       {
        "id": "a3c0",
@@ -3754,18 +4912,18 @@
         "median": 2.0
        },
        "stale": false,
-       "image": "7c4ab8b6-9468-5200-89ac-939a6d98c37e.png",
-       "gen_seconds": 24.36
+       "image": "2f85009a-465f-5910-84ac-693760db1ab4.png",
+       "gen_seconds": 24.41
       }
      ],
      "nodes": {
       "check": {
        "count": 5,
-       "total_s": 21.16
+       "total_s": 21.74
       },
       "context": {
        "count": 3,
-       "total_s": 0.28
+       "total_s": 0.29
       },
       "cut_out": {
        "count": 1,
@@ -3773,15 +4931,15 @@
       },
       "done": {
        "count": 1,
-       "total_s": 0.05
+       "total_s": 0.04
       },
       "evaluate": {
        "count": 3,
-       "total_s": 72.21
+       "total_s": 66.7
       },
       "generate": {
        "count": 6,
-       "total_s": 234.04
+       "total_s": 231.8
       },
       "review": {
        "count": 0,
@@ -3845,7 +5003,7 @@
     "node_detail": {
      "name": "node_detail",
      "errors": [],
-     "detail": "ノードの詳細　stage-070734-p1 / 検査\n✓ 完了\n回数 2\n使った時間 9秒\n{\n \"passed\": false,\n \"persons\": 2,\n \"touch\": \"B\"\n}\n出来事（新しい30件）\n07:39:24 回1 running \n07:39:27 回1 done {\"passed\":true,\"persons\":1,\"touch\":\"\"}\n07:39:27 回1 r"
+     "detail": "ノードの詳細　stage-081056-p1 / 検査\n✓ 完了\n回数 2\n使った時間 10秒\n{\n \"passed\": false,\n \"persons\": 2,\n \"touch\": \"B\"\n}\n出来事（新しい30件）\n08:38:24 回1 running \n08:38:28 回1 done {\"passed\":true,\"persons\":1,\"touch\":\"\"}\n08:38:28 回1 "
     },
     "stage_done": {
      "name": "stage_done",
@@ -3863,7 +5021,7 @@
     "duplicate_versions": 0,
     "claude_calls": 10,
     "claude_killed": 0,
-    "claude_usd": 0.4973
+    "claude_usd": 0.5
    },
    "orphans": {
     "comfy_orphans": 0,
@@ -3875,22 +5033,22 @@
   }
  },
  "node_seconds_mean_per_run": {
-  "check": 104.67,
-  "context": 43.36,
+  "check": 94.09,
+  "context": 39.08,
   "cut_out": 0.0,
-  "generate": 502.6,
-  "done": 0.12,
-  "evaluate": 19.33
+  "generate": 454.35,
+  "done": 0.09,
+  "evaluate": 16.46
  },
  "comfy_exec_seconds": {
-  "n": 44,
+  "n": 98,
   "median": 24.08,
   "min": 24.06,
-  "max": 24.16
+  "max": 26.79
  },
  "eval_spread": {
-  "n": 9,
-  "same": 8,
+  "n": 11,
+  "same": 10,
   "diff1": 1,
   "diff2plus": 0
  },
@@ -3946,6 +5104,91 @@
    "other": 0
   },
   "stage-070734-p3": {
+   "success": 5,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ip-075013": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "is-075013": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "iu-075013": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ic-generate-075013": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ic-check-075013": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ip-081056": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "is-081056": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "iu-081056": {
+   "success": 8,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ic-generate-081056": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ic-check-081056": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ic-evaluate-081056": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "ic-review-081056": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "istage-081056-p1": {
+   "success": 1,
+   "interrupted": 0,
+   "other": 0
+  },
+  "istage-081056-p2": {
+   "success": 0,
+   "interrupted": 1,
+   "other": 0
+  },
+  "stage-081056-p1": {
+   "success": 2,
+   "interrupted": 0,
+   "other": 0
+  },
+  "stage-081056-p2": {
+   "success": 4,
+   "interrupted": 0,
+   "other": 0
+  },
+  "stage-081056-p3": {
    "success": 5,
    "interrupted": 0,
    "other": 0

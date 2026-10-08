@@ -380,6 +380,8 @@ async def scenario_i() -> None:
         log("(i upstream)", node, r.get("settled_seconds"), r.get("comfy_prompt_left"))
     s, _ = await wait_for(h, lambda s, d: awaiting(s, d) and s["round"] == 4, what="最後の判断待ち")
     res["final_approve"] = await refused_update(h, "review", {"action": "approve"})
+    if res["final_approve"] is not None:  # 採用できる候補が無い（検査が全部不合格）ときは作業を取り消して終える
+        await h.cancel()
     r, status = await finished(h)
     out["upstream_each_step"] = {"steps": res, "status": status, "state": brief(await st(h)), "counts": counts_for([u])}
 
@@ -555,7 +557,7 @@ def collect() -> None:
     res = {"settings": {"width": WIDTH, "height": HEIGHT, "limits_default": DEFAULT_LIMITS,
                         "model": "SD1.5（UNet・文の符号化・VAE を分けた fp16）CPU", "evaluator": "Claude CLI sonnet",
                         "comfy_for_a": "本物の ComfyUI 0.39.2（CPU）",
-                        "comfy_for_b_to_s": "【模型】mock_comfy.py（口だけ ComfyUI と同じ。絵は (a) の本物の絵から選ぶ。"
+                        "comfy_for_b_to_s": "【モック】mock_comfy.py（口だけ ComfyUI と同じ。絵は (a) の本物の絵から選ぶ。"
                                             "1段 3 秒×8段）。絵の良し悪しに関わる数は未検証"},
            "parts": parts}
     # (e) 段ごとの時間（全部の作業の state の nodes から）

@@ -77,11 +77,11 @@ def start_comfy() -> None:
         return
     COMFY_OUT.mkdir(parents=True, exist_ok=True)
     COMFY_IN.mkdir(parents=True, exist_ok=True)
-    if os.environ.get("P60_COMFY_MOCK") == "1":  # 【模型】口だけ ComfyUI と同じ物（mock_comfy.py）
+    if os.environ.get("P60_COMFY_MOCK") == "1":  # 【モック】口だけ ComfyUI と同じ物（mock_comfy.py）
         here = Path(__file__).resolve().parent
         _spawn("comfy", [str(POC_PY), str(here / "mock_comfy.py")], here)
         if not _wait(COMFY_URL + "/system_stats", 60):
-            raise RuntimeError("ComfyUI の模型が起きない")
+            raise RuntimeError("ComfyUI のモックが起きない")
         return
     _spawn("comfy", [str(COMFY_DIR / "venv/bin/python"), str(COMFY_DIR / "ComfyUI/main.py"), "--cpu", "--port",
                      str(COMFY_PORT), "--listen", "127.0.0.1", "--preview-method", "latent2rgb",
