@@ -17,7 +17,7 @@ from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.print_export.page_render import MM_PER_INCH, RenderRefused, text_job
 from v3server.print_export.text_render import TextRenderError, font_path, layout_texts
 from v3server.server_settings import get_settings
-from v3server.v3_error_types import Invalid
+from v3server.v3_error_types import Invalid, NotFound
 
 router = APIRouter()
 
@@ -35,6 +35,8 @@ async def typeset_text(work_id: str, text_id: str, body: TypesetBody, session: S
     if t.box_mm is None:
         raise Invalid(f"文字 {text_id} の箱（box_mm）が決まっていない")
     work = await session.get(Work, work_id)
+    if work is None:
+        raise NotFound(f"works:{work_id}")
     s = get_settings()
     if not s.text_render_script:
         raise Invalid("V3_TEXT_RENDER_SCRIPT が無い。文字を組めない")

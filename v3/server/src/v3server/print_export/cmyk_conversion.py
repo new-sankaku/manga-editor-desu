@@ -69,7 +69,7 @@ def to_cmyk(img: Image.Image, icc_dir: str | None, co: ColorOutput) -> Image.Ima
         raise CmykRefused(f"CMYK にするのは RGB の絵だけ（{img.mode}）")
     path = profile_path(icc_dir, co)
     t, icc = _transform(str(path), path.stat().st_mtime_ns, co.intent, co.black_point_compensation)
-    out = ImageCms.applyTransform(img, t)
+    out = t.apply(img)
     out.info["icc_profile"] = icc
     return out
 

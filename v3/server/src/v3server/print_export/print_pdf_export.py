@@ -86,7 +86,7 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float | S
     canvas_mm = canvas_size_mm(spec)
     if paper_mm is not None and (paper_mm[0] < canvas_mm[0] or paper_mm[1] < canvas_mm[1]):
         raise ValueError(f"紙 {paper_mm}mm が塗り足し込みのページ {canvas_mm}mm より小さい")
-    dpis = list(dpi) if isinstance(dpi, (list, tuple)) else [dpi] * len(pages)
+    dpis: list[float] = [float(dpi)] * len(pages) if isinstance(dpi, (int, float)) else list(dpi)
     if len(dpis) != len(pages):
         raise ValueError(f"dpi の数 {len(dpis)} がページの数 {len(pages)} と違います")
     for i, (page, d) in enumerate(zip(pages, dpis, strict=False)):
@@ -103,11 +103,11 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float | S
     bleed_pt = spec.bleed_mm / _MM_PER_INCH * _PT_PER_INCH
     mx = (w_mm - canvas_mm[0]) / 2 / _MM_PER_INCH * _PT_PER_INCH
     my = (h_mm - canvas_mm[1]) / 2 / _MM_PER_INCH * _PT_PER_INCH
-    for page in writer.pages:
-        media = page.mediabox
+    for pdf_page in writer.pages:
+        media = pdf_page.mediabox
         left, bottom = float(media.left) + mx, float(media.bottom) + my
         right, top = float(media.right) - mx, float(media.top) - my
-        page.bleedbox = pypdf.generic.RectangleObject([left, bottom, right, top])
-        page.trimbox = pypdf.generic.RectangleObject([left + bleed_pt, bottom + bleed_pt, right - bleed_pt, top - bleed_pt])
+        pdf_page.bleedbox = pypdf.generic.RectangleObject([left, bottom, right, top])
+        pdf_page.trimbox = pypdf.generic.RectangleObject([left + bleed_pt, bottom + bleed_pt, right - bleed_pt, top - bleed_pt])
     with open(output_path, "wb") as f:
         writer.write(f)

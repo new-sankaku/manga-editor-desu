@@ -180,6 +180,9 @@ async def _check_images(session: AsyncSession, plan: PagePlan, placed: list[tupl
                                 {**loc, "effective_dpi": round(eff, 1)}))
         if plan.color_mode in ("bilevel", "grayscale"):
             f = await session.get(ImageFile, image_id)
+            if f is None:
+                issues.append(Issue(pid, "image_resolution", "error", f"絵 {image_id} が無い", loc))
+                continue
             if has_color(Image.open(io.BytesIO(read_image(f.sha256)))):
                 mode = {"bilevel": "2階調", "grayscale": "グレー"}[plan.color_mode]
                 issues.append(Issue(pid, "color_image", "warning",
