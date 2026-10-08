@@ -178,10 +178,10 @@
 | 赤入れ | `annotation_items`。`add_annotation`・`update_annotation`（文・範囲・作業・済み）・`set_removed(annotation)`。AIが付けるのは、その作業の検査の関与で許されているときだけ。赤入れから依頼を作る口 `POST /works/{id}/annotations/{id}/job`（依頼に赤入れの文と範囲を添え、`record_annotation_job` で赤入れに残す）。権限は赤入れを付けられる人（can_comment） |
 | ペン | 線（`pen_strokes`）が正本。1本ずつの物で、点（x・y・筆圧・時刻）の並び・筆（今のアプリの12種）・太さ・色・不透明度・乱れの種（seed）を持つ。`add_pen_strokes`・`update_pen_strokes`（何本でもまとめて動かす・太さ・色・不透明度・筆を変える）・`remove_pen_strokes`。人だけが出せる。層の絵は線から作った控えで、画面が描いて口 `POST /works/{id}/layers/{id}/stroke-cache`（`set_stroke_cache`）で上げる。層は線の版（`stroke_revision`）と、控えを作った版（`image_stroke_revision`）を持ち、違えば古い控えとして、AIへ渡す依頼と書き出しを止める |
 | 消しゴム | 線の消しゴム `erase_pen_strokes`：線ごと（whole）・交わりまで（to_crossings）・触れた所だけ（touched。線が分かれる）。答えは線のデータ。線を持たない絵（AIの絵の層・コマの1枚の絵）は画素の消しゴム `POST /works/{id}/panels/{id}/erase-pixels`（`erase_pixels`）で、新しい版（human_edited）と、消した所の人の手の範囲（マスク）を作る |
-| 文字（写植・描き文字） | `text_items` に書体（`font_family`）・飾り（`decoration`：塗り・縁・光彩・影・残像・帯・字間）・ルビ（`ruby`）・置き方（`transform`）・不透明度・仕上げを足した。描き文字はフキダシの形を持たない |
+| 文字（写植・描き文字） | `text_items` に書体（`font_family`）・飾り（`decoration`：塗り・縁・光彩・影・残像・帯・字間）・ルビ（`ruby`）・置き方（`transform`）・不透明度・仕上げを足した。文字の一部の書式（`spans`：書体・大きさの比・太らせる幅・色）と組版（`typesetting`：行間・自動の改行・縦中横・揃え。無ければ作品の `preferences.typesetting`）も持つ。禁則・縦中横・約物の向き・自動の改行は書き出しの組版（`v3/psd_writer/text_layout.js`。`V3サーバーの土台.md` 3.5）。描き文字はフキダシの形を持たない |
 | コマ枠 | 枠を動かす：`update_panel.frame`。分ける `split_panel`・合わせる `merge_panels` は1つの操作で、1回で取り消せる（10.1 の決まり：細すぎる分け方は閾値 `panel_short_side_min_mm` で断る。絵は大きい側に残る。隣り合わない2つは合わせない）。枠の線と塗り：`update_panel.frame_style`（無ければ作品の `preferences.frame_style`） |
 | ナイフ | `split_panel`（横・縦・斜め。斜めは角度。間の幅は `gap_mm`、無ければ作品のコマの間） |
-| フキダシ | `update_text_item` の `box_mm`・`tail_target_mm`・`text`・`balloon_shape`（型の名前と、箱に合わせた外形・線・塗り。自分で描いた形も外形で持つ） |
+| フキダシ | `update_text_item` の `box_mm`・`tail_target_mm`・`text`・`balloon_shape`（型の名前と、箱に合わせた外形・線・塗り・しっぽの根元の幅と曲がり。自分で描いた形も外形で持つ）。書き出しはしっぽを外形と1つの形にして描き、`joined_to_previous` のフキダシもつなげる |
 | トーン | `page_items`（`item_kind=tone`）。網点・線・砂目・グラデ・雪・集中線・スピード線、線数・濃さ・角度・本数・中心、貼る所（コマ・囲む・塗る＝マスクの絵）。`add_page_item`・`update_page_item` |
 | 図形 | `page_items`（`item_kind=shape`）。四角・楕円・多角形・線・絵記号（名前と外形）、線・塗り・影 |
 | 手のひら | 画面だけ |
@@ -205,8 +205,8 @@
 | 手順・モデル・シード・参照 | 手順・モデル：`service_processes`。シード：依頼の `overrides`、記録は `call_logs.seed`。参照：`input_images` の purpose=reference。人物ごとの生成の設定：設定資料の `generation`（指示文・否定の指示文・LoRA・参照の絵・シード） |
 | 設定資料（人物・小物・背景・その他） | `material_entries`（名前・特徴・服・絵・生成の設定・メモ）。`add_material_entry`・`update_material_entry`・`set_removed(material_entry)`。AIが足すと案（proposed）で、人が `decide_material_proposal` で採る |
 | あらすじ・読者・人物を抜き出す・入れないもの | `work_plans`（`set_work_plan`）。人物を抜き出す：口 `POST /works/{id}/plan/extract-characters`（extract_characters。答えの人物はAIの案として設定資料に入る） |
-| ページを足す・画像から足す・取り込む | ページを足す：`add_page`。画像から足す・取り込む：絵の口と `name-imports`。絵からコマを見つける解析は外（manga-analyzer） |
-| 画像の書き出し・コピー・解像度・紙の大きさ | 口 `POST /works/{id}/exports`（形：png・pdf・psd、ページ、解像度、紙の大きさ）。書き出しは書き出しの待ち行列（Temporal の v3-export）で行い、`GET /works/{id}/exports/{id}` で状態、`.../files/{name}` でファイル。紙の大きさを渡すと、ページを紙の真ん中に置く。コピーは画面だけ。直した PSD を戻す口 `POST /works/{id}/exports/{id}/pages/{page}/psd`（`apply_psd_import`） |
+| ページを足す・画像から足す・取り込む | ページを足す：`add_page`。並べ替える：`reorder_pages`。見開き：`add_spread`・`update_spread`（見開きにまたがる絵）・`set_removed(spread)`。ページの種類・色の種類・解像度・ノンブルの出し方：`update_page`（どれも人だけ）。画像から足す・取り込む：絵の口と `name-imports`。絵からコマを見つける解析は外（manga-analyzer） |
+| 画像の書き出し・コピー・解像度・紙の大きさ | 口 `POST /works/{id}/exports`（形：png・pdf・psd、ページ、解像度（無ければページごと）、見開きの出し方、紙の大きさ）。色の種類（2階調・グレー・カラー）と解像度はページごと、ノンブルは作品の `preferences.nombre`。入稿前の確かめ：口 `POST /works/{id}/preflight`（`V3サーバーの土台.md` 3.5）。書き出しは書き出しの待ち行列（Temporal の v3-export）で行い、`GET /works/{id}/exports/{id}` で状態、`.../files/{name}` でファイル。紙の大きさを渡すと、ページを紙の真ん中に置く。コピーは画面だけ。直した PSD を戻す口 `POST /works/{id}/exports/{id}/pages/{page}/psd`（`apply_psd_import`） |
 | マス目・基本枠・印の表示 | 基本枠：`page_spec`。表示は画面だけ |
 | 言語・自動保存・設定 | 利用者ごと：口 `GET/PUT /me/settings`（その人だけの物なので操作の窓口の外）。作品ごと：`set_work_settings.preferences`（言語・文字の種類ごとの書体・コマ枠の標準・自動保存の間隔） |
 | 探す・置き換え | 探す：口 `GET /works/{id}/search`（文字・話す人・設定資料・企画・赤入れ）。置き換え：`replace_text`（当たった全部を1回で変え、1回で取り消せる。ルビの付いた文字で字数が変わる所は止める） |
