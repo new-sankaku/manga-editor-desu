@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>V3 画像生成</title>
 <link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="common/nav.css">
 <script src="vendor/fabric-7.4.0/fabric.min.js"></script>
 <script src="vendor/lucide-0.468.0/lucide.min.js"></script>
 </head>
@@ -22,6 +23,7 @@
     <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
     <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
   </header>
+  <nav class="v3-nav" data-v3-nav="workbench"></nav>
 
   <div class="ws">
     <section class="canvas" aria-label="コマの絵">
@@ -162,6 +164,7 @@
   <p class="meta">描き足すにはキーがありません（O は読む順に使います）。</p>
 </dialog>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="v3-lum-to-alpha"><feColorMatrix type="luminanceToAlpha"/></filter></svg>
+<script type="module" src="common/nav.js"></script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -12,6 +12,7 @@ export async function loadAuth() {
   const r = await fetch("/auth/mode");
   if (!r.ok) throw new ApiError(r.status, await r.text());
   authMode = (await r.json()).mode;
+  if (authMode === "dev_header") memoUser = currentUser();
   if (authMode === "oidc") {
     const m = await fetch("/auth/me");
     if (m.status === 401) { toLogin(); return new Promise(() => {}); }
@@ -43,18 +44,19 @@ export class ApiError extends Error {
   }
 }
 
-async function call(method, path, { json, form, raw } = {}) {
-  const headers = { "X-V3-Request": "1" };
+// 口を呼ぶ所はここ1か所（作品をまたぐ画面の common/shell.js の raw もここを通す）。名乗りの見出しと
+// X-V3-Request を付け、届かなければ NetworkError、oidc で 401 ならログインの画面へ移る
+export async function authFetch(path, init = {}) {
+  const headers = { ...(init.headers || {}), "X-V3-Request": "1" };
   if (authMode === "dev_header") {
     if (!memoUser) throw new ApiError(401, "利用者の名前を入れてください");
     headers["X-V3-User"] = memoUser;
+  } else if (authMode !== "oidc") {
+    throw new ApiError(0, "名乗り方を読む前に口を呼んだ（先に loadAuth を呼ぶ）");
   }
-  let body;
-  if (json !== undefined) { headers["Content-Type"] = "application/json"; body = JSON.stringify(json); }
-  if (form !== undefined) body = form;
   let r;
   try {
-    r = await fetch(path, { method, headers, body });
+    r = await fetch(path, { ...init, headers });
   } catch (e) {
     // fetch が答えを受け取れない（回線が切れた・サーバーが止まった）。英語の「Failed to fetch」をそのまま見せない
     throw new NetworkError(navigator.onLine === false
@@ -62,6 +64,15 @@ async function call(method, path, { json, form, raw } = {}) {
       : "サーバーにつながりません。サーバーが止まっているか、回線が切れています");
   }
   if (r.status === 401 && authMode === "oidc") { toLogin(); return new Promise(() => {}); }
+  return r;
+}
+
+async function call(method, path, { json, form, raw } = {}) {
+  const headers = {};
+  let body;
+  if (json !== undefined) { headers["Content-Type"] = "application/json"; body = JSON.stringify(json); }
+  if (form !== undefined) body = form;
+  const r = await authFetch(path, { method, headers, body });
   if (raw) {
     if (!r.ok) throw new ApiError(r.status, await r.text());
     return r;
