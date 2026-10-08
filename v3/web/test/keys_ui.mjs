@@ -87,6 +87,9 @@ function answer(method, path, body, user) {
   // 工程の画面：今の状態（流れの続きは送らない。つないだままにする）
   if (method === "GET" && p === "/works/w1/harness/snapshot") return j(HARNESS);
   if (method === "GET" && p === "/works/w1/harness/review-items") return j({ items: [] });
+  if (method === "GET" && p === "/works/w1/harness/thresholds") return j({ thresholds: [] });
+  if (method === "GET" && p === "/works/w1/harness/notifications") return j({ notifications: [] });
+  if (method === "GET" && p === "/works/w1/harness/notification-settings") return j({ kinds: [], settings: null });
   if (method === "GET" && p === "/works/w1/image-processes") return j([]);
   if (method === "GET" && p === "/works/w1/review-records") return j(RECORDS);
   if (method === "GET" && p === "/works/w1/panels/pn1/layers") return j({ panel: {}, layers: [] });
@@ -124,6 +127,7 @@ takeShot = makeShot(page, { onSize: (name, kb) => check(kb < 1024, `${name}.png 
 const errors = [];
 page.on("pageerror", (e) => errors.push(`pageerror: ${e.message} ${e.stack}`));
 page.on("console", (m) => { if (m.type() === "error") errors.push(`console: ${m.text()}`); });
+page.on("response", (r) => { if (r.status() === 404) errors.push(`404: ${r.url()}`); });
 page.on("dialog", (d) => d.accept());
 await install(page);
 
