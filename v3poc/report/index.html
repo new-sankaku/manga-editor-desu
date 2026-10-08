@@ -515,7 +515,7 @@ figcaption{font-size:12px;color:var(--ink-3);margin-top:2px}
 <section id="p26">
   <h2>画像編集で写真風にならないか・背景が勝手に変わらないか</h2>
   <p class="rows">一覧 1-15・1-17 ／ <code>v3poc/p26_edit/</code></p>
-  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>編集のモデル</th><td>Qwen-Image 2.1（int8、Apache-2.0）。ComfyUI 標準の編集の文の部品に元の絵を渡す</td></tr><tr><th>中身</th><td>P17 の a（食べる）と b（走る）× 編集5種（物を持たせる・笑わせる・座らせる・後ろ向き・海辺の背景）× seed 2。20枚の予定で14枚まで作った</td></tr></table></div></details>
+  <details class="cond"><summary>条件（何を渡して何で作ったか）</summary><div class="tw"><table><tr><th>編集のモデル</th><td>Qwen-Image 2.1（int8。Qwen Research License で非商用）。ComfyUI 標準の編集の文の部品に元の絵を渡す</td></tr><tr><th>中身</th><td>P17 の a（食べる）と b（走る）× 編集5種（物を持たせる・笑わせる・座らせる・後ろ向き・海辺の背景）× seed 2。20枚の予定で14枚まで作った</td></tr></table></div></details>
   <ul><li>写真風になったのは0。同一キャラ判定は14/14で同じ人。</li>
   <li>カップを持たせる・笑わせる（b）は、ほかを保ったまま効いた。後ろ向きは効いた（1枚で三つ編みが消えた）。</li>
   <li class="bad">海辺の背景に変えると背景だけカラーになり、白黒の人物と合わない。</li>

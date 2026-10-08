@@ -1,5 +1,5 @@
 """P26 画像編集で写真風にならないか・ポーズを大きく変える編集で構造が保てるか・編集で背景が勝手に変わらないか（一覧 1-15・1-17）。
-編集のモデル：Qwen-Image 2.1（int8、ComfyUI 標準の TextEncodeQwenImage21 に元の絵を渡す。Apache-2.0）。
+編集のモデル：Qwen-Image 2.1（int8、ComfyUI 標準の TextEncodeQwenImage21 に元の絵を渡す。Qwen Research License で非商用。当時は Apache-2.0 と誤って書いていた）。
 元の絵：P17 の a（食べる・上半身）と b（走る・全身）。編集5種 × seed 2。
 判定：写実の判定器・白黒の判定器・同一キャラ判定（CCIP）・人物の枠の外の画素の変化（analyze.py）と目。
 使い方: python run.py"""
