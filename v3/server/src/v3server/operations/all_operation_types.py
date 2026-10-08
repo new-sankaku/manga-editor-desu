@@ -10,6 +10,7 @@ from v3server.operations.annotation_operations import (
     RecordAnnotationJob,
     UpdateAnnotation,
 )
+from v3server.operations.book_structure_operations import AddSpread, ReorderPages, UpdateSpread
 from v3server.operations.held_change_operations import ResolveHeldChange, UndoWithHeldChanges
 from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
 from v3server.operations.image_file_operations import (
@@ -138,6 +139,9 @@ Op = Annotated[
         DecideMaterialProposal,
         ReplaceText,
         ApplyPsdImport,
+        ReorderPages,
+        AddSpread,
+        UpdateSpread,
     ],
     Field(discriminator="type"),
 ]

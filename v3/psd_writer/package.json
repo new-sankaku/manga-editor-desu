@@ -4,11 +4,14 @@
   "private": true,
   "description": "層の JSON と PNG から PSD を書く（ag-psd）。サーバーから標準入力の JSON で呼ぶ",
   "scripts": {
-    "test": "node --test test/write_layered_psd.test.js"
+    "test": "node --test test/write_layered_psd.test.js test/text_layout.test.js"
   },
   "dependencies": {
     "@napi-rs/canvas": "1.0.10",
     "ag-psd": "31.0.2",
+    "budoux": "0.7.0",
+    "harfbuzzjs": "1.6.0",
+    "linebreak": "1.1.0",
     "pngjs": "7.0.0"
   }
 }

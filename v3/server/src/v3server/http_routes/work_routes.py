@@ -17,6 +17,7 @@ from v3server.canonical_tables.work_tree_tables import (
     Episode,
     Page,
     Panel,
+    Spread,
     Volume,
     Work,
 )
@@ -85,7 +86,8 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
                     "default_page_count", "page_spec", "first_page_is_left", "head_seq", "preferences"),
         "volumes": [row(v, "id", "number", "title", "removed") for v in await all_of(Volume)],
         "episodes": [row(e, "id", "volume_id", "number", "title", "deadline", "removed") for e in await all_of(Episode)],
-        "pages": [row(p, "id", "episode_id", "number", "layout", "human_hand_fields", "removed") for p in await all_of(Page)],
+        "pages": [row(p, "id", "episode_id", "number", "layout", "page_kind", "color_mode", "dpi", "nombre_display",
+                      "human_hand_fields", "removed") for p in await all_of(Page)],
         "panels": [
             row(p, "id", "page_id", "order", "frame", "role", "content", "image_id", "image_placement",
                 "frame_style", "adjustments", "fixed", "human_hand_fields", "human_confirmed", "removed")
@@ -94,7 +96,8 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
         "text_items": [
             row(t, "id", "page_id", "panel_id", "item_kind", "order", "text", "speaker", "balloon_kind",
                 "writing_direction", "font_size_pt", "box_mm", "tail_target_mm", "joined_to_previous",
-                "font_family", "decoration", "ruby", "balloon_shape", "transform", "opacity", "adjustments", "fixed",
+                "font_family", "decoration", "ruby", "spans", "typesetting", "balloon_shape", "transform", "opacity",
+                "adjustments", "fixed",
                 "human_hand_fields", "removed")
             for t in await all_of(TextItem)
         ],
@@ -107,7 +110,8 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
         **{name: [all_columns(x) for x in await all_of(model)]
            for name, model in (("page_items", PageItem), ("pen_strokes", PenStroke),
                                ("annotation_items", AnnotationItem), ("panel_templates", PanelTemplate),
-                               ("material_entries", MaterialEntry), ("work_plans", WorkPlan))},
+                               ("material_entries", MaterialEntry), ("work_plans", WorkPlan),
+                               ("spreads", Spread))},
         "thresholds": [row(t, "key", "value", "source", "status", "note") for t in await all_of(Threshold)],
         "destinations": [d.service_id for d in await all_of(WorkDestination)],
     }

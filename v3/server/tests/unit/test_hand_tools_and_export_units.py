@@ -111,6 +111,8 @@ def _png_bytes(img):
 
 PID, P1, L1, T1, I1 = "9" * 32, "a" * 32, "b" * 32, "c" * 32, "d" * 32
 FRAME_STYLE = {"line_width_mm": 0.5, "line_color": "#000000"}
+TYPESETTING = {"line_spacing_ratio": 0.3, "line_break": "character", "tate_chu_yoko_max_digits": 2,
+               "tate_chu_yoko_marks": True, "align": "start"}
 
 
 def _content(**over):
@@ -124,13 +126,14 @@ def _content(**over):
     text = SimpleNamespace(id=T1, order=0, item_kind="dialogue", text="あい", speaker=None, box_mm=[5, 25, 15, 40],
                            font_size_pt=12, font_family="ipag", writing_direction="vertical",
                            decoration={"fill": "#000000"}, ruby=[], transform=None, opacity=1.0, adjustments=[],
+                           panel_id=P1, tail_target_mm=None, joined_to_previous=False, spans=[], typesetting=None,
                            balloon_shape={"kind": "custom", "outline_mm": [(4, 24), (16, 24), (16, 41), (4, 41)],
                                           "line_width_mm": 0.3, "line_color": "#000000", "fill_color": "#ffffff"})
     tone = SimpleNamespace(id=I1, item_kind="tone", box_mm=[0, 0, 30, 20], transform=None, stack_order=0, opacity=1.0,
                            visible=True, adjustments=[],
                            spec={"kind": "dots", "target": {"kind": "panel", "panel_id": P1}, "density": 0.3,
                                  "lines_per_inch": 30})
-    values = dict(page_id=PID, spec=SPEC, text_direction="vertical", preferences={"frame_style": FRAME_STYLE},
+    values = dict(page_id=PID, spec=SPEC, text_direction="vertical", preferences={"frame_style": FRAME_STYLE, "typesetting": TYPESETTING},
                   panels=[panel], layers=[hand], texts=[text], page_items=[tone],
                   images={"img1": "x", "img2": "y"})
     values.update(over)
@@ -183,8 +186,9 @@ def test_render_page_refuses_missing_values():
 def test_text_render_and_font_lookup(tmp_path):
     got = render_texts([{"id": "t", "text": "縦書き", "font_path": font_path(FONT_DIR, "ipag"), "font_size_px": 24,
                          "vertical": True, "color": "#000000", "box_w_px": 40, "box_h_px": 100,
-                         "line_gap_ratio": 0.2, "decoration": {"fill": "#000000"}, "ruby": []}], NODE, TEXT_SCRIPT)
-    assert np.asarray(got[0])[..., 3].sum() > 0
+                         "typesetting": TYPESETTING, "spans": [], "language": "ja",
+                         "decoration": {"fill": "#000000"}, "ruby": []}], NODE, TEXT_SCRIPT)
+    assert np.asarray(got[0].image)[..., 3].sum() > 0 and got[0].lines == 1 and not got[0].overflow
     with pytest.raises(TextRenderError, match="無い"):
         font_path(FONT_DIR, "存在しない書体")
     with pytest.raises(TextRenderError, match="V3_FONT_DIR"):

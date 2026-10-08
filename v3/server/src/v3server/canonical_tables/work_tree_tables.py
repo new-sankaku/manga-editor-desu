@@ -82,6 +82,35 @@ class Page(Base):
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     # 抜いたページは消さずに残す（V3細部の決めごと 15章）
     removed: Mapped[bool] = mapped_column(Boolean, default=False)
+    # ページの種類（name_structure/print_settings.py の PageKind：cover・color_page・body・blank）。未定なら無い
+    page_kind: Mapped[str | None] = mapped_column(String(16))
+    # 色の種類（bilevel・grayscale・color）。無ければ作品の preferences.print.color_mode
+    color_mode: Mapped[str | None] = mapped_column(String(16))
+    # 解像度。無ければ作品の preferences.print.dpi_by_color_mode の、このページの色の種類の値
+    dpi: Mapped[int | None] = mapped_column(Integer)
+    # ノンブルの出し方（visible・hidden・none）。無ければ作品の preferences.nombre.display_by_kind
+    nombre_display: Mapped[str | None] = mapped_column(String(16))
+
+
+class Spread(Base):
+    """見開き：並んだ2ページの組と、見開きにまたがる1枚の絵（V3細部の決めごと 1.3）。
+    絵の座標は見開きの基本枠の座標（左のページの基本枠の左上が原点。右のページは仕上がりの幅だけ右）。
+    どちらのページが左になるかは、書き出しのときに読む向きで決める（print_export/book_layout.py）。"""
+
+    __tablename__ = "spreads"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_id)
+    work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
+    episode_id: Mapped[str] = mapped_column(ForeignKey("episodes.id"), index=True)
+    # 読む順で前のページと後ろのページ
+    first_page_id: Mapped[str] = mapped_column(ForeignKey("pages.id"), index=True)
+    second_page_id: Mapped[str] = mapped_column(ForeignKey("pages.id"), index=True)
+    # 見開きにまたがる絵（image_files の行）と、その切り抜きと置き場（ImagePlacement。見開きの座標）
+    image_id: Mapped[str | None] = mapped_column(ForeignKey("image_files.id"))
+    image_placement: Mapped[dict[str, Any] | None] = mapped_column()
+    adjustments: Mapped[list[Any]] = mapped_column(default=list)
+    human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
+    removed: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Panel(Base):

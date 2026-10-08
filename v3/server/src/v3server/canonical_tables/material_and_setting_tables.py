@@ -78,7 +78,10 @@ class ExportRun(Base):
     # png・pdf・psd
     format: Mapped[str] = mapped_column(String(8))
     page_ids: Mapped[list[Any]] = mapped_column()
-    dpi: Mapped[int] = mapped_column(Integer)
+    # 全ページをこの解像度で出す（下見など）。無ければページごとの解像度（ページの dpi か作品の preferences.print）
+    dpi: Mapped[int | None] = mapped_column(Integer)
+    # 見開きの出し方：split（ノドで2ページに分ける）・joined（1枚の絵）・both。見開きのページを含むときに要る
+    spread_output: Mapped[str | None] = mapped_column(String(8))
     # 紙の大きさ（mm の [幅, 高さ]）。ページの絵はこの真ん中に置く。無ければ塗り足し込みのページの大きさ
     paper_mm: Mapped[list[Any] | None] = mapped_column()
     # queued・running・done・failed

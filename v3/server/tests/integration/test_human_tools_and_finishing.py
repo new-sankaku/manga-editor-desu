@@ -18,6 +18,11 @@ from v3server.v3_error_types import FixedByPerson, Forbidden
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 FONT_DIR = "/usr/share/fonts/opentype/ipafont-gothic"
 FRAME_STYLE = {"line_width_mm": 0.5, "line_color": "#000000"}
+TYPESETTING = {"line_spacing_ratio": 0.3, "line_break": "character", "tate_chu_yoko_max_digits": 2,
+               "tate_chu_yoko_marks": True, "align": "start"}
+PRINT = {"file_code": "T", "color_mode": "color", "dpi_by_color_mode": {"bilevel": 600, "grayscale": 350, "color": 350},
+         "safe_area": {"top_mm": 5, "bottom_mm": 5, "gutter_mm": 5, "outer_mm": 5},
+         "page_count_multiple": None, "page_count_scope": "episode"}
 
 
 def png(w=40, h_=30, rgba=(200, 100, 50, 255)) -> bytes:
@@ -352,7 +357,8 @@ async def ready_page(api, a):
     wid = ids["work"]
     p = await first_panel(api, wid, a, ids["page1"])
     assert (await op(api, wid, a, {"type": "set_work_settings",
-                                   "preferences": {"frame_style": FRAME_STYLE}})).status_code == 200
+                                   "preferences": {"frame_style": FRAME_STYLE, "typesetting": TYPESETTING,
+                                                   "print": PRINT}})).status_code == 200
     r = await api.post(f"/works/{wid}/panels/{p['id']}/image", headers=h(a),
                        files={"image": ("a.png", png(), "image/png")}, data={"origin": "human_drawn"})
     assert r.status_code == 201, r.text
