@@ -44,6 +44,7 @@ from v3server.current_app_import.project_file_reader import (
     CurrentAppPage,
     CurrentAppProject,
 )
+from v3server.messages import ms, text_of
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.panel_layout.panel_frame_editing import reading_first
 from v3server.panel_layout.panel_geometry import rect_polygon
@@ -239,23 +240,23 @@ def _decoration_and_notes(obj: dict[str, Any]) -> tuple[dict[str, Any] | None, l
     fill = css_color(obj.get("fill"))
     deco = {"fill": fill[0]} if fill else None
     if fill and fill[1] < 1:
-        notes.append(f"文字の色の不透明度 {fill[1]} は移していない")
+        notes.append(ms("文字の色の不透明度 {opacity} は移していない", opacity=fill[1]))
     if (obj.get("strokeWidth") or 0) > 0 and css_color(obj.get("stroke")):
-        notes.append(f"文字の縁（{obj.get('stroke')}・太さ {obj.get('strokeWidth')}）は移していない")
+        notes.append(ms("文字の縁（{color}・太さ {width}）は移していない", color=obj.get("stroke"), width=obj.get("strokeWidth")))
     for key in ("textBackgroundColor", "backgroundColor"):
         bg = css_color(obj.get(key))
         if bg and bg[1] > 0:
-            notes.append(f"文字の背景色（{obj.get(key)}）は移していない")
+            notes.append(ms("文字の背景色（{color}）は移していない", color=obj.get(key)))
     if obj.get("fontWeight") not in (None, "normal", 400, "400"):
-        notes.append(f"太さ {obj.get('fontWeight')} は移していない")
+        notes.append(ms("太さ {weight} は移していない", weight=str(obj.get("fontWeight"))))
     if obj.get("fontStyle") not in (None, "normal"):
-        notes.append(f"字の形 {obj.get('fontStyle')} は移していない")
+        notes.append(ms("字の形 {style} は移していない", style=str(obj.get("fontStyle"))))
     if obj.get("underline") or obj.get("linethrough") or obj.get("overline"):
-        notes.append("下線・取り消し線は移していない")
+        notes.append(ms("下線・取り消し線は移していない"))
     if obj.get("styles"):
-        notes.append("文字の一部だけの書式（styles）は移していない")
+        notes.append(ms("文字の一部だけの書式（styles）は移していない"))
     if obj.get("imageTextType"):
-        notes.append(f"画像の文字の効果（{obj.get('imageTextType')}）は移していない")
+        notes.append(ms("画像の文字の効果（{effect}）は移していない", effect=str(obj.get("imageTextType"))))
     return deco, notes
 
 
@@ -289,12 +290,12 @@ class _PageBuilder:
             if not obj.get("isPanel"):
                 continue
             if obj.get("type") not in ("polygon", "rect"):
-                self.entry(i, "panel", obj, "unmapped", f"コマの形 {obj.get('type')} は読めない")
+                self.entry(i, "panel", obj, "unmapped", ms("コマの形 {type} は読めない", type=str(obj.get("type"))))
                 continue
             try:
                 poly = object_polygon_px(obj)
             except GeometryError as e:
-                self.entry(i, "panel", obj, "unmapped", f"コマの形を読めない: {e}")
+                self.entry(i, "panel", obj, "unmapped", ms("コマの形を読めない: {reason}", reason=text_of(e)))
                 continue
             found.append((i, obj, poly))
         found.sort(key=lambda t: _cmp_reading(self.ctx.direction)(self.ctx.mm(t[2])))
@@ -305,16 +306,17 @@ class _PageBuilder:
             bleeds = any(x < -PAGE_SIZE_TOLERANCE_MM or y < -PAGE_SIZE_TOLERANCE_MM
                          or x > spec.frame_width_mm + PAGE_SIZE_TOLERANCE_MM
                          or y > spec.frame_height_mm + PAGE_SIZE_TOLERANCE_MM for x, y in poly_mm)
-            notes = ["読む順は位置から決めた（今のアプリは読む順を持たない）"]
+            notes = [ms("読む順は位置から決めた（今のアプリは読む順を持たない）")]
             frame_style = None
             line = css_color(obj.get("stroke"))
             width = float(obj.get("strokeWidth") or 0)
             if line and width > 0:
                 scale = 1.0 if obj.get("strokeUniform") else (abs(obj.get("scaleX") or 1) + abs(obj.get("scaleY") or 1)) / 2
                 frame_style = {"line_width_mm": round(width * scale * self.ctx.mm_per_px, 3), "line_color": line[0]}
-                notes.append(f"枠の線（{obj.get('stroke')}・太さ {width}px）を枠の線（frame_style）に入れた")
+                notes.append(ms("枠の線（{color}・太さ {width}px）を枠の線（frame_style）に入れた",
+                                color=obj.get("stroke"), width=width))
                 if line[1] < 1:
-                    notes.append(f"枠の線の不透明度 {line[1]} は移していない（V3 の枠の線は不透明）")
+                    notes.append(ms("枠の線の不透明度 {opacity} は移していない（V3 の枠の線は不透明）", opacity=line[1]))
             self.plan.panels.append(PlannedPanel(id=pid, page_id=self.page_id, order=order,
                                                  frame={"polygon_mm": poly_mm, "bleeds": bleeds},
                                                  frame_style=frame_style))
@@ -322,7 +324,7 @@ class _PageBuilder:
             for g in obj.get("guids") or []:
                 self.guid_to_panel[g] = pid
             if obj.get("fill") not in (None, "", "transparent", "rgba(255,255,255,0.25)"):
-                notes.append(f"コマの塗り {obj.get('fill')} は移していない")
+                notes.append(ms("コマの塗り {fill} は移していない", fill=str(obj.get("fill"))))
             self.entry(i, "panel", obj, "converted", "。".join(notes), "panels", pid)
             settings = _settings_of(obj)
             if settings:
@@ -351,11 +353,11 @@ class _PageBuilder:
                     rings = [(r, obj) for r in path_rings_px(obj)]
                     scale = 1.0
             except GeometryError as e:
-                self.entry(i, "balloon_outline", obj, "unmapped", f"フキダシの線を読めない: {e}")
+                self.entry(i, "balloon_outline", obj, "unmapped", ms("フキダシの線を読めない: {reason}", reason=text_of(e)))
                 continue
             rings = [(r, c) for r, c in rings if len(r) >= 3]
             if not rings:
-                self.entry(i, "balloon_outline", obj, "unmapped", "フキダシの線に輪が無い")
+                self.entry(i, "balloon_outline", obj, "unmapped", ms("フキダシの線に輪が無い"))
                 continue
             outer, child = max(rings, key=lambda t: polygon_area(t[0]))
             line = css_color(child.get("stroke"))
@@ -365,11 +367,11 @@ class _PageBuilder:
                                             * scale * self.ctx.mm_per_px, 3),
                      "line_color": line[0] if line and line[1] > 0 else None,
                      "fill_color": fill[0] if fill and fill[1] > 0 else None}
-            notes = ["外形を1つの多角形にした（曲線は点の列に直した）"]
+            notes = [ms("外形を1つの多角形にした（曲線は点の列に直した）")]
             if len(rings) > 1:
-                notes.append(f"ほかの {len(rings) - 1} 本の線（穴・点線・飾り）は移していない")
+                notes.append(ms("ほかの {n} 本の線（穴・点線・飾り）は移していない", n=len(rings) - 1))
             if obj.get("speechBubbleGrid"):
-                notes.append("フキダシの格子（speechBubbleGrid）は移していない")
+                notes.append(ms("フキダシの格子（speechBubbleGrid）は移していない"))
             self.balloons[obj.get("guid") or f"#{i}"] = {"index": i, "obj": obj, "shape": shape, "notes": notes,
                                                          "guids": set(obj.get("guids") or [])}
 
@@ -394,7 +396,7 @@ class _PageBuilder:
         kind = "balloon_text" if in_balloon else "text"
         if panel_id is None:
             self.entry(i, kind, obj, "unmapped",
-                       "コマの外の文字は V3 で置く所が無い（文字はコマに属する）。文字: " + str(obj.get("text") or ""))
+                       ms("コマの外の文字は V3 で置く所が無い（文字はコマに属する）。文字: {text}", text=str(obj.get("text") or "")))
             if balloon is not None:
                 balloon["used"] = "unmapped"
             return
@@ -408,14 +410,15 @@ class _PageBuilder:
             "box_mm": box, "font_family": obj.get("fontFamily") or None, "decoration": deco,
             "transform": _transform(obj), "opacity": float(obj.get("opacity") if obj.get("opacity") is not None else 1)}
         if obj.get("fontFamily"):
-            notes.append(f"書体の名前 {obj.get('fontFamily')} をそのまま入れた（書き出しは V3_FONT_DIR に同じ名前の書体が要る）")
+            notes.append(ms("書体の名前 {family} をそのまま入れた（書き出しは V3_FONT_DIR に同じ名前の書体が要る）",
+                            family=str(obj.get("fontFamily"))))
         if in_balloon and balloon is not None:
             values["balloon_shape"] = balloon["shape"]
             balloon["used"] = values
         elif in_balloon:
-            notes.append("フキダシの線が見つからないので、線の無い文字として入れた")
+            notes.append(ms("フキダシの線が見つからないので、線の無い文字として入れた"))
         else:
-            notes.append("フキダシに入っていない文字はナレーションの箱（caption）として入れた。描き文字なら種類を直す")
+            notes.append(ms("フキダシに入っていない文字はナレーションの箱（caption）として入れた。描き文字なら種類を直す"))
         key = (panel_id, item_kind)
         values["order"] = orders.get(key, 0)
         orders[key] = values["order"] + 1
@@ -432,21 +435,22 @@ class _PageBuilder:
         key = obj.get("src")
         taken = self.images.get(key) if isinstance(key, str) else None
         if taken is None:
-            self.entry(i, kind, obj, "unmapped", "絵の中身がプロジェクトに無い（.img が無い）")
+            self.entry(i, kind, obj, "unmapped", ms("絵の中身がプロジェクトに無い（.img が無い）"))
             return
         if taken.blocked:
-            self.entry(i, kind, obj, "unmapped", f"絵を入れられない: {taken.blocked}")
+            self.entry(i, kind, obj, "unmapped", ms("絵を入れられない: {reason}", reason=taken.blocked))
             return
         box, center = self.ctx.box_mm(obj)
         panel_id = self.guid_to_panel.get(obj.get("guid")) or self.panel_at(center)
         if panel_id is None:
-            self.entry(i, kind, obj, "unmapped", "コマの外の絵は V3 で置く所が無い（レイヤーはコマに属する）")
+            self.entry(i, kind, obj, "unmapped", ms("コマの外の絵は V3 で置く所が無い（レイヤーはコマに属する）"))
             return
         cx, cy = int(obj.get("cropX") or 0), int(obj.get("cropY") or 0)
         crop = [cx, cy, cx + round(float(obj["width"])), cy + round(float(obj["height"]))]
         if crop[2] > taken.width or crop[3] > taken.height:
             self.entry(i, kind, obj, "unmapped",
-                       f"切り抜き {crop} が絵の大きさ {taken.width}x{taken.height} の外に出ている")
+                       ms("切り抜き {crop} が絵の大きさ {width}x{height} の外に出ている",
+                          crop=str(crop), width=taken.width, height=taken.height))
             return
         placement = {"crop_px": crop, "dest_box_mm": box, **_transform(obj)}
         role = {"tone": "tone", "effect": "effect", "image": "panel_art"}[kind]
@@ -454,22 +458,23 @@ class _PageBuilder:
         self.plan.images.append(PlannedImage(
             id=iid, key=key, page_id=self.page_id, panel_id=panel_id, role=role, sha256=taken.sha256,
             media_type=taken.media_type, width=taken.width, height=taken.height, dpi=taken.dpi,
-            source_note=f"今のアプリのプロジェクト {self.ctx.file_name} の {self.ctx.page.index + 1}ページ目の"
-                        f" {i + 1}番目の物（{name or obj.get('type')}）。{self.origin_note}"))
+            source_note=ms("今のアプリのプロジェクト {file} の {page}ページ目の {nth}番目の物（{name}）。{origin}",
+                           file=self.ctx.file_name, page=self.ctx.page.index + 1, nth=i + 1,
+                           name=str(name or obj.get("type")), origin=self.origin_note)))
         notes = []
         if kind != "image":
-            notes.append("トーン・効果線は今のアプリでは絵なので、絵のレイヤーとして入れた（網点の値には戻せない）")
+            notes.append(ms("トーン・効果線は今のアプリでは絵なので、絵のレイヤーとして入れた（網点の値には戻せない）"))
         if obj.get("filters"):
-            notes.append(f"絵の効果（filters: {[f.get('type') for f in obj['filters']]}）は移していない")
+            notes.append(ms("絵の効果（filters: {filters}）は移していない", filters=str([f.get("type") for f in obj["filters"]])))
         if obj.get("globalCompositeOperation") not in (None, "source-over"):
-            notes.append(f"重ね方 {obj.get('globalCompositeOperation')} は移していない")
+            notes.append(ms("重ね方 {mode} は移していない", mode=str(obj.get("globalCompositeOperation"))))
         opacity = float(obj.get("opacity") if obj.get("opacity") is not None else 1)
         visible = obj.get("visible") is not False
         has_panel_image = any(pi.panel_id == panel_id for pi in self.plan.panel_images)
         if kind == "image" and not has_panel_image and opacity == 1 and visible:
             self.plan.panel_images.append(PlannedPanelImage(panel_id=panel_id, image_id=iid, placement=placement))
             table, target = "panels", panel_id
-            notes.append("コマの絵（panels.image_id）として入れた")
+            notes.append(ms("コマの絵（panels.image_id）として入れた"))
         else:
             lid = new_id()
             order = stack.get(panel_id, 0)
@@ -490,41 +495,41 @@ class _PageBuilder:
     def add_pen_strokes(self, i: int, obj: dict[str, Any], paths: list[dict[str, Any]], parent, stack: dict[str, int]
                         ) -> None:
         """path（グループのときはその中の path）を、コマの人の手の層のペンの線にする。1つの物は1つの報告の行。"""
-        notes = ["筆は鉛筆（pencil）として入れた（今のアプリの path は筆の種類を持たない）",
-                 "点の時刻は今のアプリに無いので 0 を入れた（筆圧も無いので null）",
-                 "線の画像は画面が線から描く。画面で開いて描くまで、書き出しと入稿前の確かめは止まる"]
+        notes = [ms("筆は鉛筆（pencil）として入れた（今のアプリの path は筆の種類を持たない）"),
+                 ms("点の時刻は今のアプリに無いので 0 を入れた（筆圧も無いので null）"),
+                 ms("線の画像は画面が線から描く。画面で開いて描くまで、書き出しと入稿前の確かめは止まる")]
         strokes: list[tuple[list[Point], dict[str, Any]]] = []
         for path in paths:
             if path.get("stroke") is not None and not isinstance(path.get("stroke"), str):
                 self.entry(i, "pen_stroke", obj, "unmapped",
-                           "模様の筆（模様・縦線・横線）の線は、模様が今のアプリの絵で、V3 の筆の模様に直せない")
+                           ms("模様の筆（模様・縦線・横線）の線は、模様が今のアプリの絵で、V3 の筆の模様に直せない"))
                 return
             try:
                 color = css_color(path.get("stroke"))
                 rings = path_rings_px(path, parent)
             except GeometryError as e:
-                self.entry(i, "pen_stroke", obj, "unmapped", f"ペンの線を読めない: {e}")
+                self.entry(i, "pen_stroke", obj, "unmapped", ms("ペンの線を読めない: {reason}", reason=text_of(e)))
                 return
             if color is None or not rings:
-                self.entry(i, "pen_stroke", obj, "unmapped", "線の色か点が無い（見えない線）")
+                self.entry(i, "pen_stroke", obj, "unmapped", ms("線の色か点が無い（見えない線）"))
                 return
             scale = (abs(float(path.get("scaleX") or 1)) + abs(float(path.get("scaleY") or 1))) / 2
             if parent is not None:
                 scale *= (abs(float(obj.get("scaleX") or 1)) + abs(float(obj.get("scaleY") or 1))) / 2
             width_mm = float(path.get("strokeWidth") or 0) * scale * self.ctx.mm_per_px
             if width_mm <= 0:
-                self.entry(i, "pen_stroke", obj, "unmapped", "線の太さが 0")
+                self.entry(i, "pen_stroke", obj, "unmapped", ms("線の太さが 0"))
                 return
             opacity = float(path.get("opacity") if path.get("opacity") is not None else 1) * color[1]
             if parent is not None:
                 opacity *= float(obj.get("opacity") if obj.get("opacity") is not None else 1)
             if opacity <= 0:
-                self.entry(i, "pen_stroke", obj, "unmapped", "線の不透明度が 0（見えない線）")
+                self.entry(i, "pen_stroke", obj, "unmapped", ms("線の不透明度が 0（見えない線）"))
                 return
             if path.get("fill") not in (None, "", "transparent"):
-                notes.append(f"線の中の塗り {path.get('fill')} は移していない")
+                notes.append(ms("線の中の塗り {fill} は移していない", fill=str(path.get("fill"))))
             if path.get("eraser"):
-                notes.append("今のアプリの消しゴムで消した所（eraser）は移していない。消した所も線が見える")
+                notes.append(ms("今のアプリの消しゴムで消した所（eraser）は移していない。消した所も線が見える"))
             for ring in rings:
                 strokes.append((ring, {"brush": "pencil", "width_mm": round(width_mm, 4), "color": color[0],
                                        "opacity": round(min(1.0, opacity), 4), "brush_options": {}}))
@@ -532,7 +537,7 @@ class _PageBuilder:
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         panel_id = self.panel_at(((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2))
         if panel_id is None:
-            self.entry(i, "pen_stroke", obj, "unmapped", "コマの外の線は V3 で置く所が無い（レイヤーはコマに属する）")
+            self.entry(i, "pen_stroke", obj, "unmapped", ms("コマの外の線は V3 で置く所が無い（レイヤーはコマに属する）"))
             return
         layer = next((la for la in self.plan.stroke_layers if la.panel_id == panel_id), None)
         if layer is None:
@@ -557,7 +562,7 @@ class _PageBuilder:
             if obj.get("isPanel") or ct in BALLOON_OUTLINE_TYPES:
                 continue
             if ct in BALLOON_BOX_TYPES:
-                self.entry(i, "balloon_text_box", obj, "not_needed", "フキダシの文字の箱の控え。文字の箱から作り直せる")
+                self.entry(i, "balloon_text_box", obj, "not_needed", ms("フキダシの文字の箱の控え。文字の箱から作り直せる"))
             elif t in TEXT_TYPES:
                 texts.append((i, obj))
             elif t == "image":
@@ -568,9 +573,10 @@ class _PageBuilder:
                     c.get("type") == "path" and not c.get("customType") for c in obj["objects"]):
                 self.add_pen_strokes(i, obj, obj["objects"], object_matrix(obj), stack)
             elif obj.get("isIcon"):
-                self.entry(i, "icon", obj, "unmapped", "絵記号（アイコンの SVG）は V3 の図形の形に直せない")
+                self.entry(i, "icon", obj, "unmapped", ms("絵記号（アイコンの SVG）は V3 の図形の形に直せない"))
             else:
-                self.entry(i, t or "unknown", obj, "unmapped", f"V3 に受ける所が無い物（type={t}, customType={ct}）")
+                self.entry(i, t or "unknown", obj, "unmapped",
+                           ms("V3 に受ける所が無い物（type={type}, customType={custom_type}）", type=str(t), custom_type=str(ct)))
         # 文字は読む順に番号を振る
         boxes = {i: self.ctx.box_mm(o)[0] for i, o in texts}
         cmp = _cmp_reading(self.ctx.direction)
@@ -582,9 +588,10 @@ class _PageBuilder:
                 self.entry(b["index"], "balloon_outline", b["obj"], "converted", "。".join(b["notes"]),
                            "text_items", b["text_id"])
             elif b.get("used") == "unmapped":
-                self.entry(b["index"], "balloon_outline", b["obj"], "unmapped", "フキダシの文字がコマの外にある")
+                self.entry(b["index"], "balloon_outline", b["obj"], "unmapped", ms("フキダシの文字がコマの外にある"))
             else:
-                self.entry(b["index"], "balloon_outline", b["obj"], "unmapped", "フキダシに文字が無い（V3 のフキダシは文字に付く）")
+                self.entry(b["index"], "balloon_outline", b["obj"], "unmapped",
+                           ms("フキダシに文字が無い（V3 のフキダシは文字に付く）"))
 
 
 def build_import_plan(project: CurrentAppProject, spec: PageSpec, reading_direction: Literal["rtl", "ltr"],
@@ -600,25 +607,28 @@ def build_import_plan(project: CurrentAppProject, spec: PageSpec, reading_direct
         builder = _PageBuilder(plan, ctx, pid, images, origin_note)
         ratio_gap = abs(page.page_height_mm / page.canvas_height_px - ctx.mm_per_px) / ctx.mm_per_px
         if not _same_size(page, spec) or ratio_gap > 0.01:
-            why = (f"ページの寸法 {page.page_width_mm}x{page.page_height_mm}mm が作品の仕上がり "
-                   f"{spec.trim_width_mm}x{spec.trim_height_mm}mm と違う" if not _same_size(page, spec)
-                   else "キャンバスの縦横の比がページの mm の比と合わない")
-            builder.entry(None, "page", None, "converted", why + "。ページだけ作り、中の物は入れていない", "pages", pid)
+            why = (ms("ページの寸法 {width}x{height}mm が作品の仕上がり {trim_width}x{trim_height}mm と違う",
+                      width=page.page_width_mm, height=page.page_height_mm,
+                      trim_width=spec.trim_width_mm, trim_height=spec.trim_height_mm) if not _same_size(page, spec)
+                   else ms("キャンバスの縦横の比がページの mm の比と合わない"))
+            builder.entry(None, "page", None, "converted", ms("{why}。ページだけ作り、中の物は入れていない", why=why),
+                          "pages", pid)
             for i, obj in enumerate(page.canvas["objects"]):
                 builder.entry(i, obj.get("customType") or obj.get("type") or "unknown", obj, "unmapped", why)
         else:
             builder.entry(None, "page", None, "mapped", "", "pages", pid)
             builder.build()
         if page.history_count:
-            builder.entry(None, "history", None, "not_needed", f"取り消しの記録 {page.history_count} 件は移さない（最後の姿だけ）")
+            builder.entry(None, "history", None, "not_needed",
+                          ms("取り消しの記録 {n} 件は移さない（最後の姿だけ）", n=page.history_count))
         if page.fonts:
             builder.entry(None, "fonts", None, "unmapped",
-                          f"プロジェクトに入っていた書体 {len(page.fonts)} 個は受ける API が無い（V3 の書体は V3_FONT_DIR に置く）")
+                          ms("プロジェクトに入っていた書体 {n} 個は受ける API が無い（V3 の書体は V3_FONT_DIR に置く）", n=len(page.fonts)))
         if page.reference_sheets:
             builder.entry(None, "reference_sheets", None, "unmapped",
-                          f"参照の絵 {len(page.reference_sheets)} 枚は受ける API が無い（設定資料に人が入れ直す）")
+                          ms("参照の絵 {n} 枚は受ける API が無い（設定資料に人が入れ直す）", n=len(page.reference_sheets)))
         for name in page.other_files:
-            builder.entry(None, "file", None, "unmapped", f"読む対象でないファイル {name}")
+            builder.entry(None, "file", None, "unmapped", ms("読む対象でないファイル {name}", name=name))
     if base_prompts:
         distinct = {repr(sorted(b.items())) for b in base_prompts}
         if len(distinct) == 1:

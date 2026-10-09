@@ -29,6 +29,7 @@ from v3server.generation_queue import job_start_and_control
 from v3server.generation_queue.generation_workflow import JobInput
 from v3server.harness.harness_record import patch_unit
 from v3server.image_file_storage import read_image
+from v3server.messages import ms, text_of
 from v3server.openfga_permissions import Authz, open_authz
 from v3server.request_actor import Actor
 from v3server.v3_error_types import V3Error
@@ -74,7 +75,7 @@ def configure(temporal: Client) -> None:
 
 def temporal() -> Client:
     if _temporal is None:
-        raise RuntimeError("queue_calls.configure が呼ばれていない（ハーネスのワーカーの起動の順が違う）")
+        raise RuntimeError("queue_calls.configure が呼ばれていない（ハーネスのワーカーの起動の順が違う）")  # i18n:dev
     return _temporal
 
 
@@ -94,8 +95,8 @@ def blocked(detail: str, **details: Any) -> ApplicationError:
 async def require_route(session, key: str) -> str:
     process = HARNESS_PROCESSES.get(key, key)
     if await session.get(ProcessRoute, process) is None:
-        raise blocked(  # i18n:stored
-            f"処理 {process} の送り先が決まっていない（接続先の画面で送り先を決める）", process=process)
+        raise blocked(ms("処理 {process} の送り先が決まっていない（接続先の画面で送り先を決める）", process=process),
+                      process=process)
     return process
 
 
@@ -115,7 +116,7 @@ async def ensure_job(session, unit: HarnessUnit, key: str, process: str, request
         return await job_start_and_control.enqueue(session, await authz(), temporal(), actor, unit.work_id, process,
                                                    {**request, "harness_key": key}, "ai", page_id)
     except V3Error as e:
-        raise blocked(f"{process} を依頼できない: {e}", process=process) from e  # i18n:stored
+        raise blocked(ms("{process} を依頼できない: {error}", process=process, error=text_of(e)), process=process) from e
 
 
 async def _start_if_missing(session, job: Job) -> None:
@@ -178,8 +179,8 @@ async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
                 seen = t
                 if clock is not None and clock.limit is not None and clock.waited > clock.limit:
                     await asyncio.shield(_cancel_and_wait(job_ids))
-                    raise ApplicationError(  # i18n:stored
-                        f"送り先の順番待ちが待ちの上限（{clock.limit:g} 秒）を超えた。上限を上げるか、空いてから再開する",
+                    raise ApplicationError(
+                        ms("送り先の順番待ちが待ちの上限（{limit:g} 秒）を超えた。上限を上げるか、空いてから再開する", limit=clock.limit),
                         {"waited_seconds": clock.waited}, type="wait_limit", non_retryable=True)
                 state, counts = _wait_state(jobs)
                 if state != last_state and unit_id is not None:
@@ -219,7 +220,8 @@ async def _cancel_and_wait(job_ids: list[str]) -> None:
 def job_failure(job: Job) -> ApplicationError:
     """止まった依頼を、ハーネスの失敗の種類にする。内容で断られたものは送り直さない（決めごと 4.5）。"""
     kind = job.failure_kind or job.status
-    return ApplicationError(f"{job.process} が止まった（{kind}）: {job.failure_detail}", {"job_id": job.id},
+    return ApplicationError(ms("{process} が止まった（{kind}）: {detail}", process=job.process, kind=kind,
+                               detail=job.failure_detail), {"job_id": job.id},
                             type="refused" if kind == "refused" else "job_" + kind, non_retryable=True)
 
 

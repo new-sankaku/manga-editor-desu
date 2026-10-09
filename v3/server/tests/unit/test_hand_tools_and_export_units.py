@@ -28,6 +28,7 @@ from v3server.llm_questions.extract_characters_question import (
     parse_extract_characters_answer,
 )
 from v3server.llm_questions.read_prompt_question import build_read_prompt_question, parse_read_prompt_answer
+from v3server.messages import render
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.print_export.layered_psd_request import build_psd_request, psd_layers_from_nodes, write_layered_psd
 from v3server.print_export.page_render import (
@@ -391,9 +392,9 @@ def test_線の控えの絵が無い_古い層は理由を返す():
     layer = SimpleNamespace(id="L", stroke_revision=0, image_id=None, image_stroke_revision=None)
     assert stroke_cache_problem(layer) is None
     layer.stroke_revision = 1
-    assert "無い" in stroke_cache_problem(layer)
+    assert "無い" in render(stroke_cache_problem(layer), "ja")
     layer.image_id, layer.image_stroke_revision = "I", 0
-    assert "古い" in stroke_cache_problem(layer)
+    assert "古い" in render(stroke_cache_problem(layer), "ja")
     layer.image_stroke_revision = 1
     assert stroke_cache_problem(layer) is None
 

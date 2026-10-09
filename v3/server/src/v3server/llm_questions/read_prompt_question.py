@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from v3server.llm_questions.answer_json_reader import read_answer
 
 
-def build_read_prompt_question(style_note: str | None) -> str:
+def build_read_prompt_question(style_note: str | None) -> str:  # i18n:prompt
     """style_note は、人が書いた指示文の書き方の希望（つなぐ生成のモデルに合わせて人が書く）。無ければ書き方を問わない。"""
     style = (f"指示文の書き方は、次の希望に合わせてください。\n{style_note}\n" if style_note
              else "指示文の書き方は決めていません。\n")

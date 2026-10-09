@@ -137,9 +137,19 @@ try {
   let r = await api("POST", `/works/${info.wid}/harness/units/${pauseU.unit_id}/control`, { action: "pause", mode: "now" });
   check(r.status === 200, "今すぐ止めるを送れる");
   await page.waitForSelector(`.pchip[data-unit="${pauseU.unit_id}"][data-status="paused"]`, { timeout: 15000 });
-  snap = await snapshot();
-  const cancelU = snap.units.find((u) => u.status === "running" && ![pauseU.unit_id, staleTarget.unit_id].includes(u.unit_id));
+  // 「取り消し中」は、動いている呼び出しが終わるまでの間だけ出る。つまみで呼び出しを遅くしても、もう始まっている呼び出しは速いまま終わる。
+  // 遅くした後に次のステップへ入ったばかりの作業を選ぶ（終わりかけの作業を選ぶと、画面が読む前に「取り消した」へ進む。重い時に落ちた原因）
   await ctrl("/knob", { detector_sleep: 3, llm_sleep: 3 });
+  const cancelU = await (async () => {
+    const skip = [pauseU.unit_id, staleTarget.unit_id], seen = new Map(), end = Date.now() + 20000;
+    for (;;) {
+      const live = (await snapshot()).units.filter((u) => u.status === "running" && !skip.includes(u.unit_id));
+      const fresh = live.find((u) => seen.has(u.unit_id) && seen.get(u.unit_id) !== u.step && u.step !== "generate");
+      if (fresh || Date.now() > end) return fresh || live[0];
+      for (const u of live) seen.set(u.unit_id, u.step);
+      await new Promise((ok) => setTimeout(ok, 150));
+    }
+  })();
   r = await api("POST", `/works/${info.wid}/harness/units/${cancelU.unit_id}/control`, { action: "cancel_unit" });
   check(r.status === 200, `作業を取り消すを送れる ${JSON.stringify(r.body)}`);
   await page.waitForSelector(`.pchip[data-unit="${cancelU.unit_id}"][data-status="cancelling"]`, { timeout: 10000 });

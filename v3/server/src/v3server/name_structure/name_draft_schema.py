@@ -9,17 +9,18 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from v3server.messages import ms
 from v3server.name_structure.reading_direction import PageSpec, ReadingDirection
 
-PanelSize = Literal["大", "中", "小"]
-PanelShape = Literal["四角", "斜め", "枠なし", "断ち切り"]
-ShotRange = Literal["遠景", "引き", "全身", "膝上", "胸から上", "顔", "部分"]
-CameraAngle = Literal["目の高さ", "見下ろし", "見上げ", "真横", "背後", "真上"]
-FaceSize = Literal["大", "中", "小", "見えない"]
-Facing = Literal["右", "左", "正面", "後ろ"]
-BackgroundKind = Literal["描き込む", "簡略", "なし", "効果線やトーンだけ"]
-StoryRole = Literal["起", "承", "転", "結"]
-BalloonKind = Literal["台詞", "叫び", "心の声", "ナレーション"]
+PanelSize = Literal["大", "中", "小"]  # i18n:data
+PanelShape = Literal["四角", "斜め", "枠なし", "断ち切り"]  # i18n:data
+ShotRange = Literal["遠景", "引き", "全身", "膝上", "胸から上", "顔", "部分"]  # i18n:data
+CameraAngle = Literal["目の高さ", "見下ろし", "見上げ", "真横", "背後", "真上"]  # i18n:data
+FaceSize = Literal["大", "中", "小", "見えない"]  # i18n:data
+Facing = Literal["右", "左", "正面", "後ろ"]  # i18n:data
+BackgroundKind = Literal["描き込む", "簡略", "なし", "効果線やトーンだけ"]  # i18n:data
+StoryRole = Literal["起", "承", "転", "結"]  # i18n:data
+BalloonKind = Literal["台詞", "叫び", "心の声", "ナレーション"]  # i18n:data
 
 
 class FigureInPanel(BaseModel):
@@ -119,9 +120,9 @@ class NameDraft(BaseModel):
 
         for pg in self.pages:
             if pg.rows is None:
-                add("rows", f"{pg.page}ページ")
+                add("rows", ms("{page}ページ", page=pg.page))
             for p in pg.panels:
-                where = f"{pg.page}ページ コマ{p.n}"
+                where = ms("{page}ページ コマ{n}", page=pg.page, n=p.n)
                 for field in PANEL_DECIDABLE_FIELDS:
                     if getattr(p, field) is None:
                         add(field, where)

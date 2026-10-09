@@ -1,15 +1,17 @@
 """写す範囲・角度・人物の並びの検査（試作 p27 `check.py`、V3ハーネス設計 6章）。
 同じ範囲と角度の連続・寄りの連続・全身の間隔・場面の中の距離の組み合わせ・場所を見せるコマ・目の高さ以外の割合・人数・会話する2人の左右。"""
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
     Thresholds,
     count_limit_result,
+    dot_joined,
     fixed_rule_result,
     limit_result,
     no_data_result,
     rounded,
+    value_text,
 )
 from v3server.name_structure.name_draft_schema import NameDraft, NamePanel, ShotRange
 from v3server.panel_layout.reading_direction_mirror import page_reading_sequence
@@ -26,14 +28,17 @@ THRESHOLD_KEYS = {
 }
 
 # 課題35「寄りや胸から上の絵ばかり続く」の寄り
-_CLOSE: set[ShotRange] = {"胸から上", "顔", "部分"}
+_CLOSE: set[ShotRange] = {"胸から上", "顔", "部分"}  # i18n:data
 # 課題38「全身のコマが少ない」：全身と、それより広く写すもの
-_FULL_OR_WIDER: set[ShotRange] = {"遠景", "引き", "全身"}
+_FULL_OR_WIDER: set[ShotRange] = {"遠景", "引き", "全身"}  # i18n:data
 # 課題34「遠景・中くらいの距離・寄りの組み合わせ」の3つへの分け方。形の7つの範囲を広い方から3つに分けた
-_SHOT_CLASS: dict[ShotRange, str] = {"遠景": "遠", "引き": "遠", "全身": "中", "膝上": "中", "胸から上": "寄り", "顔": "寄り", "部分": "寄り"}
+# 分けた先の名前（遠・中・寄り）も値として持ち、文に入れるときに value_text で言い方を引く
+_SHOT_CLASS: dict[ShotRange, str] = {  # i18n:data
+    "遠景": "遠", "引き": "遠", "全身": "中", "膝上": "中", "胸から上": "寄り", "顔": "寄り", "部分": "寄り",
+}
 # 課題76・168「場所を見せるコマ」：広く写し、背景を描くコマ（p27 で場面の始めの引きとして数えた範囲と同じ）
-_PLACE_SHOTS: set[ShotRange] = {"遠景", "引き"}
-_PLACE_BACKGROUNDS = {"描き込む", "簡略"}
+_PLACE_SHOTS: set[ShotRange] = {"遠景", "引き"}  # i18n:data
+_PLACE_BACKGROUNDS = {"描き込む", "簡略"}  # i18n:data
 
 
 def _reading_panels(draft: NameDraft) -> list[tuple[int, NamePanel]]:
@@ -44,9 +49,10 @@ def _reading_panels(draft: NameDraft) -> list[tuple[int, NamePanel]]:
 def check_same_shot_angle_next(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """前のコマと写す範囲も角度も同じになる回数（p27）。"""
     seq = _reading_panels(draft)
-    items = [Finding(page=pb, panel=b.n, value=f"{b.shot}・{b.angle}", note=f"コマ{a.n}と同じ範囲・角度")
+    items = [Finding(page=pb, panel=b.n, value=dot_joined([value_text(b.shot), value_text(b.angle)]),
+                     note=ms("コマ{panel}と同じ範囲・角度", panel=a.n))
              for (_, a), (pb, b) in zip(seq, seq[1:], strict=False) if (a.shot, a.angle) == (b.shot, b.angle)]
-    return count_limit_result("same_shot_angle_next", "同じ範囲・角度の連続", thresholds, "same_shot_angle_next_max", items)
+    return count_limit_result("same_shot_angle_next", ms("同じ範囲・角度の連続"), thresholds, "same_shot_angle_next_max", items)
 
 
 def check_close_shot_run(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
@@ -62,10 +68,11 @@ def check_close_shot_run(draft: NameDraft, thresholds: Thresholds) -> CheckResul
         while j + 1 < len(seq) and seq[j + 1][1].shot in _CLOSE:
             j += 1
         run = j - i + 1
-        measured.append((float(run), Finding(page=seq[i][0], panel=seq[i][1].n, value=run, note=f"ここから寄りが{run}個続く")))
+        measured.append((float(run), Finding(page=seq[i][0], panel=seq[i][1].n, value=run,
+                                             note=ms("ここから寄りが{run}個続く", run=run))))
         i = j + 1
     value = max((int(v) for v, _ in measured), default=0)
-    return limit_result("close_shot_run", "寄りの連続", thresholds, "close_shot_run_max", "max", value, measured)
+    return limit_result("close_shot_run", ms("寄りの連続"), thresholds, "close_shot_run_max", "max", value, measured)
 
 
 def check_full_body_interval(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
@@ -76,15 +83,15 @@ def check_full_body_interval(draft: NameDraft, thresholds: Thresholds) -> CheckR
     for pg in draft.pages:
         if any(p.shot in _FULL_OR_WIDER for p in pg.panels):
             if run:
-                measured.append((float(run), Finding(page=run_start, value=run, note=f"ここから{run}ページ全身のコマが無い")))
+                measured.append((float(run), Finding(page=run_start, value=run, note=ms("ここから{run}ページ全身のコマが無い", run=run))))
             run, run_start = 0, None
         else:
             run_start = pg.page if run == 0 else run_start
             run += 1
     if run:
-        measured.append((float(run), Finding(page=run_start, value=run, note=f"ここから{run}ページ全身のコマが無い")))
+        measured.append((float(run), Finding(page=run_start, value=run, note=ms("ここから{run}ページ全身のコマが無い", run=run))))
     value = max((int(v) for v, _ in measured), default=0)
-    return limit_result("full_body_interval", "全身のコマの間隔", thresholds, "pages_without_full_body_max", "max", value, measured)
+    return limit_result("full_body_interval", ms("全身のコマの間隔"), thresholds, "pages_without_full_body_max", "max", value, measured)
 
 
 def _scenes(draft: NameDraft) -> list[tuple[int, list[tuple[int, NamePanel]]]]:
@@ -103,10 +110,12 @@ def check_shot_classes_per_scene(draft: NameDraft, thresholds: Thresholds) -> Ch
     measured = []
     for scene, ps in _scenes(draft):
         kinds = sorted({_SHOT_CLASS[p.shot] for _, p in ps})
+        # 種類の並びは、今までどおり角かっこと引用符の付いた形（['中', '寄り']）で文に入れる。中の言い方だけ言語で変わる
+        listed = "[" + ", ".join(f"'{value_text(k)}'" for k in kinds) + "]"
         measured.append((float(len(kinds)), Finding(page=ps[0][0], panel=ps[0][1].n, value=len(kinds),
-                                                     note=f"場面{scene}の距離の種類 {kinds}")))
+                                                     note=ms("場面{scene}の距離の種類 {kinds}", scene=scene, kinds=listed))))
     value = min((int(v) for v, _ in measured), default=None)
-    return limit_result("shot_classes_per_scene", "場面の中の距離の組み合わせ", thresholds, "shot_classes_per_scene_min", "min",
+    return limit_result("shot_classes_per_scene", ms("場面の中の距離の組み合わせ"), thresholds, "shot_classes_per_scene_min", "min",
                         value, measured)
 
 
@@ -119,7 +128,8 @@ def _place_runs(draft: NameDraft) -> list[tuple[str, list[tuple[int, NamePanel]]
         return None
     out: list[tuple[str, list[tuple[int, NamePanel]]]] = []
     for page, p in seq:
-        key = p.location if p.location is not None else f"場面{p.scene}"
+        # 区切りを比べるための鍵（文ではない）。画面に出す言い方は check_place_shown で作る
+        key = p.location if p.location is not None else f"場面{p.scene}"  # i18n:data
         if not out or out[-1][0] != key:
             out.append((key, []))
         out[-1][1].append((page, p))
@@ -129,10 +139,10 @@ def _place_runs(draft: NameDraft) -> list[tuple[str, list[tuple[int, NamePanel]]
 def check_place_shown(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """場所が変わった後に、場所を見せるコマ（遠景か引きで、背景を描き込むか簡略に描く）があるか（課題76・168）。
     前に同じ場所で場所を見せていれば省いてよい（課題76）。場所は NamePanel.location、無ければ場面の番号を場所とみなす。"""
-    title = "場所を見せるコマ"
+    title = ms("場所を見せるコマ")
     runs = _place_runs(draft)
     if runs is None:
-        return no_data_result("place_shown", title, "場所（location）が一部のコマにしか無い")
+        return no_data_result("place_shown", title, ms("場所（location）が一部のコマにしか無い"))
     shown: set[str] = set()
     findings = []
     for place, ps in runs:
@@ -140,19 +150,23 @@ def check_place_shown(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
         if has:
             shown.add(place)
         elif place not in shown:
-            findings.append(Finding(page=ps[0][0], panel=ps[0][1].n, value=place, note="場所が変わったのに場所を見せるコマが無い"))
+            first = ps[0][1]
+            # 値に出す場所の言い方。場所の名前があればそのまま、無ければ場面の番号（比べる鍵 place と同じ見た目）
+            where = first.location if first.location is not None else ms("場面{scene}", scene=first.scene)
+            findings.append(Finding(page=ps[0][0], panel=first.n, value=where, note=ms("場所が変わったのに場所を見せるコマが無い")))
     return fixed_rule_result("place_shown", title, findings)
 
 
 def check_unusual_angle_ratio(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """目の高さ以外の角度のコマの割合（p27 で26〜39%、1つだけ70%）。"""
+    title = ms("目の高さ以外の角度の割合")
     ps = draft.all_panels()
     if not ps:
-        return no_data_result("unusual_angle_ratio", "目の高さ以外の角度の割合", "コマが無い")
-    ratio = sum(p.angle != "目の高さ" for p in ps) / len(ps)
-    f = Finding(value=rounded(ratio), note=f"{len(ps)}コマ中{sum(p.angle != '目の高さ' for p in ps)}コマが目の高さ以外")
-    return limit_result("unusual_angle_ratio", "目の高さ以外の角度の割合", thresholds, "unusual_angle_ratio_max", "max",
-                        rounded(ratio), [(ratio, f)])
+        return no_data_result("unusual_angle_ratio", title, ms("コマが無い"))
+    unusual = sum(p.angle != "目の高さ" for p in ps)  # i18n:data
+    ratio = unusual / len(ps)
+    f = Finding(value=rounded(ratio), note=ms("{total}コマ中{unusual}コマが目の高さ以外", total=len(ps), unusual=unusual))
+    return limit_result("unusual_angle_ratio", title, thresholds, "unusual_angle_ratio_max", "max", rounded(ratio), [(ratio, f)])
 
 
 def check_characters(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
@@ -160,22 +174,22 @@ def check_characters(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     first: dict[str, Finding] = {}
     for page, p in _reading_panels(draft):
         for f in p.people:
-            first.setdefault(f.name, Finding(page=page, panel=p.n, value=f.name, note="初めて出る"))
-    return count_limit_result("characters", "登場人物の数", thresholds, "characters_max", list(first.values()))
+            first.setdefault(f.name, Finding(page=page, panel=p.n, value=f.name, note=ms("初めて出る")))
+    return count_limit_result("characters", ms("登場人物の数"), thresholds, "characters_max", list(first.values()))
 
 
 def check_people_per_panel(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
-    measured = [(float(len(p.people)), Finding(page=page, panel=p.n, value=len(p.people), note="写る人物の数"))
+    measured = [(float(len(p.people)), Finding(page=page, panel=p.n, value=len(p.people), note=ms("写る人物の数")))
                 for page, p in _reading_panels(draft)]
     value = max((int(v) for v, _ in measured), default=None)
-    return limit_result("people_per_panel", "1コマの人物の数", thresholds, "people_per_panel_max", "max", value, measured)
+    return limit_result("people_per_panel", ms("1コマの人物の数"), thresholds, "people_per_panel_max", "max", value, measured)
 
 
 def check_conversation_sides(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """同じ場面の中で、2人が一緒に写るコマどうしの左右が入れ替わっていないか（課題39）。
     人物の範囲（box_mm）の中心の x で左右を決める。絵は読む向きで反転しないので、ページの上の左右をそのまま比べる。
     範囲の無い人物は見ない。1人だけのコマの向き（facing）からの推し量りはしない（課題40は対象外）。"""
-    title = "会話する2人の左右"
+    title = ms("会話する2人の左右")
     findings = []
     looked = 0
     for _scene, ps in _scenes(draft):
@@ -188,11 +202,11 @@ def check_conversation_sides(draft: NameDraft, thresholds: Thresholds) -> CheckR
                     a_left = (a.box_mm[0] + a.box_mm[2]) < (b.box_mm[0] + b.box_mm[2])
                     key = (a.name, b.name)
                     if key in last and last[key][0] != a_left:
-                        findings.append(Finding(page=page, panel=p.n, value=f"{a.name}・{b.name}",
-                                                note=f"コマ{last[key][1]}と左右が入れ替わっている"))
+                        findings.append(Finding(page=page, panel=p.n, value=dot_joined([a.name, b.name]),
+                                                note=ms("コマ{panel}と左右が入れ替わっている", panel=last[key][1])))
                     last[key] = (a_left, p.n)
     if looked == 0:
-        return no_data_result("conversation_sides", title, "2人以上の人物の位置があるコマが無い")
+        return no_data_result("conversation_sides", title, ms("2人以上の人物の位置があるコマが無い"))
     return fixed_rule_result("conversation_sides", title, findings)
 
 

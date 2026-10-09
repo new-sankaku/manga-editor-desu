@@ -75,7 +75,8 @@ async def upload_image(work_id: str, session: SessionDep, authz: AuthzDep, actor
                        panel_id: Annotated[str | None, Form()] = None,
                        source_note: Annotated[str | None, Form()] = None,
                        based_on_image_id: Annotated[str | None, Form()] = None,
-                       usage_terms: Annotated[str | None, Form(description="UsageTerms の JSON")] = None):
+                       # 下の description は API の説明書き（/docs）にだけ出る
+                       usage_terms: Annotated[str | None, Form(description="UsageTerms の JSON")] = None):  # i18n:dev
     """人が描いた絵・持ち込んだ絵・前のバージョンに手を入れた絵を置いて登録する。コマに使うかは、別に update_panel の image_id で選ぶ
     （まとめて行うのは /works/{id}/panels/{panel_id}/image）。"""
     op, event_id = await _upload(session, authz, actor, work_id, image, role, origin, page_id, panel_id, source_note,

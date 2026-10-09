@@ -16,7 +16,7 @@ from typing import Any
 from v3server.generation_queue.image_process_registry import SPECS
 from v3server.llm_questions.extract_characters_question import parse_extract_characters_answer
 from v3server.llm_questions.read_prompt_question import parse_read_prompt_answer
-from v3server.messages import m
+from v3server.messages import ms
 from v3server.v3_error_types import Invalid
 
 KNOWN_PROCESSES: dict[str, tuple[str, str]] = {
@@ -32,9 +32,9 @@ KNOWN_PROCESSES: dict[str, tuple[str, str]] = {
 def check_process_task(process: str, ai_task: str | None, ai_action: str | None) -> None:
     want = KNOWN_PROCESSES.get(process)
     if want is not None and (ai_task, ai_action) != want:
-        raise Invalid(m("{process} は ai_task={task}・ai_action={action} の処理（今は {current_task}・{current_action}）",
-                        process=process, task=want[0], action=want[1], current_task=ai_task,
-                        current_action=ai_action))
+        raise Invalid(ms("{process} は ai_task={task}・ai_action={action} の処理（今は {current_task}・{current_action}）",
+                         process=process, task=want[0], action=want[1], current_task=ai_task,
+                         current_action=ai_action))
 
 
 async def handle_known_result(session, job, actor, authz, output: dict[str, Any], *,

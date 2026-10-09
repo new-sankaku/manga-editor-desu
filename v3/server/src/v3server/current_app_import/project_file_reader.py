@@ -30,7 +30,7 @@ from typing import Any
 
 import lz4.frame
 
-from v3server.messages import m
+from v3server.messages import m, ms
 
 
 class ProjectFileError(ValueError):
@@ -169,8 +169,8 @@ def data_url_bytes(value: str) -> bytes:
     """.img に入っている data URL（data:image/png;base64,...）の中身。base64 でない data URL は読まない（止める）。"""
     head, sep, body = value.partition(",")
     if not sep or not head.startswith("data:") or not head.endswith(";base64"):
-        raise ProjectFileError(f"絵が base64 の data URL でない: {value[:40]}")  # i18n:stored
+        raise ProjectFileError(ms("絵が base64 の data URL でない: {head}", head=value[:40]))
     try:
         return base64.b64decode(body, validate=True)
     except binascii.Error as e:
-        raise ProjectFileError(f"絵の base64 を読めない: {e}") from e  # i18n:stored
+        raise ProjectFileError(ms("絵の base64 を読めない: {reason}", reason=str(e))) from e

@@ -9,10 +9,10 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from v3server.messages import m
+from v3server.messages import m, ms
 
-# 完成条件の名前
-COMPLETION = {
+# 完成条件の名前（使うのは鍵だけ。右の説明は画面に出していない）
+COMPLETION = {  # i18n:dev
     "checks_pass": "検査を通った候補がある",
     "evaluator_pick": "評価モデルが1枚を選んだ",
     "human_approve": "人が採用した",
@@ -74,33 +74,35 @@ def check_limit_change(limits: dict[str, Any], used: dict[str, float], new: dict
     """走っている作業の上限を変える。使った分より小さくはできない。変えた後の上限を返す（Update の検証から呼ぶ）。"""
     unknown = set(new) - set(UnitLimits.model_fields)
     if unknown:
-        raise ValueError(f"知らない上限: {sorted(unknown)}")  # i18n:stored
+        # 並びは今までと同じ形（['名前', …]）で出す
+        raise ValueError(ms("知らない上限: {names}", names=str(sorted(unknown))))
     merged = UnitLimits.model_validate({**limits, **new}).model_dump()
     if merged["max_attempts"] < used["attempt"]:
-        raise ValueError(  # i18n:stored
-            f"回数の上限 {merged['max_attempts']} が、もう使った {used['attempt']} 回より小さい")
+        raise ValueError(ms("回数の上限 {limit} が、もう使った {used} 回より小さい",
+                            limit=merged["max_attempts"], used=used["attempt"]))
     if merged["budget_cost"] < used["cost"]:
-        raise ValueError(f"費用の上限 {merged['budget_cost']} が、もう使った {used['cost']} より小さい")  # i18n:stored
+        raise ValueError(ms("費用の上限 {limit} が、もう使った {used} より小さい",
+                            limit=merged["budget_cost"], used=used["cost"]))
     if merged["budget_seconds"] < used["seconds"]:
-        raise ValueError(  # i18n:stored
-            f"時間の上限 {merged['budget_seconds']} 秒が、もう使った {used['seconds']:.0f} 秒より小さい")
+        raise ValueError(ms("時間の上限 {limit} 秒が、もう使った {used:.0f} 秒より小さい",
+                            limit=merged["budget_seconds"], used=used["seconds"]))
     return merged
 
 
 def stop_reason(limits: dict[str, Any], s: dict[str, Any]) -> str | None:
     """次の回を始める前に、止まる理由があるかを見る。s は作業の流れの状態（unit_workflow.py）。"""
     if s.get("refused"):
-        return f"内容で断られた（送り直さない）: {s['refused']}"
+        return ms("内容で断られた（送り直さない）: {reason}", reason=s["refused"])
     if s["errors_in_row"] >= limits["error_stop"]:
-        return f"エラーが{s['errors_in_row']}回続いた"
+        return ms("エラーが{n}回続いた", n=s["errors_in_row"])
     if s["disagreements"] >= limits["disagreement_stop"]:
-        return f"評価モデルの答えが{s['disagreements']}回割れた"
+        return ms("評価モデルの答えが{n}回割れた", n=s["disagreements"])
     if s["attempt"] >= limits["max_attempts"]:
-        return f"上限回数（{limits['max_attempts']}回）に達した"
+        return ms("上限回数（{limit}回）に達した", limit=limits["max_attempts"])
     if s["cost_used"] >= limits["budget_cost"]:
-        return f"予算（費用 {s['cost_used']}/{limits['budget_cost']}）に達した"
+        return ms("予算（費用 {used}/{limit}）に達した", used=s["cost_used"], limit=limits["budget_cost"])
     if s["seconds_used"] >= limits["budget_seconds"]:
-        return f"予算（時間 {s['seconds_used']:.0f}/{limits['budget_seconds']:.0f} 秒）に達した"
+        return ms("予算（時間 {used:.0f}/{limit:.0f} 秒）に達した", used=s["seconds_used"], limit=limits["budget_seconds"])
     return None
 
 

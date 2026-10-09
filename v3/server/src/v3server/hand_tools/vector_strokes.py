@@ -20,7 +20,7 @@ import numpy as np
 import shapely
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.name_structure.item_styles import Color
 
 Brush = Literal["pencil", "double_outline", "pattern", "vertical_lines", "horizontal_lines", "crayon", "circle", "ink",
@@ -199,10 +199,11 @@ def stroke_cache_problem(layer) -> str | None:
     控えの絵が無いまま書き出すと、線が黙って抜ける（取り込んだ線は、画面で開いて描くまで控えが無い）。"""
     if layer.stroke_revision <= 0:
         return None
+    # 書き出しの失敗の理由として記録に残るので ms()（残してから出す文）
     if layer.image_id is None:
-        return m("レイヤー {id} の線の画像が無い（線のバージョン {revision}）。画面で開いて線から描いて上げる",
-                 id=layer.id, revision=layer.stroke_revision)
+        return ms("レイヤー {id} の線の画像が無い（線のバージョン {revision}）。画面で開いて線から描いて上げる",
+                  id=layer.id, revision=layer.stroke_revision)
     if layer.image_stroke_revision != layer.stroke_revision:
-        return m("レイヤー {id} の絵は古い線の画像（線のバージョン {image_revision}、今は {revision}）。画面で描き直して上げる",
-                 id=layer.id, image_revision=layer.image_stroke_revision, revision=layer.stroke_revision)
+        return ms("レイヤー {id} の絵は古い線の画像（線のバージョン {image_revision}、今は {revision}）。画面で描き直して上げる",
+                  id=layer.id, image_revision=layer.image_stroke_revision, revision=layer.stroke_revision)
     return None

@@ -31,6 +31,7 @@ from v3server.llm_questions.structure_question import (
     parse_structure_answer,
     parse_structure_views_answer,
 )
+from v3server.messages import ms, text_of
 from v3server.operations.material_and_plan_operations import SetEpisodeOutline
 from v3server.operations.operation_submit_and_undo import submit
 
@@ -51,7 +52,7 @@ async def earlier_outlines(session, work_id: str, episode: Episode) -> list[str]
         select(Episode, EpisodeOutline).join(EpisodeOutline, EpisodeOutline.episode_id == Episode.id)
         .where(Episode.work_id == work_id, Episode.number < episode.number, Episode.removed.is_(False),
                EpisodeOutline.removed.is_(False)).order_by(Episode.number))).all()
-    return [f"第{e.number}話：\n{outline_text(o.outline)}" for e, o in rows]
+    return [f"第{e.number}話：\n{outline_text(o.outline)}" for e, o in rows]  # i18n:prompt
 
 
 async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
@@ -62,7 +63,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             await q.require_route(session, "structure_views")
         plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == unit.work_id))).scalar_one_or_none()
         if plan is None or not (plan.synopsis or "").strip():
-            raise q.blocked("企画のあらすじが無い（S0 で書く）")  # i18n:stored
+            raise q.blocked(ms("企画のあらすじが無い（S0 で書く）"))
         ep = await session.get(Episode, unit.target_id)
         chars = await characters_by_name(session, unit.work_id)
         earlier = await earlier_outlines(session, unit.work_id, ep)
@@ -81,10 +82,13 @@ def shape_findings(outline: dict[str, Any], page_count: int) -> list[dict[str, A
     inside = set(range(1, page_count + 1))
     stray = sorted({*outline["highlights"], *(f["page"] for f in outline["foreshadow"])} - inside)
     return [
-        c.finding("ページの数", len(pages) == page_count, True, f"{len(pages)} ページ（決めた数 {page_count}）"),
-        c.finding("ページの番号", pages == sorted(inside), True,
-                  "1 から欠けずに並ぶ" if pages == sorted(inside) else f"並び {pages}"),
-        c.finding("見せ場・伏線のページ", not stray, True, "話の中" if not stray else f"話に無いページ {stray}"),
+        c.finding(ms("ページの数"), len(pages) == page_count, True,
+                  ms("{n} ページ（決めた数 {expected}）", n=len(pages), expected=page_count)),
+        # 番号の並びは今までと同じ形（[1, 2, …]）で出す
+        c.finding(ms("ページの番号"), pages == sorted(inside), True,
+                  ms("1 から欠けずに並ぶ") if pages == sorted(inside) else ms("並び {pages}", pages=str(pages))),
+        c.finding(ms("見せ場・伏線のページ"), not stray, True,
+                  ms("話の中") if not stray else ms("話に無いページ {pages}", pages=str(stray))),
     ]
 
 
@@ -95,7 +99,8 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async def judge(cand: HarnessCandidate) -> list[dict[str, Any]]:
         out = shape_findings(cand.content, spec.page_count)
         if not spec.views:
-            return out + [c.finding("観点ごとの判定", None, False, "観点（spec.structure.views）が無いので判定させない")]
+            return out + [c.finding(ms("観点ごとの判定"), None, False,
+                                    ms("観点（spec.structure.views）が無いので判定させない"))]
         question = build_structure_views_question(outline_text(cand.content), spec.views)
         key = f"{unit.id}:c{cand.id}:views:" + hashlib.sha256(question.encode()).hexdigest()[:12]
         text, jid = await q.ask_text(unit, key, "structure_views", q.user_message(question, []))
@@ -103,9 +108,9 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             judged = parse_structure_views_answer(text, spec.views)
         except BrokenAnswerError as e:
-            raise ApplicationError(  # i18n:stored
-                f"観点の判定の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
-        return out + [c.finding(f"観点：{v.view}", v.ok, False, v.why, judge="llm") for v in judged]
+            raise ApplicationError(ms("観点の判定の答えの形が崩れた: {error}", error=text_of(e)),
+                                   type="broken_response", non_retryable=True) from e
+        return out + [c.finding(ms("観点：{view}", view=v.view), v.ok, False, v.why, judge="llm") for v in judged]
 
     result = await c.check_candidates(unit, args, judge)
     async with get_sessionmaker()() as session:
@@ -116,7 +121,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     return await c.pick_fewest_flags(
-        unit, args, "指摘の少ない案（構成の評価モデルは置かない。観点の判定は指摘として出す）")
+        unit, args, ms("指摘の少ない案（構成の評価モデルは置かない。観点の判定は指摘として出す）"))
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

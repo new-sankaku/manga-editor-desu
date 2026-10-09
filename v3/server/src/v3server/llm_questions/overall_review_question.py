@@ -7,9 +7,10 @@
 from pydantic import BaseModel, Field
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 
 
-def build_page_summary_question(page_numbers: list[int]) -> str:
+def build_page_summary_question(page_numbers: list[int]) -> str:  # i18n:prompt
     listed = "、".join(f"{i + 1}枚目＝{n}ページ" for i, n in enumerate(page_numbers))
     return (
         f"漫画のページの絵を {len(page_numbers)} 枚添えます（{listed}）。\n"
@@ -19,7 +20,7 @@ def build_page_summary_question(page_numbers: list[int]) -> str:
     )
 
 
-def build_outline_compare_question(outline_text: str, summaries: list[tuple[int, str]]) -> str:
+def build_outline_compare_question(outline_text: str, summaries: list[tuple[int, str]]) -> str:  # i18n:prompt
     pages = "\n".join(f"{n}ページ：{s}" for n, s in summaries)
     return (
         "次は漫画の1話の構成（予定）と、仕上がったページの絵の要約です。\n\n"
@@ -43,7 +44,7 @@ class _Summaries(BaseModel):
 def parse_page_summary_answer(answer: str, count: int) -> list[PageSummary]:
     got = read_answer(answer, _Summaries).pages
     if sorted(p.image for p in got) != list(range(1, count + 1)):
-        raise BrokenAnswerError(f"絵の番号が 1〜{count} にそろっていない", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("絵の番号が 1〜{count} にそろっていない", count=count), answer)
     return sorted(got, key=lambda p: p.image)
 
 
@@ -60,5 +61,5 @@ def parse_outline_compare_answer(answer: str, pages: set[int]) -> list[Gap]:
     got = read_answer(answer, _Gaps).gaps
     unknown = sorted({g.page for g in got} - pages)
     if unknown:
-        raise BrokenAnswerError(f"無いページの番号がある: {unknown}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("無いページの番号がある: {unknown}", unknown=str(unknown)), answer)
     return got

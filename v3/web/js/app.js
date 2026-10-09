@@ -484,8 +484,8 @@ function renderCandidates(currentId) {
   $("#cand-count").textContent = waiting ? String(waiting) : "";
   if (!S.sets.length) { host.append(h("div", { class: "meta", text: t("まだ生成していません") })); return; }
   const variation = S.processes.find((p) => p.name === "variation");
-  const presets = Object.entries(variation ? variation.params_schema.properties.strength["x-presets"] || {} : {})
-    .sort((a, b) => a[1] - b[1]);
+  const presets = (variation ? variation.params_schema.properties.strength["x-presets"] || [] : [])
+    .map((p) => [p.label, p.value]).sort((a, b) => a[1] - b[1]);
   for (const set of S.sets) {
     const active = set.jobs.filter((j) => ACTIVE.has(j.status));
     const head = h("div", { class: "set-h" },

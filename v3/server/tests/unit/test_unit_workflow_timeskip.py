@@ -20,6 +20,7 @@ from temporalio.worker import Worker
 
 from v3server.harness.harness_activities import RecordInput, StepInput
 from v3server.harness.unit_workflow import Control, LimitChange, Review, UnitInput, WorkUnitWorkflow
+from v3server.messages import ms, render
 
 QUEUE = "unit-timeskip"
 LIMITS = {"max_attempts": 3, "candidates_per_attempt": 2, "budget_cost": 1000, "budget_seconds": 600,
@@ -115,13 +116,13 @@ async def test_直す上限で落ちたままなら_記録してから文脈か�
     async with worker:
         await s.until(lambda: "stopped" in s.statuses())
         fb = s.events("fix_fallback")
-        assert len(fb) == 2 and "直す上限（1回）" in fb[0].extra["reason"]
-        assert fb[0].extra["decision"].startswith("全部を作り直す")
+        assert len(fb) == 2 and "直す上限（1回）" in render(fb[0].extra["reason"], "ja")
+        assert render(fb[0].extra["decision"], "ja").startswith("全部を作り直す")
         # 回ごとに直すのは1回まで（max_fix_rounds）。2回目の回は文脈から
         assert [x[0] for x in s.steps].count("fix") == 2 and [x[0] for x in s.steps].count("context") == 2
         await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
         assert (await h.result())["status"] == "cancelled"
-    assert s.called("discard_round")[-1]["reason"] == "作業を取り消した"
+    assert render(s.called("discard_round")[-1]["reason"], "ja") == "作業を取り消した"
 
 
 async def test_直せない理由で落ちたら直さずに作り直す(env):
@@ -131,7 +132,7 @@ async def test_直せない理由で落ちたら直さずに作り直す(env):
     async with worker:
         assert (await h.result())["picked"] == "c9"
     assert "fix" not in [x[0] for x in s.steps]
-    assert "直せる所（文字・顔）でない理由" in s.events("fix_fallback")[0].extra["reason"]
+    assert "直せる所（文字・顔）でない理由" in render(s.events("fix_fallback")[0].extra["reason"], "ja")
 
 
 async def test_質問に答えると答えが次の回の文脈に入り_今の回の候補は却下になる(env):
@@ -148,7 +149,8 @@ async def test_質問に答えると答えが次の回の文脈に入り_今の�
         out = await h.result()
     assert out == {"status": "done", "candidate_id": "c3"}
     assert [a["answers"] for a in s.called("context")] == [[], ["主人公は左利き"], ["主人公は左利き", "舞台は冬"]]
-    assert [a["reason"] for a in s.called("discard_round")] == ["人が質問に答えた（次の回で答えを入れて作り直す）"] * 2
+    assert ([render(a["reason"], "ja") for a in s.called("discard_round")]
+            == ["人が質問に答えた（次の回で答えを入れて作り直す）"] * 2)
     assert s.called("finalize")[0]["by"] == "human:a"
 
 
@@ -159,7 +161,7 @@ async def test_答えの無い答えは断る(env):
         await s.until(lambda: "awaiting_review" in s.statuses())
         with pytest.raises(WorkflowUpdateFailedError) as e:
             await h.execute_update(WorkUnitWorkflow.review, Review("answer", "human:a", reason=" "))
-        assert "答え（reason）が要る" in str(e.value.cause)
+        assert "答え（reason）が要る" in render(str(e.value.cause), "ja")
         await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
         assert (await h.result())["status"] == "cancelled"
 
@@ -203,7 +205,7 @@ async def test_エラーが続くと止まり_再開すると続く(env):
         await s.until(lambda: "stopped" in s.statuses())
         assert [r.extra["type"] for r in s.events("error")] == ["generation_failed"] * 2
         stopped = next(r.patch["stop_reason"] for r in s.records if r.patch.get("status") == "stopped")
-        assert "エラーが2回続いた" in stopped
+        assert "エラーが2回続いた" in render(stopped, "ja")
         await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
         assert (await h.result())["picked"] == "c1"
 
@@ -282,7 +284,7 @@ async def test_段の取り消しは_段が成功で終わっても捨てずに�
         assert (await h.result())["picked"] == "c2"
     # 1回目の生成は成功で終わったが、頼まれた段の取り消しを当てて回を捨て、2回目から作り直す
     assert [r.extra["attempt"] for r in s.events("step_cancelled")] == [1]
-    assert s.called("discard_round")[0]["reason"] == "ステップを取り消した"
+    assert render(s.called("discard_round")[0]["reason"], "ja") == "ステップを取り消した"
     assert [a for st, a, _ in s.steps if st == "check"] == [2]
 
 
@@ -309,7 +311,7 @@ async def test_却下は止まるだけで_再開すると理由を入れて作�
         await h.execute_update(WorkUnitWorkflow.review, Review("reject", "human:a", reason="表情が硬い"))
         await s.until(lambda: "stopped" in s.statuses())
         stopped = next(r for r in s.records if r.patch.get("status") == "stopped")
-        assert "却下した（表情が硬い）" in stopped.patch["stop_reason"]
+        assert "却下した（表情が硬い）" in render(stopped.patch["stop_reason"], "ja")
         # 止まっている間は作り直さない。上限を変えても続かない（再開を押したときだけ）
         await h.execute_update(WorkUnitWorkflow.set_limits, LimitChange("human:a", {"max_attempts": 5}))
         assert len(s.called("context")) == 1
@@ -319,7 +321,7 @@ async def test_却下は止まるだけで_再開すると理由を入れて作�
         await h.execute_update(WorkUnitWorkflow.review, Review("approve", "human:a", candidate_id="c1"))
         assert (await h.result())["candidate_id"] == "c1"
     assert s.called("context")[1]["reject_reason"] == "表情が硬い"
-    assert s.called("discard_round")[0]["reason"] == "却下: 表情が硬い"
+    assert render(s.called("discard_round")[0]["reason"], "ja") == "却下: 表情が硬い"
 
 
 async def test_却下ですぐ作り直すのはredo_on_rejectのときだけ(env):
@@ -338,6 +340,29 @@ async def test_却下ですぐ作り直すのはredo_on_rejectのときだけ(en
 # ---------------------------------------------------------------- 順番待ちは時間の上限に数えず、待ちの上限で止まる（p60）
 
 
+async def test_上流が変わったら段の切れ目で止まり_理由は日本語の文の順に並ぶ(env):
+    s = Script({"check": lambda n, a: _check(1)})
+    worker, h = await _start(env, s, ["human_approve"], redo_on_reject=True)
+    async with worker:
+        await s.until(lambda: "awaiting_review" in s.statuses())
+        # 理由は包んだ文で届く（upstream_versions.stale_entries）。作り直しの要らない変化（recheck）は理由に入れない
+        await h.signal(WorkUnitWorkflow.upstream_changed, [
+            {"effect": "redraw", "reason": ms("{label}が変わった", label=ms("設定資料の人物"))},
+            {"effect": "redraw", "reason": ms("{label}が足された", label=ms("構成"))},
+            {"effect": "recheck", "reason": ms("{label}が変わった", label=ms("作画の検査の閾値"))}])
+        await h.execute_update(WorkUnitWorkflow.review, Review("reject", "human:a", reason="描き直す"))
+        await s.until(lambda: "stopped" in s.statuses())
+        stopped = next(r for r in s.records if r.patch.get("status") == "stopped")
+        assert stopped.extra == {"stale": True}
+        assert render(stopped.patch["stop_reason"], "ja") == (
+            "上流が変わった（構成が足された、設定資料の人物が変わった）。続けるか、取り消して作り直すかを人が決める")
+        assert render(stopped.patch["stop_reason"], "en") == (
+            "Upstream changed (Outline was added, Characters in the reference sheets changed). "
+            "A person decides whether to continue, or to cancel and regenerate")
+        await h.execute_update(WorkUnitWorkflow.control, Control("cancel_unit", "human:a"))
+        assert (await h.result())["status"] == "cancelled"
+
+
 async def test_待ちの上限を超えたら止まり_再開すると同じ段を頼み直す(env):
     def generate(n, a):
         if n == 1:
@@ -349,7 +374,7 @@ async def test_待ちの上限を超えたら止まり_再開すると同じ段�
     async with worker:
         await s.until(lambda: "stopped" in s.statuses())
         stopped = next(r for r in s.records if r.patch.get("status") == "stopped")
-        assert "待ちの上限" in stopped.patch["stop_reason"] and stopped.extra == {"wait_limit": True}
+        assert "待ちの上限" in render(stopped.patch["stop_reason"], "ja") and stopped.extra == {"wait_limit": True}
         # 失敗の数には入れない（混んでいるだけ）
         assert not s.events("error")
         await h.execute_update(WorkUnitWorkflow.control, Control("resume", "human:a"))
@@ -362,7 +387,8 @@ async def test_待ちの上限を超えたら止まり_再開すると同じ段�
 
 
 def _stop_reason(s: Script) -> str:
-    return [r.patch["stop_reason"] for r in s.records if r.patch.get("status") in ("stopped", "blocked")][-1]
+    reason = [r.patch["stop_reason"] for r in s.records if r.patch.get("status") in ("stopped", "blocked")][-1]
+    return render(reason, "ja")
 
 
 async def test_上限回数で止まり_上限を上げると続き_また止まる(env):

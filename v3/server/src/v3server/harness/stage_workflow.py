@@ -27,6 +27,7 @@ with workflow.unsafe.imports_passed_through():
         stage_check,
     )
     from v3server.harness.unit_workflow import Control, UnitInput, WorkUnitWorkflow
+    from v3server.messages import ms
 
 HARNESS_QUEUE = "v3-harness"
 SHORT = timedelta(seconds=60)
@@ -102,13 +103,13 @@ class StageWorkflow:
     @control.validator
     def _check_control(self, c: StageControl) -> None:
         if c.action not in ("pause", "resume", "cancel"):
-            raise ValueError(f"知らない操作: {c.action}")  # i18n:stored
+            raise ValueError(ms("知らない操作: {action}", action=c.action))
         if self.status in ("done", "cancelled") or self.cancel_by:
-            raise ValueError(f"終わった工程（{self.status}）は操作できない")  # i18n:stored
+            raise ValueError(ms("終わった工程（{status}）は操作できない", status=self.status))
         if c.action == "pause" and self.paused_by:
-            raise ValueError("もう一時停止中")  # i18n:stored
+            raise ValueError(ms("もう一時停止中"))
         if c.action == "resume" and not self.paused_by and self.status != "blocked":
-            raise ValueError("止まっていない")  # i18n:stored
+            raise ValueError(ms("止まっていない"))
 
     @workflow.update
     async def approve(self, by: str) -> dict[str, Any]:
@@ -118,7 +119,7 @@ class StageWorkflow:
     @approve.validator
     def _check_approve(self, by: str) -> None:
         if self.status != "awaiting_review":
-            raise ValueError(f"工程の検査が終わって判断待ちになってから承認する（今は {self.status}）")  # i18n:stored
+            raise ValueError(ms("工程の検査が終わって判断待ちになってから承認する（今は {status}）", status=self.status))
 
     @workflow.update
     async def rerun(self, r: Rerun) -> dict[str, Any]:
@@ -128,12 +129,13 @@ class StageWorkflow:
     @rerun.validator
     def _check_rerun(self, r: Rerun) -> None:
         if not r.unit_ids:
-            raise ValueError("作り直す作業を選ぶ")  # i18n:stored
+            raise ValueError(ms("作り直す作業を選ぶ"))
         if self.cancel_by or self.status in ("done", "cancelled"):
-            raise ValueError("終わった工程では作り直せない")  # i18n:stored
+            raise ValueError(ms("終わった工程では作り直せない"))
         busy = [u for u in r.unit_ids if u in self.running]
         if busy:
-            raise ValueError(f"動いている作業は作り直せない（先に取り消す）: {busy}")  # i18n:stored
+            # 並びは今までと同じ形（['id', …]）で出す
+            raise ValueError(ms("動いている作業は作り直せない（先に取り消す）: {units}", units=str(busy)))
 
     @workflow.query
     def state(self) -> dict[str, Any]:
@@ -161,7 +163,7 @@ class StageWorkflow:
                 self.finished[uid] = res.get("status", "done")
             except Exception as e:  # 子の失敗（作業の流れの不具合）。工程は止めず、作業を failed として残す
                 self.finished[uid] = "failed"
-                workflow.logger.warning(f"作業 {uid} の流れが失敗した: {e}")
+                workflow.logger.warning(f"作業 {uid} の流れが失敗した: {e}")  # i18n:dev
             finally:
                 self.running.pop(uid, None)
                 self.waiting.discard(uid)
@@ -197,7 +199,7 @@ class StageWorkflow:
         while True:
             await self._run_units(int(inp.limits["max_parallel_units"]))
             if self.cancel_by:
-                await self._rec({"status": "cancelled", "stop_reason": f"{self.cancel_by} が取り消した"})
+                await self._rec({"status": "cancelled", "stop_reason": ms("{by} が取り消した", by=self.cancel_by)})
                 return {"status": "cancelled"}
             await self._rec({"status": "running"}, {"phase": "stage_check"})
             try:
@@ -211,7 +213,7 @@ class StageWorkflow:
                 msg = cause.message if isinstance(cause, ApplicationError) else str(cause)
                 status = "blocked" if isinstance(cause, ApplicationError) and cause.type == "blocked" else "stopped"
                 self.resume_by = None
-                await self._rec({"status": status, "stop_reason": f"工程の検査: {msg}"})
+                await self._rec({"status": status, "stop_reason": ms("工程の検査: {reason}", reason=msg)})
                 # 人が直して resume（検査をやり直す）・作り直し・取り消しのどれかを待つ
                 await workflow.wait_condition(lambda: self.resume_by is not None or self.cancel_by is not None
                                               or bool(self.reruns))

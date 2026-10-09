@@ -5,10 +5,11 @@ LLM の41中15は形が1種だけ（市販は最低2種）。1ページの数で
 import statistics
 from typing import TypedDict
 
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.name_checks.check_report_types import (
     Bound,
     CheckResult,
+    CheckStatus,
     Finding,
     Thresholds,
     no_data_result,
@@ -34,7 +35,7 @@ THRESHOLD_KEYS = {
     "top_aligned_ratio_median_max": m("上の辺がほかのコマと揃うコマの割合の、ページの中央値の上限"),
 }
 
-_NO_FRAME = "枠の無いコマがある（コマ割りの計算の前）"
+_NO_FRAME = ms("枠の無いコマがある（コマ割りの計算の前）")
 
 
 class PageMonotony(TypedDict):
@@ -77,26 +78,26 @@ def _median_result(check_id: str, title: str, rows: list[PageMonotony], metric: 
     """ページごとの値の中央値に閾値を当てる。外れたら、閾値の側を外れたページを挙げる。"""
     med = statistics.median(r[metric] for r in rows)
     if key not in thresholds:
-        return CheckResult(check_id=check_id, title=title, status="閾値未設定", value=rounded(med), threshold_key=key)
+        return CheckResult(check_id=check_id, title=title, status="閾値未設定", value=rounded(med), threshold_key=key)  # i18n:data
     lim = float(thresholds[key])
     out = med > lim if bound == "max" else med < lim
     findings = []
     if out:
         findings = [Finding(page=r["page"], value=rounded(r[metric]), note=title)
                     for r in rows if (r[metric] > lim if bound == "max" else r[metric] < lim)]
-    return CheckResult(check_id=check_id, title=title, status="不合格" if out else "合格", value=rounded(med),
+    return CheckResult(check_id=check_id, title=title, status="不合格" if out else "合格", value=rounded(med),  # i18n:data
                        threshold_key=key, threshold_value=lim, findings=findings)
 
 
 def run_monotony_checks(draft: NameDraft, thresholds: Thresholds) -> list[CheckResult]:
-    ids = [("area_cv_median", "面積のばらつき（中央値）"), ("area_max_min_median", "大小の差（中央値）"),
-           ("single_shape_page_ratio", "形が1種類のページの割合"), ("full_width_ratio_median", "幅いっぱいのコマの割合（中央値）"),
-           ("top_aligned_ratio_median", "上の辺が揃うコマの割合（中央値）")]
+    ids = [("area_cv_median", ms("面積のばらつき（中央値）")), ("area_max_min_median", ms("大小の差（中央値）")),
+           ("single_shape_page_ratio", ms("形が1種類のページの割合")), ("full_width_ratio_median", ms("幅いっぱいのコマの割合（中央値）")),
+           ("top_aligned_ratio_median", ms("上の辺が揃うコマの割合（中央値）"))]
     if not all(p.frame is not None for p in draft.all_panels()):
         return [no_data_result(i, t, _NO_FRAME) for i, t in ids]
     pages = [pg for pg in draft.pages if len(pg.panels) >= 2]
     if not pages:
-        return [no_data_result(i, t, "コマが2つ以上のページが無い") for i, t in ids]
+        return [no_data_result(i, t, ms("コマが2つ以上のページが無い")) for i, t in ids]
     wide, tall = thresholds.get("aspect_wide_min"), thresholds.get("aspect_tall_max")
     rows = [page_monotony(pg, draft, wide, tall) for pg in pages]
     out = [
@@ -105,20 +106,23 @@ def run_monotony_checks(draft: NameDraft, thresholds: Thresholds) -> list[CheckR
     ]
     if wide is None or tall is None:
         # 形を分ける境目も閾値なので、無ければ種類の数そのものが出せない
-        out.append(CheckResult(check_id=ids[2][0], title=ids[2][1], status="閾値未設定", value=None,
+        # 鍵を2つ並べた値（文ではない。足りない閾値の名前として、止まった理由の一覧にそのまま入る）
+        out.append(CheckResult(check_id=ids[2][0], title=ids[2][1], status="閾値未設定", value=None,  # i18n:data
                                threshold_key="aspect_wide_min・aspect_tall_max"))
     else:
         single = [r for r in rows if r["shapes"] == 1]
         ratio = len(single) / len(rows)
         key = "single_shape_page_ratio_max"
         if key not in thresholds:
-            out.append(CheckResult(check_id=ids[2][0], title=ids[2][1], status="閾値未設定", value=rounded(ratio), threshold_key=key))
+            out.append(CheckResult(check_id=ids[2][0], title=ids[2][1], status="閾値未設定", value=rounded(ratio),  # i18n:data
+                                   threshold_key=key))
         else:
             lim = float(thresholds[key])
             bad = ratio > lim
-            out.append(CheckResult(check_id=ids[2][0], title=ids[2][1], status="不合格" if bad else "合格", value=rounded(ratio),
+            status: CheckStatus = "不合格" if bad else "合格"  # i18n:data
+            out.append(CheckResult(check_id=ids[2][0], title=ids[2][1], status=status, value=rounded(ratio),
                                    threshold_key=key, threshold_value=lim,
-                                   findings=[Finding(page=r["page"], value=1, note="形が1種類") for r in single] if bad else []))
+                                   findings=[Finding(page=r["page"], value=1, note=ms("形が1種類")) for r in single] if bad else []))
     out.append(_median_result(ids[3][0], ids[3][1], rows, "full_width_ratio", thresholds, "full_width_ratio_median_max", "max"))
     out.append(_median_result(ids[4][0], ids[4][1], rows, "top_aligned_ratio", thresholds, "top_aligned_ratio_median_max", "max"))
     return out

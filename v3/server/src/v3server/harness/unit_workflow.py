@@ -28,6 +28,7 @@ from temporalio.exceptions import ActivityError, ApplicationError, CancelledErro
 with workflow.unsafe.imports_passed_through():
     from v3server.harness.harness_activities import RecordInput, StepInput, record_unit, run_step, unit_usage
     from v3server.harness.harness_limits import check_limit_change, note_failure, stop_reason
+    from v3server.messages import ms, render
 
 RECORD_TIMEOUT = timedelta(seconds=30)
 HEARTBEAT_TIMEOUT = timedelta(seconds=20)
@@ -121,19 +122,19 @@ class WorkUnitWorkflow:
     @control.validator
     def _check_control(self, c: Control) -> None:
         if c.action not in CONTROL_ACTIONS:
-            raise ValueError(f"知らない操作: {c.action}")  # i18n:stored
+            raise ValueError(ms("知らない操作: {action}", action=c.action))
         if self.status in ("done", "cancelled", "failed"):
-            raise ValueError(f"終わった作業（{self.status}）は操作できない")  # i18n:stored
+            raise ValueError(ms("終わった作業（{status}）は操作できない", status=self.status))
         if c.action == "pause" and c.mode not in ("now", "boundary"):
-            raise ValueError("pause は mode に now か boundary を渡す")  # i18n:stored
+            raise ValueError(ms("pause は mode に now か boundary を渡す"))
         if c.action == "pause" and self.status in ("paused", "cancelling"):
-            raise ValueError(f"今は {self.status}")  # i18n:stored
+            raise ValueError(ms("今は {status}", status=self.status))
         if c.action == "resume" and self.status not in ("paused", "stopped", "blocked") and self.pause_mode is None:
-            raise ValueError(f"止まっていない（{self.status}）")  # i18n:stored
+            raise ValueError(ms("止まっていない（{status}）", status=self.status))
         if c.action == "cancel_step" and (self.current is None or self.step in ("cut_out", "finalize")):
-            raise ValueError("取り消せるステップが動いていない")  # i18n:stored
+            raise ValueError(ms("取り消せるステップが動いていない"))
         if c.action == "cancel_unit" and self.cancel_unit_by:
-            raise ValueError("もう取り消している")  # i18n:stored
+            raise ValueError(ms("もう取り消している"))
 
     @workflow.signal
     def parent_control(self, c: Control) -> None:
@@ -168,17 +169,17 @@ class WorkUnitWorkflow:
     @review.validator
     def _check_review(self, r: Review) -> None:
         if self.status != "awaiting_review" or self.decision is not None:
-            raise ValueError(f"判断待ちでない（{self.status}）")  # i18n:stored
+            raise ValueError(ms("判断待ちでない（{status}）", status=self.status))
         if r.action not in REVIEW_ACTIONS:
-            raise ValueError(f"知らない判断: {r.action}")  # i18n:stored
+            raise ValueError(ms("知らない判断: {action}", action=r.action))
         if r.action == "approve" and (r.candidate_id is None) == (r.image_id is None):
-            raise ValueError("採用は candidate_id か image_id のどちらか1つを渡す")  # i18n:stored
+            raise ValueError(ms("採用は candidate_id か image_id のどちらか1つを渡す"))
         if r.action == "reject" and not (r.reason or "").strip():
-            raise ValueError("却下には理由が要る（次の回の問いに入る）")  # i18n:stored
+            raise ValueError(ms("却下には理由が要る（次の回の問いに入る）"))
         if r.action == "answer" and not (r.reason or "").strip():
-            raise ValueError("答え（reason）が要る（次の回の問いに入る）")  # i18n:stored
+            raise ValueError(ms("答え（reason）が要る（次の回の問いに入る）"))
         if r.action == "edit" and not r.image_id:
-            raise ValueError("手動で修正した絵（image_id）を渡す")  # i18n:stored
+            raise ValueError(ms("手動で修正した絵（image_id）を渡す"))
 
     @workflow.update
     async def set_limits(self, c: LimitChange) -> dict[str, Any]:
@@ -190,7 +191,7 @@ class WorkUnitWorkflow:
     @set_limits.validator
     def _check_limits(self, c: LimitChange) -> None:
         if self.status in ("done", "cancelled", "failed"):
-            raise ValueError("終わった作業の上限は変えられない")  # i18n:stored
+            raise ValueError(ms("終わった作業の上限は変えられない"))
         check_limit_change(self.limits, self._used(), c.limits)
 
     @workflow.signal
@@ -245,11 +246,13 @@ class WorkUnitWorkflow:
         if self.cancel_unit_by:
             raise _UnitCancelled()
         if self.pause_mode:
-            await self._hold("paused", "人が一時停止した")
+            await self._hold("paused", ms("人が一時停止した"))
         if self.upstream_stop:
-            reasons = "、".join(sorted({e["reason"] for e in self.upstream if e["effect"] == "redraw"}))
-            await self._hold("stopped", f"上流が変わった（{reasons}）。続けるか、取り消して作り直すかを人が決める",
-                             {"stale": True})
+            # 並びは日本語の文の順（包んだ文のままの順だと、日本語で出したときの並びが前と変わる）
+            reasons = sorted({e["reason"] for e in self.upstream if e["effect"] == "redraw"},
+                             key=lambda reason: (render(reason, "ja"), reason))
+            await self._hold("stopped", ms("上流が変わった（{reasons}）。続けるか、取り消して作り直すかを人が決める",
+                                           reasons=reasons), {"stale": True})
             self.upstream_stop = False
             self.restart = True
 
@@ -386,10 +389,11 @@ class WorkUnitWorkflow:
                         chk = await self._step("check", attempt, {"context": ctx, "skip_size": skip_size})
                     if chk["passed"] == 0:
                         # 全部を作り直すのは、決めて記録してから（黙って作り直さない）
-                        why = (f"直す上限（{self.limits['max_fix_rounds']}回）に達しても落ちたまま" if chk.get("fixable")
-                               else chk.get("fix_unavailable") or f"直せる所（文字・顔）でない理由で落ちた（{chk['failure']}）")
+                        why = (ms("直す上限（{rounds}回）に達しても落ちたまま", rounds=self.limits["max_fix_rounds"])
+                               if chk.get("fixable") else chk.get("fix_unavailable")
+                               or ms("直せる所（文字・顔）でない理由で落ちた（{failure}）", failure=chk["failure"]))
                         await self._rec({}, "fix_fallback", {"attempt": attempt, "fix_rounds": rounds, "reason": why,
-                                                             "decision": "全部を作り直す（文脈から）"})
+                                                             "decision": ms("全部を作り直す（文脈から）")})
                         self.restart = note_failure(self.s, chk["failure"], self.limits)
                         continue
                     picked = None
@@ -414,20 +418,20 @@ class WorkUnitWorkflow:
                         return {"status": "done", **out}
                     if d.action == "reject":
                         reject_reason = d.reason
-                        await self._discard(attempt, f"却下: {d.reason}", d.by)
+                        await self._discard(attempt, ms("却下: {reason}", reason=d.reason), d.by)
                         # 却下は止まるだけ。作り直すのは人が再開を押したとき（決めごと 5.3）。自動で作り直すのは
                         # 上限の redo_on_reject を入れたときだけ（同 9章の4。既定は入れない）
                         if workflow.patched(PATCH_REJECT_STOPS) and not self.limits.get("redo_on_reject"):
-                            await self._hold("stopped", f"却下した（{d.reason}）。作り直すときは再開を押す",
+                            await self._hold("stopped", ms("却下した（{reason}）。作り直すときは再開を押す", reason=d.reason),
                                              {"rejected_by": d.by}, resume_on_limits=False)
                         continue
                     if d.action == "answer":
                         answers = [*answers, d.reason]
-                        await self._discard(attempt, "人が質問に答えた（次の回で答えを入れて作り直す）", d.by)
+                        await self._discard(attempt, ms("人が質問に答えた（次の回で答えを入れて作り直す）"), d.by)
                         continue
                     edit_image = d.image_id  # 手動で修正した絵から生成へ戻る（文脈はそのまま）
                 except _StepCancelled as c:
-                    await self._discard(attempt, "ステップを取り消した", c.by)
+                    await self._discard(attempt, ms("ステップを取り消した"), c.by)
                     await self._rec({"status": "running"}, "step_cancelled", {"by": c.by, "attempt": attempt})
                 except ActivityError as e:
                     cause = e.cause
@@ -444,6 +448,6 @@ class WorkUnitWorkflow:
             await workflow.wait_condition(lambda: self._cancel_noted)  # 受けた所の「取り消し中」を先に書き終える
             if self.status != "cancelling":
                 await self._rec({"status": "cancelling"}, "unit", {"by": by})
-            await self._discard(attempt, "作業を取り消した", by)
-            await self._rec({"status": "cancelled", "current_step": None, "stop_reason": f"{by} が取り消した"})
+            await self._discard(attempt, ms("作業を取り消した"), by)
+            await self._rec({"status": "cancelled", "current_step": None, "stop_reason": ms("{by} が取り消した", by=by)})
             return {"status": "cancelled"}

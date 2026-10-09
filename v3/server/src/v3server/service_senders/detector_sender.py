@@ -12,6 +12,7 @@ import httpx
 
 from v3server.canonical_tables.service_and_job_tables import Service, ServiceProcess
 from v3server.image_file_storage import read_image
+from v3server.messages import ms
 from v3server.service_senders.sender_result_types import AdapterError, AdapterResult
 
 # 検出器の API と、要る絵の項目
@@ -27,21 +28,21 @@ DETECTOR_ENDPOINTS: dict[str, tuple[str, ...]] = {
 async def call_detector(service: Service, sp: ServiceProcess, request: dict[str, Any]) -> AdapterResult:
     endpoint = request.get("endpoint")
     if endpoint not in DETECTOR_ENDPOINTS:
-        raise AdapterError("refused", f"検出器に無い API: {endpoint}")  # i18n:stored
+        raise AdapterError("refused", ms("検出器に無い API: {endpoint}", endpoint=endpoint))
     images = request.get("images", {})
     missing = [k for k in DETECTOR_ENDPOINTS[endpoint] if k not in images]
     if missing:
-        raise AdapterError("refused", f"絵が足りない: {missing}")  # i18n:stored
+        raise AdapterError("refused", ms("絵が足りない: {missing}", missing=str(missing)))
     try:
         files = {k: (f"{k}.png", read_image(images[k]), "application/octet-stream") for k in DETECTOR_ENDPOINTS[endpoint]}
     except FileNotFoundError as e:
-        raise AdapterError("refused", f"置き場に絵が無い: {e}") from e  # i18n:stored
+        raise AdapterError("refused", ms("置き場に絵が無い: {error}", error=str(e))) from e
     form = {k: str(v) for k, v in request.get("form", {}).items()}
     try:
         async with httpx.AsyncClient(base_url=service.endpoint, timeout=300) as client:
             r = await client.post(endpoint, files=files, data=form)
     except httpx.TimeoutException as e:
-        raise AdapterError("transport", f"時間切れ: {e}") from e  # i18n:stored
+        raise AdapterError("transport", ms("時間切れ: {detail}", detail=str(e))) from e
     except httpx.TransportError as e:
         raise AdapterError("transport", str(e)) from e
     if r.status_code >= 500:

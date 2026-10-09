@@ -13,7 +13,7 @@ from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem,
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Spread, Volume
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import FrameStyle, checked_adjustments
 from v3server.name_structure.name_draft_schema import PanelFrame
@@ -334,7 +334,7 @@ class SetRemoved(OpBase):
         # 人の手の印か確定印の付いた行にAIが当たったら、抜かずに判断待ちに置く（human_hand_guard.py）
         if not remove_or_hold(ctx, obj, self.removed):
             # 何も変えていない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
-            return {"type": "restore_rows", "label": "削除する・戻すを判断待ちにした取り消し",
+            return {"type": "restore_rows", "label": ms("削除する・戻すを判断待ちにした取り消し"),
                     "page_ids": [p for p in [page_id_of(obj)] if p], "snapshot": {obj.__tablename__: {}}}
         return {**self.model_dump(), "removed": not self.removed}
 

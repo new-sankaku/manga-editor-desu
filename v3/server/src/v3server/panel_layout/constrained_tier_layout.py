@@ -41,7 +41,7 @@ class BrokenConstraint:
 
     page: int
     panel: int
-    kind: Literal["固定した枠", "高さの比", "幅の比"]
+    kind: Literal["固定した枠", "高さの比", "幅の比"]  # i18n:data
     wanted: str
     got: str
 
@@ -100,10 +100,10 @@ def _bleed_polygon(lt: float, kl: float, rt: float, kr: float, t: float, b: floa
     right = lambda y: rt + kr * (y - t)  # noqa: E731
     pts = [[left(y0), y0], [right(y0), y0], [right(y1), y1], [left(y1), y1]]
     # 左のページはノドが右、右のページはノドが左
-    if first and lt <= _SOLVE_TOL and side == "左":
+    if first and lt <= _SOLVE_TOL and side == "左":  # i18n:data
         pts[0][0] = pts[3][0] = -ox - spec.bleed_mm
         moved = True
-    if last and rt >= W - _SOLVE_TOL and side == "右":
+    if last and rt >= W - _SOLVE_TOL and side == "右":  # i18n:data
         pts[1][0] = pts[2][0] = W + ox + spec.bleed_mm
         moved = True
     return [(x, y) for x, y in pts], moved
@@ -203,24 +203,24 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
             want = _clip_to_frame(polygon_bbox(pinned[c.n].polygon_mm), spec)
             got = polygon_bbox(poly)
             if any(abs(a - g) > _SOLVE_TOL for a, g in zip(want, got, strict=False)):
-                broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="固定した枠", wanted=_fmt(want), got=_fmt(got)))
+                broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="固定した枠", wanted=_fmt(want), got=_fmt(got)))  # i18n:data
             frames[c.n] = pinned[c.n]
             continue
         if c.row not in pinned_rows and abs(hv - hs_v * hs_ratio[c.row]) > _SOLVE_TOL:
-            broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="高さの比",
+            broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="高さの比",  # i18n:data
                                            wanted=f"{hs_ratio[c.row]}",
                                            got=m("高さ {height}（比の1あたり {unit}）", height=round(hv, 3),
                                                  unit=round(hs_v, 3))))
         mean_w = (rt - lt) + (c.right_k - c.left_k) * hv / 2
         ws_v = ws_vars[c.row].value()
         if abs(mean_w - ws_v * c.ratio) > _SOLVE_TOL:
-            broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="幅の比",
+            broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="幅の比",  # i18n:data
                                            wanted=f"{c.ratio}",
                                            got=m("幅 {width}（比の1あたり {unit}）", width=round(mean_w, 3),
                                                  unit=round(ws_v, 3))))
         shape = next(p.shape for p in page.panels if p.n == c.n)
         moved = False
-        if shape == "断ち切り":
+        if shape == "断ち切り":  # i18n:data
             row_visual = [x for x in cells if x.row == c.row]
             poly, moved = _bleed_polygon(lt, c.left_k, rt, c.right_k, tv, bv, c is row_visual[0], c is row_visual[-1], spec, side)
         frames[c.n] = PanelFrame(polygon_mm=poly, bleeds=moved)

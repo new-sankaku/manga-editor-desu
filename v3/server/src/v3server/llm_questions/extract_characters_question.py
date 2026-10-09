@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from v3server.llm_questions.answer_json_reader import read_answer
 
 
-def build_extract_characters_question(plan_text: str, known_names: list[str]) -> str:
+def build_extract_characters_question(plan_text: str, known_names: list[str]) -> str:  # i18n:prompt
     known = ("すでに設定資料にいる人物：" + "、".join(known_names) + "\n" if known_names
              else "設定資料にはまだ人物がいません。\n")
     return f"""次の文は、漫画の企画です。

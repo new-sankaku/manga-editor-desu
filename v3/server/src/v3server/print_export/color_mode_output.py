@@ -16,6 +16,7 @@ from dataclasses import replace
 import numpy as np
 from PIL import Image
 
+from v3server.messages import ms
 from v3server.name_structure.print_settings import BilevelSettings
 from v3server.print_export.binarize_and_halftone import binarize, halftone_screen
 from v3server.print_export.page_render import LAYER_NAME_PANEL_IMAGE, LAYER_NAME_SPREAD_IMAGE, Node, composite
@@ -39,7 +40,8 @@ def _uses_screen(n: Node) -> bool:
             return False
         if n.name in SCREEN_LAYER_ROLES:
             return True
-        raise ColorModeError(f"レイヤー {n.marker} の役 {n.name} を、2階調で閾値にするか網点にするか決めていない")  # i18n:stored
+        raise ColorModeError(ms("レイヤー {marker} の役 {name} を、2階調で閾値にするか網点にするか決めていない",
+                                marker=n.marker, name=n.name))
     return False
 
 
@@ -82,8 +84,8 @@ def page_image(nodes: list[Node], size: tuple[int, int], color_mode: str, dpi: f
         return composite(nodes, size).convert("L")
     if color_mode == "bilevel":
         if bilevel is None:
-            raise ColorModeError("2階調のページがあるのに、2階調にするルール（作品の preferences.print.bilevel）が無い")  # i18n:stored
+            raise ColorModeError(ms("2階調のページがあるのに、2階調にするルール（作品の preferences.print.bilevel）が無い"))
         flat = composite(_bilevel_nodes(nodes, dpi, bilevel), size).convert("L")
         black = np.asarray(flat) < 128
         return Image.fromarray((~black).astype(np.uint8) * 255, "L").convert("1", dither=Image.Dither.NONE)
-    raise ColorModeError(f"知らない色の種類: {color_mode}")  # i18n:stored
+    raise ColorModeError(ms("知らない色の種類: {color_mode}", color_mode=color_mode))

@@ -17,7 +17,7 @@ from typing import Literal
 import numpy as np
 from PIL import Image, ImageFilter
 
-from v3server.messages import m
+from v3server.messages import ms
 from v3server.v3_error_types import Invalid
 
 Fill = Literal["diffuse", "edge", "mirror", "gray"]
@@ -28,8 +28,8 @@ def to_array(data: bytes, size: tuple[int, int] | None = None) -> np.ndarray:
     """マスクの PNG を 0〜1 の float 配列（高さ×幅）にする。size があれば大きさを確かめる。"""
     im = Image.open(io.BytesIO(data))
     if size is not None and im.size != size:
-        raise Invalid(m("マスクの大きさ {mask_width}x{mask_height} が元の絵 {width}x{height} と違う",
-                        mask_width=im.size[0], mask_height=im.size[1], width=size[0], height=size[1]))
+        raise Invalid(ms("マスクの大きさ {mask_width}x{mask_height} が元の絵 {width}x{height} と違う",
+                         mask_width=im.size[0], mask_height=im.size[1], width=size[0], height=size[1]))
     if im.mode in ("RGBA", "LA"):
         # 透明な所は塗っていない所とみなす（画面のマスクは透明の上に塗る）
         rgba = im.convert("RGBA")
@@ -82,7 +82,7 @@ def _max_1d(a: np.ndarray, radius: int, axis: int) -> np.ndarray:
 def grow(mask: np.ndarray, px: int) -> np.ndarray:
     """白い所を px だけ広げる（正方形の窓）。0 なら変えない。"""
     if px < 0:
-        raise Invalid(m("広げる量は0以上"))
+        raise Invalid(ms("広げる量は0以上"))
     return _max_1d(_max_1d(mask, px, 0), px, 1)
 
 
@@ -91,7 +91,7 @@ def feather(mask: np.ndarray, px: int) -> np.ndarray:
     マスクの値が 1 に届かないと描き直しが効かないことがある。調査 2.1 の Stabilize Mask と同じ問題）。
     ガウスぼかし（半径 px/2）の 0.5 以上を 1 にし、0.5 未満を 2 倍する。0 なら変えない。"""
     if px < 0:
-        raise Invalid(m("ぼかしの幅は0以上"))
+        raise Invalid(ms("ぼかしの幅は0以上"))
     if px == 0:
         return mask
     im = Image.fromarray(np.clip(np.rint(mask * 255), 0, 255).astype(np.uint8), mode="L")
@@ -118,7 +118,7 @@ def crop_box(mask: np.ndarray, padding_px: int) -> tuple[int, int, int, int]:
     """マスクの白い所を囲む四角に余白を足して、絵の内側に収めた (x, y, 幅, 高さ)。白い所が無ければ断る。"""
     ys, xs = np.nonzero(mask > 0)
     if len(xs) == 0:
-        raise Invalid(m("描き直す範囲が空（手動編集の範囲を引いた後に何も残っていない）"))
+        raise Invalid(ms("描き直す範囲が空（手動編集の範囲を引いた後に何も残っていない）"))
     h, w = mask.shape
     x0, y0 = max(0, int(xs.min()) - padding_px), max(0, int(ys.min()) - padding_px)
     x1, y1 = min(w, int(xs.max()) + 1 + padding_px), min(h, int(ys.max()) + 1 + padding_px)

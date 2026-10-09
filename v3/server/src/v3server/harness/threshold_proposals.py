@@ -13,7 +13,7 @@ from v3server.harness.panel_drawing_steps import CONDITIONAL_THRESHOLDS, THRESHO
 from v3server.harness.upstream_versions import DRAWING_THRESHOLD_PREFIX
 from v3server.messages import m
 
-RESULTS = "llm_doc/V3検証の結果.md"
+RESULTS = "llm_doc/V3検証の結果.md"  # i18n:data
 
 # 鍵 → 案。value が None の鍵は、測った数が無いか、測った数から下限・上限を決められないもの。
 # 出典（source）・意味（meaning）・いつ読むか（when）は m() で作る（閾値の一覧の返事を作る所で画面の言語になる）
@@ -53,5 +53,5 @@ MEANINGS[DRAWING_THRESHOLD_PREFIX + "face_covered_max"]["stage"] = m("S4・S5")
 def threshold_rows(current: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     """current は作品の閾値 {鍵: {value, source, status}}。鍵ごとに今の値と案を並べる。"""
     if set(PROPOSALS) != set(MEANINGS):
-        raise RuntimeError(f"案と意味の鍵が合わない: {sorted(set(PROPOSALS) ^ set(MEANINGS))}")
+        raise RuntimeError(f"案と意味の鍵が合わない: {sorted(set(PROPOSALS) ^ set(MEANINGS))}")  # i18n:dev
     return [{"key": k, **MEANINGS[k], "current": current.get(k), "proposal": PROPOSALS[k]} for k in MEANINGS]

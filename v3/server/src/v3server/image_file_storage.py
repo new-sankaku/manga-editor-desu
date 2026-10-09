@@ -124,7 +124,7 @@ def _store_for(kind: str, image_dir: str | None, endpoint_url: str | None, bucke
                region: str | None, access_key_id: str | None, secret_access_key: str | None) -> ImageStore:
     if kind == "local":
         if not image_dir:
-            raise RuntimeError("V3_IMAGE_STORE=local だが V3_IMAGE_DIR が空。絵の置き場が無い")
+            raise RuntimeError("V3_IMAGE_STORE=local だが V3_IMAGE_DIR が空。絵の置き場が無い")  # i18n:dev
         return LocalFolderStore(image_dir)
     assert endpoint_url and bucket and region and access_key_id and secret_access_key  # 設定の読み込みで確かめてある
     return S3Store(endpoint_url, bucket, region, access_key_id, secret_access_key)

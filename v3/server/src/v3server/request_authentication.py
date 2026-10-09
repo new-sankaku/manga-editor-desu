@@ -28,7 +28,8 @@ from v3server.server_settings import Settings, get_settings
 log = logging.getLogger(__name__)
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
-DEV_MODE_WARNING = "V3_AUTH_MODE=dev_header：X-V3-User の値をそのまま利用者にしている。開発と試験の外では使わない"
+# 起動時のログに出すだけ（http_app_factory.py）
+DEV_MODE_WARNING = "V3_AUTH_MODE=dev_header：X-V3-User の値をそのまま利用者にしている。開発と試験の外では使わない"  # i18n:dev
 
 
 @lru_cache

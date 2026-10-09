@@ -105,7 +105,7 @@ class RequestLanguage:
         await self.app(scope, receive, send)
 
 
-app = FastAPI(title="V3 サーバー", lifespan=lifespan, default_response_class=LocalizedJSONResponse)
+app = FastAPI(title="V3 サーバー", lifespan=lifespan, default_response_class=LocalizedJSONResponse)  # i18n:dev
 _settings = get_settings()
 if _settings.auth_mode == "oidc":
     assert _settings.session_secret and _settings.public_url  # 設定の読み込みで確かめてある

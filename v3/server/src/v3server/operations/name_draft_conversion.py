@@ -50,7 +50,7 @@ def text_values_from_name_panel(panel: NamePanel) -> tuple[list[dict[str, Any]] 
     """コマの文字の行に書く値（吹き出しとナレーション, 描き文字）。未定なら None。"""
     balloons = None
     if panel.balloons is not None:
-        balloons = [{"item_kind": "caption" if b.kind == "ナレーション" else "balloon", "order": i, "text": b.text,
+        balloons = [{"item_kind": "caption" if b.kind == "ナレーション" else "balloon", "order": i, "text": b.text,  # i18n:data
                      "speaker": b.speaker, "balloon_kind": b.kind,
                      "box_mm": list(b.box_mm) if b.box_mm is not None else None,
                      "joined_to_previous": b.joined_to_previous} for i, b in enumerate(panel.balloons)]

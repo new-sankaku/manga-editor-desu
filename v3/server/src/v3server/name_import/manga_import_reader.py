@@ -28,7 +28,7 @@ from v3server.name_structure.reading_direction import PageSpec
 ImageCovers = Literal["trim", "trim_with_bleed"]
 
 # bubble_type → 吹き出しの種類。対応が決まっているものだけ（whisper・inverted・none は種類を決めない）
-BUBBLE_KIND = {"normal": "台詞", "shout": "叫び", "monologue": "心の声", "narration": "ナレーション"}
+BUBBLE_KIND = {"normal": "台詞", "shout": "叫び", "monologue": "心の声", "narration": "ナレーション"}  # i18n:data
 
 
 class MangaImportError(ValueError):
@@ -65,9 +65,9 @@ def _is_axis_rect(points: list[tuple[float, float]]) -> bool:
 def _shape(panel: dict[str, Any], points: list[tuple[float, float]]) -> str | None:
     kind = panel.get("shape")
     if panel.get("is_bleed") or kind == "bleed":
-        return "断ち切り"
+        return "断ち切り"  # i18n:data
     if kind == "normal":
-        return "四角" if _is_axis_rect(points) else "斜め"
+        return "四角" if _is_axis_rect(points) else "斜め"  # i18n:data
     if kind == "inferred":
         return None
     raise MangaImportError(m("知らないコマの形: {kind}", kind=repr(kind)))

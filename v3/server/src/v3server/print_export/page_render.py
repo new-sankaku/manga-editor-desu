@@ -22,7 +22,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 
 from v3server.hand_tools.vector_strokes import stroke_cache_problem
-from v3server.messages import m
+from v3server.messages import ms
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import (
     BalloonShape,
@@ -41,19 +41,20 @@ from v3server.print_export.text_render import RenderedText
 
 MM_PER_INCH = 25.4
 
-LAYER_NAME_PAPER = "紙"
-LAYER_NAME_PANEL = "コマ"
-LAYER_NAME_PANEL_FILL = "コマの地"
-LAYER_NAME_PANEL_IMAGE = "コマの絵"
-LAYER_NAME_ITEMS = "トーン・図形"
-LAYER_NAME_PANEL_FRAME = "コマ枠"
-LAYER_NAME_HAND_DRAWN = "人の手"
-LAYER_NAME_BALLOON = "フキダシ"
-LAYER_NAME_TYPESET = "写植"
-LAYER_NAME_SFX = "描き文字"
-LAYER_NAME_NOMBRE = "ノンブル"
-LAYER_NAME_SPREAD_IMAGE = "見開きの絵"
-LAYER_NAME_PAGE = "ページ"
+# 層の名前。書き出した PSD の層の名前になり、コードの中でも名前で比べる（文ではなく値。訳さない）
+LAYER_NAME_PAPER = "紙"  # i18n:data
+LAYER_NAME_PANEL = "コマ"  # i18n:data
+LAYER_NAME_PANEL_FILL = "コマの地"  # i18n:data
+LAYER_NAME_PANEL_IMAGE = "コマの絵"  # i18n:data
+LAYER_NAME_ITEMS = "トーン・図形"  # i18n:data
+LAYER_NAME_PANEL_FRAME = "コマ枠"  # i18n:data
+LAYER_NAME_HAND_DRAWN = "人の手"  # i18n:data
+LAYER_NAME_BALLOON = "フキダシ"  # i18n:data
+LAYER_NAME_TYPESET = "写植"  # i18n:data
+LAYER_NAME_SFX = "描き文字"  # i18n:data
+LAYER_NAME_NOMBRE = "ノンブル"  # i18n:data
+LAYER_NAME_SPREAD_IMAGE = "見開きの絵"  # i18n:data
+LAYER_NAME_PAGE = "ページ"  # i18n:data
 
 # ノンブルは1行の数字なので、組版は決まった形で組む（行間・改行・縦中横は使わない）
 NOMBRE_TYPESETTING = {"line_spacing_ratio": 0, "line_break": "none", "tate_chu_yoko_max_digits": 0,
@@ -233,7 +234,7 @@ def _blend(base: np.ndarray, top: np.ndarray, mode: str) -> np.ndarray:
         return np.maximum(base, top)
     if mode == "overlay":
         return np.where(base < 0.5, 2 * base * top, 1 - 2 * (1 - base) * (1 - top))
-    raise RenderRefused(m("知らない重ね方: {mode}", mode=mode))
+    raise RenderRefused(ms("知らない重ね方: {mode}", mode=mode))
 
 
 def composite(nodes: list[Node], size: tuple[int, int]) -> Image.Image:
@@ -319,7 +320,7 @@ def _tone_alpha(spec: ToneSpec, box_px: tuple[int, int, int, int], dpi: float, c
             d.polygon([(cx - ux * hl, cy - uy * hl), (cx + ux * hl + nx * width / 2, cy + uy * hl + ny * width / 2),
                        (cx + ux * hl - nx * width / 2, cy + uy * hl - ny * width / 2)], fill=255)
         return mask
-    raise RenderRefused(m("知らないトーン: {kind}", kind=k))
+    raise RenderRefused(ms("知らないトーン: {kind}", kind=k))
 
 
 def _hex(c: str, alpha: float = 1.0) -> tuple[int, int, int, int]:
@@ -376,15 +377,15 @@ def _shape_image(spec: ShapeSpec, box_mm, k: float) -> Image.Image:
 def _frame_polygon(panel) -> list[tuple[float, float]]:
     poly = (panel.frame or {}).get("polygon_mm")
     if not poly:
-        raise RenderRefused(m("コマ {id} に枠が無い", id=panel.id))
+        raise RenderRefused(ms("コマ {id} に枠が無い", id=panel.id))
     return [tuple(p) for p in poly]
 
 
 def _frame_style(panel, prefs) -> FrameStyle:
     raw = panel.frame_style or prefs.get("frame_style")
     if raw is None:
-        raise RenderRefused(m("コマ {id} の枠の線が決まっていない（コマの frame_style か、作品の preferences.frame_style）",
-                              id=panel.id))
+        raise RenderRefused(ms("コマ {id} の枠の線が決まっていない（コマの frame_style か、作品の preferences.frame_style）",
+                               id=panel.id))
     return FrameStyle.model_validate(raw)
 
 
@@ -446,8 +447,8 @@ def balloon_geometry(t, bs: BalloonShape, mm2px: np.ndarray) -> Polygon:
     if t.tail_target_mm is None:
         return body
     if bs.tail_base_width_mm is None or bs.tail_bend_ratio is None:
-        raise RenderRefused(m("フキダシ {id} のしっぽの根元の幅・曲がり（balloon_shape.tail_base_width_mm・tail_bend_ratio）"
-                              "が決まっていない", id=t.id))
+        raise RenderRefused(ms("フキダシ {id} のしっぽの根元の幅・曲がり（balloon_shape.tail_base_width_mm・tail_bend_ratio）"
+                               "が決まっていない", id=t.id))
     k = mm2px[0, 0]
     tail = tail_polygon(body, _pts(mm2px, [t.tail_target_mm])[0], bs.tail_base_width_mm * k, bs.tail_bend_ratio)
     return body if tail is None else body.union(tail)
@@ -469,9 +470,9 @@ def text_fill(t) -> str:
     書き出し前の確認も、この関数で同じ理由を出す）。"""
     fill = (t.decoration or {}).get("fill")
     if not fill:
-        raise RenderRefused(m("文字「{text}」（{id}）の色（decoration.fill）が決まっていない。"
-                              "取り込んだ文字か古い文字は色を持たないことがある。文字の飾りで色を選び直す",
-                              text=t.text[:12], id=t.id))
+        raise RenderRefused(ms("文字「{text}」（{id}）の色（decoration.fill）が決まっていない。"
+                               "取り込んだ文字か古い文字は色を持たないことがある。文字の飾りで色を選び直す",
+                               text=t.text[:12], id=t.id))
     return fill
 
 
@@ -485,17 +486,17 @@ def text_job(t, preferences: dict[str, Any] | None, text_direction: str, dpi: fl
     prefs = preferences or {}
     k = dpi / MM_PER_INCH
     if t.box_mm is None:
-        raise RenderRefused(m("文字 {id} の箱（box_mm）が決まっていない", id=t.id))
+        raise RenderRefused(ms("文字 {id} の箱（box_mm）が決まっていない", id=t.id))
     if t.font_size_pt is None:
-        raise RenderRefused(m("文字 {id} の大きさ（font_size_pt）が決まっていない", id=t.id))
+        raise RenderRefused(ms("文字 {id} の大きさ（font_size_pt）が決まっていない", id=t.id))
     family = t.font_family or prefs.get("fonts_by_kind", {}).get(t.item_kind)
     if family is None:
-        raise RenderRefused(m("文字 {id} の書体が決まっていない（文字の font_family か、作品の preferences.fonts_by_kind）",
-                              id=t.id))
+        raise RenderRefused(ms("文字 {id} の書体が決まっていない（文字の font_family か、作品の preferences.fonts_by_kind）",
+                               id=t.id))
     raw_ts = t.typesetting or prefs.get("typesetting")
     if raw_ts is None:
-        raise RenderRefused(m("文字 {id} の組版（行間・自動の改行・縦中横）が決まっていない（文字の typesetting か、作品の "
-                              "preferences.typesetting）", id=t.id))
+        raise RenderRefused(ms("文字 {id} の組版（行間・自動の改行・縦中横）が決まっていない（文字の typesetting か、作品の "
+                               "preferences.typesetting）", id=t.id))
     b = t.box_mm
     deco = dict(t.decoration or {})
     deco["fill"] = text_fill(t)
@@ -574,7 +575,7 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
             children.append(Node(LAYER_NAME_PANEL_FILL, f"{panel.id}-fill", fill, table="panels"))
         if panel.image_id is not None:
             if panel.image_placement is None:
-                raise RenderRefused(m("コマ {id} の絵の置き場が決まっていない", id=panel.id))
+                raise RenderRefused(ms("コマ {id} の絵の置き場が決まっていない", id=panel.id))
             got = _placed_image(open_image(panel.image_id), panel.image_placement, mm2px, size, panel.adjustments, dpi)
             if got:
                 img, left, top = got
@@ -587,7 +588,7 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
             if la.image_id is None:
                 continue
             if la.placement is None:
-                raise RenderRefused(m("レイヤー {id} の絵の置き場が決まっていない", id=la.id))
+                raise RenderRefused(ms("レイヤー {id} の絵の置き場が決まっていない", id=la.id))
             got = _placed_image(open_image(la.image_id), la.placement, mm2px, size, la.adjustments, dpi)
             if not got:
                 continue
@@ -606,7 +607,7 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
             target = ts.target
             if target.kind == "panel":
                 if target.panel_id not in frames_px:
-                    raise RenderRefused(m("トーン {id} を貼るコマ {panel} がこのページに無い", id=it.id, panel=target.panel_id))
+                    raise RenderRefused(ms("トーン {id} を貼るコマ {panel} がこのページに無い", id=it.id, panel=target.panel_id))
                 clip_polys = [frames_px[target.panel_id]]
             elif target.kind == "polygon":
                 clip_polys = [_pts(mm2px, target.polygon_mm)]
@@ -661,7 +662,7 @@ def render_page(content: PageContent, dpi: float, load_image: Callable[[str], by
         if bs.kind == "none":
             continue
         if bs.line_width_mm is None or bs.line_color is None:
-            raise RenderRefused(m("フキダシ {id} の線（line_width_mm・line_color）が決まっていない", id=t.id))
+            raise RenderRefused(ms("フキダシ {id} の線（line_width_mm・line_color）が決まっていない", id=t.id))
         geom = balloon_geometry(t, bs, mm2px)
         if t.joined_to_previous and t.panel_id in last_in_panel:
             g = groups[last_in_panel[t.panel_id]]
@@ -758,7 +759,7 @@ def render_spread(content: SpreadContent, dpi: float, load_image: Callable[[str]
                               Image.new("RGBA", size, (255, 255, 255, 255)))]
     if content.image_id is not None:
         if content.image_placement is None:
-            raise RenderRefused(f"見開き {content.spread_id} の絵の置き場が決まっていない")  # i18n:stored
+            raise RenderRefused(ms("見開き {id} の絵の置き場が決まっていない", id=content.spread_id))
         img = Image.open(io.BytesIO(load_image(content.image_id))).convert("RGBA")
         got = _placed_image(img, content.image_placement, mm_to_px_matrix(spec, dpi, 0.0), size, content.adjustments,
                             dpi)
@@ -777,5 +778,5 @@ def split_spread(img: Image.Image, spec: PageSpec, dpi: float) -> tuple[Image.Im
     （1ページの絵と同じ大きさ。print_pdf_export.canvas_size_px）。"""
     w, h = canvas_size_px(spec, dpi)
     if img.height != h:
-        raise RenderRefused(f"見開きの高さ {img.height} がページの高さ {h} と違う")  # i18n:stored
+        raise RenderRefused(ms("見開きの高さ {spread_height} がページの高さ {page_height} と違う", spread_height=img.height, page_height=h))
     return img.crop((0, 0, w, h)), img.crop((img.width - w, 0, img.width, h))

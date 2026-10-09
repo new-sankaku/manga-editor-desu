@@ -14,6 +14,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from v3server.messages import ms
 from v3server.print_export.page_render import Node
 
 BlendMode = Literal["normal", "multiply", "screen", "overlay", "darken", "lighten"]
@@ -57,7 +58,7 @@ def psd_layers_from_nodes(nodes: list[Node], png_dir: pathlib.Path, offset: tupl
                                 hidden=n.hidden, blend_mode=n.blend, opacity=n.opacity))
             continue
         if n.image is None:
-            raise ValueError(f"レイヤー {n.full_name} に絵が無い")  # i18n:stored
+            raise ValueError(ms("レイヤー {name} に絵が無い", name=n.full_name))
         path = png_dir / f"{n.marker}.png"
         n.image.save(path)
         text = None
@@ -75,7 +76,7 @@ def build_psd_request(width: int, height: int, composite_png: pathlib.Path | Non
     def check(ls: list[PsdLayer]):
         for la in ls:
             if la.text is not None and la.png_path is None:
-                raise ValueError(f"文字のレイヤー {la.name} は、文字の情報と描いた画像（png_path）の両方が要る")  # i18n:stored
+                raise ValueError(ms("文字のレイヤー {name} は、文字の情報と描いた画像（png_path）の両方が要る", name=la.name))
             if la.children:
                 check(la.children)
 
@@ -98,7 +99,8 @@ def write_layered_psd(request: dict, node_executable: str, writer_script: pathli
     done = subprocess.run([node_executable, str(writer_script)], input=json.dumps(request, ensure_ascii=False),
                           capture_output=True, text=True, encoding="utf-8", timeout=timeout_seconds)
     if done.returncode != 0:
-        raise PsdWriterError(f"PSD の書き出しが失敗しました（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")  # i18n:stored
+        raise PsdWriterError(ms("PSD の書き出しが失敗しました（終了コード {code}）: {stderr}", code=done.returncode,
+                            stderr=done.stderr.strip()[:500]))
     return json.loads(done.stdout)
 
 

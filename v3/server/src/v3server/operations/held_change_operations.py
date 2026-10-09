@@ -31,7 +31,7 @@ from v3server.canonical_tables.text_and_layer_tables import (
 )
 from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.human_hand_guard import change_with_human_hand
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
 from v3server.v3_error_types import HumanHandProtected, Invalid
@@ -186,7 +186,7 @@ class ResolveHeldChange(OpBase):
                     raise Invalid(m(
                         "このレイヤー（紙・グループなど）は書き出しで作った物で、削除する物が無い。keep で閉じる"))
                 rc.remove(await target())
-            undo = rc.inverse([held.page_id] if held.page_id else [], f"判断待ち {held.id} の取り消し")
+            undo = rc.inverse([held.page_id] if held.page_id else [], ms("判断待ち {id} の取り消し", id=held.id))
         held.status = "rejected" if choice in _NOTHING else "accepted"
         held.chosen = choice
         return {"type": self.type, "id": self.id, "decision": "reopen", "restore": {"undo": undo, "params": self.params}}

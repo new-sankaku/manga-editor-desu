@@ -28,6 +28,8 @@ MESSAGES = {
     "文の効き（CFG）": "CFG scale",
     "このコマの指示": "Prompt for this panel",
     "入れないもの": "Negative prompt",
+    "少し": "Slight",
+    "大きく": "Strong",
     "形の効き": "Guidance strength",
     "効かせる所（終わり）": "Guidance end",
     "白地に黒い線（反転して渡す）": "Black lines on white (sent inverted)",

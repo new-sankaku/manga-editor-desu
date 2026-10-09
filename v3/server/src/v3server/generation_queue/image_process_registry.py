@@ -9,8 +9,8 @@
 - 画面（v3/web/）は、ここの引数の形（JSON Schema）から入力欄を作る。欄の名前・初めの値・まとまり・部品は
   json_schema_extra の x-initial・x-group・x-widget・x-unit・x-labels に書く
 - 画面に出す名前（処理の名前と説明・欄の名前・選択肢の名前・まとまりの名前）は m() に包む。返事を作る所で画面の言語になる。
-  包まないのは2つ：まとまりの「基本」（画面が突き合わせる名前で、画面には出ない。v3/web/js/schema_form.js）と、
-  よく使う値のボタンの名前（x-presets。辞書のキーなので訳されない）
+  包まないのは、まとまりの「基本」だけ（画面が突き合わせる名前で、画面には出ない。v3/web/js/schema_form.js）。
+  よく使う値のボタン（x-presets）は、名前と値の組の並びで書く（名前を辞書のキーにすると、返事を作る所で訳されない）
 
 引数はどれも依頼に書く（サーバーに隠れた既定値を置かない）。初めの値（x-initial）は画面が欄に入れておく値で、サーバーは使わない。
 ステップ数（steps）と文の効き（cfg）だけは書かなくてよく、書かなければ接続先の中身の値を使う（V3細部の決めごと 12章の優先の順）。
@@ -35,14 +35,14 @@ from v3server.comfy_graphs.outpaint_graph import build_outpaint
 from v3server.comfy_graphs.regional_prompt_nodes import RegionPrompt
 from v3server.comfy_graphs.text_to_image_graph import build_text_to_image_process
 from v3server.generation_queue import image_process_inputs as mk
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.v3_error_types import Invalid
 
 # ---------------------------------------------------------------- 引数の形
 
 
-def _f(title: str, initial: Any = None, group: str = "基本", widget: str | None = None, unit: str | None = None,
-       labels: dict[str, str] | None = None, **kw) -> Any:
+def _f(title: str, initial: Any = None, group: str = "基本", widget: str | None = None,  # i18n:data
+       unit: str | None = None, labels: dict[str, str] | None = None, **kw) -> Any:
     # group の「基本」は m() に包まない（画面が突き合わせる名前。画面には出ない）
     extra: dict[str, Any] = {"x-group": group}
     if initial is not None:
@@ -119,9 +119,10 @@ class ImageToImageParams(_Controlled):
 
 class VariationParams(_Prompted):
     # 「少し」「大きく」の2つ（Fooocus の Vary の形）。値は未検証。
-    # ボタンの名前は辞書のキーなので、m() に包んでも訳されない（返事の中の値だけが訳される）。画面が名前をそのまま出す
     strength: float = Field(title=m("変える強さ"), ge=0.01, le=1, json_schema_extra={
-        "x-group": "基本", "x-initial": 0.3, "x-widget": "slider", "x-presets": {"少し": 0.3, "大きく": 0.55}})
+        "x-group": "基本", "x-initial": 0.3, "x-widget": "slider",  # i18n:data
+        # 名前は ms() で包む（スキーマを作る途中で、並びの中の m() の文は普通の文字列に直される。試験で見た）
+        "x-presets": [{"label": ms("少し"), "value": 0.3}, {"label": ms("大きく"), "value": 0.55}]})
 
 
 ENCODE_LABELS = {"noise_mask": m("元の絵から描く"), "inpaint_encode": m("範囲を消してから描く")}
@@ -203,9 +204,9 @@ class PrepOut:
 def _check_control(p: Any, i: PrepIn) -> None:
     wants = getattr(p, "control", "none") != "none"
     if wants and not i.has_control:
-        raise Invalid(m("形の指定には絵（purpose=control）が要る"))
+        raise Invalid(ms("形の指定には絵（purpose=control）が要る"))
     if i.has_control and not wants:
-        raise Invalid(m("形の指定の絵があるのに、形の指定が「使わない」"))
+        raise Invalid(ms("形の指定の絵があるのに、形の指定が「使わない」"))
 
 
 def _identity(size: tuple[int, int] | None) -> dict[str, Any]:
@@ -230,10 +231,10 @@ def _prep_inpaint(p: InpaintParams, i: PrepIn) -> PrepOut:
 def _prep_outpaint(p: OutpaintParams, i: PrepIn) -> PrepOut:
     _check_control(p, i)
     if p.unit != "px":
-        raise Invalid(m("描き足すの量は、依頼を受ける前にピクセルへ直す（resolve_outpaint）"))
+        raise Invalid(ms("描き足すの量は、依頼を受ける前にピクセルへ直す（resolve_outpaint）"))
     l, t, r, b = (int(round(v)) for v in (p.left, p.top, p.right, p.bottom))  # noqa: E741  左・上・右・下
     if l + t + r + b == 0:
-        raise Invalid(m("広げる量がどの辺も0"))
+        raise Invalid(ms("広げる量がどの辺も0"))
     w, h = i.source_size
     redraw = mk.extend_mask(w, h, l, t, r, b, p.feather_px)
     protected = mk.shift_into(i.protected, l, t, r, b)
@@ -271,7 +272,7 @@ def _extras(s: DiffusionSettings, p: Any) -> Extras:
     kind = getattr(p, "control", "none")
     if kind != "none":
         if s.controlnet_name is None:
-            raise Invalid(m("この接続先の中身に ControlNet（controlnet_name）が無いので、形の指定を使えない"))
+            raise Invalid(ms("この接続先の中身に ControlNet（controlnet_name）が無いので、形の指定を使えない"))
         control = ControlSettings(kind=ControlKind.POSE if kind == "pose" else ControlKind.DEPTH if kind == "depth"
                                   else ControlKind.LINE, controlnet_name=s.controlnet_name,
                                   union_type=CONTROL_UNION_TYPES[kind], strength=p.control_strength,
@@ -362,7 +363,7 @@ SPECS: dict[str, ImageProcessSpec] = {
 def spec_for(name: str) -> ImageProcessSpec:
     spec = SPECS.get(name)
     if spec is None:
-        raise Invalid(m("画像生成の処理 {name} は無い（{known}）", name=name, known=", ".join(SPECS)))
+        raise Invalid(ms("画像生成の処理 {name} は無い（{known}）", name=name, known=", ".join(SPECS)))
     return spec
 
 
@@ -370,17 +371,17 @@ def parse_params(spec: ImageProcessSpec, params: Any) -> _Params:
     try:
         return spec.params_model.model_validate(params)
     except ValueError as e:
-        raise Invalid(m("{label} の引数が正しくない: {reason}", label=spec.label, reason=str(e))) from e
+        raise Invalid(ms("{label} の引数が正しくない: {reason}", label=spec.label, reason=str(e))) from e
 
 
 def parse_settings(spec: ImageProcessSpec, settings: Any) -> BaseModel:
     if settings is None:
-        raise Invalid(m("{label} の中身（comfy_graph_settings）が決まっていない", label=spec.label))
+        raise Invalid(ms("{label} の中身（comfy_graph_settings）が決まっていない", label=spec.label))
     try:
         return spec.settings_model.model_validate(settings)
     except ValueError as e:
-        raise Invalid(m("{label} の中身（comfy_graph_settings）が正しくない: {reason}", label=spec.label,
-                        reason=str(e))) from e
+        raise Invalid(ms("{label} の中身（comfy_graph_settings）が正しくない: {reason}", label=spec.label,
+                         reason=str(e))) from e
 
 
 def build_prompt(name: str, settings: Any, params: Any, seed: int, info: dict, prefix: str) -> dict[str, Any]:
@@ -408,12 +409,12 @@ def resolve_outpaint(params: dict[str, Any], placement: dict[str, Any] | None, f
     if p.unit == "px":
         return p.model_dump()
     if placement is None:
-        raise Invalid(m("この絵はコマに置かれていない。mm・コマの枠までで広げるには置き場が要る"))
+        raise Invalid(ms("この絵はコマに置かれていない。mm・コマの枠までで広げるには置き場が要る"))
     from v3server.name_structure.image_placement import ImagePlacement
 
     pl = ImagePlacement.model_validate(placement)
     if not pl.is_identity():
-        raise Invalid(m("回転・傾き・反転のある置き場では、mm・コマの枠までで広げられない（ピクセルで指定する）"))
+        raise Invalid(ms("回転・傾き・反転のある置き場では、mm・コマの枠までで広げられない（ピクセルで指定する）"))
     x0, y0, x1, y1 = pl.crop_px
     a, b, c, d = pl.dest_box_mm
     sx, sy = (x1 - x0) / (c - a), (y1 - y0) / (d - b)  # ピクセル / mm
@@ -421,7 +422,7 @@ def resolve_outpaint(params: dict[str, Any], placement: dict[str, Any] | None, f
         amounts = (p.left * sx, p.top * sy, p.right * sx, p.bottom * sy)
     else:
         if frame_bbox_mm is None:
-            raise Invalid(m("コマの枠が決まっていない"))
+            raise Invalid(ms("コマの枠が決まっていない"))
         fx0, fy0, fx1, fy1 = frame_bbox_mm
         w, h = image_size
         # 絵の全体の mm の四角

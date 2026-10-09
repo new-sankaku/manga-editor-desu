@@ -26,7 +26,7 @@ from v3server.llm_questions.plan_interview_question import (
     missing_fields,
     parse_plan_interview_answer,
 )
-from v3server.messages import m
+from v3server.messages import m, ms, render
 from v3server.operations.material_and_plan_operations import SetWorkPlan
 from v3server.operations.operation_submit_and_undo import submit
 
@@ -42,6 +42,11 @@ class PlanSpec(BaseModel):
 
 # 作業役が人へ質問を返す種類。答え（review の answer）を次の回の文脈に入れる
 TAKES_ANSWERS = True
+# 検査の指摘に出す項目の名前。問いの中の名前（PLAN_FIELDS。LLM へ送る日本語）と同じ言葉を、画面の言語で出せる形で持つ。
+# 「入れないもの」は、生成の欄の名前（image_process_registry.py。訳は Negative prompt）と日本語が同じで意味が違う。
+# 辞書は日本語の文の形で引くので、文の形を分けてある（値 plan は空。日本語で出す文は同じ）
+FIELD_LABELS = {"synopsis": ms("あらすじ"), "audience": ms("読者"), "exclusions": ms("入れないもの{plan}", plan=""),
+                "notes": ms("メモ")}
 
 cut_out = c.cut_out_episode
 
@@ -58,7 +63,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         current = await _plan(session, unit.work_id)
     answers = list(args.get("answers") or [])
     if args.get("reject_reason"):
-        answers.append(f"（前の案への指摘）{args['reject_reason']}")
+        answers.append(f"（前の案への指摘）{args['reject_reason']}")  # i18n:prompt
     question = build_plan_interview_question(spec.request, current, answers, list(spec.required_fields))
     return {"question": question, "answers": answers, "cost": 0, "job_ids": []}
 
@@ -76,24 +81,28 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         questions = cand.content["questions"]
         missing = missing_fields(plan, list(spec.required_fields))
         return [
-            c.finding("必須項目", not missing, drops=not questions,
-                      detail=("そろっている" if not missing else "無い：" + "、".join(PLAN_FIELDS[k] for k in missing))),
-            c.finding("作者への質問", not questions, drops=False,
-                      detail=f"質問 {len(questions)} 件" + ("。答える（answer）と次の回に入る" if questions else "")),
+            c.finding(ms("必須項目"), not missing, drops=not questions,
+                      detail=(ms("そろっている") if not missing
+                              else ms("無い：{fields}", fields=[FIELD_LABELS[k] for k in missing]))),
+            c.finding(ms("作者への質問"), not questions, drops=False,
+                      detail=(ms("質問 {n} 件。答える（answer）と次の回に入る", n=len(questions)) if questions
+                              else ms("質問 {n} 件", n=len(questions)))),
         ]
 
     return await c.check_candidates(unit, args, judge)
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return await c.pick_fewest_flags(unit, args, "指摘の少ない案（企画の評価モデルは置かない）")
+    return await c.pick_fewest_flags(unit, args, ms("指摘の少ない案（企画の評価モデルは置かない）"))
 
 
 def not_approvable(cand: HarnessCandidate) -> str | None:
     content = cand.content or {}
     if not content.get("plan"):
         return m("企画の案の無い候補（質問だけ）は採れない。質問に答える（answer）")
-    if any(f["name"] == "必須項目" and f["ok"] is False for f in (cand.check or {}).get("findings", [])):
+    # 指摘の名前は包んだ文で入っている（前に作った候補は日本語の文のまま）。どちらも日本語の文に戻して比べる
+    if any(render(f["name"], "ja") == "必須項目" and f["ok"] is False  # i18n:data
+           for f in (cand.check or {}).get("findings", [])):
         return m("必須項目のそろわない案は採れない。質問に答えるか却下して作り直す")
     return None
 

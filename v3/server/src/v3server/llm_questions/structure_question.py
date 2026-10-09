@@ -7,9 +7,10 @@
 from pydantic import BaseModel, Field
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 
 
-def build_structure_question(plot: str, characters: list[tuple[str, str]], episode_number: int, page_count: int,
+def build_structure_question(plot: str, characters: list[tuple[str, str]], episode_number: int, page_count: int,  # i18n:prompt
                              earlier: list[str], note: str | None) -> str:
     chars = "\n".join(f"- {n}：{t}" for n, t in characters) or "（まだ無い）"
     before = "\n".join(earlier)
@@ -28,7 +29,7 @@ def build_structure_question(plot: str, characters: list[tuple[str, str]], episo
     )
 
 
-def build_structure_views_question(outline_text: str, views: list[str]) -> str:
+def build_structure_views_question(outline_text: str, views: list[str]) -> str:  # i18n:prompt
     listed = "\n".join(f"- {v}" for v in views)
     return (
         "次は漫画の1話の構成です。\n\n"
@@ -62,7 +63,7 @@ def parse_structure_answer(answer: str) -> Outline:
     return read_answer(answer, Outline)
 
 
-def outline_text(o: dict) -> str:
+def outline_text(o: dict) -> str:  # i18n:prompt
     lines = [f"{p['page']}ページ：{p['summary']}（{p['role']}）" for p in o["pages"]]
     if o.get("highlights"):
         lines.append("見せ場：" + "、".join(f"{x}ページ" for x in o["highlights"]))
@@ -84,8 +85,8 @@ def parse_structure_views_answer(answer: str, views: list[str]) -> list[ViewJudg
     got = read_answer(answer, _Views).views
     unknown = sorted({v.view for v in got} - set(views))
     if unknown:
-        raise BrokenAnswerError(f"聞いていない観点がある: {unknown}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("聞いていない観点がある: {unknown}", unknown=str(unknown)), answer)
     missing = sorted(set(views) - {v.view for v in got})
     if missing:
-        raise BrokenAnswerError(f"答えの無い観点がある: {missing}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("答えの無い観点がある: {missing}", missing=str(missing)), answer)
     return got

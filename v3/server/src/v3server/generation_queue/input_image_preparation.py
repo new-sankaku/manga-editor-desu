@@ -36,7 +36,7 @@ from v3server.comfy_graphs.protected_region_mask import protected_mask_png
 from v3server.generation_queue.protected_mask_cache import protected_mask_sha256
 from v3server.hand_tools.vector_strokes import refuse_stale_stroke_cache
 from v3server.image_file_storage import read_image, store_image
-from v3server.messages import m
+from v3server.messages import ms
 from v3server.operations.operation_base import get_in_work
 from v3server.v3_error_types import Invalid
 
@@ -67,12 +67,12 @@ async def _crop_source(session: AsyncSession, img: ImageFile, box: Any) -> tuple
     try:
         x0, y0, x1, y1 = (int(v) for v in box)
     except (TypeError, ValueError) as e:
-        raise Invalid(m("crop_px は [x0, y0, x1, y1] の整数: {value}", value=repr(box))) from e
+        raise Invalid(ms("crop_px は [x0, y0, x1, y1] の整数: {value}", value=repr(box))) from e
     if not (0 <= x0 < x1 <= img.width and 0 <= y0 < y1 <= img.height):
-        raise Invalid(m("crop_px {value} が元の絵（{width}x{height}）の外に出ている", value=repr(box), width=img.width,
-                        height=img.height))
+        raise Invalid(ms("crop_px {value} が元の絵（{width}x{height}）の外に出ている", value=repr(box), width=img.width,
+                         height=img.height))
     if await protected_regions_for(session, img):
-        raise Invalid(m("絵 {id} には手動編集の範囲がある。切り出して元の絵にはしない", id=img.id))
+        raise Invalid(ms("絵 {id} には手動編集の範囲がある。切り出して元の絵にはしない", id=img.id))
     with Image.open(io.BytesIO(read_image(img.sha256))) as im:
         buf = io.BytesIO()
         im.crop((x0, y0, x1, y1)).save(buf, format="PNG")
@@ -81,7 +81,7 @@ async def _crop_source(session: AsyncSession, img: ImageFile, box: Any) -> tuple
 
 def _slot(entry: Any, what: str) -> tuple[str, str]:
     if not isinstance(entry, dict) or not isinstance(entry.get("node"), str) or not isinstance(entry.get("input"), str):
-        raise Invalid(m("{what} には node と input（文字）が要る: {entry}", what=what, entry=repr(entry)))
+        raise Invalid(ms("{what} には node と input（文字）が要る: {entry}", what=what, entry=repr(entry)))
     return entry["node"], entry["input"]
 
 
@@ -89,9 +89,9 @@ def _polygons(value: Any) -> list[list[tuple[float, float]]]:
     try:
         polys = [[(float(x), float(y)) for x, y in poly] for poly in value]
     except (TypeError, ValueError) as e:
-        raise Invalid(m("region_px は多角形（[x, y] の一覧）の一覧: {reason}", reason=str(e))) from e
+        raise Invalid(ms("region_px は多角形（[x, y] の一覧）の一覧: {reason}", reason=str(e))) from e
     if not polys or any(len(p) < 3 for p in polys):
-        raise Invalid(m("region_px の多角形は1つ以上、どれも3点以上"))
+        raise Invalid(ms("region_px の多角形は1つ以上、どれも3点以上"))
     return polys
 
 
@@ -108,34 +108,34 @@ def _png(value: Any) -> bytes:
     try:
         return base64.b64decode(value, validate=True)
     except (binascii.Error, TypeError, ValueError) as e:
-        raise Invalid(m("png_base64 が base64 でない: {reason}", reason=str(e))) from e
+        raise Invalid(ms("png_base64 が base64 でない: {reason}", reason=str(e))) from e
 
 
 async def _prepare(session: AsyncSession, work_id: str, request: dict[str, Any]) -> dict[str, Any]:
     if "prepared_inputs" in request:
-        raise Invalid(m("prepared_inputs はサーバーが書く。依頼に入れられない"))
+        raise Invalid(ms("prepared_inputs はサーバーが書く。依頼に入れられない"))
     entries = request.get("input_images")
     mask_slot = request.get("protected_mask_input")
     if entries is None:
         if mask_slot is not None:
-            raise Invalid(m("元の絵（input_images）が無いのに protected_mask_input がある"))
+            raise Invalid(ms("元の絵（input_images）が無いのに protected_mask_input がある"))
         return request
     if not isinstance(entries, list):
-        raise Invalid(m("input_images は一覧で渡す"))
+        raise Invalid(ms("input_images は一覧で渡す"))
     prepared, sources, regions_in = [], [], []
     for e in entries:
         node, inp = _slot(e, "input_images")
         if e.get("purpose") not in PURPOSES:
-            raise Invalid(m("input_images の purpose は {purposes} のどれか: {entry}", purposes=str(PURPOSES),
-                            entry=repr(e)))
+            raise Invalid(ms("input_images の purpose は {purposes} のどれか: {entry}", purposes=str(PURPOSES),
+                             entry=repr(e)))
         if e["purpose"] == "mask" and "region_px" in e:
             if "image_id" in e:
-                raise Invalid(m("マスクは image_id か region_px のどちらか"))
+                raise Invalid(ms("マスクは image_id か region_px のどちらか"))
             regions_in.append((node, inp, _polygons(e["region_px"])))
             continue
         if e["purpose"] in ("mask", "control") and "png_base64" in e:
             if "image_id" in e:
-                raise Invalid(m("マスク・形の指定の絵は image_id か png_base64 のどちらか"))
+                raise Invalid(ms("マスク・形の指定の絵は image_id か png_base64 のどちらか"))
             stored = store_image(_png(e["png_base64"]))
             prepared.append({"node": node, "input": inp, "purpose": e["purpose"], "image_id": None,
                              "sha256": stored.sha256, "media_type": stored.media_type, "painted": True})
@@ -154,21 +154,21 @@ async def _prepare(session: AsyncSession, work_id: str, request: dict[str, Any])
             sources.append(img)
     for node, inp, polys in regions_in:
         if len(sources) != 1:
-            raise Invalid(m("囲んだ範囲（region_px）のマスクは、元の絵（purpose=source）が1枚のときだけ描ける"))
+            raise Invalid(ms("囲んだ範囲（region_px）のマスクは、元の絵（purpose=source）が1枚のときだけ描ける"))
         stored = store_image(protected_mask_png(sources[0].width, sources[0].height, polys))
         prepared.append({"node": node, "input": inp, "purpose": "mask", "image_id": None, "sha256": stored.sha256,
                          "media_type": stored.media_type, "region_px": polys, "for_image_id": sources[0].id})
     protected = [(img, await protected_regions_for(session, img)) for img in sources]
     with_regions = [(img, rs) for img, rs in protected if rs]
     if len(with_regions) > 1:
-        raise Invalid(m("手動編集の範囲のある元の絵が2枚以上ある。マスクを1つに決められない"))
+        raise Invalid(ms("手動編集の範囲のある元の絵が2枚以上ある。マスクを1つに決められない"))
     if with_regions and mask_slot is None:
-        raise Invalid(m("元の絵 {id} に手動編集の範囲がある。protected_mask_input を手順に用意して渡す",
-                        id=with_regions[0][0].id))
+        raise Invalid(ms("元の絵 {id} に手動編集の範囲がある。protected_mask_input を手順に用意して渡す",
+                         id=with_regions[0][0].id))
     if mask_slot is not None:
         node, inp = _slot(mask_slot, "protected_mask_input")
         if not sources:
-            raise Invalid(m("protected_mask_input は元の絵（purpose=source）と一緒に渡す"))
+            raise Invalid(ms("protected_mask_input は元の絵（purpose=source）と一緒に渡す"))
         img, regions = with_regions[0] if with_regions else (sources[0], [])
         mask_sha = await protected_mask_sha256(session, img.width, img.height, regions)
         prepared.append({"node": node, "input": inp, "purpose": "protected_mask", "image_id": None,

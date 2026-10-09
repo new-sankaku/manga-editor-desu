@@ -20,6 +20,7 @@ from v3server.canonical_tables.material_and_setting_tables import MaterialEntry,
 from v3server.canonical_tables.text_and_layer_tables import TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import ms
 
 # 作画の検査が読む閾値の鍵（drawing_checks.py と同じ物を読む）
 DRAWING_THRESHOLD_PREFIX = "harness.drawing."
@@ -61,21 +62,23 @@ async def panel_drawing_upstream(session: AsyncSession, work_id: str, panel_id: 
     panel = await session.get(Panel, panel_id)
     out: dict[str, dict[str, Any]] = {}
     if panel is None or panel.removed:
-        out[f"panel:{panel_id}"] = _entry(None, "redraw", "コマ（消えた）")
+        out[f"panel:{panel_id}"] = _entry(None, "redraw", ms("コマ（消えた）"))
         return out
     out[f"panel:{panel_id}"] = _entry(fingerprint({"content": panel.content, "frame": panel.frame, "role": panel.role}),
-                                      "redraw", "ネームのコマ")
+                                      "redraw", ms("ネームのコマ"))
     chars = await characters_by_name(session, work_id)
     for name in panel_people_names(panel):
         m = chars.get(name)
-        out[f"material:{name}"] = _entry(material_version(m), "recheck", f"設定資料の人物 {name}")
+        out[f"material:{name}"] = _entry(material_version(m), "recheck", ms("設定資料の人物 {name}", name=name))
     location = panel.content.get("location")
     if location:
         bg = (await session.execute(select(MaterialEntry).where(
             MaterialEntry.work_id == work_id, MaterialEntry.kind == "background", MaterialEntry.name == location,
             MaterialEntry.removed.is_(False), MaterialEntry.proposal_state == "adopted"))).scalar_one_or_none()
-        out[f"material:background:{location}"] = _entry(material_version(bg), "redraw", f"設定資料の場所 {location}")
-    out["thresholds:drawing"] = _entry(await drawing_thresholds_version(session, work_id), "recheck", "作画の検査の閾値")
+        out[f"material:background:{location}"] = _entry(material_version(bg), "redraw",
+                                                        ms("設定資料の場所 {name}", name=location))
+    out["thresholds:drawing"] = _entry(await drawing_thresholds_version(session, work_id), "recheck",
+                                       ms("作画の検査の閾値"))
     return out
 
 
@@ -84,22 +87,22 @@ async def name_draft_upstream(session: AsyncSession, work_id: str) -> dict[str, 
     chars = await characters_by_name(session, work_id)
     return {
         "plan": _entry(fingerprint({"synopsis": plan.synopsis, "audience": plan.audience, "exclusions": plan.exclusions})
-                       if plan else None, "redraw", "企画"),
+                       if plan else None, "redraw", ms("企画")),
         "materials:characters": _entry(fingerprint(sorted((n, material_version(m)) for n, m in chars.items())),
-                                       "redraw", "設定資料の人物"),
+                                       "redraw", ms("設定資料の人物")),
     }
 
 
 async def _plan_entry(session: AsyncSession, work_id: str) -> dict[str, Any]:
     plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == work_id))).scalar_one_or_none()
     return _entry(fingerprint({"synopsis": plan.synopsis, "audience": plan.audience, "exclusions": plan.exclusions})
-                  if plan else None, "redraw", "企画")
+                  if plan else None, "redraw", ms("企画"))
 
 
 async def _outlines_entry(session: AsyncSession, work_id: str) -> dict[str, Any]:
     rows = (await session.execute(select(EpisodeOutline).where(
         EpisodeOutline.work_id == work_id, EpisodeOutline.removed.is_(False)))).scalars().all()
-    return _entry(fingerprint(sorted((o.episode_id, fingerprint(o.outline)) for o in rows)), "redraw", "構成")
+    return _entry(fingerprint(sorted((o.episode_id, fingerprint(o.outline)) for o in rows)), "redraw", ms("構成"))
 
 
 async def episode_content_version(session: AsyncSession, episode_id: str) -> str:
@@ -126,18 +129,19 @@ async def upstream_of(session: AsyncSession, kind: str, work_id: str, target_id:
         return {}
     chars = await characters_by_name(session, work_id)
     characters = _entry(fingerprint(sorted((n, material_version(m)) for n, m in chars.items())), "redraw",
-                        "設定資料の人物")
+                        ms("設定資料の人物"))
     if kind == "structure":
         return {"plan": await _plan_entry(session, work_id), "materials:characters": characters}
     if kind == "settings_sheet":
         return {"plan": await _plan_entry(session, work_id), "outlines": await _outlines_entry(session, work_id)}
     if kind in ("page_finishing", "overall_review", "export"):
         effect = "redraw" if kind == "export" else "recheck"
-        out = {f"episode:{target_id}": _entry(await episode_content_version(session, target_id), effect, "話の原稿")}
+        out = {f"episode:{target_id}": _entry(await episode_content_version(session, target_id), effect,
+                                              ms("話の原稿"))}
         if kind == "overall_review":
             row = (await session.execute(select(EpisodeOutline).where(
                 EpisodeOutline.episode_id == target_id, EpisodeOutline.removed.is_(False)))).scalar_one_or_none()
-            out["outline"] = _entry(fingerprint(row.outline) if row else None, "recheck", "構成")
+            out["outline"] = _entry(fingerprint(row.outline) if row else None, "recheck", ms("構成"))
         return out
     raise ValueError(f"知らない作業の種類: {kind}")  # i18n:dev
 
@@ -151,8 +155,9 @@ def stale_entries(used: dict[str, dict[str, Any]], current: dict[str, dict[str, 
         if u is not None and c is not None and uv == cv:
             continue
         ref = c or u
-        reason = (f"{ref['label']}が変わった" if u is not None and c is not None
-                  else f"{ref['label']}が足された" if u is None else f"{ref['label']}が無くなった")
+        reason = (ms("{label}が変わった", label=ref["label"]) if u is not None and c is not None
+                  else ms("{label}が足された", label=ref["label"]) if u is None
+                  else ms("{label}が無くなった", label=ref["label"]))
         out.append({"upstream_key": key, "used_version": uv, "current_version": cv, "effect": ref["effect"],
                     "reason": reason})
     return out

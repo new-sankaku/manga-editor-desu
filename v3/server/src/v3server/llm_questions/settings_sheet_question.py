@@ -10,9 +10,10 @@
 from pydantic import BaseModel, Field
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 
 
-def build_settings_sheet_question(plot: str, audience: str | None, outlines: list[str], memory: list[str],
+def build_settings_sheet_question(plot: str, audience: str | None, outlines: list[str], memory: list[str],  # i18n:prompt
                                   model_description: str, count_min: int, count_max: int, note: str | None) -> str:
     return (
         "次は漫画の企画です。登場人物と場所の設定資料を書きます。\n\n"
@@ -31,7 +32,7 @@ def build_settings_sheet_question(plot: str, audience: str | None, outlines: lis
     )
 
 
-def build_distinguish_question(characters: list[tuple[str, str]]) -> str:
+def build_distinguish_question(characters: list[tuple[str, str]]) -> str:  # i18n:prompt
     listed = "\n".join(f"- {n}：{t}" for n, t in characters)
     return (
         "次は漫画の登場人物の設定です。\n\n"
@@ -64,7 +65,7 @@ def parse_settings_sheet_answer(answer: str) -> SettingsSheet:
     out = read_answer(answer, SettingsSheet)
     names = [c.name for c in out.characters] + [x.name for x in out.locations]
     if len(names) != len(set(names)):
-        raise BrokenAnswerError("同じ名前が2回ある", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("同じ名前が2回ある"), answer)
     return out
 
 
@@ -82,5 +83,5 @@ def parse_distinguish_answer(answer: str, names: set[str]) -> list[Confusable]:
     got = read_answer(answer, _Confusables).confusable
     unknown = sorted({x for c in got for x in (c.a, c.b)} - names)
     if unknown:
-        raise BrokenAnswerError(f"設定に無い名前がある: {unknown}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("設定に無い名前がある: {unknown}", unknown=str(unknown)), answer)
     return got

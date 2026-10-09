@@ -11,6 +11,7 @@ from v3server.canonical_tables.work_tree_tables import Panel, Work
 from v3server.comfy_graphs.protected_region_mask import protected_mask_png
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError
 from v3server.llm_questions.name_draft_question import parse_name_draft_answer
+from v3server.messages import render
 from v3server.name_checks.name_check_runner import CHECKS, run_name_checks
 from v3server.name_import.manga_import_reader import MangaImportError, read_manga_import
 from v3server.name_structure.image_placement import ImagePlacement
@@ -78,7 +79,8 @@ def test_枠だけのネームでも検査が回り_枠の検査は判定し_中
     assert rep.by_id("frame_bounds").status in ("合格", "不合格")
     assert rep.by_id("frame_reading_order").status in ("合格", "不合格")
     shot = rep.by_id("same_shot_angle_next")
-    assert shot.status == "データなし" and "shot" in shot.value and "1ページ コマ1" in shot.value
+    value = render(shot.value, "ja")
+    assert shot.status == "データなし" and "shot" in value and "1ページ コマ1" in value
     assert rep.by_id("rows_order").status == "データなし"
     # 全部の検査が1回ずつ結果を出す（未定でも抜けない）
     assert len(rep.results) == sum(len(e.ids) for e in CHECKS)
@@ -88,7 +90,7 @@ def test_全部決まったネームは今までどおり全部の検査が回�
     d = layout_draft(draft_of(simple_pages(2)))
     assert d.undecided_fields() == {}
     rep = run_name_checks(d, {})
-    assert not any(r.status == "データなし" and "未定" in str(r.value) for r in rep.results)
+    assert not any(r.status == "データなし" and "未定" in render(r.value, "ja") for r in rep.results)
 
 
 def test_段の割りが未定なら読む順はコマの番号の順で_割りの計算はしない():

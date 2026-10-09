@@ -24,9 +24,9 @@ async def grant_admin(user: str, revoke: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(prog="v3server.admin_command_line")
     sub = parser.add_subparsers(dest="command", required=True)
-    p = sub.add_parser("grant-admin", help="サーバーの管理者にする")
+    p = sub.add_parser("grant-admin", help="サーバーの管理者にする")  # i18n:dev
     p.add_argument("user")
-    p.add_argument("--revoke", action="store_true", help="管理者から外す")
+    p.add_argument("--revoke", action="store_true", help="管理者から外す")  # i18n:dev
     args = parser.parse_args()
     if args.command == "grant-admin":
         asyncio.run(grant_admin(args.user, args.revoke))

@@ -17,6 +17,8 @@ from dataclasses import dataclass
 import numpy as np
 from PIL import Image
 
+from v3server.messages import ms
+
 # 奥行きの図で白から黒へ変える遠さ：当たった距離のこの百分位を一番遠い所とする
 FAR_PERCENTILE = 98
 # 何にも当たらない光線の、線を引くときの距離（一番遠い所の何倍か）
@@ -120,16 +122,16 @@ def render_depth_and_line(boxes: list[Box], camera: Camera, width: int, height: 
     線は、当たった面が変わる所と、奥行きが飛ぶ所に引く。
     """
     if not boxes:
-        raise ValueError('箱が1つもありません')  # i18n:stored
+        raise ValueError(ms('箱が1つもありません'))
     if line.thickness_px < 1:
-        raise ValueError('線の太さは1ピクセル以上にしてください')  # i18n:stored
+        raise ValueError(ms('線の太さは1ピクセル以上にしてください'))
     d = camera_rays(width, height, camera).reshape(-1, 3)
     best, face = _hit_boxes(boxes, np.array(camera.position, dtype=np.float64), d)
     best = best.reshape(height, width)
     face = face.reshape(height, width)
     finite = np.isfinite(best)
     if not finite.any():
-        raise ValueError('カメラから箱が1つも見えません')  # i18n:stored
+        raise ValueError(ms('カメラから箱が1つも見えません'))
     far = np.percentile(best[finite], FAR_PERCENTILE)
     depth = np.clip(1 - best / far, 0, 1)
     depth[~finite] = 0

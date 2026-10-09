@@ -10,10 +10,11 @@ import math
 from pydantic import BaseModel, Field
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 from v3server.name_structure.reading_direction import ReadingDirection
 
 
-def build_reading_order_question(
+def build_reading_order_question(  # i18n:prompt
     reading_direction: ReadingDirection,
     frame_width: float,
     frame_height: float,
@@ -51,5 +52,6 @@ def assign_points_to_panels(
     if not panel_centers:
         raise ValueError("panel_centers が空")  # i18n:dev
     if len(points) != len(panel_centers):
-        raise BrokenAnswerError(f"座標の数 {len(points)} がコマの数 {len(panel_centers)} と違う", answer)  # i18n:stored
+        raise BrokenAnswerError(
+            ms("座標の数 {points} がコマの数 {panels} と違う", points=len(points), panels=len(panel_centers)), answer)
     return [min(panel_centers, key=lambda n: math.dist(panel_centers[n], p)) for p in points]

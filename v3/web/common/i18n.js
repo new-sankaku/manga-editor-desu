@@ -30,6 +30,8 @@ i18next.init({
   lng: lang, resources: { [lang]: { translation: dict } }, initAsync: false, showSupportNotice: false,
   keySeparator: false, nsSeparator: false, interpolation: { escapeValue: false },
 });
+// 辞書で {{kind, lowercase}} と書くと、差し込む言葉を小文字にする（英語で、種類の名前を文の途中に入れる所）
+i18next.services.formatter.add("lowercase", (value) => String(value).toLowerCase());
 
 const missing = new Set();
 export function t(key, opts) {

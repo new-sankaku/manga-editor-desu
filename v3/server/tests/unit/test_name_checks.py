@@ -1,9 +1,12 @@
 """ネームの検査の試験。根拠は試作 p12（読む順の崩れ・「大」の広さ）・p27（数え方）・p34（めくり）・p40（単調さ）・p47（顔の隠れ）。"""
 import math
+import re
+from typing import get_args
 
 import pytest
 from name_draft_samples import SPEC, draft_of, p12_page, panel, simple_pages
 
+from v3server.messages import render
 from v3server.name_checks import frame_shape_checks as fsc
 from v3server.name_checks import page_rhythm_checks as prc
 from v3server.name_checks import shot_sequence_checks as ssc
@@ -14,10 +17,23 @@ from v3server.name_checks.balloon_text_checks import (
     check_balloon_order,
     check_page_chars,
 )
+from v3server.name_checks.check_report_types import CheckResult, Finding, value_text
 from v3server.name_checks.name_check_runner import ALL_THRESHOLD_KEYS, run_name_checks
 from v3server.name_checks.page_monotony_metrics import run_monotony_checks
-from v3server.name_structure.name_draft_schema import Balloon, FigureInPanel, NamePage
+from v3server.name_structure.name_draft_schema import (
+    Balloon,
+    CameraAngle,
+    FigureInPanel,
+    NamePage,
+    PanelShape,
+    PanelSize,
+    ShotRange,
+)
+from v3server.panel_layout.reading_direction_mirror import PageSide
 from v3server.panel_layout.tier_ratio_layout import layout_draft
+
+# 日本語の字（英語で出した文に残っていないかを見る）
+JA = re.compile(r"[぀-ヿ一-鿿]")
 
 
 def laid(answer_id: str, **kw):
@@ -100,7 +116,7 @@ def test_gutter_side_and_inside_frame():
     d = layout_draft(draft_of(pages))
     r = fsc.check_gutter_side_contents(d, {})
     # 1ページ目は左のページなので、ノドは右（x=150）。顔が x=155 まで出ている
-    assert r.status == "不合格" and r.findings[0].note.startswith("顔")
+    assert r.status == "不合格" and render(r.findings[0].note, "ja").startswith("顔")
     assert fsc.check_balloon_inside_frame(d, {}).status == "不合格"
 
 
@@ -126,9 +142,57 @@ def test_report_lines_pass_is_one_line_fail_is_detailed():
     ok = prc.check_panels_per_page(d, {"panels_per_page_max": 8})[0]
     assert ok.status == "合格" and len(ok.report_lines()) == 1
     ng = prc.check_panels_per_page(d, {"panels_per_page_max": 5})[0]
-    lines = ng.report_lines()
+    lines = [render(line, "ja") for line in ng.report_lines()]
     assert ng.status == "不合格" and len(lines) == 2 and "1ページ" in lines[1] and "6" in lines[1]
     assert set(ALL_THRESHOLD_KEYS) >= {"panels_per_page_max", "face_covered_ratio_max"}
+
+
+def test_report_lines_keep_the_japanese_text_and_come_out_in_english_too():
+    """検査の結果は「文の形と値」で残す。日本語で出すと今までと同じ文になり、英語で出すと日本語が残らない。"""
+    d = laid("s1_talk_B_1")
+    ok = prc.check_panels_per_page(d, {"panels_per_page_max": 8})[0]
+    assert render(ok.report_lines()[0], "ja") == "[合格] 1ページのコマ数（多すぎ） 値 6 閾値 panels_per_page_max=8.0"
+    assert render(ok.report_lines()[0], "en") == "[Passed] Panels per page (too many): value 6, threshold panels_per_page_max=8.0"
+    ng = prc.check_panels_per_page(d, {"panels_per_page_max": 5})[0]
+    assert [render(line, "ja") for line in ng.report_lines()] == [
+        "[不合格] 1ページのコマ数（多すぎ） 値 6 閾値 panels_per_page_max=5.0", "  - 1ページ：コマ数（値 6）"]
+    assert render(ng.report_lines()[1], "en") == "  - Page 1: number of panels (value: 6)"
+    unset = prc.check_panels_per_page(d, {})[0]
+    assert render(unset.report_lines()[0], "ja") == "[閾値未設定] 1ページのコマ数（多すぎ） 値 6"
+    # 場所はページ・コマ・吹き出しを「・」でつなぐ。値の無い指摘は説明だけ
+    where = Finding(page=2, panel=3, balloon=0, value="右", note="x")
+    assert render(where.line(), "ja") == "2ページ・コマ3・吹き出し1：x（値 右）"
+    assert render(Finding(page=2, note="x").line(), "ja") == "2ページ：x"
+    assert render(Finding(value=0.5, note="x").line(), "ja") == "x（値 0.5）"
+    # データベースに残す形（model_dump）にしても、出す時に文に戻る
+    kept = CheckResult.model_validate(ng.model_dump())
+    assert [render(line, "ja") for line in kept.report_lines()] == [render(line, "ja") for line in ng.report_lines()]
+    # 全部の検査の結果を英語で出して、日本語と訳の抜けの印（⚠）が残らない（人物の名前などの利用者の値は除く）
+    rep = run_name_checks(d, {key: 0.0 for key in ALL_THRESHOLD_KEYS})
+    names = {f.name for p in d.all_panels() for f in p.people or []}
+    for line in rep.report_lines():
+        english = render(line, "en")
+        for name in names:
+            english = english.replace(name, "")
+        assert "⚠" not in english and not JA.search(english), english
+
+
+def test_undecided_fields_reason_keeps_the_japanese_text():
+    """未定の項目があって回さない検査の理由。場所は3つまで並べ、残りは数だけ出す。"""
+    panels = [panel(n, shot=None) for n in range(1, 6)]
+    d = draft_of([NamePage(page=1, spread=False, rows=[[1, 2], [3, 4, 5]], panels=panels)])
+    r = run_name_checks(d, {}).by_id("close_shot_run")
+    assert r.status == "データなし"
+    assert render(r.value, "ja") == "未定の項目がある: shot（1ページ コマ1・1ページ コマ2・1ページ コマ3 ほか2か所）"
+    assert render(r.report_lines()[0], "ja") == f"[データなし] 寄りの連続：{render(r.value, 'ja')}"
+
+
+def test_value_text_covers_every_value_of_the_name_draft():
+    """検査の文に入れるネームの値（大きさ・形・写す範囲・角度・ページの側）は、全部に言い方がある。"""
+    for kind in (PanelSize, PanelShape, ShotRange, CameraAngle, PageSide):
+        for value in get_args(kind):
+            assert render(value_text(value), "ja") == value
+    assert value_text(None) is None
 
 
 # ---- めくり（p34・p27） ----
@@ -307,5 +371,5 @@ def test_two_page_spread():
     sp = NamePage(page=2, spread=True, spread_occupies_two_pages=True, rows=[[3]],
                   panels=[panel(3, balloons=[bl], frame={"polygon_mm": [(0, 0), (316, 0), (316, 220), (0, 220)], "bleeds": False})])
     d3 = draft_of([pages[0], sp])
-    assert fsc.check_gutter_side_contents(d3, {}).findings[0].note.startswith("吹き出し")
+    assert render(fsc.check_gutter_side_contents(d3, {}).findings[0].note, "ja").startswith("吹き出し")
     assert fsc.check_frame_bounds(d3.model_copy(update={"pages": [sp]}), {}).status == "合格"

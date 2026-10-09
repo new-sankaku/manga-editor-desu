@@ -22,7 +22,7 @@ from v3server.canonical_tables.translation_review_import_tables import (
 )
 from v3server.canonical_tables.work_tree_tables import Episode, Page
 from v3server.current_app_import.import_plan import ImportPlan
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.pen_stroke_operations import AddPenStrokes, NewPenStroke
@@ -107,5 +107,6 @@ class ImportCurrentAppProject(OpBase):
                 image_id=s.image_id, prompt=s.prompt, negative_prompt=s.negative_prompt, source_values=s.source_values,
                 import_report_id=self.report_id, human_hand_fields=[], removed=False))
             created("element_generation_settings", s.id)
-        return {"type": "restore_rows", "label": f"今のアプリのプロジェクト {self.source_file_name} の取り込み",
+        return {"type": "restore_rows",
+                "label": ms("今のアプリのプロジェクト {name} の取り込み", name=self.source_file_name),
                 "page_ids": sorted(p.id for p in self.plan.pages), "snapshot": snapshot}

@@ -2,7 +2,7 @@
 試作 p47：重ねた後の絵だけから顔の検出器で隠れを見つける手は、4割隠れても顔が見つかり（81→76）、使えなかった。
 吹き出しを置く側は重ねる前の顔の位置を知っているので、楕円と顔の四角の重なりの計算だけで分かる。
 同じコマの人物の顔だけを見る（吹き出しがコマをまたいで隣のコマの顔を隠す場合は見ない）。"""
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
@@ -31,14 +31,15 @@ def face_coverages(draft: NameDraft) -> list[tuple[float, Finding]]:
                     continue
                 for f in faces:
                     c = ellipse_box_coverage(b.box_mm, f.face_box_mm)
-                    out.append((c, Finding(page=pg.page, panel=p.n, balloon=k, value=rounded(c), note=f"{f.name}の顔を覆う割合")))
+                    out.append((c, Finding(page=pg.page, panel=p.n, balloon=k, value=rounded(c),
+                                           note=ms("{name}の顔を覆う割合", name=f.name))))
     return out
 
 
 def check_balloon_face_overlap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
-    title = "吹き出しが顔を隠す割合"
+    title = ms("吹き出しが顔を隠す割合")
     measured = face_coverages(draft)
     if not measured:
-        return no_data_result("balloon_face_overlap", title, "同じコマに、位置のある吹き出しと顔の範囲の組が無い")
+        return no_data_result("balloon_face_overlap", title, ms("同じコマに、位置のある吹き出しと顔の範囲の組が無い"))
     value = rounded(max(v for v, _ in measured))
     return limit_result("balloon_face_overlap", title, thresholds, "face_covered_ratio_max", "max", value, measured)

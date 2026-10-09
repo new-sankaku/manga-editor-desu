@@ -37,6 +37,7 @@ from temporalio.testing import WorkflowEnvironment  # noqa: E402
 from v3server.database_engine import get_sessionmaker  # noqa: E402
 from v3server.generation_queue.queue_worker_main import WorkerSet  # noqa: E402
 from v3server.http_routes.http_app_factory import app  # noqa: E402
+from v3server.messages import has_packed  # noqa: E402
 from v3server.openfga_permissions import open_authz  # noqa: E402
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E402
 from v3server.service_senders.sender_result_types import AdapterError, AdapterResult  # noqa: E402
@@ -111,7 +112,15 @@ async def temporal():
 async def api(authz, temporal):
     app.state.authz = authz
     app.state.temporal = temporal
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as client:
+    async def no_packed_text(response: httpx.Response) -> None:
+        """残す文（ms()）の包みが、文に戻されないまま返事に出ていないか。どの試験の、どの返事でも見る。"""
+        if response.headers.get("content-type", "").startswith("text/event-stream"):
+            return  # 流し続ける返事は読み切れない。SSE は SSE の試験が見る
+        await response.aread()
+        assert not has_packed(response.text), f"{response.request.method} {response.request.url}: 包んだ文がそのまま出ている"
+
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test",
+                                 event_hooks={"response": [no_packed_text]}) as client:
         yield client
 
 

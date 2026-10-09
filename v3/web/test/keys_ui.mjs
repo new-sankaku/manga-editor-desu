@@ -273,6 +273,8 @@ await shot(page, "15_keys_settings_conflict");
 await page.click("#v3-ks-take");
 await page.waitForFunction(() => !document.querySelector("#v3-keys .v3-conflict"));
 check(await stored((m) => JSON.stringify(m["workbench.erase"]) === JSON.stringify(["e", "k"]) && !m["workbench.pen"]), "「相手から外して割り当てる」で消しゴムが K、ペンは初めに戻る");
+// サーバーに残った後、画面が新しい割り当てを使い始めるのは答えを受けてから。使い始める前に K を押すと、前の割り当て（ペン）で受ける
+await page.waitForFunction(() => document.querySelector("#v3-keys tr[data-id='workbench.erase']")?.textContent.includes("変えた"));
 await page.keyboard.press("Escape");
 await page.waitForFunction(() => !document.querySelector("#v3-keys")?.open);
 await page.keyboard.press("k");

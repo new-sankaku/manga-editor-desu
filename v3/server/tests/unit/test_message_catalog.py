@@ -1,12 +1,14 @@
-"""利用者に見せる文（v3server/messages.py の m()）の包み方と訳に、漏れが無いかを確かめる（llm_doc/V3細部の決めごと.md 24.5）。
+"""利用者に見せる文（v3server/messages.py の m()・ms()）の包み方と訳に、漏れが無いかを確かめる（llm_doc/V3細部の決めごと.md 24.5）。
 
 コードを読むだけで、データベースは要らない。次を止める。
-  1. m() の1つ目が文字列そのものでない・文の中の {名前} と渡した値が合わない
-  2. 日本語の文を、m() に包まずに例外に渡している（作る人だけが見る例外と、印を付けた行は除く）
+  1. m()・ms() の1つ目が文字列そのものでない・文の中の {名前} と渡した値が合わない
+  2. 日本語の文字列を、m()・ms() に包まず、印も付けずに置いている（docstring・ログ・assert の文は除く）
   3. 使っている文が辞書に無い・辞書に使っていない文がある・訳に日本語が残る・訳の {名前} が元と違う
-印（同じ行の末尾のコメント）
+  4. 残す文（ms()）が、つなぐ・JSON・例外を通っても、出す所でその言語の文に戻る
+印（その文のどこかの行の末尾のコメント。def の行に書けば、その関数の中は全部）
   # i18n:dev     作る人だけが見る文（画面に届かない）
-  # i18n:stored  データベースや Temporal の記録に残す文（残した時の日本語のまま。今は訳さない）
+  # i18n:prompt  LLM に送る文（日本語のまま）
+  # i18n:data    文ではなく値（比べる・鍵にする日本語）
 """
 
 import ast
@@ -30,7 +32,7 @@ JA = re.compile(r"[぀-ヿ一-鿿]")
 # 画面に届かない例外（プログラムの誤り・設定の誤りで起動時に止まるもの）。日本語の文を m() に包まなくてよい
 DEV_ONLY = {"RuntimeError", "AssertionError", "TypeError", "NotImplementedError", "KeyError", "LookupError", "SystemExit",
             "AttributeError", "ImportError"}
-MARK = re.compile(r"#.*\bi18n:(dev|stored)\b")
+MARK = re.compile(r"#.*\bi18n:(dev|prompt|data)\b")
 
 
 def _sources() -> list[tuple[pathlib.Path, str, ast.Module]]:
@@ -113,6 +115,65 @@ def test_japanese_text_in_exceptions_is_wrapped():
                 continue
             bad.append(f"{_where(path, node)}: {name}(…) に日本語の文を m() に包まずに渡している")
     assert not bad, f"{len(bad)} 件\n" + "\n".join(bad)
+
+
+def _loose_japanese(text: str, tree: ast.Module) -> list[tuple[int, str]]:
+    """m()・ms() に包んでいなくて、印も無い日本語の文字列（行, 文字列の頭）。docstring・ログ・assert の文は数えない。"""
+    lines = text.splitlines()
+    skip: set[int] = set()
+    parents: dict[int, ast.AST] = {}
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parents[id(child)] = node
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            first = node.body[0] if node.body else None
+            if isinstance(first, ast.Expr) and isinstance(first.value, ast.Constant):
+                skip.add(id(first.value))
+        logged = (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name)
+                  and node.func.value.id in ("log", "logger", "logging"))
+        if _is_m(node) or logged:
+            skip.update(id(inner) for inner in ast.walk(node))
+        if isinstance(node, ast.Assert) and node.msg is not None:
+            skip.update(id(inner) for inner in ast.walk(node.msg))
+    compound = (ast.If, ast.For, ast.While, ast.With, ast.Try, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.AsyncFor,
+                ast.AsyncWith, ast.Match)
+    out = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Constant) and isinstance(node.value, str) and JA.search(node.value)) or id(node) in skip:
+            continue
+        parent = parents.get(id(node))
+        if isinstance(parent, ast.JoinedStr):  # f 文字列のかけらは、f 文字列ごとに1回だけ数える
+            if next(v for v in parent.values if isinstance(v, ast.Constant) and JA.search(str(v.value))) is not node:
+                continue
+        up, statement, marked = node, None, False
+        while id(up) in parents:
+            up = parents[id(up)]
+            if statement is None and isinstance(up, ast.stmt):
+                statement = up
+                # 印は、その文のどこかの行に書く。複合文（if・for・def など）は中身まで見ずに、文字列のある行だけ見る
+                span = lines[up.lineno - 1:(up.end_lineno or up.lineno)]
+                if isinstance(up, compound):
+                    span = [lines[node.lineno - 1], lines[(node.end_lineno or node.lineno) - 1]]
+                marked = any(MARK.search(line) for line in span)
+            if isinstance(up, (ast.FunctionDef, ast.AsyncFunctionDef)):  # def の行に印があれば、その関数の中は全部
+                marked = marked or any(MARK.search(line) for line in lines[up.lineno - 1:up.body[0].lineno - 1])
+        if not marked:
+            out.append((node.lineno, node.value[:40].replace("\n", " ")))
+    return out
+
+
+def test_japanese_text_is_wrapped_or_marked():
+    """日本語の文字列は、m()・ms() に包むか、印（dev・prompt・data）を付ける。包み忘れた文は、英語の画面に日本語のまま出る。"""
+    bad = [f"{path.relative_to(SRC).as_posix()}:{lineno}: {value}"
+           for path, text, tree in SOURCES for lineno, value in _loose_japanese(text, tree)]
+    assert not bad, f"{len(bad)} 件\n" + "\n".join(bad)
+
+
+def test_stored_mark_is_gone():
+    """`# i18n:stored`（残す文は訳さない、の印）はもう使わない。残す文は ms() に包む。"""
+    bad = [f"{path.relative_to(SRC).as_posix()}:{i}" for path, text, _ in SOURCES
+           for i, line in enumerate(text.splitlines(), 1) if re.search(r"#.*\bi18n:stored\b", line)]
+    assert not bad, "\n".join(bad)
 
 
 @pytest.mark.parametrize("lang", [lang for lang in LANGS if lang != "ja"])

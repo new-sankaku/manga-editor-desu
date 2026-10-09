@@ -17,7 +17,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Episode, Volume
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.operations.ai_involvement import require_actor_may, require_ai_may_change_fields
 from v3server.operations.material_and_plan_operations import LoraUse
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
@@ -99,7 +99,7 @@ class SetEpisodePlan(OpBase):
         rc = RowChanges(ctx)
         plan = await _plan_of(ctx, rc, self.episode_id, set(changes))
         rc.change(plan, changes)
-        return rc.inverse([], "話の構成を変えた取り消し")
+        return rc.inverse([], ms("話の構成を変えた取り消し"))
 
 
 async def previous_episode(session, episode: Episode) -> Episode | None:
@@ -152,7 +152,7 @@ class CarryOverEpisodePlan(OpBase):
         plan = await _plan_of(ctx, rc, episode.id, set(CARRIED_FIELDS))
         rc.change(plan, values)
         rc.set_plain(plan, {"carried_from_episode_id": source.id})
-        return rc.inverse([], "前の話から引き継いだ取り消し")
+        return rc.inverse([], ms("前の話から引き継いだ取り消し"))
 
 
 class AddForeshadowing(OpBase):
@@ -179,7 +179,7 @@ class AddForeshadowing(OpBase):
                                  removed=False, **values,
                                  human_hand_fields=sorted(k for k, v in values.items() if v is not None)
                                  if ctx.actor.kind == "human" else []))
-        return rc.inverse([], "伏線を足した取り消し")
+        return rc.inverse([], ms("伏線を足した取り消し"))
 
 
 class UpdateForeshadowing(OpBase):
@@ -212,4 +212,4 @@ class UpdateForeshadowing(OpBase):
             raise Invalid(m("削除した伏線は set_removed で戻してから変える"))
         rc = RowChanges(ctx)
         rc.change(row, changes)
-        return rc.inverse([], "伏線を変えた取り消し")
+        return rc.inverse([], ms("伏線を変えた取り消し"))

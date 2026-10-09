@@ -35,8 +35,8 @@ REVIEW = "review"
 FINALIZE = "finalize"
 STEPS = (CUT_OUT, CONTEXT, GENERATE, CHECK, FIX, EVALUATE, REVIEW, FINALIZE)
 
-# 作り直しの辺（画面のグラフの戻りの辺）。（どこから, どこへ, 理由）
-RETRY_EDGES = (
+# 作り直しの辺（画面のグラフの戻りの辺）。（どこから, どこへ, 理由）。理由の文は画面へ送っていない（画面は自分の辞書の文を出す）
+RETRY_EDGES = (  # i18n:dev
     (CHECK, FIX, "落ちた所だけ直す"),
     (FIX, CHECK, "直した候補だけ検査し直す"),
     (CHECK, CONTEXT, "直せない・直す上限で全部を作り直す"),

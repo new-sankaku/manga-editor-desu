@@ -7,7 +7,7 @@ import math
 import numpy as np
 from PIL import Image, ImageDraw
 
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
@@ -16,6 +16,7 @@ from v3server.name_checks.check_report_types import (
     limit_result,
     no_data_result,
     rounded,
+    value_text,
 )
 from v3server.name_structure.name_draft_schema import NameDraft, NamePage, NamePanel
 from v3server.name_structure.reading_direction import PageSpec
@@ -53,7 +54,7 @@ THRESHOLD_KEYS = {
 # 空きの面積を数えるときの、1mm あたりの画素の数。測る精度であって、判定の閾値ではない
 _RASTER_PX_PER_MM = 4
 
-_NO_FRAME = "枠の無いコマがある（コマ割りの計算の前）"
+_NO_FRAME = ms("枠の無いコマがある（コマ割りの計算の前）")
 
 
 def _has_frames(draft: NameDraft) -> bool:
@@ -95,19 +96,20 @@ def check_rows_order(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     for pg in draft.pages:
         seq = page_reading_sequence(pg)
         if sorted(seq) != sorted(p.n for p in pg.panels) or len(set(seq)) != len(seq):
-            findings.append(Finding(page=pg.page, value=str(pg.rows), note="段に並べた番号とページのコマの番号が合わない"))
+            findings.append(Finding(page=pg.page, value=str(pg.rows), note=ms("段に並べた番号とページのコマの番号が合わない")))
         for n in seq:
             if prev is not None and n != prev + 1:
-                findings.append(Finding(page=pg.page, panel=n, value=f"{prev}の次が{n}", note="読む順の番号が1ずつ増えていない"))
+                findings.append(Finding(page=pg.page, panel=n, value=ms("{prev}の次が{n}", prev=prev, n=n),
+                                        note=ms("読む順の番号が1ずつ増えていない")))
             prev = n
-    return fixed_rule_result("rows_order", "段に並べた読む順の番号", findings)
+    return fixed_rule_result("rows_order", ms("段に並べた読む順の番号"), findings)
 
 
 # ---- 枠の形 ----
 
 def check_frame_bounds(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """断ち切りでないコマは基本枠の中、断ち切りのコマは塗り足しの外端の中に収まるか。"""
-    title = "枠のはみ出し"
+    title = ms("枠のはみ出し")
     if not _has_frames(draft):
         return no_data_result("frame_bounds", title, _NO_FRAME)
     spec = draft.page_spec
@@ -123,30 +125,31 @@ def check_frame_bounds(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
             b = polygon_bbox(p.frame.polygon_mm)
             limit = outer if p.frame.bleeds else inner
             if not box_inside(b, limit):
-                where = "塗り足しの外" if p.frame.bleeds else "基本枠の外"
-                findings.append(Finding(page=pg.page, panel=p.n, value=str(tuple(rounded(v) for v in b)), note=f"{where}へ出ている"))
+                note = ms("塗り足しの外へ出ている") if p.frame.bleeds else ms("基本枠の外へ出ている")
+                findings.append(Finding(page=pg.page, panel=p.n, value=str(tuple(rounded(v) for v in b)), note=note))
     return fixed_rule_result("frame_bounds", title, findings)
 
 
 def check_bleed_matches_shape(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """形が「断ち切り」のコマだけが基本枠の外へ伸びているか。
     コマ割りの計算は、基本枠の辺に接していないコマやノドの辺にしか接していないコマを伸ばさないので、その食い違いをここで出す。"""
-    title = "断ち切りの指定と枠"
+    title = ms("断ち切りの指定と枠")
     if not _has_frames(draft):
         return no_data_result("bleed_matches_shape", title, _NO_FRAME)
     findings = []
     for pg in draft.pages:
         for p in pg.panels:
-            if p.shape == "断ち切り" and not p.frame.bleeds:
-                findings.append(Finding(page=pg.page, panel=p.n, note="断ち切りの指定なのに枠が外へ伸びていない"))
-            elif p.shape != "断ち切り" and p.frame.bleeds:
-                findings.append(Finding(page=pg.page, panel=p.n, value=p.shape, note="断ち切りの指定が無いのに枠が外へ伸びている"))
+            if p.shape == "断ち切り" and not p.frame.bleeds:  # i18n:data
+                findings.append(Finding(page=pg.page, panel=p.n, note=ms("断ち切りの指定なのに枠が外へ伸びていない")))
+            elif p.shape != "断ち切り" and p.frame.bleeds:  # i18n:data
+                findings.append(Finding(page=pg.page, panel=p.n, value=value_text(p.shape),
+                                        note=ms("断ち切りの指定が無いのに枠が外へ伸びている")))
     return fixed_rule_result("bleed_matches_shape", title, findings)
 
 
 def check_overlap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """コマどうしが重なっていないか。わざと重ねるコマ（NamePanel.overlaps に挙げた組）は指摘しない。"""
-    title = "コマの重なり"
+    title = ms("コマの重なり")
     if not _has_frames(draft):
         return no_data_result("overlap", title, _NO_FRAME)
     findings = []
@@ -158,13 +161,13 @@ def check_overlap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
                     continue
                 ov = polygon_overlap_area(a.frame.polygon_mm, b.frame.polygon_mm)
                 if ov > FLOAT_EPS:
-                    findings.append(Finding(page=pg.page, panel=a.n, value=rounded(ov), note=f"コマ{b.n}と重なる（mm²）"))
+                    findings.append(Finding(page=pg.page, panel=a.n, value=rounded(ov), note=ms("コマ{panel}と重なる（mm²）", panel=b.n)))
     return fixed_rule_result("overlap", title, findings)
 
 
 def check_panel_gap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """重なっていないコマどうしの最短の隙間。接している（0mm）ものも入る。わざと重ねる組は見ない。"""
-    title = "コマどうしの隙間"
+    title = ms("コマどうしの隙間")
     if not _has_frames(draft):
         return no_data_result("panel_gap", title, _NO_FRAME)
     measured = []
@@ -175,14 +178,14 @@ def check_panel_gap(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
                 if intended_overlap(a, b) or polygon_overlap_area(a.frame.polygon_mm, b.frame.polygon_mm) > FLOAT_EPS:
                     continue  # 重なりは check_overlap が出す
                 d = polygon_distance(a.frame.polygon_mm, b.frame.polygon_mm)
-                measured.append((d, Finding(page=pg.page, panel=a.n, value=rounded(d), note=f"コマ{b.n}との隙間（mm）")))
+                measured.append((d, Finding(page=pg.page, panel=a.n, value=rounded(d), note=ms("コマ{panel}との隙間（mm）", panel=b.n))))
     value = rounded(min(v for v, _ in measured)) if measured else None
     return limit_result("panel_gap", title, thresholds, "panel_gap_min_mm", "min", value, measured)
 
 
 def check_tiny_panel(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """コマの短い辺（外接する四角の短い辺。斜めのコマは実際より長めに出る）。"""
-    title = "極小のコマ"
+    title = ms("極小のコマ")
     if not _has_frames(draft):
         return no_data_result("tiny_panel", title, _NO_FRAME)
     measured = []
@@ -190,7 +193,7 @@ def check_tiny_panel(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
         for p in pg.panels:
             b = polygon_bbox(p.frame.polygon_mm)
             s = min(box_width(b), box_height(b))
-            measured.append((s, Finding(page=pg.page, panel=p.n, value=rounded(s), note="短い辺（mm）")))
+            measured.append((s, Finding(page=pg.page, panel=p.n, value=rounded(s), note=ms("短い辺（mm）"))))
     value = rounded(min(v for v, _ in measured)) if measured else None
     return limit_result("tiny_panel", title, thresholds, "panel_short_side_min_mm", "min", value, measured)
 
@@ -231,13 +234,13 @@ def page_empty_area_mm2(page: NamePage, draft: NameDraft) -> float:
 
 def check_empty_space(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """空いた場所。試作 p12 では座標を直接出させた割りで24回中2回出た。"""
-    title = "どのコマにも入らない場所"
+    title = ms("どのコマにも入らない場所")
     if not _has_frames(draft):
         return no_data_result("empty_space", title, _NO_FRAME)
     measured = []
     for pg in draft.pages:
         a = page_empty_area_mm2(pg, draft)
-        measured.append((a, Finding(page=pg.page, value=rounded(a), note="空いた面積（mm²）")))
+        measured.append((a, Finding(page=pg.page, value=rounded(a), note=ms("空いた面積（mm²）"))))
     value = rounded(max(v for v, _ in measured)) if measured else None
     return limit_result("empty_space", title, thresholds, "empty_area_max_mm2", "max", value, measured)
 
@@ -246,7 +249,7 @@ def check_frame_reading_order(draft: NameDraft, thresholds: Thresholds) -> Check
     """枠の位置が、番号の順に右から左・上から下で読めるか（試作 p12 `check` の規則）。
     次のコマが前のコマより丸ごと上にある、または同じ高さの帯で前のコマより右にあれば崩れ。
     左から読む作品は反転してから同じ規則にかける。p34：向きを取り違えて検査すると48/48で崩れとして出る。"""
-    title = "枠の位置の読む順"
+    title = ms("枠の位置の読む順")
     if not _has_frames(draft):
         return no_data_result("frame_reading_order", title, _NO_FRAME)
     findings = []
@@ -257,36 +260,37 @@ def check_frame_reading_order(draft: NameDraft, thresholds: Thresholds) -> Check
             a, b = bb[k], bb[nxt]
             vov = min(a[3], b[3]) - max(a[1], b[1])
             if b[3] <= a[1] + FLOAT_EPS:
-                findings.append(Finding(page=pg.page, panel=nxt, note=f"コマ{k}より上にある"))
+                findings.append(Finding(page=pg.page, panel=nxt, note=ms("コマ{panel}より上にある", panel=k)))
             elif vov > FLOAT_EPS and b[0] >= a[2] - FLOAT_EPS and b[1] >= a[1] - FLOAT_EPS:
-                side = "右" if draft.reading_direction == "right_to_left" else "左"
-                findings.append(Finding(page=pg.page, panel=nxt, note=f"コマ{k}と同じ高さで{side}にある"))
+                note = (ms("コマ{panel}と同じ高さで右にある", panel=k) if draft.reading_direction == "right_to_left"
+                        else ms("コマ{panel}と同じ高さで左にある", panel=k))
+                findings.append(Finding(page=pg.page, panel=nxt, note=note))
     return fixed_rule_result("frame_reading_order", title, findings)
 
 
 def check_big_is_largest(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """「大」のコマが、そのページの「大」でないどのコマより広いか。"""
-    title = "「大」のコマの広さ"
+    title = ms("「大」のコマの広さ")
     if not _has_frames(draft):
         return no_data_result("big_is_largest", title, _NO_FRAME)
     findings = []
     for pg in draft.pages:
         area = {p.n: polygon_area(p.frame.polygon_mm) for p in pg.panels}
-        others = [area[p.n] for p in pg.panels if p.size != "大"]
+        others = [area[p.n] for p in pg.panels if p.size != "大"]  # i18n:data
         if not others:
             continue
         top = max(others)
         for p in pg.panels:
-            if p.size == "大" and area[p.n] < top - FLOAT_EPS:
+            if p.size == "大" and area[p.n] < top - FLOAT_EPS:  # i18n:data
                 findings.append(Finding(page=pg.page, panel=p.n, value=f"{rounded(area[p.n])} < {rounded(top)}",
-                                        note="「大」でないコマより狭い（mm²）"))
+                                        note=ms("「大」でないコマより狭い（mm²）")))
     return fixed_rule_result("big_is_largest", title, findings)
 
 
 def check_gutter_ratio(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """左右に並ぶコマの隙間が、上下に並ぶコマの隙間より狭いか（課題8）。比べるだけなので閾値は要らない。
     各コマのいちばん近い左右の隣・上下の隣との隙間を取り、ページの左右の最大と上下の最小を比べる。"""
-    title = "左右の隙間が上下より狭いか"
+    title = ms("左右の隙間が上下より狭いか")
     if not _has_frames(draft):
         return no_data_result("gutter_ratio", title, _NO_FRAME)
     findings = []
@@ -311,8 +315,9 @@ def check_gutter_ratio(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
             if best_stack < math.inf:
                 stack_gaps.append(best_stack)
         if side_gaps and stack_gaps and max(side_gaps) >= min(stack_gaps) - FLOAT_EPS:
-            findings.append(Finding(page=pg.page, value=f"左右 {rounded(max(side_gaps))} / 上下 {rounded(min(stack_gaps))}",
-                                    note="左右の隙間が上下の隙間より狭くない（mm）"))
+            findings.append(Finding(page=pg.page, value=ms("左右 {side} / 上下 {stack}", side=rounded(max(side_gaps)),
+                                                           stack=rounded(min(stack_gaps))),
+                                    note=ms("左右の隙間が上下の隙間より狭くない（mm）")))
     return fixed_rule_result("gutter_ratio", title, findings)
 
 
@@ -324,7 +329,7 @@ def _row_boxes(page: NamePage, draft: NameDraft) -> list[list[Box]]:
 def check_row_cut_offset(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """上下に隣り合う段で、コマを分ける縦線がどれだけずれているか（5.3「縦線は段ごとにずらす」）。
     縦線の位置は、段の中で隣り合う2コマの隙間の真ん中。段に1コマしか無ければ縦線は無い。"""
-    title = "上下の段の縦線のずれ"
+    title = ms("上下の段の縦線のずれ")
     if not _has_frames(draft):
         return no_data_result("row_cut_offset", title, _NO_FRAME)
     measured = []
@@ -337,7 +342,8 @@ def check_row_cut_offset(draft: NameDraft, thresholds: Thresholds) -> CheckResul
             if not cuts[i] or not cuts[i + 1]:
                 continue
             off = min(abs(u - v) for u in cuts[i] for v in cuts[i + 1])
-            measured.append((off, Finding(page=pg.page, value=rounded(off), note=f"{i + 1}段目と{i + 2}段目の縦線のずれ（mm）")))
+            measured.append((off, Finding(page=pg.page, value=rounded(off),
+                                          note=ms("{upper}段目と{lower}段目の縦線のずれ（mm）", upper=i + 1, lower=i + 2))))
     value = rounded(min(v for v, _ in measured)) if measured else None
     return limit_result("row_cut_offset", title, thresholds, "row_cut_offset_min_mm", "min", value, measured)
 
@@ -345,7 +351,7 @@ def check_row_cut_offset(draft: NameDraft, thresholds: Thresholds) -> CheckResul
 def check_facing_row_line_offset(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """向かい合う2ページで、段を分ける横線がどれだけずれているか（5.3「見開きの左右で横線をずらす」）。
     横線の位置は、最後の段を除く各段の下端。"""
-    title = "向かい合うページの横線のずれ"
+    title = ms("向かい合うページの横線のずれ")
     if not _has_frames(draft):
         return no_data_result("facing_row_line_offset", title, _NO_FRAME)
 
@@ -359,7 +365,7 @@ def check_facing_row_line_offset(draft: NameDraft, thresholds: Thresholds) -> Ch
             continue
         off = min(abs(u - v) for u in a for v in b)
         measured.append((off, Finding(page=draft.pages[i].page, value=rounded(off),
-                                      note=f"{draft.pages[j].page}ページとの横線のずれ（mm）")))
+                                      note=ms("{page}ページとの横線のずれ（mm）", page=draft.pages[j].page))))
     value = rounded(min(v for v, _ in measured)) if measured else None
     return limit_result("facing_row_line_offset", title, thresholds, "facing_row_line_offset_min_mm", "min", value, measured)
 
@@ -371,7 +377,7 @@ def check_gutter_side_contents(draft: NameDraft, thresholds: Thresholds) -> Chec
     断ち切りは枠、顔は人物の顔の範囲、セリフは吹き出しの範囲で見る。まだ無い範囲は見ない。
     2ページ分を占める見開き（spread_occupies_two_pages）は、顔と吹き出しがノドの線をまたいでいれば指摘（コマはまたいでよい）。
     2ページ分かを決めていない見開きはノドの位置が分からないので対象外にする（値に書く）。"""
-    title = "ノドの断ち切り・顔・セリフ"
+    title = ms("ノドの断ち切り・顔・セリフ")
     spec = draft.page_spec
     sides = page_sides(draft)
     findings = []
@@ -385,12 +391,12 @@ def check_gutter_side_contents(draft: NameDraft, thresholds: Thresholds) -> Chec
                     if f.face_box_mm is not None:
                         looked += 1
                         if f.face_box_mm[0] < g - FLOAT_EPS and f.face_box_mm[2] > g + FLOAT_EPS:
-                            findings.append(Finding(page=pg.page, panel=p.n, value=f.name, note="顔が見開きのノドをまたぐ"))
+                            findings.append(Finding(page=pg.page, panel=p.n, value=f.name, note=ms("顔が見開きのノドをまたぐ")))
                 for k, b in enumerate(p.balloons):
                     if b.box_mm is not None:
                         looked += 1
                         if b.box_mm[0] < g - FLOAT_EPS and b.box_mm[2] > g + FLOAT_EPS:
-                            findings.append(Finding(page=pg.page, panel=p.n, balloon=k, note="吹き出しが見開きのノドをまたぐ"))
+                            findings.append(Finding(page=pg.page, panel=p.n, balloon=k, note=ms("吹き出しが見開きのノドをまたぐ")))
             continue
         if pg.spread:
             continue
@@ -398,27 +404,28 @@ def check_gutter_side_contents(draft: NameDraft, thresholds: Thresholds) -> Chec
             if p.frame is not None and p.frame.bleeds:
                 looked += 1
                 if crosses_gutter_edge([x for x, _ in p.frame.polygon_mm], side, spec, FLOAT_EPS):
-                    findings.append(Finding(page=pg.page, panel=p.n, note="断ち切りがノドへ出ている"))
+                    findings.append(Finding(page=pg.page, panel=p.n, note=ms("断ち切りがノドへ出ている")))
             for f in p.people:
                 if f.face_box_mm is not None:
                     looked += 1
                     if crosses_gutter_edge([f.face_box_mm[0], f.face_box_mm[2]], side, spec, FLOAT_EPS):
-                        findings.append(Finding(page=pg.page, panel=p.n, value=f.name, note="顔がノドへ出ている"))
+                        findings.append(Finding(page=pg.page, panel=p.n, value=f.name, note=ms("顔がノドへ出ている")))
             for k, b in enumerate(p.balloons):
                 if b.box_mm is not None:
                     looked += 1
                     if crosses_gutter_edge([b.box_mm[0], b.box_mm[2]], side, spec, FLOAT_EPS):
-                        findings.append(Finding(page=pg.page, panel=p.n, balloon=k, note="吹き出しがノドへ出ている"))
+                        findings.append(Finding(page=pg.page, panel=p.n, balloon=k, note=ms("吹き出しがノドへ出ている")))
     if looked == 0:
-        return no_data_result("gutter_side_contents", title, "断ち切りの枠・顔の範囲・吹き出しの範囲がどれも無い")
-    value = f"見開きの{skipped}ページは対象外" if skipped else None
+        return no_data_result("gutter_side_contents", title, ms("断ち切りの枠・顔の範囲・吹き出しの範囲がどれも無い"))
+    # ページの番号の並びは、今までどおり角かっこ付きの形（[2, 4]）で入れる
+    value = ms("見開きの{pages}ページは対象外", pages=str(skipped)) if skipped else None
     return fixed_rule_result("gutter_side_contents", title, findings, value)
 
 
 def check_balloon_inside_frame(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
     """吹き出しが内側の枠（基本枠）に収まるか（課題30・158）。断ち切りのコマでも同じ。
     2ページ分の見開きは、左右どちらかの基本枠に収まれば合格。"""
-    title = "吹き出しが内側の枠に収まるか"
+    title = ms("吹き出しが内側の枠に収まるか")
     spec = draft.page_spec
     findings = []
     looked = 0
@@ -431,9 +438,9 @@ def check_balloon_inside_frame(draft: NameDraft, thresholds: Thresholds) -> Chec
                 looked += 1
                 if not any(box_inside(b.box_mm, r) for r in regions):
                     findings.append(Finding(page=pg.page, panel=p.n, balloon=k, value=str(tuple(rounded(v) for v in b.box_mm)),
-                                            note="内側の枠から出ている"))
+                                            note=ms("内側の枠から出ている")))
     if looked == 0:
-        return no_data_result("balloon_inside_frame", title, "吹き出しの位置がまだ無い")
+        return no_data_result("balloon_inside_frame", title, ms("吹き出しの位置がまだ無い"))
     return fixed_rule_result("balloon_inside_frame", title, findings)
 
 

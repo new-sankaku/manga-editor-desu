@@ -28,7 +28,7 @@ from v3server.canonical_tables.text_and_layer_tables import PanelLayer, Protecte
 from v3server.canonical_tables.work_tree_tables import Panel
 from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke
 from v3server.hand_tools.vector_strokes import EraseMode, PointerType, StrokeValues, erase, moved, stroke_box
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -111,7 +111,7 @@ class AddPenStrokes(OpBase):
             values = {k: x for k, x in _values(v).items() if k not in ("id", "pointer_type")}
             rc.created(_stroke_row(ctx, layer, values, top + 1 + i, v.pointer_type, v.id))
         rc.bump_strokes(layer)
-        return rc.inverse([layer.page_id], "ペンの線を足した取り消し")
+        return rc.inverse([layer.page_id], ms("ペンの線を足した取り消し"))
 
 
 class UpdatePenStrokes(OpBase):
@@ -149,7 +149,7 @@ class UpdatePenStrokes(OpBase):
                 raise Invalid(m("線 {id} をその値にできない: {reason}", id=s.id, reason=text_of(e))) from e
             rc.change(s, {k: checked[k] for k in one})
         rc.bump_strokes(layer)
-        return rc.inverse([layer.page_id], "ペンの線を変えた取り消し")
+        return rc.inverse([layer.page_id], ms("ペンの線を変えた取り消し"))
 
 
 class RemovePenStrokes(OpBase):
@@ -167,7 +167,7 @@ class RemovePenStrokes(OpBase):
         for s in strokes:
             rc.remove(s)
         rc.bump_strokes(layer)
-        return rc.inverse([layer.page_id], "ペンの線を消した取り消し")
+        return rc.inverse([layer.page_id], ms("ペンの線を消した取り消し"))
 
 
 class ErasePenStrokes(OpBase):
@@ -214,7 +214,7 @@ class ErasePenStrokes(OpBase):
         if not touched:
             raise Invalid(m("消しゴムがどの線にも触れていない"))
         rc.bump_strokes(layer)
-        return rc.inverse([layer.page_id], "線の消しゴムの取り消し")
+        return rc.inverse([layer.page_id], ms("線の消しゴムの取り消し"))
 
 
 async def _strokes_in_box(session, layer_id: str, x0: float, y0: float, x1: float, y1: float) -> list[PenStroke]:
@@ -268,7 +268,7 @@ class SetStrokeCache(OpBase):
         rc = RowChanges(ctx)
         rc.change(layer, {"image_id": self.image_id, "placement": placement})
         rc.set_plain(layer, {"image_stroke_revision": self.stroke_revision})
-        return rc.inverse([layer.page_id], "線の画像を付けた取り消し")
+        return rc.inverse([layer.page_id], ms("線の画像を付けた取り消し"))
 
 
 class ErasePixels(OpBase):
@@ -317,5 +317,5 @@ class ErasePixels(OpBase):
         rc.change(target, {"image_id": self.result_image_id})
         rc.created(ProtectedRegion(id=new_id(), work_id=ctx.work.id, image_id=self.result_image_id,
                                    page_id=panel.page_id, polygon_px=None, mask_sha256=self.erase_mask_sha256,
-                                   note="消しゴムで消した所", created_by=ctx.actor.id, removed=False))
-        return rc.inverse([panel.page_id], "ピクセルの消しゴムの取り消し")
+                                   note=ms("消しゴムで消した所"),created_by=ctx.actor.id, removed=False))
+        return rc.inverse([panel.page_id], ms("ピクセルの消しゴムの取り消し"))

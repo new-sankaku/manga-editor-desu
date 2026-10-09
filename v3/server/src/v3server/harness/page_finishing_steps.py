@@ -37,6 +37,7 @@ from v3server.llm_questions.reading_order_question import (
     build_reading_order_question,
     parse_reading_order_answer,
 )
+from v3server.messages import ms, text_of
 from v3server.name_checks.name_check_runner import run_name_checks
 from v3server.operations.image_placement_carry import frame_bbox
 from v3server.operations.name_draft_conversion import READING_DIRECTION, name_draft_of_episode
@@ -61,7 +62,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         work = await session.get(Work, unit.work_id)
         if work.page_spec is None:
-            raise q.blocked("作品の寸法（page_spec）がまだ決まっていない")  # i18n:stored
+            raise q.blocked(ms("作品の寸法（page_spec）がまだ決まっていない"))
         await q.require_route(session, "reading_order")
     return {"cost": 0, "job_ids": []}
 
@@ -78,11 +79,11 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                 pages.append({"page_id": p.id, "number": p.number, "texts": len(texts), "balloons_placed": placed,
                               "panels": len(panels), "with_image": sum(1 for x in panels if x.image_id)})
         if not any(p["texts"] or p["balloons_placed"] for p in pages):
-            raise q.blocked(  # i18n:stored
-                "フキダシ・文字がまだ置かれていない。仕上げは人が置く工程なので、置いてから再開する")
-        return {"pages": pages, "by": "人が置いた今の状態（AIは置かない）"}
+            raise q.blocked(
+                ms("フキダシ・文字がまだ置かれていない。仕上げは人が置く工程なので、置いてから再開する"))
+        return {"pages": pages, "by": ms("人が置いた今の状態（AIは置かない）")}
 
-    return await c.one_candidate(unit, args, snapshot, "仕上げは人が置く工程。候補は人が置いた今の状態の1つだけ")
+    return await c.one_candidate(unit, args, snapshot, ms("仕上げは人が置く工程。候補は人が置いた今の状態の1つだけ"))
 
 
 def frame_image(panels: list[Panel], width_mm: float, height_mm: float) -> str:
@@ -115,11 +116,13 @@ async def _reading_order(unit: HarnessUnit, work: Work, page: Page, panels: list
     try:
         got = assign_points_to_panels(parse_reading_order_answer(text), centers, text)
     except BrokenAnswerError as e:
-        raise ApplicationError(  # i18n:stored
-            f"読む順の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+        raise ApplicationError(
+            ms("読む順の答えの形が崩れた: {error}", error=text_of(e)), type="broken_response", non_retryable=True) from e
     want = list(range(len(framed)))
-    return (c.finding(f"読む順（{page.number}ページ）", got == want, False,
-                      "コマの順と同じ" if got == want else f"判定の順 {[g + 1 for g in got]}（コマの順 1〜{len(want)}）",
+    # 判定の順は [1, 2, 3] の形のまま出す（並びで渡すと区切りが変わる）
+    return (c.finding(ms("読む順（{page}ページ）", page=page.number), got == want, False,
+                      ms("コマの順と同じ") if got == want
+                      else ms("判定の順 {order}（コマの順 1〜{count}）", order=str([g + 1 for g in got]), count=len(want)),
                       judge="llm"), jid)
 
 
@@ -152,9 +155,10 @@ async def _face_overlap(unit: HarnessUnit, page: Page, panels: list[Panel], th: 
         faces = job.result.get("faces", [])
         worst = max((covered_ratio(_xyxy(f), bpx) for f in faces), default=0.0)
         hi = th["face_covered_max"]["value"]
-        out.append(c.finding(f"顔と吹き出しの重なり（{page.number}ページ {p.order}コマ）", worst <= hi, False,
-                             f"いちばん隠れた顔 {worst:.0%}（上限 {hi:.0%}、閾値は{th['face_covered_max']['status']}）。"
-                             f"顔の検出 {len(faces)}"))
+        out.append(c.finding(ms("顔と吹き出しの重なり（{page}ページ {panel}コマ）", page=page.number, panel=p.order),
+                             worst <= hi, False,
+                             ms("いちばん隠れた顔 {worst:.0%}（上限 {high:.0%}、閾値は{status}）。顔の検出 {faces}", worst=worst,
+                                high=hi, status=th["face_covered_max"]["status"], faces=len(faces))))
     return out, jobs
 
 
@@ -167,12 +171,13 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             draft = await name_draft_of_episode(session, work, unit.target_id)
             values, used = await name_check_thresholds(session, unit.work_id)
             report = run_name_checks(draft, values)
-            unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]
+            # 検査の結果の状態（name_checks の CheckStatus。比べる値で、文ではない）
+            unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]  # i18n:data
             if unset:
-                raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)  # i18n:stored
+                raise q.blocked(ms("ネームの検査の閾値が未設定: {keys}", keys=unset), missing=unset)
             pages = [(pg, await _panels(session, pg.id)) for pg in await _pages(session, unit.target_id)]
             th = await drawing_thresholds(session, unit.work_id)
-        out = [c.finding(r.title, None if r.status == "データなし" else r.status == "合格", False,
+        out = [c.finding(r.title, None if r.status == "データなし" else r.status == "合格", False,  # i18n:data
                          "；".join(r.report_lines()[:3]),
                          threshold_status=used.get(r.threshold_key, {}).get("status") if r.threshold_key else None)
                for r in report.results]
@@ -194,12 +199,12 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return await c.pick_fewest_flags(unit, args, "候補は人が置いた今の状態の1つだけ")
+    return await c.pick_fewest_flags(unit, args, ms("候補は人が置いた今の状態の1つだけ"))
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     """人が置いた物はもう正本にある。採ったことを記録するだけ。"""
-    return {"candidate_id": args["candidate_id"], "note": "仕上げは人が置いた物を正本のまま使う"}
+    return {"candidate_id": args["candidate_id"], "note": ms("仕上げは人が置いた物を正本のまま使う")}
 
 
 async def discard_round(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

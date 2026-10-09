@@ -3,6 +3,7 @@
 import pytest
 
 from v3server.harness.harness_notify import NotificationSettings, rules
+from v3server.messages import ms, render
 
 
 def kinds(out):
@@ -12,7 +13,7 @@ def kinds(out):
 def test_判断待ちになった作業と止まった作業を知らせる():
     assert kinds(rules("unit", {"unit_id": "u", "status": "awaiting_review", "attempt": 1}, None)) == [("generated", "info")]
     out = rules("unit", {"unit_id": "u", "status": "blocked", "attempt": 1, "stop_reason": "閾値が未設定"}, None)
-    assert kinds(out) == [("failed", "warn")] and "閾値が未設定" in out[0]["title"]
+    assert kinds(out) == [("failed", "warn")] and "閾値が未設定" in render(out[0]["title"], "ja")
     assert rules("unit", {"unit_id": "u", "status": "running", "attempt": 1}, None) == []
 
 
@@ -21,6 +22,19 @@ def test_止まった理由が変われば別の知らせ_同じなら同じ鍵(
     b = rules("unit", {"unit_id": "u", "status": "stopped", "attempt": 2, "stop_reason": "上限回数"}, None)
     c = rules("unit", {"unit_id": "u", "status": "stopped", "attempt": 2, "stop_reason": "予算"}, None)
     assert a[0]["dedupe"] == b[0]["dedupe"] != c[0]["dedupe"]
+
+
+def test_題は包んだ文で作り_日本語でも英語でも出せる():
+    # 止まった理由は包んだ文で届く（harness_limits.stop_reason）。題に入れても、出す時の言語の文に戻る
+    reason = ms("上限回数（{limit}回）に達した", limit=3)
+    out = rules("unit", {"unit_id": "u", "status": "stopped", "attempt": 3, "stop_reason": reason}, None)
+    assert render(out[0]["title"], "ja") == "作業が止まりました：上限回数（3回）に達した"
+    assert render(out[0]["title"], "en") == "A task stopped: Reached the attempt limit (3)"
+    made = rules("unit", {"unit_id": "u", "status": "awaiting_review", "attempt": 2}, None)
+    assert render(made[0]["title"], "ja") == "候補ができました（2回目）"
+    near = rules("unit", {"unit_id": "u", "status": "running", "cost_used": 8.0, "budget_cost": 10},
+                 NotificationSettings(kinds=["budget_near"], budget_near_ratio=0.8))
+    assert render(near[0]["title"], "ja") == "費用が予算の 80% に達しました（8.0 / 10）"
 
 
 def test_予算に近づいた知らせは割合を人が決めたときだけ():

@@ -20,6 +20,7 @@ from v3server.database_engine import get_sessionmaker
 from v3server.generation_queue.known_processes import KNOWN_PROCESSES, handle_known_result
 from v3server.image_intake import take_in_image
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError
+from v3server.messages import ms, text_of
 from v3server.openfga_permissions import Authz, open_authz
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_submit_and_undo import submit
@@ -160,19 +161,19 @@ async def _reserve(session, job: Job, service: Service, sp, attempt: int, stop) 
     for prev in (await session.execute(select(CallLog).where(
             CallLog.job_id == job.id, CallLog.outcome == "sending"))).scalars():
         prev.outcome = "unknown"
-        prev.detail = "送った後、答えを残す前にワーカーが止まった。送り先で処理されたか・費用がかかったかは分からない"
+        prev.detail = ms("送った後、答えを残す前にワーカーが止まった。送り先で処理されたか・費用がかかったかは分からない")
     # 送る直前にもう一度確かめる。待っている間に送ってよい先から外されたかもしれない
     if not await is_allowed(session, job.work_id, service):
-        await stop("destination_not_allowed", f"{service.name} はこの作品の送ってよい先に無い")
+        await stop("destination_not_allowed", ms("{service} はこの作品の送ってよい先に無い", service=service.name))
     if sp is None:
-        await stop("refused", f"{service.name} は {job.process} を受けられない")
+        await stop("refused", ms("{service} は {process} を受けられない", service=service.name, process=job.process))
     # 予算：接続先の行を取ってから数え、取り置きを足して確定するまで、ほかの依頼はここで待つ
     await session.execute(select(Service.id).where(Service.id == service.id).with_for_update())
     if service.monthly_budget is not None:
         spent = await _month_cost(session, service.id)
         cost = Decimal(sp.cost_per_call) if sp.cost_per_call is not None else Decimal(0)
         if spent >= service.monthly_budget or spent + cost > service.monthly_budget:
-            await stop("budget", f"{service.name} の月の予算の上限に達した")
+            await stop("budget", ms("{service} の月の予算の上限に達した", service=service.name))
     call = CallLog(job_id=job.id, work_id=job.work_id, service_id=service.id, attempt=attempt, outcome="sending",
                    idempotency_key=_attempt_key(job.id), cost=sp.cost_per_call)
     session.add(call)
@@ -193,7 +194,7 @@ async def _send_and_keep(session, job: Job, service: Service, sp, call: CallLog,
         await stop(e.kind, e.detail, e.retry_after, call=call, release=True)
     except asyncio.CancelledError:
         call.outcome = "unknown"
-        call.detail = "送っている間に取り消した。送り先で費用がかかったかは提供元による（未確認）"
+        call.detail = ms("送っている間に取り消した。送り先で費用がかかったかは提供元による（未確認）")
         await session.commit()
         raise
     finally:
@@ -210,7 +211,7 @@ async def _send_and_keep(session, job: Job, service: Service, sp, call: CallLog,
                            "height": stored.height, "dpi": stored.dpi})
     except (V3Error, RuntimeError) as e:
         # 答えは受け取ったが使えない（入口で止めた・置き場が無い）。費用はかかっているので取り置きは残す
-        await stop("refused", f"絵の登録を断られた: {e}", call=call)
+        await stop("refused", ms("絵の登録を断られた: {reason}", reason=text_of(e)), call=call)
     call.result = {"output": result.output, "images": images}
     call.outcome = "received"
     await session.commit()
@@ -227,8 +228,8 @@ async def _finish(session, job_id: str, service: Service, call: CallLog, stop) -
                 output["registered"] = await _register_images(session, job, service, call.result["images"])
             except (V3Error, RuntimeError) as e:
                 await session.rollback()
-                raise ApplicationError(f"絵の登録を断られた: {e}", {"retry_after": None}, type="refused",
-                                       non_retryable=True) from e  # i18n:stored
+                raise ApplicationError(ms("絵の登録を断られた: {reason}", reason=text_of(e)), {"retry_after": None},
+                                       type="refused", non_retryable=True) from e
         if job.process in KNOWN_PROCESSES:
             # 答えを読み、要るものを正本に入れる（依頼した人の代わりのAIとして、操作の窓口を通す）
             actor = Actor(kind="ai", id=f"service:{service.id}", on_behalf_of=job.requested_by)
@@ -242,8 +243,8 @@ async def _finish(session, job_id: str, service: Service, call: CallLog, stop) -
                 await stop("broken_response", str(e), call=await session.get(CallLog, call.id))
             except V3Error as e:
                 await session.rollback()
-                raise ApplicationError(f"答えを正本に入れるのを断られた: {e}", {"retry_after": None}, type="refused",
-                                       non_retryable=True) from e  # i18n:stored
+                raise ApplicationError(ms("答えを正本に入れるのを断られた: {reason}", reason=text_of(e)), {"retry_after": None},
+                                       type="refused", non_retryable=True) from e
     except ApplicationError:
         raise
     except BaseException:

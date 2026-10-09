@@ -36,7 +36,7 @@ from v3server.llm_questions.settings_sheet_question import (
     parse_settings_sheet_answer,
 )
 from v3server.llm_questions.structure_question import outline_text
-from v3server.messages import m
+from v3server.messages import m, ms, text_of
 from v3server.operations.material_and_plan_operations import AddMaterialEntry
 from v3server.operations.operation_submit_and_undo import submit
 
@@ -77,12 +77,12 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             await q.require_route(session, "imported_text")
         plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == unit.work_id))).scalar_one_or_none()
         if plan is None or not (plan.synopsis or "").strip():
-            raise q.blocked("企画のあらすじが無い（S0 で書く）")  # i18n:stored
+            raise q.blocked(ms("企画のあらすじが無い（S0 で書く）"))
         rows = (await session.execute(
             select(Episode, EpisodeOutline).join(EpisodeOutline, EpisodeOutline.episode_id == Episode.id)
             .where(Episode.work_id == unit.work_id, Episode.removed.is_(False), EpisodeOutline.removed.is_(False))
             .order_by(Episode.number))).all()
-        outlines = [f"第{e.number}話：\n{outline_text(o.outline)}" for e, o in rows]
+        outlines = [f"第{e.number}話：\n{outline_text(o.outline)}" for e, o in rows]  # i18n:prompt
     memory, suspicious, job_ids = [], [], []
     if spec.document:
         question = build_memory_with_suspicious_question(spec.document)
@@ -92,8 +92,8 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             got = parse_memory_with_suspicious_answer(text)
         except BrokenAnswerError as e:
-            raise ApplicationError(  # i18n:stored
-                f"原稿の記憶の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+            raise ApplicationError(ms("原稿の記憶の答えの形が崩れた: {error}", error=text_of(e)),
+                                   type="broken_response", non_retryable=True) from e
         memory, suspicious = [got.memory], got.suspicious
     question = build_settings_sheet_question(plan.synopsis, plan.audience, outlines, memory, spec.model_description,
                                              spec.character_min, spec.character_max, args.get("reject_reason"))
@@ -120,15 +120,15 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         names = [x["name"] for x in chars] + [x["name"] for x in cand.content["locations"]]
         same = sorted(set(names) & existing)
         out = [
-            c.finding("人物の数", spec.character_min <= n <= spec.character_max, True,
-                      f"{n} 人（{spec.character_min}〜{spec.character_max}）"),
-            c.finding("設定資料に同じ名前", not same, False,
-                      "無い" if not same else f"既にある：{'、'.join(same)}（採っても足さない）"),
-            c.finding("原稿の中の指示に見えた文", not suspicious, False,
-                      "無い" if not suspicious else "記憶に入れなかった：" + "／".join(suspicious)),
+            c.finding(ms("人物の数"), spec.character_min <= n <= spec.character_max, True,
+                      ms("{n} 人（{min}〜{max}）", n=n, min=spec.character_min, max=spec.character_max)),
+            c.finding(ms("設定資料に同じ名前"), not same, False,
+                      ms("無い") if not same else ms("既にある：{names}（採っても足さない）", names=same)),
+            c.finding(ms("原稿の中の指示に見えた文"), not suspicious, False,
+                      ms("無い") if not suspicious else ms("記憶に入れなかった：{lines}", lines="／".join(suspicious))),
         ]
         if n < 2:
-            return out + [c.finding("見分け", None, False, "人物が1人なので比べない")]
+            return out + [c.finding(ms("見分け"), None, False, ms("人物が1人なので比べない"))]
         question = build_distinguish_question([(x["name"], x["traits"]) for x in chars])
         key = f"{unit.id}:c{cand.id}:distinguish:" + hashlib.sha256(question.encode()).hexdigest()[:12]
         text, jid = await q.ask_text(unit, key, "distinguish", q.user_message(question, []))
@@ -136,11 +136,11 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             pairs = parse_distinguish_answer(text, {x["name"] for x in chars})
         except BrokenAnswerError as e:
-            raise ApplicationError(  # i18n:stored
-                f"見分けの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
-        return out + [c.finding("見分け", not pairs, False,
-                                "取り違えそうな組は無い" if not pairs
-                                else "；".join(f"{p.a} と {p.b}：{p.why}" for p in pairs), judge="llm")]
+            raise ApplicationError(ms("見分けの答えの形が崩れた: {error}", error=text_of(e)),
+                                   type="broken_response", non_retryable=True) from e
+        return out + [c.finding(ms("見分け"), not pairs, False,
+                                ms("取り違えそうな組は無い") if not pairs
+                                else "；".join(ms("{a} と {b}：{why}", a=p.a, b=p.b, why=p.why) for p in pairs), judge="llm")]
 
     result = await c.check_candidates(unit, args, judge)
     async with get_sessionmaker()() as session:
@@ -151,7 +151,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     return await c.pick_fewest_flags(
-        unit, args, "指摘の少ない案（設定資料の評価モデルは置かない。見分けの判定は指摘として出す）")
+        unit, args, ms("指摘の少ない案（設定資料の評価モデルは置かない。見分けの判定は指摘として出す）"))
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

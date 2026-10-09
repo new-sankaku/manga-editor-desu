@@ -10,6 +10,8 @@ from dataclasses import dataclass
 
 from PIL import Image, ImageDraw
 
+from v3server.messages import ms
+
 # COCO18 の関節。立ち姿を 0〜1 の枠に正規化したもの（試作 p08・p14 と同じ形）
 STANDING_KEYPOINTS = [
     (0.50, 0.05), (0.50, 0.20), (0.22, 0.21), (0.12, 0.35), (0.08, 0.49), (0.78, 0.21), (0.88, 0.35), (0.92, 0.49),
@@ -55,7 +57,7 @@ def draw_standing_pose(width: int, height: int, box: FigureBox) -> Image.Image:
     x0, y0, x1, y1 = figure_box_pixels(width, height, box)
     fh = y1 - y0
     if fh <= 0 or x1 <= x0:
-        raise ValueError(f'人物の枠が空です: {box}')  # i18n:stored
+        raise ValueError(ms('人物の枠が空です: {box}', box=str(box)))
     fw = fh * STANDING_WIDTH_RATIO
     cx = (x0 + x1) / 2
     pts = [(cx + (nx - 0.5) * fw, y0 + ny * fh) for nx, ny in STANDING_KEYPOINTS]

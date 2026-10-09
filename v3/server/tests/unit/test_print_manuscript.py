@@ -1,8 +1,10 @@
 """原稿として出す形（V3点検の結果 §3）の計算の部品：本の並び・見開き・ノンブル・色の種類・グラデの網点・
 フキダシのしっぽ・入稿前の確かめの計算・設定の形。データベースは使わない。"""
 
+import contextlib
 import io
 import pathlib
+import re
 from types import SimpleNamespace
 
 import numpy as np
@@ -11,6 +13,7 @@ import pytest
 from PIL import Image
 from shapely.geometry import Polygon
 
+from v3server.messages import render
 from v3server.name_structure.item_styles import BalloonShape, ToneSpec
 from v3server.name_structure.print_settings import BilevelSettings, NombreSettings, PrintSettings, TextSpan, check_spans
 from v3server.name_structure.reading_direction import PageSpec
@@ -50,6 +53,16 @@ FONT_DIR = "/usr/share/fonts/opentype/ipafont-gothic"
 NODE = get_settings().node_executable  # .env の V3_NODE_EXECUTABLE（サーバーと同じ node）
 needs_font = pytest.mark.skipif(not pathlib.Path(FONT_DIR, "ipag.ttf").exists(), reason="試験の書体が無い")
 
+
+@contextlib.contextmanager
+def raises_ja(kind: type[Exception], pattern: str):
+    """例外の文（ms() の包んだ文）を日本語の文に戻してから、pattern に合うかを見る。"""
+    with pytest.raises(kind) as caught:
+        yield
+    text = render(str(caught.value), "ja")
+    assert re.search(pattern, text), text
+
+
 SPEC = PageSpec(frame_width_mm=30, frame_height_mm=44, trim_width_mm=36, trim_height_mm=51, bleed_mm=3,
                 gutter_x_mm=1, gutter_y_mm=2)
 DPI = 100
@@ -87,7 +100,7 @@ def test_page_sides_and_spread_rule():
     # 左から読む本は逆
     assert spread_problem(0, 1, sides, "ltr") is not None
     assert spread_problem(1, 2, sides, "ltr") is None
-    assert "隣り合っていない" in spread_problem(0, 2, sides, "rtl")
+    assert "隣り合っていない" in render(spread_problem(0, 2, sides, "rtl"), "ja")
     assert left_page_of_spread("rtl") == "second" and left_page_of_spread("ltr") == "first"
 
 
@@ -99,9 +112,9 @@ def test_check_spreads_reports_broken_and_doubled():
     gone = SimpleNamespace(id="s3", first_page_id="p3", second_page_id="pX")
     got = check_spreads(pages, [ok, bad, gone], work)
     assert [s.id for s, _ in got] == ["s2", "s2", "s3"]
-    assert "2つの見開き" in got[0][1]
+    assert "2つの見開き" in render(got[0][1], "ja")
     undecided = SimpleNamespace(first_page_is_left=None, reading_direction="rtl")
-    assert "first_page_is_left" in check_spreads(pages, [ok], undecided)[0][1]
+    assert "first_page_is_left" in render(check_spreads(pages, [ok], undecided)[0][1], "ja")
 
 
 def _plan(pid, index, spread=None, half=None):
@@ -113,13 +126,13 @@ def test_export_units_and_spread_output_rules():
     plans = {"a": _plan("a", 1, sp, "right"), "b": _plan("b", 2, sp, "left"), "c": _plan("c", 3)}
     units = export_units(["a", "b", "c"], plans)
     assert [(u[0] and u[0].id, [p.page.id for p in u[1]]) for u in units] == [("s", ["b", "a"]), (None, ["c"])]
-    with pytest.raises(ExportRefused, match="片方"):
+    with raises_ja(ExportRefused, "片方"):
         export_units(["a"], {"a": plans["a"]})
-    with pytest.raises(ExportRefused, match="spread_output"):
+    with raises_ja(ExportRefused, "spread_output"):
         check_spread_output("png", None, True)
-    with pytest.raises(ExportRefused, match="PDF"):
+    with raises_ja(ExportRefused, "PDF"):
         check_spread_output("pdf", "joined", True)
-    with pytest.raises(ExportRefused, match="PSD"):
+    with raises_ja(ExportRefused, "PSD"):
         check_spread_output("psd", "split", True)
     check_spread_output("png", None, False)
     check_spread_output("png", "both", True)
@@ -196,7 +209,7 @@ def test_balloon_geometry_needs_tail_settings():
     m = mm_to_px_matrix(SPEC, DPI)
     t = SimpleNamespace(id="t", tail_target_mm=[30, 45])
     outline = [(4, 24), (16, 24), (16, 41), (4, 41)]
-    with pytest.raises(RenderRefused, match="しっぽ"):
+    with raises_ja(RenderRefused, "しっぽ"):
         balloon_geometry(t, BalloonShape(kind="custom", outline_mm=outline), m)
     g = balloon_geometry(t, BalloonShape(kind="custom", outline_mm=outline, tail_base_width_mm=3,
                                          tail_bend_ratio=0), m)
@@ -227,9 +240,9 @@ def test_bilevel_threshold_for_lines_and_screen_for_pictures():
     assert (arr[:, 100:] == 0).mean() == 0
     assert page_image(nodes, size, "grayscale", 600, None).mode == "L"
     assert page_image(nodes, size, "color", 600, None).mode == "RGB"
-    with pytest.raises(ColorModeError, match="bilevel"):
+    with raises_ja(ColorModeError, "bilevel"):
         page_image(nodes, size, "bilevel", 600, None)
-    with pytest.raises(ColorModeError, match="役"):
+    with raises_ja(ColorModeError, "役"):
         page_image([_leaf("知らない役", gray, "panel_layers")], size, "bilevel", 600, bs)
 
 
@@ -240,7 +253,7 @@ def test_pdf_with_per_page_dpi_and_mixed_modes(tmp_path):
     r = pypdf.PdfReader(out)
     assert len(r.pages) == 2
     assert float(r.pages[0].mediabox.width) == pytest.approx(float(r.pages[1].mediabox.width), abs=0.01)
-    with pytest.raises(ValueError, match="符号化"):
+    with raises_ja(ValueError, "符号化"):
         write_print_pdf(pages[:1], SPEC, [600], None, out)
 
 

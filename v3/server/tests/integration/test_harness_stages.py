@@ -58,6 +58,11 @@ async def test_企画は質問を返し_答えると案を作り_採ると企画
     cand, _ = await _picked(api, w, u["unit_id"])
     f = {x["name"]: x for x in cand["check"]["findings"]}
     assert f["作者への質問"]["ok"] is False and cand["content"]["questions"][0]["ask"] == "読者は誰か"
+    # 検査の結果は Temporal とデータベースに残した物。英語で読むと、残した後でも英語の文で出る（作者が書いた文はそのまま）
+    en = await api.get(f"/works/{w['wid']}/harness/snapshot", headers=h(w["a"]) | {"X-V3-Lang": "en"}, params={"unit_id": u["unit_id"]})
+    en_cand = next(c for c in en.json()["unit"]["candidates"] if c["id"] == cand["id"])
+    assert {x["name"] for x in en_cand["check"]["findings"]} == {"Required fields", "Questions for the author"}, en_cand["check"]
+    assert en_cand["content"]["questions"][0]["ask"] == "読者は誰か" and "⚠" not in en.text
     # 質問だけの候補は採れない
     r = await unit_post(api, w, u["unit_id"], "review", {"action": "approve", "candidate_id": cand["id"]})
     assert r.status_code == 422 and "answer" in r.json()["detail"]

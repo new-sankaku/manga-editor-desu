@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.image_file_tables import ImageIntakeScreening
 from v3server.image_file_storage import StoredImage, staged_file, store_image_file
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid
 
@@ -40,7 +40,8 @@ class JudgeVerdict:
 IntakeJudge = Callable[[bytes, str, IntakeEntry], Awaitable[JudgeVerdict]]
 INTAKE_JUDGES: list[tuple[str, IntakeJudge]] = []
 
-NOT_JUDGED_DETAIL = "規制の判定の手段がまだ決まっていない（V3ハーネス設計 12章）。判定していない"
+# 判定の記録（image_intake_screenings.detail）に残す文。残してから出すので ms()
+NOT_JUDGED_DETAIL = ms("規制の判定の手段がまだ決まっていない（V3ハーネス設計 12章）。判定していない")
 
 
 # PNG に残してよい欄（色と解像度。文字の欄は外す）
@@ -68,7 +69,7 @@ def check_pixel_count(path: pathlib.Path) -> None:
     ここでは警告も止めとして扱う。上限が Pillow の値より大きい設定は、後で絵を開く所（縮小画像・書き出し）で警告が出るので断る。"""
     limit = get_settings().image_max_pixels
     if Image.MAX_IMAGE_PIXELS is not None and limit > Image.MAX_IMAGE_PIXELS:
-        raise RuntimeError(f"V3_IMAGE_MAX_PIXELS（{limit}）が Pillow の上限 Image.MAX_IMAGE_PIXELS"
+        raise RuntimeError(f"V3_IMAGE_MAX_PIXELS（{limit}）が Pillow の上限 Image.MAX_IMAGE_PIXELS"  # i18n:dev
                            f"（{Image.MAX_IMAGE_PIXELS}）より大きい")
     try:
         with warnings.catch_warnings():

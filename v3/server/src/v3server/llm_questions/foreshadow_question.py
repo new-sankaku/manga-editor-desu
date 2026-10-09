@@ -12,12 +12,13 @@ from pydantic import BaseModel, field_validator
 
 from v3server.llm_questions.answer_json_reader import read_answer, require_known_ids
 from v3server.llm_questions.contradiction_question import ScriptLine, script_lines_text
+from v3server.messages import ms
 
-IssueKind = Literal["未回収", "食い違い"]
-SetupState = Literal["回収済み", "未回収", "食い違い"]
+IssueKind = Literal["未回収", "食い違い"]  # i18n:data
+SetupState = Literal["回収済み", "未回収", "食い違い"]  # i18n:data
 
 
-def _head(settings: str, lines: list[ScriptLine]) -> str:
+def _head(settings: str, lines: list[ScriptLine]) -> str:  # i18n:prompt
     episodes = len({x.episode for x in lines})
     return f"""次は連載漫画の{episodes}話分の台本と、その設定です。
 
@@ -30,7 +31,7 @@ def _head(settings: str, lines: list[ScriptLine]) -> str:
 """
 
 
-def build_foreshadow_issues_question(settings: str, lines: list[ScriptLine]) -> str:
+def build_foreshadow_issues_question(settings: str, lines: list[ScriptLine]) -> str:  # i18n:prompt
     """問題のある行だけを挙げさせる問いの文。"""
     return _head(settings, lines) + (
         "この台本で、前の話で置いた伏線や手がかりが後の話で回収されていない所と、回収のしかたが前の描写と食い違っている所を探してください。\n"
@@ -39,7 +40,7 @@ def build_foreshadow_issues_question(settings: str, lines: list[ScriptLine]) -> 
     )
 
 
-def build_foreshadow_setups_question(settings: str, lines: list[ScriptLine]) -> str:
+def build_foreshadow_setups_question(settings: str, lines: list[ScriptLine]) -> str:  # i18n:prompt
     """伏線に見える行を全部並べ、それぞれの状態を付けさせる問いの文。"""
     return _head(settings, lines) + (
         "この台本で、後の話で回収されることを読者が期待しそうな行（伏線や手がかり）を並べ、それぞれがどうなったかを付けてください。\n"
@@ -79,12 +80,12 @@ class _SetupsAnswer(BaseModel):
 
 def parse_foreshadow_issues_answer(answer: str, lines: list[ScriptLine]) -> list[ForeshadowIssue]:
     issues = read_answer(answer, _IssuesAnswer).issues
-    require_known_ids([x.line for x in issues], {x.line_id for x in lines}, "行の番号", answer)
+    require_known_ids([x.line for x in issues], {x.line_id for x in lines}, ms("行の番号"), answer)
     return issues
 
 
 def parse_foreshadow_setups_answer(answer: str, lines: list[ScriptLine]) -> list[ForeshadowSetup]:
     setups = read_answer(answer, _SetupsAnswer).setups
     ids = [x.line for x in setups] + [x.payoff for x in setups if x.payoff is not None]
-    require_known_ids(ids, {x.line_id for x in lines}, "行の番号", answer)
+    require_known_ids(ids, {x.line_id for x in lines}, ms("行の番号"), answer)
     return setups

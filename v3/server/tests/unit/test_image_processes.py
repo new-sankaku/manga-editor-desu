@@ -1,7 +1,9 @@
 """画像生成の処理（generation_queue/image_process_registry.py）の単体の試験。
 マスクの下ごしらえ・手順の組み方・置き場の引き継ぎ・送り手の分かれ道・PNG の文字の欄を外す。"""
+import contextlib
 import io
 import json
+import re
 from functools import partial
 
 import httpx
@@ -21,12 +23,22 @@ from v3server.generation_queue.image_process_registry import (
 )
 from v3server.generation_queue.known_processes import KNOWN_PROCESSES
 from v3server.image_intake import strip_png_text
-from v3server.messages import render_tree
+from v3server.messages import render, render_tree
 from v3server.operations.image_placement_carry import Geometry, Version, carry, cover, placement_for, relation
 from v3server.service_senders import comfyui_sender
 from v3server.service_senders.comfyui_sender import call_comfyui
 from v3server.service_senders.sender_result_types import AdapterError
 from v3server.v3_error_types import Invalid
+
+
+@contextlib.contextmanager
+def raises_ja(kind: type[Exception], pattern: str):
+    """例外の文（ms() の包んだ文）を日本語の文に戻してから、pattern に合うかを見る。"""
+    with pytest.raises(kind) as caught:
+        yield
+    text = render(str(caught.value), "ja")
+    assert re.search(pattern, text), text
+
 
 SD = {"model": {"kind": "separate", "unet_name": "u.safetensors", "weight_dtype": "default", "clip_name": "c.safetensors",
                 "clip_type": "stable_diffusion", "vae_name": "v.safetensors"},
@@ -195,7 +207,7 @@ def test_inpaint_refuses_mask_fully_inside_human_region(store):
     mask = Image.new("RGB", (64, 48), 0)
     mask.paste((255, 255, 255), (30, 10, 40, 20))
     prot = Image.new("RGB", (64, 48), (255, 255, 255))
-    with pytest.raises(Invalid, match="空"):
+    with raises_ja(Invalid, "空"):
         finish_image_process(_req(store, "inpaint", initial("inpaint"), mask, prot))
 
 
@@ -216,24 +228,24 @@ def test_outpaint_preparation_pads_and_shifts_protected(store):
 
 
 def test_outpaint_mm_must_be_resolved_first(store):
-    with pytest.raises(Invalid, match="ピクセル"):
+    with raises_ja(Invalid, "ピクセル"):
         finish_image_process(_req(store, "outpaint", {**initial("outpaint"), "left": 5}))
 
 
 def test_preparation_refusals(store):
-    with pytest.raises(Invalid, match="サーバーが書く"):
+    with raises_ja(Invalid, "サーバーが書く"):
         r = _req(store, "image_to_image", initial("image_to_image"))
         r["image_process"]["prepared"] = {}
         finish_image_process(r)
-    with pytest.raises(Invalid, match="受けない"):
+    with raises_ja(Invalid, "受けない"):
         finish_image_process(_req(store, "image_to_image", initial("image_to_image"), Image.new("RGB", (64, 48))))
-    with pytest.raises(Invalid, match="要る"):
+    with raises_ja(Invalid, "要る"):
         finish_image_process(_req(store, "inpaint", initial("inpaint")))
-    with pytest.raises(Invalid, match="形の指定"):
+    with raises_ja(Invalid, "形の指定"):
         finish_image_process(_req(store, "image_to_image", {**initial("image_to_image"), "control": "lineart"}))
     r = _req(store, "image_to_image", initial("image_to_image"))
     r["prepared_inputs"] = [e for e in r["prepared_inputs"] if e["purpose"] != "protected_mask"]
-    with pytest.raises(Invalid, match="手動編集"):
+    with raises_ja(Invalid, "手動編集"):
         finish_image_process(r)
 
 
@@ -300,7 +312,7 @@ def test_outpaint_graph_works_on_padded_size():
 
 def test_control_requires_controlnet_in_settings_and_inserts_union():
     params = {**initial("image_to_image"), "control": "lineart"}
-    with pytest.raises(Invalid, match="ControlNet"):
+    with raises_ja(Invalid, "ControlNet"):
         build_prompt("image_to_image", SD, params, 1, _info("i2i"), "x")
     p = build_prompt("image_to_image", {**SD, "controlnet_name": "union_promax.safetensors"}, params, 1,
                      _info("i2i"), "x")
@@ -355,9 +367,9 @@ def test_binarize_and_diffuse_fill():
 
 
 def test_settings_are_checked():
-    with pytest.raises(Invalid, match="comfy_graph_settings"):
+    with raises_ja(Invalid, "comfy_graph_settings"):
         build_prompt("inpaint", None, initial("inpaint"), 1, _info("i"), "x")
-    with pytest.raises(Invalid, match="正しくない"):
+    with raises_ja(Invalid, "正しくない"):
         build_prompt("inpaint", {**SD, "native_long_side": 1}, initial("inpaint"), 1, _info("i"), "x")
 
 
@@ -370,9 +382,9 @@ def test_resolve_outpaint_mm_and_frame():
     assert (r["unit"], r["left"], r["bottom"], r["top"]) == ("px", 10, 5, 0)
     f = resolve_outpaint({**initial("outpaint"), "unit": "frame"}, pl, (5, 10, 60, 40), (100, 50))
     assert (f["left"], f["top"], f["right"], f["bottom"]) == (10, 0, 0, 10)
-    with pytest.raises(Invalid, match="回転"):
+    with raises_ja(Invalid, "回転"):
         resolve_outpaint({**initial("outpaint"), "left": 1}, {**pl, "rotation_deg": 10}, None, (100, 50))
-    with pytest.raises(Invalid, match="置き場"):
+    with raises_ja(Invalid, "置き場"):
         resolve_outpaint({**initial("outpaint"), "left": 1}, None, None, (100, 50))
 
 
@@ -469,7 +481,7 @@ async def test_sender_builds_graph_from_registry_and_returns_seed(comfy):
     sp.comfy_graph_settings = None
     with pytest.raises(AdapterError) as e:
         await call_comfyui(SERVICE, sp, req)
-    assert e.value.kind == "refused" and "comfy_graph_settings" in e.value.detail
+    assert e.value.kind == "refused" and "comfy_graph_settings" in render(e.value.detail, "ja")
 
 
 # ---------------------------------------------------------------- PNG の文字の欄

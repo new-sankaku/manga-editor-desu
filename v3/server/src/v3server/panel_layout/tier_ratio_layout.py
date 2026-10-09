@@ -91,9 +91,9 @@ def _bleed_box(box: Box, spec: PageSpec, side: PageSide) -> tuple[Box, bool]:
     if y1 >= H - FLOAT_EPS:
         y1, moved = H + oy + spec.bleed_mm, True
     # 左のページはノドが右、右のページはノドが左
-    if x0 <= FLOAT_EPS and side == "左":
+    if x0 <= FLOAT_EPS and side == "左":  # i18n:data
         x0, moved = -ox - spec.bleed_mm, True
-    if x1 >= W - FLOAT_EPS and side == "右":
+    if x1 >= W - FLOAT_EPS and side == "右":  # i18n:data
         x1, moved = W + ox + spec.bleed_mm, True
     return (x0, y0, x1, y1), moved
 
@@ -103,7 +103,7 @@ def page_frames(page: NamePage, spec: PageSpec, direction: ReadingDirection, sid
     shapes = {p.n: p.shape for p in page.panels}
     frames: dict[int, PanelFrame] = {}
     for n, box in tier_boxes(page, spec, direction).items():
-        if shapes[n] == "断ち切り":
+        if shapes[n] == "断ち切り":  # i18n:data
             box, moved = _bleed_box(box, spec, side)
         else:
             moved = False

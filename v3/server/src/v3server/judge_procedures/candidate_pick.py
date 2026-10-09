@@ -13,8 +13,9 @@ from pydantic import BaseModel
 from v3server.judge_procedures.blind_image_copy import make_blind_copies
 from v3server.judge_procedures.pair_comparison import AskWithImages
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 
-NONE_PICKED = "なし"
+NONE_PICKED = "なし"  # i18n:data
 
 
 @dataclass(frozen=True)
@@ -38,7 +39,7 @@ def build_candidate_question(target: str, image_names: list[str]) -> str:
 狙いにいちばん合う1枚を選んでください。どれも狙いに合わなければ「{NONE_PICKED}」と答えてください。
 「{NONE_PICKED}」を選ぶと作り直しになり時間がかかります。合わない絵を選ぶと、そのまま次の工程に進みます。
 
-出力はJSONだけにしてください。形式：{{"pick":"名前 か {NONE_PICKED}","why":"理由"}}"""
+出力はJSONだけにしてください。形式：{{"pick":"名前 か {NONE_PICKED}","why":"理由"}}"""  # i18n:prompt
 
 
 class _PickAnswer(BaseModel):
@@ -55,7 +56,7 @@ def parse_candidate_answer(answer: str, image_names: list[str]) -> tuple[str | N
         return None, d.why
     name = Path(pick).name
     if name not in image_names:
-        raise BrokenAnswerError(f"候補に無い名前: {pick}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("候補に無い名前: {pick}", pick=pick), answer)
     return name, d.why
 
 

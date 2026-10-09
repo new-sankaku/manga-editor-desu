@@ -9,6 +9,7 @@ import httpx
 import pytest
 
 from v3server.canonical_tables.service_and_job_tables import Service, ServiceProcess
+from v3server.messages import render
 from v3server.service_senders import comfyui_sender
 from v3server.service_senders.comfyui_sender import call_comfyui, check_choices
 from v3server.service_senders.sender_result_types import AdapterError
@@ -101,6 +102,11 @@ async def failure(comfy_sp=None, request=None, service=SERVICE) -> AdapterError:
     return e.value
 
 
+def ja(e: AdapterError) -> str:
+    """失敗の文（ms() の包んだ文）を日本語の文に戻す。"""
+    return render(e.detail, "ja")
+
+
 async def test_success_fetches_files(comfy):
     r = await call_comfyui(SERVICE, sp(), REQUEST)
     assert r.output["prompt_id"] == PID
@@ -112,7 +118,7 @@ async def test_success_fetches_files(comfy):
 async def test_overrides_applied_and_unknown_node_refused(comfy):
     await call_comfyui(SERVICE, sp(), {**REQUEST, "overrides": {"7": {"seed": 9}}})
     e = await failure(request={**REQUEST, "overrides": {"99": {"seed": 1}}})
-    assert e.kind == "refused" and "99" in e.detail
+    assert e.kind == "refused" and "99" in ja(e)
 
 
 @pytest.mark.parametrize("name, kw", [
@@ -135,8 +141,8 @@ async def test_prompt_400_refused_with_node_errors(comfy):
             {"type": "value_not_in_list", "message": "Value not in list", "details": "sampler_name: 'x'"}]}}})
     e = await failure()
     assert e.kind == "refused"
-    assert e.detail.startswith("400 prompt_outputs_failed_validation")
-    assert "ノード 7 (KSampler): value_not_in_list" in e.detail
+    assert ja(e).startswith("400 prompt_outputs_failed_validation")
+    assert "ノード 7 (KSampler): value_not_in_list" in ja(e)
 
 
 async def test_prompt_missing_node_type_refused(comfy):
@@ -144,7 +150,7 @@ async def test_prompt_missing_node_type_refused(comfy):
         "error": {"type": "missing_node_type", "message": "Node 'X' not found", "details": "Node ID '#7'"},
         "node_errors": {}})
     e = await failure()
-    assert e.kind == "refused" and "missing_node_type" in e.detail and "#7" in e.detail
+    assert e.kind == "refused" and "missing_node_type" in ja(e) and "#7" in ja(e)
 
 
 async def test_prompt_429_is_rate_limited_with_retry_after(comfy):
@@ -162,7 +168,7 @@ async def test_prompt_5xx_is_transport(comfy, code):
 async def test_prompt_other_4xx_is_refused_even_if_not_json(comfy):
     comfy.prompt_response = lambda: httpx.Response(404, text="not here")
     e = await failure()
-    assert e.kind == "refused" and "404" in e.detail
+    assert e.kind == "refused" and "404" in ja(e)
 
 
 async def test_prompt_broken_bodies(comfy):
@@ -213,14 +219,14 @@ async def test_execution_error_is_refused_with_full_exception_message(comfy):
         ["execution_start", {"prompt_id": PID}],
         ["execution_error", {"node_id": "1", "node_type": "UNETLoader", "exception_message": long}]]}, "outputs": {}}]
     e = await failure()
-    assert e.kind == "refused" and "UNETLoader" in e.detail and e.detail.endswith("END")
+    assert e.kind == "refused" and "UNETLoader" in ja(e) and ja(e).endswith("END")
 
 
 async def test_execution_interrupted_is_its_own_kind(comfy):
     comfy.histories = [{"status": {"status_str": "error", "messages": [
         ["execution_interrupted", {"node_id": "7", "node_type": "KSampler"}]]}, "outputs": {}}]
     e = await failure()
-    assert e.kind == "interrupted" and "KSampler" in e.detail
+    assert e.kind == "interrupted" and "KSampler" in ja(e)
 
 
 async def test_error_without_known_message_is_broken_response(comfy):
@@ -257,7 +263,7 @@ async def test_waits_while_running_then_succeeds(comfy):
 async def test_gone_from_queue_and_history_is_transport(comfy):
     comfy.histories = [{}]
     e = await failure()
-    assert e.kind == "transport" and "履歴にも無い" in e.detail
+    assert e.kind == "transport" and "履歴にも無い" in ja(e)
 
 
 async def test_finished_between_history_and_queue_checks(comfy):
@@ -270,7 +276,7 @@ async def test_wait_limit_exceeded_is_transport(comfy):
     comfy.histories = [{}]
     comfy.queue = {"queue_running": [], "queue_pending": [[1, PID, {}, {}, []]]}
     e = await failure(comfy_sp=sp(comfy_wait_seconds=0))
-    assert e.kind == "transport" and "comfy_wait_seconds" in e.detail
+    assert e.kind == "transport" and "comfy_wait_seconds" in ja(e)
 
 
 async def test_queue_body_broken(comfy):
@@ -286,7 +292,7 @@ async def test_check_choices_toggle(comfy):
     await call_comfyui(SERVICE, sp(comfy_workflow=bad), REQUEST)  # 切ってあれば確かめず、/prompt に任せる
     assert not any(p.startswith("/object_info") for _, p in comfy.calls)
     e = await failure(comfy_sp=sp(comfy_workflow=bad, comfy_check_choices=True))
-    assert e.kind == "refused" and "unet_name" in e.detail and "missing.safetensors" in e.detail
+    assert e.kind == "refused" and "unet_name" in ja(e) and "missing.safetensors" in ja(e)
     assert not comfy.called("POST", "/prompt") or comfy.calls.count(("POST", "/prompt")) == 1  # 2回目は送っていない
 
 
@@ -298,10 +304,10 @@ async def test_check_choices_passes_and_skips_links(comfy):
 async def test_check_choices_new_combo_format_and_unknown_node(comfy):
     wf = {"7": {"class_type": "KSampler", "inputs": {"sampler_name": "nope"}}}
     e = await failure(comfy_sp=sp(comfy_workflow=wf, comfy_check_choices=True))
-    assert e.kind == "refused" and "sampler_name" in e.detail
+    assert e.kind == "refused" and "sampler_name" in ja(e)
     wf = {"3": {"class_type": "NoSuchNode", "inputs": {}}}
     e = await failure(comfy_sp=sp(comfy_workflow=wf, comfy_check_choices=True))
-    assert e.kind == "refused" and "NoSuchNode" in e.detail
+    assert e.kind == "refused" and "NoSuchNode" in ja(e)
 
 
 async def test_check_choices_reports_all_problems(comfy):
@@ -309,7 +315,7 @@ async def test_check_choices_reports_all_problems(comfy):
     async with httpx.AsyncClient(base_url="http://comfy", transport=httpx.MockTransport(comfy)) as c:
         with pytest.raises(AdapterError) as e:
             await check_choices(c, wf)
-    assert "unet_name" in e.value.detail and "weight_dtype" in e.value.detail
+    assert "unet_name" in ja(e.value) and "weight_dtype" in ja(e.value)
 
 
 # 取り消し
@@ -399,5 +405,5 @@ async def test_upload_failures(comfy, stored_png):
     comfy.upload = lambda req: httpx.Response(200, json={"x": 1})
     assert (await failure(request={**REQUEST, "prepared_inputs": [_prepared(stored_png)]})).kind == "broken_response"
     e = await failure(request={**REQUEST, "prepared_inputs": [_prepared(stored_png, node="99")]})
-    assert e.kind == "refused" and "99" in e.detail
+    assert e.kind == "refused" and "99" in ja(e)
     assert not comfy.called("POST", "/prompt")

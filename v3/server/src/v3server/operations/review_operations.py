@@ -23,7 +23,7 @@ from v3server.canonical_tables.translation_review_import_tables import (
     ReviewState,
 )
 from v3server.canonical_tables.work_tree_tables import Page
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.operation_base import (
     OpBase,
     Scope,
@@ -116,4 +116,4 @@ class SetReviewStatus(OpBase):
             actor_id=ctx.actor.id, reverts_record_id=self.reverts_record_id))
         # 取り消しも、取り消しの取り消しも、この記録を指して前の状態へ戻す（記録はどれも残る）
         return {"type": self.type, "target_kind": self.target_kind, "target_id": self.target_id,
-                "status": before, "comment": "取り消し", "reverts_record_id": self.record_id}
+                "status": before, "comment": ms("取り消し"),"reverts_record_id": self.record_id}

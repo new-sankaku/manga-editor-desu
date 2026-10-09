@@ -9,11 +9,13 @@
 from pydantic import BaseModel, Field
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 
-PLAN_FIELDS = {"synopsis": "あらすじ", "audience": "読者", "exclusions": "入れないもの", "notes": "メモ"}
+# 問いに書く項目の呼び名（プロンプトの一部。日本語のまま）
+PLAN_FIELDS = {"synopsis": "あらすじ", "audience": "読者", "exclusions": "入れないもの", "notes": "メモ"}  # i18n:prompt
 
 
-def build_plan_interview_question(request: str, current: dict[str, object], answers: list[str],
+def build_plan_interview_question(request: str, current: dict[str, object], answers: list[str],  # i18n:prompt
                                   required: list[str]) -> str:
     now = "\n".join(f"- {PLAN_FIELDS[k]}：{v}" for k, v in current.items() if v not in (None, "", []))
     talk = "\n\n".join(f"人の答え{i + 1}：\n{a}" for i, a in enumerate(answers))
@@ -54,7 +56,7 @@ class PlanInterviewAnswer(BaseModel):
 def parse_plan_interview_answer(answer: str) -> PlanInterviewAnswer:
     out = read_answer(answer, PlanInterviewAnswer)
     if not out.questions and out.plan is None:
-        raise BrokenAnswerError("質問も企画の案も無い", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("質問も企画の案も無い"), answer)
     return out
 
 

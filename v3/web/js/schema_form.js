@@ -6,7 +6,7 @@ import { t } from "../common/i18n.js";
 //   x-widget   textarea / number / slider / select / check
 //   x-labels   選ぶ欄の見出し
 //   x-unit     数の単位
-//   x-presets  よく使う値のボタン（見出し → 値）
+//   x-presets  よく使う値のボタン（{ label, value } の並び）
 const BASIC = "基本";  // i18n:data（サーバーの x-group と突き合わせる名前）
 
 function plain(prop) {
@@ -120,7 +120,7 @@ export function renderForm(host, schema, initial, onChange, openGroups = []) {
       kv.append(label, v);
       if (p["x-presets"]) {
         const chips = el("div", { class: "chips" });
-        for (const [k, x] of Object.entries(p["x-presets"])) {
+        for (const { label: k, value: x } of p["x-presets"]) {
           const c = el("button", { class: "chip", type: "button", text: k, "data-preset": name });
           c.addEventListener("click", () => { setters[name](x); changed(name, x); });
           chips.append(c);

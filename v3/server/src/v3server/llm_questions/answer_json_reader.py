@@ -10,6 +10,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel, ValidationError
 
+from v3server.messages import ms
+
 # サーバーの失敗の種類の名前（generation_queue の送り直さない種類の一覧と同じ綴り）
 BROKEN_RESPONSE_KIND = "broken_response"
 
@@ -35,13 +37,13 @@ def extract_json_object(answer: str) -> dict:
     """答えの文字列から JSON の物（辞書）を1つ取り出す。"""
     m = _OBJECT_SPAN.search(answer)
     if m is None:
-        raise BrokenAnswerError("答えに JSON オブジェクトが無い", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("答えに JSON オブジェクトが無い"), answer)
     try:
         value = json.loads(m.group(0))
     except json.JSONDecodeError as e:
-        raise BrokenAnswerError(f"JSON として読めない: {e}", answer) from e  # i18n:stored
+        raise BrokenAnswerError(ms("JSON として読めない: {error}", error=str(e)), answer) from e
     if not isinstance(value, dict):
-        raise BrokenAnswerError("JSON の一番外がオブジェクト（辞書）でない", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("JSON の一番外がオブジェクト（辞書）でない"), answer)
     return value
 
 
@@ -51,12 +53,15 @@ def read_answer(answer: str, model: type[ModelT]) -> ModelT:
     try:
         return model.model_validate(value)
     except ValidationError as e:
-        raise BrokenAnswerError(  # i18n:stored
-            f"形が合わない: {e.error_count()}か所 {e.errors()[0]['loc']} {e.errors()[0]['msg']}", answer) from e
+        first = e.errors()[0]
+        raise BrokenAnswerError(
+            ms("形が合わない: {count}か所 {loc} {msg}", count=e.error_count(), loc=str(first["loc"]), msg=first["msg"]),
+            answer) from e
 
 
 def require_known_ids(found: list[str], known: set[str], what: str, answer: str) -> None:
-    """答えが挙げた番号が、問いで渡した番号の中にあるか。無い番号があれば BrokenAnswerError。"""
+    """答えが挙げた番号が、問いで渡した番号の中にあるか。無い番号があれば BrokenAnswerError。
+    what は番号の呼び名（ms() で作った文を渡す）。"""
     unknown = sorted({x for x in found if x not in known})
     if unknown:
-        raise BrokenAnswerError(f"問いに無い{what}: {unknown}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("問いに無い{what}: {unknown}", what=what, unknown=str(unknown)), answer)

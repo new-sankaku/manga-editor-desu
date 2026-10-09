@@ -9,11 +9,12 @@
 from pydantic import BaseModel, Field
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 from v3server.name_structure.name_draft_schema import NamePage
 from v3server.name_structure.reading_direction import ReadingDirection
 
 
-def build_layout_tier_question(page: NamePage, reading_direction: ReadingDirection) -> str:
+def build_layout_tier_question(page: NamePage, reading_direction: ReadingDirection) -> str:  # i18n:prompt
     """page のコマ（番号・大きさ・中身）を台本として渡す問いの文。"""
     if not page.panels:
         raise ValueError("page にコマが無い")  # i18n:dev
@@ -69,7 +70,7 @@ def parse_layout_tier_answer(answer: str) -> LayoutTiers:
     d = read_answer(answer, _TierAnswer)
     numbers = [c.n for r in d.rows for c in r.cells]
     if len(numbers) != len(set(numbers)):
-        raise BrokenAnswerError("同じコマ番号が2回以上ある", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("同じコマ番号が2回以上ある"), answer)
     return LayoutTiers(
         rows=[[c.n for c in r.cells] for r in d.rows],
         row_height_ratios=[r.h for r in d.rows],

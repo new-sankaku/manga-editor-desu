@@ -50,7 +50,7 @@ class ComfyNodeGraph:
         """番号の代わりに名前を付けてノードを足す。アダプターが絵を上げて入れる LoadImage に使う
         （名前で入れ先を指すので、入力名の一致で別のノードを書き換えることが起きない。ai-verification.md 1.1 の原因A）。"""
         if node_id in self._nodes or node_id.isdigit():
-            raise KeyError(f'ノードの名前 {node_id} は使えない（重なっているか、数字だけ）')
+            raise KeyError(f'ノードの名前 {node_id} は使えない（重なっているか、数字だけ）')  # i18n:dev
         return self._put(node_id, class_type, inputs)
 
     def _put(self, node_id: str, class_type: str, inputs: dict[str, Any]) -> Node:
@@ -64,7 +64,7 @@ class ComfyNodeGraph:
         """既にあるノードの入力を差し替える（制御を間に挟むときなど）。"""
         inputs = self._node(node)['inputs']
         if input_name not in inputs:
-            raise KeyError(f'{node.class_type}（{node.node_id}）に入力 {input_name} がありません')
+            raise KeyError(f'{node.class_type}（{node.node_id}）に入力 {input_name} がありません')  # i18n:dev
         inputs[input_name] = self._to_value(value)
 
     def input_link(self, node: Node, input_name: str) -> NodeOutput:
@@ -83,14 +83,14 @@ class ComfyNodeGraph:
 
     def _node(self, node: Node) -> dict[str, Any]:
         if node.node_id not in self._nodes:
-            raise KeyError(f'ノード {node.node_id} はこの手順にありません')
+            raise KeyError(f'ノード {node.node_id} はこの手順にありません')  # i18n:dev
         return self._nodes[node.node_id]
 
     def _to_value(self, value: Any) -> Any:
         if isinstance(value, Node):
-            raise TypeError('ノードそのものではなく、node[0] のように出力の番号を付けて渡してください')
+            raise TypeError('ノードそのものではなく、node[0] のように出力の番号を付けて渡してください')  # i18n:dev
         if isinstance(value, NodeOutput):
             if value.node_id not in self._nodes:
-                raise KeyError(f'つなぎ先のノード {value.node_id} がこの手順にありません')
+                raise KeyError(f'つなぎ先のノード {value.node_id} がこの手順にありません')  # i18n:dev
             return value.as_link()
         return value

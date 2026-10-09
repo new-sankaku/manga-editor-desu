@@ -49,6 +49,7 @@ from v3server.llm_questions.shot_angle_question import (
     build_shot_angle_question,
     parse_shot_angle_answer,
 )
+from v3server.messages import render
 from v3server.name_structure.reading_direction import PageSpec
 
 SPEC = PageSpec(frame_width_mm=150, frame_height_mm=220, trim_width_mm=182, trim_height_mm=257, bleed_mm=3,
@@ -79,6 +80,28 @@ def test_extract_broken(answer):
     with pytest.raises(BrokenAnswerError) as e:
         extract_json_object(answer)
     assert e.value.failure_kind == BROKEN_RESPONSE_KIND == "broken_response"
+
+
+def test_broken_answer_text_is_rendered_per_language():
+    """答えが崩れたときの文は包んだ文（ms()）。日本語で出すと今までの文と同じで、英語では訳で出る。"""
+    with pytest.raises(BrokenAnswerError) as e:
+        parse_contradiction_answer('{"issues":[{"line":"L9","why":"x"}]}', LINES)
+    assert render(str(e.value), "ja") == "broken_response: 問いに無い行の番号: ['L9']"
+    assert render(str(e.value), "en") == "broken_response: The response refers to line numbers that are not in the question: ['L9']"
+    assert render(e.value.detail, "ja") == "問いに無い行の番号: ['L9']"
+    # 文の中に別の文を入れた形（欄ごとの文を「, 」でつなぐ）
+    a, b = _panel(1), _panel(2)
+    del a["role"], b["role"], b["shot"]
+    answer = json.dumps({"pages": [{"page": 1, "spread": False, "rows": [[1, 2]], "panels": [a, b]}]}, ensure_ascii=False)
+    with pytest.raises(BrokenAnswerError) as e:
+        parse_name_draft_answer(answer, "right_to_left", SPEC, True)
+    assert render(e.value.detail, "ja") == "欠けた欄がある: role（1ページ コマ1 ほか2か所）, shot（1ページ コマ2 ほか1か所）"
+    assert render(e.value.detail, "en").startswith("Some fields are missing: role (")
+    # 値に並びの見た目（['L9'] の形）と数を入れた文
+    with pytest.raises(BrokenAnswerError) as e:
+        parse_shot_angle_answer('{"items":[{"image":1,"shot":"引き","angle":"目の高さ","facing":"右"}]}', 2)
+    assert render(e.value.detail, "ja") == "画像の番号が 1〜2 に揃っていない: [1]"
+    assert render(e.value.detail, "en") == "The image numbers are not exactly 1 to 2: [1]"
 
 
 # ---- ネーム ----

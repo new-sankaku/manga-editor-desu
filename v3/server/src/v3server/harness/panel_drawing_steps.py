@@ -65,7 +65,7 @@ from v3server.llm_questions.redo_instruction_question import (
     parse_tags_answer,
 )
 from v3server.llm_questions.shot_angle_question import build_shot_angle_question, parse_shot_angle_answer
-from v3server.messages import m
+from v3server.messages import m, ms, text_of
 from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
 from v3server.operations.image_placement_carry import frame_bbox
 from v3server.operations.operation_submit_and_undo import submit
@@ -85,10 +85,13 @@ CONDITIONAL_THRESHOLDS = {
     "ccip_threshold": m("同じ人物とみなす CCIP の差の上限（設定資料に人物の絵があるコマ）"),
     "face_covered_max": m("顔がフキダシに隠れてよい割合の上限（フキダシを置いたコマ）"),
 }
+# 検査の名前（画面に出す文。ms() の包んだ文なので、比べるときはここの値どうしを比べる）
+VIEW_TEXT_IN_IMAGE = ms("絵の中の文字・吹き出し")
+VIEW_SAME_PERSON = ms("同じ人物（CCIP）")
 # 手段が無く、人の確認に回す観点（設計 8.2）
-HUMAN_ONLY_VIEWS = ("背景", "視線", "ぼやけ・線の潰れ", "服・アクセサリー・小物")
+HUMAN_ONLY_VIEWS = (ms("背景"), ms("視線"), ms("ぼやけ・線の潰れ"), ms("服・アクセサリー・小物"))
 # 直させられる検査の名前と、直す所の種類（FixSpec.words の鍵）
-FIXABLE = {"絵の中の文字・吹き出し": "text", "同じ人物（CCIP）": "face"}
+FIXABLE = {VIEW_TEXT_IN_IMAGE: "text", VIEW_SAME_PERSON: "face"}
 # 同じ人物の判定をしない小さな人物（高さの割合。p43：小さい人物は差が大きく出た）
 CCIP_MIN_H_RATIO = 0.2
 
@@ -100,10 +103,14 @@ async def drawing_thresholds(session, work_id: str) -> dict[str, dict[str, Any]]
     got = {t.key[len(DRAWING_THRESHOLD_PREFIX):]: t for t in rows if t.status != "rejected"}
     missing = [k for k in THRESHOLDS if k not in got]
     if missing:
-        raise q.blocked("作画の検査の閾値が未設定: " + "、".join(f"{DRAWING_THRESHOLD_PREFIX}{k}（{THRESHOLDS[k]}）"
-                                                     for k in missing), missing=[DRAWING_THRESHOLD_PREFIX + k
-                                                                                 for k in missing])  # i18n:stored
+        raise q.blocked(ms("作画の検査の閾値が未設定: {thresholds}", thresholds=_unset(missing, THRESHOLDS)),
+                        missing=[DRAWING_THRESHOLD_PREFIX + k for k in missing])
     return {k: {"value": float(t.value["value"]), "status": t.status, "source": t.source} for k, t in got.items()}
+
+
+def _unset(missing: list[str], meanings: dict[str, str]) -> list[str]:
+    """未設定の閾値の並び（鍵と、何の閾値か）。"""
+    return [ms("{key}（{meaning}）", key=DRAWING_THRESHOLD_PREFIX + k, meaning=meanings[k]) for k in missing]
 
 
 async def text_boxes_mm(session, panel_id: str) -> list[list[float]]:
@@ -116,12 +123,13 @@ async def text_boxes_mm(session, panel_id: str) -> list[list[float]]:
 def _require(th: dict[str, Any], keys: list[str]) -> None:
     missing = [k for k in keys if k not in th]
     if missing:
-        raise q.blocked("このコマの検査に要る閾値が未設定: " + "、".join(  # i18n:stored
-            f"{DRAWING_THRESHOLD_PREFIX}{k}（{CONDITIONAL_THRESHOLDS[k]}）" for k in missing),
-            missing=[DRAWING_THRESHOLD_PREFIX + k for k in missing])
+        raise q.blocked(ms("このコマの検査に要る閾値が未設定: {thresholds}",
+                           thresholds=_unset(missing, CONDITIONAL_THRESHOLDS)),
+                        missing=[DRAWING_THRESHOLD_PREFIX + k for k in missing])
 
 
-def panel_description(panel: Panel) -> str:
+def panel_description(panel: Panel) -> str:  # i18n:prompt
+    """コマの中身を LLM・VLM に伝える文（タグを作らせる問いと、2枚を比べる問いの狙いに入る）。"""
     c = panel.content
     parts = []
     if c.get("content"):
@@ -145,10 +153,10 @@ async def cut_out(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         panel = await session.get(Panel, unit.target_id)
         if panel is None or panel.removed:
-            raise ApplicationError("コマが無い（消された）", type="refused", non_retryable=True)  # i18n:stored
+            raise ApplicationError(ms("コマが無い（消された）"), type="refused", non_retryable=True)
         if panel.human_confirmed:
-            raise ApplicationError("人の確定印のあるコマは、AIが作り直さない（設計 9.2）", type="refused",
-                                   non_retryable=True)  # i18n:stored
+            raise ApplicationError(ms("人の確定印のあるコマは、AIが作り直さない（設計 9.2）"), type="refused",
+                                   non_retryable=True)
         DrawingSpec.model_validate(unit.spec.get("drawing"))
         return {"panel_id": panel.id, "page_id": panel.page_id, "people": panel_people_names(panel)}
 
@@ -167,11 +175,11 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         for name in panel_people_names(panel):
             m = chars.get(name)
             if m is None:
-                raise q.blocked(f"設定資料に人物 {name} が無い（採った人物だけを使う）", character=name)  # i18n:stored
+                raise q.blocked(ms("設定資料に人物 {name} が無い（採った人物だけを使う）", name=name), character=name)
             prompt = (m.generation or {}).get("prompt")
             if not prompt:
-                raise q.blocked(f"設定資料の人物 {name} に生成の言葉（generation.prompt）が無い。特徴の言葉は毎回全部入れる"
-                                "（試作 p17）ので、人が設定資料に書く", character=name)  # i18n:stored
+                raise q.blocked(ms("設定資料の人物 {name} に生成の言葉（generation.prompt）が無い。特徴の言葉は毎回全部入れる"
+                                   "（試作 p17）ので、人が設定資料に書く", name=name), character=name)
             fixed.append(prompt)
             people.append({"name": name, "prompt": prompt, "reference_image_id": (m.image_ids or [None])[0]})
             if (m.generation or {}).get("negative_prompt"):
@@ -203,8 +211,8 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     try:
         tags = parse_tags_answer(text)
     except BrokenAnswerError as e:
-        raise ApplicationError(  # i18n:stored
-            f"タグの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+        raise ApplicationError(
+            ms("タグの答えの形が崩れた: {error}", error=text_of(e)), type="broken_response", non_retryable=True) from e
     prompt = ", ".join(p.strip() for p in [spec.quality_words, spec.style_words, *fixed, ", ".join(tags)] if p.strip())
     async with get_sessionmaker()() as session:
         cost = await q.jobs_cost(session, [job_id])
@@ -311,8 +319,8 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     ctx, attempt, k = args["context"], args["attempt"], unit.limits["candidates_per_attempt"]
     source = args.get("edit_image_id")
     if source and spec.redraw_params is None:
-        raise q.blocked(  # i18n:stored
-            "手動で修正した絵から続けるには、作業の決めごとに redraw_params（image_to_image の引数）が要る")
+        raise q.blocked(
+            ms("手動で修正した絵から続けるには、作業の決めごとに redraw_params（image_to_image の引数）が要る"))
     plan = ctx["plan"]
     set_id = f"{unit.id}a{attempt}"
     cand_ids, first_jobs = [], []
@@ -376,7 +384,8 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                 cand.image_id, cand.status = job.result["registered"][0]["image_id"], "generated"
             else:
                 cand.status = "failed" if job.status == "stopped" else "cancelled"
-                cand.dropped_reason = f"生成が止まった（{job.failure_kind}）: {job.failure_detail}"
+                cand.dropped_reason = ms("生成が止まった（{kind}）: {detail}", kind=job.failure_kind,
+                                         detail=job.failure_detail)
             cand.made_with = {**cand.made_with, "jobs": [{**x, **(await _job_row(session, x["job_id"]))}
                                                          for x in cand.made_with["jobs"]]}
             out.append({"candidate_id": cid, "image_id": cand.image_id, "status": cand.status,
@@ -385,10 +394,10 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         await session.commit()
     refused = [o for o in out if o["failure_kind"] == "refused"]
     if refused and len(refused) == len(out):
-        raise ApplicationError(  # i18n:stored
-            f"生成が全部断られた: {jobs[0].failure_detail}", type="refused", non_retryable=True)
+        raise ApplicationError(
+            ms("生成が全部断られた: {detail}", detail=jobs[0].failure_detail), type="refused", non_retryable=True)
     if not any(o["image_id"] for o in out):
-        raise ApplicationError("生成が全部止まった", {"kinds": [o["failure_kind"] for o in out]},  # i18n:stored
+        raise ApplicationError(ms("生成が全部止まった"), {"kinds": [o["failure_kind"] for o in out]},
                                type="generation_failed", non_retryable=True)
     return {"candidates": out, "cost": cost, "job_ids": all_job_ids, "route": "edit" if source else plan["route"],
             "placement": plan["placement"], "used": plan["used"], "missing": plan["missing"]}
@@ -473,7 +482,9 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
     W, H = img.width, img.height
     if not skip_size:
         want = tuple(plan["size"])
-        findings.append(_finding("大きさ", (W, H) == want, None, f"{W}x{H}（依頼した {want[0]}x{want[1]}）"))
+        findings.append(_finding(ms("大きさ"), (W, H) == want, None,
+                                 ms("{width}x{height}（依頼した {want_width}x{want_height}）", width=W, height=H,
+                                    want_width=want[0], want_height=want[1])))
     form_p = {"edge_px": int(th["edge_px"]["value"]), "score_threshold": th["person_score"]["value"]}
     pj, _ = await _detect(unit, f"{unit.id}:c{cand.id}:detect_person", "detect_person", "/person_face_head",
                           {"image": img.sha256}, form_p)
@@ -490,11 +501,12 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
     persons = pjob.result.get("persons", [])
     faces = pjob.result.get("faces", []) + pjob.result.get("heads", [])
     want_people = len(plan["people"])
-    findings.append(_finding("人数", len(persons) == want_people, th["person_score"],
-                             f"検出 {len(persons)} 人・ネーム {want_people} 人"))
+    findings.append(_finding(ms("人数"), len(persons) == want_people, th["person_score"],
+                             ms("検出 {found} 人・ネーム {want} 人", found=len(persons), want=want_people)))
     touching = [p["touch"] for p in persons if p.get("touch")]
-    findings.append({**_finding("見切れ", not touching, th["edge_px"],
-                                f"端に接した人物 {len(touching)}（{','.join(touching)}）"), "drop": False})
+    findings.append({**_finding(ms("見切れ"), not touching, th["edge_px"],
+                                ms("端に接した人物 {count}（{sides}）", count=len(touching), sides=",".join(touching))),
+                     "drop": False})
     # ネームの人物の範囲と検出の重なり（IoU）
     got_boxes = [_xyxy(p) for p in persons]
     matches: list[tuple[int, int | None, float]] = []
@@ -503,12 +515,13 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
         matches = match_people(want_boxes, got_boxes)
         lo = th["person_iou_min"]["value"]
         worst = min((v for _, _, v in matches), default=0.0)
-        findings.append(_finding("人物の位置（IoU）", worst >= lo, th["person_iou_min"],
-                                 "、".join(f"{plan['people'][i]['name']} {v:.2f}" for i, _, v in matches)
-                                 + f"（下限 {lo}）"))
+        # 人物ごとの「名前 重なり」は言語で変わらないので、並びのまま渡す（区切りは出す時の言語で付く）
+        findings.append(_finding(ms("人物の位置（IoU）"), worst >= lo, th["person_iou_min"],
+                                 ms("{people}（下限 {low}）", low=lo,
+                                    people=[f"{plan['people'][i]['name']} {v:.2f}" for i, _, v in matches])))
     else:
-        findings.append(_finding("人物の位置（IoU）", None, None,
-                                 "ネームに人物の範囲が無いので比べない" if plan["people"] else "人物がいない"))
+        findings.append(_finding(ms("人物の位置（IoU）"), None, None,
+                                 ms("ネームに人物の範囲が無いので比べない") if plan["people"] else ms("人物がいない")))
     # 顔と吹き出しの重なり（p47）
     balloons_mm = ctx["balloons_mm"]
     if balloons_mm and plan["people"]:
@@ -517,36 +530,41 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
                 (b[3] - fy0) / (fy1 - fy0) * H] for b in balloons_mm]
         worst = max((covered_ratio(_xyxy(f), bpx) for f in faces), default=0.0)
         hi = th["face_covered_max"]["value"]
-        findings.append(_finding("顔と吹き出しの重なり", worst <= hi, th["face_covered_max"],
-                                 f"いちばん隠れた顔 {worst:.0%}（上限 {hi:.0%}）。顔の検出 {len(faces)}"))
+        findings.append(_finding(ms("顔と吹き出しの重なり"), worst <= hi, th["face_covered_max"],
+                                 ms("いちばん隠れた顔 {worst:.0%}（上限 {high:.0%}）。顔の検出 {faces}", worst=worst, high=hi,
+                                    faces=len(faces))))
     else:
-        findings.append(_finding("顔と吹き出しの重なり", None, None,
-                                 "フキダシを置いていない（仕上げ S5 で置いた後に検査する）"))
+        findings.append(_finding(ms("顔と吹き出しの重なり"), None, None,
+                                 ms("フキダシを置いていない（仕上げ S5 で置いた後に検査する）")))
     texts = tjob.result.get("texts", [])
-    findings.append({**_finding("絵の中の文字・吹き出し", not texts, th["text_score"], f"文字の範囲 {len(texts)}"),
+    findings.append({**_finding(VIEW_TEXT_IN_IMAGE, not texts, th["text_score"], ms("文字の範囲 {count}", count=len(texts))),
                      "fix": {"kind": "text", "boxes_px": [_xyxy(t) for t in texts]} if texts else None})
     hands = hjob.result.get("hands", [])
-    findings.append(_finding("手", None, None, f"手の検出 {len(hands)}。崩れの判定器は無いので人が見る"))
+    findings.append(_finding(ms("手"), None, None,
+                             ms("手の検出 {count}。崩れの判定器は無いので人が見る", count=len(hands))))
     rating = ajob.result.get("rating") or {}
     top = max(rating.items(), key=lambda kv: kv[1])[0] if rating else None
-    findings.append(_finding("年齢区分", None, None, f"いちばん高い区分 {top}（記録だけ。判定に使わない）"))
+    findings.append(_finding(ms("年齢区分"), None, None, ms("いちばん高い区分 {top}（記録だけ。判定に使わない）", top=top)))
     # 同じ人物か（CCIP。「違う」で落とす専用。同じ=true は同じ人物の証拠にならない）
     data = None
     for i, f in enumerate(plan["people"]):
         ref = refs.get(f["name"])
         if ref is None:
-            findings.append(_finding("同じ人物（CCIP）", None, None, f"設定資料の {f['name']} に絵が無いので比べない"))
+            findings.append(_finding(VIEW_SAME_PERSON, None, None,
+                                     ms("設定資料の {name} に絵が無いので比べない", name=f["name"])))
             continue
         if matches:
             j = matches[i][1]
         else:
             j = 0 if len(plan["people"]) == 1 and len(persons) == 1 else None
         if j is None:
-            findings.append(_finding("同じ人物（CCIP）", None, None, f"{f['name']} に当たる検出の人物が決められない"))
+            findings.append(_finding(VIEW_SAME_PERSON, None, None,
+                                     ms("{name} に当たる検出の人物が決められない", name=f["name"])))
             continue
         if persons[j].get("h_ratio", 1) < CCIP_MIN_H_RATIO:
-            findings.append(_finding("同じ人物（CCIP）", None, None,
-                                     f"{f['name']} は小さい（高さ {persons[j].get('h_ratio')}。p43 で差が大きく出た）"))
+            findings.append(_finding(VIEW_SAME_PERSON, None, None,
+                                     ms("{name} は小さい（高さ {ratio}。p43 で差が大きく出た）", name=f["name"],
+                                        ratio=persons[j].get("h_ratio"))))
             continue
         data = data or read_image(img.sha256)
         crop = store_image(_crop_png(data, got_boxes[j]))
@@ -559,9 +577,12 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
             raise q.job_failure(cjob)
         same = bool(cjob.result.get("same"))
         head = next((_xyxy(x) for x in faces if _inside(_xyxy(x), got_boxes[j])), None)
-        findings.append({**_finding("同じ人物（CCIP）", True if same else False, th["ccip_threshold"],
-                                    f"{f['name']} 差 {cjob.result.get('difference')}（閾値 {cjob.result.get('threshold')}）"
-                                    + ("" if same else "。違う人物と出た")),
+        diff, limit = cjob.result.get("difference"), cjob.result.get("threshold")
+        findings.append({**_finding(VIEW_SAME_PERSON, True if same else False, th["ccip_threshold"],
+                                    ms("{name} 差 {difference}（閾値 {threshold}）", name=f["name"], difference=diff,
+                                       threshold=limit) if same
+                                    else ms("{name} 差 {difference}（閾値 {threshold}）。違う人物と出た", name=f["name"],
+                                            difference=diff, threshold=limit)),
                          "fix": None if same or head is None else {"kind": "face", "boxes_px": [head],
                                                                    "character": f["name"]}})
     return findings, job_ids
@@ -613,24 +634,26 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             judged = parse_shot_angle_answer(text, len(cands))
         except BrokenAnswerError as e:
-            raise ApplicationError(f"写す範囲・角度の答えの形が崩れた: {e}", type="broken_response",  # i18n:stored
-                                   non_retryable=True) from e
+            raise ApplicationError(ms("写す範囲・角度の答えの形が崩れた: {error}", error=text_of(e)),
+                                   type="broken_response", non_retryable=True) from e
         for c, j in zip(cands, judged, strict=True):
             if want_shot:
-                findings[c.id].append({**_finding("写す範囲", j.shot == want_shot, None,
-                                                  f"VLM {j.shot}・ネーム {want_shot}"), "drop": False})
+                findings[c.id].append({**_finding(ms("写す範囲"), j.shot == want_shot, None,
+                                                  ms("VLM {judged}・ネーム {want}", judged=j.shot, want=want_shot)),
+                                       "drop": False})
             if want_angle:
-                findings[c.id].append({**_finding("角度", j.angle == want_angle, None,
-                                                  f"VLM {j.angle}・ネーム {want_angle}"), "drop": False})
+                findings[c.id].append({**_finding(ms("角度"), j.angle == want_angle, None,
+                                                  ms("VLM {judged}・ネーム {want}", judged=j.angle, want=want_angle)),
+                                       "drop": False})
     results = []
     async with get_sessionmaker()() as session:
         for c in cands:
-            f = findings[c.id] + [_finding(v, None, None, "手段が無い。人が確かめる") for v in HUMAN_ONLY_VIEWS]
+            f = findings[c.id] + [_finding(v, None, None, ms("手段が無い。人が確かめる")) for v in HUMAN_ONLY_VIEWS]
             cand = await session.get(HarnessCandidate, c.id)
             cand.check = {"findings": f}
             cand.check_verdict = verdict_of(f)
             if cand.check_verdict == "drop":
-                cand.dropped_reason = "検査で落ちた: " + "、".join(x["name"] for x in f if x["ok"] is False)
+                cand.dropped_reason = ms("検査で落ちた: {names}", names=[x["name"] for x in f if x["ok"] is False])
             results.append({"candidate_id": c.id, "verdict": cand.check_verdict, "fix_round": c.fix_round,
                             "findings": [{"name": x["name"], "ok": x["ok"], "threshold_status": x["threshold_status"]}
                                          for x in f]})
@@ -651,7 +674,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         if targets is None:
             continue
         if spec.fix is None:
-            why_not = "作業の決めごとに fix（直させるステップの引数）が無い"
+            why_not = ms("作業の決めごとに fix（直させるステップの引数）が無い")
             continue
         fixable.append(c.id)
     failed_names = sorted({x["name"] for c in current if c.check_verdict == "drop" for x in c.check["findings"]
@@ -706,7 +729,8 @@ async def fix(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             cand.job_id = job.id
             cand.made_with = {**(src.made_with or {}), "fix": {"kinds": kinds, "regions_px": polys, "from": src.id},
                               "jobs": [{"role": "fix", "job_id": job.id, "process": fx.process}]}
-            src.dropped_reason = f"検査で落ちた所を直させた（{fx.process}・{'、'.join(kinds)}）。直した候補を使う"
+            src.dropped_reason = ms("検査で落ちた所を直させた（{process}・{kinds}）。直した候補を使う", process=fx.process,
+                                    kinds=kinds)
             await session.commit()
             made.append(cand.id)
             job_ids.append(job.id)
@@ -719,7 +743,8 @@ async def fix(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                 cand.image_id, cand.status = job.result["registered"][0]["image_id"], "generated"
             else:
                 cand.status, cand.check_verdict = "failed", "drop"
-                cand.dropped_reason = f"直す依頼が止まった（{job.failure_kind}）: {job.failure_detail}"
+                cand.dropped_reason = ms("直す依頼が止まった（{kind}）: {detail}", kind=job.failure_kind,
+                                         detail=job.failure_detail)
                 cand.check = {"findings": []}
             cand.made_with = {**cand.made_with, "jobs": [{**x, **(await _job_row(session, x["job_id"]))}
                                                          for x in cand.made_with["jobs"]]}
@@ -747,14 +772,14 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         target = panel_description(panel).replace("\n", "／")
         files = {c.id: (await session.get(ImageFile, c.image_id)) for c in cands}
     if not cands:
-        return {"picked": None, "why": "選べる候補が無い", "rounds": [], "cost": 0, "job_ids": [], "disagree": False,
-                "failure": "evaluate:なし"}
+        return {"picked": None, "why": ms("選べる候補が無い"), "rounds": [], "cost": 0, "job_ids": [], "disagree": False,
+                "failure": "evaluate:なし"}  # i18n:data
     if len(cands) == 1:
         async with get_sessionmaker()() as session:
             row = await session.get(HarnessCandidate, cands[0].id)
-            row.evaluation, row.picked = {"score": None, "why": "比べる相手が無い（通った候補が1枚）"}, True
+            row.evaluation, row.picked = {"score": None, "why": ms("比べる相手が無い（通った候補が1枚）")}, True
             await session.commit()
-        return {"picked": cands[0].id, "why": "通った候補が1枚なので比べずに選んだ", "rounds": [], "cost": 0,
+        return {"picked": cands[0].id, "why": ms("通った候補が1枚なので比べずに選んだ"), "rounds": [], "cost": 0,
                 "job_ids": [], "disagree": False, "failure": None}
     tmp = tempfile.mkdtemp(prefix="v3-harness-pair-")
     path_of, cid_of = {}, {}
@@ -764,7 +789,7 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             fh.write(read_image(img.sha256))
         path_of[cid], cid_of[p] = p, cid
     pairs = [ImagePair(path_of[a.id], path_of[b.id]) for a, b in itertools.combinations(cands, 2)]
-    criterion = f"狙い「{target}」に、AとBのどちらの絵が合っているかを答えてください。"
+    criterion = f"狙い「{target}」に、AとBのどちらの絵が合っているかを答えてください。"  # i18n:prompt
     job_ids: list[str] = []
     rounds, tops, scores_by_repeat = [], [], []
     for r in range(repeats):
@@ -782,8 +807,8 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             outcomes = await compare_pairs(ask, pairs, criterion, os.path.join(tmp, f"blind{r}"),
                                            salt=f"{unit.id}:a{attempt}:r{r}")
         except BrokenAnswerError as e:
-            raise ApplicationError(  # i18n:stored
-                f"評価モデルの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+            raise ApplicationError(ms("評価モデルの答えの形が崩れた: {error}", error=text_of(e)),
+                                   type="broken_response", non_retryable=True) from e
         score = {c.id: {"wins": 0, "ties": 0, "losses": 0} for c in cands}
         for o in outcomes:
             a, b = cid_of[o.pair.left], cid_of[o.pair.right]
@@ -809,9 +834,10 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             row.picked = c.id == picked
         cost = await q.jobs_cost(session, job_ids)
         await session.commit()
-    failure = "evaluate:割れた" if disagree else ("evaluate:同点" if picked is None else None)
-    why = ("くり返すと1位が変わった" if disagree else "1位が1枚に決まらない（同点）" if picked is None
-           else "勝ち＋引き分けの半分がいちばん多い")
+    # 失敗の印（同じ失敗が続いたかを比べる値。文ではない）
+    failure = "evaluate:割れた" if disagree else ("evaluate:同点" if picked is None else None)  # i18n:data
+    why = (ms("くり返すと1位が変わった") if disagree else ms("1位が1枚に決まらない（同点）") if picked is None
+           else ms("勝ち＋引き分けの半分がいちばん多い"))
     return {"picked": picked, "tops": tops, "why": why, "rounds": rounds, "scores": scores_by_repeat,
             "disagree": disagree, "cost": cost, "job_ids": job_ids, "failure": failure}
 
@@ -880,7 +906,7 @@ async def drift_check(session, run: HarnessStageRun) -> dict[str, Any]:
             continue
         refs = [chars[n].image_ids[0] for n in names if n in chars and chars[n].image_ids]
         if len(names) != 1 or len(refs) != 1:
-            skipped.append({"unit_id": u.id, "why": "設定資料に絵のある人物が1人だけ写るコマでない"})
+            skipped.append({"unit_id": u.id, "why": ms("設定資料に絵のある人物が1人だけ写るコマでない")})
             continue
         _require(th, ["ccip_threshold"])
         img = await session.get(ImageFile, panel.image_id)
@@ -898,7 +924,8 @@ async def drift_check(session, run: HarnessStageRun) -> dict[str, Any]:
             raise q.job_failure(pjob)
         persons = pjob.result.get("persons", [])
         if len(persons) != 1 or persons[0].get("h_ratio", 1) < CCIP_MIN_H_RATIO:
-            skipped.append({"unit_id": u.id, "why": f"検出の人物 {len(persons)} 人（1人で高さ2割以上のときだけ比べる）"})
+            skipped.append({"unit_id": u.id,
+                            "why": ms("検出の人物 {count} 人（1人で高さ2割以上のときだけ比べる）", count=len(persons))})
             continue
         crop = store_image(_crop_png(read_image(img.sha256), _xyxy(persons[0])))
         cj = await q.ensure_job(session, asker, f"{run.id}:drift:{u.id}:{img.id}:ccip",

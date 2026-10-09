@@ -42,6 +42,7 @@ from v3server.harness import queue_calls as q
 from v3server.harness.harness_record import finish_step, now, patch_stage, patch_unit, start_step
 from v3server.harness.harness_states import HUMAN_APPROVE_STAGES, STAGES, UNIT_KIND_OF_STAGE
 from v3server.harness.upstream_versions import upstream_of
+from v3server.messages import ms, text_of
 from v3server.v3_error_types import V3Error
 
 # 段の活動の生存の通知（秒）。取り消しはこの返事で届く。2秒から1秒にした（test_harness_perf.py で測った）
@@ -81,7 +82,7 @@ async def _beat() -> None:
 @activity.defn
 async def run_step(inp: StepInput) -> dict[str, Any]:
     if inp.step not in STEP_FUNCTIONS:
-        raise ApplicationError(f"知らないステップ: {inp.step}", non_retryable=True)  # i18n:stored
+        raise ApplicationError(ms("知らないステップ: {step}", step=inp.step), non_retryable=True)
     async with get_sessionmaker()() as session:
         unit = await session.get(HarnessUnit, inp.unit_id)
         fn = getattr(STEP_MODULES[unit.kind], inp.step)
@@ -100,15 +101,15 @@ async def run_step(inp: StepInput) -> dict[str, Any]:
         status, detail = "done", out
         return out
     except asyncio.CancelledError:
-        status, detail = "cancelled", {"reason": "取り消された"}
+        status, detail = "cancelled", {"reason": ms("取り消された")}
         raise
     except ApplicationError as e:
         status, detail = "failed", {"type": e.type, "message": e.message, "details": list(e.details)}
         raise
     except V3Error as e:
         # 操作の窓口が断った（権限・ロック・形）。人が直すまで進めない
-        status, detail = "failed", {"type": "blocked", "message": str(e)}
-        raise q.blocked(f"操作が断られた: {e}") from e  # i18n:stored
+        status, detail = "failed", {"type": "blocked", "message": ms("{error}", error=text_of(e))}
+        raise q.blocked(ms("操作が断られた: {error}", error=text_of(e))) from e
     finally:
         beat.cancel()
         if inp.step != "discard_round":
@@ -188,7 +189,7 @@ async def prepare_stage(stage_run_id: str) -> dict[str, Any]:
             # 人が採るまで終わらない工程（設計 5 の表の「人の確認：必須」）。頼んだ完成条件に無くても足し、出来事に残す
             completion.append("human_approve")
             await patch_stage(session, run.id, {}, {"completion_added": "human_approve",
-                                                    "why": f"{run.stage} は人の確認が必須の工程"})
+                                                    "why": ms("{stage} は人の確認が必須の工程", stage=run.stage)})
         for target_kind, target_id, page_id in await _targets(session, run):
             unit = HarnessUnit(stage_run_id=run.id, work_id=run.work_id, stage=run.stage, kind=kind,
                                target_kind=target_kind, target_id=target_id, page_id=page_id,
@@ -213,8 +214,8 @@ async def rerun_units(inp: RecordInput) -> list[str]:
         for uid in inp.patch["unit_ids"]:
             old = await session.get(HarnessUnit, uid)
             if old is None or old.stage_run_id != inp.target_id:
-                raise ApplicationError(  # i18n:stored
-                    f"この工程の作業でない: {uid}", type="refused", non_retryable=True)
+                raise ApplicationError(
+                    ms("この工程の作業でない: {unit}", unit=uid), type="refused", non_retryable=True)
             again = (await session.execute(select(HarnessUnit).where(HarnessUnit.rerun_of == uid))).scalars().all()
             pending = [u for u in again if u.status not in ("done", "cancelled", "failed")]
             if pending:
@@ -268,18 +269,18 @@ async def _check_name_stage(session, run: HarnessStageRun) -> dict[str, Any]:
     draft = await name_draft_of_episode(session, work, run.episode_id)
     values, used = await name_check_thresholds(session, run.work_id)
     report = run_name_checks(draft, values)
-    unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]
+    unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]  # i18n:data
     if unset:
-        raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)  # i18n:stored
+        raise q.blocked(ms("ネームの検査の閾値が未設定: {keys}", keys=unset), missing=unset)
     lines = [ScriptLine(f"p{pg.page}-{pn.n}-{i}", ep.number, b.text)
              for pg in draft.pages for pn in pg.panels for i, b in enumerate(pn.balloons or []) if b.text.strip()]
     plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == run.work_id))).scalar_one_or_none()
     chars = await characters_by_name(session, run.work_id)
-    settings = "\n".join([f"あらすじ：{plan.synopsis}" if plan and plan.synopsis else ""] +
+    settings = "\n".join([f"あらすじ：{plan.synopsis}" if plan and plan.synopsis else ""] +  # i18n:prompt
                          [f"{n}：{m.traits or ''}" for n, m in sorted(chars.items())]).strip()
     out: dict[str, Any] = {"name_checks": [r.model_dump() for r in report.results], "thresholds_used": used}
     if not lines:
-        out["script"] = "台詞が無いので、台本の問い（矛盾・伏線）は聞いていない"
+        out["script"] = ms("台詞が無いので、台本の問い（矛盾・伏線）は聞いていない")
         return out
     await q.require_route(session, "contradiction")
     await q.require_route(session, "foreshadow")
@@ -290,8 +291,8 @@ async def _check_name_stage(session, run: HarnessStageRun) -> dict[str, Any]:
         text, _ = await _ask_stage(run, "foreshadow", "foreshadow", build_foreshadow_issues_question(settings, lines))
         out["foreshadow"] = [i.model_dump() for i in parse_foreshadow_issues_answer(text, lines)]
     except BrokenAnswerError as e:
-        raise ApplicationError(  # i18n:stored
-            f"台本の問いの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+        raise ApplicationError(ms("台本の問いの答えの形が崩れた: {error}", error=text_of(e)),
+                               type="broken_response", non_retryable=True) from e
     return out
 
 
@@ -303,7 +304,7 @@ async def _check_drawing_stage(session, run: HarnessStageRun) -> dict[str, Any]:
     drift = await panel_drawing_steps.drift_check(session, run)
     return {"pages": await panel_drawing_steps.page_summary(session, run), "flagged_units": sorted(set(flagged)),
             **drift,
-            "note": "コマをまたぐ一致は、設定資料の絵と同じ人物か（CCIP）だけを見る。服・背景の一致は人が見る"}
+            "note": ms("コマをまたぐ一致は、設定資料の絵と同じ人物か（CCIP）だけを見る。服・背景の一致は人が見る")}
 
 
 async def _stage_results(session, run: HarnessStageRun) -> dict[str, Any]:
@@ -339,7 +340,7 @@ async def stage_check(stage_run_id: str) -> dict[str, Any]:
                 else:
                     result.update(await _stage_results(session, run))
             except V3Error as e:
-                raise q.blocked(f"工程の検査ができない: {e}") from e  # i18n:stored
+                raise q.blocked(ms("工程の検査ができない: {error}", error=text_of(e))) from e
             await patch_stage(session, run.id, {"stage_check": result})
             await session.commit()
             return result

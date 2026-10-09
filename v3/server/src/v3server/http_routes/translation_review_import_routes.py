@@ -45,7 +45,7 @@ from v3server.http_routes.http_dependencies import (
     row,
 )
 from v3server.image_intake import take_in_image
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.current_app_import_operations import ImportCurrentAppProject
@@ -103,12 +103,13 @@ async def import_current_app_project(
             stored = await take_in_image(session, work_id, data_url_bytes(value), "human_upload")
         except (ProjectFileError, Invalid) as e:
             # 読めない絵・入口で止めた絵は入れず、報告に理由を残す（import_plan.py）
-            taken[key] = TakenImage(None, None, None, None, None, blocked=str(e))
+            # str(e) にすると m() の文が普通の文字列になり、報告に残した後で訳せなくなる
+            taken[key] = TakenImage(None, None, None, None, None, blocked=text_of(e))
             continue
         taken[key] = TakenImage(stored.sha256, stored.media_type, stored.width, stored.height, stored.dpi)
     sha = hashlib.sha256(data).hexdigest()
     plan = build_import_plan(parsed, PageSpec.model_validate(work.page_spec), work.reading_direction, taken, name,
-                             f"今のアプリのプロジェクト {name}（sha256 {sha[:12]}）から取り込んだ")
+                             ms("今のアプリのプロジェクト {name}（sha256 {sha}）から取り込んだ", name=name, sha=sha[:12]))
     op = ImportCurrentAppProject(episode_id=episode_id, source_file_name=name, source_sha256=sha,
                                  image_origin=image_origin, usage_terms=terms, plan=plan)
     event = await operation_submit_and_undo.submit(session, authz, actor, work_id, op)

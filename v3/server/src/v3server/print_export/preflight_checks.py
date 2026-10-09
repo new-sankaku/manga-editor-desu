@@ -36,7 +36,7 @@ from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, PanelL
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Work
 from v3server.hand_tools.vector_strokes import stroke_cache_problem
 from v3server.image_file_storage import read_image
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_transform import ItemTransform, transform_matrix
 from v3server.name_structure.print_settings import PrintSettings
@@ -119,8 +119,8 @@ def _joined_sides(sides: list[str]) -> str:
 def page_count_problem(count: int, multiple: int | None) -> str | None:
     if multiple is None or count % multiple == 0:
         return None
-    return m("ページ数 {count} が {multiple} の倍数でない（あと {rest} ページで揃う）", count=count, multiple=multiple,
-             rest=multiple - count % multiple)
+    return ms("ページ数 {count} が {multiple} の倍数でない（あと {rest} ページで揃う）", count=count, multiple=multiple,
+              rest=multiple - count % multiple)
 
 
 def _corners_in_trim(t, spec: PageSpec) -> list[tuple[float, float]]:
@@ -149,8 +149,8 @@ def _check_text(session_texts, content: PageContent, plan: PagePlan, spec: PageS
             over = safe_area_overrun(_corners_in_trim(t, spec), plan.side, spec, ps)
             if over:
                 issues.append(Issue(pid, "safe_area", "warning" if t.item_kind == "drawn_sfx" else "error",
-                                    m("文字「{text}」が安全線の外に出ている（{sides}）", text=t.text[:12],
-                                      sides=_joined_sides(over)), loc))
+                                    ms("文字「{text}」が安全線の外に出ている（{sides}）", text=t.text[:12],
+                                       sides=_joined_sides(over)), loc))
         try:
             text_fill(t)
         except RenderRefused as e:
@@ -168,11 +168,11 @@ def _check_text(session_texts, content: PageContent, plan: PagePlan, spec: PageS
             loc = {"table": "text_items", "id": t.id, "box_mm": t.box_mm}
             if rt.missing_chars:
                 issues.append(Issue(pid, "font", "error",
-                                    m("文字「{text}」の書体に無い字がある: {chars}", text=t.text[:12],
-                                      chars="".join(rt.missing_chars)), loc))
+                                    ms("文字「{text}」の書体に無い字がある: {chars}", text=t.text[:12],
+                                       chars="".join(rt.missing_chars)), loc))
             if rt.overflow:
                 issues.append(Issue(pid, "text_overflow", "error",
-                                    m("文字「{text}」が箱に入りきらない", text=t.text[:12]), loc))
+                                    ms("文字「{text}」が箱に入りきらない", text=t.text[:12]), loc))
     return issues
 
 
@@ -184,22 +184,22 @@ async def _check_images(session: AsyncSession, plan: PagePlan, placed: list[tupl
     for table, row_id, image_id, placement in placed:
         loc = {"table": table, "id": row_id, "image_id": image_id}
         if placement is None:
-            issues.append(Issue(pid, "image_resolution", "error", m("絵 {id} の置き場が決まっていない", id=image_id), loc))
+            issues.append(Issue(pid, "image_resolution", "error", ms("絵 {id} の置き場が決まっていない", id=image_id), loc))
             continue
         eff = effective_dpi(placement)
         if plan.dpi is not None and eff < plan.dpi:
             issues.append(Issue(pid, "image_resolution", "error",
-                                m("絵 {id} の実際の解像度 {actual}dpi が、ページの解像度 {dpi}dpi より低い", id=image_id,
-                                  actual=f"{eff:.0f}", dpi=plan.dpi),
+                                ms("絵 {id} の実際の解像度 {actual}dpi が、ページの解像度 {dpi}dpi より低い", id=image_id,
+                                   actual=f"{eff:.0f}", dpi=plan.dpi),
                                 {**loc, "effective_dpi": round(eff, 1)}))
         if plan.color_mode in ("bilevel", "grayscale"):
             f = await session.get(ImageFile, image_id)
             if f is None:
-                issues.append(Issue(pid, "image_resolution", "error", m("絵 {id} が無い", id=image_id), loc))
+                issues.append(Issue(pid, "image_resolution", "error", ms("絵 {id} が無い", id=image_id), loc))
                 continue
             if has_color(Image.open(io.BytesIO(read_image(f.sha256)))):
-                text = {"bilevel": m("2階調のページに色のある絵 {id} がある（書き出しで2階調にする）", id=image_id),
-                        "grayscale": m("グレーのページに色のある絵 {id} がある（書き出しでグレーにする）", id=image_id),
+                text = {"bilevel": ms("2階調のページに色のある絵 {id} がある（書き出しで2階調にする）", id=image_id),
+                        "grayscale": ms("グレーのページに色のある絵 {id} がある（書き出しでグレーにする）", id=image_id),
                         }[plan.color_mode]
                 issues.append(Issue(pid, "color_image", "warning", text, loc))
     return issues
@@ -211,16 +211,16 @@ async def _check_ai(session: AsyncSession, pid: str, in_use: set[str]) -> list[I
                                                              HeldAiChange.status == "open"))).scalars().all()
     for h in held:
         issues.append(Issue(pid, "held_change", "error",
-                            m("判断待ち（{kind}・{table}.{field}）が残っている", kind=h.kind, table=h.target_table,
-                              field=h.field),
+                            ms("判断待ち（{kind}・{table}.{field}）が残っている", kind=h.kind, table=h.target_table,
+                               field=h.field),
                             {"table": "held_ai_changes", "id": h.id, "target_table": h.target_table,
                              "target_id": h.target_id}))
     jobs = (await session.execute(select(Job).where(Job.page_id == pid, Job.status.not_in(JOB_FINISHED)))
             ).scalars().all()
     for j in jobs:
         issues.append(Issue(pid, "job", "error",
-                            m("生成の依頼 {id}（{process}）が終わっていない（{status}）", id=j.id, process=j.process,
-                              status=j.status),
+                            ms("生成の依頼 {id}（{process}）が終わっていない（{status}）", id=j.id, process=j.process,
+                               status=j.status),
                             {"table": "jobs", "id": j.id}))
     cands = (await session.execute(select(ImageFile).where(ImageFile.page_id == pid, ImageFile.origin == "generated",
                                                            ImageFile.discarded.is_(False)))).scalars().all()
@@ -230,7 +230,7 @@ async def _check_ai(session: AsyncSession, pid: str, in_use: set[str]) -> list[I
         if c.id in in_use or c.id in ancestors:
             continue
         issues.append(Issue(pid, "ai_candidate", "warning",
-                            m("まだ選んでいない生成の候補 {id} がある（採るか却下する）", id=c.id),
+                            ms("まだ選んでいない生成の候補 {id} がある（採るか却下する）", id=c.id),
                             {"table": "image_files", "id": c.id, "panel_id": c.panel_id}))
     return issues
 
@@ -243,18 +243,18 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
     issues: list[Issue] = []
     if language is not None and not (work.preferences or {}).get("language"):
         return [Issue(None, "settings", "error",
-                      m("作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない"))]
+                      ms("作品の言語（preferences.language）が決まっていない。どれが元の言語か分からない"))]
     if work.page_spec is None:
-        return [Issue(None, "settings", "error", m("作品のページの寸法（page_spec）が決まっていない"))]
+        return [Issue(None, "settings", "error", ms("作品のページの寸法（page_spec）が決まっていない"))]
     spec = PageSpec.model_validate(work.page_spec)
     ps = print_settings_of(work)
     if ps is None:
-        return [Issue(None, "settings", "error", m("作品の入稿の設定（preferences.print）が無い"))]
+        return [Issue(None, "settings", "error", ms("作品の入稿の設定（preferences.print）が無い"))]
     if work.medium == "paper" and nombre_settings_of(work) is None:
-        issues.append(Issue(None, "settings", "error", m("紙の作品なのに、ノンブルの設定（preferences.nombre）が無い")))
+        issues.append(Issue(None, "settings", "error", ms("紙の作品なのに、ノンブルの設定（preferences.nombre）が無い")))
     if work.first_page_is_left is None:
-        issues.append(Issue(None, "settings", "error", m("1ページ目を左に置くか（作品の first_page_is_left）が決まっていない"
-                                                          "（見開き・ノンブル・安全線のノドが決まらない）")))
+        issues.append(Issue(None, "settings", "error", ms("1ページ目を左に置くか（作品の first_page_is_left）が決まっていない"
+                                                           "（見開き・ノンブル・安全線のノドが決まらない）")))
     if page_ids is None:
         q = (select(Page.id).join(Episode, Episode.id == Page.episode_id)
              .where(Page.work_id == work.id, Page.removed.is_(False), Episode.removed.is_(False))
@@ -295,20 +295,20 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
         plan = plans[pid]
         page = plan.page
         if page.page_kind is None:
-            issues.append(Issue(pid, "page_kind", "error", m("ページの種類（表紙・カラー・本文・白ページ）が決まっていない")))
+            issues.append(Issue(pid, "page_kind", "error", ms("ページの種類（表紙・カラー・本文・白ページ）が決まっていない")))
         if plan.color_mode is None:
-            issues.append(Issue(pid, "color_mode", "error", m("色の種類が決まっていない")))
+            issues.append(Issue(pid, "color_mode", "error", ms("色の種類が決まっていない")))
         if plan.dpi is None:
-            issues.append(Issue(pid, "dpi", "error", m("解像度が決まっていない")))
+            issues.append(Issue(pid, "dpi", "error", ms("解像度が決まっていない")))
         sp = plan.spread
         if sp is not None:
             other_id = sp.second_page_id if sp.first_page_id == pid else sp.first_page_id
             other = plans.get(other_id)
             if other is not None and (other.color_mode != plan.color_mode or other.dpi != plan.dpi):
                 issues.append(Issue(pid, "spread", "error",
-                                    m("見開きの相手のページと色の種類か解像度が違う（{color_mode} {dpi}dpi・"
-                                      "{other_color_mode} {other_dpi}dpi）", color_mode=plan.color_mode, dpi=plan.dpi,
-                                      other_color_mode=other.color_mode, other_dpi=other.dpi),
+                                    ms("見開きの相手のページと色の種類か解像度が違う（{color_mode} {dpi}dpi・"
+                                       "{other_color_mode} {other_dpi}dpi）", color_mode=plan.color_mode, dpi=plan.dpi,
+                                       other_color_mode=other.color_mode, other_dpi=other.dpi),
                                     {"table": "spreads", "id": sp.id}))
         panels, layers = await _rows(session, Panel, pid), await _rows(session, PanelLayer, pid)
         texts, items = await _rows(session, TextItem, pid), await _rows(session, PageItem, pid)
@@ -329,7 +329,7 @@ async def run_preflight(session: AsyncSession, work: Work, page_ids: list[str] |
             texts, missing = await translate_texts(session, work, texts, language)
             content.texts = texts
             issues += [Issue(pid, "translation", "error",
-                             m("文字「{text}」に {language} の訳文が無い", text=t.text[:12], language=language),
+                             ms("文字「{text}」に {language} の訳文が無い", text=t.text[:12], language=language),
                              {"table": "text_items", "id": t.id, "box_mm": t.box_mm}) for t in missing]
         issues += _check_text(texts, content, plan, spec, ps, measure, font_path)
         issues += await _check_ai(session, pid, {x[2] for x in placed})

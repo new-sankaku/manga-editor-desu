@@ -31,7 +31,7 @@ from v3server.llm_questions.overall_review_question import (
     parse_page_summary_answer,
 )
 from v3server.llm_questions.structure_question import outline_text
-from v3server.messages import m
+from v3server.messages import m, ms, text_of
 from v3server.print_export.book_layout import episode_pages, page_sides
 from v3server.print_export.export_runner import ExportRefused, render_page_preview
 
@@ -50,8 +50,8 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         work = await session.get(Work, unit.work_id)
         if work.page_spec is None or work.first_page_is_left is None:
-            raise q.blocked(  # i18n:stored
-                "作品の寸法（page_spec）と1ページ目の位置（first_page_is_left）がまだ決まっていない")
+            raise q.blocked(
+                ms("作品の寸法（page_spec）と1ページ目の位置（first_page_is_left）がまだ決まっていない"))
         await q.require_route(session, "page_summary")
         th = await c.thresholds_of(session, unit.work_id, PREFIX, NEEDED)
         outline = (await session.execute(select(EpisodeOutline).where(
@@ -85,10 +85,10 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                 try:
                     images.append(await render_page_preview(session, work, p.id, PREVIEW_DPI))
                 except ExportRefused as e:
-                    raise q.blocked(f"ページ {p.number} を描けない: {e}") from e  # i18n:stored
+                    raise q.blocked(ms("ページ {page} を描けない: {error}", page=p.number, error=text_of(e))) from e
             rd, first_left = work.reading_direction, work.first_page_is_left
         if not pages:
-            raise q.blocked("話にページが無い")  # i18n:stored
+            raise q.blocked(ms("話にページが無い"))
         ratios = [_ratios(im) for im in images]
         rows = [{"page_id": p.id, "number": p.number, "black": b, "white": w} for p, (b, w) in zip(pages, ratios, strict=True)]
         openings = [{"pages": [pages[a].number, pages[b].number], "black": (ratios[a][0] + ratios[b][0]) / 2}
@@ -106,8 +106,8 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             summaries = [(numbers[s.image - 1], s.summary) for s in parse_page_summary_answer(text, len(numbers))]
         except BrokenAnswerError as e:
-            raise ApplicationError(f"ページの要約の答えの形が崩れた: {e}", type="broken_response",  # i18n:stored
-                                   non_retryable=True) from e
+            raise ApplicationError(ms("ページの要約の答えの形が崩れた: {error}", error=text_of(e)),
+                                   type="broken_response", non_retryable=True) from e
         gaps = None
         if ctx["outline"] is not None:
             question = build_outline_compare_question(outline_text(ctx["outline"]), summaries)
@@ -117,14 +117,14 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             try:
                 gaps = [g.model_dump() for g in parse_outline_compare_answer(text, set(numbers))]
             except BrokenAnswerError as e:
-                raise ApplicationError(f"構成との比べの答えの形が崩れた: {e}", type="broken_response",  # i18n:stored
-                                       non_retryable=True) from e
+                raise ApplicationError(ms("構成との比べの答えの形が崩れた: {error}", error=text_of(e)),
+                                       type="broken_response", non_retryable=True) from e
         async with get_sessionmaker()() as session:
             cost = await q.jobs_cost(session, job_ids)
         return {"pages": rows, "openings": openings, "summaries": [{"page": n, "summary": s} for n, s in summaries],
                 "gaps": gaps, "cost": cost, "job_ids": job_ids}
 
-    return await c.one_candidate(unit, args, measure, "今の原稿を測った物なので候補は1つ")
+    return await c.one_candidate(unit, args, measure, ms("今の原稿を測った物なので候補は1つ"))
 
 
 async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
@@ -134,17 +134,21 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         bmax, wmax = th["spread_black_max"], th["page_white_max"]
         out = []
         for o in cand.content["openings"]:
-            out.append(c.finding(f"見開きの黒（{o['pages'][0]}・{o['pages'][1]}ページ）", o["black"] <= bmax["value"],
-                                 False, f"{o['black']:.0%}（上限 {bmax['value']:.0%}、閾値は{bmax['status']}）"))
+            out.append(c.finding(ms("見開きの黒（{first}・{second}ページ）", first=o["pages"][0], second=o["pages"][1]),
+                                 o["black"] <= bmax["value"], False,
+                                 ms("{ratio:.0%}（上限 {high:.0%}、閾値は{status}）", ratio=o["black"], high=bmax["value"],
+                                    status=bmax["status"])))
         for p in cand.content["pages"]:
-            out.append(c.finding(f"ページの白（{p['number']}ページ）", p["white"] <= wmax["value"], False,
-                                 f"{p['white']:.0%}（上限 {wmax['value']:.0%}、閾値は{wmax['status']}）"))
+            out.append(c.finding(ms("ページの白（{page}ページ）", page=p["number"]), p["white"] <= wmax["value"], False,
+                                 ms("{ratio:.0%}（上限 {high:.0%}、閾値は{status}）", ratio=p["white"], high=wmax["value"],
+                                    status=wmax["status"])))
         gaps = cand.content["gaps"]
         if gaps is None:
-            out.append(c.finding("構成との食い違い", None, False, "構成（S1）が無いので比べない"))
+            out.append(c.finding(ms("構成との食い違い"), None, False, ms("構成（S1）が無いので比べない")))
         else:
-            out.append(c.finding("構成との食い違い", not gaps, False,
-                                 "無い" if not gaps else "；".join(f"{g['page']}ページ：{g['why']}" for g in gaps),
+            out.append(c.finding(ms("構成との食い違い"), not gaps, False,
+                                 ms("無い") if not gaps
+                                 else "；".join(ms("{page}ページ：{why}", page=g["page"], why=g["why"]) for g in gaps),
                                  judge="llm"))
         return out
 
@@ -152,11 +156,11 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return await c.pick_fewest_flags(unit, args, "今の原稿を測った候補は1つ")
+    return await c.pick_fewest_flags(unit, args, ms("今の原稿を測った候補は1つ"))
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return {"candidate_id": args["candidate_id"], "note": "人が総合の判定を見て完成とした"}
+    return {"candidate_id": args["candidate_id"], "note": ms("人が総合の判定を見て完成とした")}
 
 
 async def discard_round(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

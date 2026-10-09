@@ -16,6 +16,9 @@ from temporalio import activity, workflow
 from temporalio.common import RetryPolicy
 from temporalio.exceptions import ActivityError, ApplicationError
 
+with workflow.unsafe.imports_passed_through():
+    from v3server.messages import ms
+
 EXPORT_QUEUE = "v3-export"
 # 生存の知らせの間と、途絶えたとみなすまでの時間。描く・書くは別のスレッドで行うので（export_runner.off_loop）、
 # 書き出しの最中もイベントループは空いていて、知らせは止まらない
@@ -100,7 +103,9 @@ class ExportRunWorkflow:
                 # 値の問題。依頼はもう failed で、理由も書いてある
                 raise
             await workflow.execute_activity(
-                "mark_export_failed", args=[run_id, f"書き出しを {MAX_ATTEMPTS} 回やり直しても終わらなかった（{cause or e}）"],
+                "mark_export_failed",
+                args=[run_id, ms("書き出しを {attempts} 回やり直しても終わらなかった（{cause}）", attempts=MAX_ATTEMPTS,
+                                 cause=str(cause or e))],
                 task_queue=EXPORT_QUEUE, start_to_close_timeout=timedelta(minutes=1),
                 retry_policy=RetryPolicy(maximum_attempts=0),
             )

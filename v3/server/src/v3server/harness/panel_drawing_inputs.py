@@ -30,7 +30,7 @@ from v3server.canonical_tables.work_tree_tables import Panel
 from v3server.comfy_graphs.pose_skeleton_image import FigureBox, draw_standing_pose
 from v3server.generation_queue.image_process_registry import spec_for
 from v3server.harness import queue_calls as q
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.image_placement_carry import frame_bbox
 
 ControlName = Literal["pose", "depth", "lineart"]
@@ -123,10 +123,10 @@ class DrawingSpec(BaseModel):
 def size_for_frame(frame: dict[str, Any] | None, long_side: int) -> tuple[int, int]:
     box = frame_bbox(frame)
     if box is None:
-        raise q.blocked("コマの枠が無い。ネームで枠を決めてから作画する")  # i18n:stored
+        raise q.blocked(ms("コマの枠が無い。ネームで枠を決めてから作画する"))
     w, h = box[2] - box[0], box[3] - box[1]
     if w <= 0 or h <= 0:
-        raise q.blocked("コマの枠の大きさが0")  # i18n:stored
+        raise q.blocked(ms("コマの枠の大きさが0"))
     if w >= h:
         return long_side // 8 * 8, max(64, math.floor(long_side * h / w / 8) * 8)
     return max(64, math.floor(long_side * w / h / 8) * 8), long_side // 8 * 8
@@ -158,14 +158,14 @@ def aspect_crop(img_w: int, img_h: int, want_w: int, want_h: int, box: list[floa
     """正本の絵から切り出す範囲（ピクセル）。ネームに切り出す範囲（background_crop）があればそれ、無ければ絵の真ん中を
     コマの縦横比でいちばん大きく取る（取り方を返して道の記録に書く）。"""
     if box is not None:
-        return box_px(box, img_w, img_h), "ネームの切り出す範囲（background_crop）"
+        return box_px(box, img_w, img_h), ms("ネームの切り出す範囲（background_crop）")
     ratio = want_w / want_h
     if img_w / img_h > ratio:
         cw, ch = round(img_h * ratio), img_h
     else:
         cw, ch = img_w, round(img_w / ratio)
     x0, y0 = (img_w - cw) // 2, (img_h - ch) // 2
-    return [x0, y0, x0 + cw, y0 + ch], "ネームに切り出す範囲が無いので、正本の絵の真ん中をコマの縦横比で切り出した"
+    return [x0, y0, x0 + cw, y0 + ch], ms("ネームに切り出す範囲が無いので、正本の絵の真ん中をコマの縦横比で切り出した")
 
 
 def png_b64(im: Image.Image) -> str:
@@ -194,8 +194,8 @@ def scene_image(scene: dict[str, Any], view: str, width: int, height: int, bg: B
 def control_fields(spec: DrawingSpec, name: ControlName, invert: bool) -> dict[str, Any]:
     use = spec.controls.get(name)
     if use is None:
-        raise q.blocked(  # i18n:stored
-            f"作業の決めごとの controls に {name} の効き（strength・end）が無い。この形の指定を使うには要る")
+        raise q.blocked(
+            ms("作業の決めごとの controls に {name} の効き（strength・end）が無い。この形の指定を使うには要る", name=name))
     return {"control": "lineart" if name == "lineart" else name, "control_strength": use.strength,
             "control_end": use.end, "control_invert": invert}
 
@@ -224,60 +224,62 @@ async def plan_panel(session, work_id: str, panel: Panel, spec: DrawingSpec, peo
     for p, src in zip(people, [x for x in (c.get("people") or []) if isinstance(x, dict) and x.get("name")], strict=True):
         box = box_in_panel(panel.frame, src["box_mm"]) if src.get("box_mm") else None
         if box is None:
-            missing.append(f"人物 {p['name']} の範囲（ネームの box_mm）が無い")
+            missing.append(ms("人物 {name} の範囲（ネームの box_mm）が無い", name=p["name"]))
         else:
-            used.append(f"人物 {p['name']} の範囲")
+            used.append(ms("人物 {name} の範囲", name=p["name"]))
         face = box_in_panel(panel.frame, src["face_box_mm"]) if src.get("face_box_mm") else None
         figs.append({**p, "box": box, "face_box": face})
     boxes_ok = bool(figs) and all(f["box"] is not None for f in figs)
     plan: dict[str, Any] = {"people": figs, "placement": spec.person_placement if boxes_ok else None,
                             "size": [width, height], "used": used, "missing": missing}
     if figs and not boxes_ok:
-        missing.append("人物の範囲が揃わないので、人物の置き場（範囲ごとの文・骨格）は渡さない")
+        missing.append(ms("人物の範囲が揃わないので、人物の置き場（範囲ごとの文・骨格）は渡さない"))
     rough = await human_rough(session, panel)
     if rough is not None:
-        used.append("人が描いた下絵（線画の形の指定。背景と人物を分けずに描く）")
+        used.append(ms("人が描いた下絵（線画の形の指定。背景と人物を分けずに描く）"))
         return {**plan, "route": "rough", "rough_image_id": rough.id}
     loc = await background_of(session, work_id, c.get("location"))
     view = c.get("view")
     if not c.get("location"):
-        missing.append("ネームに場所（location）が無い。背景の正本は使えない")
+        missing.append(ms("ネームに場所（location）が無い。背景の正本は使えない"))
         return {**plan, "route": "single"}
     if loc is None:
-        missing.append(f"設定資料に場所 {c['location']} の背景（採った物）が無い")
+        missing.append(ms("設定資料に場所 {location} の背景（採った物）が無い", location=c["location"]))
         return {**plan, "route": "single"}
     gen = loc.generation or {}
     canonical = gen.get("canonical") or {}
     scene = gen.get("scene3d") or {}
     if view is None:
-        missing.append("ネームにコマの向き（view）が無い。正本の向きと比べられない")
+        missing.append(ms("ネームにコマの向き（view）が無い。正本の向きと比べられない"))
         return {**plan, "route": "single", "location": loc.name}
     if spec.background is None:
-        missing.append("作業の決めごとに background（背景を作る引数）が無いので、場所の正本は使わない")
+        missing.append(ms("作業の決めごとに background（背景を作る引数）が無いので、場所の正本は使わない"))
         return {**plan, "route": "single", "location": loc.name}
     if figs and not boxes_ok:
-        missing.append("人物の範囲が無いと背景の上に人物を描けないので、場所の正本は使わない")
+        missing.append(ms("人物の範囲が無いと背景の上に人物を描けないので、場所の正本は使わない"))
         return {**plan, "route": "single", "location": loc.name}
     location_prompt = gen.get("prompt")
     if canonical.get("image_id") and canonical.get("view") == view:
         img = await session.get(ImageFile, canonical["image_id"])
         crop, how = aspect_crop(img.width, img.height, width, height, c.get("background_crop"))
-        used.append(f"場所 {loc.name} の正本の背景の絵（向き {view} が同じ）を切り出した")
+        used.append(ms("場所 {location} の正本の背景の絵（向き {view} が同じ）を切り出した", location=loc.name, view=view))
         if c.get("background_crop") is None:
             missing.append(how)
         if not figs and spec.redraw_params is None:
-            raise q.blocked(  # i18n:stored
-                "人物のいないコマで正本の背景を使うには、作業の決めごとに redraw_params が要る")
+            raise q.blocked(
+                ms("人物のいないコマで正本の背景を使うには、作業の決めごとに redraw_params が要る"))
         return {**plan, "route": "background_crop", "location": loc.name, "view": view,
                 "background": {"image_id": img.id, "crop_px": crop, "how": how},
                 "size": [crop[2] - crop[0], crop[3] - crop[1]]}
     if (scene.get("cameras") or {}).get(view) and scene.get("boxes"):
         if not location_prompt:
-            raise q.blocked(f"設定資料の場所 {loc.name} に背景の生成の言葉（generation.prompt）が無い")  # i18n:stored
-        used.append(f"場所 {loc.name} の箱の3D（向き {view} のカメラ）から{'奥行き' if spec.background.control == 'depth' else '線画'}を描いた")
+            raise q.blocked(ms("設定資料の場所 {location} に背景の生成の言葉（generation.prompt）が無い", location=loc.name))
+        used.append(ms("場所 {location} の箱の3D（向き {view} のカメラ）から奥行きを描いた", location=loc.name, view=view)
+                    if spec.background.control == "depth"
+                    else ms("場所 {location} の箱の3D（向き {view} のカメラ）から線画を描いた", location=loc.name, view=view))
         return {**plan, "route": "background_3d", "location": loc.name, "view": view,
                 "background": {"scene3d": scene, "prompt": location_prompt}}
-    missing.append(f"場所 {loc.name} の正本に、向き {view} の絵も3Dのカメラも無い")
+    missing.append(ms("場所 {location} の正本に、向き {view} の絵も3Dのカメラも無い", location=loc.name, view=view))
     return {**plan, "route": "single", "location": loc.name}
 
 

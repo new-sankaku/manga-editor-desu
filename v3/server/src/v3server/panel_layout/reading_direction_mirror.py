@@ -8,7 +8,7 @@ from v3server.name_structure.name_draft_schema import NameDraft, NamePage
 from v3server.name_structure.reading_direction import PageSpec, ReadingDirection
 from v3server.panel_layout.panel_geometry import Box, Point, Polygon
 
-PageSide = Literal["左", "右"]
+PageSide = Literal["左", "右"]  # i18n:data
 
 
 def frame_span_width(page: NamePage, spec: PageSpec) -> float:
@@ -46,11 +46,11 @@ def to_right_to_left_box(box: Box, direction: ReadingDirection, width: float) ->
 
 def before_turn_side(direction: ReadingDirection) -> PageSide:
     """めくる直前に読むページの側。右から読む本は右→左と読んでからめくるので左、左から読む本は右。"""
-    return "左" if direction == "right_to_left" else "右"
+    return "左" if direction == "right_to_left" else "右"  # i18n:data
 
 
 def opposite_side(side: PageSide) -> PageSide:
-    return "右" if side == "左" else "左"
+    return "右" if side == "左" else "左"  # i18n:data
 
 
 def occupies_two_pages(page: NamePage) -> bool:
@@ -60,7 +60,7 @@ def occupies_two_pages(page: NamePage) -> bool:
 
 def _page_slots(draft: NameDraft) -> list[tuple[PageSide, PageSide]]:
     """各ページの（最初の側, 最後の側）。2ページ分を占める見開きは、左右の2つの側を続けて使う。"""
-    first: PageSide = "左" if draft.first_page_is_left else "右"
+    first: PageSide = "左" if draft.first_page_is_left else "右"  # i18n:data
     out = []
     slot = 0
     for pg in draft.pages:
@@ -102,13 +102,13 @@ def spread_gutter_x(spec: PageSpec) -> float:
 
 def gutter_edge_x(side: PageSide, spec: PageSpec) -> float:
     """ノド（綴じる側）にある基本枠の縦の辺の x。左のページは右の辺、右のページは左の辺。読む向きによらない。"""
-    return spec.frame_width_mm if side == "左" else 0.0
+    return spec.frame_width_mm if side == "左" else 0.0  # i18n:data
 
 
 def crosses_gutter_edge(xs: list[float], side: PageSide, spec: PageSpec, eps: float) -> bool:
     """点の x のどれかが、基本枠のノドの辺を越えてノドの側へ出ているか。"""
     edge = gutter_edge_x(side, spec)
-    return any(x > edge + eps for x in xs) if side == "左" else any(x < edge - eps for x in xs)
+    return any(x > edge + eps for x in xs) if side == "左" else any(x < edge - eps for x in xs)  # i18n:data
 
 
 def page_reading_sequence(page: NamePage) -> list[int]:

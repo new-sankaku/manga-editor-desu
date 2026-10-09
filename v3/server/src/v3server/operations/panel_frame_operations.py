@@ -25,7 +25,7 @@ from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.name_structure.item_styles import FrameStyle
 from v3server.name_structure.name_draft_schema import PanelFrame
 from v3server.name_structure.reading_direction import PageSpec
@@ -135,7 +135,8 @@ class _Plan:
         rc = RowChanges(ctx)
         if ctx.actor.kind == "ai" and self.touched_human_hand():
             # 何も変えない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
-            hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0], "手動編集の印の付いたコマ・文字に当たる")
+            hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0],
+                              ms("手動編集の印の付いたコマ・文字に当たる"))
             return rc.inverse(page_ids, label)
         # 足す行を先に書き出す。変える値が足す行を指す（文字の panel_id を新しいコマへ移すなど）と、同じ書き出しの中では
         # 行を入れる前に値を変えることがあり、text_items_panel_id_fkey で止まった（2026-10-08。panels と image_files の
@@ -222,7 +223,7 @@ class SplitPanel(OpBase):
         for it in items:
             if point_in_polygon(_box_center(it.box_mm), small):
                 plan.change(it, {"panel_id": new.id})
-        return await plan.apply(ctx, self, pages, panel, "コマを分ける")
+        return await plan.apply(ctx, self, pages, panel, ms("コマを分ける"))
 
 
 class MergePanels(OpBase):
@@ -266,7 +267,7 @@ class MergePanels(OpBase):
             plan.change(t, {"panel_id": keep.id})
         pages = [a.page_id] + await _shift_orders(plan, ctx.session, ctx.work.id, max(a.order, b.order), -1,
                                                   {a.id, b.id})
-        return await plan.apply(ctx, self, pages, keep, "コマを合わせる")
+        return await plan.apply(ctx, self, pages, keep, ms("コマを合わせる"))
 
 
 class RandomSplitPanel(OpBase):
@@ -319,7 +320,7 @@ class RandomSplitPanel(OpBase):
             for it in items:
                 if point_in_polygon(_box_center(it.box_mm), piece):
                     plan.change(it, {"panel_id": new.id})
-        return await plan.apply(ctx, self, pages, panel, "ばらばらに割る")
+        return await plan.apply(ctx, self, pages, panel, ms("ばらばらに割る"))
 
 
 class AddShapePanel(OpBase):
@@ -350,7 +351,7 @@ class AddShapePanel(OpBase):
                  if self.frame_style else None)
         rc = RowChanges(ctx)
         rc.created(_new_panel(ctx, self.page_id, self.order, _frame(poly, self.bleeds), style, self.id))
-        return rc.inverse([self.page_id], "図形のコマを足す")
+        return rc.inverse([self.page_id], ms("図形のコマを足す"))
 
 
 class SavePanelTemplate(OpBase):
@@ -376,7 +377,7 @@ class SavePanelTemplate(OpBase):
         rc = RowChanges(ctx)
         rc.created(PanelTemplate(id=self.id, work_id=ctx.work.id, name=self.name, frames=frames,
                                  created_by=ctx.actor.id, human_hand_fields=["frames", "name"], removed=False))
-        return rc.inverse([], "コマの型を保存する")
+        return rc.inverse([], ms("コマの型を保存する"))
 
 
 class ApplyPanelTemplate(OpBase):
@@ -420,5 +421,5 @@ class ApplyPanelTemplate(OpBase):
             plan.creates.append(_new_panel(ctx, self.page_id, self.first_order + i, _frame(poly, f["bleeds"]),
                                            f.get("frame_style"), pid))
         page = await ctx.session.get(Page, self.page_id)
-        return await plan.apply(ctx, self, [self.page_id], page, "コマの型を当てる")
+        return await plan.apply(ctx, self, [self.page_id], page, ms("コマの型を当てる"))
 

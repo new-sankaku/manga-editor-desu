@@ -12,7 +12,7 @@ from v3server.canonical_tables.page_item_tables import AnnotationItem
 from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.ai_involvement import Task, require_actor_may
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -57,7 +57,7 @@ class AddAnnotation(OpBase):
                                   author_kind=ctx.actor.kind, author_id=ctx.actor.id, status="open", job_ids=[],
                                   removed=False,
                                   human_hand_fields=["about_task", "body", "region_mm"] if is_human else []))
-        return rc.inverse([self.page_id], "赤入れを付けた取り消し")
+        return rc.inverse([self.page_id], ms("赤入れを付けた取り消し"))
 
 
 class UpdateAnnotation(OpBase):
@@ -88,7 +88,7 @@ class UpdateAnnotation(OpBase):
             changes["region_mm"] = _region(changes["region_mm"])
         rc = RowChanges(ctx)
         rc.change(item, changes)
-        return rc.inverse([item.page_id], "赤入れを直した取り消し")
+        return rc.inverse([item.page_id], ms("赤入れを直した取り消し"))
 
 
 class RecordAnnotationJob(OpBase):
@@ -109,4 +109,4 @@ class RecordAnnotationJob(OpBase):
             raise Invalid(m("すでに残してある"))
         rc = RowChanges(ctx)
         rc.set_plain(item, {"job_ids": [*item.job_ids, self.job_id]})
-        return rc.inverse([item.page_id], "赤入れの依頼の記録の取り消し")
+        return rc.inverse([item.page_id], ms("赤入れの依頼の記録の取り消し"))

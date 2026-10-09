@@ -15,11 +15,12 @@ from pydantic import BaseModel
 
 from v3server.judge_procedures.blind_image_copy import BlindCopies, make_blind_copies
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 
 # LLM を呼ぶ関数。問いの文と、添える画像の場所（この順に添える）を受け取り、答えの文字列を返す
 AskWithImages = Callable[[str, list[str]], Awaitable[str]]
 
-AnswerChoice = Literal["A", "B", "同じ"]
+AnswerChoice = Literal["A", "B", "同じ"]  # i18n:data
 PairSide = Literal["left", "right", "tie"]
 
 
@@ -51,14 +52,14 @@ def build_pair_question(criterion: str, image_names: list[str], pair_lines: list
     if not criterion.strip():
         raise ValueError("criterion が空")  # i18n:dev
     names = "\n".join(image_names)
-    pairs = "\n".join(f"組{i}：A＝{a}　B＝{b}" for i, a, b in pair_lines)
+    pairs = "\n".join(f"組{i}：A＝{a}　B＝{b}" for i, a, b in pair_lines)  # i18n:prompt
     return f"""添えた画像は、どれも漫画の1コマ用の絵です。添えた順に、次の名前で呼びます。
 {names}
 
 下の各組について、{criterion}差が見分けられないときは「同じ」を選べます。「同じ」を選びすぎると順が分からなくなり、無理に選ぶと見分けられない差を作ってしまいます。
 {pairs}
 
-出力はJSONだけにしてください。形式：{{"pairs":[{{"id":組の番号,"choice":"A か B か 同じ"}}]}}"""
+出力はJSONだけにしてください。形式：{{"pairs":[{{"id":組の番号,"choice":"A か B か 同じ"}}]}}"""  # i18n:prompt
 
 
 class _PairChoice(BaseModel):
@@ -75,12 +76,12 @@ def parse_pair_answer(answer: str, pair_count: int) -> dict[int, AnswerChoice]:
     items = read_answer(answer, _PairAnswer).pairs
     ids = sorted(x.id for x in items)
     if ids != list(range(1, pair_count + 1)):
-        raise BrokenAnswerError(f"組の番号が 1〜{pair_count} に揃っていない: {ids}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("組の番号が 1〜{count} に揃っていない: {ids}", count=pair_count, ids=str(ids)), answer)
     return {x.id: x.choice for x in items}
 
 
 def _to_side(choice: AnswerChoice, swapped: bool) -> PairSide:
-    if choice == "同じ":
+    if choice == "同じ":  # i18n:data
         return "tie"
     a_is_left = not swapped
     return "left" if (choice == "A") == a_is_left else "right"

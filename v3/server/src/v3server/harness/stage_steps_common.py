@@ -20,6 +20,7 @@ from v3server.canonical_tables.work_tree_tables import Episode, Work
 from v3server.database_engine import get_sessionmaker
 from v3server.harness import queue_calls as q
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError
+from v3server.messages import ms, text_of
 from v3server.request_actor import Actor
 
 
@@ -35,8 +36,7 @@ def human(by: str) -> Actor:
 def spec_of(unit: HarnessUnit, key: str, model):
     """作業の決めごと。無ければ blocked（工程の決めごとを PUT .../stages/{id}/spec で足してから再開する）。"""
     if key not in (unit.spec or {}):
-        raise q.blocked(  # i18n:stored
-            f"作業の決めごと spec.{key} が無い。工程の決めごとに足してから再開する", spec=key)
+        raise q.blocked(ms("作業の決めごと spec.{key} が無い。工程の決めごとに足してから再開する", key=key), spec=key)
     return model.model_validate(unit.spec[key])
 
 
@@ -44,11 +44,11 @@ async def cut_out_episode(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, 
     async with get_sessionmaker()() as session:
         if unit.target_kind == "work":
             if await session.get(Work, unit.target_id) is None:
-                raise ApplicationError("作品が無い", type="refused", non_retryable=True)  # i18n:stored
+                raise ApplicationError(ms("作品が無い"), type="refused", non_retryable=True)
             return {"work_id": unit.target_id}
         ep = await session.get(Episode, unit.target_id)
         if ep is None or ep.removed:
-            raise ApplicationError("話が無い（消された）", type="refused", non_retryable=True)  # i18n:stored
+            raise ApplicationError(ms("話が無い（消された）"), type="refused", non_retryable=True)
         return {"episode_id": ep.id}
 
 
@@ -85,14 +85,14 @@ async def ask_candidates(unit: HarnessUnit, args: dict[str, Any], step: str, que
             try:
                 cand.content, cand.status = read(text), "generated"
             except BrokenAnswerError as e:
-                cand.status, cand.dropped_reason = "failed", f"答えの形が崩れた: {e}"
+                cand.status, cand.dropped_reason = "failed", ms("答えの形が崩れた: {error}", error=text_of(e))
             await session.commit()
             out.append({"candidate_id": cid, "status": cand.status})
     async with get_sessionmaker()() as session:
         cost = await q.jobs_cost(session, job_ids)
     if not any(o["status"] == "generated" for o in out):
-        raise ApplicationError(  # i18n:stored
-            "案が1つも読めなかった（答えの形が崩れた）", type="broken_response", non_retryable=True)
+        raise ApplicationError(
+            ms("案が1つも読めなかった（答えの形が崩れた）"), type="broken_response", non_retryable=True)
     return {"candidates": out, "cost": cost, "job_ids": job_ids}
 
 
@@ -120,7 +120,8 @@ async def thresholds_of(session, work_id: str, prefix: str, needed: dict[str, st
     got = {t.key[len(prefix):]: t for t in rows if t.status != "rejected"}
     missing = [k for k in needed if k not in got]
     if missing:
-        raise q.blocked("閾値が未設定: " + "、".join(f"{prefix}{k}（{needed[k]}）" for k in missing),  # i18n:stored
+        raise q.blocked(ms("閾値が未設定: {keys}",
+                           keys=[ms("{key}（{meaning}）", key=prefix + k, meaning=needed[k]) for k in missing]),
                         missing=[prefix + k for k in missing])
     return {k: {"value": float(t.value["value"]), "status": t.status, "source": t.source} for k, t in got.items()}
 
@@ -150,7 +151,7 @@ async def check_candidates(unit: HarnessUnit, args: dict[str, Any],
             c.check = {"findings": findings}
             c.check_verdict = "drop" if dropped else ("flag" if any(f["ok"] is False for f in findings) else "pass")
             if dropped:
-                c.dropped_reason = "検査で落ちた: " + "、".join(f["name"] for f in dropped)
+                c.dropped_reason = ms("検査で落ちた: {names}", names=[f["name"] for f in dropped])
             failed |= {f["name"] for f in findings if f["ok"] is False}
             out.append({"candidate_id": c.id, "verdict": c.check_verdict})
             await session.commit()
@@ -164,8 +165,8 @@ async def pick_fewest_flags(unit: HarnessUnit, args: dict[str, Any], why: str) -
             HarnessCandidate.unit_id == unit.id, HarnessCandidate.attempt == args["attempt"],
             HarnessCandidate.check_verdict.in_(["pass", "flag"])).order_by(HarnessCandidate.k_index))).scalars().all()
         if not cands:
-            return {"picked": None, "why": "選べる案が無い", "cost": 0, "job_ids": [], "disagree": False,
-                    "failure": "evaluate:なし"}
+            return {"picked": None, "why": ms("選べる案が無い"), "cost": 0, "job_ids": [], "disagree": False,
+                    "failure": "evaluate:なし"}  # i18n:data
 
         def flags(c):
             return sum(1 for f in c.check["findings"] if f["ok"] is False)
@@ -196,5 +197,5 @@ async def discard_candidates(unit: HarnessUnit, args: dict[str, Any],
 async def picked_content(session, args: dict[str, Any]) -> HarnessCandidate:
     cand = await session.get(HarnessCandidate, args["candidate_id"])
     if cand is None or cand.content is None:
-        raise ApplicationError("採る候補に中身が無い", type="refused", non_retryable=True)  # i18n:stored
+        raise ApplicationError(ms("採る候補に中身が無い"), type="refused", non_retryable=True)
     return cand

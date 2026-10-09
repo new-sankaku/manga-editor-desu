@@ -17,6 +17,7 @@ import numpy as np
 import pypdf
 from PIL import Image
 
+from v3server.messages import ms
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.print_export.cmyk_conversion import cmyk_tiff_bytes
 
@@ -41,19 +42,19 @@ def _encode_page(image: Image.Image, bilevel_codec: BilevelCodec | None, dpi: fl
     buf = io.BytesIO()
     if image.mode == "1":
         if bilevel_codec is None:
-            raise ValueError("2値のページがあるのに、2値の符号化が決まっていない")  # i18n:stored
+            raise ValueError(ms("2値のページがあるのに、2値の符号化が決まっていない"))
         if bilevel_codec == "ccitt_g4":
             image.save(buf, format="TIFF", compression="group4", dpi=(dpi, dpi))
         elif bilevel_codec == "flate":
             image.save(buf, format="PNG", dpi=(dpi, dpi))
         else:
-            raise ValueError(f"2値の符号化が不明です: {bilevel_codec}")  # i18n:stored
+            raise ValueError(ms("2値の符号化が不明です: {codec}", codec=bilevel_codec))
     elif image.mode in ("L", "RGB"):
         image.save(buf, format="PNG", dpi=(dpi, dpi))
     elif image.mode == "CMYK":
         # cmyk_conversion.to_cmyk で作った絵（ICC プロファイル付き）。img2pdf が ICCBased の色空間にする
         if "icc_profile" not in image.info:
-            raise ValueError("CMYK のページに ICC プロファイルが付いていない")  # i18n:stored
+            raise ValueError(ms("CMYK のページに ICC プロファイルが付いていない"))
         return cmyk_tiff_bytes(image, dpi)
     else:
         raise ValueError(f"画像のモードは 1・L・RGB・CMYK のどれかにしてください（{image.mode}）")  # i18n:dev
@@ -82,17 +83,18 @@ def write_print_pdf(pages: Sequence[Image.Image], spec: PageSpec, dpi: float | S
     BleedBox は塗り足し込みにする。紙を渡したときは、ページの絵が紙の真ん中に置いてある前提。
     """
     if not pages:
-        raise ValueError("ページが1枚もありません")  # i18n:stored
+        raise ValueError(ms("ページが1枚もありません"))
     canvas_mm = canvas_size_mm(spec)
     if paper_mm is not None and (paper_mm[0] < canvas_mm[0] or paper_mm[1] < canvas_mm[1]):
-        raise ValueError(f"紙 {paper_mm}mm が塗り足し込みのページ {canvas_mm}mm より小さい")  # i18n:stored
+        raise ValueError(ms("紙 {paper}mm が塗り足し込みのページ {canvas}mm より小さい", paper=str(paper_mm), canvas=str(canvas_mm)))
     dpis: list[float] = [float(dpi)] * len(pages) if isinstance(dpi, (int, float)) else list(dpi)
     if len(dpis) != len(pages):
         raise ValueError(f"dpi の数 {len(dpis)} がページの数 {len(pages)} と違います")  # i18n:dev
     for i, (page, d) in enumerate(zip(pages, dpis, strict=False)):
         expected = paper_size_px(paper_mm, d) if paper_mm is not None else canvas_size_px(spec, d)
         if page.size != expected:
-            raise ValueError(f"{i + 1}ページ目のピクセル数 {page.size} が、寸法と dpi から計算した {expected} と違います")  # i18n:stored
+            raise ValueError(ms("{number}ページ目のピクセル数 {size} が、寸法と dpi から計算した {expected} と違います", number=i + 1,
+                                size=str(page.size), expected=str(expected)))
     w_mm, h_mm = paper_mm if paper_mm is not None else canvas_mm
     layout = img2pdf.get_layout_fun((img2pdf.mm_to_pt(w_mm), img2pdf.mm_to_pt(h_mm)))
     raw = img2pdf.convert([_encode_page(p, bilevel_codec, d) for p, d in zip(pages, dpis, strict=False)], layout_fun=layout)

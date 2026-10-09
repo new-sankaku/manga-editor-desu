@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, Node
+from v3server.messages import ms
 
 # ConditioningSetArea の幅・高さ・位置は 8 ピクセル刻み（ComfyUI の入力の定義）
 AREA_STEP = 8
@@ -50,11 +51,12 @@ def regional_positive(graph: ComfyNodeGraph, positive, clip, regions: list[Regio
 
 def _check(regions: list[RegionPrompt]) -> None:
     if not regions:
-        raise ValueError('範囲が1つもありません')  # i18n:stored
+        raise ValueError(ms('範囲が1つもありません'))
     for r in regions:
         for name in ('x', 'y', 'width', 'height'):
             if getattr(r, name) % AREA_STEP:
-                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} ピクセル刻みではありません')  # i18n:stored
+                raise ValueError(ms('範囲の {name}={value} が {step} ピクセル刻みではありません', name=name, value=getattr(r, name),
+                                    step=AREA_STEP))
 
 
 def apply_regional_prompts(graph: ComfyNodeGraph, sampler: Node, clip_source: Node, regions: list[RegionPrompt]) -> Node:
@@ -65,11 +67,12 @@ def apply_regional_prompts(graph: ComfyNodeGraph, sampler: Node, clip_source: No
     白黒では 2/6〜3/6 で、ほかは複数コマのページの絵になった。白黒の2人はこれだけでは足りない。
     """
     if not regions:
-        raise ValueError('範囲が1つもありません')  # i18n:stored
+        raise ValueError(ms('範囲が1つもありません'))
     for r in regions:
         for name in ('x', 'y', 'width', 'height'):
             if getattr(r, name) % AREA_STEP:
-                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} ピクセル刻みではありません')  # i18n:stored
+                raise ValueError(ms('範囲の {name}={value} が {step} ピクセル刻みではありません', name=name, value=getattr(r, name),
+                                    step=AREA_STEP))
     combined = None
     for r in regions:
         enc = graph.add('CLIPTextEncode', text=r.text, clip=clip_source[1])

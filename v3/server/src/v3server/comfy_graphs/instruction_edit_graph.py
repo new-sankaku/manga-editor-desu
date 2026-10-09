@@ -31,6 +31,7 @@ from v3server.comfy_graphs.source_and_masks import (
     resize,
     save,
 )
+from v3server.messages import ms
 
 ColorMatch = Literal["none", "reinhard_lab", "mkl_lab", "histogram"]
 
@@ -61,7 +62,7 @@ def build_instruction_edit(settings: EditSettings, instruction: str, negative_te
                            filename_prefix: str) -> ComfyNodeGraph:
     """crop（x, y, 幅, 高さ）があれば、そこだけ切り出してモデルに渡し、戻すときに元の大きさへ直して同じ場所に重ねる。"""
     if crop is not None and not use_region:
-        raise ValueError("切り出しは囲んだ範囲があるときだけ")  # i18n:stored
+        raise ValueError(ms("切り出しは囲んだ範囲があるときだけ"))
     g = ComfyNodeGraph()
     model = g.add('UNETLoader', unet_name=settings.unet_name, weight_dtype=settings.weight_dtype)[0]
     for lora in settings.loras:

@@ -20,6 +20,7 @@ from v3server.current_app_import.project_file_reader import (
     unpack_container,
 )
 from v3server.image_file_storage import inspect_image_file
+from v3server.messages import render
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations.review_operations import move_kind
 from v3server.review_progress import PageStatus, estimate
@@ -185,7 +186,7 @@ def test_入口で止めた絵は入れず理由を残す():
     blocked = {k: TakenImage(None, None, None, None, None, blocked="判定で止めた") for k in referenced_image_keys(proj)}
     plan = build_import_plan(proj, A4, "rtl", blocked, "x", "試験")
     assert not plan.images
-    assert sum(1 for e in plan.entries if "判定で止めた" in e.note) == 2
+    assert sum(1 for e in plan.entries if "判定で止めた" in render(e.note, "ja")) == 2
 
 
 # ---------------------------------------------------------------- 確認の状態

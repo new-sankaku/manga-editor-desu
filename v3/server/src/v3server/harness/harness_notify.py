@@ -36,7 +36,7 @@ from v3server.canonical_tables.harness_tables import (
 )
 from v3server.canonical_tables.table_base import new_id
 from v3server.database_engine import get_sessionmaker
-from v3server.messages import m
+from v3server.messages import m, ms, render_tree
 
 log = logging.getLogger(__name__)
 
@@ -91,25 +91,28 @@ def rules(kind: str, payload: dict[str, Any], s: NotificationSettings | None) ->
     out = []
     uid, status, attempt = payload.get("unit_id"), payload.get("status"), payload.get("attempt")
     if kind == "unit" and uid and status == "awaiting_review":
-        out.append({"kind": "generated", "level": "info", "title": f"候補ができました（{attempt}回目）",
+        out.append({"kind": "generated", "level": "info", "title": ms("候補ができました（{attempt}回目）", attempt=attempt),
                     "dedupe": f"{uid}:generated:{attempt}"})
     if kind == "unit" and uid and status in STOP_STATUSES:
         reason = payload.get("stop_reason") or ""
-        out.append({"kind": "failed", "level": "warn", "title": f"作業が止まりました：{reason}"[:200],
+        # 題は切らない（包んだ文は途中で切れない。止まった理由は包んだ文で届く）
+        out.append({"kind": "failed", "level": "warn", "title": ms("作業が止まりました：{reason}", reason=reason),
                     "dedupe": f"{uid}:{status}:{attempt}:" + hashlib.sha256(reason.encode()).hexdigest()[:12]})
     if (kind in ("unit", "step") and uid and s is not None and s.budget_near_ratio is not None
             and payload.get("budget_cost") and payload.get("cost_used") is not None
             and payload["cost_used"] >= s.budget_near_ratio * float(payload["budget_cost"])):
         out.append({"kind": "budget_near", "level": "warn",
-                    "title": f"費用が予算の {s.budget_near_ratio:.0%} に達しました（{payload['cost_used']} / "
-                             f"{payload['budget_cost']}）", "dedupe": f"{uid}:budget_near"})
+                    "title": ms("費用が予算の {ratio:.0%} に達しました（{used} / {budget}）", ratio=s.budget_near_ratio,
+                                used=payload["cost_used"], budget=payload["budget_cost"]),
+                    "dedupe": f"{uid}:budget_near"})
     if kind == "review_notice" and uid:
         n = int(payload.get("waited_notices") or 0)
         escalate = s is not None and s.escalate_after_notices is not None and n >= s.escalate_after_notices
         out.append({"kind": "review_overdue", "level": "escalated" if escalate else "warn",
-                    "title": f"判断待ちが長くなっています（通知 {n} 回目）", "dedupe": f"{uid}:overdue:{attempt}:{n}"})
+                    "title": ms("判断待ちが長くなっています（通知 {n} 回目）", n=n), "dedupe": f"{uid}:overdue:{attempt}:{n}"})
     if kind == "stage" and status == "awaiting_review" and payload.get("stage_run_id"):
-        out.append({"kind": "stage_review", "level": "info", "title": f"{payload.get('stage')} の工程の承認を待っています",
+        out.append({"kind": "stage_review", "level": "info",
+                    "title": ms("{stage} の工程の承認を待っています", stage=payload.get("stage")),
                     "dedupe": f"{payload['stage_run_id']}:stage_review"})
     return out
 
@@ -158,7 +161,7 @@ async def _send_webhook(target: str, body: dict[str, Any], s: NotificationSettin
     headers = {"Content-Type": "application/json"}
     hook = next((w for w in s.webhooks if str(w.url) == target), None)
     if hook is None:
-        raise RuntimeError("作品の通知のルールから送り先が外された")
+        raise RuntimeError("作品の通知のルールから送り先が外された")  # i18n:dev
     if hook.secret:
         headers["X-V3-Signature"] = "sha256=" + hmac.new(hook.secret.encode(), data, hashlib.sha256).hexdigest()
     async with httpx.AsyncClient(timeout=SEND_TIMEOUT_SECONDS) as client:
@@ -185,13 +188,14 @@ async def send_pending_once(limit: int = 20) -> int:
             .with_for_update(skip_locked=True, of=HarnessNotificationDelivery))).all()
         for d, n in rows:
             s = await settings_of(session, n.work_id)
-            body = {"id": n.id, "work_id": n.work_id, "kind": n.kind, "level": n.level, "title": n.title,
-                    "unit_id": n.unit_id, "stage_run_id": n.stage_run_id, "created_at": n.created_at.isoformat(),
-                    "body": n.body}
+            # 外へ出す物なので、ここで文に戻す。送り先ごとの言語の設定は無いので日本語（今までと同じ文）
+            body = render_tree({"id": n.id, "work_id": n.work_id, "kind": n.kind, "level": n.level, "title": n.title,
+                                "unit_id": n.unit_id, "stage_run_id": n.stage_run_id,
+                                "created_at": n.created_at.isoformat(), "body": n.body}, "ja")
             d.attempts += 1
             try:
                 if s is None:
-                    raise RuntimeError("作品の通知のルールが消された")
+                    raise RuntimeError("作品の通知のルールが消された")  # i18n:dev
                 await CHANNEL_SENDERS[d.channel](d.target, body, s)
                 d.status, d.sent_at, d.last_error = "sent", now(), None
                 done += 1

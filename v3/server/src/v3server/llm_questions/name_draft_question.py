@@ -10,6 +10,7 @@ from typing import get_args
 from pydantic import BaseModel
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 from v3server.name_structure.name_draft_schema import (
     BackgroundKind,
     BalloonKind,
@@ -26,12 +27,12 @@ from v3server.name_structure.name_draft_schema import (
 from v3server.name_structure.reading_direction import PageSpec, ReadingDirection
 
 
-def _choices(literal) -> str:
+def _choices(literal) -> str:  # i18n:prompt
     """ネームの形の選択肢を「・」でつなぐ。形と問いの選択肢をずらさないため、形から作る。"""
     return "・".join(get_args(literal))
 
 
-def book_rule_text(reading_direction: ReadingDirection, first_page_is_left: bool) -> str:
+def book_rule_text(reading_direction: ReadingDirection, first_page_is_left: bool) -> str:  # i18n:prompt
     """本の並びとコマの読む向きの説明。アプリの制約なので断定で書く。"""
     first_side = "左" if first_page_is_left else "右"
     if reading_direction == "right_to_left":
@@ -47,7 +48,7 @@ def book_rule_text(reading_direction: ReadingDirection, first_page_is_left: bool
     )
 
 
-def build_name_draft_question(
+def build_name_draft_question(  # i18n:prompt
     plot: str,
     characters: list[tuple[str, str]],
     page_count: int,
@@ -115,6 +116,7 @@ def parse_name_draft_answer(
     )
     missing = draft.undecided_fields()
     if missing:
-        raise BrokenAnswerError(f"欠けた欄がある: {', '.join(f'{k}（{v[0]} ほか{len(v)}か所）' for k, v in missing.items())}",
-                                answer)  # i18n:stored
+        # 欄ごとの文を「, 」でつなぐ（今までと同じ区切り。日本語でも英語でも変えない）
+        fields = ", ".join(ms("{field}（{first} ほか{count}か所）", field=k, first=v[0], count=len(v)) for k, v in missing.items())
+        raise BrokenAnswerError(ms("欠けた欄がある: {fields}", fields=fields), answer)
     return draft

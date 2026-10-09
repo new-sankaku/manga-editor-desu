@@ -11,6 +11,7 @@ import pytest
 from temporalio.exceptions import ApplicationError
 
 from v3server.harness import queue_calls as q
+from v3server.messages import render
 
 
 class FakeSession:
@@ -74,7 +75,7 @@ async def test_待ちの上限を超えたら依頼を取り消してwait_limit�
     with pytest.raises(ApplicationError) as e:
         await q.wait_jobs(None, ["j1", "j2"])
     assert e.value.type == "wait_limit" and e.value.non_retryable
-    assert "待ちの上限" in e.value.message
+    assert "待ちの上限" in render(e.value.message, "ja")
     assert cancelled == [["j1", "j2"]]
 
 

@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import AnnotationItem
 from v3server.canonical_tables.text_and_layer_tables import TextItem
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.operation_base import OpBase, Scope, page_obj, work_obj
 from v3server.operations.row_snapshot import RowChanges
 from v3server.v3_error_types import Invalid
@@ -106,4 +106,5 @@ class ReplaceText(OpBase):
             if pid:
                 page_ids.add(pid)
             rc.change(obj, changes)
-        return rc.inverse(sorted(page_ids), f"「{self.find}」を「{self.replace}」に置き換えた取り消し")
+        return rc.inverse(sorted(page_ids),
+                          ms("「{find}」を「{replace}」に置き換えた取り消し", find=self.find, replace=self.replace))

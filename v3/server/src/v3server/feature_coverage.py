@@ -11,7 +11,7 @@ SCREEN = "screen"
 EXCLUDED = "excluded"
 
 # 10.1 の道具（帯に並ぶ物と、その右の物）
-TOOLS_10_1: dict[str, object] = {
+TOOLS_10_1: dict[str, object] = {  # i18n:data（文書の行と突き合わせる鍵）
     "選ぶ": SCREEN,
     "囲んで頼む": {"routes": ["POST /works/{work_id}/jobs"]},  # input_images の purpose=mask に region_px
     "赤入れ": {"ops": ["add_annotation", "update_annotation", "set_removed"],
@@ -36,7 +36,7 @@ TOOLS_10_1: dict[str, object] = {
 }
 
 # 10.4 の表の各行（左の列の文字そのまま）
-ROWS_10_4: dict[str, object] = {
+ROWS_10_4: dict[str, object] = {  # i18n:data（文書の行と突き合わせる鍵）
     "コマの型・図形のコマ・コマの間・枠の線と塗り・ばらばらに割る": {
         "ops": ["save_panel_template", "apply_panel_template", "add_shape_panel", "set_work_settings", "update_panel",
                 "random_split_panel"]},

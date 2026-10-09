@@ -19,7 +19,7 @@ from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Episode
 from v3server.llm_questions.structure_question import Outline
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.operations.ai_involvement import require_actor_may, require_ai_may_change_fields
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -142,7 +142,7 @@ class SetWorkPlan(OpBase):
                                                  "human_hand_fields": []}}
         else:
             rc.change(plan, changes)
-        return rc.inverse([], "企画を変えた取り消し")
+        return rc.inverse([], ms("企画を変えた取り消し"))
 
 
 class AddMaterialEntry(OpBase):
@@ -177,7 +177,7 @@ class AddMaterialEntry(OpBase):
         rc.created(MaterialEntry(id=self.id, work_id=ctx.work.id, proposal_state="proposed" if is_ai else "adopted",
                                  job_id=self.job_id, removed=False,
                                  human_hand_fields=[] if is_ai else sorted(values), **values))
-        return rc.inverse([], "設定資料を足した取り消し")
+        return rc.inverse([], ms("設定資料を足した取り消し"))
 
 
 class UpdateMaterialEntry(OpBase):
@@ -208,7 +208,7 @@ class UpdateMaterialEntry(OpBase):
         await _check_images(ctx.session, ctx.work.id, changes)
         rc = RowChanges(ctx)
         rc.change(entry, changes)
-        return rc.inverse([], "設定資料を変えた取り消し")
+        return rc.inverse([], ms("設定資料を変えた取り消し"))
 
 
 class DecideMaterialProposal(OpBase):
@@ -265,4 +265,4 @@ class SetEpisodeOutline(OpBase):
             if row.removed:
                 rc.set_plain(row, {"removed": False})
             rc.change(row, {"outline": value})
-        return rc.inverse([], "構成を書いた取り消し")
+        return rc.inverse([], ms("構成を書いた取り消し"))

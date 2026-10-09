@@ -33,7 +33,7 @@ from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, PanelLayer, TextItem
 from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from v3server.messages import m
+from v3server.messages import m, ms
 from v3server.operations.held_change_operations import CHOICES
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
@@ -110,7 +110,7 @@ class ApplyPsdImport(OpBase):
                 await self._new(ctx, rc, e)
             else:
                 await self._missing(ctx, rc, e)
-        return rc.inverse(pages, "PSD の戻しの取り消し")
+        return rc.inverse(pages, ms("PSD の戻しの取り消し"))
 
     async def _row(self, ctx, table: str, rid: str):
         obj = await ctx.session.get(MODELS[table], rid)
@@ -140,7 +140,7 @@ class ApplyPsdImport(OpBase):
                 TextItemTranslation.removed.is_(False)))
             if tr is None:
                 choices = ["discard"] if kind == "psd_text_pixels" else ["keep"]
-                reason = f"{reason}（{self._language} の訳文は書き出した後に削除された）"
+                reason = ms("{reason}（{language} の訳文は書き出した後に削除された）", reason=reason, language=self._language)
             else:
                 table, target_id = "text_item_translations", tr.id
                 if kind == "psd_text_pixels":
@@ -177,23 +177,24 @@ class ApplyPsdImport(OpBase):
         obj = await self._row(ctx, table, base)
         if obj is None or getattr(obj, "removed", False):
             await self._hold(ctx, rc, "psd_unmatched_layer", "pages", self._page, e, None, False,
-                             "どのページの物でもないレイヤー（見開きの絵・見開きの紙）のピクセルが変わった"
-                             if obj is None and table == "pages" else "書き出した後に、元の物が削除された")
+                             ms("どのページの物でもないレイヤー（見開きの絵・見開きの紙）のピクセルが変わった")
+                             if obj is None and table == "pages" else ms("書き出した後に、元の物が削除された"))
             return
         panel_id = obj.id if table == "panels" else getattr(obj, "panel_id", None)
         if getattr(obj, "fixed", False):
             await self._hold(ctx, rc, "psd_unmatched_layer", table, obj.id, e, panel_id, False,
-                             "人が「動かさない」にしている物のレイヤーが変わった")
+                             ms("人が「動かさない」にしている物のレイヤーが変わった"))
             return
         if table == "panels" and suffix == "image" and obj.image_id is not None:
             await self._replace(ctx, rc, e, obj, "panel_art", "image_id", "image_placement")
         elif table == "panel_layers" and suffix is None and obj.stroke_revision == 0 and obj.image_id is not None:
             await self._replace(ctx, rc, e, obj, obj.role, "image_id", "placement")
         elif table == "text_items" and suffix is None:
-            await self._hold(ctx, rc, "psd_text_pixels", table, obj.id, e, panel_id, False, "文字のレイヤーのピクセルが変わった")
+            await self._hold(ctx, rc, "psd_text_pixels", table, obj.id, e, panel_id, False,
+                             ms("文字のレイヤーのピクセルが変わった"))
         else:
             await self._hold(ctx, rc, "psd_vector_changed", table, obj.id, e, panel_id, table == "pages",
-                             "線や形の値から描いたレイヤーのピクセルが変わった")
+                             ms("線や形の値から描いたレイヤーのピクセルが変わった"))
 
     async def _new(self, ctx, rc, e: PsdImportEntry) -> None:
         panel = None
@@ -207,7 +208,8 @@ class ApplyPsdImport(OpBase):
         if panel is None or panel.fixed:
             await self._hold(ctx, rc, "psd_unmatched_layer", "pages", self._page, e,
                              panel.id if panel is not None else None, False,
-                             "どのコマにも入っていない新しいレイヤー" if panel is None else "「動かさない」のコマに入った新しいレイヤー")
+                             ms("どのコマにも入っていない新しいレイヤー") if panel is None
+                             else ms("「動かさない」のコマに入った新しいレイヤー"))
             return
         iid = await self._register(ctx, e, role="human_hand", origin="human_drawn", panel_id=panel.id)
         layers = [la for la in (await ctx.session.execute(
@@ -233,4 +235,4 @@ class ApplyPsdImport(OpBase):
             return
         panel_id = obj.id if table == "panels" else getattr(obj, "panel_id", None)
         await self._hold(ctx, rc, "psd_layer_missing", table, obj.id, e, panel_id, suffix is not None,
-                         "書き出したレイヤーが PSD に無い")
+                         ms("書き出したレイヤーが PSD に無い"))

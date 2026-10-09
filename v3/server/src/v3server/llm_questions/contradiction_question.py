@@ -9,9 +9,10 @@ from dataclasses import dataclass
 from pydantic import BaseModel
 
 from v3server.llm_questions.answer_json_reader import read_answer, require_known_ids
+from v3server.messages import ms
 
 # 観点の名前と、問いに書く説明。説明に台本の中身に寄った例は書かない（答えがその例に寄るため）
-CONTRADICTION_VIEWS: dict[str, str] = {
+CONTRADICTION_VIEWS: dict[str, str] = {  # i18n:prompt
     "口調": "登場人物の話し方が、設定の話し方と合っているか",
     "設定": "人物について設定に書かれていることと、台本の描写が合っているか",
     "物の状態": "物や体の状態が、前の行で起きたことと合っているか",
@@ -28,7 +29,7 @@ class ScriptLine:
     text: str
 
 
-def script_lines_text(lines: list[ScriptLine]) -> str:
+def script_lines_text(lines: list[ScriptLine]) -> str:  # i18n:prompt
     """台本の行を「番号（第n話）中身」で並べる。伏線の問いでも使う。"""
     if not lines:
         raise ValueError("台本の行が空")  # i18n:dev
@@ -38,7 +39,7 @@ def script_lines_text(lines: list[ScriptLine]) -> str:
     return "\n".join(f"{x.line_id}（第{x.episode}話）{x.text}" for x in lines)
 
 
-def build_contradiction_question(settings: str, lines: list[ScriptLine], views: list[str]) -> str:
+def build_contradiction_question(settings: str, lines: list[ScriptLine], views: list[str]) -> str:  # i18n:prompt
     """views は CONTRADICTION_VIEWS の名前の並び。全部を1回で聞くか、観点ごとに分けて聞くかは呼ぶ側が決める。"""
     if not views:
         raise ValueError("views が空")  # i18n:dev
@@ -74,5 +75,5 @@ class _ContradictionAnswer(BaseModel):
 def parse_contradiction_answer(answer: str, lines: list[ScriptLine]) -> list[ContradictionIssue]:
     """答えを指摘の並びに読む。問いに無い行の番号を挙げたら BrokenAnswerError。"""
     issues = read_answer(answer, _ContradictionAnswer).issues
-    require_known_ids([x.line for x in issues], {x.line_id for x in lines}, "行の番号", answer)
+    require_known_ids([x.line for x in issues], {x.line_id for x in lines}, ms("行の番号"), answer)
     return issues

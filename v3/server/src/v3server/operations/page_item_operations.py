@@ -13,7 +13,7 @@ from v3server.canonical_tables.page_item_tables import PageItem
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Page, Panel
-from v3server.messages import m, text_of
+from v3server.messages import m, ms, text_of
 from v3server.name_structure.item_styles import ShapeSpec, ToneSpec, checked_adjustments
 from v3server.name_structure.item_transform import ItemTransform
 from v3server.operations.ai_involvement import (
@@ -103,7 +103,7 @@ class AddPageItem(OpBase):
         rc.created(PageItem(id=self.id, work_id=ctx.work.id, page_id=self.page_id, panel_id=self.panel_id,
                             item_kind=self.item_kind, fixed=False, removed=False,
                             human_hand_fields=sorted(values) if ctx.actor.kind == "human" else [], **values))
-        return rc.inverse([self.page_id], "トーン・図形を置いた取り消し")
+        return rc.inverse([self.page_id], ms("トーン・図形を置いた取り消し"))
 
 
 class UpdatePageItem(OpBase):
@@ -151,7 +151,7 @@ class UpdatePageItem(OpBase):
             changes["adjustments"] = checked_adjustments(changes["adjustments"])
         rc = RowChanges(ctx)
         rc.change(item, changes)
-        return rc.inverse([item.page_id], "トーン・図形を変えた取り消し")
+        return rc.inverse([item.page_id], ms("トーン・図形を変えた取り消し"))
 
 
 # ---------------------------------------------------------------- 動かさない・仕上げを外す
@@ -220,4 +220,4 @@ class ResetAdjustments(OpBase):
         rc = RowChanges(ctx)
         for o in objs:
             rc.change(o, {"adjustments": []})
-        return rc.inverse([page_id], "仕上げをまとめて外した取り消し")
+        return rc.inverse([page_id], ms("仕上げをまとめて外した取り消し"))

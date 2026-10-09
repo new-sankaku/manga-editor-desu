@@ -33,6 +33,7 @@ import httpx
 from v3server.canonical_tables.service_and_job_tables import Service, ServiceProcess
 from v3server.generation_queue.image_process_registry import build_prompt
 from v3server.image_file_storage import read_image
+from v3server.messages import ms
 from v3server.service_senders.comfyui_progress import ProgressListener
 from v3server.service_senders.sender_result_types import (
     AdapterError,
@@ -54,7 +55,22 @@ DETAIL_LIMIT = 2000
 
 
 def _short(text: str) -> str:
+    """長さで切る。切ってよいのは包む前の値（相手が返した文など）だけ。包んだ文（ms()）を切ると、文に戻せなくなる。"""
     return text if len(text) <= DETAIL_LIMIT else text[:DETAIL_LIMIT] + "…"
+
+
+def _joined(parts: list[str]) -> str:
+    """失敗の文を「; 」でつなぐ。合わせて DETAIL_LIMIT を超える所で止めて「…」を付ける（包んだ文の途中では切らない。
+    1つ目は必ず入れる）。"""
+    kept: list[str] = []
+    used = 0
+    for part in parts:
+        used += len(part)
+        if kept and used > DETAIL_LIMIT:
+            out = "; ".join(kept)
+            return out if out.endswith("…") else out + "…"
+        kept.append(part)
+    return "; ".join(kept)
 
 
 def prompt_error_detail(r: httpx.Response) -> str:
@@ -65,10 +81,13 @@ def prompt_error_detail(r: httpx.Response) -> str:
         head = f"{r.status_code} {err.get('type')}: {err.get('message')}"
         if err.get("details"):
             head += f" ({err['details']})"
+        parts = [_short(head)]
         for node_id, ne in (body.get("node_errors") or {}).items():
             for e in ne.get("errors", []):
-                head += f"; ノード {node_id} ({ne.get('class_type')}): {e.get('type')} {e.get('message')} {e.get('details', '')}".rstrip()
-        return _short(head)
+                error = f"{e.get('type')} {e.get('message')} {e.get('details', '')}".rstrip()
+                parts.append(ms("ノード {node} ({class_type}): {error}", node=node_id, class_type=ne.get("class_type"),
+                                error=_short(error)))
+        return _joined(parts)
     except (ValueError, KeyError, AttributeError, TypeError):
         return _short(f"{r.status_code} {r.text}")
 
@@ -86,9 +105,9 @@ def _json_object(r: httpx.Response, what: str) -> dict[str, Any]:
     try:
         body = r.json()
     except ValueError as e:
-        raise AdapterError("broken_response", f"{what} が JSON でない: {e}") from e  # i18n:stored
+        raise AdapterError("broken_response", ms("{what} が JSON でない: {error}", what=what, error=str(e))) from e
     if not isinstance(body, dict):
-        raise AdapterError("broken_response", f"{what} が辞書でない: {type(body).__name__}")  # i18n:stored
+        raise AdapterError("broken_response", ms("{what} が辞書でない: {type}", what=what, type=type(body).__name__))
     return body
 
 
@@ -98,7 +117,7 @@ def _raise_for_poll_status(r: httpx.Response, what: str) -> None:
     if r.status_code >= 500:
         raise AdapterError("transport", f"{what} {r.status_code}")
     if r.status_code >= 400:
-        raise AdapterError("broken_response", f"{what} が {r.status_code}。ComfyUI の API ではない")  # i18n:stored
+        raise AdapterError("broken_response", ms("{what} が {status}。ComfyUI の API ではない", what=what, status=r.status_code))
 
 
 def combo_options(spec: Any) -> list[Any] | None:
@@ -128,7 +147,7 @@ async def check_choices(client: httpx.AsyncClient, prompt: dict[str, Any]) -> No
             infos[cls] = _json_object(r, f"/object_info/{cls}").get(cls, {})
         info = infos[cls]
         if not info:
-            problems.append(f"ノード {node_id}: {cls} が ComfyUI に無い")
+            problems.append(ms("ノード {node}: {class_type} が ComfyUI に無い", node=node_id, class_type=cls))
             continue
         defs = {**info.get("input", {}).get("required", {}), **info.get("input", {}).get("optional", {})}
         for name, value in node.get("inputs", {}).items():
@@ -136,31 +155,33 @@ async def check_choices(client: httpx.AsyncClient, prompt: dict[str, Any]) -> No
                 continue
             options = combo_options(defs.get(name))
             if options is not None and value not in options:
-                problems.append(f"ノード {node_id} ({cls}) の {name}={value!r} は選べない")
+                problems.append(ms("ノード {node} ({class_type}) の {name}={value} は選べない", node=node_id, class_type=cls, name=name,
+                                   value=repr(value)))
     if problems:
-        raise AdapterError("refused", _short("; ".join(problems)))
+        raise AdapterError("refused", _joined(problems))
 
 
 def _failure_from_history(hist: dict[str, Any]) -> AdapterError | None:
     status = hist.get("status")
     if not isinstance(status, dict):
-        raise AdapterError("broken_response", "history に status が無い")  # i18n:stored
+        raise AdapterError("broken_response", ms("history に status が無い"))
     if status.get("status_str") != "error":
         return None
     messages = status.get("messages")
     if not isinstance(messages, list):
-        raise AdapterError("broken_response", "history の messages が一覧でない")  # i18n:stored
+        raise AdapterError("broken_response", ms("history の messages が一覧でない"))
     for m in messages:
         if isinstance(m, list) and len(m) == 2 and m[0] == "execution_interrupted":
             node = m[1].get("node_type") if isinstance(m[1], dict) else None
-            return AdapterError("interrupted", f"ComfyUI で止められた（{node} の実行中）")
+            return AdapterError("interrupted", ms("ComfyUI で止められた（{node} の実行中）", node=node))
     for m in messages:
         if isinstance(m, list) and len(m) == 2 and m[0] == "execution_error" and isinstance(m[1], dict):
             e = m[1]
             return AdapterError(
-                "refused", _short(f"実行に失敗（{e.get('node_type')} ノード {e.get('node_id')}）: {e.get('exception_message')}")
+                "refused", ms("実行に失敗（{node_type} ノード {node_id}）: {error}", node_type=e.get("node_type"),
+                              node_id=e.get("node_id"), error=_short(str(e.get("exception_message"))))
             )
-    raise AdapterError("broken_response", "history が error なのに execution_error が無い")  # i18n:stored
+    raise AdapterError("broken_response", ms("history が error なのに execution_error が無い"))
 
 
 async def _in_queue(client: httpx.AsyncClient, prompt_id: str) -> str | None:
@@ -174,7 +195,7 @@ async def _in_queue(client: httpx.AsyncClient, prompt_id: str) -> str | None:
         if any(item[1] == prompt_id for item in q["queue_pending"]):
             return "pending"
     except (KeyError, IndexError, TypeError) as e:
-        raise AdapterError("broken_response", f"/queue の形が違う: {e!r}") from e  # i18n:stored
+        raise AdapterError("broken_response", ms("/queue の形が違う: {error}", error=repr(e))) from e
     return None
 
 
@@ -198,7 +219,7 @@ async def _fetch_images(client: httpx.AsyncClient, images: list[dict[str, Any]])
         try:
             params = {"filename": img["filename"], "subfolder": img["subfolder"], "type": img["type"]}
         except (KeyError, TypeError) as e:
-            raise AdapterError("broken_response", f"画像の指定の形が違う: {img!r}") from e  # i18n:stored
+            raise AdapterError("broken_response", ms("画像の指定の形が違う: {image}", image=repr(img))) from e
         r = await client.get("/view", params=params)
         _raise_for_poll_status(r, "/view")
         files.append(r.content)
@@ -207,17 +228,18 @@ async def _fetch_images(client: httpx.AsyncClient, images: list[dict[str, Any]])
 
 def _validate_request(service: Service, sp: ServiceProcess, request: dict[str, Any]) -> None:
     if service.endpoint is None:
-        raise AdapterError("refused", f"{service.name} に URL が無い")  # i18n:stored
+        raise AdapterError("refused", ms("{service} に URL が無い", service=service.name))
     if "image_process" in request:
         if request.get("overrides"):
-            raise AdapterError("refused", "画像生成の処理（image_process）に overrides は使えない（引数で渡す）")  # i18n:stored
+            raise AdapterError("refused", ms("画像生成の処理（image_process）に overrides は使えない（引数で渡す）"))
     elif sp.comfy_workflow is None:
-        raise AdapterError("refused", f"{service.name} の {sp.process} に手順が無い")  # i18n:stored
+        raise AdapterError("refused", ms("{service} の {process} に手順が無い", service=service.name, process=sp.process))
     if sp.comfy_wait_seconds is None:
-        raise AdapterError("refused", f"{service.name} の {sp.process} に待ちの上限（comfy_wait_seconds）が決まっていない")  # i18n:stored
+        raise AdapterError("refused", ms("{service} の {process} に待ちの上限（comfy_wait_seconds）が決まっていない",
+                                         service=service.name, process=sp.process))
     register = request.get("register")
     if not isinstance(register, dict) or not register.get("role"):
-        raise AdapterError("refused", "request.register.role が無い。受け取った絵の役目が決まらない")  # i18n:stored
+        raise AdapterError("refused", ms("request.register.role が無い。受け取った絵の役目が決まらない"))
 
 
 async def _upload_inputs(client: httpx.AsyncClient, prompt: dict[str, Any], request: dict[str, Any]) -> list[dict]:
@@ -226,18 +248,18 @@ async def _upload_inputs(client: httpx.AsyncClient, prompt: dict[str, Any], requ
     for entry in request.get("prepared_inputs", []):
         node, inp = entry["node"], entry["input"]
         if node not in prompt:
-            raise AdapterError("refused", f"手順にノード {node} が無い（上げる絵の入れ先）")  # i18n:stored
+            raise AdapterError("refused", ms("手順にノード {node} が無い（上げる絵の入れ先）", node=node))
         ext = entry["media_type"].split("/")[-1]
         name = f"v3_{entry['sha256']}.{ext}"
         r = await client.post("/upload/image", files={"image": (name, read_image(entry["sha256"]), entry["media_type"])},
                               data={"type": "input", "overwrite": "true"})
         if r.status_code >= 500:
-            raise AdapterError("transport", f"/upload/image が {r.status_code}")  # i18n:stored
+            raise AdapterError("transport", ms("/upload/image が {status}", status=r.status_code))
         if r.status_code >= 400:
-            raise AdapterError("refused", f"/upload/image が {r.status_code}: {_short(r.text)}")  # i18n:stored
+            raise AdapterError("refused", ms("/upload/image が {status}: {body}", status=r.status_code, body=_short(r.text)))
         body = _json_object(r, "/upload/image")
         if not isinstance(body.get("name"), str):
-            raise AdapterError("broken_response", "/upload/image の返事に name が無い")  # i18n:stored
+            raise AdapterError("broken_response", ms("/upload/image の返事に name が無い"))
         value = f"{body['subfolder']}/{body['name']}" if body.get("subfolder") else body["name"]
         prompt[node]["inputs"][inp] = value
         uploaded.append({"node": node, "input": inp, "name": value, "purpose": entry["purpose"],
@@ -253,7 +275,7 @@ async def _wait_history(client: httpx.AsyncClient, prompt_id: str, limit: float)
         hist = _json_object(r, "/history").get(prompt_id)
         if hist is not None:
             if not isinstance(hist, dict):
-                raise AdapterError("broken_response", "history の中身が辞書でない")  # i18n:stored
+                raise AdapterError("broken_response", ms("history の中身が辞書でない"))
             return hist
         # 履歴にまだ無い。待ちにも実行中にも無ければ、再起動か外から消されたので、待っても出ない。
         # 見に行く間に終わっていることがあるので、無いと分かったらもう一度だけ履歴を見る
@@ -262,12 +284,12 @@ async def _wait_history(client: httpx.AsyncClient, prompt_id: str, limit: float)
             _raise_for_poll_status(r, "/history")
             hist = _json_object(r, "/history").get(prompt_id)
             if hist is None:
-                raise AdapterError("transport", "ComfyUI の待ちにも実行中にも履歴にも無い（再起動か、外から消された）")  # i18n:stored
+                raise AdapterError("transport", ms("ComfyUI の待ちにも実行中にも履歴にも無い（再起動か、外から消された）"))
             if not isinstance(hist, dict):
-                raise AdapterError("broken_response", "history の中身が辞書でない")  # i18n:stored
+                raise AdapterError("broken_response", ms("history の中身が辞書でない"))
             return hist
         if time.monotonic() - started > limit:
-            raise AdapterError("transport", f"{limit} 秒待っても終わらない（comfy_wait_seconds）")  # i18n:stored
+            raise AdapterError("transport", ms("{seconds} 秒待っても終わらない（comfy_wait_seconds）", seconds=limit))
         await asyncio.sleep(POLL_SECONDS)
 
 
@@ -285,7 +307,7 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
         prompt = {k: {**v, "inputs": dict(v.get("inputs", {}))} for k, v in sp.comfy_workflow.items()}
         for node_id, inputs in request.get("overrides", {}).items():
             if node_id not in prompt:
-                raise AdapterError("refused", f"手順にノード {node_id} が無い")  # i18n:stored
+                raise AdapterError("refused", ms("手順にノード {node} が無い", node=node_id))
             prompt[node_id]["inputs"].update(inputs)
 
     prompt_id: str | None = None
@@ -306,7 +328,7 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
                 _raise_for_prompt_status(r)
                 body = _json_object(r, "/prompt")
                 if not isinstance(body.get("prompt_id"), str):
-                    raise AdapterError("broken_response", "/prompt の返事に prompt_id が無い")  # i18n:stored
+                    raise AdapterError("broken_response", ms("/prompt の返事に prompt_id が無い"))
                 prompt_id = body["prompt_id"]
                 if listener is not None:
                     listener.prompt_id = prompt_id
@@ -316,10 +338,10 @@ async def call_comfyui(service: Service, sp: ServiceProcess, request: dict[str, 
                     raise failure
                 outputs = hist.get("outputs")
                 if not isinstance(outputs, dict):
-                    raise AdapterError("broken_response", "history に outputs が無い")  # i18n:stored
+                    raise AdapterError("broken_response", ms("history に outputs が無い"))
                 images = [img for out in outputs.values() if isinstance(out, dict) for img in out.get("images", [])]
                 if not images:
-                    raise AdapterError("broken_response", "画像が返っていない")  # i18n:stored
+                    raise AdapterError("broken_response", ms("画像が返っていない"))
                 files = await _fetch_images(client, images)
                 final_state = "finished"
             except asyncio.CancelledError:

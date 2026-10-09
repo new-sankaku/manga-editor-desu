@@ -12,6 +12,7 @@ from typing import get_args
 from pydantic import BaseModel
 
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
+from v3server.messages import ms
 from v3server.name_structure.name_draft_schema import CameraAngle, Facing, ShotRange
 
 
@@ -19,7 +20,7 @@ def _quoted(literal) -> str:
     return "".join(f"「{x}」" for x in get_args(literal))
 
 
-def build_shot_angle_question(image_count: int) -> str:
+def build_shot_angle_question(image_count: int) -> str:  # i18n:prompt
     """画像は呼ぶ側が image_count 枚、この順に添える。画像は添えた順の番号で呼ぶ（ファイルの名前を答えに使わせない）。"""
     if image_count < 1:
         raise ValueError("image_count は1以上")  # i18n:dev
@@ -51,5 +52,5 @@ def parse_shot_angle_answer(answer: str, image_count: int) -> list[ShotAngleJudg
     items = read_answer(answer, _ShotAngleAnswer).items
     got = sorted(x.image for x in items)
     if got != list(range(1, image_count + 1)):
-        raise BrokenAnswerError(f"画像の番号が 1〜{image_count} に揃っていない: {got}", answer)  # i18n:stored
+        raise BrokenAnswerError(ms("画像の番号が 1〜{count} に揃っていない: {got}", count=image_count, got=str(got)), answer)
     return sorted(items, key=lambda x: x.image)

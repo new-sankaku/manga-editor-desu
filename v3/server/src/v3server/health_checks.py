@@ -47,7 +47,7 @@ async def _pollers(client: Client) -> None:
             namespace=client.namespace, task_queue=TaskQueue(name=queue),
             task_queue_type=TaskQueueType.TASK_QUEUE_TYPE_WORKFLOW))
         if not r.pollers:
-            raise RuntimeError(f"キュー {queue} を取りに来るワーカーがいない")
+            raise RuntimeError(f"キュー {queue} を取りに来るワーカーがいない")  # i18n:dev
 
 
 async def readiness(client: Client, include_workers: bool = False) -> dict[str, Any]:
@@ -69,5 +69,5 @@ async def _main(kind: str) -> int:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in ("api", "worker"):
-        sys.exit("使い方: python -m v3server.health_checks api|worker")
+        sys.exit("使い方: python -m v3server.health_checks api|worker")  # i18n:dev
     sys.exit(asyncio.run(_main(sys.argv[1])))
