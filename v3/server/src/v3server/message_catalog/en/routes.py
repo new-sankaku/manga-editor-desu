@@ -119,6 +119,15 @@ MESSAGES = {
     "トークンを確かめられない: {error}": "Could not verify the token: {error}",
     "ログインしていない（/auth/login）": "Not logged in (/auth/login)",
     "クッキーで書き換えるときはヘッダー X-V3-Request: 1 が要る": "Write requests with a cookie require the header X-V3-Request: 1",
+    # openfga_permissions.py
+    "この作品": "this work",
+    "このページ": "this page",
+    "{user} には、{target}を見る権限が無い": "{user} does not have permission to view {target}",
+    "{user} には、{target}を描く・直す権限が無い": "{user} does not have permission to draw on or edit {target}",
+    "{user} には、{target}の設定と参加者を変える権限が無い": "{user} does not have permission to change the settings and members of {target}",
+    "{user} には、{target}を承認する権限が無い": "{user} does not have permission to approve {target}",
+    "{user} には、{target}にコメントを書く権限が無い": "{user} does not have permission to comment on {target}",
+    "{user} には、{target}の訳文を書く権限が無い": "{user} does not have permission to translate {target}",
     # http_app_factory.py
     "すでに同じものがある（{name}）": "The same item already exists ({name})",
     # usage_terms_schema.py

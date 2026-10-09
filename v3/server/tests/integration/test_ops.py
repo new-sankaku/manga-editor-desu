@@ -130,6 +130,11 @@ async def test_権限_見るだけ_編集者_アシスタント(api):
 
     panel = {"type": "add_panel", "page_id": ids["page1"], "order": 1}
     assert (await op(api, wid, viewer, panel)).status_code == 403
+    # 断る文は、内部の権限の名前（can_draw など）や「page:…」を出さずに、何ができないかを言う
+    refused = (await op(api, wid, viewer, panel)).json()["detail"]
+    assert refused == f"{viewer} には、このページを描く・直す権限が無い"
+    refused_en = (await api.post(f"/works/{wid}/ops", headers=h(viewer) | {"X-V3-Lang": "en"}, json=panel)).json()["detail"]
+    assert refused_en == f"{viewer} does not have permission to draw on or edit this page"
     assert (await op(api, wid, editor, panel)).status_code == 403
     assert (await op(api, wid, asst, panel)).status_code == 200
     # 割り当てられていないページには描けない

@@ -12,6 +12,7 @@ import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.threshold_and_finding_tables import SystemValue
+from v3server.messages import Message, m
 from v3server.server_settings import get_settings
 
 MODEL_PATH = Path(__file__).resolve().parents[2] / "openfga" / "model.json"
@@ -117,3 +118,21 @@ async def open_authz(session: AsyncSession) -> Authz:
     await session.commit()
     return Authz(store_id, model_id, client)
 
+
+def no_permission(user: str, obj: str, relation: str) -> Message:
+    """権限が無いときの文。作品とページの決まった権限は、内部の名前（can_view など）を出さずに言う。
+    それ以外（管理者の権限など）は、対象と権限の名前をそのまま出す。"""
+    target = {"work": m("この作品"), "page": m("このページ")}.get(obj.split(":", 1)[0])
+    if target is not None and relation == "can_view":
+        return m("{user} には、{target}を見る権限が無い", user=user, target=target)
+    if target is not None and relation == "can_draw":
+        return m("{user} には、{target}を描く・直す権限が無い", user=user, target=target)
+    if target is not None and relation == "can_manage":
+        return m("{user} には、{target}の設定と参加者を変える権限が無い", user=user, target=target)
+    if target is not None and relation == "can_approve":
+        return m("{user} には、{target}を承認する権限が無い", user=user, target=target)
+    if target is not None and relation == "can_comment":
+        return m("{user} には、{target}にコメントを書く権限が無い", user=user, target=target)
+    if target is not None and relation == "can_translate":
+        return m("{user} には、{target}の訳文を書く権限が無い", user=user, target=target)
+    return m("{user} に {object} の {relation} が無い", user=user, object=obj, relation=relation)

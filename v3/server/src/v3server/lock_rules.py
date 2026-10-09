@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.event_and_lock_tables import Lock
 from v3server.canonical_tables.work_tree_tables import Page, Panel
 from v3server.messages import m
-from v3server.openfga_permissions import Authz
+from v3server.openfga_permissions import Authz, no_permission
 from v3server.operations.operation_base import get_in_work, page_obj
 from v3server.operations.operation_submit_and_undo import (
     append_event,
@@ -64,8 +64,7 @@ async def acquire(
         work = await lock_work(session, work_id)
         page_id = await _page_of(session, work_id, target_kind, target_id, page_id)
         if not await authz.check(actor.permission_user, "can_draw", page_obj(page_id)):
-            raise Forbidden(m("{user} に {object} の {relation} が無い", user=actor.permission_user,
-                              object=page_obj(page_id), relation="can_draw"))
+            raise Forbidden(no_permission(actor.permission_user, page_obj(page_id), "can_draw"))
 
         if target_kind == "page":
             conflicts = await conflicting_locks(session, actor, [("page", page_id)], page_tree=page_id)

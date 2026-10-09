@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.event_and_lock_tables import Event, Lock, UndoConflict
 from v3server.canonical_tables.work_tree_tables import Work
 from v3server.messages import m, text_of
-from v3server.openfga_permissions import Authz
+from v3server.openfga_permissions import Authz, no_permission
 from v3server.operations.all_operation_types import op_adapter
 from v3server.operations.field_change_record import find_undo_conflicts, merge_hand_marks, record_field_changes
 from v3server.operations.human_hand_guard import inverse_with_held
@@ -97,8 +97,7 @@ async def check_may_submit(session: AsyncSession, authz: Authz, actor: Actor, wo
 
 async def check_scope(session: AsyncSession, authz: Authz, actor: Actor, scope: Scope) -> None:
     if not await authz.check(actor.permission_user, scope.relation, scope.object):
-        raise Forbidden(m("{user} に {object} の {relation} が無い",
-                          user=actor.permission_user, object=scope.object, relation=scope.relation))
+        raise Forbidden(no_permission(actor.permission_user, scope.object, scope.relation))
     for lock in await conflicting_locks(session, actor, scope.lock_targets, scope.page_tree):
         raise locked_error(lock)
 

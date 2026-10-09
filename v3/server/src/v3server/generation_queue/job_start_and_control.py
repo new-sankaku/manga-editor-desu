@@ -21,7 +21,7 @@ from v3server.generation_queue.queue_names_and_priority import (
     job_priority,
 )
 from v3server.messages import m
-from v3server.openfga_permissions import Authz
+from v3server.openfga_permissions import Authz, no_permission
 from v3server.operations.ai_involvement import require_ai_may
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.request_actor import Actor
@@ -53,8 +53,7 @@ async def enqueue(
     else:
         relation, obj = "can_manage", work_obj(work_id)
     if not await authz.check(actor.permission_user, relation, obj):
-        raise Forbidden(m("{user} に {object} の {relation} が無い", user=actor.permission_user, object=obj,
-                          relation=relation))
+        raise Forbidden(no_permission(actor.permission_user, obj, relation))
 
     route = await session.get(ProcessRoute, process)
     if route is None:

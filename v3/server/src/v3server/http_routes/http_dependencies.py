@@ -8,8 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from temporalio.client import Client
 
 from v3server.database_engine import session_scope
-from v3server.messages import m
-from v3server.openfga_permissions import Authz
+from v3server.openfga_permissions import Authz, no_permission
 from v3server.request_actor import Actor
 from v3server.request_authentication import current_actor
 from v3server.v3_error_types import Forbidden
@@ -37,8 +36,7 @@ ActorDep = Annotated[Actor, Depends(current_actor)]
 
 async def require(authz: Authz, actor: Actor, relation: str, obj: str) -> None:
     if not await authz.check(actor.permission_user, relation, obj):
-        raise Forbidden(m("{user} に {object} の {relation} が無い", user=actor.permission_user, object=obj,
-                          relation=relation))
+        raise Forbidden(no_permission(actor.permission_user, obj, relation))
 
 
 def row(obj, *fields: str) -> dict[str, Any]:
