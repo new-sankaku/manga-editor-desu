@@ -173,7 +173,7 @@ async def skipping(api, skipping_env):
 
 @pytest.fixture
 def fake_adapter(monkeypatch):
-    """つなぎ先への送信を差し替える。request["script"] の順に振る舞う（呼ばれた回数で進む）。"""
+    """接続先への送信を差し替える。request["script"] の順に振る舞う（呼ばれた回数で進む）。"""
     state = {"calls": [], "running": 0, "max_running": 0}
 
     async def fake(service, sp, request):

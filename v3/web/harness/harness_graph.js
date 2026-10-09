@@ -461,7 +461,7 @@ export class HarnessGraph {
       const name = gid === sid ? t("{{stage}} の作業", { stage }) : n.data("page");
       const shut = this.collapsed.has(gid);
       if (!shut) {
-        n.data("label", `${name}（${us.length}）`);
+        n.data("label", t("{{a}}（{{b}}）", { a: name, b: us.length }));
         n.classes(gid === sid ? "frame group" : "frame group page");
         continue;
       }
@@ -471,7 +471,7 @@ export class HarnessGraph {
       const top = [...count.keys()].sort((a, b) => urgency(a) - urgency(b))[0];
       const stale = us.some((u) => u.stale);
       // 内訳は全部出す（隠さない）。行が増えれば、ノードを高くする
-      n.data({ label: `${name}（${us.length}）\n${parts.join("\n")}`, lmy: -BAND / 2 });
+      n.data({ label: `${t("{{a}}（{{b}}）", { a: name, b: us.length })}\n${parts.join("\n")}`, lmy: -BAND / 2 });
       n.classes(`group folded${gid === sid ? "" : " page"} ${statusClass(top)}${stale ? " stale" : ""}`);
     }
   }

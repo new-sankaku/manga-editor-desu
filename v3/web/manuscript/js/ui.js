@@ -1,5 +1,6 @@
 // 画面の部品を作る小さなヘルパー（画像生成の画面 js/app.js と同じ形・同じ言い方）
 import * as api from "../../js/api.js";
+import { t } from "../../common/i18n.js";
 import { PRINT_INK } from "./print_colors.js";
 
 export const $ = (s, root = document) => root.querySelector(s);
@@ -41,7 +42,7 @@ export function toast(msg, kind = "") {
 // message：何が失敗したかを表す丸ごとの文。理由と一緒に出す
 export function fail(e, message = "") {
   console.error(e);
-  toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
+  toast(message ? t("{{a}}：{{b}}", { a: message, b: api.errorText(e) }) : api.errorText(e), "bad");
 }
 
 // 押した方だけ aria-pressed を true にする並び

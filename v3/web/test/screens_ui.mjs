@@ -1,5 +1,5 @@
 // 作品をまたぐ画面（作品と話・企画・構成・設定資料・書き出し・生成サービス・取り込み・翻訳・確認）を Playwright で通し、画面の写しを残す。
-// 本物のサーバー（/web を出す）に、作品・話・ページ・文字・設定資料・訳文・確認の記録・つなぎ先を足してから見る。
+// 本物のサーバー（/web を出す）に、作品・話・ページ・文字・設定資料・訳文・確認の記録・接続先を足してから見る。
 // 使い方：
 //   V3_WEB=http://127.0.0.1:8771/web/ \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/screens_ui.mjs
@@ -101,7 +101,7 @@ async function seed(pngBytes) {
   return { wid, ep1, ep2, pages };
 }
 
-// つなぎ先（全作品で共通）。無ければ足す
+// 接続先（全作品で共通）。無ければ足す
 async function seedServices() {
   const cur = await req(ADMIN, "GET", "/services");
   if (cur.services.some((s) => s.name === "手元のComfyUI")) return;
@@ -156,7 +156,7 @@ page.on("dialog", (d) => d.accept("砂の商人"));
 await page.setContent("<canvas id=c width=256 height=256></canvas>");
 const dataUrl = await page.evaluate(() => { const c = document.getElementById("c").getContext("2d"); c.fillStyle = "#fff"; c.fillRect(0, 0, 256, 256);
   c.fillStyle = "#433F35"; c.beginPath(); c.arc(128, 90, 46, 0, 7); c.fill(); c.fillRect(88, 140, 80, 100); return document.getElementById("c").toDataURL("image/png"); });
-// 作品とつなぎ先は口から足す（画面からは足さない）。録った答えで通すときは、録ったときの作品の id を使う
+// 作品と接続先は口から足す（画面からは足さない）。録った答えで通すときは、録ったときの作品の id を使う
 const replayer = REPLAY ? new ApiReplayer(RECORDING) : null;
 let seeded;
 if (REPLAY) {

@@ -250,7 +250,7 @@ export default {
   "{{group}}：変わる処理 {{n}}": "{{group}}: processes that change {{n}}",
   "変えない処理：": "Unchanged processes:",
   "{{process}}（{{reason}}）": "{{process}} ({{reason}})",
-  "、": ",",
+  "、": ", ",
   "切り替える": "Switch",
   "やめる": "Cancel",
   "いまの並びをプリセットに残す・同じ指示で比べる・得意さと費用をこの表で直すことは、サーバーにAPIが無いのでできません": "Saving the current setup as a preset, comparing with the same prompt, and editing strength and cost in this table are not possible because the server has no API for them",

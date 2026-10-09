@@ -359,7 +359,7 @@ await page.keyboard.press("Escape");
 check(!(await html("data-focus")) && await page.isVisible("#side"), "工程の画面：Esc で図だけから戻る");
 
 // ===== ほかの画面にも帯のボタンとキーがある
-// 偽のサーバーはこれらの画面の中身（話の一覧・進み・設定資料・つなぎ先など）を持たない。中身を読めずに出るエラーはここでは数えない
+// 偽のサーバーはこれらの画面の中身（話の一覧・進み・設定資料・接続先など）を持たない。中身を読めずに出るエラーはここでは数えない
 const errorsBeforeOthers = errors.length;
 for (const s of ["works", "plan", "structure", "materials", "export", "services", "import", "translation"]) {
   await page.goto(`${ORIGIN}/web/${s}/`);

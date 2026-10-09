@@ -1,5 +1,6 @@
 // 英語の辞書（manuscript）。左が画面に書いた日本語の文言、右が英語
 export default {
+  "{{a}}：{{b}}": "{{a}}: {{b}}",
   "V3 原稿": "V3 Manuscript",
   "原稿": "Manuscript",
   "作品・話・ページ": "Work, episode, page",

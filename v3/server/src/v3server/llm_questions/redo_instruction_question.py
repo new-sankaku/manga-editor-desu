@@ -32,7 +32,7 @@ def _head(panel_content: str, model_description: str) -> str:  # i18n:prompt
 
 
 def build_first_tags_question(panel_content: str, model_description: str) -> str:
-    """model_description は渡す先のモデルが受け付ける言葉の説明（つなぎ先の設定から渡す）。"""
+    """model_description は渡す先のモデルが受け付ける言葉の説明（接続先の設定から渡す）。"""
     return _head(panel_content, model_description) + "\n" + _FORMAT
 
 

@@ -4,7 +4,7 @@ model
 # 利用者
 type user
 
-# サーバー全体。つなぎ先と処理ごとの送り先は全作品で共通なので、ここで管理する
+# サーバー全体。接続先と処理ごとの送り先は全作品で共通なので、ここで管理する
 type system
   relations
     define admin: [user]

@@ -1,5 +1,5 @@
 """作品をまたぐ画面が要る口（V3画面の一覧 5章）。PostgreSQL・OpenFGA・Temporal を実際に使う。
-つなぎ先の様子を読む口（ComfyUI・LiteLLM）は、この環境に本物が無いので、口を呼ぶ所（service_inspection._client）を
+接続先の様子を読む口（ComfyUI・LiteLLM）は、この環境に本物が無いので、口を呼ぶ所（service_inspection._client）を
 模擬（mock）の答えに差し替えて確かめる。本物の ComfyUI・LiteLLM への呼び出しは未検証。"""
 
 import json
@@ -180,7 +180,7 @@ async def test_送り先の無い処理も作業と手を返す(api):
     assert all(set(x) == {"process", "ai_task", "ai_action", "routed"} for x in rows.values())
 
 
-# ---------------------------------------------------------------- 7. つなぎ先の様子（模擬の ComfyUI・LiteLLM）
+# ---------------------------------------------------------------- 7. 接続先の様子（模擬の ComfyUI・LiteLLM）
 
 
 def _mock_comfy(request: httpx.Request) -> httpx.Response:
@@ -222,7 +222,7 @@ def mock_services(monkeypatch):
     monkeypatch.setattr(get_settings(), "litellm_master_key", "sk-mock")
 
 
-async def test_つなぎ先を試す_走り具合_止まったもの_入っているモデル(api, admin, mock_services):  # noqa: F811
+async def test_接続先を試す_走り具合_止まったもの_入っているモデル(api, admin, mock_services):  # noqa: F811
     sid, _ = await make_service(api, admin)  # ComfyUI（http://127.0.0.1:8188。答えは模擬）
     r = await api.post(f"/services/{sid}/connection-test", headers=h(admin))
     assert r.status_code == 200 and r.json()["ok"] and r.json()["state"] == "connected", r.text

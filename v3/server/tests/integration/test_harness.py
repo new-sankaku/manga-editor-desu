@@ -57,7 +57,7 @@ DRAWING = {"model_description": "Stable Diffusion 1.5 系。英語のタグを�
 # 背景の正本を使うときの決めごと（場所の3Dから奥行きを描いて渡し、背景の上に人物を描く）
 BACKGROUND = {"control": "depth", "depth_jump_log": 0.05, "thickness_px": 2,
               "params": NO_CONTROL, "composite_params": {**INPAINT, "denoise": 0.8}}
-# 形の指定を使う道があるので、つなぎ先の中身に ControlNet の名前を入れる
+# 形の指定を使う道があるので、接続先の中身に ControlNet の名前を入れる
 SD_CN = {**SD, "controlnet_name": "cn.safetensors"}
 
 
@@ -488,8 +488,10 @@ async def test_ワーカーが落ちても送り直しで依頼を重ねず続�
         await hw.start()
         u = await until_unit(api, w, "awaiting_review", timeout=120)
         jobs = await no_duplicate_sends(u["unit_id"])
-        assert len([j for j in jobs if j.process == "text_to_image"]) == 2
-        cands = await candidates_of(u["unit_id"])
+        # 重い時は、ワーカーを起こし直す間に別のステップの依頼が時間切れになり、作業が次の回へ進むことがある
+        # （2026-10-09 に、同じコンテナで別の試験を同時に流していて1回見た）。数は回ごとに数える
+        assert len([j for j in jobs if j.process == "text_to_image"]) == 2 * u["attempt"]
+        cands = [c for c in await candidates_of(u["unit_id"]) if c.attempt == u["attempt"]]
         assert len(cands) == 2 and all(c.image_id for c in cands)
     finally:
         comfy.step_seconds = 0.1

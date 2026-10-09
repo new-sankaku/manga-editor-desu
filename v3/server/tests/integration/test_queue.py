@@ -62,13 +62,13 @@ async def enqueue(api, wid, u, process, **request):
     return r.json()["id"]
 
 
-async def test_管理者でなければつなぎ先を変えられない(api):
+async def test_管理者でなければ接続先を変えられない(api):
     r = await api.post("/services", headers=h(user()), json={
         "name": "x", "kind": "text", "location": "local", "adapter": "litellm", "send_mode": "serial"})
     assert r.status_code == 403
 
 
-async def test_つなぎ先の一覧は管理者だけ_参加者には住所と費用を見せない(api, admin):
+async def test_接続先の一覧は管理者だけ_参加者には住所と費用を見せない(api, admin):
     a = user()
     wid = (await new_work(api, a))["work"]
     sid, p = await make_service(api, admin, budget=50)
@@ -83,7 +83,7 @@ async def test_つなぎ先の一覧は管理者だけ_参加者には住所と�
     assert (mine["location"], mine["allowed"]) == ("local", True)
     assert {"process": p, "service_id": sid} in r.json()["routes"]
     assert "processes" not in r.json()
-    # 招かれていない人は作品のつなぎ先も見られない
+    # 招かれていない人は作品の接続先も見られない
     assert (await api.get(f"/works/{wid}/services", headers=h(user()))).status_code == 403
 
 
@@ -270,7 +270,7 @@ async def test_予算の上限で待ち_続けるで再開する(api, admin, wor
 
 
 async def test_同時に送っても予算を超えない(api, admin, workers, fake_adapter):
-    """予算はつなぎ先の行を取ってから数え、送る前に費用を取り置く。同時に3件送れる先でも、上限20・1回10なら2件だけ送る。"""
+    """予算は接続先の行を取ってから数え、送る前に費用を取り置く。同時に3件送れる先でも、上限20・1回10なら2件だけ送る。"""
     a = user()
     wid = (await new_work(api, a))["work"]
     sid, p = await make_service(api, admin, send_mode="parallel", n=3, budget=20)

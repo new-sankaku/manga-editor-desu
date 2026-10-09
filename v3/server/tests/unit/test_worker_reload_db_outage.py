@@ -1,6 +1,6 @@
 """ワーカーの読み直しが PostgreSQL に届かなくても、プロセスが終わらないことの試験（既製品は使わない）。
 
-前は WorkerSet の読み直し（つなぎ先の一覧を読む）が OperationalError で落ちると、ワーカーのプロセスごと終わり、
+前は WorkerSet の読み直し（接続先の一覧を読む）が OperationalError で落ちると、ワーカーのプロセスごと終わり、
 PostgreSQL が戻っても生成・書き出し・ハーネスが進まなかった（2026-10-08 保存と再起動の確かめの場面 e で見つけた。
 V3サーバーの土台「保存と再起動の確かめ」）。
 """
@@ -39,7 +39,7 @@ async def test_DB以外の失敗は隠さない(monkeypatch):
     monkeypatch.setattr(queue_worker_main, "RELOAD_SECONDS", 0.01)
 
     async def reload(self):
-        raise ValueError("つなぎ先の設定がおかしい")
+        raise ValueError("接続先の設定がおかしい")
 
     monkeypatch.setattr(WorkerSet, "reload", reload)
     with pytest.raises(ValueError):

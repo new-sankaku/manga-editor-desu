@@ -581,7 +581,7 @@ function unitPanel() {
   const back = RETRY_EDGES.map(([a, b]) => [`${a}>${b}`, (S.edgeCounts || {})[`${a}>${b}`] || 0]).filter(([, n]) => n);
   if (back.length) {
     out.push(h("section", { cls: "box" }, h("h3", { text: t("戻った回数") }),
-      h("dl", { cls: "kv" }, back.flatMap(([k, n]) => [h("dt", { text: t("{{n}}回", { n }) }), h("dd", { text: `${STEP_JA[k.split(">")[0]]}→${STEP_JA[k.split(">")[1]]}：${EDGE_TEXT[k]}` })]))));
+      h("dl", { cls: "kv" }, back.flatMap(([k, n]) => [h("dt", { text: t("{{n}}回", { n }) }), h("dd", { text: t("{{from}}→{{to}}：{{text}}", { from: STEP_JA[k.split(">")[0]], to: STEP_JA[k.split(">")[1]], text: EDGE_TEXT[k] }) })]))));
   }
 
   const ctl = (body) => post(`${base}/control`, body);
@@ -600,7 +600,7 @@ function unitPanel() {
   const marks = [...S.stale.values()].filter((m) => m.unit_id === u.unit_id);
   if (marks.length) {
     out.push(h("section", { cls: "box stale-box" }, h("h3", { text: t("上流が変わった（自動では作り直さない）") }),
-      marks.map((m) => h("div", { cls: "stale-row" }, h("p", { text: `${m.reason}（${m.effect}）` }),
+      marks.map((m) => h("div", { cls: "stale-row" }, h("p", { text: t("{{a}}（{{b}}）", { a: m.reason, b: m.effect }) }),
         h("div", { cls: "actions" },
           act(t("作り直す"), () => post(`/works/${S.workId}/harness/stages/${u.stage_run_id}/rerun`, { unit_ids: [u.unit_id] }), "primary"),
           act(t("このままでよい"), () => post(`/works/${S.workId}/harness/stale/${m.id}/dismiss`)))))));
@@ -676,7 +676,7 @@ function contentView(content) {
     if (lines.length >= 12) return;
     if (v && typeof v === "object") {
       for (const [k, x] of Object.entries(v)) if (!["cost", "job_ids"].includes(k)) walk(x, path ? `${path}.${k}` : k);
-    } else if (v !== null && v !== "") lines.push(`${path}：${v}`);
+    } else if (v !== null && v !== "") lines.push(t("{{a}}：{{b}}", { a: path, b: v }));
   };
   walk(content, "");
   return h("ul", { cls: "noimg content-lines" }, lines.map((line) => h("li", { text: line })));
@@ -808,7 +808,7 @@ function thresholdRow(r) {
   const state = cur ? t("{{value}}（{{status}}）", { value: cur.value, status: { unverified: t("未検証"), verified: t("確かめた"), rejected: t("使わない") }[cur.status] || cur.status }) : t("未設定");
   return h("div", { cls: `th-row${cur ? "" : " th-unset"}` },
     h("div", { cls: "kvline" }, h("span", { cls: "label key", text: `${r.stage} ${r.key}` }), h("span", { text: state })),
-    h("p", { cls: "muted", text: `${r.meaning}（${r.when}）` }),
+    h("p", { cls: "muted", text: t("{{a}}（{{b}}）", { a: r.meaning, b: r.when }) }),
     h("p", { cls: "muted", text: t("案：{{value}} ／ {{source}}", { value: prop.value ?? t("値なし"), source: prop.source }) }),
     h("div", { cls: "th-inputs" }, value, source),
     h("div", { cls: "actions" },

@@ -61,7 +61,7 @@ function icons() { window.lucide.createIcons({ attrs: { class: "lucide" } }); }
 // message：何をしようとして失敗したかの丸ごとの文（「採用できませんでした」など）。理由と一緒に出す
 function fail(e, message = "") {
   console.error(e);
-  toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
+  toast(message ? t("{{a}}：{{b}}", { a: message, b: api.errorText(e) }) : api.errorText(e), "bad");
 }
 // 線とレイヤーの id は画面で作る（保存を待たずに取り消しの記録に載せるため）。http の画面でも使えるよう getRandomValues で作る
 function newId() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join(""); }

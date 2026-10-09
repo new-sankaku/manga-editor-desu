@@ -36,7 +36,7 @@ export function toast(msg, kind = "") {
 // message：失敗を伝える丸ごとの文（t() に包んで渡す）。理由と一緒に出す
 export function fail(e, message = "") {
   console.error(e);
-  toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
+  toast(message ? t("{{a}}：{{b}}", { a: message, b: api.errorText(e) }) : api.errorText(e), "bad");
 }
 
 // js/api.js に無い PUT・PATCH（接続先と送り先）と、ファイルを取る GET。失敗の形は api.js と同じ（ApiError・NetworkError）

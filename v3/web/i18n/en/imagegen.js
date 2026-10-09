@@ -1,5 +1,6 @@
 // 英語の辞書（imagegen）。左が画面に書いた日本語の文言、右が英語
 export default {
+  "{{a}}：{{b}}": "{{a}}: {{b}}",
   "AIが作った": "Created by AI",
   "API": "API",
   "V3 画像生成": "V3 Image generation",

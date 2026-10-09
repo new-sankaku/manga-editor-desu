@@ -98,8 +98,10 @@ class GenerationJob:
                         await workflow.sleep(timedelta(seconds=retry_after) if retry_after else RATE_LIMIT_WAIT)
                         continue
                     if kind == "budget":
-                        await self._status("waiting_budget", kind, detail)
+                        # 印は、状態を「予算待ち」と書く前に下ろす。書いた後に下ろすと、書いた直後に届いた「続ける」を
+                        # 消してしまう（Temporal は同じ回で、合図を先に、書き終わりの続きを後に流す。2026-10-09 に試験で見た）
                         self._resumed = False
+                        await self._status("waiting_budget", kind, detail)
                         await workflow.wait_condition(lambda: self._resumed)
                         continue
                     await self._status("stopped", kind or "transport", detail)

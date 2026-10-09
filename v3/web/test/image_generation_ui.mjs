@@ -88,7 +88,7 @@ await page.waitForFunction(() => document.querySelectorAll(".cand[data-image]").
 await page.waitForTimeout(800);
 await shot("inpaint_candidates");
 const meta = await page.locator(".cand[data-image] .cand-f .meta").first().textContent();
-check(/seed \d+/.test(meta) && meta.includes("sd15_unet"), `候補につなぎ先・モデル・seed が出る（${meta}）`);
+check(/seed \d+/.test(meta) && meta.includes("sd15_unet"), `候補に接続先・モデル・seed が出る（${meta}）`);
 check(await page.locator(".cand[data-image] .prot").count() >= 1, "候補に人の手の範囲の印が出る");
 
 // ---- 比べる
@@ -180,7 +180,7 @@ await page.waitForTimeout(500);
 check(await page.locator('.tool[data-tool="erase"]').getAttribute("aria-pressed") === "true", "消した後も消しゴムのまま");
 await shot("erase_pixels");
 
-// ---- 指示で直す（このつなぎ先は持っていないので、つなぎ先が無いと出る）
+// ---- 指示で直す（この接続先は持っていないので、接続先が無いと出る）
 await page.click('#process-list .chip[data-process="instruction_edit"]');
 await shot("instruction_edit_form");
 

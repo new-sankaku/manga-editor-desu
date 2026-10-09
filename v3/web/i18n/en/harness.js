@@ -1,5 +1,8 @@
 // 英語の辞書（harness）。左が画面に書いた日本語の文言、右が英語
 export default {
+  "{{a}}（{{b}}）": "{{a}} ({{b}})",
+  "{{a}}：{{b}}": "{{a}}: {{b}}",
+  "{{from}}→{{to}}：{{text}}": "{{from}} → {{to}}: {{text}}",
   "AIハーネス": "AI pipeline",
   "AIハーネス：{{level}}": "AI pipeline: {{level}}",
   "図": "Graph",

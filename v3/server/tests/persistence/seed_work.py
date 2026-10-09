@@ -1,7 +1,7 @@
 """保存と再起動の確かめ（v3/web/test/persistence_e2e.mjs）の作品を、操作の窓口（本物の口）から作る。
 
 画面で確かめる編集（コマ・文字・トーン・層・絵・ページの設定・ペン・訳文・確認の状態・キー）はここでは入れない。
-ここで入れるのは、その前提だけ：つなぎ先と送り先（管理者）・作品の設定・閾値・話とページ・ハーネスのコマ・訳す文字。
+ここで入れるのは、その前提だけ：接続先と送り先（管理者）・作品の設定・閾値・話とページ・ハーネスのコマ・訳す文字。
 ハーネスは偽の LLM・検出器・ComfyUI（fake_workers_main.py・fake_comfy_main.py）で、話2の工程 S4 を始める。
 
   uv run python tests/persistence/seed_work.py --api http://127.0.0.1:8961 --comfy http://127.0.0.1:8963 \
@@ -86,7 +86,7 @@ async def seed(api: str, comfy: str, admin: str, author: str) -> dict:
                 raise SystemExit(f"{method} {path} → {r.status_code} {r.text}")
             return r.json() if r.content else None
 
-        # つなぎ先（管理者）。ComfyUI・LLM・検出器（LLM と検出器はワーカーの中で偽物に差し替える）
+        # 接続先（管理者）。ComfyUI・LLM・検出器（LLM と検出器はワーカーの中で偽物に差し替える）
         async def service(**body):
             return (await call("POST", "/services", admin, json={"name": f"pe-{nid()[:6]}", **body}))["id"]
 

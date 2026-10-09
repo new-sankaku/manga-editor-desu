@@ -80,7 +80,7 @@ services:
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?LITELLM_MASTER_KEY を .env に書いてください}
-      # 単価の表を外から取りに行かない。費用はつなぎ先ごとに人が入れる（V3細部の決めごと 4.1）
+      # 単価の表を外から取りに行かない。費用は接続先ごとに人が入れる（V3細部の決めごと 4.1）
       LITELLM_LOCAL_MODEL_COST_MAP: "True"
     ports:
       - "127.0.0.1:54000:4000"

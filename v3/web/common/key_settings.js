@@ -117,7 +117,7 @@ function draw() {
       ${st.why ? html`<div class="note need">${icon("triangle-alert")}<span>${st.why}</span></div>` : nothing}
       ${S.error ? html`<div class="note bad" role="alert">${icon("circle-alert")}<span>${S.error}</span></div>` : nothing}
       ${conflicts.length ? html`<div class="note bad" id="v3-ks-conflicts">${icon("triangle-alert")}<span>${t("重なっているキーがあります：")}
-        ${conflicts.map(([a, b, s], i) => html`${i ? "、" : ""}<kbd>${km.keyLabel(s)}</kbd>（${a.label}／${b.label}）`)}${t("。先に結ばれた方（ツール → 画面 → どの画面でも）が効きます")}</span></div>` : nothing}
+        ${conflicts.map(([a, b, s], i) => html`${i ? t("、") : ""}<kbd>${km.keyLabel(s)}</kbd>${t("（{{a}}／{{b}}）", { a: a.label, b: b.label })}`)}${t("。先に結ばれた方（ツール → 画面 → どの画面でも）が効きます")}</span></div>` : nothing}
       <div class="acts">
         <label class="v3-search grow">${icon("search")}<input class="field" type="search" id="v3-ks-q" placeholder=${t("すること・キー・画面で探す")} aria-label=${t("操作を探す")}
           .value=${live(S.query)} @input=${(e) => { S.query = e.target.value; draw(); }}></label>

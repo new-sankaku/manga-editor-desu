@@ -110,7 +110,7 @@ class SetMember(OpBase):
 
 
 class AllowDestination(OpBase):
-    """作品の送ってよい先に API のつなぎ先を足す・外す。"""
+    """作品の送ってよい先に API の接続先を足す・外す。"""
 
     type: Literal["allow_destination"] = "allow_destination"
     service_id: str
