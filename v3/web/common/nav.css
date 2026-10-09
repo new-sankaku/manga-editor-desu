@@ -4,3 +4,4 @@
 .v3-nav-a:hover{color:var(--ink)}
 .v3-nav-a[aria-current="page"]{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
 .v3-nav-a svg.lucide{width:15px;height:15px;stroke-width:1.9}
+.v3-nav-lang{align-self:center;min-height:26px;padding:0 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface-2);color:var(--ink-3);font:inherit}

@@ -5,7 +5,7 @@
 // - serveWeb：画面のファイル（v3/web）を、偽の住所の下でそのまま出す。口の答えは answer(route, url) で決める
 import { createRequire } from "node:module";
 import { existsSync, mkdirSync, readFileSync, statSync } from "node:fs";
-import { extname, join, normalize } from "node:path";
+import { extname, join, normalize, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
@@ -52,7 +52,7 @@ export async function serveWeb(page, origin, answer) {
     const url = new URL(route.request().url());
     if (url.pathname.startsWith("/web/")) {
       const f = normalize(join(WEB_DIR, decodeURIComponent(url.pathname.slice(5)) || "index.html"));
-      const file = f.endsWith("/") ? join(f, "index.html") : f;
+      const file = f.endsWith(sep) ? join(f, "index.html") : f;  // Windows では区切りが \ になる
       if (!file.startsWith(WEB_DIR) || !existsSync(file)) return route.fulfill({ status: 404, body: "無い" });
       return route.fulfill({ status: 200, body: readFileSync(file), contentType: TYPES[extname(file)] || "application/octet-stream" });
     }
