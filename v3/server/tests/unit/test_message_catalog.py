@@ -22,7 +22,7 @@ import pytest
 from starlette.requests import Request
 
 from v3server.message_catalog import CATALOG
-from v3server.messages import LANGS, Message, m, render, request_lang, text_of
+from v3server.messages import LANGS, Message, has_packed, m, ms, render, render_tree, request_lang, text_of
 from v3server.v3_error_types import Invalid
 
 SRC = pathlib.Path(__file__).resolve().parents[2] / "src" / "v3server"
@@ -55,7 +55,7 @@ def _fields(template: str) -> set[str]:
 
 
 def _is_m(node: ast.AST) -> bool:
-    return isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "m"
+    return isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in ("m", "ms")
 
 
 def _m_calls() -> list[tuple[pathlib.Path, ast.Call]]:
@@ -136,6 +136,40 @@ def test_message_is_the_japanese_text_and_keeps_its_source():
         assert clone == text and clone.template == text.template and clone.values == text.values
     assert text_of(Invalid(text)) is text
     assert text_of(ValueError("plain")) == "plain" and not isinstance(text_of(ValueError("plain")), Message)
+
+
+def test_stored_message_survives_text_handling_and_is_rendered_at_the_output(monkeypatch):
+    """残す文（ms()）は、f 文字列・JSON・例外の文を通っても、出す所でその言語の文に戻る。"""
+    monkeypatch.setitem(CATALOG, "en", {"{name} に URL が無い": "{name} has no URL", "送れなかった: {reason}": "Could not send: {reason}",
+                                        "足りない: {names}（{n} 件）": "Missing: {names} ({n})", "幅が足りない（{mm}mm）": "Too narrow ({mm} mm)"})
+    inner = ms("{name} に URL が無い", name="comfy1")
+    assert has_packed(inner) and "comfy1" in inner and inner != "comfy1 に URL が無い"
+    assert render(inner, "ja") == "comfy1 に URL が無い" and render(inner, "en") == "comfy1 has no URL"
+    # つなぐ・例外にする・JSON にして読み戻す
+    travelled = json.loads(json.dumps({"reason": str(ValueError(f"refused: {inner}"))}))["reason"]
+    assert render(travelled, "ja") == "refused: comfy1 に URL が無い" and render(travelled, "en") == "refused: comfy1 has no URL"
+    # 別の文の値に入れる（ms() の中に ms()、ms() の中に m()）。並びはその言語の区切りでつなぐ。数は書式を保つ
+    outer = ms("送れなかった: {reason}", reason=inner)
+    assert render(outer, "ja") == "送れなかった: comfy1 に URL が無い" and render(outer, "en") == "Could not send: comfy1 has no URL"
+    assert render(ms("送れなかった: {reason}", reason=m("幅が足りない（{mm}mm）", mm=3)), "en") == "Could not send: Too narrow (3 mm)"
+    listed = ms("足りない: {names}（{n} 件）", names=["顔", inner], n=2)
+    assert render(listed, "ja") == "足りない: 顔、comfy1 に URL が無い（2 件）" and render(listed, "en") == "Missing: 顔, comfy1 has no URL (2)"
+    assert render(ms("辞書に無い文 {n:.1f}", n=1.25), "ja") == "辞書に無い文 1.2" and render(ms("辞書に無い文 {n:.1f}", n=1.25), "en") == "⚠ 辞書に無い文 1.2"
+    # 同じ文と値なら同じ文字列（重なりを省く所が今までどおり働く）
+    assert ms("{name} に URL が無い", name="comfy1") == inner
+    # 返事の中身は、日本語でも文に戻す
+    tree = {"items": [{"reason": travelled, "n": 1}], "plain": "そのまま"}
+    assert render_tree(tree, "ja") == {"items": [{"reason": "refused: comfy1 に URL が無い", "n": 1}], "plain": "そのまま"}
+    assert render_tree(tree, "en")["items"][0]["reason"] == "refused: comfy1 has no URL"
+
+
+def test_stored_message_in_a_response_is_rendered_in_japanese_too():
+    from v3server.http_routes.http_app_factory import LocalizedJSONResponse
+    from v3server.messages import set_current_lang
+
+    set_current_lang("ja")
+    body = LocalizedJSONResponse({"reason": ms("{name} に URL が無い", name="comfy1"), "big": [1, 2, 3]}).body
+    assert json.loads(body) == {"reason": "comfy1 に URL が無い", "big": [1, 2, 3]}
 
 
 def test_render_translates_nested_messages_and_marks_missing_ones(monkeypatch):

@@ -65,6 +65,8 @@ from v3server.v3_error_types import (
 )
 
 log = logging.getLogger(__name__)
+# 包んだ文（ms()）の開く印を UTF-8 にした物
+PACKED_MARK = "\ue000".encode()
 
 
 @asynccontextmanager
@@ -83,7 +85,12 @@ class LocalizedJSONResponse(JSONResponse):
     """返事の中の m() の文（処理の名前・項目の名前・成功の返事に入れた失敗の理由など）を、呼び出しの言語で出す。"""
 
     def render(self, content) -> bytes:
-        return super().render(render_tree(content, current_lang()))
+        lang = current_lang()
+        if lang != "ja":
+            return super().render(render_tree(content, lang))
+        # 日本語では、包んだ文（ms()）が入っている返事だけ中をたどる（大きい返事を毎回たどらない）
+        body = super().render(content)
+        return super().render(render_tree(content, lang)) if PACKED_MARK in body else body
 
 
 class RequestLanguage:
@@ -156,7 +163,8 @@ async def validation_error(request: Request, exc: RequestValidationError):
         cause = (error.get("ctx") or {}).get("error")
         text = text_of(cause) if isinstance(cause, BaseException) else None
         errors.append({**error, "msg": render(text, lang)} if isinstance(text, Message) else error)
-    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
+    # 確かめの中で ms() の文を投げた時は、pydantic が作った文の中に包んだ文が入っている。全部を文に戻す
+    return JSONResponse(status_code=422, content={"detail": render_tree(jsonable_encoder(errors), lang)})
 
 
 for _routes in (login_routes, work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,

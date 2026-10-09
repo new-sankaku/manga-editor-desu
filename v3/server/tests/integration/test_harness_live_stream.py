@@ -28,7 +28,7 @@ async def test_確定の遅れた出来事も_大きいidを流した後で流�
     async def disconnected() -> bool:
         return closed
 
-    it = live_stream.stream(wid, 0, disconnected)
+    it = live_stream.stream(wid, 0, disconnected, "ja")
     late = get_sessionmaker()()
     try:
         await add_event(late, wid, "stale", {"n": "late"})  # id は決まったが、まだ確定しない

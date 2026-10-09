@@ -33,6 +33,7 @@ from v3server.canonical_tables.harness_tables import (
 from v3server.canonical_tables.service_and_job_tables import CallLog, Job, Service
 from v3server.database_engine import get_sessionmaker
 from v3server.harness.harness_record import unit_counters
+from v3server.messages import render_tree
 
 POLL_SECONDS = 0.2
 KEEPALIVE_SECONDS = 15
@@ -133,12 +134,14 @@ async def unit_detail(session: AsyncSession, unit_id: str) -> dict[str, Any]:
             "stale": [row_of(m, MARK_FIELDS) for m in marks]}
 
 
-def _sse(data: dict[str, Any], event: str, eid: int | None = None) -> str:
+def _sse(data: dict[str, Any], event: str, lang: str, eid: int | None = None) -> str:
+    # 残した文（ms()）は、ここで見ている人の言語の文に戻す
+    data = render_tree(data, lang)
     head = f"id: {eid}\n" if eid is not None else ""
     return f"{head}event: {event}\ndata: {json.dumps(data, ensure_ascii=False, default=str)}\n\n"
 
 
-async def stream(work_id: str, after: int, disconnected: Callable[[], Awaitable[bool]]) -> AsyncIterator[str]:
+async def stream(work_id: str, after: int, disconnected: Callable[[], Awaitable[bool]], lang: str) -> AsyncIterator[str]:
     yield "retry: 1500\n\n"
     since: datetime | None = None
     seen: dict[str, datetime] = {}
@@ -166,7 +169,7 @@ async def stream(work_id: str, after: int, disconnected: Callable[[], Awaitable[
                 streamed.add(e.id)
                 sent = True
                 yield _sse({**e.payload, "kind": e.kind, "unit_id": e.unit_id, "stage_run_id": e.stage_run_id,
-                            "at": e.created_at.isoformat()}, e.kind, e.id)
+                            "at": e.created_at.isoformat()}, e.kind, lang, e.id)
             # 次に読む境は、読む前のデータベースの時刻から少し戻した所（書き込みの確定が読むより遅れた物も拾う）。
             # 同じ値を2回送らないよう、鍵ごとに送った時刻を覚える
             t0 = await session.scalar(select(func.clock_timestamp()))
@@ -175,7 +178,7 @@ async def stream(work_id: str, after: int, disconnected: Callable[[], Awaitable[
                     continue
                 seen[c.id] = p.updated_at
                 sent = True
-                yield _sse(_progress(p, c), "progress")
+                yield _sse(_progress(p, c), "progress", lang)
             since = t0 - PROGRESS_OVERLAP
         if sent:
             quiet_since = loop.time()

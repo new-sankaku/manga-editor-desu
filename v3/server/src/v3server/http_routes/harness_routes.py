@@ -50,7 +50,7 @@ from v3server.harness.structure_steps import StructureSpec
 from v3server.harness.threshold_proposals import threshold_rows
 from v3server.harness.unit_workflow import Control, LimitChange, Review, WorkUnitWorkflow
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require
-from v3server.messages import m, text_of
+from v3server.messages import m, request_lang, text_of
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.v3_error_types import Invalid, Locked, NotFound
 
@@ -311,7 +311,7 @@ async def get_stream(work_id: str, request: Request, authz: AuthzDep, actor: Act
     """SSE。Last-Event-ID（か ?after=）の続きから流す。画面は fetch で読む（ヘッダーで名乗るため EventSource は使わない）。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     start = after if after is not None else int(last_event_id) if last_event_id else 0
-    return StreamingResponse(live_stream.stream(work_id, start, request.is_disconnected),
+    return StreamingResponse(live_stream.stream(work_id, start, request.is_disconnected, request_lang(request.headers)),
                              media_type="text/event-stream",
                              headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 

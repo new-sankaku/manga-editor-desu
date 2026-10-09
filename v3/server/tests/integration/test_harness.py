@@ -567,14 +567,14 @@ async def test_SSEは出来事を順に流し_続きから読み直せ_進み具
         stop["n"] += 1
         return stop["n"] > 3
 
-    got = [c async for c in live_stream.stream(w["wid"], 0, disconnected)]
+    got = [c async for c in live_stream.stream(w["wid"], 0, disconnected, "ja")]
     ids = [int(line[4:]) for c in got for line in c.splitlines() if line.startswith("id: ")]
     assert ids == sorted(ids) and len(ids) > 10
     kinds = {line[7:] for c in got for line in c.splitlines() if line.startswith("event: ")}
     assert {"stage", "unit", "step"} <= kinds
     mid = ids[len(ids) // 2]
     stop["n"] = 0
-    rest = [c async for c in live_stream.stream(w["wid"], mid, disconnected)]
+    rest = [c async for c in live_stream.stream(w["wid"], mid, disconnected, "ja")]
     rest_ids = [int(line[4:]) for c in rest for line in c.splitlines() if line.startswith("id: ")]
     assert rest_ids == [i for i in ids if i > mid]
     cands = await candidates_of((await snap(api, w))["units"][0]["unit_id"])
