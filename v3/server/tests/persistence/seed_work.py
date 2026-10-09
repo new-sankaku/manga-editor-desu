@@ -19,6 +19,8 @@ import uuid
 import httpx
 from PIL import Image, ImageDraw
 
+from v3server.harness.queue_calls import HARNESS_PROCESSES as HARNESS_PROCESS_NAMES
+
 # 試験と同じ値（tests/integration/test_harness.py・test_image_generation.py）
 SD = {"model": {"kind": "separate", "unet_name": "u.safetensors", "weight_dtype": "default", "clip_name": "c.safetensors",
                 "clip_type": "stable_diffusion", "vae_name": "v.safetensors"},
@@ -33,9 +35,10 @@ DRAWING = {"model_description": "Stable Diffusion 1.5 系。英語のタグを�
            "long_side": 256, "base_params": {"steps": 4, "cfg": 7, "control": "none", "control_strength": 1.0,
                                              "control_end": 1.0, "control_invert": False},
            "redraw_params": {"steps": 4, "cfg": 7, "control": "none", "control_strength": 1.0, "control_end": 1.0,
-                             "control_invert": False, "strength": 0.6}}
-HARNESS_PROCESSES = ["harness_panel_tags", "harness_detect_person", "harness_detect_text", "harness_shot_angle",
-                     "harness_pick", "harness_name_draft", "harness_contradiction", "harness_foreshadow"]
+                             "control_invert": False, "strength": 0.6},
+           "person_placement": "region", "region_strength": 1.0, "controls": {}}
+# 工程が頼む処理の全部（一覧はサーバーの物を使う。ここに書き写すと、処理が増えたときに送り先が足りずに作業が止まる）
+HARNESS_PROCESSES = sorted(HARNESS_PROCESS_NAMES.values())
 PAGE_SPEC = {"frame_width_mm": 150, "frame_height_mm": 220, "trim_width_mm": 182, "trim_height_mm": 257,
              "bleed_mm": 3, "gutter_x_mm": 3, "gutter_y_mm": 6}
 # 書き出しは小さい解像度で（速さのため。解像度の値は画面で変える：ページの設定）
@@ -51,7 +54,7 @@ NOMBRE = {"font_family": "ipam", "font_size_pt": 9, "hidden_font_size_pt": 6, "c
           "display_by_kind": {"cover": "none", "color_page": "hidden", "body": "visible", "blank": "hidden"}}
 TYPESETTING = {"line_spacing_ratio": 0.15, "line_break": "phrase", "tate_chu_yoko_max_digits": 2,
                "tate_chu_yoko_marks": True, "align": "start"}
-LIMITS = {"unit": {"max_attempts": 3, "candidates_per_attempt": 2, "budget_cost": 1000, "budget_seconds": 900,
+LIMITS = {"unit": {"max_attempts": 3, "candidates_per_attempt": 2, "budget_cost": 1000, "budget_seconds": 900, "wait_seconds": 900, "max_fix_rounds": 1,
                    "error_stop": 3, "same_failure_restart": 2, "eval_repeats": 1, "disagreement_stop": 2,
                    "review_notice_seconds": 3600, "resend_limit": 0},
           "max_parallel_units": 2, "completion": ["checks_pass", "evaluator_pick", "human_approve"]}

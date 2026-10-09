@@ -1,8 +1,8 @@
-// キー・キーの一覧・キーを変える・絵だけ・全画面の試験（V3細部の決めごと 22章）。Playwright（Chromium）で通す。
+// キー・キーの一覧・キーを変える・集中モード・全画面の試験（V3細部の決めごと 22章）。Playwright（Chromium）で通す。
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers \
 //   node v3/web/test/keys_ui.mjs
 // 相手は偽のサーバー（下の MOCK。page.route で口を横取りして答える。本物ではない）。
-// 画面のファイル（v3/web）はそのまま出す。偽なのは口の答えだけで、キーの受け方・窓・絵だけ・全画面は本物の画面のコード。
+// 画面のファイル（v3/web）はそのまま出す。偽なのは口の答えだけで、キーの受け方・窓・集中モード・全画面は本物の画面のコード。
 // 偽の口：/auth/mode・/me/settings（利用者ごとの設定。本物と同じく PUT は全部を書き換える）・作品・ページ・コマ・絵・候補・版・確認の記録
 // 画面の写しは SHOTS=<フォルダ> を付けたときだけ撮る（ui_common.mjs）。普段は v3/web/test/run_ui.mjs から流す
 import zlib from "node:zlib";
@@ -215,12 +215,12 @@ await page.keyboard.press("Escape");
 check(!(await page.isVisible("#v3-help")), "Esc でキーの一覧が閉じる");
 // 探す欄に入ったまま閉じても、すぐ次のキーが効く（閉じた窓の欄に残ったままキーが止まっていたのを直した）
 
-// 絵だけ・Tab・全画面・Esc の順
+// 集中モード・Tab・全画面・Esc の順
 await page.keyboard.press("Shift+F");
-check(await html("data-focus"), "Shift+F で絵だけになる");
-check(!(await page.isVisible("header.top")) && !(await page.isVisible(".v3-nav")), "絵だけの間は上の帯と画面の帯を隠す");
-check(await page.isVisible(".cand[data-image=c1]") && !(await page.isVisible("[data-pane=ask]")), "絵だけの間は候補の帯だけ残す");
-check(await page.isVisible(".ftb") && await page.isVisible(".v3-viewbar"), "絵だけの間も道具の帯と小さい帯は出る");
+check(await html("data-focus"), "Shift+F で集中モードになる");
+check(!(await page.isVisible("header.top")) && !(await page.isVisible(".v3-nav")), "集中モードの間は上の帯と画面の帯を隠す");
+check(await page.isVisible(".cand[data-image=c1]") && !(await page.isVisible("[data-pane=ask]")), "集中モードの間は候補の帯だけ残す");
+check(await page.isVisible(".ftb") && await page.isVisible(".v3-viewbar"), "集中モードの間も道具の帯と小さい帯は出る");
 await shot(page, "14_workbench_focus");
 await page.keyboard.press("Tab");
 check(await html("data-peek") && await page.isVisible("header.top"), "Tab でパネルを一時的に出す");
@@ -228,7 +228,7 @@ await page.keyboard.press("Tab");
 check(!(await html("data-peek")) && !(await page.isVisible("header.top")), "もう一度 Tab で隠す");
 await page.reload();
 await page.waitForSelector(".cand[data-image=c1] img[src]", { state: "attached" });
-check(await html("data-focus"), "絵だけは画面ごとに覚え、開き直しても絵だけのまま");
+check(await html("data-focus"), "集中モードは画面ごとに覚え、開き直しても集中モードのまま");
 
 await page.keyboard.press("Control+Shift+F");
 await page.waitForFunction(() => document.documentElement.hasAttribute("data-fullscreen"));
@@ -240,7 +240,7 @@ const afterEsc1 = await page.evaluate(() => ({ poly: !!window.v3Stage.poly, focu
 check(!afterEsc1.poly && afterEsc1.focus && afterEsc1.fs, "Esc 1回目：道具（多角形）だけをやめる");
 await page.keyboard.press("Escape");
 const afterEsc2 = await page.evaluate(() => ({ focus: document.documentElement.hasAttribute("data-focus"), fs: !!document.fullscreenElement }));
-check(!afterEsc2.focus && afterEsc2.fs, "Esc 2回目：絵だけから抜ける（全画面のまま）");
+check(!afterEsc2.focus && afterEsc2.fs, "Esc 2回目：集中モードから抜ける（全画面のまま）");
 await page.keyboard.press("Escape");
 // 全画面の印は fullscreenchange で外す。fullscreenElement が先に消えるので、印が外れるまで待つ（待たないと5回に1回落ちた）
 const esc3 = await page.waitForFunction(() => !document.fullscreenElement && !document.documentElement.hasAttribute("data-fullscreen"), null, { timeout: 5000 }).then(() => true, () => false);
@@ -252,9 +252,9 @@ await page.waitForFunction(() => !!document.fullscreenElement);
 await page.evaluate(() => document.exitFullscreen());
 await page.waitForFunction(() => !document.documentElement.hasAttribute("data-fullscreen"));
 check(await html("data-focus") && (await attr(".v3-viewbar [data-view=fullscreen]", "aria-pressed")) === "false",
-  "ブラウザの側で全画面を抜けると、全画面の印が外れ、絵だけはそのまま");
+  "ブラウザの側で全画面を抜けると、全画面の印が外れ、集中モードはそのまま");
 await page.click(".v3-viewbar [data-view=exit]");
-check(!(await html("data-focus")), "小さい帯の「抜ける」で絵だけから抜ける");
+check(!(await html("data-focus")), "小さい帯の「抜ける」で集中モードから抜ける");
 await page.keyboard.press("v");
 
 // キーを変える：足す・残す・重なり・初めに戻す・今のアプリのキー
@@ -312,7 +312,7 @@ check(true, "G のあと 0 で確認の画面へ");
 await page.waitForSelector("[data-page=p1]");
 await page.click("#read-through");
 await page.waitForSelector(".reader-page");
-check(await html("data-focus") && !(await page.isVisible("#top")), "「読み通す」で絵だけになり、ページを大きく出す");
+check(await html("data-focus") && !(await page.isVisible("#top")), "「読み通す」で集中モードになり、ページを大きく出す");
 const n = () => page.textContent(".reader-n");
 check((await n()) === "1", "読み通すは 1 ページから");
 await page.keyboard.press("ArrowLeft");
@@ -326,7 +326,7 @@ await shot(page, "16_review_read_through");
 await page.keyboard.press("Escape");
 check(!(await html("data-focus")) && await page.isVisible("#top"), "Esc で読み通すから抜ける");
 await page.keyboard.press("ArrowLeft");
-check(!(await page.isVisible(".reader-page")), "絵だけでないときは ← で何もしない");
+check(!(await page.isVisible(".reader-page")), "集中モードでないときは ← で何もしない");
 await page.keyboard.press("Shift+?");
 await page.waitForSelector("#v3-help[open]");
 check(await page.isVisible("#v3-help tr[data-id='review.left']"), "確認の画面のキーの一覧に「左のページへ」が出る");
@@ -336,7 +336,7 @@ await page.keyboard.press("Shift+?");
 check(!(await page.isVisible("#v3-help")), "コメントの欄で ? を打ってもキーの一覧は開かない");
 check((await page.inputValue("#comment")) === "?", "コメントの欄に ? が入る");
 
-// ===== 工程の画面：絵だけは図だけ（見張る画面）
+// ===== 工程の画面：集中モードは図だけ（見張る画面）
 await page.goto(`${ORIGIN}/web/harness/?work=w1`);
 await page.waitForSelector("#graph canvas");
 await page.waitForFunction(() => document.querySelector("#fit kbd")?.textContent === "0");
@@ -365,7 +365,7 @@ for (const s of ["works", "plan", "structure", "materials", "export", "services"
   await page.keyboard.press("Shift+F");
   const ok = await html("data-focus") && !(await page.isVisible("#top"));
   await page.keyboard.press("Escape");
-  check(ok && !(await html("data-focus")), `${s}：帯にキーのボタンがあり、Shift+F で絵だけ・Esc で戻る`);
+  check(ok && !(await html("data-focus")), `${s}：帯にキーのボタンがあり、Shift+F で集中モード・Esc で戻る`);
 }
 
 console.log("偽のサーバーに無かった口：", [...new Set(misses)].join("、") || "なし");

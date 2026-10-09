@@ -298,7 +298,7 @@ try {
   check(await beforeUnloadAsks(), "画像生成：塗った囲み（保存しない）があると、閉じる前に聞く");
   await shot("wb_mask");
 
-  // ほかの画面：訳文・確認の状態・キーの設定・絵だけ
+  // ほかの画面：訳文・確認の状態・キーの設定・集中モード
   const nd = dialogs.length;
   await page.goto(`${API}/web/translation/?work=${W}&episode=${EP1}&lang=en`);
   check(dialogs.length === nd + 1 && dialogs.at(-1) === "beforeunload", "囲みを残したまま画面を離れると、ブラウザが閉じる前に聞く");
@@ -424,7 +424,7 @@ try {
   await page.waitForFunction(() => document.documentElement.hasAttribute("data-focus"));
   await page.reload();
   await page.waitForFunction(() => window.__ms && window.__ms.m);
-  check(await S(() => document.documentElement.hasAttribute("data-focus")), "a：絵だけ（localStorage）は開き直しても残る");
+  check(await S(() => document.documentElement.hasAttribute("data-focus")), "a：集中モード（localStorage）は開き直しても残る");
   await page.keyboard.press("Shift+F");
   await page.waitForFunction(() => !document.documentElement.hasAttribute("data-focus"));
   await msIdle();
