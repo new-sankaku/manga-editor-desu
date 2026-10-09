@@ -9,11 +9,14 @@
 // 前もって：利用者 scr-admin をサーバーの管理者にしておく（uv run python -m v3server.admin_command_line grant-admin scr-admin）
 //
 // 模擬（本物でない所）は下の MOCK だけ。どれも page.route で差し替え、写しの名前に mock を付ける。
-// - POST /works/{id}/exports と、その進み具合・ファイル：本物は Temporal の作業者で書き出す（この環境では共有の Temporal に流さない）
+// - POST /works/{id}/exports と、その進み具合・ファイル：本物は Temporal のワーカーで書き出す（この環境では共有の Temporal に流さない）
 // 入稿前の確かめ（POST /works/{id}/preflight）は本物。作品に入稿の設定が無いので、その問題が出る
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ApiRecorder, ApiReplayer } from "./recorded_api.mjs";
+// V3_LANG を付けて流すときは、画面の文言をその言語の辞書から引いて探す。辞書に無い文（サーバーの文・録った答えの文）はそのまま
+const DICT = process.env.V3_LANG ? (await import(`../i18n/${process.env.V3_LANG}.js`)).default : null;
+const L = (s) => (DICT && DICT[s]) || s;
 import { makeShot, openBrowser, trackRequests } from "./ui_common.mjs";
 
 const REPLAY = process.env.REPLAY === "1";
@@ -202,19 +205,19 @@ await shot("03_structure");
 // 設定資料
 await open("materials/", AUTHOR);
 await page.getByText("ナギ").first().click();
-await until(() => document.querySelector("#main").innerText.includes("見た目の指示"));
-check((await text()).includes("見た目の指示"), "設定資料：生成の設定が出る");
+await until((s) => document.querySelector("#main").innerText.includes(s), L("見た目の指示"));
+check((await text()).includes(L("見た目の指示")), "設定資料：生成の設定が出る");
 await shot("04_materials");
 
 // 書き出し（入稿前の確かめは本物、書き出しは模擬）
 const unmockExport = await mockExport(page, seeded.pages);
 await open("export/", AUTHOR, `&episode=${seeded.ep1}`);
-await page.getByRole("button", { name: "全部", exact: true }).click();
+await page.getByRole("button", { name: L("全部"), exact: true }).click();
 check(await page.locator("#export").isDisabled(), "書き出し：確かめる前は書き出せない");
 await page.locator("#preflight").click();
 await until(() => document.querySelector("#main").innerText.includes("入稿の設定（preferences.print）が無い"));
 check((await text()).includes("入稿の設定（preferences.print）が無い"), "書き出し：確かめた問題が出る（本物の口）");
-check(await page.getByRole("link", { name: "企画で直す" }).count() > 0, "書き出し：設定の問題から企画へ行ける");
+check(await page.getByRole("link", { name: L("企画で直す") }).count() > 0, "書き出し：設定の問題から企画へ行ける");
 await shot("05_export_preflight");
 await page.locator("#export").click();
 await page.waitForSelector("#run .flag.on", { timeout: 10000 });
@@ -238,9 +241,9 @@ await shot("09_services_member");
 // 取り込み（本物：fixture の 4 ページを第2話へ）
 await open("import/", AUTHOR, `&episode=${seeded.ep2}`);
 await page.setInputFiles("#project", { name: "current_app_project_4pages.lz4", mimeType: "application/octet-stream", buffer: readFileSync(FIXTURE) });
-await page.getByRole("button", { name: "取り込む" }).click();
+await page.getByRole("button", { name: L("取り込む"), exact: true }).click();
 await page.waitForSelector("#report table, #report .note", { timeout: 30000 });
-check((await text()).includes("取り込みの報告"), "取り込み：報告が出る");
+check((await text()).includes(L("取り込みの報告")), "取り込み：報告が出る");
 await shot("10_import_report");
 
 // 翻訳（翻訳者）
@@ -256,11 +259,11 @@ await shot("11_translation");
 // 確認（編集者）
 await open("review/", EDITOR, `&episode=${seeded.ep1}&page=${seeded.pages[0]}`);
 await page.locator('[data-move="needs_changes"]').click();
-await until(() => document.querySelector("#toast").innerText.includes("コメント"));
-check((await page.innerText("#toast")).includes("コメント"), "確認：直しの依頼にはコメントが要る");
+await until((s) => document.querySelector("#toast").innerText.includes(s), L("何を直すかをコメントに書いてください"));
+check((await page.innerText("#toast")).includes(L("何を直すかをコメントに書いてください")), "確認：直しの依頼にはコメントが要る");
 await page.locator('[data-move="approved"]').click();
-await until(() => document.querySelector("#cur-status").innerText === "承認");
-check((await page.innerText("#cur-status")) === "承認", "確認：編集者が承認できる");
+await until((s) => document.querySelector("#cur-status").innerText === s, L("承認"));
+check((await page.innerText("#cur-status")) === L("承認"), "確認：編集者が承認できる");
 await page.locator(`.pg[data-page="${seeded.pages[2]}"]`).click();
 await page.waitForSelector(`.pg[data-page="${seeded.pages[2]}"][aria-pressed="true"]`);
 await quiet();

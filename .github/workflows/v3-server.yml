@@ -87,7 +87,7 @@ jobs:
           V3_TEST_S3_ENDPOINT_URL: http://127.0.0.1:58333
           V3_TEST_S3_ACCESS_KEY_ID: ci-access
           V3_TEST_S3_SECRET_ACCESS_KEY: ci-secret-key
-        # 速い組だけ（full・perf の印は除く）。4本同時（作業者ごとにデータベースと Temporal の名前空間を分ける）
+        # 速い組だけ（full・perf の印は除く）。4本同時（ワーカーごとにデータベースと Temporal の名前空間を分ける）
         run: uv run pytest -q -n 4 --dist load -m "not full and not perf" tests/integration
       - if: failure()
         run: docker compose logs --tail 200

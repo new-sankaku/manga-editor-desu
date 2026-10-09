@@ -4,7 +4,7 @@
 人の操作の可否は流れの側の検証（validator）が決める。断られたら 409 で理由を返す。
 """
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Header, Query, Request
 from fastapi.responses import StreamingResponse
@@ -295,7 +295,7 @@ async def dismiss_stale(work_id: str, mark_id: str, session: SessionDep, authz: 
 
 @router.get("/works/{work_id}/harness/review-items")
 async def get_review_items(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
-                           kind: list[str] | None = Query(default=None), stage: str | None = None,
+                           kind: Annotated[list[str] | None, Query()] = None, stage: str | None = None,
                            page_id: str | None = None, stage_run_id: str | None = None):
     await require(authz, actor, "can_view", work_obj(work_id))
     try:

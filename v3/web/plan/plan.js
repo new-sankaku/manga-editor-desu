@@ -10,7 +10,7 @@ import { fieldsHtml, readFields } from "../common/form_fields.js";
 
 const main = document.getElementById("main");
 main.className = "screen side-r";
-const dot = (list) => list.join("・");  // i18n:data（区切りの記号）
+const dot = (list) => list.join(t("・"));
 const S = { workId: null, work: null, ai: [], why: null, busy: false };
 
 const MODE = { ai_auto: t("AIに任せる"), ai_proposes: t("AIが案を出し人が選ぶ"), human_makes_ai_checks: t("人が作りAIは検査だけ"), no_ai: t("AIを使わない") };

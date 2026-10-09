@@ -1,6 +1,6 @@
-"""保存と再起動の確かめ（v3/web/test/persistence_e2e.mjs）の作業者。試験の外では使わない。
+"""保存と再起動の確かめ（v3/web/test/persistence_e2e.mjs）のワーカー。試験の外では使わない。
 
-今の作業者（queue_worker_main の WorkerSet）とハーネスの作業者（HarnessWorker）を、本物と同じ Temporal・PostgreSQL に
+今のワーカー（queue_worker_main の WorkerSet）とハーネスのワーカー（HarnessWorker）を、本物と同じ Temporal・PostgreSQL に
 つないで1つのプロセスで動かす。違うのは LLM と検出器の送り手だけで、どちらも偽物（tests/integration/harness_fakes.py の
 fake_llm・fake_detector）に差し替える。ComfyUI は本物の送り手（comfyui）のまま、偽の ComfyUI（fake_comfy_main.py）へ送る。
 
@@ -28,7 +28,7 @@ from v3server.service_senders.sender_by_adapter_name import ADAPTERS  # noqa: E4
 
 async def main() -> None:
     logging.basicConfig(level=logging.INFO)
-    logging.getLogger(__name__).warning("偽の LLM・検出器で動かす作業者（保存と再起動の確かめ用）")
+    logging.getLogger(__name__).warning("偽の LLM・検出器で動かすワーカー（保存と再起動の確かめ用）")
     image_store().check()
     script = Script()
     ADAPTERS["litellm"] = fake_llm(script)

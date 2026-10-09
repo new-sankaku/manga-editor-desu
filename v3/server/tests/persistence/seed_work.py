@@ -83,7 +83,7 @@ async def seed(api: str, comfy: str, admin: str, author: str) -> dict:
                 raise SystemExit(f"{method} {path} → {r.status_code} {r.text}")
             return r.json() if r.content else None
 
-        # つなぎ先（管理者）。ComfyUI・LLM・検出器（LLM と検出器は作業者の中で偽物に差し替える）
+        # つなぎ先（管理者）。ComfyUI・LLM・検出器（LLM と検出器はワーカーの中で偽物に差し替える）
         async def service(**body):
             return (await call("POST", "/services", admin, json={"name": f"pe-{nid()[:6]}", **body}))["id"]
 
@@ -118,7 +118,7 @@ async def seed(api: str, comfy: str, admin: str, author: str) -> dict:
         await op({"type": "add_volume", "id": vol, "number": 1})
         await op({"type": "add_episode", "id": ep1, "volume_id": vol, "number": 1, "title": "原稿"})
         await op({"type": "add_episode", "id": ep2, "volume_id": vol, "number": 2, "title": "工程（確認待ちにする）"})
-        await op({"type": "add_episode", "id": ep3, "volume_id": vol, "number": 3, "title": "工程（作業者を止める）"})
+        await op({"type": "add_episode", "id": ep3, "volume_id": vol, "number": 3, "title": "工程（ワーカーを止める）"})
         await op({"type": "set_work_settings", "page_spec": PAGE_SPEC, "first_page_is_left": False,
                   "preferences": {"language": "ja",
                                   "fonts_by_kind": {"balloon": "ipam", "caption": "ipam",

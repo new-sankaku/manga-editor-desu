@@ -86,7 +86,7 @@ MESSAGES = {
     "{service} は {process} を受けられない（先に処理の中身を登録する）":
         "{service} cannot take {process} (register the process settings first)",
     "{service} はこの作品の送ってよい先に無い": "{service} is not in this work's allowed destinations",
-    "{seconds} 秒待ってもキューに入らなかった（制御の作業者が動いていない）":
+    "{seconds} 秒待ってもキューに入らなかった（制御のワーカーが動いていない）":
         "Not queued after waiting {seconds} seconds (the control worker is not running)",
     "jobs:{id} {detail}": "jobs:{id} {detail}",
     "jobs:{id} は流れていない": "jobs:{id} is not running",

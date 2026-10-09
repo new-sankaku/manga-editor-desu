@@ -1,4 +1,4 @@
-// 画像生成の画面を Playwright で通す。サーバー（/web を出す）と ComfyUI と作業者が動いていること。
+// 画像生成の画面を Playwright で通す。サーバー（/web を出す）と ComfyUI とワーカーが動いていること。
 // 使い方：
 //   V3_WEB=http://127.0.0.1:8765/web/ V3_USER=ui-author \
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/image_generation_ui.mjs

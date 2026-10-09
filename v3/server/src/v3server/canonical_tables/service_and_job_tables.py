@@ -136,7 +136,7 @@ class CallLog(Base):
     """呼び出し口の記録（V3ハーネス設計 11章）。送った・送らなかったの両方を残す。
 
     送る前に1行置いて確定し（outcome=sending・idempotency_key・費用の取り置き）、受け取ったら答えを result に残して確定する
-    （received）。正本への登録と依頼の終わりは1回で確定する（ok）。作業者が落ちて Temporal がやり直したときは、
+    （received）。正本への登録と依頼の終わりは1回で確定する（ok）。ワーカーが落ちて Temporal がやり直したときは、
     受け取った答え（received）があれば送らずにそれを登録する（generation_queue/service_call_activity.py）。"""
 
     __tablename__ = "call_logs"

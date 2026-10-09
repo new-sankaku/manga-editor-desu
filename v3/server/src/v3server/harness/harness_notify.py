@@ -5,7 +5,7 @@
 - 出す先
   - アプリの中の一覧（harness_notifications）。作品の決まりの行が無ければ、全部の種類をここにだけ出す
   - 外：作品の決まり（harness_notification_settings.webhooks）で入れた Webhook にだけ出す。既定では送らない
-    （自動で走る機能は既定で止める。決めごと 17章）。送るのは send_pending_forever（ハーネスの作業者の中で回す）
+    （自動で走る機能は既定で止める。決めごと 17章）。送るのは send_pending_forever（ハーネスのワーカーの中で回す）
   - メール：送る所は作っていない。CHANNEL_SENDERS に "email" のアダプターを足し、決まりの検査（NotificationSettings）で
     受けるようにすれば、同じ届けた記録（harness_notification_deliveries）と送り直しで動く
   - ブラウザの通知：通知を足すと出来事 notification も足すので、画面は SSE で受けて出す

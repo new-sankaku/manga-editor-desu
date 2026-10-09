@@ -1,15 +1,14 @@
-"""書き出しの途中で作業者が止まったときの試験（compose の PostgreSQL・OpenFGA・Temporal を使う）。
+"""書き出しの途中でワーカーが止まったときの試験（compose の PostgreSQL・OpenFGA・Temporal を使う）。
 
-前は書き出しの送り直しが1回きりで、生存の知らせも無かった。作業者を止めると ExportRun が running のまま残り、
+前は書き出しの送り直しが1回きりで、生存の知らせも無かった。ワーカーを止めると ExportRun が running のまま残り、
 書き出しが終わらなかった（2026-10-08 保存と再起動の確かめで見つけた。V3サーバーの土台「保存と再起動の確かめ」）。
-ここでは作業者を止めて起こし、別の回でやり直して1回だけ終えること、やり直しを使い切ったら failed にすることを確かめる。
+ここではワーカーを止めて起こし、別の回でやり直して1回だけ終えること、やり直しを使い切ったら failed にすることを確かめる。
 本物のプロセスを落とす確かめ（SIGTERM）は v3/web/test/persistence_e2e.mjs の場面 c。
 """
 
 import asyncio
 
 import pytest
-
 from conftest import h, user, wait_for
 from temporalio import activity
 from temporalio.worker import Worker
@@ -23,7 +22,7 @@ from v3server.print_export.export_workflow import EXPORT_ACTIVITIES, EXPORT_QUEU
 
 
 async def restart_export_worker(workers) -> None:
-    """書き出しの待ち行列の作業者だけを止めて、新しく起こす（止めると、動いている書き出しは取り消される）。"""
+    """書き出しのキューのワーカーだけを止めて、新しく起こす（止めると、動いている書き出しは取り消される）。"""
     await workers.export.shutdown()
     await workers._export_task
     workers.export = Worker(workers.client, task_queue=EXPORT_QUEUE, workflows=[ExportRunWorkflow],
@@ -53,17 +52,17 @@ async def _until_end(api, wid, a, rid, timeout=60):
 
 @pytest.mark.full
 @needs_font
-async def test_書き出しの途中で作業者が止まっても_やり直して1回だけ終える(api, authz, workers, export_env, monkeypatch):  # noqa: F811
+async def test_書き出しの途中でワーカーが止まっても_やり直して1回だけ終える(api, authz, workers, export_env, monkeypatch):  # noqa: F811
     a = user()
     wid, page = await _ready_book(api, a)
     real = export_runner.run_export
     attempts: list[int] = []
 
-    async def first_hangs(session, run):
+    async def first_hangs(session, run, pages_done):
         attempts.append(activity.info().attempt)
         if len(attempts) == 1:
-            await asyncio.Event().wait()   # 1回目は終わらない（作業者が止まるまで）
-        return await real(session, run)
+            await asyncio.Event().wait()   # 1回目は終わらない（ワーカーが止まるまで）
+        return await real(session, run, pages_done)
 
     monkeypatch.setattr(export_runner, "run_export", first_hangs)
     rid = await _start(api, wid, a, page)
@@ -82,7 +81,7 @@ async def test_やり直しを使い切ったら書き出しをfailedにして�
     wid, page = await _ready_book(api, a)
     attempts: list[int] = []
 
-    async def always_hangs(session, run):
+    async def always_hangs(session, run, pages_done):
         attempts.append(activity.info().attempt)
         await asyncio.Event().wait()
 

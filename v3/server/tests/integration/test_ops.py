@@ -152,6 +152,20 @@ async def test_同時に書いても番号が飛ばず重ならない(api):
     assert seqs == list(range(6, 26))
 
 
+async def test_同じidの物をもう一度足すと409(api):
+    a = user()
+    ids = await new_work(api, a)
+    wid = ids["work"]
+    again = {"type": "add_page", "id": ids["page1"], "episode_id": ids["episode"], "number": 3}
+    r = await op(api, wid, a, again)
+    assert r.status_code == 409 and r.json()["code"] == "already_exists", r.text
+    assert "すでに同じものがある" in r.json()["detail"]
+    en = await api.post(f"/works/{wid}/ops", headers=h(a) | {"X-V3-Lang": "en"}, json=again)
+    assert en.status_code == 409 and en.json()["detail"].startswith("The same item already exists"), en.text
+    # 断った後も、続けて操作できる
+    assert (await op(api, wid, a, {"type": "add_page", "episode_id": ids["episode"], "number": 3})).status_code == 200
+
+
 async def test_閾値は出典と検証の状態を持つ(api):
     a = user()
     ids = await new_work(api, a)

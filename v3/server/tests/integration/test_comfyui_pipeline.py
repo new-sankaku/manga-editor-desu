@@ -164,7 +164,7 @@ async def test_取り消すと送り先の実行中の物も止める(api, admin
     await wait_for(interrupted, timeout=40)
 
 
-# ---------------------------------------------------------------- 作業者が途中で落ちたとき（点検5 4-2）
+# ---------------------------------------------------------------- ワーカーが途中で落ちたとき（点検5 4-2）
 
 
 class TwoImageComfy(SlowFakeComfy):
@@ -187,7 +187,7 @@ class TwoImageComfy(SlowFakeComfy):
 
 
 class Crash(Exception):
-    """作業者が落ちた代わり。活動が受け止めない例外なので、Temporal が活動をやり直す。"""
+    """ワーカーが落ちた代わり。活動が受け止めない例外なので、Temporal が活動をやり直す。"""
 
 
 def crash_once(monkeypatch, name: str, on_call: int = 1):
@@ -207,7 +207,7 @@ def crash_once(monkeypatch, name: str, on_call: int = 1):
 
 
 async def run_two_images(api, admin, skipping, fake_comfy):
-    """作業者が落ちると Temporal が活動をやり直す（間隔 5秒）。時間を飛ばせる Temporal で待たずに通す（conftest の skipping）。"""
+    """ワーカーが落ちると Temporal が活動をやり直す（間隔 5秒）。時間を飛ばせる Temporal で待たずに通す（conftest の skipping）。"""
     fake = fake_comfy(TwoImageComfy(finish_after=1))
     a = user()
     ids = await new_work(api, a)

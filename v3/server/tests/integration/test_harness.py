@@ -31,7 +31,7 @@ from v3server.server_settings import get_settings
 from v3server.service_senders import comfyui_sender
 from v3server.service_senders.sender_by_adapter_name import ADAPTERS
 
-# Temporal は、full の印の付いた試験だけ本物（compose）を使い、ほかは試験用のサーバー（conftest の skipping。作業者ごとに
+# Temporal は、full の印の付いた試験だけ本物（compose）を使い、ほかは試験用のサーバー（conftest の skipping。ワーカーごとに
 # 1つ立てるので、同時に流しても依頼を取り合わない）を使う（harness_temporal）。流れの筋道だけの試験は
 # tests/unit/test_unit_workflow_timeskip.py（活動を差し替え、時間を飛ばす）
 
@@ -87,8 +87,8 @@ async def no_leftover_flows(temporal):
 
 
 @pytest.fixture
-async def harness_temporal(request, api, temporal, skipping_env, monkeypatch):
-    """(依頼の作業者, Temporal の client)。full・perf の印の試験は本物の Temporal、ほかは試験用のサーバー
+async def harness_temporal(request, api, temporal, workers, skipping_env, monkeypatch):
+    """(依頼のワーカー, Temporal の client)。full・perf の印の試験は本物の Temporal、ほかは試験用のサーバー
     （口 app.state.temporal も向け替え、終わったら戻す）。"""
     real = request.node.get_closest_marker("full") or request.node.get_closest_marker("perf")
     client = temporal if real else skipping_env.client
@@ -100,15 +100,19 @@ async def harness_temporal(request, api, temporal, skipping_env, monkeypatch):
                                (upstream_watch, "SCAN_SECONDS", 0.1), (harness_notify, "POLL_SECONDS", 0.1),
                                (live_stream, "POLL_SECONDS", 0.05)):
             monkeypatch.setattr(mod, name, sec)
-    ws = WorkerSet(client)
-    await ws.start()
+    # 本物の Temporal では、試験の全体で1つのワーカーの組（conftest の workers）を使う。同じ名前空間の同じキューに
+    # 2組目は起こせない（temporalio が断る。書き出しの試験が先に動くと、その組が残っている）
+    ws = workers if real else WorkerSet(client)
+    if not real:
+        await ws.start()
     before = app.state.temporal
     app.state.temporal = client
     try:
         yield ws, client
     finally:
         app.state.temporal = before
-        await ws.shutdown()
+        if not real:
+            await ws.shutdown()
 
 
 @pytest.fixture
@@ -469,8 +473,8 @@ async def test_段を取り消すと半端な候補を却下にして次の回�
         comfy.step_seconds, comfy.steps = 0.1, 6
 
 
-@pytest.mark.full  # 作業者が落ちたときの送り直しを本物の Temporal で確かめる
-async def test_作業者が落ちても送り直しで依頼を重ねず続く(api, services, harness_temporal, script, comfy):
+@pytest.mark.full  # ワーカーが落ちたときの送り直しを本物の Temporal で確かめる
+async def test_ワーカーが落ちても送り直しで依頼を重ねず続く(api, services, harness_temporal, script, comfy):
     comfy.step_seconds = 0.4
     hw = HarnessWorker(harness_temporal[1])
     await hw.start()
@@ -478,7 +482,7 @@ async def test_作業者が落ちても送り直しで依頼を重ねず続く(a
         w = await make_work(api)
         await start(api, w, unit={"resend_limit": 2})
         u = await _until_step(api, w, "generate", comfy)
-        await hw.shutdown()  # 作業者が落ちる（依頼は取り消さない）
+        await hw.shutdown()  # ワーカーが落ちる（依頼は取り消さない）
         comfy.step_seconds = 0.05
         hw = HarnessWorker(harness_temporal[1])
         await hw.start()

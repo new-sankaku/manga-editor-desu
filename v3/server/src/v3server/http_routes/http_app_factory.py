@@ -14,6 +14,8 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from psycopg.errors import UniqueViolation
+from sqlalchemy.exc import IntegrityError
 from starlette.datastructures import Headers
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
@@ -44,7 +46,7 @@ from v3server.http_routes import (
 )
 from v3server.http_routes.request_size_limit import RequestSizeLimit
 from v3server.image_file_storage import image_store
-from v3server.messages import Message, current_lang, render, render_tree, request_lang, set_current_lang, text_of
+from v3server.messages import Message, current_lang, m, render, render_tree, request_lang, set_current_lang, text_of
 from v3server.openfga_permissions import open_authz
 from v3server.request_authentication import DEV_MODE_WARNING
 from v3server.server_settings import get_settings
@@ -126,6 +128,16 @@ async def v3_error(request: Request, exc: V3Error):
                         content={"code": exc.code, "detail": detail, **(exc.extra or {})})
 
 
+@app.exception_handler(IntegrityError)
+async def duplicate_key(request: Request, exc: IntegrityError):
+    """同じ id の物をもう一度作ろうとした時（同じ操作を送り直した時など）は 409 を返す。
+    ほかの食い違い（参照先が無いなど）はプログラムの誤りなので、500 のままにする。"""
+    if not isinstance(exc.orig, UniqueViolation):
+        raise exc
+    detail = render(m("すでに同じものがある（{name}）", name=exc.orig.diag.constraint_name or ""), request_lang(request.headers))
+    return JSONResponse(status_code=409, content={"code": "already_exists", "detail": detail})
+
+
 @app.exception_handler(StarletteHTTPException)
 async def http_error(request: Request, exc: StarletteHTTPException):
     """HTTPException の文も、呼び出しの言語で出す（中身は FastAPI の既定の返事と同じ）。"""
@@ -166,6 +178,6 @@ async def health() -> dict[str, str]:
 
 @app.get("/health/ready")
 async def health_ready(request: Request) -> JSONResponse:
-    """DB・OpenFGA・Temporal・絵の置き場・作業者に届くか。1つでも届かなければ 503。"""
+    """DB・OpenFGA・Temporal・絵の置き場・ワーカーに届くか。1つでも届かなければ 503。"""
     result = await readiness(request.app.state.temporal)
     return JSONResponse(status_code=200 if result["ok"] else 503, content=result)

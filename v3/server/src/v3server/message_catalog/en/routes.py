@@ -119,6 +119,8 @@ MESSAGES = {
     "トークンを確かめられない: {error}": "Could not verify the token: {error}",
     "ログインしていない（/auth/login）": "Not logged in (/auth/login)",
     "クッキーで書き換えるときはヘッダー X-V3-Request: 1 が要る": "Write requests with a cookie require the header X-V3-Request: 1",
+    # http_app_factory.py
+    "すでに同じものがある（{name}）": "The same item already exists ({name})",
     # usage_terms_schema.py
     "規約・許諾のURL（terms_url）か、確かめた所の説明（terms_note）が要る":
         "Provide either the URL of the terms or license (terms_url) or a note on where they were checked (terms_note)",

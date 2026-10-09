@@ -17,7 +17,7 @@ from v3server.server_settings import Settings, get_settings
 # 試験の DB のサーバーは、.env の V3_DATABASE_URL と同じ。V3_TEST_DATABASE_URL で替えられる（名前は v3_test の代わりの頭に使う）。
 # 利用者は開発用の見出し（X-V3-User）で名乗り、絵は手元のフォルダに置く
 _BASE_URL = make_url(os.environ.get("V3_TEST_DATABASE_URL") or make_url(Settings().database_url).set(database="v3_test"))
-XDIST_WORKER = os.environ.get("PYTEST_XDIST_WORKER")  # pytest-xdist で同時に流すときの作業者の名前（gw0 …）
+XDIST_WORKER = os.environ.get("PYTEST_XDIST_WORKER")  # pytest-xdist で同時に流すときのワーカーの名前（gw0 …）
 TEST_DB_NAME = f"{_BASE_URL.database}_{uuid.uuid4().hex[:10]}"
 TEST_DB = _BASE_URL.set(database=TEST_DB_NAME).render_as_string(hide_password=False)
 os.environ["V3_DATABASE_URL"] = TEST_DB
@@ -58,7 +58,7 @@ def _maintenance(sql: str) -> None:
 def schema():
     _maintenance(f'CREATE DATABASE "{TEST_DB_NAME}"')
     try:
-        # 戻す移行も通ることを確かめてから作り直す。同時に流すときは、確かめるのは1つの作業者（gw0）だけ（中身は同じ）
+        # 戻す移行も通ることを確かめてから作り直す。同時に流すときは、確かめるのは1つのワーカー（gw0）だけ（中身は同じ）
         _alembic("upgrade", "head")
         if XDIST_WORKER in (None, "gw0"):
             _alembic("downgrade", "base")
@@ -74,8 +74,8 @@ async def authz(schema):
         return await open_authz(session)
 
 
-# いくつも同時に流す（pytest-xdist）ときは、作業者（gw0, gw1 …）ごとに Temporal の名前空間を分ける。同じ名前空間だと、
-# ほかの作業者が同じ待ち行列（v3-control・v3-export など）の依頼を取り、自分のデータベースに無い行を探して失敗する
+# いくつも同時に流す（pytest-xdist）ときは、ワーカー（gw0, gw1 …）ごとに Temporal の名前空間を分ける。同じ名前空間だと、
+# ほかのワーカーが同じキュー（v3-control・v3-export など）の依頼を取り、自分のデータベースに無い行を探して失敗する
 TEMPORAL_NAMESPACE = f"v3test-{XDIST_WORKER}" if XDIST_WORKER else "default"
 
 
@@ -132,7 +132,7 @@ async def skipping_env():
 
 
 class SkippingTemporal:
-    """口（app.state.temporal）と作業者を、時間を飛ばせる Temporal に向けた間の道具。"""
+    """口（app.state.temporal）とワーカーを、時間を飛ばせる Temporal に向けた間の道具。"""
 
     def __init__(self, env, workers: WorkerSet):
         self.env, self.workers = env, workers
@@ -150,7 +150,7 @@ class SkippingTemporal:
 @pytest.fixture
 async def skipping(api, skipping_env):
     """Temporal 自身の送り直し（間隔 5秒・10秒）や待ちに頼る試験で使う。終わったら口を本物の Temporal に戻す。
-    本物の Temporal（優先順位・公平さ・作業者の入れ替え）で確かめる試験は workers を使う。"""
+    本物の Temporal（優先順位・公平さ・ワーカーの入れ替え）で確かめる試験は workers を使う。"""
     real = app.state.temporal
     ws = WorkerSet(skipping_env.client)
     await ws.start()

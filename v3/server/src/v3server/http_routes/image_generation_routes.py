@@ -2,7 +2,7 @@
 
 採る・却下する・前のバージョンに戻すは操作の窓口（POST /works/{id}/ops の adopt_image・set_image_discarded）を通す。取り消しも同じ。
 進行状況は画面が数秒ごとに見に来る（GET /works/{id}/panels/{id}/candidates）。SSE にしない理由：ブラウザの EventSource は
-ヘッダー（X-V3-User）を付けられない。状態は作業者が PostgreSQL に書くので、見に来た時に読めば足りる。
+ヘッダー（X-V3-User）を付けられない。状態はワーカーが PostgreSQL に書くので、見に来た時に読めば足りる。
 """
 from __future__ import annotations
 

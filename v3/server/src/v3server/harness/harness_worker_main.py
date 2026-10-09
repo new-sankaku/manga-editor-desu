@@ -1,8 +1,8 @@
-"""ハーネスの作業者（`uv run python -m v3server.harness.harness_worker_main`）。
+"""ハーネスのワーカー（`uv run python -m v3server.harness.harness_worker_main`）。
 
 工程の進行役と作業の流れ（キュー v3-harness）と、上流の変化を見る所（upstream_watch）と、通知を外へ届ける所
 （harness_notify）を1つのプロセスで動かす。
-生成・検出器・LLM の送信は今の作業者（queue_worker_main）が受ける。ハーネスは順番待ちに頼むだけ。
+生成・検出器・LLM の送信は今のワーカー（queue_worker_main）が受ける。ハーネスは順番待ちに頼むだけ。
 """
 
 import asyncio

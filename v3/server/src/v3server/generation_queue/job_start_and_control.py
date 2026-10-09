@@ -100,7 +100,7 @@ async def _start_and_wait_until_queued(session: AsyncSession, temporal: Client, 
     """流れを始め、送信を接続先のキューに入れ終えるまで待つ（generation_workflow.py の until_queued）。
     入れ終えてから返すので、続けて頼んだ依頼は頼んだ順にキューに入る（V3細部の決めごと 4.4「同じ扱いの中は、頼んだ順」）。
     流れを始めただけで返すと、続けて頼んだ依頼の送信が前後して入った（2026-10-08 実測。V3サーバーの土台 7章）。
-    制御の作業者が動いておらず QUEUE_ENTRY_WAIT を超えたら、流れを終わらせ、依頼を止めて知らせる。"""
+    制御のワーカーが動いておらず QUEUE_ENTRY_WAIT を超えたら、流れを終わらせ、依頼を止めて知らせる。"""
     start = WithStartWorkflowOperation(
         GenerationJob.run,
         inp,
@@ -118,7 +118,7 @@ async def _start_and_wait_until_queued(session: AsyncSession, temporal: Client, 
         # WorkflowUpdateRPCTimeoutOrCancelledError に変えて投げる。時間を超えたときだけここで扱う
         if not limit.expired():
             raise
-        detail = m("{seconds} 秒待ってもキューに入らなかった（制御の作業者が動いていない）",
+        detail = m("{seconds} 秒待ってもキューに入らなかった（制御のワーカーが動いていない）",
                    seconds=f"{QUEUE_ENTRY_WAIT.total_seconds():.0f}")
         try:
             await temporal.get_workflow_handle(job.workflow_id).terminate(detail)

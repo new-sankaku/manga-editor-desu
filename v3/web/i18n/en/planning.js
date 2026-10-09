@@ -1,5 +1,6 @@
 // 英語の辞書（planning）。左が画面に書いた日本語の文言、右が英語
 export default {
+  "・": ", ",
   "!? を縦中横に": "Set !? in tate-chu-yoko",
   "0 は縦中横にしない": "0 turns tate-chu-yoko off",
   "1〜255。これより暗いピクセルを黒にする": "1-255. Pixels darker than this become black",

@@ -1,6 +1,6 @@
 """ハーネスの画面を見るための動く見本（Playwright の v3/web/test/harness_ui.mjs が使う）。試験ではない。
 
-本物のサーバー（uvicorn で /web も出す）・Temporal・PostgreSQL・OpenFGA と、今の作業者（WorkerSet）・ハーネスの作業者を
+本物のサーバー（uvicorn で /web も出す）・Temporal・PostgreSQL・OpenFGA と、今のワーカー（WorkerSet）・ハーネスのワーカーを
 動かす。ComfyUI・LLM・検出器は偽物（harness_fakes.py。どれも偽物だと画面の文書にも書く）。
 データベースは .env の V3_DATABASE_URL と同じサーバーの v3_harness_demo（試験の v3_test とは分ける。V3_DEMO_DATABASE_URL で替える）。
 

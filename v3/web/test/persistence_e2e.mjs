@@ -1,12 +1,12 @@
 // 保存と再起動の確かめ（opt-in の e2e の組。速い組には入れない）。
-// 本物の一式（PostgreSQL・Temporal・OpenFGA・口のサーバー・作業者）を、ほかの作業と分けて動かし（v3/server/tests/persistence/stack.sh）、
-// 画面で編集した物が、開き直し・口のサーバーの再起動・作業者の停止・既製品の再起動・compose の down と up の後も
+// 本物の一式（PostgreSQL・Temporal・OpenFGA・口のサーバー・ワーカー）を、ほかの作業と分けて動かし（v3/server/tests/persistence/stack.sh）、
+// 画面で編集した物が、開き直し・口のサーバーの再起動・ワーカーの停止・既製品の再起動・compose の down と up の後も
 // 同じに残るかを確かめる。偽物は LLM・検出器・ComfyUI だけ（fake_workers_main.py・fake_comfy_main.py）。
 //
 //   NODE_PATH=/opt/node22/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node v3/web/test/persistence_e2e.mjs
 //
 // 前提を作るのは口から（seed_work.py）。画面で行うのは、残るべき編集と、開き直した後の確かめだけ。ブラウザは1回だけ起こす。
-// 待つのは状態（保存の待ち行列が空・正本の値・画面の画素が落ち着く）で、決まった時間は待たない。
+// 待つのは状態（保存のキューが空・正本の値・画面の画素が落ち着く）で、決まった時間は待たない。
 // 結果は PE_DIR（既定 /tmp/v3pe）の results.json に置く。画面の写しは SHOTS=<フォルダ> を付けたときだけそこへ置く（比べる写しは手元の記憶で持つ）。手順と結果は llm_doc/V3サーバーの土台.md「保存と再起動の確かめ」。
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
@@ -52,9 +52,9 @@ async function api(method, p, body, who = USER) {
   if (r.status >= 300) throw new Error(`${method} ${p} → ${r.status} ${t.slice(0, 300)}`);
   return t ? JSON.parse(t) : null;
 }
-// /health/ready は作業者を見ない。作業者のプロセスが生きていることは stack.sh status で見る（前は作業者が落ちたまま進み、最後の承認で止まった）
+// /health/ready はワーカーを見ない。ワーカーのプロセスが生きていることは stack.sh status で見る（前はワーカーが落ちたまま進み、最後の承認で止まった）
 const workersUp = () => /^workers up$/m.test(execFileSync(STACK, ["status"], { encoding: "utf8" }));
-const ready = () => until(async () => workersUp() && (await fetch(`${API}/health/ready`)).status === 200, "口のサーバーと作業者がそろう", 90000);
+const ready = () => until(async () => workersUp() && (await fetch(`${API}/health/ready`)).status === 200, "口のサーバーとワーカーがそろう", 90000);
 
 // ---------------------------------------------------------------- 一式を起こし、前提を口から入れる
 stack("up");
@@ -451,7 +451,7 @@ try {
   check(dialogs.length === nd2 + 1, "b2：そのまま開き直すと、ブラウザが閉じる前に聞く");
   stack("start", "api"); await ready();
   await openManuscript(P1);
-  check((await api("GET", `/works/${W}`)).pages.find((p) => p.id === P1).dpi === 150, "b2：聞かれても閉じると、送れなかった変更は消える（待ち行列はブラウザのメモリだけ）");
+  check((await api("GET", `/works/${W}`)).pages.find((p) => p.id === P1).dpi === 150, "b2：聞かれても閉じると、送れなかった変更は消える（キューはブラウザのメモリだけ）");
   await page.click('.itab[data-tab="tools"]');
   stack("stop", "api");
   i = page.locator('input[aria-label="解像度"]');
@@ -496,7 +496,7 @@ try {
   EXPECTED.events = EXPECTED.events + "（b2・b3 の送り直しと取り消しの出来事も足される）";
   await compare("b2_saves_while_down");
 
-  // c. 作業者を止めて起こす：ハーネスの作業の途中と、書き出しの途中
+  // c. ワーカーを止めて起こす：ハーネスの作業の途中と、書き出しの途中
   await markEdit();
   const st3 = await api("POST", `/works/${W}/harness/stages`, { episode_id: EP3, stage: "S4", limits: seed.limits, spec: { drawing: seed.drawing } });
   await until(async () => ["running"].includes((await harnessUnit(st3.stage_run_id))?.status) && (await harnessUnit(st3.stage_run_id)).step !== null, "話3の作業が動き出す");
@@ -513,7 +513,7 @@ try {
   stack("start", "workers"); await ready();
   await undoMark("c");
   const done = await until(async () => { const r = await api("GET", `/works/${W}/exports/${exp.id}`); return ["done", "failed"].includes(r.status) ? r : null; }, "書き出しが終わる", 240000);
-  check(done.status === "done", `c：作業者を止めても、書き出しはやり直して終わる（${done.status} ${done.detail || ""}）`);
+  check(done.status === "done", `c：ワーカーを止めても、書き出しはやり直して終わる（${done.status} ${done.detail || ""}）`);
   const files = readdirSync(`${PE_DIR}/exports`, { recursive: true }).filter((f) => f.includes(exp.id) && statSync(`${PE_DIR}/exports/${f}`).isFile());
   const outFiles = done.outputs.map((o) => o.file);
   check(outFiles.length >= 1 && new Set(outFiles).size === outFiles.length && files.length === outFiles.length,
@@ -521,7 +521,7 @@ try {
   results.scenarios.c_workers.export = { status: done.status, outputs: done.outputs.length, files };
   const u3 = await until(async () => { const u = await harnessUnit(st3.stage_run_id); return ["awaiting_review", "failed", "stopped"].includes(u.status) ? u : null; }, "話3の作業が止まらずに進む", 120000);
   results.scenarios.c_workers.unit_after = { status: u3.status, step: u3.step, attempt: u3.attempt, stop_reason: u3.stop_reason };
-  check(u3.status === "awaiting_review", `c：作業者を止めても、ハーネスの作業はやり直して確認待ちになる（${u3.status}・${u3.attempt} 回目 ${u3.stop_reason || ""}）`);
+  check(u3.status === "awaiting_review", `c：ワーカーを止めても、ハーネスの作業はやり直して確認待ちになる（${u3.status}・${u3.attempt} 回目 ${u3.stop_reason || ""}）`);
   await compare("c_workers");
 
   // d. 既製品（PostgreSQL・Temporal・OpenFGA）を docker compose restart

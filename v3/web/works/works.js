@@ -7,7 +7,7 @@ import { html, render, nothing, api, icon, toast, fail, op, startShell, emptyNot
 
 const main = document.getElementById("main");
 main.className = "screen side-r";
-const dot = (list) => list.join("・");  // i18n:data（区切りの記号）
+const dot = (list) => list.join(t("・"));
 const S = { workId: null, work: null, members: [], progress: null, why: null, busy: false };
 let shell;
 

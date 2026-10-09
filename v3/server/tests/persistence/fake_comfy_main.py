@@ -3,7 +3,7 @@
 
   uv run python tests/persistence/fake_comfy_main.py --port 8963 --steps 20 --step-seconds 0.3
 
-作業者を止めて起こしても、このプロセスは動かしたままにする（ComfyUI は作業者とは別の機械にあるのと同じ形）。
+ワーカーを止めて起こしても、このプロセスは動かしたままにする（ComfyUI はワーカーとは別の機械にあるのと同じ形）。
 """
 
 import argparse

@@ -261,7 +261,7 @@ def _swallowing(s: Script, step: str, started: asyncio.Event) -> list[Any]:
 
 async def _start_with(env: WorkflowEnvironment, acts: list[Any], completion: list[str], **lim: Any
                       ) -> tuple[Worker, WorkflowHandle]:
-    # 取り消しは生存の知らせの返事で届く。作業者の間引きを本番（harness_worker_main）と同じ1秒より短くして待たない
+    # 取り消しは生存の知らせの返事で届く。ワーカーの間引きを本番（harness_worker_main）と同じ1秒より短くして待たない
     worker = Worker(env.client, task_queue=QUEUE, workflows=[WorkUnitWorkflow], activities=acts,
                     max_heartbeat_throttle_interval=timedelta(milliseconds=100),
                     default_heartbeat_throttle_interval=timedelta(milliseconds=100))

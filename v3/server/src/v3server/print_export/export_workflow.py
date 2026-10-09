@@ -1,9 +1,9 @@
-"""書き出しの流れ（Temporal）。書き出しの依頼（ExportRun）を1件ずつ、書き出しの待ち行列の作業者が行う。
+"""書き出しの流れ（Temporal）。書き出しの依頼（ExportRun）を1件ずつ、書き出しのキューのワーカーが行う。
 
-- 待ち行列は v3-export（生成の待ち行列とは分ける。書き出しが生成の順番を待たないように）
+- キューは v3-export（生成のキューとは分ける。書き出しが生成の順番を待たないように）
 - 足りない値で止めたとき（ExportRefused・RenderRefused など値の問題）は送り直さず failed にし、理由を detail に書く
-- 作業者が途中で落ちたとき：書き出しの間は生存の知らせ（heartbeat）を送り続け、途絶えたら Temporal が別の作業者で
-  初めからやり直す（同じフォルダに同じ名前で書き直す）。前は送り直しが1回きりで生存の知らせも無く、作業者を止めると
+- ワーカーが途中で落ちたとき：書き出しの間は生存の知らせ（heartbeat）を送り続け、途絶えたら Temporal が別のワーカーで
+  初めからやり直す（同じフォルダに同じ名前で書き直す）。前は送り直しが1回きりで生存の知らせも無く、ワーカーを止めると
   ExportRun が running のまま残った（2026-10-08 保存と再起動の確かめで見つけた。V3サーバーの土台「保存と再起動の確かめ」）
 - やり直しても終わるのは1回だけ：もう done の依頼は何もしないで返す。やり直しの回数を使い切ったら failed にして理由を残す
 """
@@ -21,7 +21,7 @@ EXPORT_QUEUE = "v3-export"
 # 書き出しの最中もイベントループは空いていて、知らせは止まらない
 HEARTBEAT_SECONDS = 2
 HEARTBEAT_TIMEOUT = timedelta(seconds=20)
-# 作業者が落ちたときにやり直す回数（初めの1回を含む）
+# ワーカーが落ちたときにやり直す回数（初めの1回を含む）
 MAX_ATTEMPTS = 3
 
 
@@ -71,7 +71,7 @@ async def run_export_activity(run_id: str) -> None:
 
 @activity.defn(name="mark_export_failed")
 async def mark_export_failed_activity(run_id: str, reason: str) -> None:
-    """やり直しを使い切ったとき（作業者が続けて落ちた・時間切れ）に、依頼を failed にして理由を残す。"""
+    """やり直しを使い切ったとき（ワーカーが続けて落ちた・時間切れ）に、依頼を failed にして理由を残す。"""
     from v3server.canonical_tables.material_and_setting_tables import ExportRun
     from v3server.database_engine import get_sessionmaker
 
@@ -107,5 +107,5 @@ class ExportRunWorkflow:
             raise
 
 
-# 書き出しの待ち行列の作業者が受ける作業（queue_worker_main.WorkerSet）
+# 書き出しのキューのワーカーが受ける作業（queue_worker_main.WorkerSet）
 EXPORT_ACTIVITIES = [run_export_activity, mark_export_failed_activity]

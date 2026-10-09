@@ -67,14 +67,14 @@ _authz: Authz | None = None
 
 
 def configure(temporal: Client) -> None:
-    """ハーネスの作業者が起きるときに1回呼ぶ（harness_worker_main.py）。"""
+    """ハーネスのワーカーが起きるときに1回呼ぶ（harness_worker_main.py）。"""
     global _temporal
     _temporal = temporal
 
 
 def temporal() -> Client:
     if _temporal is None:
-        raise RuntimeError("queue_calls.configure が呼ばれていない（ハーネスの作業者の起動の順が違う）")
+        raise RuntimeError("queue_calls.configure が呼ばれていない（ハーネスのワーカーの起動の順が違う）")
     return _temporal
 
 
@@ -102,7 +102,7 @@ async def require_route(session, key: str) -> str:
 async def ensure_job(session, unit: HarnessUnit, key: str, process: str, request: dict[str, Any],
                      page_id: str | None) -> Job:
     """harness_key の依頼を1件にする。無ければ頼む（AIが工程を進めるための依頼。順番は人の依頼の後）。
-    いちばん新しい依頼が取り消し（人が「今すぐ止める」）なら、再開した段は頼み直す。作業者が落ちたときは
+    いちばん新しい依頼が取り消し（人が「今すぐ止める」）なら、再開した段は頼み直す。ワーカーが落ちたときは
     依頼を取り消さない（wait_jobs）ので、ここで頼み直すのは人が止めたときだけ。"""
     existing = (await session.execute(select(Job).where(
         Job.work_id == unit.work_id, Job.request["harness_key"].as_string() == key)
@@ -190,7 +190,7 @@ async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
                     last_state = state
             await asyncio.sleep(POLL_SECONDS)
     except asyncio.CancelledError:
-        # 作業者が止まる（再起動）ときは依頼を取り消さない。送り直された活動が同じ鍵の依頼を待ち直す
+        # ワーカーが止まる（再起動）ときは依頼を取り消さない。送り直された活動が同じ鍵の依頼を待ち直す
         if not activity.is_worker_shutdown():
             await asyncio.shield(_cancel_and_wait(job_ids))
         raise

@@ -1,9 +1,9 @@
-"""Temporal の作業者をまとめて動かす。`uv run python -m v3server.generation_queue.queue_worker_main`
+"""Temporal のワーカーをまとめて動かす。`uv run python -m v3server.generation_queue.queue_worker_main`
 
 - 制御のキュー: 依頼の流れと、状態の書き込み
 - 書き出しのキュー（v3-export）: 書き出し（PNG・PDF・PSD）。print_export/export_workflow.py
 - 接続先ごとのキュー: 送信。同時実行数は「1件ずつ」なら1、「同時にN件まで」ならN
-- 接続先の表を数秒ごとに読み直し、一時停止した・数を変えた先の作業者を止めて作り直す
+- 接続先の表を数秒ごとに読み直し、一時停止した・数を変えた先のワーカーを止めて作り直す
 """
 
 import asyncio
@@ -43,7 +43,7 @@ class WorkerSet:
         self._control_task: asyncio.Task | None = None
         self.export: Worker | None = None
         self._export_task: asyncio.Task | None = None
-        # service_id -> (同時実行数, 作業者, 動かしている task)
+        # service_id -> (同時実行数, ワーカー, 動かしている task)
         self.services: dict[str, tuple[int, Worker, asyncio.Task]] = {}
 
     async def start(self) -> None:
@@ -84,13 +84,13 @@ class WorkerSet:
                     default_heartbeat_throttle_interval=timedelta(seconds=1),
                 )
                 self.services[sid] = (n, worker, asyncio.create_task(worker.run()))
-                log.info("つなぎ先 %s の作業者を動かした（同時に %d 件）", sid, n)
+                log.info("接続先 %s のワーカーを動かした（同時に %d 件）", sid, n)
 
     async def _stop(self, sid: str) -> None:
         _, worker, task = self.services.pop(sid)
         await worker.shutdown()
         await task
-        log.info("つなぎ先 %s の作業者を止めた", sid)
+        log.info("接続先 %s のワーカーを止めた", sid)
 
     async def shutdown(self) -> None:
         for sid in list(self.services):
@@ -105,7 +105,7 @@ class WorkerSet:
     async def keep_reloading(self) -> None:
         """接続先の一覧を RELOAD_SECONDS ごとに読み直す。
 
-        PostgreSQL に届かない間（再起動・compose の down と up）は、今動いている作業者のまま続け、次の回に読み直す。
+        PostgreSQL に届かない間（再起動・compose の down と up）は、今動いているワーカーのまま続け、次の回に読み直す。
         前は読み直しの失敗でプロセスごと終わり、PostgreSQL が戻っても生成・書き出し・ハーネスが進まなかった
         （2026-10-08 保存と再起動の確かめで見つけた。V3サーバーの土台「保存と再起動の確かめ」）。
         """
@@ -114,7 +114,7 @@ class WorkerSet:
             try:
                 await self.reload()
             except DBAPIError as e:
-                log.warning("つなぎ先の一覧を読めなかった（%s）。今の作業者のまま続け、%d 秒後に読み直す",
+                log.warning("接続先の一覧を読めなかった（%s）。今のワーカーのまま続け、%d 秒後に読み直す",
                             type(e.orig).__name__ if e.orig else type(e).__name__, RELOAD_SECONDS)
 
     async def run_forever(self) -> None:

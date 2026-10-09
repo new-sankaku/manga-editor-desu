@@ -57,6 +57,6 @@ class FixedByPerson(V3Error):
 
 
 class QueueNotRunning(V3Error):
-    """依頼をキューに入れられなかった（制御の作業者が動いていない）。依頼は止めてある（stopped）。"""
+    """依頼をキューに入れられなかった（制御のワーカーが動いていない）。依頼は止めてある（stopped）。"""
 
     code = "queue_not_running"

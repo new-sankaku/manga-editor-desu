@@ -123,7 +123,7 @@ async def test_手元と言えないlocalの記録は送ってよい先に載せ
     await until_status(api, wid, a, jid, "done")
 
 
-@pytest.mark.full  # 本物の作業者の同時実行数を、送る時間（0.5秒・1.5秒）を重ねて確かめる
+@pytest.mark.full  # 本物のワーカーの同時実行数を、送る時間（0.5秒・1.5秒）を重ねて確かめる
 async def test_1件ずつと同時にN件まで(api, admin, workers, fake_adapter):
     a = user()
     wid = (await new_work(api, a))["work"]
@@ -238,7 +238,7 @@ async def test_失敗の種類ごとの扱い(api, admin, skipping, fake_adapter
 
 @pytest.mark.full
 async def test_失敗の種類ごとの扱い_本物のTemporal(api, admin, workers, fake_adapter):
-    """上と同じことを本物の Temporal と作業者で通す（送り直しの間隔を実際に待つので 30 秒ほどかかる）。"""
+    """上と同じことを本物の Temporal とワーカーで通す（送り直しの間隔を実際に待つので 30 秒ほどかかる）。"""
     async def settle(wid, a, jid, *statuses):
         return await until_status(api, wid, a, jid, *statuses, timeout=60)
     await _failure_kinds(api, admin, workers, fake_adapter, settle)
@@ -287,7 +287,7 @@ async def test_同時に送っても予算を超えない(api, admin, workers, f
 
 
 async def test_人の依頼をAIの依頼より先に送る(api, admin, workers, fake_adapter, authz, temporal):
-    """Temporal の優先順位（priority_key）が待ち行列で効くかを確かめる。"""
+    """Temporal の優先順位（priority_key）がキューで効くかを確かめる。"""
 
     a = user()
     wid = (await new_work(api, a))["work"]
@@ -295,8 +295,8 @@ async def test_人の依頼をAIの依頼より先に送る(api, admin, workers,
     await api.patch(f"/services/{sid}", headers=h(admin), json={"paused": True})
     await workers.reload()
 
-    # 依頼を受ける口は、送信を待ち行列に入れ終えてから返す（job_start_and_control.enqueue）。
-    # ここまでで6件とも待ち行列に入っている
+    # 依頼を受ける口は、送信をキューに入れ終えてから返す（job_start_and_control.enqueue）。
+    # ここまでで6件ともキューに入っている
     ai = Actor(kind="ai", id="ai-test", on_behalf_of=a)
     async with get_sessionmaker()() as session:
         for i in range(3):
@@ -342,13 +342,13 @@ async def test_同じ優先順位の中では作品ごとに順に送る(api, ad
     assert b_pos[-1] <= 6, order
 
 
-async def test_待ち行列に入れられなければ依頼を止めて知らせる(api, admin, workers, fake_adapter, temporal, monkeypatch):
-    """制御の作業者が動いていないとき。依頼を受けた（201）と返さず、依頼を止めて 503 で知らせる。"""
+async def test_キューに入れられなければ依頼を止めて知らせる(api, admin, workers, fake_adapter, temporal, monkeypatch):
+    """制御のワーカーが動いていないとき。依頼を受けた（201）と返さず、依頼を止めて 503 で知らせる。"""
 
     a = user()
     wid = (await new_work(api, a))["work"]
     _, p = await make_service(api, admin)
-    # 作業者のいない制御の待ち行列へ流す
+    # ワーカーのいない制御のキューへ流す
     monkeypatch.setattr(job_start_and_control, "CONTROL_QUEUE", f"v3-control-nobody-{uuid.uuid4().hex[:6]}")
     monkeypatch.setattr(job_start_and_control, "QUEUE_ENTRY_WAIT", timedelta(seconds=2))
     r = await api.post(f"/works/{wid}/jobs", headers=h(a), json={"process": p, "request": {"tag": "nobody"}})

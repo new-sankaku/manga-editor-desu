@@ -153,7 +153,7 @@ async def create_service(body: NewService, session: SessionDep, authz: AuthzDep,
 @router.patch("/services/{service_id}")
 async def patch_service(service_id: str, body: ServicePatch, session: SessionDep, authz: AuthzDep,
                         actor: ActorDep):
-    """一時停止・再開、送り方を変える。作業者は数秒で作り直される（generation_queue/queue_worker_main.py）。"""
+    """一時停止・再開、送り方を変える。ワーカーは数秒で作り直される（generation_queue/queue_worker_main.py）。"""
     await require(authz, actor, "admin", SYSTEM_OBJ)
     service = await session.get(Service, service_id)
     if service is None:

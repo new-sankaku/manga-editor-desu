@@ -1,5 +1,5 @@
 """書き出し（PNG・PDF・PSD）を1件行う。書き出しの依頼（ExportRun）は http_routes/export_routes.py が作り、
-Temporal の書き出しの待ち行列（print_export/export_workflow.py）の作業者がここを呼ぶ。
+Temporal の書き出しのキュー（print_export/export_workflow.py）のワーカーがここを呼ぶ。
 
 - どの書き出しも、ページの絵は page_render.py の同じ層から作る（PNG・PDF は層を重ねた絵、PSD は層のまま）
 - 紙の大きさ（paper_mm）を渡すと、ページ（塗り足し込み）を紙の真ん中に置く。紙がページより小さければ止める
@@ -261,7 +261,7 @@ def check_spread_output(fmt: str, spread_output: str | None, has_spread: bool) -
 
 
 async def off_loop(fn, *args):
-    """描く・書く（Pillow と Node。数秒〜数十秒かかる）は別のスレッドで行う。作業者のイベントループを塞ぐと、
+    """描く・書く（Pillow と Node。数秒〜数十秒かかる）は別のスレッドで行う。ワーカーのイベントループを塞ぐと、
     書き出しの生存の知らせ（export_workflow.py）が届かず、ほかの流れも止まる。1つずつ順に呼ぶ（並べない）。"""
     return await asyncio.to_thread(fn, *args)
 

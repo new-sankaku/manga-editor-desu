@@ -33,7 +33,7 @@ NON_RETRYABLE = ["rate_limited", "refused", "broken_response", "interrupted", "b
 
 # 活動の生存を Temporal に知らせる間隔（秒）。取り消しは、この知らせの返事で活動に届く
 # 1秒：5秒だと「今すぐ止める」が ComfyUI に届くまで最大5秒遅れた（tests/integration/test_harness_perf.py で測った）。
-# 作業者の間引き（queue_worker_main の heartbeat_throttle）も1秒なので、これより短くしても速くならない
+# ワーカーの間引き（queue_worker_main の heartbeat_throttle）も1秒なので、これより短くしても速くならない
 HEARTBEAT_SECONDS = 1
 
 _authz: Authz | None = None
@@ -109,7 +109,7 @@ def _attempt_key(job_id: str) -> str:
 
 @activity.defn
 async def call_service(job_id: str) -> None:
-    """依頼を1回送り、答えを正本に入れる。作業者が途中で落ちて Temporal がやり直しても、二重に送らず二重に登録しない。
+    """依頼を1回送り、答えを正本に入れる。ワーカーが途中で落ちて Temporal がやり直しても、二重に送らず二重に登録しない。
 
     1. 前の回が答えを受け取って残していれば（received）、送らずにそれを使う（3へ）
     2. 送る前に、鍵と費用の取り置きを持った呼び出しの記録（sending）を確定する。予算は接続先の行を FOR UPDATE で取ってから
@@ -160,7 +160,7 @@ async def _reserve(session, job: Job, service: Service, sp, attempt: int, stop) 
     for prev in (await session.execute(select(CallLog).where(
             CallLog.job_id == job.id, CallLog.outcome == "sending"))).scalars():
         prev.outcome = "unknown"
-        prev.detail = "送った後、答えを残す前に作業者が止まった。送り先で処理されたか・費用がかかったかは分からない"
+        prev.detail = "送った後、答えを残す前にワーカーが止まった。送り先で処理されたか・費用がかかったかは分からない"
     # 送る直前にもう一度確かめる。待っている間に送ってよい先から外されたかもしれない
     if not await is_allowed(session, job.work_id, service):
         await stop("destination_not_allowed", f"{service.name} はこの作品の送ってよい先に無い")

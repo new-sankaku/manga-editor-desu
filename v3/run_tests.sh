@@ -71,7 +71,7 @@ case "$SUITE" in
     ;;
   full)
     fast_python
-    # 本物の Temporal の名前空間 default を使う。ハーネスの動く見本と同時には流さない（同じ待ち行列の依頼を取り合う）
+    # 本物の Temporal の名前空間 default を使う。ハーネスの動く見本と同時には流さない（同じキューの依頼を取り合う）
     step "重い試験（pytest の full の印。本物の Temporal・書き出しの描画）" "${PYTEST[@]}" -m full tests/integration tests/unit
     WORK="$(mktemp -d)"
     STAMP="$(date +%s)_$$"
@@ -85,7 +85,7 @@ case "$SUITE" in
     }
     trap cleanup EXIT
     start_real_server "$PORT" "$(db_admin create "$UI_DB")" "$WORK"
-    # ハーネスの動く見本（本物のサーバー・Temporal・作業者。ComfyUI・LLM・検出器は偽物）。操作の口は DEMO_PORT+1
+    # ハーネスの動く見本（本物のサーバー・Temporal・ワーカー。ComfyUI・LLM・検出器は偽物）。操作の口は DEMO_PORT+1
     DEMO_URL="$(db_admin create "$DEMO_DB")"
     V3_DEMO_DATABASE_URL="$DEMO_URL" uv run --directory "$SERVER" python tests/integration/harness_screen_demo.py --port "$DEMO_PORT" >"$WORK/demo.log" 2>&1 &
     DEMO_PID=$!

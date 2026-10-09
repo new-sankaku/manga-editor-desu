@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # 保存と再起動の確かめ（v3/web/test/persistence_e2e.mjs）が使う、ほかの作業と分けた一式を動かす。
 # 既製品は compose.persistence.yaml（名前 v3pe・口はほかの作業と重ならない番号）。
-# 口のサーバー（uvicorn）・作業者（偽の LLM・検出器。fake_workers_main.py）・偽の ComfyUI は別々のプロセスで、
+# 口のサーバー（uvicorn）・ワーカー（偽の LLM・検出器。fake_workers_main.py）・偽の ComfyUI は別々のプロセスで、
 # 起動は手元で動かすとき（V3サーバーの土台 1.1）と同じ設定（dev_header・絵は手元のフォルダ）。
 #
 #   stack.sh up | down | wipe | restart-infra | migrate | start api|workers|comfy | stop api|workers|comfy | status | pytest <引数>
@@ -21,7 +21,7 @@ export OPENFGA_PRESHARED_KEY="${OPENFGA_PRESHARED_KEY:-v3pe-preshared-key-012345
 export V3_DATABASE_URL="postgresql+psycopg://v3:v3@127.0.0.1:${V3PE_PG_PORT}/v3"
 export V3_TEMPORAL_ADDRESS="127.0.0.1:${V3PE_TEMPORAL_PORT}"
 export V3_OPENFGA_URL="http://127.0.0.1:${V3PE_OPENFGA_PORT}"
-# LLM は偽物（作業者の中で差し替える）。口の設定に要るので、届かない住所を入れておく
+# LLM は偽物（ワーカーの中で差し替える）。口の設定に要るので、届かない住所を入れておく
 export V3_LITELLM_URL="http://127.0.0.1:9"
 export V3_AUTH_MODE=dev_header
 export V3_IMAGE_STORE=local
@@ -76,8 +76,8 @@ case "${1:-}" in
   grant-admin) cd "$SERVER" && uv run python -m v3server.admin_command_line grant-admin "$2" ;;
   start) start "$2" ;;
   stop) stop "$2" "${3:-TERM}" ;;
-  # この一式の PostgreSQL（v3_test）・Temporal・OpenFGA で pytest を流す。作業者（workers）は先に止める
-  # （同じ Temporal の待ち行列を、v3 のデータベースを見る作業者が取ってしまうため。V3サーバーの土台 1.1）
+  # この一式の PostgreSQL（v3_test）・Temporal・OpenFGA で pytest を流す。ワーカー（workers）は先に止める
+  # （同じ Temporal のキューを、v3 のデータベースを見るワーカーが取ってしまうため。V3サーバーの土台 1.1）
   pytest) shift; stop workers; cd "$SERVER" && exec uv run pytest "$@" ;;
   status) for n in api workers comfy; do f="$PE_DIR/run/$n.pid"; if [[ -f "$f" ]] && kill -0 "$(cat "$f")" 2>/dev/null; then echo "$n up"; else echo "$n down"; fi; done ;;
   *) echo "使い方: $0 up|down|wipe|restart-infra|migrate|grant-admin <名>|start <名>|stop <名> [信号]|status" >&2; exit 2 ;;

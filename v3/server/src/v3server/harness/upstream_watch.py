@@ -80,6 +80,6 @@ async def run_forever(temporal: Client) -> None:
             await scan_once(temporal)
         except asyncio.CancelledError:
             raise
-        except Exception:  # 見る所が落ちても作業者は止めない。次の回でまた見る（記録は残す）
+        except Exception:  # 見る所が落ちてもワーカーは止めない。次の回でまた見る（記録は残す）
             log.exception("上流の変化を見る所でエラー")
         await asyncio.sleep(SCAN_SECONDS)

@@ -2,7 +2,7 @@
 
 活動（call_service・set_job_status）は偽物。本物の活動は test_service_call_activity.py（integration）で直接呼んで確かめる。
 送り直しの間隔（5秒・10秒）や制限の待ちは、試験用サーバーが時間を飛ばすので待たない。
-本物の Temporal と作業者で通す試験は tests/integration/test_queue.py の test_失敗の種類ごとの扱い（full の組）。
+本物の Temporal とワーカーで通す試験は tests/integration/test_queue.py の test_失敗の種類ごとの扱い（full の組）。
 試験用サーバーは temporalio が初回に取ってくる（ネットにつながっていること）。
 """
 
