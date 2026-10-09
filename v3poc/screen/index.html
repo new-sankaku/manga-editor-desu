@@ -303,6 +303,11 @@ textarea.field{height:auto;min-height:64px;padding:8px 11px;resize:vertical;line
 .attr:first-child{border-top:0}
 .attr .k{font-size:12px;color:var(--ink-3)}
 .attr .v{font-weight:500}
+.attr .tone{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-size:11px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+.attr .tone i{width:.9em;height:.9em;border-radius:3px;box-shadow:0 0 0 1px var(--line-2);flex:0 0 auto}
+.lvs{display:inline-flex;gap:3px;align-items:center}
+.lvs i{font-style:normal;font-size:10px;font-weight:600;line-height:1;padding:3px 4px;border-radius:4px;background:var(--surface-3);color:var(--ink-2)}
+.lvs i.off{background:none;color:var(--ink-4);text-decoration:line-through}
 .apps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));direction:rtl;gap:6px}
 .app{display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;text-decoration:none;color:var(--ink-3);font-size:10.5px}
 .app .page{width:100%}
@@ -467,7 +472,7 @@ kbd{font:600 11.5px/1 var(--font);min-width:22px;height:22px;padding:0 6px;displ
   .tabs,.side-b{-webkit-mask-image:linear-gradient(90deg,#000 82%,transparent);mask-image:linear-gradient(90deg,#000 82%,transparent)}
 }
 
-/* ---------- 道具・層・小さな窓 ---------- */
+/* ---------- ツール・レイヤー・ポップアップ ---------- */
 .top-r{gap:6px}
 .top-r .aiq{margin-right:6px}
 .top-r .avs{margin-left:6px}
@@ -587,7 +592,47 @@ button.mrow:hover{background:var(--surface-2)}
 .kgrid.ed kbd{border-color:var(--ai-line);background:var(--ai-tint);color:var(--ai-ink);cursor:pointer}
 .pop.find .rep{padding:6px 0 2px}
 @media (max-width:960px){.strip-wrap{position:relative;inset:auto;padding:12px 16px}.smap{display:none}}
-/* ---------- つなぎ先の状態 ---------- */
+/* ---------- 経過（コマごとの指示・絵を作る・検査・比べる・作り直し） ---------- */
+.st-drawn{--ink:#15181D;--sw:.7;--sw2:.38;--sil:#15181D;--fr:#15181D;--frw:.9;--beamline:#15181D}
+.sp-stage .page.ai::after{display:none}
+.ov-run{overflow:hidden}
+.ov-run::after,.pc.is-run .box::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,rgba(61,90,214,.04) 20%,rgba(61,90,214,.26) 45%,rgba(61,90,214,.04) 70%) 0 0/260% 100%;animation:shim 2.4s linear infinite}
+.ov-st{position:absolute;transform:translate(calc(-100% - 5px),calc(-100% - 5px));display:inline-flex;align-items:center;gap:6px;min-height:22px;padding:2px 8px;border-radius:6px;background:rgba(20,23,28,.86);color:#fff;font-size:11px;font-weight:600;white-space:nowrap;z-index:3;--bad:#F5887A;--ai:#9DB0FF;--ok:#6FCF97}
+.ov-st svg.lucide{width:12px;height:12px}
+.ov-st.on{box-shadow:0 0 0 2px #9DB0FF}
+.cds{display:inline-flex;align-items:center;gap:3px}
+.cds i{width:8px;height:8px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor;opacity:.5}
+.cds i.ok{background:currentColor;opacity:1}
+.cds i.win{background:var(--ok);box-shadow:none;opacity:1}
+.cds i.bad{background:var(--bad);box-shadow:none;opacity:1;border-radius:2px}
+.cds i.run{box-shadow:inset 0 0 0 1.5px var(--ai);opacity:1;animation:blink 1.1s ease-in-out infinite}
+@keyframes blink{50%{opacity:.3}}
+.pcs{display:grid;grid-template-columns:repeat(auto-fill,minmax(7rem,1fr));gap:10px 8px}
+.pc{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pc .box{position:relative;aspect-ratio:var(--ar,2);border-radius:6px;overflow:hidden;background:#fff;box-shadow:0 0 0 1px var(--line-2);display:grid;place-items:center;color:var(--ink-3)}
+.pc .box svg.pg{display:block;width:100%;height:100%}
+.pc .id{position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:4px;background:rgba(20,23,28,.85);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center}
+.pc.is-bad .box svg.pg{opacity:.45}
+.pc.is-win .box{box-shadow:0 0 0 2px var(--ok)}
+.pc.is-run .box,.pc.is-wait .box{background:var(--surface-2)}
+.pc.is-wait .box{box-shadow:none;border:1px dashed var(--line-2)}
+.pc .why{font-size:10.5px;line-height:1.3;font-weight:600;color:var(--ink-3);overflow-wrap:anywhere}
+.pc.is-bad .why{color:var(--bad-ink)}
+.pc.is-win .why{color:var(--ok)}
+.chg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:12px;color:var(--ink-2)}
+.chg svg.lucide{width:13px;height:13px;color:var(--ai)}
+.chg s{color:var(--ink-4)}
+.vs{display:flex;align-items:center;gap:8px;min-height:28px;font-size:12px}
+.vs svg.lucide{width:13px;height:13px;color:var(--ink-3)}
+.pid{min-width:18px;height:18px;padding:0 4px;border-radius:4px;background:var(--surface-3);color:var(--ink);font-size:10.5px;font-weight:700;display:inline-grid;place-items:center}
+.toks{display:flex;flex-wrap:wrap;gap:4px}
+.toks .flag svg.lucide{width:11px;height:11px;vertical-align:-1px;margin-right:3px}
+.ltx{white-space:pre-wrap;font-size:12px;line-height:1.6;color:var(--ink-2);padding:8px 10px;border-radius:var(--r);background:var(--surface-2)}
+.lopen{display:flex;flex-direction:column;gap:6px;padding:2px 0 10px}
+.jt{display:block;text-align:left;min-width:0;width:100%}
+.job .fail{color:var(--bad);font-weight:700;text-align:center}
+.itab svg.lucide{width:13px;height:13px;color:var(--ai)}
+/* ---------- 接続先の状態 ---------- */
 .cdot{display:inline-block;box-sizing:border-box;width:10px;height:10px;border-radius:50%;background:var(--ink-4);flex:0 0 auto}
 .cdot.ok{background:var(--ok)} .cdot.bad{background:var(--bad)} .cdot.warn{background:var(--need)}
 .cdot.unk{background:var(--surface);border:2px solid var(--ink-3)}
@@ -649,6 +694,7 @@ button.mrow:hover{background:var(--surface-2)}
 </div>
 <div id="toast-slot"></div>
 
+<script src="i18n/en.js"></script>
 <script>
 (function(){
 /* =========================================================
@@ -993,12 +1039,12 @@ function title(t, X, Y, w, h) {
 }
 
 let UID = 0;
-/* 層：下から コマ枠・AIの絵・人の手・フキダシ・写植・描き文字 */
+/* レイヤー：下から コマ枠・AIの絵・手描き・フキダシ・写植・描き文字 */
 /* コマは [左, 上, 幅, 高さ]。斜めに切ったコマは5つ目に角の点を持つ */
 const shapeOf = (b, cls) => (b[4] ? `<polygon points="${b[4].map((q) => q.join(' ')).join(' ')}"${cls}/>` : `<rect x="${b[0]}" y="${b[1]}" width="${b[2]}" height="${b[3]}"${cls}/>`);
 const clipCss = (b) => (b[4] ? 'clip-path:polygon(' + b[4].map(([x, y]) => `${r1((x - b[0]) / b[2] * 100)}% ${r1((y - b[1]) / b[3] * 100)}%`).join(',') + ')' : '');
 const LV_ALL = { frame: true, ai: true, hand: true, bal: true, type: true, sfx: true };
-/* ナイフで分けたページは S.lay に持つ。分けていないページは型のまま */
+/* ナイフで分けたページは S.lay に持つ。分けていないページはテンプレートのまま */
 const layOf = (n) => S.lay[n] || { L: TPL[PG[n].t], p: PG[n].p };
 function pageSVG(n, o) {
   o = o || {};
@@ -1008,9 +1054,10 @@ function pageSVG(n, o) {
     if (o.only != null && o.only !== i) return;
     const sp = (o.ov && o.ov[i]) || lo.p[i] || {};
     defs += `<clipPath id="${id}c${i}">${shapeOf(L[i], '')}</clipPath>`;
-    const rough = st === 'name' || st === 'ai' ? ' filter="url(#rough)"' : '';
-    if (lv.ai) body += `<g clip-path="url(#${id}c${i})"><g transform="translate(${X} ${Y})"${rough}>${panelArt(sp, w, h, n * 10 + i)}</g></g>`;
-    if (lv.frame) body += shapeOf(L[i], ' class="fr"');
+    const pst = o.pst && o.pst[i], g0 = pst ? `<g class="st-${pst}">` : '', g1 = pst ? '</g>' : '';
+    const rough = (pst || st) === 'name' || (pst || st) === 'ai' ? ' filter="url(#rough)"' : '';
+    if (lv.ai) body += `${g0}<g clip-path="url(#${id}c${i})"><g transform="translate(${X} ${Y})"${rough}>${panelArt(sp, w, h, n * 10 + i)}</g></g>${g1}`;
+    if (lv.frame) body += g0 + shapeOf(L[i], ' class="fr"') + g1;
     (sp.bal || []).forEach((b) => { top += balloon(b, X, Y, w, h, lv); });
     if (sp.narr) top += narr(sp.narr, X, Y, w, h, lv);
     if (sp.title && lv.sfx) top += title(sp.title, X, Y, w, h);
@@ -1061,17 +1108,18 @@ const RP = [['出るな、ミオ', '6字', ['出るな、', 'ミオ']], ['外に
 const NCHK = [
   { id: 'amount', m: 'bad', label: 'セリフの量', where: 'p.12 コマ1', fact: '18字　上限 14字', spots: [[12, 0]], fix: 10 },
   { id: 'side', m: 'bad', label: '人物の左右', where: 'p.13 コマ3〜4', fact: 'ミオとゲンの左右が入れ替わる', spots: [[13, 2], [13, 3]], fix: 30 },
-  { id: 'tone', m: 'unk', label: '言い回し', where: 'p.13 コマ2', fact: 'ミオの口調の手本が2件しかない', spots: [[13, 1]], link: true },
+  { id: 'tone', m: 'unk', label: '言い回し', where: 'p.13 コマ2', fact: 'ミオの口調の例が2件しかない', spots: [[13, 1]], link: true },
+  { id: 'exlv', m: 'bad', label: '表情の強さ', where: 'p.12 コマ3', fact: '驚きの弱　描き分けられるのは強だけ', spots: [[12, 2]], link: true },
   { id: 'order', m: 'ok', label: '読む順' }, { id: 'turn', m: 'ok', label: 'めくり' }, { id: 'count', m: 'ok', label: 'コマ数' }
 ];
 const ECHK = [{ id: 'folio', m: 'bad', label: 'ノンブルの位置', where: 'p.1', fact: '裁ち落としの線にかかっている', fix: 20 }];
 const V3 = { 10: ['灯りの消えた海', 'redo'], 11: ['ミオ、岩場へ', 'redo'], 14: ['霧の中から船', 'sp'], 15: ['霧の中から船', 'sp'], 16: ['船の灯り', ''] };
 const STAGE_W = { plan: '構成のみ', name: 'ネーム済', drawn: '作画済', ai: '生成中', fin: '仕上げ済' };
-/* つなぎ先：手元（host:'local'）もAPI（host:'api'）も同じ形。do は「処理: [得意さ 3〜1, 1回の費用]」。無い処理はできない。数字はすべて例 */
+/* 接続先：ローカル（host:'local'）もAPI（host:'api'）も同じ形。do は「処理: [得意さ 3〜1, 1回の費用]」。無い処理はできない。数字はすべて例 */
 const SVC = [
   { id: 'comfy', kind: 'img', host: 'local', name: 'ComfyUI', short: 'ComfyUI', sub: 'このPC', ic: 'cpu', price: 0, unit: '枚', at: 'http://127.0.0.1:8188', has: [2, 3, 7], sec: 40,
     do: { name: [2, 0], chara: [3, 0], draw: [3, 0], i2i: [3, 0], area: [3, 0], angle: [2, 0], face: [3, 0], finish: [3, 0], up: [2, 0], cut: [3, 0] } },
-  { id: 'comfy2', kind: 'img', host: 'local', name: 'RunPod ComfyUI', short: 'RunPod', sub: '借りたPC', ic: 'server', price: 2, unit: '枚', at: 'https://xxxxxxxx-8188.proxy.runpod.net', has: [1, 0, 4], lack: '線を保つ拡大', sec: 14,
+  { id: 'comfy2', kind: 'img', host: 'local', name: 'RunPod ComfyUI', short: 'RunPod', sub: 'クラウドPC', ic: 'server', price: 2, unit: '枚', at: 'https://xxxxxxxx-8188.proxy.runpod.net', has: [1, 0, 4], lack: '線を保つ拡大', sec: 14,
     do: { name: [2, 2], chara: [3, 2], draw: [3, 2], i2i: [3, 2], area: [3, 2], angle: [2, 2], face: [2, 2], finish: [3, 2], up: [1, 2], cut: [3, 2] } },
   { id: 'img-std', kind: 'img', host: 'api', name: 'Fal.ai', short: 'Fal.ai', sub: 'API', ic: 'cloud', price: 4, unit: '枚', sec: 9,
     do: { name: [3, 4], chara: [2, 4], draw: [2, 4], i2i: [2, 4], up: [3, 6], cut: [3, 1] } },
@@ -1089,7 +1137,7 @@ const TASKS = [
   ['img', 'ネーム', [['name', 'ラフを作る']]],
   ['img', '設定資料', [['chara', '人物の絵を作る']]],
   ['img', '作画', [['draw', '絵を作る'], ['i2i', '絵から作り直す'], ['area', '囲んで直す'], ['angle', '角度を変える'], ['face', '顔・手を直す']]],
-  ['img', '仕上げ', [['finish', '白黒化・トーン'], ['up', '拡大'], ['cut', '背景を抜く']]],
+  ['img', '仕上げ', [['finish', '白黒化・トーン'], ['up', '拡大'], ['cut', '背景を切り抜く']]],
   ['txt', '構成', [['plan', '構成・コマ割り'], ['line', 'セリフ'], ['tr', '翻訳']]],
   ['txt', '絵の指示', [['prm', '指示を書く'], ['tag', '絵から指示を読む']]],
   ['txt', '検査', [['see', '検査・評価']]]
@@ -1101,19 +1149,62 @@ const markOf = (sid, tid) => S.mark[sid + ':' + tid] || SV(sid).do[tid][0];
 const costOf = (sid, tid) => SV(sid).do[tid][1];
 /* 実績の例：20回のうち採用した数。本番は、採用・却下の記録から数える */
 const usedOf = (sid, tid) => ({ 1: 5, 2: 11, 3: 16 })[SV(sid).do[tid][0]] + (sid.length + tid.length) % 3;
-const CON = { ok: ['つながっている', 'ok'], down: ['止まっている', 'bad'], key: ['キーが通らない', 'bad'], unk: ['未確認', 'unk'], rest: ['休ませている', 'warn'] };
+const CON = { ok: ['接続済み', 'ok'], down: ['止まっている', 'bad'], key: ['APIキーが無効', 'bad'], unk: ['未確認', 'unk'], rest: ['一時停止中', 'warn'] };
 const conOf = (id) => (S.rest[id] ? 'rest' : S.con[id]);
 const live = (id) => conOf(id) === 'ok';
 const cdot = (id) => `<i class="cdot ${CON[conOf(id)][1]}" title="${CON[conOf(id)][0]}"></i>`;
 const FAILS = [{ t: 'p.9 作画', svc: 'comfy2', why: '通信の失敗　3回' }];
 const SV = (id) => SVC.find((x) => x.id === id);
+/* キュー：step は処理の名前、n は「済んだ数 / 全体」、r は作り直しの回、k は経過を開くコマ */
 const JOBS = [
-  { t: 'p.8 作画', svc: 'comfy', c: 0, el: '1分20秒' },
-  { t: 'p.13 ネームの直し', svc: 'comfy', c: 0 },
-  { t: 'p.7 コマ3 候補 2案', svc: 'comfy', c: 0 }
+  { t: 'p.8 コマ3', step: '絵を作る', n: [1, 4], r: 2, k: '8:2', svc: 'comfy', c: 0, el: '1分20秒' },
+  { t: 'p.7 コマ3 候補 2案', step: '絵を作る', svc: 'comfy', c: 0 },
+  { t: 'p.8 コマ2', step: '比べる', n: [2, 3], k: '8:1', svc: 'txt-hi', c: 10, el: '6秒' },
+  { t: 'p.13 ネームの直し', step: 'セリフ', svc: 'txt-std', c: 1, el: '3秒' },
+  { t: 'p.2', step: '拡大', svc: 'img-std', c: 6, el: '9秒' },
+  { t: 'p.3', step: '拡大', svc: 'img-std', c: 6, el: '9秒' },
+  { t: 'p.4', step: '拡大', svc: 'img-std', c: 6, el: '4秒' }
 ];
-/* 組：送り先の全体を1回で切り替える。送れる先だけから選び、選べる先が無い処理は変えない */
-const SETS = [['cheap', '安く'], ['good', '得意を優先'], ['local', '手元だけ'], ['api', 'APIだけ']];
+/* 経過：コマごとに、ハーネスがしたことの記録。本番は、呼び出しと判断の記録から組む
+   rounds は作り直しの回。cs は候補［記号, 結果, 落ちた理由, 絵の違い］。vs は比べた組［左, 右, 1回目, 左右を入れ替えた2回目, 勝ち, 観点］ */
+const PST = { prm: '指示を書いている', gen: '絵を作っている', chk: '検査している', cmp: '比べている', done: '確定', stop: '止まった', wait: '待ち' };
+const mioFar = (x, y, h) => ({ figs: [{ c: 'mio', v: 'far', x, y, h }] });
+const mioBust = (x, h, o) => ({ figs: [Object.assign({ c: 'mio', v: 'bust', x, y: 1.02, h }, o)] });
+const PROC = {
+  '8:0': { st: 'done', max: 3, at: '10:28', win: 'B', by: 'txt-std',
+    fix: ['ミオ', '髪　肩まで', '服　上着・膝丈', '岩場の海'], vars: [['距離', '引き'], ['角度', 'ふつう'], ['向き', '右'], ['動作', '立つ'], ['表情', '普通']],
+    rounds: [{ by: 'comfy', t: '2分48秒', c: 0,
+      cs: [['A', 'bad', '手', mioFar(.3, .72, .5)], ['B', 'win', '', null], ['C', 'bad', '見切れ', mioFar(.05, .99, .92)], ['D', 'ok', '', mioFar(.42, .72, .44)]],
+      vs: [['B', 'D', 'B', 'B', 'B', '構図']] }] },
+  '8:1': { st: 'cmp', max: 3, by: 'txt-std',
+    fix: ['ミオ', '髪　肩まで', '服　上着・膝丈'], vars: [['距離', '胸から上'], ['角度', 'ふつう'], ['向き', '右'], ['動作', '振り向く'], ['表情', '驚き　強']],
+    rounds: [{ by: 'comfy', t: '2分51秒', c: 0,
+      cs: [['A', 'ok', '', null], ['B', 'bad', '絵の中の文字', { keepBal: 1 }], ['C', 'ok', '', mioBust(.52, 1.05)], ['D', 'ok', '', mioBust(.3, 1.2)]],
+      vs: [['A', 'C', 'A', 'A', 'A', '表情'], ['A', 'D', 'A', 'D', '', '構図'], ['C', 'D']], vby: 'txt-hi' }],
+    log: [['10:29', '指示を書く', 'txt-std', '4秒', 1], ['10:29', '絵を作る　4枚', 'comfy', '2分51秒', 0], ['10:32', '検査', '', '2秒', 0],
+      ['10:32', '比べる　A と C', 'txt-hi', '5秒', 10, ['2枚の絵と、このコマのネーム。観点は表情。', 'A。Cは目の開きが弱く、驚きの強に届いていない。左右を入れ替えても A。']],
+      ['10:32', '比べる　A と D', 'txt-hi', '6秒', 10, ['2枚の絵と、このコマのネーム。観点は構図。', '1回目は A、左右を入れ替えると D。差が小さいので引き分け。']],
+      ['10:33', '比べる　C と D', 'txt-hi', '', 10]] },
+  '8:2': { st: 'gen', max: 3, by: 'txt-std',
+    fix: ['岩場の海', '画風'], vars: [['距離', '遠景'], ['角度', '正面'], ['人物', 'なし']],
+    rounds: [{ by: 'comfy', t: '2分40秒', c: 0, end: '残り 0枚',
+      cs: [['A', 'bad', '人が写っている', Object.assign({ bg: { sea: .5 } }, mioFar(.3, .8, .5))], ['B', 'bad', 'ネームに無い船', { bg: { sea: .5, boat: { x: .6, s: .5 } } }], ['C', 'bad', '人が写っている', Object.assign({ bg: { sea: .5 } }, mioFar(.7, .8, .4))], ['D', 'bad', '水平線の高さ', { bg: { sea: .25 } }]] },
+    { by: 'comfy', t: '1分20秒', c: 0, chg: [['人物', '', 'なし'], ['角度', '見下ろす', '正面']],
+      cs: [['A', 'ok', '', null], ['B', 'run'], ['C', 'wait'], ['D', 'wait']] }],
+    log: [['10:31', '指示を書く', 'txt-std', '4秒', 1], ['10:31', '絵を作る　4枚', 'comfy', '2分40秒', 0], ['10:34', '検査', '', '2秒', 0],
+      ['10:34', '指示を直す', 'txt-std', '5秒', 1, ['前の指示：距離 遠景・角度 見下ろす。\n検査で落ちた理由：人が写っている 2枚、ネームに無い船 1枚、水平線の高さ 1枚。', '人物を「なし」と書き足す。角度を正面にして、水平線をネームの高さに合わせる。']],
+      ['10:34', '絵を作る　4枚', 'comfy', '1分20秒', 0]] },
+  '9:1': { st: 'stop', max: 3, pin: 5, by: 'txt-std',
+    fix: ['ミオ', '髪　肩まで・前髪は眉の上でまっすぐ', '服　上着・膝丈'], vars: [['距離', '胸から上'], ['角度', 'ふつう'], ['向き', '正面'], ['表情', '普通']],
+    rounds: [{ by: 'comfy', t: '2分44秒', c: 0, end: '残り 0枚',
+      cs: [['A', 'bad', '前髪', null], ['B', 'bad', '前髪', mioBust(.42, 1.08, { part: 1 })], ['C', 'bad', '見切れ', mioBust(.5, 1.6, { part: 1 })], ['D', 'bad', '前髪', mioBust(.58, 1.02, { part: 1 })]] },
+    { by: 'comfy', t: '2分39秒', c: 0, end: '残り 0枚', chg: [['髪', '', '前髪は分けない']],
+      cs: [['A', 'bad', '前髪', mioBust(.46, 1.1, { part: 1 })], ['B', 'bad', '前髪', null], ['C', 'bad', '前髪', mioBust(.54, 1.04, { part: 1 })], ['D', 'bad', '手', mioBust(.5, .9, { part: 1 })]] },
+    { by: 'comfy', t: '2分47秒', c: 0, end: '残り 0枚', fresh: 1,
+      cs: [['A', 'bad', '前髪', null], ['B', 'bad', '前髪', mioBust(.44, 1.12, { part: 1 })], ['C', 'bad', '前髪', mioBust(.56, 1.06, { part: 1 })], ['D', 'bad', '前髪', mioBust(.5, 1.0, { part: 1 })]] }] }
+};
+/* プリセット：送り先の全体を1回で切り替える。送れる先だけから選び、選べる先が無い処理は変えない */
+const SETS = [['cheap', '安く'], ['good', '得意を優先'], ['local', 'ローカルだけ'], ['api', 'APIだけ']];
 function routeFor(k) {
   const r = {}, none = [];
   Object.keys(TASK).forEach((tid) => {
@@ -1145,7 +1236,7 @@ const FOOT = (n) => {
    State — decisions live only in S.done; everything else is derived
    ========================================================= */
 const S = {
-  view: 'daiwari', dir: 'rtl', sel: 1, ssel: 6, done: {}, only: false, zoom: 2, dv: 'v3',
+  view: 'daiwari', lang: 'ja', dir: 'rtl', sel: 1, ssel: 6, done: {}, only: false, zoom: 2, dv: 'v3',
   spread: '6-7', tool: 'select', order: false, pick: 'A', show: 'cand', rp: 0,
   regen: false, scope: 'person', keep: { text: true, pos: true, look: false }, count: 4,
   nsel: 'amount', esel: 'folio', fixing: {}, skip: {},
@@ -1158,7 +1249,7 @@ const S = {
   capN: { comfy: 2, comfy2: 2, 'txt-loc': 2, 'img-std': 8, 'img-hi': 2, 'txt-std': 16, 'txt-hi': 4 },
   route: { name: 'img-std', chara: 'comfy', draw: 'comfy', i2i: 'img-hi', area: 'comfy', angle: 'comfy', face: 'comfy', finish: 'comfy', up: 'img-std', cut: 'comfy', plan: 'txt-hi', line: 'txt-std', tr: 'txt-std', prm: 'txt-std', tag: 'txt-std', see: 'txt-hi' }, mark: {}, task: '', stab: 'to', lic: {},
   spent: 4210, asks: [], toast: null,
-  /* pop: 開いている小さな窓。side: 原稿の右の欄（判断・道具・層） */
+  /* pop: 開いているポップアップ。side: 原稿の右のパネル（判断・ツール・レイヤー） */
   pop: '', side: 'dec', obj: null, area: null, ver: false, find: '',
   lay: {}, hand: {}, hist: [], redo: [],
   lv: Object.assign({}, LV_ALL), lk: {}, lsel: 'ai', lpage: 0, join: null, out: [],
@@ -1166,7 +1257,7 @@ const S = {
   cfg: { notify: true, out: false, backup: true, keepHand: true, credit: true, refMark: true, refText: true },
   er: { hand: true, ai: false },
   medium: 'paper', wdir: 'v', aud: 'boy', xlang: 'ja', upx: 'on',
-  /* o: 道具の選択肢。v: つまみ・色・入力欄の値（描き直しても残す） */
+  /* o: ツールの選択肢。v: スライダー・色・入力欄の値（描き直しても残す） */
   o: { cut: 'h', pen: 'ink', pl: 'hand', tk: 'line', voice: 'say', tdir: 'v', deco: 'none', fm: 'move', shape: 'sq', tpl: 't4', tplo: 'v', bm: 'tpl', bs: 'round', bd: 'point', bl: 'solid', tail: 'on', tn: 'dot', ta: 'panel', am: 'rect', rk: 'line', ic: 'fill', icn: 'anchor', fx: 'none', fxs: 'sel', lang: 'ja', vl: 'ja', col: 'mono', lu: 'unk', lr: 'unk', lt: 'unk', lc: 'unk' },
   v: {}
 };
@@ -1232,10 +1323,11 @@ function spTitle(u) {
    ========================================================= */
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const CH = { mio: 'ミオ', gen: 'ゲン', dad: '父' };
-const LANGS = ['日本語', 'English', '中文', '한국어', 'Français', 'Español', 'Deutsch', 'Русский'];
+/* 画面の言語：辞書のある言語だけを選べる。日本語は元の文言なので辞書を持たない */
+const LANGS = [['ja', '日本語']].concat(Object.keys(window.V3_I18N || {}).map((k) => [k, window.V3_I18N[k].name]));
 const NEWS = [
   { ic: 'check', t: 'p.7 コマ3 候補 4案', s: '生成が終わった　10:15', pin: 6 },
-  { ic: 'triangle-alert', t: 'p.9 コマ2 前髪', s: '検査で外れた　09:58', pin: 5 },
+  { ic: 'triangle-alert', t: 'p.9 コマ2 前髪', s: '検査で落ちた　09:58', pin: 5 },
   { ic: 'pen-line', t: '高橋が赤入れした', s: 'p.7 コマ4　09:40', pin: 4 },
   { ic: 'calendar-clock', t: '締切 10/12', s: '見込み 10/11' }
 ];
@@ -1267,7 +1359,10 @@ function renderTop() {
   const tabs = [['plan', '企画', 'file-text'], ['daiwari', '構成', 'layout-grid'], ['chara', '設定資料', 'contact'], ['spread', '原稿', 'book-open'], ['export', '書き出し', 'download']];
   const left = 10000 - S.spent, LQ = lanes(), nDead = new Set(Object.values(S.route).flat().filter((id) => !live(id))).size;
   const nRun = LQ.reduce((a, l) => a + l.run.length, 0), nWait = LQ.reduce((a, l) => a + l.wait.length, 0);
-  const job = (j, run, i) => `<div class="job"><span class="${run ? 'run' : 'meta'}">${run ? spin() : I('clock-3')}</span><div><div class="t">${j.t}</div><div class="s">${run ? '生成中' + (j.el ? '　' + j.el : '') : '待ち　' + (i + 1) + '番目'}</div></div><span class="meta num">${j.c ? '¥' + j.c : ''}</span><button type="button" class="ibtn" aria-label="${run ? '止める' : '取り消す'}">${I(run ? 'square' : 'x')}</button></div>`;
+  const stepS = (j) => [j.step, j.n ? j.n[0] + ' / ' + j.n[1] : '', j.r > 1 ? j.r + '回目' : ''].filter(Boolean).join('　');
+  const jobT = (j) => `<div class="t">${j.t}</div><div class="s">`;
+  const job = (j, run, i) => `<div class="job"><span class="${run ? 'run' : 'meta'}">${run ? spin() : I('clock-3')}</span>${j.k ? `<button type="button" class="jt" data-a="proc" data-v="${j.k}">` : '<div>'}${jobT(j)}${run ? (stepS(j) || '実行中') + (j.el ? '　' + j.el : '') : '待ち　' + (i + 1) + '番目' + (j.step ? '　' + j.step : '')}</div>${j.k ? '</button>' : '</div>'}<span class="meta num">${j.c ? '¥' + j.c : ''}</span><button type="button" class="ibtn" aria-label="${run ? '止める' : '取り消す'}">${I(run ? 'square' : 'x')}</button></div>`;
+  const failRow = (f) => `<div class="job"><span class="fail">!</span><div>${jobT(f)}${f.why}</div></div><button type="button" class="btn sm" data-a="view" data-v="svc">送り先を選ぶ</button><button type="button" class="ibtn" aria-label="もう一度送る" title="もう一度送る">${I('rotate-cw')}</button></div>`;
   const pb = (id, ic, label, cls) => `<button type="button" class="ibtn${cls || ''}" data-a="pop" data-v="${id}" aria-pressed="${S.pop === id}" aria-label="${label}" title="${label}">${I(ic)}</button>`;
   const popH = (t) => `<div class="pop-h">${t}<button type="button" class="ibtn" data-a="pop" data-v="" aria-label="閉じる">${I('x')}</button></div>`;
   const mrow = (ic, t, s, attr, cur) => `<button type="button" class="mrow${cur ? ' cur' : ''}"${attr || ''}>${ic ? I(ic) : ''}<span class="grow t">${t}</span><span class="meta">${s || ''}</span>${cur ? I('check') : ''}</button>`;
@@ -1276,18 +1371,18 @@ function renderTop() {
       <div class="kgrid${S.cfg.keyEdit ? ' ed' : ''}">${KEYS.map(([g, rows]) => `<section><span class="lbl">${g}</span>${rows.map(([k, l]) => `<div class="krow"><span>${l}</span><span>${k.split(' ').map((x) => x === '→' || x === '/' ? `<i>${x}</i>` : `<kbd>${x}</kbd>`).join('')}</span></div>`).join('')}</section>`).join('')}</div><div class="pop-f">${tchip('cfg.keyEdit', '割り当てを変える', 'pencil')}${S.cfg.keyEdit ? `<button type="button" class="btn ghost sm">${I('rotate-ccw')}元に戻す</button>` : ''}</div></div>`,
     out: () => `<div class="pop" role="dialog" aria-label="抜いたページ">${popH('抜いたページ')}
       ${S.out.length ? S.out.map((n) => `<div class="mrow"><span class="th-p">${pageBox(n)}</span><span class="grow t num">p.${n}</span><button type="button" class="btn sm" data-a="outpage" data-v="${n}">${I('undo-2')}戻す</button></div>`).join('') : '<div class="mrow"><span class="meta">なし</span></div>'}</div>`,
-    q: () => `<div class="pop" role="dialog" aria-label="AIの待ち行列">${popH('AIの待ち行列')}
-      ${LQ.filter((l) => l.jobs.length).map((l) => `<div class="lane-h"><b>${l.s.name}</b>${live(l.s.id) ? '' : `<span class="flag warn">${CON[conOf(l.s.id)][0]}</span>`}${slots(l)}<span class="grow"></span><button type="button" class="ibtn" data-a="view" data-v="svc" data-s="${l.s.id}" aria-label="${l.s.name}の設定">${I('settings-2')}</button></div>
-        ${l.run.map((j) => job(j, true)).join('')}${l.wait.map((j, i) => job(j, false, i)).join('')}`).join('')}
+    q: () => `<div class="pop" role="dialog" aria-label="AIのキュー">${popH('AIのキュー')}
+      ${LQ.filter((l) => l.jobs.length || FAILS.some((f) => f.svc === l.s.id)).map((l) => `<div class="lane-h"><b>${l.s.name}</b>${live(l.s.id) ? '' : `<span class="flag warn">${CON[conOf(l.s.id)][0]}</span>`}${slots(l)}<span class="grow"></span><button type="button" class="ibtn" data-a="view" data-v="svc" data-s="${l.s.id}" aria-label="${l.s.name}の設定">${I('settings-2')}</button></div>
+        ${l.run.map((j) => job(j, true)).join('')}${l.wait.map((j, i) => job(j, false, i)).join('')}${FAILS.filter((f) => f.svc === l.s.id).map(failRow).join('')}`).join('')}
       <div class="pop-f"><span>今月</span><span class="num">¥${S.spent.toLocaleString()} / ¥10,000　${S.stopAt}%で止める</span></div></div>`,
     find: () => `<div class="pop find" role="dialog" aria-label="探す"><div class="row"><label class="search grow">${I('search')}<input class="field" id="find-in" aria-label="探す" placeholder="セリフ・人物・赤入れ・ページ" value="${esc(S.find)}"></label>${tchip('cfg.rep', '置き換え', 'replace')}</div>${S.cfg.rep ? `<div class="row rep">${fld('rep-in', '', '置き換える言葉', 'sm', 'placeholder="置き換える言葉"')}<button type="button" class="btn sm">次を置き換える</button><button type="button" class="btn sm">すべて</button></div>` : ''}<div id="find-res">${findHTML()}</div></div>`,
-    bell: () => `<div class="pop" role="dialog" aria-label="知らせ">${popH('知らせ')}
+    bell: () => `<div class="pop" role="dialog" aria-label="通知">${popH('通知')}
       ${NEWS.map((x) => mrow(x.ic, x.t, x.s, x.pin ? ` data-a="goto" data-v="${x.pin}"` : ' data-a="view" data-v="daiwari"')).join('')}</div>`,
     gear: () => `<div class="pop" role="dialog" aria-label="設定">${popH('設定')}
-      <div class="swr"><span class="grow">言語</span>${dd('cfg-lang', LANGS)}</div>
-      <div class="swr"><span class="grow">ブラウザの知らせ</span>${tsw('cfg.notify', 'ブラウザの知らせ')}</div>
-      <div class="swr"><span class="grow">メール・チャットへの知らせ</span>${tsw('cfg.out', 'メール・チャットへの知らせ')}</div>
-      <div class="swr"><span class="grow">控え　1日1回</span>${tsw('cfg.backup', '控えを1日1回作る')}</div>
+      <div class="swr"><span class="grow">言語</span>${seg('lang', LANGS, S.lang)}</div>
+      <div class="swr"><span class="grow">ブラウザの通知</span>${tsw('cfg.notify', 'ブラウザの通知')}</div>
+      <div class="swr"><span class="grow">メール・チャットへの通知</span>${tsw('cfg.out', 'メール・チャットへの通知')}</div>
+      <div class="swr"><span class="grow">バックアップ　1日1回</span>${tsw('cfg.backup', 'バックアップを1日1回作る')}</div>
       <div class="msep"></div>
       ${mrow('keyboard', 'キーの割り当て', '?', ' data-a="pop" data-v="keys"')}
       ${mrow('file-down', '作品を1つのファイルに書き出す')}${mrow('file-up', '作品のファイルを読み込む')}
@@ -1302,9 +1397,9 @@ function renderTop() {
       <div class="mrow"><span class="av sm" style="--c:#6F7A8C">佐</span><span class="grow t">佐藤</span><span class="meta">作者</span></div>
       <div class="mrow"><span class="av sm" style="--c:#8A6A4E">高</span><span class="grow t">高橋</span><span class="meta">編集者　全ページ</span></div>
       <div class="msep"></div>
-      <div class="swr"><span class="grow">役</span>${dd('inv-role', ['アシスタント', '編集者', '作者'])}</div>
-      <div class="swr"><span class="grow">ページ</span>${fld('inv-pages', '8-13', '任せるページ', 'sm num', 'style="flex:0 1 96px"')}</div>
-      <div class="swr">${fld('inv-mail', '', 'メールアドレス', 'sm', 'placeholder="メールアドレス"')}<button type="button" class="btn sm">${I('user-plus')}招く</button></div></div>`
+      <div class="swr"><span class="grow">役割</span>${dd('inv-role', ['アシスタント', '編集者', '作者'])}</div>
+      <div class="swr"><span class="grow">ページ</span>${fld('inv-pages', '8-13', '担当ページ', 'sm num', 'style="flex:0 1 96px"')}</div>
+      <div class="swr">${fld('inv-mail', '', 'メールアドレス', 'sm', 'placeholder="メールアドレス"')}<button type="button" class="btn sm">${I('user-plus')}招待</button></div></div>`
   };
   document.getElementById('top').innerHTML = `
     <div class="brand">
@@ -1318,8 +1413,8 @@ function renderTop() {
       ${tabs.map(([id, l, ic]) => { const c = PINS.filter((p) => p.tab === id && isOpen(p.n)).length; return `<button type="button" role="tab" class="tab" data-a="view" data-v="${id}" aria-selected="${S.view === id}">${I(ic)}${l}${c ? `<span class="count num" aria-label="判断待ち ${c}件">${c}</span>` : ''}</button>`; }).join('')}
     </nav>
     <div class="top-r">
-      <button type="button" class="aiq" data-a="pop" data-v="q" aria-expanded="${S.pop === 'q'}">${nRun ? spin() : ''}生成中 <span class="num">${nRun}</span><span class="dv"></span>待ち <span class="num">${nWait}</span>${nDead ? `<span class="dv"></span><span class="stp">送れない先 <span class="num">${nDead}</span></span>` : ''}${S.spent >= 8000 ? `<span class="dv"></span>残り <span class="num">¥${left.toLocaleString()}</span>` : ''}</button>
-      ${pb('find', 'search', '探す　/')}${pb('bell', 'bell', '知らせ')}${pb('keys', 'keyboard', 'ショートカットキー　?', ' kbtn')}
+      <button type="button" class="aiq" data-a="pop" data-v="q" aria-expanded="${S.pop === 'q'}">${nRun ? spin() : ''}実行中 <span class="num">${nRun}</span><span class="dv"></span>待ち <span class="num">${nWait}</span>${nDead ? `<span class="dv"></span><span class="stp">送れない先 <span class="num">${nDead}</span></span>` : ''}${S.spent >= 8000 ? `<span class="dv"></span>残り <span class="num">¥${left.toLocaleString()}</span>` : ''}</button>
+      ${pb('find', 'search', '探す　/')}${pb('bell', 'bell', '通知')}${pb('keys', 'keyboard', 'ショートカットキー　?', ' kbtn')}
       <button type="button" class="ibtn" data-a="view" data-v="svc" aria-pressed="${S.view === 'svc'}" aria-label="生成サービス" title="生成サービス">${I('server')}</button>
       ${pb('gear', 'settings', '設定')}
       <button type="button" class="avs" data-a="pop" data-v="people" aria-pressed="${S.pop === 'people'}" aria-label="人" title="人"><span class="av" style="--c:#8A6A4E">高</span><span class="av" style="--c:#6F7A8C">佐</span></button>
@@ -1467,7 +1562,9 @@ function spreadArt(n, cur) {
     if (ok(4)) ov[3] = rpBalloon(curRp());
     else if (isOpen(4) && sel === 4) ov[3] = rpBalloon(S.rp);
   }
-  return { ov, lv: S.lv };
+  const pst = {};
+  if (PG[n].s === 'ai') Object.keys(PROC).forEach((k) => { const [pn, i] = k.split(':').map(Number); if (pn === n && PROC[k].st === 'done') pst[i] = 'drawn'; });
+  return { ov, lv: S.lv, pst };
 }
 /* 読む順：上の段から。同じ段の中は読む向きの側から */
 function readOrder(n) {
@@ -1501,11 +1598,17 @@ function spreadOverlays(n, cur) {
       o += `<span class="ov ov-mark${S.nsel === c.id ? ' on' : ''}" style="${boxPct(b)};--c:${col}"></span><span class="ov-mtag" style="${pct(b[0], b[1])};--c:${col}">${c.m === 'bad' ? '×' : '?'} ${c.label}</span>`;
     }));
   }
+  Object.keys(PROC).filter((k) => +k.split(':')[0] === n).forEach((k) => {
+    const p = PROC[k], i = +k.split(':')[1], b = lo.L[i];
+    if (!b || p.st === 'stop') return;
+    if (p.st === 'gen') o += `<span class="ov ov-run" style="${boxPct(b)}"></span>`;
+    o += `<button type="button" class="ov-st${S.side === 'proc' && procKey() === k ? ' on' : ''}" data-a="proc" data-v="${k}" style="${pct(b[0] + b[2], b[1] + b[3])}" aria-label="p.${n} コマ${i + 1}　${PST[p.st]}" title="${PST[p.st]}">${p.st === 'done' ? I('check') : p.st === 'cmp' ? I('scale') : spin()}${p.st === 'done' ? '' : cds(p.rounds[p.rounds.length - 1].cs)}${p.rounds.length > 1 ? `<span class="num">${p.rounds.length}回目</span>` : ''}</button>`;
+  });
   const ob = S.obj;
   if (ob && ob.n === n && tool === 'select' && lo.L[ob.i]) o += `<span class="ov ov-pick" style="${boxPct(ob.k === 'bal' ? balBox(lo, ob.i, ob.j) : lo.L[ob.i])}"><i></i><i></i><i></i><i></i></span>`;
   if (tool === 'frame' && S.join && S.join.n === n && lo.L[S.join.i]) o += `<span class="ov ov-pick" style="${boxPct(lo.L[S.join.i])}"><i></i><i></i><i></i><i></i></span>`;
   if (tool === 'area' && S.area && S.area.n === n && lo.L[S.area.i]) { const [x, y, w, h] = lo.L[S.area.i]; o += `<span class="ov ov-area" style="${boxPct([x + w * .16, y + h * .14, w * .52, h * .72])}"></span>`; }
-  if (S.vw.hand) lo.L.forEach((b, i) => { if (S.hand[n + ':' + i]) o += `<span class="ov-hand" style="${pct(b[0] + b[2], b[1])}" title="人の手">${I('hand')}</span>`; });
+  if (S.vw.hand) lo.L.forEach((b, i) => { if (S.hand[n + ':' + i]) o += `<span class="ov-hand" style="${pct(b[0] + b[2], b[1])}" title="手描き">${I('hand')}</span>`; });
   if (S.vw.ref) lo.L.forEach((b, i) => {
     const who = [...new Set(((lo.p[i] || {}).figs || []).map((g) => CH[g.c]))];
     if (who.length) o += `<span class="ov-ref" style="${pct(b[0], b[1] + b[3])}">${who.map((w) => `<b title="${w}">${w[0]}</b>`).join('')}</span>`;
@@ -1514,7 +1617,7 @@ function spreadOverlays(n, cur) {
   if (!S.order && S.vw.pins) PINS.filter((p) => p.page === n).forEach((p) => { const [x, y] = pinPos(p); o += pinHTML(p, x, y, sel === p.n); });
   return o;
 }
-/* 縦読み：ページ・見開き・めくりが無い。1話を1本の帯にして、コマの間の余白で間を作る */
+/* 縦読み：ページ・見開き・めくりが無い。1話を1本の帯にして、コマの間隔の余白で間を作る */
 const STRIP_W = 800, STRIP_CUT = 1280;
 const KA = () => (S.o.cut === 'h' ? 0 : S.o.cut === 'v' ? 90 : +vv('ka', 12));
 const pagesIn = () => Object.keys(PG).map(Number).sort((a, b) => a - b).filter((n) => !S.out.includes(n));
@@ -1536,7 +1639,7 @@ function stripStage() {
     let cut = '';
     px += Math.round(STRIP_W * (gap / 100 + .88 * h / w));
     if (px > (cuts + 1) * STRIP_CUT) { cuts++; cut = `<div class="st-cut"><span class="num">${cuts}</span></div>`; }
-    return `${cut}<div class="st-p${on ? ' on' : ''}"${it.first ? ` id="st-${it.n}"` : ''} style="margin-top:${gap}%;aspect-ratio:${w}/${h}">${pageSVG(it.n, { stage: pageState(it.n).st, vb: `${X} ${Y} ${w} ${h}`, only: it.i, lv: S.lv })}${hitOn ? `<button type="button" class="hit pn" data-a="hit" data-k="panel" data-n="${it.n}" data-i="${it.i}" style="inset:0;${clipCss(it.b)}" aria-label="p.${it.n} コマ${it.i + 1}">${tool === 'knife' ? '<span class="cutl"></span>' : ''}</button>` : ''}${S.vw.hand && S.hand[it.n + ':' + it.i] ? `<span class="ov-hand" style="left:100%;top:0" title="人の手">${I('hand')}</span>` : ''}</div>`;
+    return `${cut}<div class="st-p${on ? ' on' : ''}"${it.first ? ` id="st-${it.n}"` : ''} style="margin-top:${gap}%;aspect-ratio:${w}/${h}">${pageSVG(it.n, { stage: pageState(it.n).st, vb: `${X} ${Y} ${w} ${h}`, only: it.i, lv: S.lv })}${hitOn ? `<button type="button" class="hit pn" data-a="hit" data-k="panel" data-n="${it.n}" data-i="${it.i}" style="inset:0;${clipCss(it.b)}" aria-label="p.${it.n} コマ${it.i + 1}">${tool === 'knife' ? '<span class="cutl"></span>' : ''}</button>` : ''}${S.vw.hand && S.hand[it.n + ':' + it.i] ? `<span class="ov-hand" style="left:100%;top:0" title="手描き">${I('hand')}</span>` : ''}</div>`;
   }).join('');
   const scenes = [...new Set(items.map((x) => x.n))];
   const smap = scenes.map((n, k) => `<button type="button" data-a="sjump" data-v="${n}" style="--f:${r1(items.filter((x) => x.n === n).reduce((a, x) => a + x.b[3] / x.b[2], 0))}" aria-label="場面${k + 1}" title="場面${k + 1}"><span class="num">${k + 1}</span></button>`).join('');
@@ -1555,9 +1658,54 @@ const VERS = [['v3', 'いま', '10/5 佐藤'], ['v2', '', '10/3 佐藤'], ['v1',
 function inspTabs() {
   const u = UNITS.find((x) => uid(x) === S.spread);
   const c = SPINS().filter((p) => isOpen(p.n) && u.includes(p.page)).length;
-  return `<div class="itabs" role="tablist" aria-label="右の欄">${[['dec', '判断', c], ['tool', '道具'], ['layer', '層']].map(([id, l, k]) => `<button type="button" role="tab" class="itab" data-a="side" data-v="${id}" aria-selected="${S.side === id}">${l}${k ? `<span class="count num">${k}</span>` : ''}</button>`).join('')}</div>`;
+  return `<div class="itabs" role="tablist" aria-label="右のパネル">${[['dec', '判断', c], ['tool', 'ツール'], ['layer', 'レイヤー'], ['proc', '経過', 0, procKeys().some((k) => !['done', 'stop'].includes(PROC[k].st))]].map(([id, l, k, run]) => `<button type="button" role="tab" class="itab" data-a="side" data-v="${id}" aria-selected="${S.side === id}">${l}${k ? `<span class="count num">${k}</span>` : ''}${run ? spin() : ''}</button>`).join('')}</div>`;
+}
+/* 経過：選んだコマで、指示・候補・検査・比べた結果・作り直しを回ごとに並べる */
+const cds = (cs) => `<span class="cds">${cs.map(([, r]) => `<i class="${r === 'wait' ? '' : r}"></i>`).join('')}</span>`;
+function procKeys() {
+  const u = UNITS.find((x) => uid(x) === S.spread).filter(Boolean);
+  return Object.keys(PROC).filter((k) => u.includes(+k.split(':')[0]));
+}
+function procKey() {
+  const ob = S.obj, ks = procKeys();
+  if (ob && ob.k === 'panel') return ob.n + ':' + ob.i;
+  return ks.find((k) => !['done', 'stop'].includes(PROC[k].st)) || ks[0] || '';
+}
+function procTile(k, [id, r, why, sp]) {
+  const [n, i] = k.split(':').map(Number), lo = layOf(n), [X, Y, w, h] = lo.L[i];
+  const art = () => pageSVG(n, { only: i, stage: 'drawn', vb: `${X} ${Y} ${w} ${h}`, ov: { [i]: Object.assign({}, lo.p[i], sp, sp && sp.keepBal ? {} : { bal: null }) } });
+  const word = { bad: '× ' + why, win: '選ばれた', ok: '検査を通った', run: '作っている', wait: '待ち' }[r];
+  return `<div class="pc is-${r}"><div class="box" style="--ar:${r1(w / h)}">${r === 'run' ? spin() : r === 'wait' ? I('clock-3') : art()}<span class="id">${id}</span></div><span class="why">${word}</span></div>`;
+}
+const procVs = ([a, b, v1, v2, win, pt]) => `<div class="vs"><span class="pid">${a}</span><span class="pid">${b}</span><span class="grow meta">${pt || ''}</span>${v1 ? `<span class="pid">${v1}</span><span title="左右を入れ替えてもう一度">${I('arrow-left-right')}</span><span class="pid">${v2}</span>${I('arrow-right')}${win ? `<b>${win}</b>` : '<span class="flag mut">引き分け</span>'}` : `${spin()}<span class="meta">比べている</span>`}</div>`;
+function procPanel() {
+  const k = procKey(), p = PROC[k], ks = procKeys();
+  if (!p) return `<div class="insp-b"><div class="dec-h"><div class="grow"><div class="h2">${k ? 'p.' + k.replace(':', ' コマ').replace(/\d+$/, (x) => +x + 1) : 'p.' + S.spread.replace('-', '〜')}</div><div class="meta">AIの記録なし</div></div></div></div>`;
+  const [n, i] = k.split(':').map(Number), run = !['done', 'stop'].includes(p.st), nm = `p.${n} コマ${i + 1}`;
+  const head = p.st === 'done' ? `確定　${p.win}　${p.at}` : `${PST[p.st]}　${p.rounds.length}回目 / ${p.max}回まで`;
+  const rd = (r, ri) => sec(`${ri + 1}回目`,
+    (r.fresh ? `<div class="chg">${I('eraser')}<span>同じ失敗が2回　指示を一から書き直した</span></div>` : '') +
+    (r.chg ? `<div class="chg">${I('pencil')}${r.chg.map(([kk, a, b]) => `<span>${kk}　${a ? `<s>${a}</s>　` : ''}<b>${b}</b></span>`).join('')}</div>` : '') +
+    `<div class="pcs">${r.cs.map((c) => procTile(k, c)).join('')}</div>` +
+    (r.vs ? `<div>${r.vs.map(procVs).join('')}</div>` : '') +
+    (r.end ? `<div class="fwarn"><span class="mk bad">×</span>${r.end}</div>` : ''),
+    `<span class="meta num">${SV(r.by).short}　${r.t}${r.vby ? '　' + SV(r.vby).short : ''}</span>`);
+  const log = p.log ? `<section class="sec"><button type="button" class="fold" data-a="tg" data-k="cfg.plog" aria-expanded="${!!S.cfg.plog}"><span class="lbl">呼び出しの記録</span><span class="meta num">${p.log.length}</span>${I('chevron-down')}</button>
+    ${S.cfg.plog ? `<div>${p.log.map(([at, st, sv, t, c, tx], li) => `<div class="vrow"><span class="meta num">${at}</span><span class="grow">${st}</span><span class="meta num">${sv ? SV(sv).short : 'プログラム'}${t ? '　' + t : ''}${c ? '　¥' + c : ''}</span>${t ? (tx ? `<button type="button" class="ibtn" data-a="plog" data-v="${li}" aria-expanded="${S.plog === li}" aria-label="送った文と返ってきた文">${I('chevron-down')}</button>` : '<span class="ibtn"></span>') : `<span class="ibtn">${spin()}</span>`}</div>${tx && S.plog === li ? `<div class="lopen"><span class="lbl">送った文</span><div class="ltx">${tx[0]}</div><span class="lbl">返ってきた文</span><div class="ltx">${tx[1]}</div></div>` : ''}`).join('')}</div>` : ''}</section>` : '';
+  const pin = p.pin ? PIN(p.pin) : null;
+  return `<div class="insp-b">
+      <div class="dec-h">${run ? `<span class="mk fix">${spin()}</span>` : ''}<div class="grow"><div class="h2">${nm}</div><div class="meta num">${head}</div></div>
+        <div class="stepper"><button type="button" class="ibtn" data-a="pstep" data-v="-1" aria-label="前のコマ">${I('chevron-left')}</button><span class="num">${ks.indexOf(k) + 1} / ${ks.length}</span><button type="button" class="ibtn" data-a="pstep" data-v="1" aria-label="次のコマ">${I('chevron-right')}</button></div></div>
+      ${sec('指示', `<div class="toks">${p.fix.map((t) => `<span class="flag mut" title="設定資料から">${I('lock')}${t}</span>`).join('')}</div><div>${p.vars.map(([kk, v]) => kv(kk, `<span>${v}</span>`)).join('')}</div>`, `<span class="meta">${SV(p.by).short}</span>`)}
+      ${p.rounds.map(rd).join('')}
+      ${pin ? `<section class="sec"><button type="button" class="opt" data-a="goto" data-v="${pin.n}">${pinSt(pin, 1)}<span class="grow"><b>${pin.title}</b>　<span class="meta">${isOpen(pin.n) ? '判断待ち' : S.done[pin.n].t}</span></span>${I('arrow-up-right')}</button></section>` : ''}
+      ${log}</div>
+    <div class="insp-f"><div class="inline-ai"><input class="field" aria-label="${nm} への指示" placeholder="${nm} への指示"><button type="button" class="btn ai-o" data-a="ask" data-p="0">${I('sparkles')}頼む<span class="cost">${SV(p.rounds[0].by).short} ¥${SV(p.rounds[0].by).price * 4}</span></button></div>
+      ${run ? `<div class="fwarn need">${I('refresh-cw')}頼むと、いまの回を止めて始め直す</div>` : ''}
+      <div class="row">${run ? `<button type="button" class="btn lg grow">${I('square')}止める</button>` : `<button type="button" class="btn lg grow">${I('refresh-cw')}作り直す</button>`}</div></div>`;
 }
 function inspSpread() {
+  if (S.side === 'proc') return procPanel();
   if (S.side === 'tool') return toolPanel();
   if (S.side === 'layer') return layerPanel();
   const cur = spreadSel();
@@ -1584,10 +1732,10 @@ function vSpread() {
       <span class="du-n">${x.filter(Boolean).join('-')}</span>
       ${ps.length ? `<span class="du-pins">${ps.map((p) => pinSt(p, 1)).join('')}</span>` : ''}</button>`;
   }).join('');
-  const view = [['vw.pins', '判断の印'], ['vw.hand', '人の手の印'], ['vw.ref', '人物の印'], ['vw.guide', '基本枠'], ['vw.grid', 'マス目　10mm']];
+  const view = [['vw.pins', '判断の印'], ['vw.hand', '手描きの印'], ['vw.ref', '人物の印'], ['vw.guide', '基本枠'], ['vw.grid', 'グリッド　10mm']];
   return `<div class="ws">
     <section class="canvas sp" aria-label="原稿">
-      <div class="ftb" role="toolbar" aria-label="道具">
+      <div class="ftb" role="toolbar" aria-label="ツール">
         ${tools.map(([id, icn, lb, k]) => `<button type="button" class="tool" data-a="tool" data-v="${id}" aria-pressed="${S.tool === id}" title="${lb}　${k}" aria-keyshortcuts="${k}">${I(icn)}<span>${lb}</span></button>`).join('')}
         <span class="vsep"></span>
         ${draw.map(([id, icn, lb, k]) => ic('tool', id, icn, lb, k, S.tool === id)).join('')}
@@ -1596,13 +1744,13 @@ function vSpread() {
         <span class="vsep"></span>
         ${ic('back', '', 'undo-2', '取り消す', 'Ctrl+Z', 0, !S.hist.length)}${ic('fwd', '', 'redo-2', 'やり直す', 'Ctrl+Shift+Z', 0, !S.redo.length)}
         <span class="vsep"></span>
-        ${strip ? `<span class="tb-t num">長さ ${strip.px.toLocaleString()}px　分け目 ${strip.cuts}</span><span class="vsep"></span>` : ''}${zoomCtl()}
+        ${strip ? `<span class="tb-t num">長さ ${strip.px.toLocaleString()}px　分割 ${strip.cuts}</span><span class="vsep"></span>` : ''}${zoomCtl()}
       </div>
       ${S.pop === 'view' ? `<div class="pop view" role="dialog" aria-label="表示するもの"><div class="swr"><span class="grow">言語の版</span>${oseg('vl', [['ja', '日本語'], ['en', 'English']])}</div>${view.map(([k, lb]) => `<div class="swr"><span class="grow">${lb}</span>${tsw(k, lb)}</div>`).join('')}</div>` : ''}
       ${strip ? strip.html : `<div class="sp-center"><div class="sp-stage t-${S.tool}${S.tool === 'knife' ? ' kn kn-' + S.o.cut : ''}" style="--zs:${[70, 85, 100, 120][S.zoom] / 100};--ka:${KA()}deg">${pg(r, S.dir === 'ltr' ? 'l' : 'r')}${pg(l, S.dir === 'ltr' ? 'r' : 'l')}${spTitle(u)}</div></div>
       <nav class="dock" aria-label="ページ">${dock}</nav>`}
     </section>
-    <aside class="insp" aria-label="右の欄">${inspTabs()}${inspSpread()}</aside>
+    <aside class="insp" aria-label="右のパネル">${inspTabs()}${inspSpread()}</aside>
   </div>`;
 }
 
@@ -1610,13 +1758,13 @@ function vSpread() {
 /* =========================================================
    設定資料
    ========================================================= */
-/* 参照・生成の中身・追加学習（人物ごと） */
+/* 参照・生成の設定・追加学習（人物ごと） */
 function charaExtra() {
-  const ref = (art, name, d) => `<div class="ref"><div class="box">${art}</div>${fld('rf-n-' + name, name, '呼び名', 'sm')}${sl('rf-s-' + name, name + 'の効き具合', d, 0, 100, '%')}</div>`;
+  const ref = (art, name, d) => `<div class="ref"><div class="box">${art}</div>${fld('rf-n-' + name, name, '名前', 'sm')}${sl('rf-s-' + name, name + 'の強さ', d, 0, 100, '%')}</div>`;
   const front = symSVG('0 0 60 150', '<rect width="60" height="150" fill="#fff"/><use href="#mio-front" width="60" height="150"/>');
   return sec('参照', `<div class="refs">${ref(front, '三面図', 70)}${ref(face('normal', 0, '18 22 64 64'), '顔', 85)}<div class="ref new"><button type="button" class="box" aria-label="参照を足す">${I('plus')}</button></div></div>
       <div class="acts">${tchip('cfg.refMark', '原稿に印を出す')}${tchip('cfg.refText', '指示に書き添える')}</div>`, `<button type="button" class="btn ghost sm">${I('image-plus')}原稿の絵から足す</button>`) +
-    sec('生成の中身', `<div class="narrow">${kv('サービス', dd('ch-svc', SVC.filter((x) => x.kind === 'img').map((x) => x.name))) + kv('手順', dd('ch-wf', WF.chara)) + kv('モデル', dd('ch-md', MODELS)) + kv('追加学習', dd('ch-lora', ['ミオ v2', 'ミオ v1', 'なし']))}</div>`, '<span class="meta">この人物</span>') +
+    sec('生成の設定', `<div class="narrow">${kv('サービス', dd('ch-svc', SVC.filter((x) => x.kind === 'img').map((x) => x.name))) + kv('ワークフロー', dd('ch-wf', WF.chara)) + kv('モデル', dd('ch-md', MODELS)) + kv('追加学習', dd('ch-lora', ['ミオ v2', 'ミオ v1', 'なし']))}</div>`, '<span class="meta">この人物</span>') +
     sec('追加学習', `<div>${[['v2', '9/28　絵 14枚', 1], ['v1', '9/22　絵 9枚', 0]].map(([v, m, now]) => `<div class="vrow"><b>${v}</b><span class="grow meta">${m}</span>${now ? '<span class="flag mut">いま</span>' : `<button type="button" class="btn ghost sm">${I('columns-2')}比べる</button><button type="button" class="btn sm">${I('rotate-ccw')}戻す</button>`}</div>`).join('')}</div>`, jobBtn('追加学習', 'graduation-cap', { s: 'chara', t: 'ミオ', text: '学習を頼む', u: 30 }));
 }
 function vChara() {
@@ -1641,9 +1789,12 @@ function vChara() {
     <g class="st-ghost"><use href="#gen-far" x="${r1(318 - 20 * kG)}" y="${r1(FL - 98.4 * kG)}" width="${r1(40 * kG)}" height="${r1(100 * kG)}"/></g>
     ${cap(66, '正面')}${cap(144, '横')}${cap(222, '後ろ')}${cap(318, 'ゲン', '#A7AEB9')}</svg>`;
   const exps = [['normal', '普通'], ['smile', '笑い'], ['angry', '怒り'], ['surprise', '驚き']];
+  const lvs = (l) => (EXL[l].length ? `<span class="lvs" title="描き分けられる強さ">${['弱', '中', '強'].filter((x) => !EXL[l].some(([, t]) => t.includes(x))).map((x) => `<i class="off">${x}</i>`).join('')}${EXL[l].map(([, t]) => `<i>${t}</i>`).join('')}</span>` : '');
   const p3 = PIN(3), open3 = isOpen(3);
   const cry = open3 || ok(3) ? `<div class="exp${open3 ? ' ai' : ''}"><div class="box">${face('cry', 0, '18 22 64 64')}</div>${open3 ? `<span class="pin need">3</span>` : ''}<div class="cap"><b>泣き顔</b>${open3 ? '<span class="flag warn">AI案</span>' : ''}</div></div>` : '';
-  const attrs = [['ht', '身長', '148cm'], ['hair', '髪', '黒・肩まで・前髪は眉の上でまっすぐ'], ['eye', '目', '黒・たれ目'], ['cloth', '服', '紺の上着・白い襟・膝丈'], ['voice', '口調', '短く言い切る・父を「父さん」'], ['age', '年齢', '14']];
+  const attrs = [['ht', '身長', '148cm'], ['hair', '髪', '肩まで・前髪は眉の上でまっすぐ', '黒', 'k'], ['eye', '目', 'たれ目', '黒', 'k'], ['cloth', '服', '上着・膝丈', '紺', 'd'], ['collar', '襟', '大きめ', '白', 'w'], ['voice', '口調', '短く言い切る・父を「父さん」'], ['age', '年齢', '14']];
+  const HUE = { 黒: '#1E2024', 紺: '#27335E', 白: '#FFFFFF' }, LUM = { k: ['黒', '#1E2024'], d: ['濃い', '#5B6068'], l: ['薄い', '#B9BDC4'], w: ['白', '#FFFFFF'] };
+  const tone = (c, b) => (c ? `<span class="tone" title="色"><i style="background:${HUE[c]}"></i>${c}</span><span class="tone" title="白黒での明るさ"><i style="background:${LUM[b][1]}"></i>${LUM[b][0]}</span>` : '');
   return `<div class="ws three">
     <nav class="side" aria-label="設定資料">
       <div class="side-h"><label class="search">${I('search')}<input class="field" aria-label="探す" placeholder="探す"></label></div>
@@ -1656,19 +1807,19 @@ function vChara() {
         <div class="turn">${turn}</div>
         <section class="sec"><div class="sec-h"><span class="lbl">表情</span><button type="button" class="btn ghost sm">${I('plus')}追加</button></div>
           <div class="exps">
-            ${exps.map(([e, l]) => `<div class="exp"><div class="box">${face(e, 0, '18 22 64 64')}</div><div class="cap"><b>${l}</b></div></div>`).join('')}${cry}
+            ${exps.map(([e, l]) => `<div class="exp"><div class="box">${face(e, 0, '18 22 64 64')}</div><div class="cap"><b>${l}</b>${lvs(l)}</div></div>`).join('')}${cry}
           </div></section>
-        <section class="sec"><span class="lbl">口調の手本</span><div class="lines">
+        <section class="sec"><span class="lbl">口調の例</span><div class="lines">
           <div><span class="q">「父さん、灯り消えてる」</span><span class="meta">p.7</span></div>
           <div><span class="q">「行かなきゃ」</span><span class="meta">p.6</span></div></div></section>
         ${charaExtra()}
       </div>
     </section>
-    <aside class="insp" aria-label="決まり">
+    <aside class="insp" aria-label="ルール">
       <div class="insp-b">
         ${decHead(p3)}
-        <section class="sec"><div class="sec-h"><span class="lbl">決まり</span><span class="meta">検査に使う</span></div><div>
-          ${attrs.map(([k, l, v]) => `<div class="attr"><span class="k">${l}</span><span class="v">${v.replace(/・/g, '・<wbr>')}</span><button type="button" class="sw" role="switch" aria-checked="${!!S.use[k]}" aria-label="${l}を検査に使う" data-a="use" data-v="${k}"></button></div>`).join('')}
+        <section class="sec"><div class="sec-h"><span class="lbl">ルール</span><span class="meta">検査に使う</span></div><div>
+          ${attrs.map(([k, l, v, c, b]) => `<div class="attr"><span class="k">${l}</span><span class="v">${v.replace(/・/g, '・<wbr>')}${tone(c, b)}</span><button type="button" class="sw" role="switch" aria-checked="${!!S.use[k]}" aria-label="${l}を検査に使う" data-a="use" data-v="${k}"></button></div>`).join('')}
         </div></section>
         <section class="sec"><div class="sec-h"><span class="lbl">登場</span><span class="meta">8ページ</span></div>
           <div class="apps">${[2, 6, 7, 8, 9, 10, 11, 12].map((n) => `<a class="app" href="#spread" data-a="go-page" data-v="${n}">${pageBox(n)}${n === 12 && open3 ? '<span class="pin need xs">3</span>' : ''}<span class="num">${n}</span></a>`).join('')}</div></section>
@@ -1683,7 +1834,7 @@ function vChara() {
    ========================================================= */
 function vPlan() {
   const stages = [['story', '構成'], ['chara', '設定資料'], ['name', 'ネーム'], ['draw', '作画'], ['finish', '仕上げ'], ['total', '総合の検査']];
-  const MODE = [['always', '毎回止める'], ['drift', '決まりから外れた時'], ['never', '止めない']];
+  const MODE = [['always', '毎回止める'], ['drift', 'ルールから外れた時'], ['never', '止めない']];
   const sel = (k, cur, label) => `<select class="dd" data-k="${k}" aria-label="${label}">${MODE.map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
   const props = (rows) => `<div class="props">${rows.map(([k, v]) => `<div class="prop"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('')}</div>`;
   return `<div class="ws">
@@ -1692,8 +1843,8 @@ function vPlan() {
         <div class="doc-h"><div class="row"><span class="flag mut">企画 ${S.planV ? 'v3' : 'v2'}</span><span class="meta">${S.planV ? '10:52' : '9/25'} 佐藤</span><span class="grow"></span><button type="button" class="btn ghost sm">${I('pencil')}編集</button></div><span class="h1">第3話「霧の夜」</span></div>
         <section class="sec"><div class="sec-h"><span class="lbl">あらすじ</span>${jobBtn('人物を抜き出す', 'users', { s: 'plan', t: 'あらすじ' })}</div>
           <p class="plot">霧の夜にだけ灯台の灯りを消す父。ミオはその理由を確かめようと、夜の岩場へ出る。幼なじみのゲンは止めるが、ミオは聞かない。灯りの消えた海に、見たことのない船が近づいてくる。</p></section>
-        <section class="sec"><span class="lbl">決めごと</span>${props([['媒体', seg('medium', [['paper', '紙'], ['web', 'Webのページ型'], ['strip', '縦読み']], S.medium)], ['判型', dd('fmt-size', ['B5　182×257mm', 'A5　148×210mm', 'B4　257×364mm', '自分で決める'])], ['色', '白黒2階調'], ['ページ', '16'], ['見開き', '1回まで'], ['最後のページ', '次回への引き'], ['1ページのコマ', '6つまで'], ['読む向き', seg('dir', [['rtl', '右から'], ['ltr', '左から']], S.dir)], ['文字', seg('wdir', [['v', '縦書き'], ['h', '横書き']], S.wdir)], ['言語の版', '日本語・English'], ['読者', seg('aud', [['boy', '少年'], ['girl', '少女'], ['young', '青年'], ['all', '一般'], ['adult', '成人']], S.aud)], ['締切', '10/12']])}</section>
-        <section class="sec"><span class="lbl">絵の決まり</span>${props([['線', 'Gペン・強弱はっきり'], ['トーン', '60線・霧は砂目'], ['背景', '灯台と海は写実'], ['人物', '設定資料の三面図どおり'], ['入れないもの', '絵の中の文字・署名']])}</section>
+        <section class="sec"><span class="lbl">基本設定</span>${props([['媒体', seg('medium', [['paper', '紙'], ['web', 'Webのページ型'], ['strip', '縦読み']], S.medium)], ['判型', dd('fmt-size', ['B5　182×257mm', 'A5　148×210mm', 'B4　257×364mm', '自分で決める'])], ['色', '白黒2階調'], ['ページ', '16'], ['見開き', '1回まで'], ['最後のページ', '次回への引き'], ['1ページのコマ', '6つまで'], ['読む向き', seg('dir', [['rtl', '右から'], ['ltr', '左から']], S.dir)], ['文字', seg('wdir', [['v', '縦書き'], ['h', '横書き']], S.wdir)], ['言語の版', '日本語・English'], ['読者', seg('aud', [['boy', '少年'], ['girl', '少女'], ['young', '青年'], ['all', '一般'], ['adult', '成人']], S.aud)], ['締切', '10/12']])}</section>
+        <section class="sec"><span class="lbl">絵のルール</span>${props([['線', 'Gペン・強弱はっきり'], ['トーン', '60線・霧は砂目'], ['背景', '灯台と海は写実'], ['人物', '設定資料の三面図どおり'], ['入れないもの', '絵の中の文字・署名']])}</section>
       </article>
     </section>
     <aside class="insp" aria-label="任せ方">
@@ -1735,10 +1886,10 @@ function vExport() {
       <div class="ex" style="--pw:${pw}px"><div class="spreads">${spreads}</div></div></section>
     <aside class="insp" aria-label="書き出し"><div class="insp-b">
       <section class="sec"><span class="lbl">形式</span>
-        <div class="setrow"><span class="k">ファイル</span>${seg('fmt', [['psd', 'PSD'], ['png', 'PNG'], ['pdf', 'PDF'], ['svg', 'SVG'], ['strip', '分けた画像']], S.fmt)}</div>${S.fmt === 'strip' ? `
-        <div class="setrow"><span class="k">分け方</span>${fld('st-w', STRIP_W, '幅', 'sm num', 'style="max-width:6em"')}<span class="suf">px 幅</span>${fld('st-h', STRIP_CUT, '分ける長さ', 'sm num', 'style="max-width:6em"')}<span class="suf">px ごと</span></div>` : ''}${S.fmt === 'psd' ? `
-        <div class="setrow"><span class="k"></span><span class="meta">ペンの線は、PSD では画素の層になります（線のデータはアプリに残ります。PSD から線には戻りません）</span></div>` : ''}
-        <div class="setrow"><span class="k">解像度</span>${seg('dpi', [[350, '350'], [600, '600'], [1200, '1200']], S.dpi)}<span class="suf">dpi</span><span class="suf num">${Math.round(182 / 25.4 * S.dpi)}×${Math.round(257 / 25.4 * S.dpi)} 画素</span></div>
+        <div class="setrow"><span class="k">ファイル</span>${seg('fmt', [['psd', 'PSD'], ['png', 'PNG'], ['pdf', 'PDF'], ['svg', 'SVG'], ['strip', '分割した画像']], S.fmt)}</div>${S.fmt === 'strip' ? `
+        <div class="setrow"><span class="k">分割方法</span>${fld('st-w', STRIP_W, '幅', 'sm num', 'style="max-width:6em"')}<span class="suf">px 幅</span>${fld('st-h', STRIP_CUT, '分割する長さ', 'sm num', 'style="max-width:6em"')}<span class="suf">px ごと</span></div>` : ''}${S.fmt === 'psd' ? `
+        <div class="setrow"><span class="k"></span><span class="meta">ペンの線は、PSD ではピクセルのレイヤーになります（線のデータはアプリに残ります。PSD から線には戻りません）</span></div>` : ''}
+        <div class="setrow"><span class="k">解像度</span>${seg('dpi', [[350, '350'], [600, '600'], [1200, '1200']], S.dpi)}<span class="suf">dpi</span><span class="suf num">${Math.round(182 / 25.4 * S.dpi)}×${Math.round(257 / 25.4 * S.dpi)} ピクセル</span></div>
         <div class="setrow"><span class="k">色</span>${seg('color', [['mono', 'モノクロ2階調'], ['gray', 'グレー'], ['color', 'カラー']], S.color)}</div>
         <div class="setrow"><span class="k">裁ち落とし</span>${seg('bleed', [['on', 'あり'], ['off', 'なし']], S.bleed)}</div>
         <div class="setrow"><span class="k">ノンブル</span>${seg('folio', [['on', 'あり'], ['off', 'なし']], S.folio)}</div>
@@ -1761,12 +1912,12 @@ function vSvc() {
   const L = lanes(), dead = [...new Set(Object.values(S.route))].filter((id) => !live(id));
   const comfy = (x) => x.id.indexOf('comfy') === 0;
   const marks = (sid, tid) => `<div class="seg rate" role="group" aria-label="得意さ">${[3, 2, 1].map((m) => `<button type="button" data-a="mark" data-k="${sid}:${tid}" data-v="${m}" aria-pressed="${markOf(sid, tid) === m}" title="${MARK[m][1]}">${MARK[m][0]}</button>`).join('')}</div>`;
-  /* 表：行は処理、列はつなぎ先。セルを押すと送り先が決まる。行の名前を押すと、その行の細かい設定が下に開く */
+  /* 表：行は処理、列は接続先。セルを押すと送り先が決まる。行の名前を押すと、その行の細かい設定が下に開く */
   const mx = (kind, title) => {
     const cols = SVC.filter((x) => x.kind === kind), unit = cols[0].unit;
     const head = `<span class="mx-c0">${title}</span>` + cols.map((x) => {
       const l = L.find((y) => y.s.id === x.id), q = [l.run.length ? '生成中 ' + l.run.length : '', l.wait.length ? '待ち ' + l.wait.length : ''].filter(Boolean).join('　');
-      return `<button type="button" class="mx-h${live(x.id) ? '' : ' off'}" data-a="svc" data-v="${x.id}" title="つなぎ先の設定を開く"><span class="mx-hn">${cdot(x.id)}<b>${x.name}</b></span><span class="meta">${x.sub}${live(x.id) ? '' : '　' + CON[conOf(x.id)][0]}</span>${q ? `<span class="mq num">${q}</span>` : ''}</button>`;
+      return `<button type="button" class="mx-h${live(x.id) ? '' : ' off'}" data-a="svc" data-v="${x.id}" title="接続先の設定を開く"><span class="mx-hn">${cdot(x.id)}<b>${x.name}</b></span><span class="meta">${x.sub}${live(x.id) ? '' : '　' + CON[conOf(x.id)][0]}</span>${q ? `<span class="mq num">${q}</span>` : ''}</button>`;
     }).join('');
     const detail = (tid) => {
       const line = (cap, f) => `<span class="mx-dk">${cap}</span>` + cols.map((x) => (x.do[tid] ? `<span class="mx-dv${S.route[tid] === x.id ? ' on' : ''}">${f(x)}</span>` : '<span></span>')).join('');
@@ -1775,7 +1926,7 @@ function vSvc() {
         line('採用した数', (x) => `<span class="num"><b>${usedOf(x.id, tid)}</b> / 20</span>`) +
         line('採用1' + unit + 'あたり', (x) => `<b class="num">¥${Math.round(costOf(x.id, tid) * 20 / usedOf(x.id, tid))}</b>`) +
         line('平均の時間', (x) => `<span class="num">${x.sec}秒</span>`) +
-        (cols.some(comfy) ? line('手順', (x) => (comfy(x) ? dd('wf-' + x.id + '-' + tid, WF[tid] || [TASK[tid].lb]) : '<span class="meta">—</span>')) : '') +
+        (cols.some(comfy) ? line('ワークフロー', (x) => (comfy(x) ? dd('wf-' + x.id + '-' + tid, WF[tid] || [TASK[tid].lb]) : '<span class="meta">—</span>')) : '') +
         line('モデル', (x) => dd('md-' + x.id + '-' + tid, comfy(x) ? MODELS : ['提供元の既定', '名前を入れる'])) +
         `<div class="mx-df">${kv('送り直し', sl('rs-' + tid, '送り直しの回数', 2, 0, 5, '回'))}${kv('作り直し', sl('rt-' + tid, '作り直しの回数', 3, 0, 8, '回'))}<button type="button" class="btn sm">${I('columns-3')}同じ指示で比べる</button></div>`;
     };
@@ -1789,30 +1940,30 @@ function vSvc() {
     }).join('')).join('');
     return `<div class="mx-w"><div class="mx" style="--n:${cols.length}">${head}${body}</div></div>`;
   };
-  const sets = `<div class="acts">${SETS.map(([k, lb]) => `<button type="button" class="chip" data-a="rset" data-v="${k}" aria-pressed="${sameRoute(routeFor(k).r)}">${lb}</button>`).join('')}<button type="button" class="btn ghost sm">${I('bookmark-plus')}いまの並びを組に残す</button><span class="grow"></span><span class="meta">◎ 得意　○ ふつう　△ 苦手</span></div>${dead.length ? `<div class="note-w">${I('triangle-alert')}${dead.map((id) => SV(id).name).join('・')} へ頼んだものは、待ちに入る</div>` : ''}`;
-  /* つなぎ先：1つを1枚のカードにまとめる */
+  const sets = `<div class="acts">${SETS.map(([k, lb]) => `<button type="button" class="chip" data-a="rset" data-v="${k}" aria-pressed="${sameRoute(routeFor(k).r)}">${lb}</button>`).join('')}<button type="button" class="btn ghost sm">${I('bookmark-plus')}いまの並びをプリセットに保存</button><span class="grow"></span><span class="meta">◎ 得意　○ ふつう　△ 苦手</span></div>${dead.length ? `<div class="note-w">${I('triangle-alert')}${dead.map((id) => SV(id).name).join('・')} へ頼んだものは、待ちに入る</div>` : ''}`;
+  /* 接続先：1つを1枚のカードにまとめる */
   const con = (x) => {
     const l = L.find((y) => y.s.id === x.id), loc = x.host === 'local', many = S.send[x.id] === 'many', fails = FAILS.filter((f) => f.svc === x.id), nTo = Object.keys(TASK).filter((t) => S.route[t] === x.id).length, lic = !!S.lic[x.id];
     return `<section class="con${S.svc === x.id ? ' on' : ''}" id="con-${x.id}">
-      <div class="con-h"><span class="svc-ic">${I(x.ic)}${cdot(x.id)}</span><div class="grow"><div class="h2">${x.name}</div><div class="meta">${x.sub}　${CON[conOf(x.id)][0]}　${nTo ? '送り先にしている処理 ' + nTo : '送り先にしていない'}</div></div><span class="meta">休ませる</span>${tsw('rest.' + x.id, x.name + 'を休ませる')}</div>
+      <div class="con-h"><span class="svc-ic">${I(x.ic)}${cdot(x.id)}</span><div class="grow"><div class="h2">${x.name}</div><div class="meta">${x.sub}　${CON[conOf(x.id)][0]}　${nTo ? '送り先にしている処理 ' + nTo : '送り先にしていない'}</div></div><span class="meta">一時停止</span>${tsw('rest.' + x.id, x.name + 'を一時停止')}</div>
       <div class="setrow"><span class="k">${loc ? '送り先' : 'APIキー'}</span><input class="field" aria-label="${x.name}の${loc ? '送り先' : 'APIキー'}" value="${loc ? x.at : '••••••••••••3f2a'}" style="flex:1 1 150px;min-width:0"><button type="button" class="btn sm" data-a="ping" data-v="${x.id}">${I('plug-zap')}試す</button></div>
       <div class="setrow"><span class="k">送り方</span>${seg('send.' + x.id, [['one', '1件ずつ'], ['many', '同時に']], S.send[x.id])}${many ? `<span class="numstep"><button type="button" class="ibtn bd" data-a="capn" data-v="-1" data-s="${x.id}" aria-label="減らす">${I('minus')}</button><b class="num">${S.capN[x.id]}</b><button type="button" class="ibtn bd" data-a="capn" data-v="1" data-s="${x.id}" aria-label="増やす">${I('plus')}</button></span><span class="suf">件まで</span>` : ''}</div>
       <div class="setrow"><span class="k">いま</span>${slots(l)}<span class="svc-w num">${l.wait.length ? '待ち ' + l.wait.length : ''}</span></div>
-      ${loc ? `<div class="setrow"><span class="k">入っているもの</span><span class="has">${[['モデル', 0], ['追加学習', 1], ['手順', 2]].filter(([, k]) => x.has[k]).map(([lb, k]) => `<span>${lb} <b class="num">${x.has[k]}</b></span>`).join('')}</span><span class="grow"></span><button type="button" class="btn ghost sm">${I('refresh-cw')}読み直す</button>${comfy(x) ? `<button type="button" class="btn ghost sm">${I('workflow')}手順を編集</button>` : ''}</div>${x.lack ? `<div class="note-w">${I('triangle-alert')}手順「${x.lack}」に要るモデルが無い</div>` : ''}` : ''}
-      ${fails.map((f) => `<div class="setrow"><span class="k">止まったもの</span><span class="grow"><b>${f.t}</b>　<span class="meta">${f.why}</span></span><button type="button" class="btn sm">もう一度</button><button type="button" class="btn ghost sm">先を選ぶ</button></div>`).join('')}
+      ${loc ? `<div class="setrow"><span class="k">入っているもの</span><span class="has">${[['モデル', 0], ['追加学習', 1], ['ワークフロー', 2]].filter(([, k]) => x.has[k]).map(([lb, k]) => `<span>${lb} <b class="num">${x.has[k]}</b></span>`).join('')}</span><span class="grow"></span><button type="button" class="btn ghost sm">${I('refresh-cw')}再読み込み</button>${comfy(x) ? `<button type="button" class="btn ghost sm">${I('workflow')}ワークフローを編集</button>` : ''}</div>${x.lack ? `<div class="note-w">${I('triangle-alert')}ワークフロー「${x.lack}」に必要なモデルが無い</div>` : ''}` : ''}
+      ${fails.map((f) => `<div class="setrow"><span class="k">止まったもの</span><span class="grow"><b>${f.t}</b>　<span class="meta">${f.why}</span></span><button type="button" class="btn sm">もう一度</button><button type="button" class="btn ghost sm">送り先を選ぶ</button></div>`).join('')}
       <div class="setrow"><span class="k">商用利用</span><span class="meta">未確認</span><span class="grow"></span><button type="button" class="btn ghost sm" data-a="tg" data-k="lic.${x.id}" aria-expanded="${lic}">${I(lic ? 'chevron-down' : 'chevron-right')}条件</button></div>
-      ${lic ? kv('商用', oseg('lu', [['yes', '使える'], ['no', '使えない'], ['unk', '未確認']])) + kv('出力の権利', oseg('lr', [['me', '利用者'], ['svc', 'サービス'], ['unk', '未確認']])) + kv('学習に使う', oseg('lt', [['yes', '使われる'], ['no', '使われない'], ['unk', '未確認']])) + kv('クレジット', oseg('lc', [['yes', '要る'], ['no', '要らない'], ['unk', '未確認']])) + kv('確かめた日', fld('lic-d-' + x.id, '', '確かめた日', 'sm', 'type="date"')) + kv('規約', fld('lic-u-' + x.id, '', '規約のURL', 'sm', 'placeholder="https://"')) : ''}
+      ${lic ? kv('商用', oseg('lu', [['yes', '使える'], ['no', '使えない'], ['unk', '未確認']])) + kv('出力の権利', oseg('lr', [['me', '利用者'], ['svc', 'サービス'], ['unk', '未確認']])) + kv('学習に使う', oseg('lt', [['yes', '使われる'], ['no', '使われない'], ['unk', '未確認']])) + kv('クレジット', oseg('lc', [['yes', '必要'], ['no', '不要'], ['unk', '未確認']])) + kv('確認日', fld('lic-d-' + x.id, '', '確認日', 'sm', 'type="date"')) + kv('規約', fld('lic-u-' + x.id, '', '規約のURL', 'sm', 'placeholder="https://"')) : ''}
     </section>`;
   };
   const tabTo = `<section class="sec">${sets}</section>${mx('img', '画像')}${mx('txt', '文章')}`;
-  const tabCon = `${S.cfg.addSvc ? sec('足すもの', `<div class="acts">${[['cpu', '手元のComfyUI'], ['server', '借りたPCのComfyUI'], ['cpu', '手元の文章モデル'], ['cloud', '画像のAPI'], ['cloud', '文章のAPI'], ['link', '住所を入れてつなぐ']].map(([ic, lb]) => `<button type="button" class="btn sm">${I(ic)}${lb}</button>`).join('')}</div>`) : ''}
+  const tabCon = `${S.cfg.addSvc ? sec('足すもの', `<div class="acts">${[['cpu', 'ローカルのComfyUI'], ['server', 'クラウドPCのComfyUI'], ['cpu', 'ローカルの文章モデル'], ['cloud', '画像のAPI'], ['cloud', '文章のAPI'], ['link', 'URLを入れて接続']].map(([ic, lb]) => `<button type="button" class="btn sm">${I(ic)}${lb}</button>`).join('')}</div>`) : ''}
         ${sec('画像', `<div class="cons">${SVC.filter((x) => x.kind === 'img').map(con).join('')}</div>`)}
         ${sec('文章', `<div class="cons">${SVC.filter((x) => x.kind === 'txt').map(con).join('')}</div>`)}`;
   return `<div class="ws one">
     <section class="canvas plain" aria-label="生成サービス">
       <article class="doc wide">
         <div class="doc-h"><div class="row"><span class="flag mut">全作品で共通</span></div><h1 class="h1">生成サービス</h1>
-          <div class="row">${seg('stab', [['to', '処理ごとの送り先'], ['con', 'つなぎ先']], S.stab)}<span class="grow"></span>${S.stab === 'con' ? `<button type="button" class="btn ghost sm" data-a="tg" data-k="cfg.addSvc" aria-expanded="${!!S.cfg.addSvc}">${I('plus')}つなぎ先を足す</button>` : ''}</div></div>
+          <div class="row">${seg('stab', [['to', '処理ごとの送り先'], ['con', '接続先']], S.stab)}<span class="grow"></span>${S.stab === 'con' ? `<button type="button" class="btn ghost sm" data-a="tg" data-k="cfg.addSvc" aria-expanded="${!!S.cfg.addSvc}">${I('plus')}接続先を足す</button>` : ''}</div></div>
         ${S.stab === 'con' ? tabCon : tabTo}
       </article>
     </section>
@@ -1820,7 +1971,7 @@ function vSvc() {
 }
 
 /* =========================================================
-   道具の設定と層（原稿の右の欄）
+   ツールの設定とレイヤー（原稿の右のパネル）
    ========================================================= */
 const vv = (id, d) => (S.v[id] != null ? S.v[id] : d);
 const sl = (id, label, d, min, max, suf, step) => `<span class="sl"><input type="range" id="${id}" data-suf="${suf || ''}" min="${min}" max="${max}" step="${step || 1}" value="${vv(id, d)}" aria-label="${label}"><output class="num" for="${id}">${vv(id, d)}${suf || ''}</output></span>`;
@@ -1834,7 +1985,7 @@ const sec = (label, body, right) => `<section class="sec">${label ? `<div class=
 const oseg = (key, opts) => `<div class="seg wrap" role="group">${opts.map(([v, l]) => `<button type="button" data-a="opt" data-k="${key}" data-v="${v}" aria-pressed="${S.o[key] === v}">${l}</button>`).join('')}</div>`;
 const tiles = (key, items, art, cls) => `<div class="tiles${cls ? ' ' + cls : ''}">${items.map(([v, l, icn]) => `<button type="button" class="tile" data-a="opt" data-k="${key}" data-v="${v}" aria-pressed="${S.o[key] === v}">${art ? art(v) : I(icn)}<span>${l}</span></button>`).join('')}</div>`;
 const tHead = (icn, t, meta, right) => `<div class="dec-h"><span class="svc-ic">${I(icn)}</span><div class="grow"><div class="h2">${t}</div><div class="meta">${meta || ''}</div></div>${right || ''}</div>`;
-/* 生成はすべて待ち行列を通す。送り先は「生成サービス」の使い分けから取る */
+/* 生成はすべてキューを通す。送り先は「生成サービス」の使い分けから取る */
 const jobBtn = (label, icn, o) => {
   o = o || {};
   const tk = o.s || (o.fix ? 'i2i' : 'draw'), to = SV(S.route[tk]), u = o.u || 1, off = !live(to.id);
@@ -1853,7 +2004,7 @@ const finishSec = () => sec('仕上げ',
   kv('範囲', oseg('fxs', [['sel', '選んだ物'], ['page', 'ページ'], ['all', '全ページ']])) +
   tiles('fx', [['none', 'なし', 'circle-off'], ['light', '白黒 薄め', 'sun-dim'], ['dark', '白黒 濃いめ', 'moon'], ['rough', '白黒 荒め', 'grip'], ['simple', '白黒 かんたん', 'contrast'], ['tint', '薄い色', 'droplet'], ['deep', '暗部を強く', 'sun-moon'], ['glow', 'グロー', 'sparkle']]) +
   kv('明るさ', sl('fx-b', '明るさ', 0, -100, 100, '')) + kv('コントラスト', sl('fx-c', 'コントラスト', 0, -100, 100, '')) + kv('ぼかし', sl('fx-bl', 'ぼかし', 0, 0, 40, 'px')) +
-  kv('重ね方', dd('fx-blend', BLENDS)),
+  kv('合成モード', dd('fx-blend', BLENDS)),
   `<button type="button" class="btn ghost sm">${I('rotate-ccw')}まとめて戻す</button>`);
 
 /* 小さな見本の絵 */
@@ -1935,16 +2086,18 @@ function objPanel() {
       place('bp', balBox(lo, ob.i, ob.j)), f: askFoot('セリフへの指示') };
   }
   const st = pageState(ob.n).st, hand = S.hand[ob.n + ':' + ob.i], id = `k${ob.n}-${ob.i}`;
-  return { b: tHead('layout-panel-top', `p.${ob.n} コマ${ob.i + 1}`, STAGE_W[st] + (who.length ? '　' + who.join('・') : ''), hand ? `<span class="flag mut">人の手</span>` : '') +
-    sec('絵', `<div class="acts">${jobBtn('作る', 'image-plus')}${jobBtn('絵から作り直す', 'images', { fix: 1 })}${jobBtn('拡大', 'maximize-2', { s: 'up' })}${jobBtn('背景を抜く', 'scissors', { s: 'cut' })}${jobBtn('絵から指示を読む', 'tags', { s: 'tag' })}</div>`) +
+  return { b: tHead('layout-panel-top', `p.${ob.n} コマ${ob.i + 1}`, STAGE_W[st] + (who.length ? '　' + who.join('・') : ''), hand ? `<span class="flag mut">手描き</span>` : '') +
+    sec('絵', `<div class="acts">${jobBtn('作る', 'image-plus')}${jobBtn('絵から作り直す', 'images', { fix: 1 })}${jobBtn('拡大', 'maximize-2', { s: 'up' })}${jobBtn('背景を切り抜く', 'scissors', { s: 'cut' })}${jobBtn('絵から指示を読む', 'tags', { s: 'tag' })}</div>`) +
     sec('角度', kv('左右', sl(id + '-ax', '左右の回り', 0, -180, 180, '°')) + kv('上下', sl(id + '-ay', '上下の傾き', 0, -30, 60, '°')) + kv('寄り', sl(id + '-az', '寄り引き', 100, 50, 200, '%')), jobBtn('角度を変える', 'rotate-3d', { s: 'angle' })) +
+    (who.length ? sec('表情', who.map((w, wi) => { const ek = `${id}-e${wi}`, lv = EXL[S.o[ek]] || []; return kv(w, `<div class="row" style="flex-wrap:wrap">${oseg(ek, Object.keys(EXL).map((x) => [x, x]))}${lv.length ? oseg(`${id}-l${wi}`, lv) : ''}</div>`); }).join('')) : '') +
     sec('指示', `<textarea class="field" id="${id}-pr" data-keep aria-label="このコマの指示" rows="3" placeholder="このコマの指示">${esc(vv(id + '-pr', ''))}</textarea>` + fld(id + '-ng', '', '入れないもの', '', 'placeholder="入れないもの"'), `<button type="button" class="btn ghost sm">${I('tags')}絵から読む</button>`) +
-    sec('中身', kv('手順', dd(id + '-wf', WF.draw)) + kv('モデル', dd(id + '-md', MODELS)) + kv('追加学習', dd(id + '-lora', who.map((w) => w + ' v2').concat(['なし']))) +
-      kv('参照', `<div class="acts">${who.map((w) => `<span class="chip">${w}　三面図</span>`).join('')}<button type="button" class="chip">${I('plus')}足す</button></div>`) + kv('効き具合', sl(id + '-ref', '参照の効き具合', 70, 0, 100, '%')) +
+    sec('中身', kv('ワークフロー', dd(id + '-wf', WF.draw)) + kv('モデル', dd(id + '-md', MODELS)) + kv('追加学習', dd(id + '-lora', who.map((w) => w + ' v2').concat(['なし']))) +
+      kv('参照', `<div class="acts">${who.map((w) => `<span class="chip">${w}　三面図</span>`).join('')}<button type="button" class="chip">${I('plus')}足す</button></div>`) + kv('強さ', sl(id + '-ref', '参照の強さ', 70, 0, 100, '%')) +
       kv('シード', `<div class="row">${fld(id + '-seed', 48213 + ob.n * 100 + ob.i, 'シード', 'sm num')}${tchip('lk.seed', '固定', 'lock')}</div>`), `<span class="meta">${vv(id + '-wf', WF.draw[0]) === WF.draw[0] ? '作品の設定のまま' : 'このコマだけ'}</span>`) +
     sec('枠', lineFill('pf'), `<button type="button" class="btn ghost sm">すべてのコマに</button>`) +
     finishSec() + place('pp', box), f: askFoot('このコマへの指示') };
 }
+const EXL = { 普通: [], 笑い: [['w', '弱'], ['m', '中'], ['s', '強']], 怒り: [['wm', '弱中'], ['s', '強']], 驚き: [['s', '強']], 泣き顔: [['wm', '弱中'], ['s', '強']] };
 const VOICES = [['say', '発話'], ['mind', '心の声'], ['shout', '叫び'], ['narr', 'ナレーション']];
 const FONTS = ['アンチック体', '丸ゴシック', '太ゴシック', '明朝', '手書き風'];
 const WF = { name: ['ネーム・ラフ'], chara: ['三面図', '表情'], draw: ['線から描く', '範囲ごとに指示する', '標準'], finish: ['白黒化・トーン'], up: ['線を保つ拡大', '標準の拡大'] };
@@ -1955,36 +2108,36 @@ const P_TOOL = {
   area: () => ({ b: tHead('scan', '囲んで頼む', S.area ? `p.${S.area.n} コマ${S.area.i + 1}` : '') +
     sec('囲み方', oseg('am', [['rect', '四角'], ['lasso', '投げ縄'], ['brush', 'ブラシ']]) + kv('太さ', sl('am-w', 'ブラシの太さ', 24, 2, 120, 'px')) +
       `<div class="acts"><button type="button" class="btn sm">${I('paint-bucket')}全部塗る</button><button type="button" class="btn sm">${I('eraser')}消す</button></div>`) +
-    sec('変え方', kv('変える強さ', sl('am-d', '変える強さ', 60, 0, 100, '%')) + `<div class="swr"><span class="grow">人の手の範囲は変えない</span>${tsw('cfg.keepHand', '人の手の範囲は変えない')}</div>`) +
+    sec('変え方', kv('変える強さ', sl('am-d', '変える強さ', 60, 0, 100, '%')) + `<div class="swr"><span class="grow">手描きの範囲は変えない</span>${tsw('cfg.keepHand', '手描きの範囲は変えない')}</div>`) +
     regenOpts(), f: askFoot('囲んだ所への指示', `<input class="field" aria-label="入れないもの" placeholder="入れないもの">`) }),
   pen: () => { const u = UNITS.find((x) => uid(x) === S.spread), cm = PINS.filter((p) => p.t === 'cm' && u.includes(p.page));
     return { b: tHead('pen-line', '赤入れ', 'p.' + u.filter(Boolean).join('〜')) +
       sec('書き方', oseg('rk', [['line', '線'], ['ring', '丸'], ['text', '文字']]) + kv('太さ', sl('rk-w', '赤入れの太さ', 3, 1, 12, 'px')) + kv('宛先', dd('rk-to', ['AI', '佐藤', '高橋', '全員']))) +
       (cm.length ? sec('この見開き', cm.map((p) => `<button type="button" class="opt" data-a="goto" data-v="${p.n}">${pinSt(p, 1)}<span class="grow"><b>${p.title}</b>　<span class="meta">${p.who} ${p.at}</span></span>${I('arrow-up-right')}</button>`).join('')) : '') }; },
-  brush: () => ({ b: tHead('brush', 'ペン', '人の手の層') + sec('ペン先', tiles('pen', PENS, penArt)) +
-    sec('線', kv('太さ', sl('pn-w', 'ペンの太さ', 3, 1, 60, 'px')) + kv('色', `<div class="row">${swt('pn-c', '#15181d', 'ペンの色')}${sl('pn-o', 'ペンの不透明度', 100, 0, 100, '%')}</div>`) + kv('描く層', oseg('pl', [['hand', '人の手'], ['sfx', '描き文字']]))) }),
-  erase: () => ({ b: tHead('eraser', '消しゴム', '消した跡は人の手') + sec('', kv('太さ', sl('er-w', '消しゴムの太さ', 16, 1, 120, 'px')) + kv('効く層', `<div class="acts">${tchip('er.hand', '人の手')}${tchip('er.ai', 'AIの絵')}</div>`)) }),
+  brush: () => ({ b: tHead('brush', 'ペン', '手描きのレイヤー') + sec('ペン先', tiles('pen', PENS, penArt)) +
+    sec('線', kv('太さ', sl('pn-w', 'ペンの太さ', 3, 1, 60, 'px')) + kv('色', `<div class="row">${swt('pn-c', '#15181d', 'ペンの色')}${sl('pn-o', 'ペンの不透明度', 100, 0, 100, '%')}</div>`) + kv('描くレイヤー', oseg('pl', [['hand', '手描き'], ['sfx', '描き文字']]))) }),
+  erase: () => ({ b: tHead('eraser', '消しゴム', '消した跡は手描き') + sec('', kv('太さ', sl('er-w', '消しゴムの太さ', 16, 1, 120, 'px')) + kv('効くレイヤー', `<div class="acts">${tchip('er.hand', '手描き')}${tchip('er.ai', 'AIの絵')}</div>`)) }),
   text: () => ({ b: tHead('type', '文字', S.o.tk === 'line' ? '写植' : '描き文字') +
     sec('', oseg('tk', [['line', '写植'], ['sfx', '描き文字']]) + (S.o.tk === 'line' ? kv('種類', oseg('voice', VOICES)) : '') + kv('向き', oseg('tdir', [['v', '縦書き'], ['h', '横書き']]))) +
-    sec('フォント', kv('書体', dd('tx-font', FONTS)) + kv('大きさ', sl('tx-size', '文字の大きさ', 9, 5, 120, 'pt')) + kv('色', `<div class="row">${swt('tx-c', '#15181d', '文字の色')}${tchip('lk.bold', '太字', 'bold')}</div>`) +
+    sec('フォント', kv('フォント', dd('tx-font', FONTS)) + kv('大きさ', sl('tx-size', '文字の大きさ', 9, 5, 120, 'pt')) + kv('色', `<div class="row">${swt('tx-c', '#15181d', '文字の色')}${tchip('lk.bold', '太字', 'bold')}</div>`) +
       kv('フチ', `<div class="row">${swt('tx-oc', '#ffffff', 'フチの色')}${sl('tx-ow', 'フチの太さ', 0, 0, 20, 'px')}</div>`) + kv('背景', `<div class="row">${swt('tx-bg', '#ffffff', '背景の色')}${sl('tx-bo', '背景の不透明度', 0, 0, 100, '%')}</div>`),
-      `<button type="button" class="btn ghost sm">${I('plus')}書体を足す</button>`) +
+      `<button type="button" class="btn ghost sm">${I('plus')}フォントを足す</button>`) +
     sec('飾り', tiles('deco', DECOS, decoArt)) }),
   frame: () => ({ b: tHead('layout-panel-top', 'コマ枠', S.o.fm === 'join' ? '合わせる2つを順に押す' : '') +
     sec('', oseg('fm', [['move', '線を動かす'], ['edit', '角を直す'], ['join', '合わせる'], ['add', '足す']])) +
     (S.o.fm === 'add' ? sec('足す形', tiles('shape', [['sq', '四角', 'square'], ['tall', '縦長', 'rectangle-vertical'], ['wide', '横長', 'rectangle-horizontal'], ['tri', '三角', 'triangle'], ['pen', '五角', 'pentagon'], ['hex', '六角', 'hexagon'], ['star', '星', 'star'], ['heart', 'ハート', 'heart']])) : '') +
-    sec('型', tiles('tpl', Object.keys(TPL).map((k) => [k, TPL[k].length + 'コマ']), tplArt, 'tall'), oseg('tplo', [['v', '縦'], ['h', '横']])) +
-    sec('コマの間', kv('横', sl('gp-x', '横のコマの間', 2.5, 0, 10, 'mm', .5)) + kv('縦', sl('gp-y', '縦のコマの間', 4, 0, 14, 'mm', .5))) +
+    sec('テンプレート', tiles('tpl', Object.keys(TPL).map((k) => [k, TPL[k].length + 'コマ']), tplArt, 'tall'), oseg('tplo', [['v', '縦'], ['h', '横']])) +
+    sec('コマの間隔', kv('横', sl('gp-x', '横のコマの間隔', 2.5, 0, 10, 'mm', .5)) + kv('縦', sl('gp-y', '縦のコマの間隔', 4, 0, 14, 'mm', .5))) +
     sec('枠', lineFill('pf'), `<button type="button" class="btn ghost sm">すべてのコマに</button>`) +
     sec('ばらばらに割る', kv('縦', sl('rc-v', '縦に割る数', 3, 1, 6, '')) + kv('横', sl('rc-h', '横に割る数', 2, 1, 4, '')) + kv('傾き', sl('rc-t', '傾き', 0, 0, 30, '°')), `<button type="button" class="btn sm">${I('dices')}割る</button>`) }),
   knife: () => ({ b: tHead('slice', 'ナイフ', 'コマを押した所で分ける') +
-    sec('', kv('向き', oseg('cut', [['h', '横に切る'], ['v', '縦に切る'], ['d', '斜めに切る']])) + (S.o.cut === 'd' ? kv('角度', sl('ka', '切る角度', 12, -45, 45, '°')) : '') + kv('コマの間', sl('gap', 'コマの間', 2.5, 0, 10, 'mm', .5))) +
+    sec('', kv('向き', oseg('cut', [['h', '横に切る'], ['v', '縦に切る'], ['d', '斜めに切る']])) + (S.o.cut === 'd' ? kv('角度', sl('ka', '切る角度', 12, -45, 45, '°')) : '') + kv('コマの間隔', sl('gap', 'コマの間隔', 2.5, 0, 10, 'mm', .5))) +
     sec('', `<div class="acts"><button type="button" class="btn sm" data-a="back" aria-disabled="${!S.hist.length}">${I('undo-2')}取り消す</button><button type="button" class="btn sm" data-a="fwd" aria-disabled="${!S.redo.length}">${I('redo-2')}やり直す</button></div>`) }),
   balloon: () => ({ b: tHead('message-circle', 'フキダシ', '') +
-    sec('', oseg('bm', [['tpl', '型から'], ['free', '自分で描く']])) +
-    (S.o.bm === 'tpl' ? sec('型', tiles('bs', BALS, balArt)) : sec('描き方', oseg('bd', [['point', '点で描く'], ['free', 'フリーハンド'], ['pick', '選ぶ'], ['move', '動かす'], ['del', '消す']]) +
-      kv('なめらかさ', sl('bd-s', 'なめらかさ', 50, 0, 100, '%')) + kv('角の丸み', sl('bd-r', '角の丸み', 8, 0, 40, 'px')) + kv('点の間', sl('bd-p', '点の間', 12, 2, 40, 'px')))) +
-    sec('線', kv('線の型', oseg('bl', [['solid', '実線'], ['dash', '破線'], ['double', '二重']])) + lineFill('bo') + kv('しっぽ', oseg('tail', [['on', 'あり'], ['off', 'なし'], ['bub', '泡']]))) }),
+    sec('', oseg('bm', [['tpl', 'テンプレートから'], ['free', '自分で描く']])) +
+    (S.o.bm === 'tpl' ? sec('テンプレート', tiles('bs', BALS, balArt)) : sec('描き方', oseg('bd', [['point', '点で描く'], ['free', 'フリーハンド'], ['pick', '選ぶ'], ['move', '動かす'], ['del', '消す']]) +
+      kv('なめらかさ', sl('bd-s', 'なめらかさ', 50, 0, 100, '%')) + kv('角の丸み', sl('bd-r', '角の丸み', 8, 0, 40, 'px')) + kv('点の間隔', sl('bd-p', '点の間隔', 12, 2, 40, 'px')))) +
+    sec('線', kv('線の種類', oseg('bl', [['solid', '実線'], ['dash', '破線'], ['double', '二重']])) + lineFill('bo') + kv('しっぽ', oseg('tail', [['on', 'あり'], ['off', 'なし'], ['bub', '泡']]))) }),
   tone: () => ({ b: tHead('grip', 'トーン', '') + sec('', tiles('tn', TONES, toneArt)) +
     sec('', kv('線数', sl('tn-l', 'トーンの線数', 60, 20, 85, '線')) + kv('濃さ', sl('tn-d', 'トーンの濃さ', 30, 5, 90, '%')) + kv('角度', sl('tn-a', 'トーンの角度', 45, 0, 90, '°')) + kv('貼る所', oseg('ta', [['panel', 'コマ'], ['lasso', '囲む'], ['paint', '塗る']]))) }),
   shape: () => ({ b: tHead('shapes', '図形', '') +
@@ -1997,7 +2150,7 @@ function toolPanel() {
   const r = P_TOOL[S.tool]();
   return `<div class="insp-b">${r.b}</div>${r.f || ''}`;
 }
-const LAYERS = [['sfx', '描き文字', 'audio-lines'], ['type', '写植', 'type'], ['bal', 'フキダシ', 'message-circle'], ['hand', '人の手', 'hand'], ['ai', 'AIの絵', 'sparkles'], ['frame', 'コマ枠', 'layout-panel-top']];
+const LAYERS = [['sfx', '描き文字', 'audio-lines'], ['type', '写植', 'type'], ['bal', 'フキダシ', 'message-circle'], ['hand', '手描き', 'hand'], ['ai', 'AIの絵', 'sparkles'], ['frame', 'コマ枠', 'layout-panel-top']];
 function layerPanel() {
   const u = UNITS.find((x) => uid(x) === S.spread).filter(Boolean), n = u[S.lpage] || u[0], lo = layOf(n), plan = pageState(n).st === 'plan';
   const nb = plan ? 0 : lo.p.reduce((a, sp) => a + ((sp && sp.bal) || []).length + (sp && sp.narr ? 1 : 0), 0);
@@ -2005,14 +2158,14 @@ function layerPanel() {
   const row = ([id, name, icn]) => `<div class="lyr${S.lsel === id ? ' on' : ''}"><button type="button" class="ibtn" data-a="tg" data-k="lv.${id}" aria-pressed="${!!S.lv[id]}" aria-label="${name}を見せる">${I(S.lv[id] ? 'eye' : 'eye-off')}</button>
       <button type="button" class="lyr-n" data-a="set" data-k="lsel" data-v="${id}">${I(icn)}<span class="grow">${name}</span><span class="meta num">${cnt[id]}</span></button>
       <button type="button" class="ibtn" data-a="tg" data-k="lk.${id}" aria-pressed="${!!S.lk[id]}" aria-label="${name}を動かさない">${I(S.lk[id] ? 'lock' : 'lock-open')}</button></div>
-    ${id === 'ai' && S.lsel === 'ai' && !plan ? lo.L.map(([X, Y, w, h], i) => `<div class="lyr sub"><button type="button" class="lyr-n" data-a="lpick" data-n="${n}" data-i="${i}"><span class="th">${pageSVG(n, { vb: `${X} ${Y} ${w} ${h}` })}</span><span class="grow">コマ${i + 1}</span>${S.hand[n + ':' + i] ? `<span class="flag mut">人の手</span>` : ''}</button></div>`).join('') : ''}`;
+    ${id === 'ai' && S.lsel === 'ai' && !plan ? lo.L.map(([X, Y, w, h], i) => `<div class="lyr sub"><button type="button" class="lyr-n" data-a="lpick" data-n="${n}" data-i="${i}"><span class="th">${pageSVG(n, { vb: `${X} ${Y} ${w} ${h}` })}</span><span class="grow">コマ${i + 1}</span>${S.hand[n + ':' + i] ? `<span class="flag mut">手描き</span>` : ''}</button></div>`).join('') : ''}`;
   return `<div class="insp-b">
-    <div class="dec-h"><div class="grow"><div class="h2">層</div></div>${u.length > 1 ? seg('lpage', u.map((x, i) => [i, 'p.' + x]), u[S.lpage] ? S.lpage : 0) : `<span class="meta">p.${n}</span>`}</div>
+    <div class="dec-h"><div class="grow"><div class="h2">レイヤー</div></div>${u.length > 1 ? seg('lpage', u.map((x, i) => [i, 'p.' + x]), u[S.lpage] ? S.lpage : 0) : `<span class="meta">p.${n}</span>`}</div>
     <section class="sec"><div class="lyrs">${LAYERS.map(row).join('')}</div></section>
-    ${sec(LAYERS.find((x) => x[0] === S.lsel)[1], kv('不透明度', sl('ly-o-' + S.lsel, '層の不透明度', 100, 0, 100, '%')) + kv('重ね方', dd('ly-b-' + S.lsel, BLENDS)))}
+    ${sec(LAYERS.find((x) => x[0] === S.lsel)[1], kv('不透明度', sl('ly-o-' + S.lsel, 'レイヤーの不透明度', 100, 0, 100, '%')) + kv('合成モード', dd('ly-b-' + S.lsel, BLENDS)))}
   </div>`;
 }
-/* ナイフ：押した所でコマを2つに分ける。絵は大きい側に残り、分けたコマに人の手の印が付く */
+/* ナイフ：押した所でコマを2つに分ける。絵は大きい側に残り、分けたコマに手描きの印が付く */
 const snap = () => JSON.stringify({ lay: S.lay, hand: S.hand });
 const polyOf = (b) => b[4] || [[b[0], b[1]], [b[0] + b[2], b[1]], [b[0] + b[2], b[1] + b[3]], [b[0], b[1] + b[3]]];
 const areaOf = (P) => Math.abs(P.reduce((a, q, k) => { const z = P[(k + 1) % P.length]; return a + q[0] * z[1] - z[0] * q[1]; }, 0)) / 2;
@@ -2121,12 +2274,15 @@ const ACT = {
     toast(`${TASK[tid].lb} を ${SV(v).name} へ送る`, true);
   },
   mark: (v, el) => set({ mark: Object.assign({}, S.mark, { [el.dataset.k]: +v }) }),
-  ping: (v) => { const c = SV(v || S.svc), now = S.con[c.id] === 'unk' ? 'ok' : S.con[c.id]; set({ con: Object.assign({}, S.con, { [c.id]: now }) }); toast(now === 'ok' ? `${c.name} につながった` : `${c.name} につながらない`); },
-  rset: (v) => { const { r, none } = routeFor(v); set({ route: r }); toast(none.length ? `${none.join('・')} は送れる先が無いので変えていない` : `使い分けを「${SETS.find((x) => x[0] === v)[1]}」にした`); },
+  ping: (v) => { const c = SV(v || S.svc), now = S.con[c.id] === 'unk' ? 'ok' : S.con[c.id]; set({ con: Object.assign({}, S.con, { [c.id]: now }) }); toast(now === 'ok' ? `${c.name} に接続した` : `${c.name} に接続できない`); },
+  rset: (v) => { const { r, none } = routeFor(v); set({ route: r }); toast(none.length ? `${none.join('・')} は送れる先が無いので変えていない` : `プリセットを「${SETS.find((x) => x[0] === v)[1]}」にした`); },
   capn: (v, el) => { const id = (el && el.dataset.s) || S.svc; set({ capN: Object.assign({}, S.capN, { [id]: Math.max(2, Math.min(16, S.capN[id] + +v)) }) }); },
   view: (v, el) => { S.pop = ''; if (el && el.dataset.s) { S.svc = el.dataset.s; S.stab = 'con'; } if (location.hash !== '#' + v) history.replaceState(null, '', '#' + v); set({ view: v }); },
   pop: (v) => { set({ pop: S.pop === v ? '' : v }); const f = document.getElementById('find-in'); if (f) { f.focus(); f.select(); } },
   side: (v) => set({ side: v }),
+  proc: (v) => { const [n, i] = v.split(':').map(Number); if (S.view !== 'spread' || S.spread !== unitOf(n)) gotoSpread(unitOf(n)); set({ pop: '', tool: 'select', side: 'proc', plog: -1, obj: { k: 'panel', n, i, j: 0 } }); },
+  pstep: (v) => { const ks = procKeys(), i = ks.indexOf(procKey()); if (ks.length) ACT.proc(ks[(Math.max(i, 0) + +v + ks.length) % ks.length]); },
+  plog: (v) => set({ plog: S.plog === +v ? -1 : +v }),
   ver: () => set({ ver: !S.ver }),
   tg: (v, el) => { const [m, k] = el.dataset.k.split('.'); set({ [m]: Object.assign({}, S[m], { [k]: !S[m][k] }) }); },
   opt: (v, el) => set({ o: Object.assign({}, S.o, { [el.dataset.k]: v }) }),
@@ -2241,7 +2397,7 @@ document.addEventListener('change', (e) => {
   else if (t.matches('select[data-add]')) { if (t.value) ACT.addpage(t.value); }
   else if (t.matches('select[data-keep]')) S.v[t.id] = t.value;
 });
-/* つまみ・色・入力欄は描き直さずに値だけ持つ */
+/* スライダー・色・入力欄は描き直さずに値だけ持つ */
 document.addEventListener('input', (e) => {
   const t = e.target;
   if (t.id === 'find-in') { S.find = t.value; document.getElementById('find-res').innerHTML = findHTML(); return; }
@@ -2260,8 +2416,8 @@ document.addEventListener('pointermove', (e) => {
 });
 const KEYS = [
   ['判断', [['J', '次の判断'], ['K', '前の判断'], ['A', '採用'], ['X', '却下・このまま'], ['1 → 6', '候補を選ぶ'], ['I', '指示を書く'], ['Ctrl Enter', '頼む'], ['Ctrl Z', '取り消す'], ['Ctrl Shift Z', 'やり直す']]],
-  ['道具', [['V', '選ぶ'], ['L', '囲んで頼む'], ['R', '赤入れ'], ['B', 'ペン'], ['E', '消しゴム'], ['T', '文字'], ['F', 'コマ枠'], ['C', 'ナイフ'], ['S', 'フキダシ'], ['N', 'トーン'], ['U', '図形'], ['H', '手のひら'], ['O', '読む順']]],
-  ['表示', [['+ / −', '拡大・縮小'], ['PgUp / PgDn', '前後の見開き'], ['D', '判断・道具・層'], ['W', '表示するもの'], ['Q', '待ち行列'], ['/', '探す'], ['?', 'この一覧'], ['Esc', '閉じる']]],
+  ['ツール', [['V', '選ぶ'], ['L', '囲んで頼む'], ['R', '赤入れ'], ['B', 'ペン'], ['E', '消しゴム'], ['T', '文字'], ['F', 'コマ枠'], ['C', 'ナイフ'], ['S', 'フキダシ'], ['N', 'トーン'], ['U', '図形'], ['H', '手のひら'], ['O', '読む順']]],
+  ['表示', [['+ / −', '拡大・縮小'], ['PgUp / PgDn', '前後の見開き'], ['D', '判断・ツール・レイヤー'], ['W', '表示するもの'], ['Q', 'キュー'], ['/', '探す'], ['?', 'この一覧'], ['Esc', '閉じる']]],
   ['画面', [['G 1', '企画'], ['G 2', '構成'], ['G 3', '設定資料'], ['G 4', '原稿'], ['G 5', '書き出し'], ['G 6', '生成サービス']]]
 ];
 const KEYMAP = {
@@ -2306,10 +2462,47 @@ document.addEventListener('keydown', (e) => {
   }
   if (KEYMAP[k] && press(KEYMAP[k])) e.preventDefault();
 });
+/* 多言語：描いた後の画面の文字を、言語ごとの辞書（i18n/言語.js）で置き換える。置き換えはここ1か所。
+   試作の簡易な作り。本番は文言をキーで持ち、既製のライブラリで引く（細部の決めごと 24章）
+   dict の値が null の文言は作品の中身（セリフ・人物名など）で、訳さない。辞書に無い文言は window.__miss に集める */
+const JA_RE = /[\u3040-\u30ff\u4e00-\u9fff]/;
+function trCore(c, L, miss) {
+  if (Object.prototype.hasOwnProperty.call(L.dict, c)) return L.dict[c] === null ? c : L.dict[c];
+  for (const [re, tpl] of L.rules) {
+    const m = c.match(re);
+    if (m) return tpl.replace(/\$(\d)/g, (_, d) => trCore(m[+d], L, miss));
+  }
+  if (c.includes('\u3000')) return c.split('\u3000').map((x) => trCore(x, L, miss)).join('  ');
+  if (JA_RE.test(c)) miss.push(c);
+  return c;
+}
+function trText(s, L, miss) {
+  const c = s.trim();
+  return c && JA_RE.test(c) ? s.replace(c, () => trCore(c, L, miss)) : s;
+}
+function applyLang() {
+  const L = S.lang !== 'ja' && window.V3_I18N && window.V3_I18N[S.lang], miss = [];
+  document.documentElement.lang = S.lang;
+  if (!L) { window.__miss = []; return; }
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) {
+    if (n.parentElement.closest('svg.pg, script, style')) continue;
+    const t = trText(n.nodeValue, L, miss);
+    if (t !== n.nodeValue) n.nodeValue = t;
+  }
+  document.querySelectorAll('[aria-label],[title],[placeholder]').forEach((el) => ['aria-label', 'title', 'placeholder'].forEach((a) => {
+    const v = el.getAttribute(a), t = v ? trText(v, L, miss) : v;
+    if (t !== v) el.setAttribute(a, t);
+  }));
+  window.__miss = [...new Set((window.__miss || []).concat(miss))];
+}
+const langWatch = new MutationObserver(() => { langWatch.disconnect(); applyLang(); langWatch.observe(document.body, { childList: true, subtree: true }); });
+langWatch.observe(document.body, { childList: true, subtree: true });
 function fromHash() {
   const h = location.hash.replace('#', '');
   if (h === 'name') { S.view = 'spread'; S.spread = '12-13'; S.ssel = 2; }
   else if (h === 'redpen') { S.view = 'spread'; S.spread = '6-7'; S.ssel = 4; }
+  else if (h === 'proc') { S.view = 'spread'; S.spread = '8-9'; S.ssel = 5; S.side = 'proc'; S.obj = { k: 'panel', n: 8, i: 2, j: 0 }; }
   else if (['plan', 'daiwari', 'chara', 'spread', 'export', 'svc'].includes(h)) S.view = h;
 }
 window.addEventListener('hashchange', () => { fromHash(); render(); });
