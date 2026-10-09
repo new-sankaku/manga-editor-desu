@@ -11,14 +11,16 @@
 /* global cytoscape, ELK */
 const elk = new ELK();
 
+import { t } from "../common/i18n.js";
+
 export const STATUS_JA = {
-  queued: "順番待ち", running: "実行中", waiting_limit: "上限で待つ", waiting_budget: "予算で待つ",
-  awaiting_review: "判断待ち", paused: "止めた", cancelling: "取り消し中", retrying: "やり直し中",
-  stopped: "止まった", failed: "失敗", cancelled: "取り消した", done: "完了", blocked: "決めるまで進めない",
+  queued: t("順番待ち"), running: t("実行中"), waiting_limit: t("上限で待つ"), waiting_budget: t("予算で待つ"),
+  awaiting_review: t("判断待ち"), paused: t("一時停止中"), cancelling: t("取り消し中"), retrying: t("やり直し中"),
+  stopped: t("止まった"), failed: t("失敗"), cancelled: t("取り消した"), done: t("完了"), blocked: t("決めるまで進めない"),
 };
 export const STEP_JA = {
-  cut_out: "切り出し", context: "文脈", generate: "生成", check: "検査", evaluate: "評価",
-  review: "人の判断", finalize: "確定", end: "完了", discard_round: "却下", fix: "直させる",
+  cut_out: t("切り出し"), context: t("文脈"), generate: t("生成"), check: t("検査"), evaluate: t("評価"),
+  review: t("人の判断"), finalize: t("確定"), end: t("完了"), discard_round: t("却下"), fix: t("直させる"),
 };
 // harness_states.py の STEPS と RETRY_EDGES と同じ並び
 export const STEPS = ["cut_out", "context", "generate", "check", "fix", "evaluate", "review", "finalize"];
@@ -30,14 +32,14 @@ const FORWARD = [
 ];
 // 辺のラベルは短く（図の上）。全文は辺に指を置いたときの説明と、横の欄の「戻った回数」に出す。
 // 検査→直させるは隣の列へ入る短い線で、ラベルを置く長さが無い。行き先の「直させる」が中身を言うので、図にはラベルを出さない
-const SKIPS = [["check", "review", "評価なし", "評価の段を使わない"], ["evaluate", "end", "判断なし", "人の判断を使わない"]];
+const SKIPS = [["check", "review", t("評価なし"), t("評価の段を使わない")], ["evaluate", "end", t("判断なし"), t("人の判断を使わない")]];
 export const RETRY_EDGES = [
-  ["check", "fix", "", "落ちた所だけ直す"],
-  ["fix", "check", "検査し直す", "直した候補だけ検査し直す"],
-  ["check", "context", "作り直す", "直せない・直す上限で全部を作り直す"],
-  ["evaluate", "context", "選べない", "評価で選べない・割れた"],
-  ["review", "context", "却下", "却下（理由つき）"],
-  ["review", "generate", "直した絵から", "人が直した絵から続ける"],
+  ["check", "fix", "", t("落ちた所だけ直す")],
+  ["fix", "check", t("検査し直す"), t("直した候補だけ検査し直す")],
+  ["check", "context", t("作り直す"), t("直せない・直す上限で全部を作り直す")],
+  ["evaluate", "context", t("選べない"), t("評価で選べない・割れた")],
+  ["review", "context", t("却下"), t("却下（理由つき）")],
+  ["review", "generate", t("直した絵から"), t("人が直した絵から続ける")],
 ];
 export const EDGE_TEXT = Object.fromEntries([...SKIPS, ...RETRY_EDGES].map(([a, b, , full]) => [`${a}>${b}`, full]));
 
@@ -67,7 +69,7 @@ probe.style.display = "none";
 document.documentElement.append(probe);
 const px = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
 function token(name) {
-  if (!getComputedStyle(document.documentElement).getPropertyValue(name).trim()) throw new Error(`色の変数 ${name} がありません`);
+  if (!getComputedStyle(document.documentElement).getPropertyValue(name).trim()) throw new Error(`色の変数 ${name} がありません`); // i18n:dev
   probe.style.color = `var(${name})`;
   px.clearRect(0, 0, 1, 1);
   px.fillStyle = getComputedStyle(probe).color;
@@ -85,7 +87,7 @@ const C = Object.fromEntries(Object.entries({
 probe.remove();
 // 文字の形は theme.css の --font-mono。図の文字の大きさの計り（canvas）と Cytoscape に同じ物を渡す
 const MONO = getComputedStyle(document.documentElement).getPropertyValue("--font-mono").trim();
-if (!MONO) throw new Error("文字の変数 --font-mono がありません");
+if (!MONO) throw new Error("文字の変数 --font-mono がありません"); // i18n:dev
 
 export const FONT = 12;        // 図の文字（ノード・辺・枠）。全体を見たときもこれより小さくしない（fit の下限が 1 倍）
 const LH = 1.35;               // 行の高さ（文字の大きさの倍）
@@ -269,8 +271,8 @@ export class HarnessGraph {
             el.position({ x: x + c.width / 2, y: y + c.height / 2 });
             if (el.hasClass("frame")) {
               el.data({ w: c.width, h: c.height });
-              const t = textSize(el.data("label"));
-              el.data({ lmx: -c.width / 2 + FRAME_PAD + t.w / 2, lmy: -c.height / 2 + 6 + t.h / 2 });
+              const tz = textSize(el.data("label"));
+              el.data({ lmx: -c.width / 2 + FRAME_PAD + tz.w / 2, lmy: -c.height / 2 + 6 + tz.h / 2 });
             }
           }
           walk(c, x, y);
@@ -341,9 +343,9 @@ export class HarnessGraph {
   // 工程のノードは同じ大きさにそろえる（一番長いラベルに合わせる。行の数は今の一番多いもの、3行を下限）
   _sizeStages() {
     const ns = this.cy.nodes(".stage");
-    const t = ns.map((n) => textSize(n.data("label")));
-    const w = Math.max(textSize("送り先を待つ 99").w, ...t.map((x) => x.w)) + 2 * PAD_X;
-    const lines = Math.max(3, ...t.map((x) => x.lines));
+    const sizes = ns.map((n) => textSize(n.data("label")));
+    const w = Math.max(textSize(t("送り先を待つ {{n}}", { n: 99 })).w, ...sizes.map((x) => x.w)) + 2 * PAD_X;
+    const lines = Math.max(3, ...sizes.map((x) => x.lines));
     const h = Math.ceil(lines * FONT * LH) + 2 * PAD_Y;
     let changed = false;
     ns.forEach((n) => { if (n.data("w") !== w || n.data("h") !== h) { n.data({ w, h }); changed = true; } });
@@ -409,9 +411,9 @@ export class HarnessGraph {
   _sizeUnits(stage) {
     const ns = this.cy.nodes('[kind="unit"]').filter((n) => this.where.get(n.data("unit_id"))?.[0] === `group:${stage}`);
     const folded = this.cy.nodes(".folded").filter((n) => n.data("stage") === stage);
-    const t = [...ns, ...folded].map((n) => textSize(n.data("label")));
-    const w = Math.max(textSize("p99-99 99/99").w, textSize("判断待ち・古い").w, ...t.map((x) => x.w)) + 2 * PAD_X;
-    const h = Math.ceil(Math.max(3, ...t.map((x) => x.lines)) * FONT * LH) + 2 * PAD_Y + BAND;
+    const sizes = [...ns, ...folded].map((n) => textSize(n.data("label")));
+    const w = Math.max(textSize("p99-99 99/99").w, textSize(t("{{status}}・古い", { status: STATUS_JA.awaiting_review })).w, ...sizes.map((x) => x.w)) + 2 * PAD_X;
+    const h = Math.ceil(Math.max(3, ...sizes.map((x) => x.lines)) * FONT * LH) + 2 * PAD_Y + BAND;
     let changed = false;
     for (const n of [...ns, ...folded]) if (n.data("w") !== w || n.data("h") !== h) { n.data({ w, h }); changed = true; }
     return changed;
@@ -456,7 +458,7 @@ export class HarnessGraph {
     for (const [gid, us] of byGroup) {
       const n = this.cy.getElementById(gid);
       if (!n.length) continue;
-      const name = gid === sid ? `${stage} の作業` : n.data("page");
+      const name = gid === sid ? t("{{stage}} の作業", { stage }) : n.data("page");
       const shut = this.collapsed.has(gid);
       if (!shut) {
         n.data("label", `${name}（${us.length}）`);
@@ -549,13 +551,13 @@ export class HarnessGraph {
   // 段のノードは同じ大きさにそろえる（2行。1行目は名前と回数、2行目は候補の数・却下の数）
   _sizeSteps() {
     const ns = this.cy.nodes(".step-node").not(".frame");
-    const t = ns.map((n) => textSize(n.data("label")));
-    const w = Math.max(textSize("人の判断 ×99 ＋").w, ...t.map((x) => x.w)) + 2 * PAD_X;
-    const h = Math.ceil(Math.max(2, ...t.map((x) => x.lines)) * FONT * LH) + 2 * PAD_Y;
+    const sizes = ns.map((n) => textSize(n.data("label")));
+    const w = Math.max(textSize(`${STEP_JA.review} ×99 ＋`).w, ...sizes.map((x) => x.w)) + 2 * PAD_X;
+    const h = Math.ceil(Math.max(2, ...sizes.map((x) => x.lines)) * FONT * LH) + 2 * PAD_Y;
     let changed = false;
     ns.forEach((n) => {
       const end = n.data("step") === "end";
-      const ww = end ? textSize("完了 ×9").w + 2 * PAD_X : w;
+      const ww = end ? textSize(`${STEP_JA.end} ×9`).w + 2 * PAD_X : w;
       const hh = end ? Math.ceil(2 * FONT * LH) + 2 * PAD_Y : h;
       if (n.data("w") !== ww || n.data("h") !== hh) { n.data({ w: ww, h: hh }); changed = true; }
     });
@@ -639,8 +641,8 @@ export class HarnessGraph {
   // 開いた段の名前は枠の左上。ラベルの長さが変わったら、ずらしを当て直す（並べ直さない）
   _frameLabels() {
     for (const n of this.cy.nodes(".frame")) {
-      const t = textSize(n.data("label"));
-      n.data({ lmx: -n.data("w") / 2 + FRAME_PAD + t.w / 2, lmy: -n.data("h") / 2 + 6 + t.h / 2 });
+      const tz = textSize(n.data("label"));
+      n.data({ lmx: -n.data("w") / 2 + FRAME_PAD + tz.w / 2, lmy: -n.data("h") / 2 + 6 + tz.h / 2 });
     }
     for (const n of this.cy.nodes(".step-node").not(".frame")) n.data({ lmx: 0, lmy: 0 });
   }
@@ -651,7 +653,7 @@ export class HarnessGraph {
     this.cy.edges().forEach((e) => {
       const n = counts[e.id().slice(2)] || 0;
       const full = e.data("full");
-      if (full) e.data("note", `${full}${n ? `（${n}回）` : ""}`);
+      if (full) e.data("note", n ? t("{{full}}（{{n}}回）", { full, n }) : full);
       e.toggleClass("used", n > 0);
     });
   }
@@ -993,7 +995,7 @@ function setEdgeGeometry(el, pts) {
     const got = el.segmentPoints() || [];
     if (got.length === bends.length && got.every((p, i) => Math.hypot(p.x - bends[i].x, p.y - bends[i].y) < 1)) { el.scratch("_pts", pts); return; }
   }
-  throw new Error(`辺 ${el.id()} の折れ点を当てられない`);
+  throw new Error(`辺 ${el.id()} の折れ点を当てられない`); // i18n:dev
 }
 
 function groupProgress(rows) {
@@ -1006,8 +1008,8 @@ function groupProgress(rows) {
   return [...by.values()];
 }
 
-const PSTATE_JA = { pending: "送った", running: "描いている", finished: "描き終えた", unavailable: "進み具合を受け取れない",
-                    interrupted: "止めた", error: "止まった" };
+const PSTATE_JA = { pending: t("送った"), running: t("描いている"), finished: t("描き終えた"), unavailable: t("進み具合を受け取れない"),
+                    interrupted: t("中断"), error: t("止まった") };
 const pctOf = (r) => (r.max ? Math.round((100 * (r.value || 0)) / r.max) : 0);
 
 // ノードの中の帯：候補ごとの棒を横に並べる
@@ -1042,9 +1044,9 @@ function renderProgressDetail(box, rows) {
     line.className = `hz-bar s-${r.state}`;
     const fill = document.createElement("span");
     fill.style.width = `${pctOf(r)}%`;
-    const t = document.createElement("em");
-    t.textContent = `#${r.k_index + 1} ${PSTATE_JA[r.state] || r.state}${r.max ? ` ${r.value || 0}/${r.max}` : ""}`;
-    line.append(fill, t);
+    const em = document.createElement("em");
+    em.textContent = `#${r.k_index + 1} ${PSTATE_JA[r.state] || r.state}${r.max ? ` ${r.value || 0}/${r.max}` : ""}`;
+    line.append(fill, em);
     rowsEl.appendChild(line);
   }
   const withPreview = list.filter((r) => r.preview);
@@ -1054,7 +1056,7 @@ function renderProgressDetail(box, rows) {
     for (const r of withPreview) {
       const im = document.createElement("img");
       im.src = r.preview;
-      im.alt = `候補 ${r.k_index + 1} の途中の絵`;
+      im.alt = t("候補 {{n}} の途中の絵", { n: r.k_index + 1 });
       strip.appendChild(im);
     }
     rowsEl.appendChild(strip);

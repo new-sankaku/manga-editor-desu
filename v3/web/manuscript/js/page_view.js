@@ -6,6 +6,7 @@ import { drawTone } from "./tone_draw.js";
 import { TextLayer } from "./text_layer.js";
 import * as api from "../../js/api.js";
 import { C, alpha, readTheme } from "./theme_colors.js";
+import { t } from "../../common/i18n.js";
 
 const { Canvas, FabricObject, FabricImage, Point, Control, util } = window.fabric;
 
@@ -404,7 +405,7 @@ export class PageView {
       this.loading.delete(id);
       clearTimeout(this.reloadT);
       this.reloadT = setTimeout(() => this.rebuild(), 30);
-    }).catch((e) => { this.loading.delete(id); this.hooks.onError(e, "コマの絵を読むこと"); });
+    }).catch((e) => { this.loading.delete(id); this.hooks.onError(e, t("コマの絵を読み込めませんでした")); });
   }
 
   panelItem(p, style, ox, oy) {
@@ -553,8 +554,8 @@ export class PageView {
     const held = this.opts.heldBy || new Map();
     const add = (row, x, y, kind) => {
       const h = held.get(row.id) || [];
-      if (show.hand && (row.human_hand_fields || []).length) this.text.mark(`${row.id}:hand`, x, y, "hand", `人の手：${row.human_hand_fields.join("・")}`);
-      if (show.held && h.length) this.text.mark(`${row.id}:held`, x, y, "held", `判断待ち ${h.length} 件`, h.length);
+      if (show.hand && (row.human_hand_fields || []).length) this.text.mark(`${row.id}:hand`, x, y, "hand", t("手動編集：{{fields}}", { fields: row.human_hand_fields.join(t("・")) }));
+      if (show.held && h.length) this.text.mark(`${row.id}:held`, x, y, "held", t("判断待ち {{count}} 件", { count: h.length }), h.length);
     };
     for (const p of panels) { const [, y0, x1] = bbox(p.frame.polygon_mm); add(p, x1 + ox, y0 + oy, "panel"); }
     for (const t of texts) if (t.box_mm) add(t, t.box_mm[2] + ox, t.box_mm[1] + oy, "text");
@@ -700,9 +701,9 @@ export class PageView {
   }
 
   editText(id) {
-    const t = this.model.find("text_items", id);
-    if (!t) return;
-    if (t.fixed) { this.hooks.onRefuse("動かさない印の付いた文字は直せません"); return; }
+    const row = this.model.find("text_items", id);
+    if (!row) return;
+    if (row.fixed) { this.hooks.onRefuse(t("動かさない印の付いた文字は直せません")); return; }
     this.c.discardActiveObject();
     // 文字の道具で押したとき（mouse:down の中）に欄へフォーカスを移しても、そのあとのブラウザの既定の動き
     // （押した所へフォーカスを移す）で欄から外れ、打つ前に終わっていた。押す出来事が終わってから打てる状態にする

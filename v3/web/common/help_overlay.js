@@ -2,6 +2,7 @@
 // 探す欄で、すること・キーのどちらからでも絞れる。利用者が変えたキーには「変えた」を付ける。
 import { html, render, nothing } from "../vendor/lit-html-3.2.1/lit-html.js";
 import { live } from "../vendor/lit-html-3.2.1/directives/live.js";
+import { t } from "./i18n.js";
 import * as km from "./keymap.js";
 import { icon } from "./shell.js";
 
@@ -17,7 +18,7 @@ function rows(scope) {
 }
 function kbds(id) {
   const ls = km.keyLabels(id);
-  return ls.length ? ls.map((l) => html`<kbd>${l}</kbd> `) : html`<span class="meta">キーなし</span>`;
+  return ls.length ? ls.map((l) => html`<kbd>${l}</kbd> `) : html`<span class="meta">${t("キーなし")}</span>`;
 }
 
 function draw() {
@@ -25,19 +26,19 @@ function draw() {
   const st = km.userKeysState();
   const groups = scopes.map((s) => [s, rows(s)]).filter(([, r]) => r.length);
   render(html`
-    <div class="v3-dlg-h"><span class="h2 grow" id="v3-help-title">キーの一覧（${km.SCOPES[km.currentScreen()]}）</span>
-      <button class="btn sm" id="v3-help-settings" @click=${openSettings}>${icon("keyboard")}キーを変える</button>
-      <button class="btn sm" id="v3-help-close" @click=${() => dlg.close()}>${icon("x")}閉じる</button></div>
+    <div class="v3-dlg-h"><span class="h2 grow" id="v3-help-title">${t("キーの一覧（{{scope}}）", { scope: km.SCOPES[km.currentScreen()] })}</span>
+      <button class="btn sm" id="v3-help-settings" @click=${openSettings}>${icon("keyboard")}${t("キーを変える")}</button>
+      <button class="btn sm" id="v3-help-close" @click=${() => dlg.close()}>${icon("x")}${t("閉じる")}</button></div>
     <div class="v3-dlg-b">
-      <label class="v3-search">${icon("search")}<input class="field" id="v3-help-q" type="search" placeholder="すること・キーで探す"
-        aria-label="キーを探す" .value=${live(query)} @input=${(e) => { query = e.target.value; draw(); }}></label>
+      <label class="v3-search">${icon("search")}<input class="field" id="v3-help-q" type="search" placeholder=${t("すること・キーで探す")}
+        aria-label=${t("キーを探す")} .value=${live(query)} @input=${(e) => { query = e.target.value; draw(); }}></label>
       ${st.why ? html`<div class="note need">${icon("triangle-alert")}<span>${st.why}</span></div>` : nothing}
       ${groups.length ? groups.map(([s, r]) => html`<section class="v3-keys-g" data-scope=${s}>
-        <div class="lbl">${km.SCOPES[s] ?? s}${s.includes(":") ? "（選んでいる道具）" : ""}</div>
+        <div class="lbl">${km.SCOPES[s] ?? s}${s.includes(":") ? t("（選んでいるツール）") : ""}</div>
         <table class="keys-t">${r.map((k) => html`<tr data-id=${k.id}><th>${kbds(k.id)}</th>
-          <td>${k.label}${k.hold ? html` <span class="flag mut">押している間</span>` : nothing}${km.isMissing(k.id) ? html` <span class="flag warn">この画面にまだ無い</span>` : nothing}${km.isCustom(k.id) ? html` <span class="flag ai">変えた</span>` : nothing}</td></tr>`)}</table>
-      </section>`) : html`<p class="meta">「${query}」に合うキーはありません</p>`}
-      <p class="meta">${km.IS_MAC ? "⌘ は Cmd、⌥ は Option です。" : "Mac では Ctrl の所が ⌘（Cmd）になります。"}文字を打っている間は、Esc と Ctrl+Enter のような印の付いた物だけが効きます。</p>
+          <td>${k.label}${k.hold ? html` <span class="flag mut">${t("押している間")}</span>` : nothing}${km.isMissing(k.id) ? html` <span class="flag warn">${t("この画面にまだ無い")}</span>` : nothing}${km.isCustom(k.id) ? html` <span class="flag ai">${t("変えた")}</span>` : nothing}</td></tr>`)}</table>
+      </section>`) : html`<p class="meta">${t("「{{query}}」に合うキーはありません", { query })}</p>`}
+      <p class="meta">${km.IS_MAC ? t("⌘ は Cmd、⌥ は Option です。") : t("Mac では Ctrl の所が ⌘（Cmd）になります。")}${t("文字を打っている間は、Esc と Ctrl+Enter のような印の付いた物だけが効きます。")}</p>
     </div>`, dlg);
 }
 

@@ -6,27 +6,28 @@ import { loadAuth, mode, myName, currentUser, setUser, authFetch, showIn, get, p
 import { readStream } from "./harness_sse.js";
 import { storedWork, rememberWork } from "../common/nav.js";
 import { startKeys, km } from "../common/keys.js";
+import { t } from "../common/i18n.js";
 import { HarnessGraph, STATUS_JA, STEP_JA, STEPS, RETRY_EDGES, EDGE_TEXT, statusClass, isHumanWait, urgentStatus } from "./harness_graph.js";
 
 const STAGES = ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7"];
-const STAGE_JA = { S0: "企画", S1: "構成", S2: "設定資料", S3: "ネーム", S4: "作画", S5: "仕上げ", S6: "総合", S7: "書き出し" };
-const ITEM_JA = { stopped: "止まった作業", check_failed: "検査で落ちた候補", candidates: "候補の判断待ち",
-                  stale: "上流が変わった", held_ai_change: "保留のAIの変更", stage_review: "工程の承認待ち" };
+const STAGE_JA = { S0: t("企画"), S1: t("構成"), S2: t("設定資料"), S3: t("ネーム"), S4: t("作画"), S5: t("仕上げ"), S6: t("総合"), S7: t("書き出し") };
+const ITEM_JA = { stopped: t("止まった作業"), check_failed: t("検査で落ちた候補"), candidates: t("候補の判断待ち"),
+                  stale: t("上流が変わった"), held_ai_change: t("保留のAIの変更"), stage_review: t("工程の承認待ち") };
 const ACTIVE = new Set(["queued", "running", "waiting_limit", "waiting_budget", "retrying", "cancelling"]);
 // 上限の名前（harness_limits.py の UnitLimits の項目）
-const LIMIT_JA = { max_attempts: "回の上限", candidates_per_attempt: "1回の候補の数", budget_cost: "費用の上限",
-                   budget_seconds: "秒の上限", error_stop: "続けて失敗したら止める", same_failure_restart: "同じ失敗で文脈から",
-                   eval_repeats: "評価を繰り返す数", disagreement_stop: "評価が割れたら止める", review_notice_seconds: "判断待ちの知らせ（秒）",
-                   resend_limit: "送り直しの上限", max_fix_rounds: "直させる回数の上限", wait_seconds: "順番待ちの上限（秒）",
-                   redo_on_reject: "却下したらすぐ作り直す" };
+const LIMIT_JA = { max_attempts: t("回の上限"), candidates_per_attempt: t("1回の候補の数"), budget_cost: t("費用の上限"),
+                   budget_seconds: t("秒の上限"), error_stop: t("続けて失敗したら止める"), same_failure_restart: t("同じ失敗で文脈から"),
+                   eval_repeats: t("評価を繰り返す数"), disagreement_stop: t("評価が割れたら止める"), review_notice_seconds: t("判断待ちの通知（秒）"),
+                   resend_limit: t("送り直しの上限"), max_fix_rounds: t("直させる回数の上限"), wait_seconds: t("順番待ちの上限（秒）"),
+                   redo_on_reject: t("却下したらすぐ作り直す") };
 // 作業の種類の名前と、何を対象にするか（作品・話・コマ）
-const KIND_JA = { plan_interview: "企画の聞き取り", structure: "構成", settings_sheet: "設定資料", name_draft: "ネームの作業",
-                  panel_drawing: "コマの作画", page_finishing: "仕上げ", overall_review: "総合", export: "書き出し" };
-const WHOLE = { plan_interview: "作品全体", settings_sheet: "作品全体", structure: "話全体", name_draft: "話全体",
-                page_finishing: "話全体", overall_review: "話全体", export: "話全体" };
+const KIND_JA = { plan_interview: t("企画の聞き取り"), structure: t("構成"), settings_sheet: t("設定資料"), name_draft: t("ネームの作業"),
+                  panel_drawing: t("コマの作画"), page_finishing: t("仕上げ"), overall_review: t("総合"), export: t("書き出し") };
+const WHOLE = { plan_interview: t("作品全体"), settings_sheet: t("作品全体"), structure: t("話全体"), name_draft: t("話全体"),
+                page_finishing: t("話全体"), overall_review: t("話全体"), export: t("話全体") };
 // 作業役が人へ質問を返す種類（サーバーの TAKES_ANSWERS と同じ。ほかの種類はサーバーが answer を断る）
 const ANSWER_KINDS = new Set(["plan_interview"]);
-const CAND_JA = { requested: "頼んだ", generated: "描けた", failed: "失敗", cancelled: "取り消した" };
+const CAND_JA = { requested: t("頼んだ"), generated: t("描けた"), failed: t("失敗"), cancelled: t("取り消した") };
 const RUNNING = new Set(["running", "retrying", "cancelling"]);
 
 const $ = (s) => document.querySelector(s);
@@ -81,16 +82,16 @@ async function main() {
   } else {
     $("#user").value = currentUser();
     $("#user-form").addEventListener("submit", (e) => { e.preventDefault(); setUser($("#user").value.trim()); location.reload(); });
-    if (!currentUser()) { showEmpty("利用者の名前を入れてください"); return; }
+    if (!currentUser()) { showEmpty(t("利用者の名前を入れてください")); return; }
   }
   if (!S.workId) {
     const works = await get("/works");
-    if (!works.length) { showEmpty("見てよい作品がありません"); return; }
+    if (!works.length) { showEmpty(t("見てよい作品がありません")); return; }
     S.workId = works[0].id;
   }
   rememberWork(S.workId);
   graph = new HarnessGraph($("#graph"), $("#graph-overlay"), { onTap, onStepsChanged: refreshDetail, detailBox: $("#gen-progress"),
-                                                              onHover: (t) => { $("#graph-note").textContent = t; } });
+                                                              onHover: (text) => { $("#graph-note").textContent = text; } });
   // 画面の試験（harness_ui.mjs）が図の中を見る。たたんだノードの data には中の要素（collapsedChildren）が入り、
   // ブラウザの外へ渡せないので、文字・数・真偽の値だけを渡す
   probe.graphNodes = (sel) => graph.cy.nodes(sel).map((n) =>
@@ -147,8 +148,8 @@ function setConn(c) {
   S.conn = probe.conn = c;
   const el = $("#conn");
   el.className = `conn conn-${c}`;
-  el.textContent = { connecting: "つないでいます", reconnecting: "つなぎ直しています", live: "受信中",
-                     disconnected: `切断中（${S.retries}回目のつなぎ直しを待つ）` }[c];
+  el.textContent = { connecting: t("接続中"), reconnecting: t("再接続中"), live: t("受信中"),
+                     disconnected: t("切断中（再接続{{n}}回目を待っています）", { n: S.retries }) }[c];
   document.body.classList.toggle("is-disconnected", c === "disconnected" || c === "reconnecting");
 }
 
@@ -323,17 +324,17 @@ function stageInfo(stage) {
   const count = (pred) => units.filter(pred).length;
   const parts = [];
   if (units.length) {
-    parts.push(`完了 ${count((u) => u.status === "done")}/${units.length}`);
+    parts.push(t("完了 {{done}}/{{total}}", { done: count((u) => u.status === "done"), total: units.length }));
     const run_ = count((u) => RUNNING.has(u.status));
     const queued = count((u) => ACTIVE.has(u.status) && !RUNNING.has(u.status));
     const wait = count((u) => isHumanWait(u.status));
-    if (run_) parts.push(`実行中 ${run_}`);
-    if (queued) parts.push(`送り先を待つ ${queued}`);
-    if (wait) parts.push(`人を待つ ${wait}`);
+    if (run_) parts.push(t("実行中 {{n}}", { n: run_ }));
+    if (queued) parts.push(t("送り先を待つ {{n}}", { n: queued }));
+    if (wait) parts.push(t("人を待つ {{n}}", { n: wait }));
   }
   const status = run ? run.status : null;
   return { stage, cls: run ? statusClass(status) : "st-none unused", lines: 2 + parts.length,
-           label: `${stage} ${STAGE_JA[stage]}\n${status ? STATUS_JA[status] || status : "まだ"}${parts.length ? `\n${parts.join("\n")}` : ""}` };
+           label: `${stage} ${STAGE_JA[stage]}\n${status ? STATUS_JA[status] || status : t("まだ")}${parts.length ? `\n${parts.join("\n")}` : ""}` };
 }
 
 function buildStageGraph() {
@@ -346,15 +347,16 @@ function unitLabel(u) {
   const page = pageOf(u);
   const where = WHOLE[u.kind] || `p${page ? page.number : "?"}-${p ? p.order : "?"}`;
   const tries = u.max_attempts ? ` ${u.attempt}/${u.max_attempts}` : "";
+  const statusText = STATUS_JA[u.status] || u.status;
   const step = u.step && ACTIVE.has(u.status) ? `\n${STEP_JA[u.step] || u.step}` : "";
-  return `${where}${tries}\n${STATUS_JA[u.status] || u.status}${u.stale ? "・古い" : ""}${step}`;
+  return `${where}${tries}\n${u.stale ? t("{{status}}・古い", { status: statusText }) : statusText}${step}`;
 }
 
 // 工程の図で作業を入れるまとまり（ページ。ページを持たない作業は、作品・話の全体として1つにまとめる）
 function unitGroup(u) {
   if (WHOLE[u.kind]) return { key: "whole", label: WHOLE[u.kind] };
   const page = pageOf(u);
-  return { key: u.page_id || "none", label: page ? `p${page.number}` : "ページなし" };
+  return { key: u.page_id || "none", label: page ? `p${page.number}` : t("ページなし") };
 }
 
 function renderStageGraph() {
@@ -385,9 +387,9 @@ function renderUnitGraph() {
   const u = S.units.get(d.unit_id) || d;
   const rejects = d.decisions.filter((x) => x.action === "reject").length;
   states.review = { count: d.decisions.length + (u.status === "awaiting_review" ? 1 : 0),
-                    status: d.decisions.length ? "done" : null, note: rejects ? `却下 ${rejects}` : "" };
+                    status: d.decisions.length ? "done" : null, note: rejects ? t("却下 {{n}}", { n: rejects }) : "" };
   if (u.status === "done") states.end = { count: 1, status: "done" };
-  if (states.generate) states.generate.note = `候補 ${u.candidates}`;
+  if (states.generate) states.generate.note = t("候補 {{n}}", { n: u.candidates });
   const current = u.status === "awaiting_review" ? "review" : u.status === "done" ? "end" : (u.step || S.pos);
   graph.setStepParts(stepParts(d, u));
   graph.setSteps(states, current, u.status);
@@ -415,15 +417,15 @@ function stepParts(d, u) {
     return [...by].map(([id, g]) => {
       const bad = g.list.filter((j) => j.failure_kind).length;
       return { id, status: urgentStatus(g.list.map((j) => j.status)),
-               label: `${g.name}\n依頼 ${g.list.length}${bad ? `・失敗 ${bad}` : ""}` };
+               label: `${g.name}\n${bad ? t("依頼 {{n}}・失敗 {{bad}}", { n: g.list.length, bad }) : t("依頼 {{n}}", { n: g.list.length })}` };
     });
   };
   const checks = new Map();
   for (const c of d.cands.filter((x) => `a${x.attempt}` === att && x.check)) {
     for (const f of c.check.findings || []) {
       if (!checks.has(f.name)) checks.set(f.name, { ok: 0, ng: 0, none: 0 });
-      const t = checks.get(f.name);
-      if (f.ok === true) t.ok += 1; else if (f.ok === false) t.ng += 1; else t.none += 1;
+      const cnt = checks.get(f.name);
+      if (f.ok === true) cnt.ok += 1; else if (f.ok === false) cnt.ng += 1; else cnt.none += 1;
     }
   }
   const evals = [...d.steps.values()].filter((x) => x.step === "evaluate" && `a${x.attempt}` === att && x.detail?.rounds)
@@ -434,14 +436,14 @@ function stepParts(d, u) {
   return {
     generate: byService(jobsOf(/^(gen|comp)\d/)),
     fix: byService(jobsOf(/^fix\d/)),
-    check: [...checks].map(([name, t]) => ({ id: name, status: t.ng ? "failed" : t.none ? "waiting_limit" : "done",
-      label: `${name}\n通る ${t.ok}・落ちる ${t.ng}${t.none ? `\n測れない ${t.none}` : ""}` })),
+    check: [...checks].map(([name, cnt]) => ({ id: name, status: cnt.ng ? "failed" : cnt.none ? "waiting_limit" : "done",
+      label: `${name}\n${t("通る {{ok}}・落ちる {{ng}}", { ok: cnt.ok, ng: cnt.ng })}${cnt.none ? `\n${t("測れない {{n}}", { n: cnt.none })}` : ""}` })),
     evaluate: repeats.map((r) => {
       const rs = ev.rounds.filter((x) => x.repeat === r);
       const ties = rs.filter((x) => x.verdict === "tie").length;
       const top = ev.tops[r];
       return { id: String(r), status: top ? "done" : "stopped",
-               label: `${r + 1}回目 比べた ${rs.length}${ties ? `\n同点 ${ties}` : ""}\n1位 ${top ? short(top) : "決まらない"}` };
+               label: `${t("{{round}}回目 比べた {{n}}", { round: r + 1, n: rs.length })}${ties ? `\n${t("同点 {{n}}", { n: ties })}` : ""}\n${top ? t("1位 {{name}}", { name: short(top) }) : t("1位 決まらない")}` };
     }),
   };
 }
@@ -454,7 +456,7 @@ function tick() {
 
 function ago(iso) {
   const s = Math.max(0, Math.round((Date.now() - Date.parse(iso)) / 1000));
-  return s < 60 ? `${s}秒` : s < 3600 ? `${Math.floor(s / 60)}分${s % 60}秒` : `${Math.floor(s / 3600)}時間${Math.floor((s % 3600) / 60)}分`;
+  return s < 60 ? t("{{n}}秒", { n: s }) : s < 3600 ? t("{{m}}分{{s}}秒", { m: Math.floor(s / 60), s: s % 60 }) : t("{{h}}時間{{m}}分", { h: Math.floor(s / 3600), m: Math.floor((s % 3600) / 60) });
 }
 
 // ------------------------------------------------------------------ 時間の列（作業の図の下）
@@ -463,11 +465,11 @@ function renderTimeline() {
   const d = S.detail;
   const box = $("#timeline");
   const rows = [...d.steps.values()].filter((s) => s.started_at);
-  if (!rows.length) { box.replaceChildren(h("p", { cls: "muted", text: "まだ段が始まっていません" })); return; }
+  if (!rows.length) { box.replaceChildren(h("p", { cls: "muted", text: t("まだ段が始まっていません") })); return; }
   const u = S.units.get(d.unit_id) || d;
   const bars = rows.map((s) => ({ lane: s.step, t0: Date.parse(s.started_at),
                                   t1: s.finished_at ? Date.parse(s.finished_at) : Date.now(), status: s.status,
-                                  label: `${STEP_JA[s.step]} ${s.attempt ? `${s.attempt}回目` : ""}` }));
+                                  label: s.attempt ? t("{{step}} {{n}}回目", { step: STEP_JA[s.step], n: s.attempt }) : `${STEP_JA[s.step]} ` }));
   // 人の判断を待った間：その前に終わった段から、判断の時刻（まだなら今）まで
   const ends = rows.filter((s) => s.finished_at).map((s) => Date.parse(s.finished_at)).sort((a, b) => a - b);
   const waits = d.decisions.map((x) => ({ t1: Date.parse(x.at), action: x.action }));
@@ -475,7 +477,7 @@ function renderTimeline() {
   for (const w of waits) {
     const t0 = ends.filter((t) => t <= w.t1).at(-1);
     if (t0) bars.push({ lane: "review", t0, t1: w.t1, status: w.action ? "done" : "awaiting_review",
-                        label: w.action ? { approve: "採用", reject: "却下", edit: "直した絵" }[w.action] : "判断待ち" });
+                        label: w.action ? { approve: t("採用"), reject: t("却下"), edit: t("直した絵") }[w.action] : t("判断待ち") });
   }
   const tmin = Math.min(...bars.map((b) => b.t0));
   const tmax = Math.max(Date.now() - (ACTIVE.has(u.status) || isHumanWait(u.status) ? 0 : 1e12), ...bars.map((b) => b.t1));
@@ -508,11 +510,11 @@ function renderTimeline() {
     const frac = Math.max(0.006, at(t1) - at(t0));
     el.style.left = `${100 * at(t0)}%`;
     el.style.width = `${100 * frac}%`;
-    const text = `${((t1 - t0) / 1000).toFixed(1)}秒`;
+    const text = t("{{n}}秒", { n: ((t1 - t0) / 1000).toFixed(1) });
     el.title = `${el.dataset.what}　${text}`;
     el.textContent = frac * trackW >= textWidth(text, el) + 8 ? text : "";
   }
-  $("#timeline-span").textContent = `${((tmax - tmin) / 1000).toFixed(1)}秒（長い間は縮めて描いています）`;
+  $("#timeline-span").textContent = t("{{n}}秒（長い間は縮めて描いています）", { n: ((tmax - tmin) / 1000).toFixed(1) });
 }
 
 // 文字の幅（時間の列の棒の中に入るかを見る）
@@ -548,14 +550,14 @@ function sideKey() {
                          S.reviewItems.map((i) => i.kind + (i.unit_id || i.stage_run_id || ""))]);
 }
 
-function chip(status) { return h("span", { cls: `chip ${statusClass(status)}`, text: STATUS_JA[status] || status || "まだ" }); }
+function chip(status) { return h("span", { cls: `chip ${statusClass(status)}`, text: STATUS_JA[status] || status || t("まだ") }); }
 
 function act(label, fn, cls = "") {
   return h("button", { type: "button", cls: `btn ${cls}`, onclick: async (e) => {
     const b = e.currentTarget;
     b.disabled = true;
-    try { await fn(); toast(`${label}を送りました`); }
-    catch (err) { toast(`${label}できません：${err.message}`, true); }
+    try { await fn(); toast(t("{{label}}を送りました", { label })); }
+    catch (err) { toast(t("{{label}}に失敗しました：{{message}}", { label, message: err.message }), true); }
     finally { b.disabled = false; }
   } }, label);
 }
@@ -570,38 +572,38 @@ function unitPanel() {
     h("h2", { text: unitLabel(u).split("\n")[0] }), chip(u.status)));
   if (u.stop_reason) out.push(h("p", { cls: `reason ${statusClass(u.status)}`, text: u.stop_reason }));
   out.push(h("dl", { cls: "kv" },
-    h("dt", { text: "段" }), h("dd", { text: u.status === "awaiting_review" ? STEP_JA.review : STEP_JA[u.step] || u.step || "—" }),
-    h("dt", { text: "回" }), h("dd", { text: `${u.attempt} / ${u.max_attempts ?? "—"}` }),
-    h("dt", { text: "費用" }), h("dd", { text: `${u.cost_used} / ${u.budget_cost ?? "—"}` }),
-    h("dt", { text: "秒" }), h("dd", { text: `${Math.round(u.seconds_used)} / ${u.budget_seconds ?? "—"}` }),
-    h("dt", { text: "候補" }), h("dd", { text: String(u.candidates) })));
+    h("dt", { text: t("段") }), h("dd", { text: u.status === "awaiting_review" ? STEP_JA.review : STEP_JA[u.step] || u.step || "—" }),
+    h("dt", { text: t("回") }), h("dd", { text: `${u.attempt} / ${u.max_attempts ?? "—"}` }),
+    h("dt", { text: t("費用") }), h("dd", { text: `${u.cost_used} / ${u.budget_cost ?? "—"}` }),
+    h("dt", { text: t("秒") }), h("dd", { text: `${Math.round(u.seconds_used)} / ${u.budget_seconds ?? "—"}` }),
+    h("dt", { text: t("候補") }), h("dd", { text: String(u.candidates) })));
   // 戻った回数（図の戻りの辺のラベルは短いので、全文と回数はここに出す）
   const back = RETRY_EDGES.map(([a, b]) => [`${a}>${b}`, (S.edgeCounts || {})[`${a}>${b}`] || 0]).filter(([, n]) => n);
   if (back.length) {
-    out.push(h("section", { cls: "box" }, h("h3", { text: "戻った回数" }),
-      h("dl", { cls: "kv" }, back.flatMap(([k, n]) => [h("dt", { text: `${n}回` }), h("dd", { text: `${STEP_JA[k.split(">")[0]]}→${STEP_JA[k.split(">")[1]]}：${EDGE_TEXT[k]}` })]))));
+    out.push(h("section", { cls: "box" }, h("h3", { text: t("戻った回数") }),
+      h("dl", { cls: "kv" }, back.flatMap(([k, n]) => [h("dt", { text: t("{{n}}回", { n }) }), h("dd", { text: `${STEP_JA[k.split(">")[0]]}→${STEP_JA[k.split(">")[1]]}：${EDGE_TEXT[k]}` })]))));
   }
 
   const ctl = (body) => post(`${base}/control`, body);
   const btns = [];
   if (ACTIVE.has(u.status)) {
-    btns.push(act("段の切れ目で止める", () => ctl({ action: "pause", mode: "boundary" })),
-              act("今すぐ止める", () => ctl({ action: "pause", mode: "now" })),
-              act("段を取り消す", () => ctl({ action: "cancel_step" })));
+    btns.push(act(t("段の切れ目で止める"), () => ctl({ action: "pause", mode: "boundary" })),
+              act(t("今すぐ止める"), () => ctl({ action: "pause", mode: "now" })),
+              act(t("段を取り消す"), () => ctl({ action: "cancel_step" })));
   }
-  if (u.status === "paused" || u.status === "blocked" || u.status === "stopped") btns.push(act("再開", () => ctl({ action: "resume" }), "primary"));
-  if (!["done", "cancelled", "failed", "cancelling"].includes(u.status)) btns.push(act("作業を取り消す", () => ctl({ action: "cancel_unit" }), "danger"));
+  if (u.status === "paused" || u.status === "blocked" || u.status === "stopped") btns.push(act(t("再開"), () => ctl({ action: "resume" }), "primary"));
+  if (!["done", "cancelled", "failed", "cancelling"].includes(u.status)) btns.push(act(t("作業を取り消す"), () => ctl({ action: "cancel_unit" }), "danger"));
   if (btns.length) out.push(h("div", { cls: "actions" }, btns));
 
   if (u.status === "awaiting_review") out.push(reviewPanel(u, d, base));
 
   const marks = [...S.stale.values()].filter((m) => m.unit_id === u.unit_id);
   if (marks.length) {
-    out.push(h("section", { cls: "box stale-box" }, h("h3", { text: "上流が変わった（自動では作り直さない）" }),
+    out.push(h("section", { cls: "box stale-box" }, h("h3", { text: t("上流が変わった（自動では作り直さない）") }),
       marks.map((m) => h("div", { cls: "stale-row" }, h("p", { text: `${m.reason}（${m.effect}）` }),
         h("div", { cls: "actions" },
-          act("作り直す", () => post(`/works/${S.workId}/harness/stages/${u.stage_run_id}/rerun`, { unit_ids: [u.unit_id] }), "primary"),
-          act("このままでよい", () => post(`/works/${S.workId}/harness/stale/${m.id}/dismiss`)))))));
+          act(t("作り直す"), () => post(`/works/${S.workId}/harness/stages/${u.stage_run_id}/rerun`, { unit_ids: [u.unit_id] }), "primary"),
+          act(t("このままでよい"), () => post(`/works/${S.workId}/harness/stale/${m.id}/dismiss`)))))));
   }
 
   out.push(limitsForm(u, d, base));
@@ -613,42 +615,43 @@ function reviewPanel(u, d, base) {
   const attempt = (u.review || d.review || {}).attempt ?? u.attempt;
   const picked = (u.review || d.review || {}).picked;
   const cands = d.cands.filter((c) => c.attempt === attempt);
-  const reason = h("textarea", { rows: 2, placeholder: "却下の理由（次の文脈に入ります）", id: "reject-reason" });
-  const edited = h("input", { type: "text", placeholder: "人が直した絵の id", id: "edit-image" });
-  const answer = h("textarea", { rows: 2, placeholder: "候補が返した質問への答え（これまでの答えと一緒に次の文脈に入ります）", id: "answer-text" });
+  const reason = h("textarea", { rows: 2, placeholder: t("却下の理由（次の文脈に入ります）"), id: "reject-reason" });
+  const edited = h("input", { type: "text", placeholder: t("人が直した絵の id"), id: "edit-image" });
+  const answer = h("textarea", { rows: 2, placeholder: t("候補が返した質問への答え（これまでの答えと一緒に次の文脈に入ります）"), id: "answer-text" });
   const since = (u.review || d.review || {}).since;
   return h("section", { cls: "box review-box" },
-    h("h3", {}, "人の判断を待っています", since ? h("span", { cls: "since", dataset: { since }, text: ago(since) }) : null),
+    h("h3", {}, t("人の判断を待っています"), since ? h("span", { cls: "since", dataset: { since }, text: ago(since) }) : null),
     h("div", { cls: "cands" }, cands.map((c) => candidateCard(c, picked, () => post(`${base}/review`, { action: "approve", candidate_id: c.id })))),
-    h("label", { cls: "label", text: "却下" }), reason,
+    h("label", { cls: "label", text: t("却下") }), reason,
     // 却下は止まるだけ（決めごと 5.3）。すぐ作り直すのは上限の redo_on_reject を入れたときだけ
-    h("div", { cls: "actions" }, act((u.limits || d.limits || {}).redo_on_reject ? "却下して作り直す" : "却下して止める", () => {
-      if (!reason.value.trim()) throw new Error("理由を入れてください");
+    h("div", { cls: "actions" }, act((u.limits || d.limits || {}).redo_on_reject ? t("却下して作り直す") : t("却下して止める"), () => {
+      if (!reason.value.trim()) throw new Error(t("理由を入れてください"));
       return post(`${base}/review`, { action: "reject", reason: reason.value.trim() });
     }, "danger")),
-    ...(ANSWER_KINDS.has(u.kind) ? [h("label", { cls: "label", text: "質問に答える" }), answer,
-      h("div", { cls: "actions" }, act("答えて作り直す", () => {
-        if (!answer.value.trim()) throw new Error("答えを入れてください");
+    ...(ANSWER_KINDS.has(u.kind) ? [h("label", { cls: "label", text: t("質問に答える") }), answer,
+      h("div", { cls: "actions" }, act(t("答えて作り直す"), () => {
+        if (!answer.value.trim()) throw new Error(t("答えを入れてください"));
         return post(`${base}/review`, { action: "answer", reason: answer.value.trim() });
       }))] : []),
-    h("label", { cls: "label", text: "直した絵から続ける" }), edited,
-    h("div", { cls: "actions" }, act("直した絵で生成へ戻す", () => {
-      if (!edited.value.trim()) throw new Error("絵の id を入れてください");
+    h("label", { cls: "label", text: t("直した絵から続ける") }), edited,
+    h("div", { cls: "actions" }, act(t("直した絵で生成へ戻す"), () => {
+      if (!edited.value.trim()) throw new Error(t("絵の id を入れてください"));
       return post(`${base}/review`, { action: "edit", image_id: edited.value.trim() });
     })));
 }
 
 function candidateCard(c, picked, approve) {
-  const img = h("img", { alt: `候補 ${c.k_index + 1}` });
+  const img = h("img", { alt: t("候補 {{n}}", { n: c.k_index + 1 }) });
   if (c.image_id) showIn(img, `/works/${S.workId}/images/${c.image_id}/thumbnail?size=256`).catch((e) => { img.alt = String(e.message || e); });
-  const issues = ((c.check || {}).findings || []).filter((f) => f.ok !== true).map((f) => `${f.ok === false ? "外れ" : "人が見る"}：${f.name}`);
+  const verdict = { pass: t("通過"), flag: t("指摘あり"), drop: t("落ちた") }[c.check_verdict] || t("検査前");
+  const issues = ((c.check || {}).findings || []).filter((f) => f.ok !== true).map((f) => (f.ok === false ? t("外れ：{{name}}", { name: f.name }) : t("人が見る：{{name}}", { name: f.name })));
   return h("div", { cls: `cand${c.id === picked ? " picked" : ""} v-${c.check_verdict || "none"}` },
-    c.image_id ? img : c.content ? contentView(c.content) : h("div", { cls: "noimg", text: c.proposal_id ? "ネームの案" : "絵なし" }),
+    c.image_id ? img : c.content ? contentView(c.content) : h("div", { cls: "noimg", text: c.proposal_id ? t("ネームの案") : t("絵なし") }),
     h("div", { cls: "cand-meta" },
-      h("span", { cls: "label", text: `#${c.k_index + 1} ${{ pass: "通過", flag: "指摘あり", drop: "落ちた" }[c.check_verdict] || "検査前"}${c.id === picked ? "・評価役が選んだ" : ""}` }),
-      issues.length ? h("ul", { cls: "issues" }, issues.slice(0, 6).map((t) => h("li", { text: t }))) : null,
+      h("span", { cls: "label", text: (c.id === picked ? t("#{{n}} {{verdict}}・評価役が選んだ", { n: c.k_index + 1, verdict }) : t("#{{n}} {{verdict}}", { n: c.k_index + 1, verdict })) }),
+      issues.length ? h("ul", { cls: "issues" }, issues.slice(0, 6).map((line) => h("li", { text: line }))) : null,
       c.evaluation ? h("span", { cls: "muted eval", text: evaluationText(c.evaluation) }) : null,
-      c.check_verdict !== "drop" && (c.image_id || c.proposal_id || c.content) ? act("これを採用", approve, "primary") : null));
+      c.check_verdict !== "drop" && (c.image_id || c.proposal_id || c.content) ? act(t("これを採用"), approve, "primary") : null));
 }
 
 // 候補の評価（harness_candidates.evaluation）を短い行にする。サーバーが書く形は3つ：
@@ -659,11 +662,11 @@ function candidateCard(c, picked, approve) {
 function evaluationText(ev) {
   if (Array.isArray(ev.repeats)) {
     const sum = (k) => ev.repeats.reduce((a, r) => a + r[k], 0);
-    return `比べ 勝ち${sum("wins")}・分け${sum("ties")}・負け${sum("losses")}　1位 ${ev.top_count}/${ev.repeats.length}回`;
+    return t("比べ 勝ち{{wins}}・分け{{ties}}・負け{{losses}}　1位 {{top}}/{{total}}回", { wins: sum("wins"), ties: sum("ties"), losses: sum("losses"), top: ev.top_count, total: ev.repeats.length });
   }
-  if (ev.by === "program") return `外れ ${ev.flags} 件（外れの少ない案を選ぶ）`;
+  if (ev.by === "program") return t("外れ {{n}} 件（外れの少ない案を選ぶ）", { n: ev.flags });
   if (ev.why) return ev.why;
-  return `評価を読めない（${Object.keys(ev).join("・")}）`;
+  return t("評価を読めない（{{keys}}）", { keys: Object.keys(ev).join(t("・")) });
 }
 
 // 絵の無い候補（企画・構成・設定資料・仕上げ・総合・書き出し）の中身を、種類を問わず短い行で出す
@@ -676,7 +679,7 @@ function contentView(content) {
     } else if (v !== null && v !== "") lines.push(`${path}：${v}`);
   };
   walk(content, "");
-  return h("ul", { cls: "noimg content-lines" }, lines.map((t) => h("li", { text: t })));
+  return h("ul", { cls: "noimg content-lines" }, lines.map((line) => h("li", { text: line })));
 }
 
 function limitsForm(u, d, base) {
@@ -692,18 +695,18 @@ function limitsForm(u, d, base) {
       const v = i.type === "checkbox" ? i.checked : Number(i.value);
       if (v !== limits[i.name]) next[i.name] = v;
     }
-    try { await post(`${base}/limits`, { limits: next }); toast("上限を変えました"); }
-    catch (err) { toast(`上限を変えられません：${err.message}`, true); }
-  } }, h("h3", { text: "上限（動いている作業にも効く）" }), h("div", { cls: "lim-grid" }, inputs),
-  h("div", { cls: "actions" }, h("button", { type: "submit", cls: "btn" }, "上限を変える")));
+    try { await post(`${base}/limits`, { limits: next }); toast(t("上限を変えました")); }
+    catch (err) { toast(t("上限を変えられませんでした：{{message}}", { message: err.message }), true); }
+  } }, h("h3", { text: t("上限（動いている作業にも効く）") }), h("div", { cls: "lim-grid" }, inputs),
+  h("div", { cls: "actions" }, h("button", { type: "submit", cls: "btn" }, t("上限を変える"))));
   return form;
 }
 
 function candidateList(d) {
   const cands = d.cands;
-  if (!cands.length) return h("section", { cls: "box" }, h("h3", { text: "候補" }), h("p", { cls: "muted", text: "まだありません" }));
-  return h("section", { cls: "box" }, h("h3", { text: `候補（全 ${cands.length}）` }),
-    h("table", { cls: "mini" }, h("tr", {}, ["回", "#", "状態", "検査", "落とした理由"].map((t) => h("th", { text: t }))),
+  if (!cands.length) return h("section", { cls: "box" }, h("h3", { text: t("候補") }), h("p", { cls: "muted", text: t("まだありません") }));
+  return h("section", { cls: "box" }, h("h3", { text: t("候補（全 {{n}}）", { n: cands.length }) }),
+    h("table", { cls: "mini" }, h("tr", {}, [t("回"), "#", t("状態"), t("検査"), t("落とした理由")].map((label) => h("th", { text: label }))),
       cands.map((c) => h("tr", {}, h("td", { text: c.attempt }), h("td", { text: c.k_index + 1 }), h("td", { text: CAND_JA[c.status] || c.status }),
                                    h("td", { text: c.check_verdict || "—" }), h("td", { text: c.dropped_reason || "" })))));
 }
@@ -713,43 +716,43 @@ function stagePanel() {
   const run = S.stageSel ? S.runs.get(S.stageSel) : runsOfEpisode().at(-1);
   if (run) {
     const base = `/works/${S.workId}/harness/stages/${run.id}`;
-    out.push(h("div", { cls: "side-head" }, h("span", { cls: "label", text: "工程" }),
+    out.push(h("div", { cls: "side-head" }, h("span", { cls: "label", text: t("工程") }),
       h("h2", { text: `${run.stage} ${STAGE_JA[run.stage]}` }), chip(run.status)));
     if (run.stop_reason) out.push(h("p", { cls: `reason ${statusClass(run.status)}`, text: run.stop_reason }));
     const btns = [];
-    if (run.status === "awaiting_review") btns.push(act("工程を承認して次へ", () => post(`${base}/approve`), "primary"));
-    if (ACTIVE.has(run.status)) btns.push(act("止める", () => post(`${base}/control`, { action: "pause" })));
-    if (run.status === "paused" || run.status === "blocked" || run.status === "stopped") btns.push(act("再開", () => post(`${base}/control`, { action: "resume" }), "primary"));
-    if (!["done", "cancelled", "failed"].includes(run.status)) btns.push(act("工程を取り消す", () => post(`${base}/control`, { action: "cancel" }), "danger"));
+    if (run.status === "awaiting_review") btns.push(act(t("工程を承認して次へ"), () => post(`${base}/approve`), "primary"));
+    if (ACTIVE.has(run.status)) btns.push(act(t("止める"), () => post(`${base}/control`, { action: "pause" })));
+    if (run.status === "paused" || run.status === "blocked" || run.status === "stopped") btns.push(act(t("再開"), () => post(`${base}/control`, { action: "resume" }), "primary"));
+    if (!["done", "cancelled", "failed"].includes(run.status)) btns.push(act(t("工程を取り消す"), () => post(`${base}/control`, { action: "cancel" }), "danger"));
     if (btns.length) out.push(h("div", { cls: "actions" }, btns));
-    if (run.stage_check) out.push(h("section", { cls: "box" }, h("h3", { text: "工程の検査" }), stageCheckView(run.stage_check)));
+    if (run.stage_check) out.push(h("section", { cls: "box" }, h("h3", { text: t("工程の検査") }), stageCheckView(run.stage_check)));
   }
-  out.push(h("section", { cls: "box" }, h("h3", { text: `判断待ちの一覧（${S.reviewItems.length}）` }),
-    S.reviewItems.length ? h("ul", { cls: "items" }, S.reviewItems.map(itemRow)) : h("p", { cls: "muted", text: "ありません" })));
+  out.push(h("section", { cls: "box" }, h("h3", { text: t("判断待ちの一覧（{{n}}）", { n: S.reviewItems.length }) }),
+    S.reviewItems.length ? h("ul", { cls: "items" }, S.reviewItems.map(itemRow)) : h("p", { cls: "muted", text: t("ありません") })));
   out.push(noteBox());
   if (S.thresholds) out.push(thresholdBox(S.thresholds));
   if (S.notify) out.push(notifySettingsBox(S.notify));
   return out;
 }
 
-const LEVEL_JA = { info: "知らせ", warn: "注意", escalated: "急ぎ" };
+const LEVEL_JA = { info: t("情報"), warn: t("注意"), escalated: t("急ぎ") };
 
 // アプリの中の知らせ（未読）。出来事から作るのはサーバーの1か所（harness_notify.py）
 function noteBox() {
-  return h("section", { cls: "box notes" }, h("h3", { text: `知らせ（未読 ${S.notes.length}）` }),
+  return h("section", { cls: "box notes" }, h("h3", { text: t("通知（未読 {{n}}）", { n: S.notes.length }) }),
     S.notes.length ? h("ul", { cls: "items" }, S.notes.map((n) => h("li", { cls: `item note lv-${n.level}` },
       h("span", { cls: "label", text: `${LEVEL_JA[n.level] || n.level} ${ago(n.created_at)}` }),
       h("span", { text: n.title, onclick: () => n.unit_id && openUnit(n.unit_id) }),
       n.deliveries.length ? h("span", { cls: "muted", text: n.deliveries.map((d) => `${d.channel}:${d.status}`).join(" ") }) : null,
-      act("既読", () => post(`/works/${S.workId}/harness/notifications/${n.id}/read`).then(refreshReviewItems)))))
-      : h("p", { cls: "muted", text: "ありません" }),
+      act(t("既読"), () => post(`/works/${S.workId}/harness/notifications/${n.id}/read`).then(refreshReviewItems)))))
+      : h("p", { cls: "muted", text: t("ありません") }),
     "Notification" in window && Notification.permission === "default"
-      ? h("div", { cls: "actions" }, act("ブラウザの知らせを使う", () => Notification.requestPermission())) : null);
+      ? h("div", { cls: "actions" }, act(t("ブラウザの通知を使う"), () => Notification.requestPermission())) : null);
 }
 
 function browserNotify(data) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
-  new Notification(`AIハーネス：${LEVEL_JA[data.level] || data.level}`, { body: data.title, tag: data.id });
+  new Notification(t("AIハーネス：{{level}}", { level: LEVEL_JA[data.level] || data.level }), { body: data.title, tag: data.id });
 }
 
 // 作品の知らせの決まり。外（Webhook）へは、ここで入れた先にだけ送る（既定は送らない）
@@ -757,11 +760,11 @@ function notifySettingsBox(n) {
   const cur = n.settings || { kinds: Object.keys(n.kinds), webhooks: [], escalate_after_notices: null, budget_near_ratio: null };
   const checks = Object.entries(n.kinds).map(([k, ja]) => h("label", { cls: "chk" },
     h("input", { type: "checkbox", name: k, checked: cur.kinds.includes(k) }), h("span", { text: ja })));
-  const hooks = h("textarea", { rows: 2, placeholder: "Webhook の URL（1行に1つ。後ろに空白で区切って送る種類を書けます）",
-    "aria-label": "Webhook の URL" });
+  const hooks = h("textarea", { rows: 2, placeholder: t("Webhook の URL（1行に1つ。後ろに空白で区切って送る種類を書けます）"),
+    "aria-label": t("Webhook の URL") });
   hooks.value = cur.webhooks.map((w) => [w.url, ...(w.kinds || [])].join(" ")).join("\n");
-  const esc = h("input", { type: "number", min: 1, step: 1, value: cur.escalate_after_notices ?? "", "aria-label": "急ぎに上げる回数" });
-  const ratio = h("input", { type: "number", min: 0.01, max: 0.99, step: 0.01, value: cur.budget_near_ratio ?? "", "aria-label": "予算の割合" });
+  const esc = h("input", { type: "number", min: 1, step: 1, value: cur.escalate_after_notices ?? "", "aria-label": t("急ぎに上げる回数") });
+  const ratio = h("input", { type: "number", min: 0.01, max: 0.99, step: 0.01, value: cur.budget_near_ratio ?? "", "aria-label": t("予算の割合") });
   const save = () => {
     const kinds = checks.map((c) => c.querySelector("input")).filter((i) => i.checked).map((i) => i.name);
     const webhooks = hooks.value.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
@@ -772,56 +775,52 @@ function notifySettingsBox(n) {
       kinds, webhooks, escalate_after_notices: esc.value === "" ? null : Number(esc.value),
       budget_near_ratio: ratio.value === "" ? null : Number(ratio.value) }).then(refreshReviewItems);
   };
-  return h("section", { cls: "box notify-settings" }, h("h3", { text: n.settings ? "知らせの決まり" : "知らせの決まり（未設定：一覧にだけ出す）" }),
-    h("p", { cls: "muted", text: "チェックした種類を上の一覧に出します。Webhook は入れた先にだけ送ります（既定は送りません）。"
-      + "判断待ちの知らせが決めた回数に達すると「急ぎ」に上げ、種類の絞り込みに関係なく全部の送り先へ送ります。"
-      + "予算の割合は空なら出しません。署名の鍵は画面では変えません（今の鍵をそのまま使います）。" }),
+  return h("section", { cls: "box notify-settings" }, h("h3", { text: n.settings ? t("通知のルール") : t("通知のルール（未設定：一覧にだけ出す）") }),
+    h("p", { cls: "muted", text: t("チェックした種類を上の一覧に出します。Webhook は入れた先にだけ送ります（既定は送りません）。判断待ちの通知が決めた回数に達すると「急ぎ」に上げ、種類の絞り込みに関係なく全部の送り先へ送ります。予算の割合は空なら出しません。署名の鍵は画面では変えません（今の鍵をそのまま使います）。") }),
     h("div", { cls: "chks" }, checks), hooks,
     h("div", { cls: "lim-grid" },
-      h("label", { cls: "lim" }, h("span", { cls: "label key", text: "急ぎに上げる回数" }), esc),
-      h("label", { cls: "lim" }, h("span", { cls: "label key", text: "予算の割合（0〜1）" }), ratio)),
-    h("div", { cls: "actions" }, act("決まりを保存", save, "primary")));
+      h("label", { cls: "lim" }, h("span", { cls: "label key", text: t("急ぎに上げる回数") }), esc),
+      h("label", { cls: "lim" }, h("span", { cls: "label key", text: t("予算の割合（0〜1）") }), ratio)),
+    h("div", { cls: "actions" }, act(t("ルールを保存"), save, "primary")));
 }
 
 // 閾値は作品ごとに人が置く。案は出典つきで並べるだけで、押すまで入れない（黙って決めない）
 function thresholdBox(rows) {
   const unset = rows.filter((r) => !r.current || r.current.status === "rejected").length;
   return h("section", { cls: "box thresholds" },
-    h("h3", { text: `閾値（未設定 ${unset} / ${rows.length}）` }),
-    h("p", { cls: "muted", text: "検査が読む閾値です。作品ごとに置きます。案の値は試作で測った数で、置くと「未検証」になります。"
-      + "この作品の絵で確かめたら「確かめた」を押してください。測っていない鍵は案の値がないので、値と出典を入れて置きます。"
-      + "閾値が無い検査は止まります（その作業は「閾値未設定」で待ちます）。" }),
+    h("h3", { text: t("閾値（未設定 {{unset}} / {{total}}）", { unset, total: rows.length }) }),
+    h("p", { cls: "muted", text: t("検査が読む閾値です。作品ごとに置きます。案の値は試作で測った数で、置くと「未検証」になります。この作品の絵で確かめたら「確かめた」を押してください。測っていない鍵は案の値がないので、値と出典を入れて置きます。閾値が無い検査は止まります（その作業は「閾値未設定」で待ちます）。") }),
     rows.map(thresholdRow));
 }
 
 function thresholdRow(r) {
   const cur = r.current;
   const prop = r.proposal;
-  const value = h("input", { type: "number", step: "any", value: cur ? cur.value : prop.value ?? "", "aria-label": `${r.key} の値` });
+  const value = h("input", { type: "number", step: "any", value: cur ? cur.value : prop.value ?? "", "aria-label": t("{{key}} の値", { key: r.key }) });
   const source = h("input", { type: "text", value: cur ? cur.source : prop.value !== null ? prop.source : "",
-                              placeholder: "出典（何で決めたか）", "aria-label": `${r.key} の出典` });
+                              placeholder: t("出典（何で決めたか）"), "aria-label": t("{{key}} の出典", { key: r.key }) });
   const put = (status) => {
-    if (value.value === "" || Number.isNaN(Number(value.value))) throw new Error("値を入れてください");
-    if (!source.value.trim()) throw new Error("出典を入れてください");
+    if (value.value === "" || Number.isNaN(Number(value.value))) throw new Error(t("値を入れてください"));
+    if (!source.value.trim()) throw new Error(t("出典を入れてください"));
     return op(S.workId, { type: "set_threshold", key: r.key, value: { value: Number(value.value) }, source: source.value.trim(), status })
       .then(refreshReviewItems);
   };
-  const state = cur ? `${cur.value}（${{ unverified: "未検証", verified: "確かめた", rejected: "使わない" }[cur.status] || cur.status}）` : "未設定";
+  const state = cur ? t("{{value}}（{{status}}）", { value: cur.value, status: { unverified: t("未検証"), verified: t("確かめた"), rejected: t("使わない") }[cur.status] || cur.status }) : t("未設定");
   return h("div", { cls: `th-row${cur ? "" : " th-unset"}` },
     h("div", { cls: "kvline" }, h("span", { cls: "label key", text: `${r.stage} ${r.key}` }), h("span", { text: state })),
     h("p", { cls: "muted", text: `${r.meaning}（${r.when}）` }),
-    h("p", { cls: "muted", text: `案：${prop.value ?? "値なし"} ／ ${prop.source}` }),
+    h("p", { cls: "muted", text: t("案：{{value}} ／ {{source}}", { value: prop.value ?? t("値なし"), source: prop.source }) }),
     h("div", { cls: "th-inputs" }, value, source),
     h("div", { cls: "actions" },
-      act("置く（未検証）", () => put("unverified")),
-      cur && cur.status === "unverified" ? act("確かめた", () => put("verified"), "primary") : null));
+      act(t("置く（未検証）"), () => put("unverified")),
+      cur && cur.status === "unverified" ? act(t("確かめた"), () => put("verified"), "primary") : null));
 }
 
 function stageCheckView(c) {
   const lines = [];
   const walk = (v, path) => {
     if (v && typeof v === "object" && !Array.isArray(v)) for (const [k, x] of Object.entries(v)) walk(x, path ? `${path}.${k}` : k);
-    else lines.push(h("div", { cls: "kvline" }, h("span", { cls: "label", text: path }), h("span", { text: Array.isArray(v) ? `${v.length}件` : String(v) })));
+    else lines.push(h("div", { cls: "kvline" }, h("span", { cls: "label", text: path }), h("span", { text: Array.isArray(v) ? t("{{count}}件", { count: v.length }) : String(v) })));
   };
   walk(c, "");
   return h("div", {}, lines.slice(0, 30));
@@ -829,7 +828,7 @@ function stageCheckView(c) {
 
 function itemRow(i) {
   const u = i.unit_id ? S.units.get(i.unit_id) : null;
-  const what = u ? unitLabel(u).split("\n")[0] : i.stage_run_id ? "工程" : (i.target_table || "");
+  const what = u ? unitLabel(u).split("\n")[0] : i.stage_run_id ? t("工程") : (i.target_table || "");
   return h("li", { cls: `item k-${i.kind}`, onclick: () => (i.unit_id ? openUnit(i.unit_id) : i.stage_run_id && selectStage(i.stage_run_id)) },
     h("span", { cls: "label", text: `${i.stage || "—"} ${ITEM_JA[i.kind] || i.kind}` }),
     h("span", { text: `${what} ${i.reason || i.dropped_reason || ""}`.trim() }));
@@ -860,16 +859,16 @@ function renderTable() {
   for (const u of S.units.values()) latestByTarget.set(u.target_id, u);  // 作られた順なので、後の物が新しい
   const rows = [];
   const ep = [...S.units.values()].filter((u) => u.kind === "name_draft" && u.target_id === S.episodeId).at(-1);
-  if (ep) rows.push(h("tr", {}, h("th", { text: "話全体" }), h("td", {}, unitChip(ep, "ネーム")), h("td", { text: "" })));
+  if (ep) rows.push(h("tr", {}, h("th", { text: t("話全体") }), h("td", {}, unitChip(ep, t("ネーム"))), h("td", { text: "" })));
   for (const page of pages) {
     const panels = S.work.panels.filter((p) => p.page_id === page.id && !p.removed).sort((a, b) => a.order - b.order);
     const units = panels.map((p) => latestByTarget.get(p.id));
     const sum = {};
     for (const u of units) { const k = u ? u.status : "none"; sum[k] = (sum[k] || 0) + 1; }
-    rows.push(h("tr", {}, h("th", { text: `${page.number}ページ` }),
-      h("td", {}, h("div", { cls: "chips" }, panels.map((p, i) => units[i] ? unitChip(units[i], `コマ${p.order}`)
-        : h("span", { cls: `pchip ${p.image_id ? "st-done" : "st-none"}`, text: `コマ${p.order} ${p.human_confirmed ? "人が確定" : p.image_id ? "絵あり" : "作業なし"}` })))),
-      h("td", { cls: "sum" }, Object.entries(sum).map(([k, n]) => h("span", { cls: `chip small ${statusClass(k)}`, text: `${STATUS_JA[k] || "作業なし"} ${n}` })))));
+    rows.push(h("tr", {}, h("th", { text: t("{{n}}ページ", { n: page.number }) }),
+      h("td", {}, h("div", { cls: "chips" }, panels.map((p, i) => units[i] ? unitChip(units[i], t("コマ{{n}}", { n: p.order }))
+        : h("span", { cls: `pchip ${p.image_id ? "st-done" : "st-none"}`, text: t("コマ{{n}} {{state}}", { n: p.order, state: p.human_confirmed ? t("人が確定") : p.image_id ? t("絵あり") : t("作業なし") }) })))),
+      h("td", { cls: "sum" }, Object.entries(sum).map(([k, n]) => h("span", { cls: `chip small ${statusClass(k)}`, text: `${STATUS_JA[k] || t("作業なし")} ${n}` })))));
   }
   const key = rows.map((r) => r.textContent + r.innerHTML.length).join("|");
   if (tb.dataset.key === key) return;
@@ -882,7 +881,7 @@ function unitChip(u, name) {
                        onclick: () => openUnit(u.unit_id), title: u.stop_reason || "", dataset: { unit: u.unit_id, status: u.status } },
     h("b", { text: name }), ` ${STATUS_JA[u.status] || u.status}`,
     u.max_attempts ? h("i", { text: ` ${u.attempt}/${u.max_attempts}` }) : null,
-    u.stale ? h("i", { cls: "stale-tag", text: " 古い" }) : null);
+    u.stale ? h("i", { cls: "stale-tag", text: ` ${t("古い")}` }) : null);
 }
 
 // ------------------------------------------------------------------ 切り替え
@@ -927,11 +926,11 @@ function openStageView() {
 }
 
 function toast(msg, bad = false) {
-  const t = $("#toast");
-  t.textContent = msg;
-  t.className = `toast show${bad ? " bad" : ""}`;
+  const box = $("#toast");
+  box.textContent = msg;
+  box.className = `toast show${bad ? " bad" : ""}`;
   clearTimeout(S.toast);
-  S.toast = setTimeout(() => { t.className = "toast"; }, 3500);
+  S.toast = setTimeout(() => { box.className = "toast"; }, 3500);
 }
 
-main().catch((e) => { console.error(e); showEmpty(`開けません：${e.message}`); });
+main().catch((e) => { console.error(e); showEmpty(t("開けません：{{message}}", { message: e.message })); });

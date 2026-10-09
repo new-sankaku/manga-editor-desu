@@ -38,10 +38,10 @@ export function toast(msg, kind = "") {
   toast.h = setTimeout(() => t.replaceChildren(), kind === "bad" ? 9000 : 4000);
 }
 
-// what：何をしようとして失敗したか。理由と一緒に出す
-export function fail(e, what = "") {
+// message：何が失敗したかを表す丸ごとの文。理由と一緒に出す
+export function fail(e, message = "") {
   console.error(e);
-  toast(what ? `${what}できませんでした：${api.errorText(e)}` : api.errorText(e), "bad");
+  toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
 }
 
 // 押した方だけ aria-pressed を true にする並び

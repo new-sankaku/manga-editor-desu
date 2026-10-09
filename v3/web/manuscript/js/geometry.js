@@ -1,5 +1,6 @@
 // 形の計算（mm）。コマを切る計算はサーバー（v3server/panel_layout/panel_frame_editing.py）と同じ式にする。
 // 画面で先に見せるためだけに使い、正本はサーバーが返した形で置き換える。
+import { t } from "../../common/i18n.js";
 
 export const PT_MM = 25.4 / 72;
 const EPS = 1e-6;
@@ -55,7 +56,7 @@ export function splitPolygon(P, through, n, gap) {
   const a = clipHalf(P, n, c + gap / 2);
   const b = clipHalf(P, [-n[0], -n[1]], -(c - gap / 2));
   if (a.length < 3 || b.length < 3 || area(a) <= EPS || area(b) <= EPS) {
-    throw new Error("切る線がコマを横切っていない（または間の幅がコマより広い）");
+    throw new Error(t("切る線がコマを横切っていない（または間の幅がコマより広い）"));
   }
   return [a, b];
 }
@@ -107,10 +108,10 @@ export const roundPts = (P) => P.map(([x, y]) => [r2(x), r2(y)]);
 // ---------------------------------------------------------------- フキダシの形
 // 箱（mm の [x0, y0, x1, y1]）に合わせた外形の多角形。外形は正本に入れる（書き出しは外形を描く）
 export const BALLOON_FORMS = [
-  ["ellipse", "楕円", "circle"],
-  ["rounded", "角丸", "square"],
-  ["burst", "叫び", "zap"],
-  ["cloud", "もこもこ", "cloud"],
+  ["ellipse", t("楕円"), "circle"],
+  ["rounded", t("角丸"), "square"],
+  ["burst", t("叫び"), "zap"],
+  ["cloud", t("もこもこ"), "cloud"],
 ];
 
 export function balloonOutline(form, box, pad) {

@@ -4,7 +4,7 @@
 
 function raw(name) {
   const v = getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim();
-  if (!v) throw new Error(`色の組に --${name} がありません（common/theme.css）`);
+  if (!v) throw new Error(`色の組に --${name} がありません（common/theme.css）`);  // i18n:dev
   return v;
 }
 

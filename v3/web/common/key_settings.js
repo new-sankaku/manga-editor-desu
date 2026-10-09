@@ -6,6 +6,7 @@
 // - 初めに戻す（1つずつ・全部）。今のアプリ（js/shortcut.js）のキーを読み込む（違う物だけを並べ、選んで読み込む）
 import { html, render, nothing } from "../vendor/lit-html-3.2.1/lit-html.js";
 import { live } from "../vendor/lit-html-3.2.1/directives/live.js";
+import { t } from "./i18n.js";
 import * as km from "./keymap.js";
 import { CURRENT_APP_NOT_MAPPED } from "./key_catalog.js";
 import { icon } from "./shell.js";
@@ -27,7 +28,7 @@ function match(k) {
 
 async function act(fn) {
   S.busy = true; S.error = null; draw();
-  try { await fn(); } catch (e) { console.error(e); S.error = `残せませんでした：${api.errorText(e)}`; }
+  try { await fn(); } catch (e) { console.error(e); S.error = t("残せませんでした：{{reason}}", { reason: api.errorText(e) }); }
   S.busy = false; draw();
 }
 
@@ -92,16 +93,15 @@ function row(k) {
   const rec = S.rec?.id === k.id;
   const cf = S.conflict?.id === k.id ? S.conflict : null;
   return html`<tr data-id=${k.id} class=${rec ? "rec" : ""}>
-    <td class="v3-ks-l">${k.label}${k.hold ? html` <span class="flag mut">押している間</span>` : nothing}${km.isCustom(k.id) ? html` <span class="flag ai">変えた</span>` : nothing}
-      ${cf ? html`<div class="note bad v3-conflict" role="alert">${icon("triangle-alert")}<span><kbd>${km.keyLabel(cf.key)}</kbd> は
-        ${cf.others.map((o, i) => html`${i ? "・" : ""}「${o.label}」（${km.SCOPES[o.scope]}）`)} と重なります。
-        <span class="acts"><button class="btn sm" id="v3-ks-take" @click=${takeOver}>相手から外して割り当てる</button>
-        <button class="btn ghost sm" @click=${() => { S.conflict = null; draw(); }}>やめる</button></span></span></div>` : nothing}</td>
-    <td class="v3-ks-k">${km.keyGroups(k.id).map((g) => html`<span class="v3-chip"><kbd>${g.label}</kbd><button class="ibtn" title="外す" aria-label="${g.label} を外す"
+    <td class="v3-ks-l">${k.label}${k.hold ? html` <span class="flag mut">${t("押している間")}</span>` : nothing}${km.isCustom(k.id) ? html` <span class="flag ai">${t("変えた")}</span>` : nothing}
+      ${cf ? html`<div class="note bad v3-conflict" role="alert">${icon("triangle-alert")}<span><kbd>${km.keyLabel(cf.key)}</kbd> ${t("は {{others}} と重なります。", { others: cf.others.map((o) => t("「{{label}}」（{{scope}}）", { label: o.label, scope: km.SCOPES[o.scope] })).join(t("・")) })}
+        <span class="acts"><button class="btn sm" id="v3-ks-take" @click=${takeOver}>${t("相手から外して割り当てる")}</button>
+        <button class="btn ghost sm" @click=${() => { S.conflict = null; draw(); }}>${t("やめる")}</button></span></span></div>` : nothing}</td>
+    <td class="v3-ks-k">${km.keyGroups(k.id).map((g) => html`<span class="v3-chip"><kbd>${g.label}</kbd><button class="ibtn" title=${t("外す")} aria-label=${t("{{key}} を外す", { key: g.label })}
         ?disabled=${S.busy} @click=${() => act(() => km.setKeys(k.id, keys.filter((y) => !g.keys.includes(y))))}>${icon("x")}</button></span>`)}
-      ${rec ? html`<button class="btn sm ai v3-rec" @keydown=${onRecKey} @keyup=${onRecKeyUp} @blur=${stopRec}>キーを押してください（Esc でやめる）</button>`
-        : html`<button class="btn ghost sm" data-add ?disabled=${S.busy} @click=${() => startRec(k.id)}>${icon("plus")}足す</button>`}
-      ${km.isCustom(k.id) ? html`<button class="btn ghost sm" data-reset ?disabled=${S.busy} @click=${() => act(() => km.setKeys(k.id, km.entry(k.id).keys))}>${icon("rotate-ccw")}初めに戻す</button>` : nothing}</td></tr>`;
+      ${rec ? html`<button class="btn sm ai v3-rec" @keydown=${onRecKey} @keyup=${onRecKeyUp} @blur=${stopRec}>${t("キーを押してください（Esc でやめる）")}</button>`
+        : html`<button class="btn ghost sm" data-add ?disabled=${S.busy} @click=${() => startRec(k.id)}>${icon("plus")}${t("足す")}</button>`}
+      ${km.isCustom(k.id) ? html`<button class="btn ghost sm" data-reset ?disabled=${S.busy} @click=${() => act(() => km.setKeys(k.id, km.entry(k.id).keys))}>${icon("rotate-ccw")}${t("初めに戻す")}</button>` : nothing}</td></tr>`;
 }
 
 function draw() {
@@ -109,26 +109,26 @@ function draw() {
   const conflicts = km.allConflicts();
   const imp = importRows();
   render(html`
-    <div class="v3-dlg-h"><span class="h2 grow" id="v3-ks-title">キーを変える</span>
-      <button class="btn sm" @click=${() => dlg.close()}>${icon("x")}閉じる</button></div>
+    <div class="v3-dlg-h"><span class="h2 grow" id="v3-ks-title">${t("キーを変える")}</span>
+      <button class="btn sm" @click=${() => dlg.close()}>${icon("x")}${t("閉じる")}</button></div>
     <div class="v3-dlg-b">
-      <p class="meta">割り当ては利用者ごとにサーバーへ残します（どのブラウザで開いても同じです）。「足す」を押してからキーを押します。
-        ${km.IS_MAC ? "⌘ は Cmd です。" : "Mac で開くと Ctrl の所は ⌘（Cmd）になります。"}</p>
+      <p class="meta">${t("割り当ては利用者ごとにサーバーへ残します（どのブラウザで開いても同じです）。「足す」を押してからキーを押します。")}
+        ${km.IS_MAC ? t("⌘ は Cmd です。") : t("Mac で開くと Ctrl の所は ⌘（Cmd）になります。")}</p>
       ${st.why ? html`<div class="note need">${icon("triangle-alert")}<span>${st.why}</span></div>` : nothing}
       ${S.error ? html`<div class="note bad" role="alert">${icon("circle-alert")}<span>${S.error}</span></div>` : nothing}
-      ${conflicts.length ? html`<div class="note bad" id="v3-ks-conflicts">${icon("triangle-alert")}<span>重なっているキーがあります：
-        ${conflicts.map(([a, b, s], i) => html`${i ? "、" : ""}<kbd>${km.keyLabel(s)}</kbd>（${a.label}／${b.label}）`)}。先に結ばれた方（道具 → 画面 → どの画面でも）が効きます</span></div>` : nothing}
+      ${conflicts.length ? html`<div class="note bad" id="v3-ks-conflicts">${icon("triangle-alert")}<span>${t("重なっているキーがあります：")}
+        ${conflicts.map(([a, b, s], i) => html`${i ? "、" : ""}<kbd>${km.keyLabel(s)}</kbd>（${a.label}／${b.label}）`)}${t("。先に結ばれた方（ツール → 画面 → どの画面でも）が効きます")}</span></div>` : nothing}
       <div class="acts">
-        <label class="v3-search grow">${icon("search")}<input class="field" type="search" id="v3-ks-q" placeholder="すること・キー・画面で探す" aria-label="操作を探す"
+        <label class="v3-search grow">${icon("search")}<input class="field" type="search" id="v3-ks-q" placeholder=${t("すること・キー・画面で探す")} aria-label=${t("操作を探す")}
           .value=${live(S.query)} @input=${(e) => { S.query = e.target.value; draw(); }}></label>
-        <button class="btn sm" id="v3-ks-import" ?disabled=${S.busy || !imp.length} @click=${() => { S.importing = !S.importing; draw(); }}>${icon("import")}今のアプリのキーを読み込む</button>
-        <button class="btn sm" id="v3-ks-reset" ?disabled=${S.busy} @click=${() => { if (confirm("全部の操作のキーを初めの割り当てに戻します。よろしいですか")) act(() => km.resetAll()); }}>${icon("rotate-ccw")}全部を初めに戻す</button>
+        <button class="btn sm" id="v3-ks-import" ?disabled=${S.busy || !imp.length} @click=${() => { S.importing = !S.importing; draw(); }}>${icon("import")}${t("今のアプリのキーを読み込む")}</button>
+        <button class="btn sm" id="v3-ks-reset" ?disabled=${S.busy} @click=${() => { if (confirm(t("全部の操作のキーを初めの割り当てに戻します。よろしいですか"))) act(() => km.resetAll()); }}>${icon("rotate-ccw")}${t("全部を初めに戻す")}</button>
       </div>
-      ${S.importing ? html`<div class="card v3-import" id="v3-ks-import-list"><div class="lbl">今のアプリ（manga-editor-desu の画面）で違うキー</div>
-        <table class="keys-t">${imp.map((k) => html`<tr><th>${k.current.map((c) => html`<kbd>${km.keyLabel(c)}</kbd> `)}</th><td>${k.label}（${km.SCOPES[k.scope]}）。今は ${km.keyLabels(k.id).join("・") || "キーなし"}。読み込むと足します</td></tr>`)}</table>
-        <div class="meta">${CURRENT_APP_NOT_MAPPED.map((t) => html`<div>${t}</div>`)}</div>
-        <div class="acts"><button class="btn primary sm" id="v3-ks-import-go" @click=${doImport}>読み込む</button>
-          <button class="btn ghost sm" @click=${() => { S.importing = false; draw(); }}>やめる</button></div></div>` : nothing}
+      ${S.importing ? html`<div class="card v3-import" id="v3-ks-import-list"><div class="lbl">${t("今のアプリ（manga-editor-desu の画面）で違うキー")}</div>
+        <table class="keys-t">${imp.map((k) => html`<tr><th>${k.current.map((c) => html`<kbd>${km.keyLabel(c)}</kbd> `)}</th><td>${t("{{label}}（{{scope}}）。今は {{now}}。読み込むと足します", { label: k.label, scope: km.SCOPES[k.scope], now: km.keyLabels(k.id).join(t("・")) || t("キーなし") })}</td></tr>`)}</table>
+        <div class="meta">${CURRENT_APP_NOT_MAPPED.map((msg) => html`<div>${msg}</div>`)}</div>
+        <div class="acts"><button class="btn primary sm" id="v3-ks-import-go" @click=${doImport}>${t("読み込む")}</button>
+          <button class="btn ghost sm" @click=${() => { S.importing = false; draw(); }}>${t("やめる")}</button></div></div>` : nothing}
       ${scopeOrder().map((s) => {
         const list = km.KEYS.filter((k) => k.scope === s && match(k));
         return list.length ? html`<section class="v3-keys-g" data-scope=${s}><div class="lbl">${km.SCOPES[s]}</div>

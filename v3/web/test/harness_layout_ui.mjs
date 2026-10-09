@@ -16,6 +16,10 @@ import { makeShot, openBrowser, serveWeb, SHOTS } from "./ui_common.mjs";
 
 const ORIGIN = "http://harness-layout.test";
 const USER = "layout-author";
+// V3_LANG を付けて流すときは、画面の文言をその言語の辞書から引いて探す
+const DICT = process.env.V3_LANG ? (await import(`../i18n/${process.env.V3_LANG}.js`)).default : null;
+const EVAL_ROW = "比べ 勝ち{{wins}}・分け{{ties}}・負け{{losses}}　1位 {{top}}/{{total}}回";
+const evalRow = (v) => (DICT ? DICT[EVAL_ROW] : EVAL_ROW).replace(/\{\{(\w+)\}\}/g, (_, k) => v[k]);
 const SIZES = (process.env.SIZES || "1920x1080,1280x800,1024x768,390x844").split(",").map((s) => s.split("x").map(Number));
 
 // ---------------------------------------------------------------- 試験の絵（作品の絵ではない）
@@ -127,11 +131,11 @@ const SCENARIOS = [
   { name: "04_unit_review", what: "作業の図。人の判断待ち（脈打つ）。横の欄に候補と採用・却下",
     unit: () => { const u = unit("p1-1", "awaiting_review", "review"); return { u, d: detail(u, ["cut_out", "context", "generate", "check", "evaluate"], "done") }; },
     // 候補のカードに評価の行が出る（前は「票 undefined」と出ていた。サーバーに無い値を読んでいた）
-    cards: () => {
+    cards: (wants) => {
       const texts = [...document.querySelectorAll(".review-box .cand")].map((c) => c.textContent);
       const bad = texts.length === 2 ? [] : [`候補のカードが ${texts.length} 枚`];
-      for (const t of texts) if (/undefined|NaN|読めない/.test(t)) bad.push(t);
-      for (const want of ["比べ 勝ち1・分け0・負け0　1位 1/1回", "比べ 勝ち0・分け0・負け1　1位 0/1回"]) {
+      for (const t of texts) if (/undefined|NaN|読めない|Cannot read/.test(t)) bad.push(t);
+      for (const want of wants) {
         if (!texts.some((t) => t.includes(want))) bad.push(`評価の行「${want}」が無い`);
       }
       return bad;
@@ -365,7 +369,7 @@ async function runOne(context, W, H, sc) {
   if (moved3.length) m.bad.movedOnResize = moved3;
   if (total(m3.bad)) m.bad.afterResize = Object.entries(m3.bad).filter(([, v]) => v.length).map(([k, v]) => `${k}: ${v.slice(0, 3).join(" / ")}`);
   if (sc.cards) {
-    const bad = await page.evaluate(sc.cards);
+    const bad = await page.evaluate(sc.cards, [evalRow({ wins: 1, ties: 0, losses: 0, top: 1, total: 1 }), evalRow({ wins: 0, ties: 0, losses: 1, top: 0, total: 1 })]);
     if (bad.length) m.bad.cards = bad;
   }
   if (errors.length) m.bad.pageErrors = errors;

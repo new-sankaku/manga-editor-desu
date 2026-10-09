@@ -3,6 +3,7 @@
 // - dev_header: 開発と試験だけ。名前の欄の値を X-V3-User で送る
 // 絵も同じ口から取るので、<img src> に URL を直接は入れず、取ってきて blob の URL にする。
 // blob の URL は絵を読み終えたらすぐ解放する（revokeObjectURL）。取ってきた中身（Blob）は大きさの上限つきで持つ。
+import { t } from "../common/i18n.js";
 const USER_KEY = "v3.user";
 let authMode = null;
 let me = null;
@@ -49,10 +50,10 @@ export class ApiError extends Error {
 export async function authFetch(path, init = {}) {
   const headers = { ...(init.headers || {}), "X-V3-Request": "1" };
   if (authMode === "dev_header") {
-    if (!memoUser) throw new ApiError(401, "利用者の名前を入れてください");
+    if (!memoUser) throw new ApiError(401, t("利用者の名前を入れてください"));
     headers["X-V3-User"] = memoUser;
   } else if (authMode !== "oidc") {
-    throw new ApiError(0, "名乗り方を読む前に口を呼んだ（先に loadAuth を呼ぶ）");
+    throw new ApiError(0, "名乗り方を読む前に口を呼んだ（先に loadAuth を呼ぶ）");  // i18n:dev
   }
   let r;
   try {
@@ -60,8 +61,8 @@ export async function authFetch(path, init = {}) {
   } catch (e) {
     // fetch が答えを受け取れない（回線が切れた・サーバーが止まった）。英語の「Failed to fetch」をそのまま見せない
     throw new NetworkError(navigator.onLine === false
-      ? "オフラインです。回線がつながったら、もう一度してください"
-      : "サーバーにつながりません。サーバーが止まっているか、回線が切れています");
+      ? t("オフラインです。回線がつながったら、もう一度してください")
+      : t("サーバーにつながりません。サーバーが止まっているか、回線が切れています"));
   }
   if (r.status === 401 && authMode === "oidc") { toLogin(); return new Promise(() => {}); }
   return r;
@@ -151,7 +152,7 @@ export async function fileImage(file) {
 export async function loadImage(url) {
   const im = new Image();
   im.src = url;
-  try { await im.decode(); } catch { throw new Error("絵を読めませんでした"); }
+  try { await im.decode(); } catch { throw new Error(t("絵を読めませんでした")); }
   return im;
 }
 
@@ -166,7 +167,7 @@ export function maskOverlay(path, rgb, alpha, maxSide = 0) {
   if (!overlayCache.has(key)) {
     const p = (async () => {
       if (!("filter" in CanvasRenderingContext2D.prototype)) {
-        throw new Error("このブラウザは canvas の filter に対応していないので、人の手の範囲を色で出せません");
+        throw new Error(t("このブラウザは canvas の filter に対応していないので、手動編集の範囲を色で出せません"));
       }
       const { image: im } = await image(path);
       const k = maxSide ? Math.min(1, maxSide / Math.max(im.naturalWidth, im.naturalHeight)) : 1;
@@ -195,7 +196,7 @@ export function errorText(e) {
     if (Array.isArray(d)) return d.map((x) => `${(x.loc || []).slice(1).join(".")}: ${x.msg}`).join(" / ");
     if (typeof d === "string" && d) return d;
     if (d && typeof d === "object" && !Array.isArray(d)) return JSON.stringify(d);
-    return `サーバーが ${e.status} を返しました`;
+    return t("サーバーが {{status}} を返しました", { status: e.status });
   }
   return String(e && e.message ? e.message : e);
 }

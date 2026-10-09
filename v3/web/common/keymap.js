@@ -7,6 +7,7 @@
 //   "input"・"any" の物だけが効く
 // - 利用者が変えたキーは、サーバーの利用者ごとの設定（GET・PUT /me/settings の other.keymap）に残す
 import { parseKeybinding, matchKeyBindingPress } from "../vendor/tinykeys-3.0.0/tinykeys.modern.js";
+import { t } from "./i18n.js";
 import { KEYS, SCOPES } from "./key_catalog.js";
 import * as api from "../js/api.js";
 
@@ -20,7 +21,7 @@ const SEQ_MS = 1000;
 const handlers = new Map();      // id → 処理（hold の物は { down, up }）
 let screen = null, tool = null;
 let overrides = {};              // id → [キー]（初めの割り当てと違う物だけ）
-let userState = { loaded: false, why: "まだ読んでいません" };
+let userState = { loaded: false, why: t("まだ読んでいません") };
 let pending = null, pendingTimer = 0;
 const held = new Map();          // e.code → 押している間の項目
 let suspended = 0;               // キーを変える画面がキーを拾っている間は 1 以上
@@ -28,7 +29,7 @@ const watchers = new Set();
 
 export function entry(id) {
   const k = BY_ID.get(id);
-  if (!k) throw new Error(`キーの一覧（common/key_catalog.js）に ${id} がありません`);
+  if (!k) throw new Error(`キーの一覧（common/key_catalog.js）に ${id} がありません`);  // i18n:dev
   return k;
 }
 export function keysOf(id) { return overrides[id] ?? entry(id).keys; }
@@ -46,8 +47,8 @@ export function activeScopes() {
 
 // ---------------------------------------------------------------- 画面から使う
 export function start(screenId) {
-  if (screen) throw new Error("keymap.start は1つの画面で1回だけ呼ぶ");
-  if (!SCOPES[screenId]) throw new Error(`画面 ${screenId} が SCOPES にありません`);
+  if (screen) throw new Error("keymap.start は1つの画面で1回だけ呼ぶ");  // i18n:dev
+  if (!SCOPES[screenId]) throw new Error(`画面 ${screenId} が SCOPES にありません`);  // i18n:dev
   screen = screenId;
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
@@ -59,7 +60,7 @@ export function isMissing(id) { return missing.has(id); }
 export function bind(id, fn, opts = {}) {
   const k = entry(id);
   if (opts.missing) missing.add(id);
-  if (k.hold && (typeof fn.down !== "function" || typeof fn.up !== "function")) throw new Error(`${id} は押している間の物なので { down, up } で結ぶ`);
+  if (k.hold && (typeof fn.down !== "function" || typeof fn.up !== "function")) throw new Error(`${id} は押している間の物なので { down, up } で結ぶ`);  // i18n:dev
   handlers.set(id, fn);
   applyHints();
 }
@@ -94,7 +95,7 @@ export function keyLabel(str) {
     if (key.length === 1 && !/[a-z0-9]/i.test(key)) mods = mods.filter((m) => m !== "Shift");
     const shown = NAMES[key.toLowerCase()] ?? (key.length === 1 ? key.toUpperCase() : key);
     return [...mods.map(modName), shown].join("+");
-  }).join(" のあと ");
+  }).join(t(" のあと "));
 }
 // 見せ方が同じキー（"+" と "Shift++" など、配列で Shift が要るかどうかの違い）は1つにまとめる
 export function keyGroups(id) {
@@ -150,14 +151,14 @@ export function allConflicts() {
 export async function loadUserKeys() {
   overrides = {};
   if (api.mode() !== "oidc" && !api.currentUser()) {
-    userState = { loaded: false, why: "利用者の名前が無いので、変えたキーを読めません。初めの割り当てで動いています" };
+    userState = { loaded: false, why: t("利用者の名前が無いので、変えたキーを読めません。初めの割り当てで動いています") };
   } else {
     try {
       const s = await api.get("/me/settings");
       overrides = clean(s.other?.keymap ?? {});
       userState = { loaded: true, why: null };
     } catch (e) {
-      userState = { loaded: false, why: `変えたキーを読めませんでした（${api.errorText(e)}）。初めの割り当てで動いています` };
+      userState = { loaded: false, why: t("変えたキーを読めませんでした（{{reason}}）。初めの割り当てで動いています", { reason: api.errorText(e) }) };
     }
   }
   changed();
@@ -201,7 +202,7 @@ export function applyHints(root = document) {
     if (!BY_ID.has(id)) continue;
     el.dataset.titleBase ??= el.title;
     const labels = keyLabels(id);
-    el.title = labels.length ? `${el.dataset.titleBase} (${labels.join("・")})` : el.dataset.titleBase;
+    el.title = labels.length ? `${el.dataset.titleBase} (${labels.join(t("・"))})` : el.dataset.titleBase;
     const kbd = el.querySelector("kbd");
     if (kbd) { kbd.textContent = labels[0] ?? ""; kbd.hidden = !labels.length; }
   }

@@ -1,6 +1,7 @@
 // V3 画像生成の画面。作品・ページ・コマを選び、処理を頼み、候補から選んで採用し、人の手で直し、版を戻す。
 // 処理の一覧と入力欄の形はサーバー（GET /works/{id}/image-processes）から来る。処理を足しても、この画面は変えない。
 import * as api from "./api.js";
+import { t, lang } from "../common/i18n.js";
 import { renderForm } from "./schema_form.js";
 import { Stage } from "./stage.js";
 import { drawStroke } from "./pen_render.js";
@@ -11,9 +12,9 @@ import { pollMs } from "../common/poll_interval.js";
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const ACTIVE = new Set(["queued", "running", "waiting_limit", "waiting_budget"]);
-const STATUS = { queued: "順番待ち", running: "作っている", waiting_limit: "回数の上限で待ち", waiting_budget: "予算で待ち",
-                 stopped: "止まった", done: "できた", cancelled: "止めた" };
-const ORIGIN = { generated: "AIが作った", human_drawn: "人が描いた", imported: "取り込んだ", human_edited: "人が直した" };
+const STATUS = { queued: t("順番待ち"), running: t("作っている"), waiting_limit: t("回数の上限で待ち"), waiting_budget: t("予算で待ち"),
+                 stopped: t("止まった"), done: t("できた"), cancelled: t("取り消した") };
+const ORIGIN = { generated: t("AIが作った"), human_drawn: t("人が描いた"), imported: t("取り込んだ"), human_edited: t("人が直した") };
 const POLL_MS = pollMs(1500);
 const THUMB = 256;
 const PEN_INK = "#000000";   // 色の決め打ちを許す：ペンの線の色は絵の中身（墨）で、画面の色ではない（色の組を替えても変えない）
@@ -46,10 +47,10 @@ let stage;
 
 // ---------------------------------------------------------------- 知らせ
 function toast(msg, kind = "") {
-  const t = $("#toast");
-  t.replaceChildren(note(msg, kind));
+  const box = $("#toast");
+  box.replaceChildren(note(msg, kind));
   clearTimeout(toast.h);
-  toast.h = setTimeout(() => t.replaceChildren(), kind === "bad" ? 9000 : 4000);
+  toast.h = setTimeout(() => box.replaceChildren(), kind === "bad" ? 9000 : 4000);
 }
 function note(text, kind = "", icon = kind === "bad" ? "circle-alert" : kind === "need" ? "triangle-alert" : "info") {
   const n = h("div", { class: `note ${kind}` }, icon ? h("i", { "data-lucide": icon }) : null, h("span", { text }));
@@ -57,10 +58,10 @@ function note(text, kind = "", icon = kind === "bad" ? "circle-alert" : kind ===
   return n;
 }
 function icons() { window.lucide.createIcons({ attrs: { class: "lucide" } }); }
-// what：何をしようとして失敗したか（「採用」など）。理由と一緒に出す
-function fail(e, what = "") {
+// message：何をしようとして失敗したかの丸ごとの文（「採用できませんでした」など）。理由と一緒に出す
+function fail(e, message = "") {
   console.error(e);
-  toast(what ? `${what}できませんでした：${api.errorText(e)}` : api.errorText(e), "bad");
+  toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
 }
 // 線と層の id は画面で作る（保存を待たずに取り消しの記録に載せるため）。http の画面でも使えるよう getRandomValues で作る
 function newId() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join(""); }
@@ -96,7 +97,7 @@ async function loadWorks() {
   S.works = await api.get("/works");
   const sel = $("#pick-work");
   sel.replaceChildren(...S.works.map((w) => h("option", { value: w.id, text: w.title })));
-  if (!S.works.length) { showEmpty("見てよい作品がありません"); return; }
+  if (!S.works.length) { showEmpty(t("見てよい作品がありません")); return; }
   const saved = wanted("work");
   await selectWork(S.works.some((w) => w.id === saved) ? saved : S.works[0].id);
 }
@@ -108,8 +109,8 @@ async function selectWork(id) {
   S.hist = new Map(); S.masks = new Map(); S.maskUnsent = false; S.shownPanel = null; S.hand = null; syncUndo();
   [S.work, S.processes] = await Promise.all([api.get(`/works/${id}`), api.get(`/works/${id}/image-processes`)]);
   const pages = S.work.pages.filter((p) => !p.removed).sort((a, b) => a.number - b.number);
-  $("#pick-page").replaceChildren(...pages.map((p) => h("option", { value: p.id, text: `${p.number} ページ` })));
-  if (!pages.length) { showEmpty("この作品にはページがありません"); return; }
+  $("#pick-page").replaceChildren(...pages.map((p) => h("option", { value: p.id, text: t("{{number}} ページ", { number: p.number }) })));
+  if (!pages.length) { showEmpty(t("この作品にはページがありません")); return; }
   const saved = wanted("page");
   await selectPage(pages.some((p) => p.id === saved) ? saved : pages[0].id);
 }
@@ -119,8 +120,8 @@ async function selectPage(id) {
   $("#pick-page").value = id;
   writePref("page", id);
   const panels = livePanels();
-  $("#pick-panel").replaceChildren(...panels.map((p) => h("option", { value: p.id, text: `コマ ${p.order}` })));
-  if (!panels.length) { showEmpty("このページにはコマがありません"); return; }
+  $("#pick-panel").replaceChildren(...panels.map((p) => h("option", { value: p.id, text: t("コマ {{order}}", { order: p.order }) })));
+  if (!panels.length) { showEmpty(t("このページにはコマがありません")); return; }
   const saved = wanted("panel");
   await selectPanel(panels.some((p) => p.id === saved) ? saved : panels[0].id);
 }
@@ -132,7 +133,7 @@ const panel = () => (S.work ? S.work.panels.find((p) => p.id === S.panelId) : nu
 
 async function selectPanel(id) {
   // 前のコマの線の控えは、待たずに上げておく（失敗は知らせる）
-  if (S.hand && S.hand.dirty) uploadCache(S.hand).catch((e) => fail(e, "線の控えを上げる"));
+  if (S.hand && S.hand.dirty) uploadCache(S.hand).catch((e) => fail(e, t("線の画像をサーバーに送れませんでした")));
   S.panelId = id;
   $("#pick-panel").value = id;
   writePref("panel", id);
@@ -179,7 +180,7 @@ async function refreshPanel(imageId) {
     S.image = null; S.protectedCount = 0;
     await stage.show({ image: null });
     S.shownPanel = p.id; S.shownViewing = !!imageId;
-    showEmpty("このコマにはまだ絵がありません。右の「文から作る」で作れます");
+    showEmpty(t("このコマにはまだ絵がありません。右の「文から作る」で作れます"));
     renderInputNotes();
     return;
   }
@@ -195,11 +196,11 @@ async function refreshPanel(imageId) {
   S.protectedCount = protectedCount;
   S.frame = frame;
   const r = await stage.show({ image, protectedCanvas, layers, keepView: same, keepMask: same });
-  if (same && !r.maskKept) dropMask(p.id, "絵の大きさが変わったので、塗っていた囲みを消しました");
+  if (same && !r.maskKept) dropMask(p.id, t("絵の大きさが変わったので、塗っていた囲みを消しました"));
   if (!same && !imageId && S.masks.has(p.id)) {
     const saved = S.masks.get(p.id);
     S.masks.delete(p.id);
-    if (!stage.putMask(saved)) dropMask(p.id, "絵の大きさが変わったので、このコマで塗っていた囲みを消しました");
+    if (!stage.putMask(saved)) dropMask(p.id, t("絵の大きさが変わったので、このコマで塗っていた囲みを消しました"));
   }
   S.shownPanel = p.id; S.shownViewing = !!imageId;
   renderInputNotes();
@@ -211,7 +212,7 @@ async function loadProtected(imageId) {
   const protPath = `/works/${S.workId}/images/${imageId}/protected-mask`;
   const headers = await api.imageHeaders(protPath);
   const count = headers.get("X-V3-Region-Count");
-  if (count === null) throw new Error("人の手の範囲の数がサーバーから来ませんでした");
+  if (count === null) throw new Error(t("手動編集の範囲の数がサーバーから来ませんでした"));
   return { count: Number(count), canvas: Number(count) ? await api.maskOverlay(protPath, stage.col.protectRgb, 1) : null };
 }
 
@@ -253,24 +254,24 @@ async function panelLayers(p, frame, size) {
 }
 
 // ---------------------------------------------------------------- 道具
-function setTool(t) {
-  S.tool = t;
-  for (const b of $$(".ftb .tool[data-tool]")) b.setAttribute("aria-pressed", String(b.dataset.tool === t));
-  $("#mask-bar").hidden = t !== "mask";
-  $("#pen-bar").hidden = t !== "pen";
-  $("#erase-bar").hidden = t !== "erase";
-  stage.setTool(t);
-  km.setTool(t);   // "workbench:mask" のキー（多角形の Enter・Esc）は囲む道具の間だけ効く
+function setTool(tool) {
+  S.tool = tool;
+  for (const b of $$(".ftb .tool[data-tool]")) b.setAttribute("aria-pressed", String(b.dataset.tool === tool));
+  $("#mask-bar").hidden = tool !== "mask";
+  $("#pen-bar").hidden = tool !== "pen";
+  $("#erase-bar").hidden = tool !== "erase";
+  stage.setTool(tool);
+  km.setTool(tool);   // "workbench:mask" のキー（多角形の Enter・Esc）は囲む道具の間だけ効く
   syncPenBar();
 }
 
 function syncPenBar() {
   const p = panel();
   let msg = "";
-  if (!S.image) msg = "コマに絵が無いので描けません";
-  else if (!S.frame) msg = "コマの絵に置き場が無いか、回転・傾き・反転があるので、ペンの線の位置を決められません";
+  if (!S.image) msg = t("コマに絵が無いので描けません");
+  else if (!S.frame) msg = t("コマの絵に置き場が無いか、回転・傾き・反転があるので、ペンの線の位置を決められません");
   else if (S.hand && S.hand.blocked) msg = S.hand.blocked;
-  $("#pen-note").textContent = msg || "人の手の層に描きます。線は人の手の範囲として残ります";
+  $("#pen-note").textContent = msg || t("手描きレイヤーに描きます。線は手動編集の範囲として残ります");
   if (!msg) { stage.penWidthPx = Number($("#pen-width [aria-pressed=true]").dataset.w) / S.frame.sx; stage.syncCursor(); }
   return p && !msg;
 }
@@ -284,7 +285,7 @@ function renderProcesses() {
     const blocked = !usable(sp);
     host.append(h("button", { class: "chip", type: "button", "data-process": sp.name,
       "aria-pressed": String(S.proc && S.proc.name === sp.name), "aria-disabled": blocked ? "true" : null,
-      title: blocked ? "コマに絵があるときに使えます" : sp.hint, text: sp.label,
+      title: blocked ? t("コマに絵があるときに使えます") : sp.hint, text: sp.label,
       onclick: () => { if (!blocked) selectProcess(sp.name); } }));
   }
   // 選んでいた処理がまだ使えるなら、入力欄と道具はそのままにする（採用・描いた後に入れた値や道具を変えない）
@@ -326,17 +327,17 @@ function syncExtendFromForm() {
   const notes = $("#extend-note");
   if (v.unit === "frame") {
     stage.setExtend({ left: 0, top: 0, right: 0, bottom: 0 });
-    if (notes) notes.textContent = "コマの枠までの量は、頼むときにサーバーがコマの置き場から決めます。枠を動かすと「画素で」に変わります";
+    if (notes) notes.textContent = t("コマの枠までの量は、頼むときにサーバーがコマの置き場から決めます。枠を動かすと「ピクセルで」に変わります");
     return;
   }
   let k = 1;
   if (v.unit === "mm") {
-    if (!S.frame) { if (notes) notes.textContent = "コマの絵に置き場が無いので mm を画素に直せません"; return; }
+    if (!S.frame) { if (notes) notes.textContent = t("コマの絵に置き場が無いので mm をピクセルに直せません"); return; }
     k = 1 / S.frame.sx;
   }
   stage.setExtend({ left: Math.ceil(v.left * k), top: Math.ceil(v.top * k), right: Math.ceil(v.right * k),
                     bottom: Math.ceil(v.bottom * k) });
-  if (notes) notes.textContent = "画面の枠の角や辺を動かしても決められます（動かすと「画素で」に変わります）";
+  if (notes) notes.textContent = t("画面の枠の角や辺を動かしても決められます（動かすと「ピクセルで」に変わります）");
 }
 
 function onExtendFromStage(e) {
@@ -344,18 +345,18 @@ function onExtendFromStage(e) {
   S.form.set("unit", "px");
   for (const k of ["left", "top", "right", "bottom"]) S.form.set(k, e[k]);
   const n = $("#extend-note");
-  if (n) n.textContent = `画素で 左 ${e.left}・上 ${e.top}・右 ${e.right}・下 ${e.bottom}`;
+  if (n) n.textContent = t("ピクセルで 左 {{left}}・上 {{top}}・右 {{right}}・下 {{bottom}}", { left: e.left, top: e.top, right: e.right, bottom: e.bottom });
 }
 
 function renderInputNotes() {
   const host = $("#input-notes");
   host.replaceChildren();
   if (!S.proc) return;
-  if (S.proc.source === "required" && !S.image) host.append(note("コマに絵があるときに使えます", "need"));
-  if (S.proc.mask === "required") host.append(note("描き直す所を、画面の「囲んで頼む」で塗ってください。塗った所だけを描き直します", "", "lasso-select"));
-  if (S.proc.mask === "optional") host.append(note("画面で塗ると、その所だけを直します。塗らなければ絵の全体に指示を効かせます", "", "lasso-select"));
+  if (S.proc.source === "required" && !S.image) host.append(note(t("コマに絵があるときに使えます"), "need"));
+  if (S.proc.mask === "required") host.append(note(t("描き直す所を、画面の「囲んで頼む」で塗ってください。塗った所だけを描き直します"), "", "lasso-select"));
+  if (S.proc.mask === "optional") host.append(note(t("画面で塗ると、その所だけを直します。塗らなければ絵の全体に指示を効かせます"), "", "lasso-select"));
   if (S.proc.source === "required" && S.protectedCount) {
-    host.append(note(`橙の所は人の手の範囲（${S.protectedCount} か所）です。塗れず、描き直しません。できた絵にも元の画素を戻します`, "need", "shield"));
+    host.append(note(t("橙の所は手動編集の範囲（{{count}} か所）です。塗れず、描き直しません。できた絵にも元のピクセルを戻します", { count: S.protectedCount }), "need", "shield"));
   }
   if (S.proc.canvas_tool === "extend") host.append(h("div", { class: "meta", id: "extend-note" }));
   const v = S.form ? S.form.values() : {};
@@ -364,8 +365,8 @@ function renderInputNotes() {
     input.addEventListener("change", async () => {
       S.control = input.files[0] ? await toPngBase64(input.files[0]) : null;
     });
-    host.append(h("div", { class: "full" }, h("label", { class: "lbl", for: "control-file", text: "形の指定に使う絵" }), input,
-      h("div", { class: "meta", text: "線画・落書き・骨格・奥行きの絵。コマの絵と同じ縦横の比で用意してください" })));
+    host.append(h("div", { class: "full" }, h("label", { class: "lbl", for: "control-file", text: t("形の指定に使う絵") }), input,
+      h("div", { class: "meta", text: t("線画・落書き・骨格・奥行きの絵。コマの絵と同じ縦横の比で用意してください") })));
   }
   if (S.proc.canvas_tool === "extend") syncExtendFromForm();
 }
@@ -382,23 +383,23 @@ function renderServices() {
   const sel = $("#service");
   sel.replaceChildren();
   for (const s of S.proc.services) {
-    const why = !s.allowed ? "（この作品からは送れない）" : s.paused ? "（休ませている）" : "";
-    sel.append(h("option", { value: s.service_id, text: `${s.name}・${s.location === "local" ? "手元" : "API"}${why}`,
+    const why = !s.allowed ? t("（この作品からは送れない）") : s.paused ? t("（一時停止中）") : "";
+    sel.append(h("option", { value: s.service_id, text: t("{{name}}・{{location}}{{note}}", { name: s.name, location: s.location === "local" ? t("ローカル") : t("API"), note: why }),
                              disabled: !s.allowed || null }));
   }
   if (S.proc.route_service_id) sel.value = S.proc.route_service_id;
   const none = !S.proc.services.length;
   $("#generate").setAttribute("aria-disabled", String(none));
   showServiceMeta();
-  if (none) $("#service-meta").textContent = "この処理をできるつなぎ先がまだありません（つなぎ先の管理で、処理の設定を足してください）";
+  if (none) $("#service-meta").textContent = t("この処理をできる接続先がまだありません（接続先の管理で、処理の設定を足してください）");
 }
 
 function showServiceMeta() {
   const s = S.proc.services.find((x) => x.service_id === $("#service").value);
   const st = s && s.settings;
-  $("#service-meta").textContent = st ? [st.model, st.native_long_side && `長い辺 ${st.native_long_side}px`,
-    st.resolution && `読ませる大きさ ${st.resolution}px`, st.controlnet ? "形の指定を使える" : "形の指定は使えない",
-    ...(st.loras || [])].filter(Boolean).join("・") : "";
+  $("#service-meta").textContent = st ? [st.model, st.native_long_side && t("長い辺 {{px}}px", { px: st.native_long_side }),
+    st.resolution && t("読ませる大きさ {{px}}px", { px: st.resolution }), st.controlnet ? t("形の指定を使える") : t("形の指定は使えない"),
+    ...(st.loras || [])].filter(Boolean).join(t("・")) : "";
 }
 
 // ---------------------------------------------------------------- 頼む
@@ -422,10 +423,10 @@ async function send(over) {
   if (!over.proc && spec.mask !== "none") {
     const m = stage.maskPngBase64();
     if (m) { body.mask = { png_base64: m }; S.maskUnsent = false; }
-    else if (spec.mask === "required") { toast("描き直す所を塗ってください（囲んで頼む）", "need"); setTool("mask"); return; }
+    else if (spec.mask === "required") { toast(t("描き直す所を塗ってください（囲んで頼む）"), "need"); setTool("mask"); return; }
   }
   if (params.control && params.control !== "none") {
-    if (!S.control) { toast("形の指定に使う絵を選んでください", "need"); return; }
+    if (!S.control) { toast(t("形の指定に使う絵を選んでください"), "need"); return; }
     body.control = { png_base64: S.control };
   }
   const svc = over.service_id || $("#service").value;
@@ -436,10 +437,10 @@ async function send(over) {
     if (S.hand && S.hand.dirty) await uploadCache(S.hand);
     if (spec.source === "required" && !over.source_image_id) body.source_image_id = S.viewing || panel().image_id;
     const r = await api.post(`/works/${S.workId}/panels/${S.panelId}/generate`, body);
-    toast(`${spec.label}を ${r.jobs.length} 件頼みました`);
+    toast(t("{{label}}を {{count}} 件頼みました", { label: spec.label, count: r.jobs.length }));
     showTab("cands");
     await loadCandidates();
-  } catch (e) { fail(e, spec.label); }
+  } catch (e) { fail(e, t("{{label}}を頼めませんでした", { label: spec.label })); }
 }
 
 // ---------------------------------------------------------------- 候補
@@ -458,7 +459,7 @@ async function loadCandidates() {
   } catch (e) {
     if (at !== `${S.workId}/${S.panelId}`) return;
     S.pollFails += 1;
-    S.link = { text: `候補と進み具合を読めません：${api.errorText(e)}` };
+    S.link = { text: t("候補と進み具合を読めません：{{reason}}", { reason: api.errorText(e) }) };
   }
   if (S.pollFails || S.sets.some((s) => s.jobs.some((j) => ACTIVE.has(j.status)))) {
     const wait = S.pollFails ? Math.min(POLL_MAX_MS, POLL_MS * 2 ** S.pollFails) : POLL_MS;
@@ -471,9 +472,9 @@ async function loadCandidates() {
 function paramText(params) {
   const v = params || {};
   const parts = [];
-  if (v.strength !== undefined) parts.push(`強さ ${v.strength}`);
-  if (v.denoise !== undefined) parts.push(`描き直し ${v.denoise}`);
-  return parts.join("・");
+  if (v.strength !== undefined) parts.push(t("強さ {{value}}", { value: v.strength }));
+  if (v.denoise !== undefined) parts.push(t("描き直し {{value}}", { value: v.denoise }));
+  return parts.join(t("・"));
 }
 
 function renderCandidates(currentId) {
@@ -481,7 +482,7 @@ function renderCandidates(currentId) {
   host.replaceChildren();
   const waiting = S.sets.reduce((n, s) => n + s.images.filter((i) => !i.discarded).length, 0);
   $("#cand-count").textContent = waiting ? String(waiting) : "";
-  if (!S.sets.length) { host.append(h("div", { class: "meta", text: "まだ頼んでいません" })); return; }
+  if (!S.sets.length) { host.append(h("div", { class: "meta", text: t("まだ頼んでいません") })); return; }
   const variation = S.processes.find((p) => p.name === "variation");
   const presets = Object.entries(variation ? variation.params_schema.properties.strength["x-presets"] || {} : {})
     .sort((a, b) => a[1] - b[1]);
@@ -489,9 +490,9 @@ function renderCandidates(currentId) {
     const active = set.jobs.filter((j) => ACTIVE.has(j.status));
     const head = h("div", { class: "set-h" },
       h("span", { class: "lbl grow", text: set.label }),
-      h("span", { class: "meta num", text: new Date(set.created_at).toLocaleString("ja-JP", { dateStyle: "short", timeStyle: "short" }) }),
-      active.length ? h("button", { class: "btn sm", text: "止める", onclick: () => cancelSet(set) }) : null,
-      h("button", { class: "btn sm ghost", onclick: () => reuse(set) }, h("i", { "data-lucide": "rotate-ccw" }), "この設定でもう一度"));
+      h("span", { class: "meta num", text: new Date(set.created_at).toLocaleString(lang === "ja" ? "ja-JP" : lang, { dateStyle: "short", timeStyle: "short" }) }),
+      active.length ? h("button", { class: "btn sm", text: t("止める"), onclick: () => cancelSet(set) }) : null,
+      h("button", { class: "btn sm ghost", onclick: () => reuse(set) }, h("i", { "data-lucide": "rotate-ccw" }), t("この設定でもう一度")));
     const prompt = set.requested_params && set.requested_params.prompt;
     const grid = h("div", { class: "cands" });
     let k = 0;
@@ -499,48 +500,48 @@ function renderCandidates(currentId) {
       k += 1;
       const sel = S.selected.includes(img.id);
       const cur = img.id === currentId;
-      const th = h("button", { class: "th", type: "button", title: "選ぶ", onclick: () => toggleSelect(img.id) });
+      const th = h("button", { class: "th", type: "button", title: t("選ぶ"), onclick: () => toggleSelect(img.id) });
       const im = h("img", { alt: "" });
       th.prepend(im);
-      api.showIn(im, `/works/${S.workId}/images/${img.id}/thumbnail?size=${THUMB}`).catch((e) => fail(e, "候補の小さい絵を読む"));
+      api.showIn(im, `/works/${S.workId}/images/${img.id}/thumbnail?size=${THUMB}`).catch((e) => fail(e, t("候補の小さい絵を読み込めませんでした")));
       if (img.protected_mask_url) {
         api.maskOverlay(img.protected_mask_url, stage.col.protectRgb, 0.55, THUMB * 2).then((c) => {
           const copy = h("canvas", { class: "prot" });
           copy.width = c.width; copy.height = c.height;
           copy.getContext("2d").drawImage(c, 0, 0);
           th.append(copy);
-        }).catch((e) => fail(e, "人の手の範囲を出す"));
+        }).catch((e) => fail(e, t("手動編集の範囲を表示できませんでした")));
       }
       const flags = h("div", { class: "flags" },
-        cur ? h("span", { class: "flag on", text: "採用中" }) : null,
-        img.discarded ? h("span", { class: "flag bad", text: "却下" }) : null,
-        img.protected_mask_url ? h("span", { class: "flag warn", title: "人の手の範囲は元の画素のまま", text: "人の手そのまま" }) : null);
+        cur ? h("span", { class: "flag on", text: t("採用中") }) : null,
+        img.discarded ? h("span", { class: "flag bad", text: t("却下") }) : null,
+        img.protected_mask_url ? h("span", { class: "flag warn", title: t("手動編集の範囲は元のピクセルのまま"), text: t("手動編集のまま") }) : null);
       const model = img.settings && img.settings.model && img.settings.model.replace(/\.(safetensors|ckpt|gguf)$/, "");
       const meta = h("div", { class: "meta num",
-        text: [img.service_name, model, `seed ${img.seed}`, paramText(set.params)].filter(Boolean).join("・") });
+        text: [img.service_name, model, `seed ${img.seed}`, paramText(set.params)].filter(Boolean).join(t("・")) });
       const acts = h("div", { class: "acts" },
-        h("button", { class: "btn sm primary", "aria-disabled": String(cur || img.discarded), onclick: () => adopt(img.id) }, "採用"),
+        h("button", { class: "btn sm primary", "aria-disabled": String(cur || img.discarded), onclick: () => adopt(img.id) }, t("採用")),
         img.discarded
-          ? h("button", { class: "btn sm", onclick: () => discard(img.id, false) }, "却下をやめる")
-          : h("button", { class: "btn sm", "aria-disabled": String(cur), onclick: () => discard(img.id, true) }, "却下"),
-        ...presets.map(([label, strength]) => h("button", { class: "btn sm ai-o", title: "この絵を元に似た別案を作る",
-          onclick: () => similar(img, set, strength) }, `似た別案 ${label}`)));
+          ? h("button", { class: "btn sm", onclick: () => discard(img.id, false) }, t("却下をやめる"))
+          : h("button", { class: "btn sm", "aria-disabled": String(cur), onclick: () => discard(img.id, true) }, t("却下")),
+        ...presets.map(([label, strength]) => h("button", { class: "btn sm ai-o", title: t("この絵を元に似た別案を作る"),
+          onclick: () => similar(img, set, strength) }, t("似た別案 {{label}}", { label }))));
       grid.append(h("div", { class: `cand${img.discarded ? " discarded" : ""}`, "aria-pressed": String(sel), "data-image": img.id },
         th, h("span", { class: "id num", text: String(k) }), flags, h("div", { class: "cand-f" }, meta, acts)));
     }
     for (const j of set.jobs) {
       if (set.images.some((i) => i.job_id === j.id)) continue;
       const why = j.failure_detail || j.failure_kind;
-      const failText = j.status === "stopped" ? (why ? `${STATUS[j.status]}：${why}` : `${STATUS[j.status]}（理由はサーバーに残っていません）`) : STATUS[j.status] || j.status;
+      const failText = j.status === "stopped" ? (why ? t("{{status}}：{{reason}}", { status: STATUS[j.status], reason: why }) : t("{{status}}（理由はサーバーに残っていません）", { status: STATUS[j.status] })) : STATUS[j.status] || j.status;
       grid.append(h("div", { class: "cand wait" },
         h("div", { class: "th" }, ACTIVE.has(j.status) ? h("i", { "data-lucide": "loader", class: "spin" }) : null),
         h("div", { class: "cand-f" }, h("div", { class: `meta${j.status === "stopped" ? " bad" : ""}`, text: failText }),
           h("div", { class: "meta num", text: `seed ${j.seed}` }))));
     }
     const compare = h("button", { class: "btn sm", "aria-disabled": String(!S.selected.length), onclick: openCompare },
-      h("i", { "data-lucide": "columns-2" }), "比べる");
+      h("i", { "data-lucide": "columns-2" }), t("比べる"));
     host.append(h("div", { class: "set" }, head,
-      prompt ? h("div", { class: "meta", text: `指示：${prompt}` }) : null, grid, h("div", { class: "row" }, compare)));
+      prompt ? h("div", { class: "meta", text: t("指示：{{prompt}}", { prompt }) }) : null, grid, h("div", { class: "row" }, compare)));
   }
   icons();
 }
@@ -553,8 +554,8 @@ function renderProgress() {
     if (!active.length) continue;
     const done = set.jobs.filter((j) => j.status === "done").length;
     host.append(h("div", { class: "job" }, h("i", { "data-lucide": "loader", class: "spin" }),
-      h("span", { class: "s", text: `${set.label}：${done} / ${set.jobs.length} 枚（${STATUS[active[0].status]}）` }),
-      h("button", { class: "btn sm", onclick: () => cancelSet(set) }, "止める")));
+      h("span", { class: "s", text: t("{{label}}：{{done}} / {{total}} 枚（{{status}}）", { label: set.label, done, total: set.jobs.length, status: STATUS[active[0].status] }) }),
+      h("button", { class: "btn sm", onclick: () => cancelSet(set) }, t("止める"))));
   }
   icons();
 }
@@ -563,7 +564,7 @@ async function cancelSet(set) {
   try {
     for (const j of set.jobs.filter((x) => ACTIVE.has(x.status))) await api.post(`/works/${S.workId}/jobs/${j.id}/cancel`);
     await loadCandidates();
-  } catch (e) { fail(e, "止めること"); }
+  } catch (e) { fail(e, t("止められませんでした")); }
 }
 
 function toggleSelect(id) {
@@ -578,7 +579,7 @@ function reuse(set) {
   showTab("ask");
   selectProcess(set.process, set.requested_params || {});
   const spec = S.processes.find((p) => p.name === set.process);
-  if (spec && spec.mask !== "none") toast("囲んだ範囲は前のものを使いません。塗り直してください", "need");
+  if (spec && spec.mask !== "none") toast(t("囲んだ範囲は前のものを使いません。塗り直してください"), "need");
 }
 
 function similar(img, set, strength) {
@@ -633,7 +634,7 @@ function syncUndo() {
 
 async function undoRedo(dir) {
   if (S.undoing) return;
-  if (S.viewing) { toast("昔の版を見ている間は取り消せません。「今の絵に戻る」を押してください", "need"); return; }
+  if (S.viewing) { toast(t("昔の版を見ている間は取り消せません。「今の絵に戻る」を押してください"), "need"); return; }
   const h = hist();
   const [from, to] = dir === "undo" ? [h.undo, h.redo] : [h.redo, h.undo];
   const entry = from.pop();
@@ -653,10 +654,10 @@ async function undoRedo(dir) {
     to.push({ ...entry, ids: Promise.resolve(back) });
   } catch (e) {
     from.push(entry);
-    fail(e, dir === "undo" ? "取り消すこと" : "やり直すこと");
+    fail(e, dir === "undo" ? t("取り消せませんでした") : t("やり直せませんでした"));
     return;
   } finally { S.undoing = false; syncUndo(); }
-  await refreshAfter(entry.refresh).catch((e) => fail(e, "読み直し"));
+  await refreshAfter(entry.refresh).catch((e) => fail(e, t("読み直せませんでした")));
 }
 
 // 取り消した操作が変えた物だけを読み直す
@@ -694,7 +695,7 @@ async function pump() {
   } catch (e) {
     console.error(e);
     Q.failed = { job, error: e };
-    for (const w of Q.waiters.splice(0)) w.reject(new Error(`保存できていない変更があります（${job.label}）`));
+    for (const w of Q.waiters.splice(0)) w.reject(new Error(t("保存できていない変更があります（{{label}}）", { label: job.label })));
   }
   Q.running = false;
   renderStatus();
@@ -703,7 +704,7 @@ async function pump() {
 
 // 保存が全部済むまで待つ。止まっていれば断る
 function idleSaves() {
-  if (Q.failed) return Promise.reject(new Error(`保存できていない変更があります（${Q.failed.job.label}）`));
+  if (Q.failed) return Promise.reject(new Error(t("保存できていない変更があります（{{label}}）", { label: Q.failed.job.label })));
   if (!Q.jobs.length) return Promise.resolve();
   return new Promise((resolve, reject) => Q.waiters.push({ resolve, reject }));
 }
@@ -714,7 +715,7 @@ function retrySaves() { Q.failed = null; pump(); }
 async function discardSaves() {
   const jobs = Q.jobs.splice(0);
   Q.failed = null;
-  for (const j of jobs) j.reject(new Error("捨てた"));
+  for (const j of jobs) j.reject(new Error(t("捨てた")));
   renderStatus();
   if (S.hand) S.hand.forceReload = true;
   await refreshPanelRow();
@@ -727,21 +728,21 @@ function savingCount() { return Q.jobs.length + (S.hand && S.hand.uploading ? 1 
 function renderStatus() {
   const host = $("#stage-msg");
   if (Q.failed) {
-    const n = note(`保存できませんでした（${Q.failed.job.label}）：${api.errorText(Q.failed.error)}。描いた物は画面にだけあります`, "bad");
-    n.append(h("button", { class: "btn sm", onclick: retrySaves }, "もう一度送る"),
-      h("button", { class: "btn sm", onclick: () => discardSaves().catch((e) => fail(e, "読み直し")) }, "この変更を捨てる"));
+    const n = note(t("保存できませんでした（{{label}}）：{{reason}}。描いた物は画面にだけあります", { label: Q.failed.job.label, reason: api.errorText(Q.failed.error) }), "bad");
+    n.append(h("button", { class: "btn sm", onclick: retrySaves }, t("もう一度送る")),
+      h("button", { class: "btn sm", onclick: () => discardSaves().catch((e) => fail(e, t("読み直せませんでした"))) }, t("この変更を捨てる")));
     host.replaceChildren(n);
     return;
   }
   if (S.link) {
     const sec = Math.max(1, Math.round((S.link.at - Date.now()) / 1000));
-    const n = note(`${S.link.text}。${sec} 秒後にもう一度読みます`, "need", "wifi-off");
-    n.append(h("button", { class: "btn sm", onclick: () => loadCandidates() }, "今すぐ読む"));
+    const n = note(t("{{text}}。{{sec}} 秒後にもう一度読みます", { text: S.link.text, sec }), "need", "wifi-off");
+    n.append(h("button", { class: "btn sm", onclick: () => loadCandidates() }, t("今すぐ読む")));
     host.replaceChildren(n);
     return;
   }
   const n = savingCount();
-  host.replaceChildren(n ? note(`保存しています（${n} 件）`, "", "loader") : "");
+  host.replaceChildren(n ? note(t("保存しています（{{count}} 件）", { count: n }), "", "loader") : "");
 }
 
 // ---------------------------------------------------------------- 採用・却下・版
@@ -763,9 +764,9 @@ async function adopt(imageId) {
     await idleSaves();
     const ids = await submitOps({ type: "adopt_image", panel_id: S.panelId, image_id: imageId });
     pushUndo({ kind: "server", ids: Promise.resolve(ids), refresh: "all" });
-    toast("採用しました（取り消せます）");
+    toast(t("採用しました（取り消せます）"));
     await afterChange();
-  } catch (e) { fail(e, "採用"); }
+  } catch (e) { fail(e, t("採用できませんでした")); }
 }
 
 async function discard(imageId, on) {
@@ -773,7 +774,7 @@ async function discard(imageId, on) {
     const ids = await submitOps({ type: "set_image_discarded", image_id: imageId, discarded: on });
     pushUndo({ kind: "server", ids: Promise.resolve(ids), refresh: "candidates" });
     await loadCandidates();
-  } catch (e) { fail(e, on ? "却下" : "却下をやめること"); }
+  } catch (e) { fail(e, on ? t("却下できませんでした") : t("却下を取り消せませんでした")); }
 }
 
 async function loadVersions() {
@@ -782,41 +783,41 @@ async function loadVersions() {
   if (at !== `${S.workId}/${S.panelId}`) return;
   const host = $("#versions");
   host.replaceChildren();
-  if (!res.versions.length) { host.append(h("div", { class: "meta", text: "まだ絵を置いていません" })); return; }
+  if (!res.versions.length) { host.append(h("div", { class: "meta", text: t("まだ絵を置いていません") })); return; }
   const list = res.versions.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
   for (const v of list) {
     const im = h("img", { alt: "" });
     const th = h("div", { class: "th" }, im);
-    api.showIn(im, `/works/${S.workId}/images/${v.id}/thumbnail?size=128`).catch((e) => fail(e, "版の小さい絵を読む"));
+    api.showIn(im, `/works/${S.workId}/images/${v.id}/thumbnail?size=128`).catch((e) => fail(e, t("版の小さい絵を読み込めませんでした")));
     const proc = v.details && v.details.process;
     const label = proc ? (S.processes.find((p) => p.name === proc) || {}).label || proc : ORIGIN[v.origin] || v.origin;
     host.append(h("div", { class: `vrow${v.current ? " cur" : ""}`, "data-version": v.id }, th,
       h("div", {}, h("div", { class: "row wrap" }, h("span", { class: "lbl", text: label }),
-          v.current ? h("span", { class: "flag on", text: "今の絵" }) : null,
+          v.current ? h("span", { class: "flag on", text: t("今の絵") }) : null,
           h("span", { class: `flag ${v.origin === "generated" ? "ai" : "mut"}`, text: ORIGIN[v.origin] || v.origin })),
-        h("div", { class: "meta num", text: `${v.width}×${v.height}・${new Date(v.created_at).toLocaleString("ja-JP", { dateStyle: "short", timeStyle: "short" })}` })),
+        h("div", { class: "meta num", text: t("{{width}}×{{height}}・{{date}}", { width: v.width, height: v.height, date: new Date(v.created_at).toLocaleString(lang === "ja" ? "ja-JP" : lang, { dateStyle: "short", timeStyle: "short" }) }) })),
       h("div", { class: "acts" },
-        h("button", { class: "btn sm", onclick: () => view(v, label) }, "見る"),
-        h("button", { class: "btn sm primary", "aria-disabled": String(v.current), onclick: () => adopt(v.id) }, "戻す"))));
+        h("button", { class: "btn sm", onclick: () => view(v, label) }, t("見る")),
+        h("button", { class: "btn sm primary", "aria-disabled": String(v.current), onclick: () => adopt(v.id) }, t("戻す")))));
   }
 }
 
 async function view(v, label) {
   S.viewing = v.id;
-  $("#viewing-text").textContent = `${label}（${v.width}×${v.height}）を見ています。描いたり囲んだりはできません`;
+  $("#viewing-text").textContent = t("{{label}}（{{width}}×{{height}}）を見ています。描いたり囲んだりはできません", { label, width: v.width, height: v.height });
   $("#viewing").hidden = false;
   setTool("select");
-  await refreshPanel(v.id).catch((e) => fail(e, "版を出すこと"));
+  await refreshPanel(v.id).catch((e) => fail(e, t("版を表示できませんでした")));
 }
 
 // ---------------------------------------------------------------- 比べる
 async function openCompare() {
   if (!S.selected.length) return;
   const ids = S.selected.length === 1 && panel().image_id ? [panel().image_id, S.selected[0]] : S.selected.slice(0, 2);
-  const names = ids.map((id) => (id === panel().image_id ? "今の絵" : `候補 ${candNo(id)}`));
+  const names = ids.map((id) => (id === panel().image_id ? t("今の絵") : t("候補 {{no}}", { no: candNo(id) })));
   S.compareIds = ids; S.compareNames = names;
   $("#compare").hidden = false;
-  $("#compare-title").textContent = `比べる：${names.join(" と ")}`;
+  $("#compare-title").textContent = names.length === 2 ? t("比べる：{{first}} と {{second}}", { first: names[0], second: names[1] }) : t("比べる：{{first}}", { first: names[0] });
   await renderCompare();
 }
 
@@ -839,11 +840,11 @@ async function renderCompare() {
   imgs[1].className = "b";
   const wrap = h("div", { class: "slider-wrap", style: `--ar:${a.naturalWidth}/${a.naturalHeight}` }, imgs[0], imgs[1],
     h("div", { class: "bar" }));
-  const r = h("input", { type: "range", min: 0, max: 100, value: 50, "aria-label": "境目の位置" });
+  const r = h("input", { type: "range", min: 0, max: 100, value: 50, "aria-label": t("境目の位置") });
   r.addEventListener("input", () => wrap.style.setProperty("--cut", `${r.value}%`));
   wrap.append(r);
   body.replaceChildren(h("figure", { class: "slider-fig" },
-    wrap, h("figcaption", { text: `左：${S.compareNames[0]}　右：${S.compareNames[1]}` })));
+    wrap, h("figcaption", { text: t("左：{{left}}　右：{{right}}", { left: S.compareNames[0], right: S.compareNames[1] }) })));
 }
 
 // ---------------------------------------------------------------- 人の手で描く（ペン）
@@ -863,7 +864,7 @@ async function prepareHand(p, frame, size, target) {
                  version: 0, blocked: "", frame };
   S.hand = hand;
   if (!target) return hand;
-  if (!target.visible) { hand.blocked = "人の手の層を隠しているので描けません"; return hand; }
+  if (!target.visible) { hand.blocked = t("手描きレイヤーを隠しているので描けません"); return hand; }
   const cacheOk = target.image_id && target.stroke_revision === target.image_stroke_revision && aligned(target, frame);
   if (cacheOk) {
     // 控えが今の線と合っていれば、その絵をそのまま使う（線は読まない）
@@ -895,7 +896,7 @@ async function reloadHand(hand) {
   hand.strokes = strokes;
   hand.version += 1;
   const other = strokes.find((s) => s.brush !== "pencil");
-  hand.blocked = other ? `この画面は鉛筆の線しか描けません。この層には「${other.brush}」の線があるので、描き直せません` : "";
+  hand.blocked = other ? t("この画面は鉛筆の線しか描けません。このレイヤーには「{{brush}}」の線があるので、描き直せません", { brush: other.brush }) : "";
   const x = hand.canvas.getContext("2d");
   x.clearRect(0, 0, hand.canvas.width, hand.canvas.height);
   if (!hand.blocked) for (const s of strokes) drawServerStroke(x, s, hand.frame);
@@ -922,7 +923,7 @@ function drawServerStroke(ctx, s, f) {
 }
 
 function penBegin() {
-  if (S.viewing) throw new Error("昔の版を見ている間は描けません");
+  if (S.viewing) throw new Error(t("昔の版を見ている間は描けません"));
   if (!syncPenBar()) throw new Error($("#pen-note").textContent);
   return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: PEN_INK };
 }
@@ -944,7 +945,7 @@ function onPenStroke(points, pointerType) {
   const workId = S.workId;
   // 層を作る操作が通った後で線が通らなかったときは、もう一度送るときに層を作り直さない
   let layerEvent = null;
-  const ids = enqueue("ペンの線", async () => {
+  const ids = enqueue(t("ペンの線"), async () => {
     const out = [];
     if (makeLayer && !layerEvent) {
       layerEvent = (await api.op(workId, makeLayer)).event_id;
@@ -963,7 +964,7 @@ function onPenStroke(points, pointerType) {
 
 function scheduleUpload(hand) {
   clearTimeout(hand.timer);
-  hand.timer = setTimeout(() => uploadCache(hand).catch((e) => fail(e, "線の控えを上げる")), CACHE_IDLE_MS);
+  hand.timer = setTimeout(() => uploadCache(hand).catch((e) => fail(e, t("線の画像をサーバーに送れませんでした"))), CACHE_IDLE_MS);
 }
 
 // 控えの絵を上げる。サーバーの線（id だけ読む）が画面の線と同じなら、canvas をそのまま上げる。
@@ -1002,15 +1003,15 @@ async function uploadCache(hand) {
 
 // ---------------------------------------------------------------- 人の手で消す（画素の消しゴム）
 function eraseBegin() {
-  if (S.viewing) throw new Error("昔の版を見ている間は消せません");
-  if (!S.image) throw new Error("消す絵がありません");
+  if (S.viewing) throw new Error(t("昔の版を見ている間は消せません"));
+  if (!S.image) throw new Error(t("消す絵がありません"));
   return true;
 }
 
 // 消した所は stage.js が絵の写しから先に消して見せている。サーバーの答え（新しい版）が来たら、その絵に替える
 function onErase(points, widthPx) {
   const panelId = S.panelId, workId = S.workId;
-  const ids = enqueue("消しゴム", async () => {
+  const ids = enqueue(t("消しゴム"), async () => {
     const form = new FormData();
     form.append("strokes", JSON.stringify([{ points: points.map((p) => [p.x, p.y]), width_px: widthPx }]));
     const r = await api.postForm(`/works/${workId}/panels/${panelId}/erase-pixels`, form);
@@ -1018,7 +1019,7 @@ function onErase(points, widthPx) {
     if (p) p.image_id = r.image_id;
     // まだ送っていない消しゴムがあれば、最後の答えが来てから替える（先に替えると、その消した所が見えなくなる）
     if (S.panelId === panelId && !S.viewing && !Q.jobs.slice(1).some((j) => j.kind === "erase")) {
-      refreshPanel().then(() => loadVersions()).catch((e) => fail(e, "消した後の絵を読むこと"));
+      refreshPanel().then(() => loadVersions()).catch((e) => fail(e, t("消した後の絵を読み込めませんでした")));
     }
     return [r.event_id];
   }, "erase");
@@ -1026,9 +1027,9 @@ function onErase(points, widthPx) {
 }
 
 // ---------------------------------------------------------------- タブ・保存しておく選び
-function showTab(t) {
-  for (const b of $$(".itab")) b.setAttribute("aria-selected", String(b.dataset.tab === t));
-  for (const p of $$("[data-pane]")) p.hidden = p.dataset.pane !== t;
+function showTab(tab) {
+  for (const b of $$(".itab")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
+  for (const p of $$("[data-pane]")) p.hidden = p.dataset.pane !== tab;
 }
 function readPref(k) { try { return localStorage.getItem(`v3.gen.${k}`); } catch { return null; } }
 // 原稿の画面から開いたとき（?work=&page=&panel=）は、覚えた選び方より URL を先に使う。使ったら URL から消す
@@ -1083,7 +1084,7 @@ function bindUi() {
   $("#compare-close").addEventListener("click", () => { $("#compare").hidden = true; });
   $("#keys-open").addEventListener("click", () => openHelp());
   window.addEventListener("online", () => { if (S.link) loadCandidates(); if (Q.failed) retrySaves(); });
-  window.addEventListener("offline", () => { S.link = { text: "ネットにつながっていません", at: Date.now() + POLL_MAX_MS }; renderStatus(); });
+  window.addEventListener("offline", () => { S.link = { text: t("ネットにつながっていません"), at: Date.now() + POLL_MAX_MS }; renderStatus(); });
   // 保存していない線・消した所・まだ頼んでいない囲みがあるときは、閉じる前に聞く
   window.addEventListener("beforeunload", (e) => {
     if (Q.jobs.length || (S.hand && (S.hand.dirty || S.hand.uploading)) || S.maskUnsent) e.preventDefault();
@@ -1127,13 +1128,13 @@ function bindKeys() {
 
 // Ctrl+S：保存の具合を知らせる（描いた線と消した所は、描いた後に後ろで送っている）
 function showSaveState() {
-  if (Q.failed) toast(`保存できていない変更があります（${Q.failed.job.label}）。左下の「もう一度送る」か「この変更を捨てる」を選んでください`, "bad");
-  else if (savingCount() || (S.hand && S.hand.dirty)) toast(`保存しています（${savingCount() || 1} 件）。済むと左下の印が消えます`);
-  else toast("描いた物は全部サーバーに残っています");
+  if (Q.failed) toast(t("保存できていない変更があります（{{label}}）。左下の「もう一度送る」か「この変更を捨てる」を選んでください", { label: Q.failed.job.label }), "bad");
+  else if (savingCount() || (S.hand && S.hand.dirty)) toast(t("保存しています（{{count}} 件）。済むと左下の印が消えます", { count: savingCount() || 1 }));
+  else toast(t("描いた物は全部サーバーに残っています"));
 }
 
 function maskBegin() {
-  if (S.viewing) { toast("昔の版を見ている間は囲めません。「今の絵に戻る」を押してください", "need"); return false; }
+  if (S.viewing) { toast(t("昔の版を見ている間は囲めません。「今の絵に戻る」を押してください"), "need"); return false; }
   return true;
 }
 
@@ -1151,7 +1152,7 @@ async function showWho() {
 }
 
 async function start() {
-  if (!api.currentUser()) { showEmpty("右上の「利用者」に名前を入れてください"); return; }
+  if (!api.currentUser()) { showEmpty(t("右上の「利用者」に名前を入れてください")); return; }
   try { await loadWorks(); } catch (e) { fail(e); }
 }
 

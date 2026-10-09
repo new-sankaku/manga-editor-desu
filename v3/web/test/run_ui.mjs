@@ -24,6 +24,7 @@ const need = (name) => { if (!process.env[name]) throw new Error(`${suite} の�
 
 const FAST = [
   { name: "theme_check", file: "theme_check.mjs", env: {}, browser: false },
+  { name: "i18n_check（訳し漏れ）", file: "i18n_check.mjs", env: {}, browser: false },
   { name: "keys_ui（偽のサーバー）", file: "keys_ui.mjs", env: shotsFor("keys") },
   { name: "manuscript_ui（偽のサーバー）", file: "manuscript_ui.mjs", env: { MOCK: "1", ...shotsFor("manuscript_mock") } },
   { name: "screens_ui（録った答え）", file: "screens_ui.mjs", env: { REPLAY: "1", ...shotsFor("screens_replay") } },
@@ -60,7 +61,7 @@ function run(job) {
     const started = Date.now();
     const env = { ...process.env, ...job.env, ...(job.browser === false ? {} : { PW_WS: server.wsEndpoint() }) };
     // 本物と偽を同じ回で流すので、組ごとに決めた相手だけを渡す（外から渡された相手の設定は消す）
-    for (const k of ["MOCK", "REPLAY", "RECORD", "PERF", "V3_ORIGIN", "V3_WEB", "CTRL", "SHOTS"]) if (!(k in job.env)) delete env[k];
+    for (const k of ["MOCK", "REPLAY", "RECORD", "PERF", "V3_ORIGIN", "V3_WEB", "CTRL", "SHOTS", "V3_LANG"]) if (!(k in job.env)) delete env[k];
     const child = spawn(process.execPath, [join(HERE, job.file)], { env });
     let out = "";
     child.stdout.on("data", (d) => { out += d; });

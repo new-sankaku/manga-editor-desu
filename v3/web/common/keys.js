@@ -1,6 +1,7 @@
 // 画面がキーと表示を始める1か所（V3細部の決めごと 22章）。画面ごとに1回 startKeys(画面の id) を呼ぶ。
 // どの画面でも効くキー（キーの一覧・絵だけ・全画面・Tab・Esc・画面の切り替え）はここで結ぶ。
 // 画面の操作（道具・取り消すなど）は、画面が keymap.js の bind で結ぶ。
+import { t } from "./i18n.js";
 import * as km from "./keymap.js";
 import * as view from "./fullscreen.js";
 import { toggleHelp } from "./help_overlay.js";
@@ -41,9 +42,9 @@ function navTools() {
     return el;
   };
   box.append(
-    b("v3-focus", "maximize", "絵だけ", "view.focus", () => view.toggleFocus()),
-    b("v3-fullscreen", "fullscreen", "全画面", "view.fullscreen", () => { view.toggleFullscreen().catch((e) => console.error("全画面にできませんでした", e)); }),
-    b("v3-keys", "keyboard", "キー", null, () => import("./key_settings.js").then((m) => m.openKeySettings())));
+    b("v3-focus", "maximize", t("絵だけ"), "view.focus", () => view.toggleFocus()),
+    b("v3-fullscreen", "fullscreen", t("全画面"), "view.fullscreen", () => { view.toggleFullscreen().catch((e) => console.error("全画面にできませんでした", e)); }),
+    b("v3-keys", "keyboard", t("キー"), null, () => import("./key_settings.js").then((m) => m.openKeySettings())));
   queueMicrotask(() => km.applyHints(box));
   return box;
 }

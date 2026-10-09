@@ -7,6 +7,7 @@ import { html, render, nothing } from "../vendor/lit-html-3.2.1/lit-html.js";
 import { live } from "../vendor/lit-html-3.2.1/directives/live.js";
 import { repeat } from "../vendor/lit-html-3.2.1/directives/repeat.js";
 import * as api from "../js/api.js";
+import { t } from "./i18n.js";
 import { SCREENS, storedWork, rememberWork, screenHref } from "./nav.js";
 import { startKeys, km } from "./keys.js";
 
@@ -16,7 +17,7 @@ export { html, render, nothing, live, repeat, api, screenHref, km };
 export function icon(name, cls = "") {
   const key = name.replace(/(^|-)(\w)/g, (_, __, c) => c.toUpperCase());
   const node = window.lucide.icons[key];
-  if (!node) throw new Error(`lucide に ${name} が無い`);
+  if (!node) throw new Error(`lucide に ${name} が無い`);  // i18n:dev
   const svg = window.lucide.createElement(node);
   svg.classList.add("lucide");
   if (cls) for (const c of cls.split(" ")) svg.classList.add(c);
@@ -26,16 +27,16 @@ export function icon(name, cls = "") {
 
 // ---------------------------------------------------------------- 知らせ（画像生成の画面の toast と同じ見た目）
 export function toast(msg, kind = "") {
-  const t = document.getElementById("toast");
+  const box = document.getElementById("toast");
   const ic = kind === "bad" ? "circle-alert" : kind === "need" ? "triangle-alert" : "info";
-  render(html`<div class="note ${kind}" role="status">${icon(ic)}<span>${msg}</span></div>`, t);
+  render(html`<div class="note ${kind}" role="status">${icon(ic)}<span>${msg}</span></div>`, box);
   clearTimeout(toast.h);
-  toast.h = setTimeout(() => render(nothing, t), kind === "bad" ? 9000 : 4000);
+  toast.h = setTimeout(() => render(nothing, box), kind === "bad" ? 9000 : 4000);
 }
-// what：何をしようとして失敗したか。理由と一緒に出す
-export function fail(e, what = "") {
+// message：失敗を伝える丸ごとの文（t() に包んで渡す）。理由と一緒に出す
+export function fail(e, message = "") {
   console.error(e);
-  toast(what ? `${what}できませんでした：${api.errorText(e)}` : api.errorText(e), "bad");
+  toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
 }
 
 // js/api.js に無い PUT・PATCH（つなぎ先と送り先）と、ファイルを取る GET。失敗の形は api.js と同じ（ApiError・NetworkError）
@@ -59,16 +60,16 @@ export async function raw(path, init = {}) {
 export function op(workId, body) { return api.op(workId, body); }
 
 // ---------------------------------------------------------------- 言葉
-export const ROLE = { author: "作者", editor: "編集者", assistant: "アシスタント", client: "依頼主", translator: "翻訳者", viewer: "見るだけ" };
-export const MEDIUM = { paper: "紙", web_page: "Webのページ型", vertical_scroll: "縦読み" };
-export const READING = { rtl: "右から左", ltr: "左から右" };
-export const TEXT_DIR = { vertical: "縦書き", horizontal: "横書き" };
-export const REVIEW = { draft: "下書き", in_review: "確認待ち", approved: "承認", needs_changes: "直しが要る" };
+export const ROLE = { author: t("作者"), editor: t("編集者"), assistant: t("アシスタント"), client: t("依頼主"), translator: t("翻訳者"), viewer: t("見るだけ") };
+export const MEDIUM = { paper: t("紙"), web_page: t("Webのページ型"), vertical_scroll: t("縦読み") };
+export const READING = { rtl: t("右から左"), ltr: t("左から右") };
+export const TEXT_DIR = { vertical: t("縦書き"), horizontal: t("横書き") };
+export const REVIEW = { draft: t("下書き"), in_review: t("確認待ち"), approved: t("承認"), needs_changes: t("直しが要る") };
 export const REVIEW_FLAG = { draft: "mut", in_review: "ai", approved: "on", needs_changes: "warn" };
-export const PAGE_KIND = { cover: "表紙", color_page: "カラー", body: "本文", blank: "白ページ" };
-export const COLOR_MODE = { bilevel: "白黒2階調", grayscale: "グレー", color: "カラー" };
-export const NOMBRE = { visible: "見せる", hidden: "隠し", none: "出さない" };
-export const YNU = { yes: "はい", no: "いいえ", unknown: "未確認" };
+export const PAGE_KIND = { cover: t("表紙"), color_page: t("カラー"), body: t("本文"), blank: t("白ページ") };
+export const COLOR_MODE = { bilevel: t("白黒2階調"), grayscale: t("グレー"), color: t("カラー") };
+export const NOMBRE = { visible: t("見せる"), hidden: t("隠し"), none: t("出さない") };
+export const YNU = { yes: t("はい"), no: t("いいえ"), unknown: t("未確認") };
 
 export function fmtDate(iso) {
   if (!iso) return "";
@@ -76,7 +77,7 @@ export function fmtDate(iso) {
   return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 // 話の名前（第3話「霧の夜」）
-export function episodeName(ep) { return `第${ep.number}話${ep.title ? `「${ep.title}」` : ""}`; }
+export function episodeName(ep) { return ep.title ? t("第{{number}}話「{{title}}」", { number: ep.number, title: ep.title }) : t("第{{number}}話", { number: ep.number }); }
 
 // ---------------------------------------------------------------- 上の帯
 // opts.screen：nav.js の SCREENS の id。opts.needsWork：作品を選ぶ欄を出すか。
@@ -91,15 +92,15 @@ export async function startShell({ screen, needsWork = true, onWork }) {
   await startKeys(screen);
   const drawTop = () => render(html`
     <div class="brand"><span class="mark">${icon(s.icon)}</span><span>${s.label}</span></div>
-    ${needsWork ? html`<nav class="pickers" aria-label="作品">
-      <select id="pick-work" class="field" aria-label="作品" @change=${(e) => pick(e.target.value)}>
-        ${state.works.length ? nothing : html`<option value="">作品がありません</option>`}
+    ${needsWork ? html`<nav class="pickers" aria-label=${t("作品")}>
+      <select id="pick-work" class="field" aria-label=${t("作品")} @change=${(e) => pick(e.target.value)}>
+        ${state.works.length ? nothing : html`<option value="">${t("作品がありません")}</option>`}
         ${state.works.map((w) => html`<option value=${w.id} ?selected=${w.id === state.workId}>${w.title}</option>`)}
       </select>
-      <a class="btn ghost sm" href=${screenHref("works", "")}>${icon("plus")}作品を作る</a></nav>` : html`<span class="grow"></span>`}
+      <a class="btn ghost sm" href=${screenHref("works", "")}>${icon("plus")}${t("作品を作る")}</a></nav>` : html`<span class="grow"></span>`}
     ${api.mode() === "oidc"
-      ? html`<span class="who">${api.myName()} <a href="/auth/logout">ログアウト</a></span>`
-      : html`<label class="who">利用者（開発用） <input id="user" class="field" autocomplete="username"
+      ? html`<span class="who">${api.myName()} <a href="/auth/logout">${t("ログアウト")}</a></span>`
+      : html`<label class="who">${t("利用者（開発用）")} <input id="user" class="field" autocomplete="username"
           .value=${live(api.currentUser())} @change=${(e) => { api.setUser(e.target.value.trim()); km.loadUserKeys(); load(); }}></label>`}`, top);
 
   async function pick(id) {
@@ -110,16 +111,16 @@ export async function startShell({ screen, needsWork = true, onWork }) {
   }
   async function load() {
     drawTop();
-    if (!api.currentUser()) { await onWork(null, "利用者の名前を入れてください（右上の欄）"); return; }
+    if (!api.currentUser()) { await onWork(null, t("利用者の名前を入れてください（右上の欄）")); return; }
     if (!needsWork) { await onWork(null); return; }
     try {
       state.works = await api.get("/works");
-    } catch (e) { fail(e, "作品の一覧を読む"); await onWork(null, api.errorText(e)); return; }
+    } catch (e) { fail(e, t("作品の一覧を読み込めませんでした")); await onWork(null, api.errorText(e)); return; }
     const want = storedWork();
     state.workId = state.works.some((w) => w.id === want) ? want : (state.works[0] ? state.works[0].id : null);
     rememberWork(state.workId);
     drawTop();
-    await onWork(state.workId, state.works.length ? null : "見てよい作品がありません。「作品と話」で作るか、作者に招いてもらってください");
+    await onWork(state.workId, state.works.length ? null : t("見てよい作品がありません。「作品と話」で作るか、作者に招いてもらってください"));
   }
   await load();
   return { reload: load, setWorks: (works, id) => { state.works = works; pick(id); } };
@@ -150,7 +151,7 @@ export function rememberEpisode(id) {
 }
 export function episodePicker(work, current, onPick) {
   const eps = work.episodes.filter((e) => !e.removed).sort((a, b) => a.number - b.number);
-  return html`<select class="field" id="pick-episode" aria-label="話" @change=${(e) => onPick(e.target.value)}>
+  return html`<select class="field" id="pick-episode" aria-label=${t("話")} @change=${(e) => onPick(e.target.value)}>
     ${eps.map((e) => html`<option value=${e.id} ?selected=${e.id === current}>${episodeName(e)}</option>`)}</select>`;
 }
 
@@ -159,7 +160,7 @@ export function loadThumbs(root = document) {
   for (const img of root.querySelectorAll("img[data-thumb]")) {
     if (img.dataset.loaded === img.dataset.thumb) continue;
     img.dataset.loaded = img.dataset.thumb;
-    api.showIn(img, img.dataset.thumb).catch((e) => { img.alt = `読めませんでした：${api.errorText(e)}`; });
+    api.showIn(img, img.dataset.thumb).catch((e) => { img.alt = t("読み込めませんでした：{{reason}}", { reason: api.errorText(e) }); });
   }
 }
 

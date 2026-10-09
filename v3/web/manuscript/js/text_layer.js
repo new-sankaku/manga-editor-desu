@@ -5,6 +5,7 @@
 // 書き出しの組み方はサーバー（v3/psd_writer/text_layout.js：HarfBuzz・UAX #14・BudouX）で、画面とは別の実装。
 // 2つが同じ所で改行するかは未検証。入りきるかの最後の判断は、入稿前の確かめ（サーバーの組版で測る）に任せる。
 import { PT_MM } from "./geometry.js";
+import { t } from "../../common/i18n.js";
 
 // 要素の中の 1mm の大きさ（CSS の px）。文字が小さすぎてブラウザに丸められないように、mm を K 倍して置く
 export const K = 10;
@@ -81,34 +82,34 @@ export class TextLayer {
   clear() { if (this.editing) this.finishEdit(); this.el.replaceChildren(); this.nodes.clear(); }
 
   // t：文字の行。ox, oy：ページの基本枠の左上（mm）。ts：組版（無ければ null）。font：書体の名前（無ければ null）
-  put(t, ox, oy, ts, font, opts) {
-    if (!t.box_mm) return;
-    let n = this.nodes.get(t.id);
+  put(item, ox, oy, ts, font, opts) {
+    if (!item.box_mm) return;
+    let n = this.nodes.get(item.id);
     if (!n) {
       n = document.createElement("div");
       n.className = "tx";
-      n.dataset.id = t.id;
+      n.dataset.id = item.id;
       n.inner = document.createElement("div");
       n.inner.className = "tx-in";
       n.append(n.inner);
       this.el.append(n);
-      this.nodes.set(t.id, n);
+      this.nodes.set(item.id, n);
     }
     n.dataset.ox = ox; n.dataset.oy = oy;
-    this.place(n, t.box_mm, ox, oy);
-    const vertical = t.writing_direction === "vertical";
+    this.place(n, item.box_mm, ox, oy);
+    const vertical = item.writing_direction === "vertical";
     n.classList.toggle("v", vertical);
-    n.classList.toggle("sfx", t.item_kind === "drawn_sfx");
+    n.classList.toggle("sfx", item.item_kind === "drawn_sfx");
     n.hidden = !opts.visible;
     const st = n.inner.style;
-    st.fontSize = t.font_size_pt ? `${t.font_size_pt * PT_MM * K}px` : "";
+    st.fontSize = item.font_size_pt ? `${item.font_size_pt * PT_MM * K}px` : "";
     st.fontFamily = font ? `"${font}", serif` : "serif";
     st.lineHeight = ts ? String(1 + ts.line_spacing_ratio) : "";
     st.textAlign = ts ? (ts.align === "center" ? "center" : "start") : "";
     st.whiteSpace = ts && ts.line_break === "none" ? "pre" : "pre-wrap";
     st.wordBreak = ts && ts.line_break === "phrase" ? "auto-phrase" : "normal";
-    st.opacity = String(t.opacity ?? 1);
-    const deco = t.decoration || {};
+    st.opacity = String(item.opacity ?? 1);
+    const deco = item.decoration || {};
     st.color = deco.fill || "";
     st.letterSpacing = deco.spacing_ratio ? `${deco.spacing_ratio}em` : "";
     if (deco.edge) {
@@ -116,10 +117,10 @@ export class TextLayer {
       st.paintOrder = "stroke fill";
     } else { st.webkitTextStroke = ""; st.paintOrder = ""; }
     n.classList.toggle("nofont", !font);
-    n.classList.toggle("nots", !ts && t.item_kind !== "drawn_sfx");
-    if (this.editing !== t.id) n.inner.replaceChildren(...richNodes(t, ts));
-    n.title = [!font ? "書体が決まっていません（画面はこのブラウザの書体で見せています）" : "",
-               !ts ? "組版が決まっていません" : ""].filter(Boolean).join("。");
+    n.classList.toggle("nots", !ts && item.item_kind !== "drawn_sfx");
+    if (this.editing !== item.id) n.inner.replaceChildren(...richNodes(item, ts));
+    n.title = [!font ? t("書体が決まっていません（画面はこのブラウザの書体で見せています）") : "",
+               !ts ? t("組版が決まっていません") : ""].filter(Boolean).join("。");
     this.checkOverflow(n);
   }
 
@@ -151,27 +152,27 @@ export class TextLayer {
     n.style.left = `${x * K}px`;
     n.style.top = `${y * K}px`;
     n.title = title;
-    n.textContent = kind === "hand" ? "手" : `判断 ${count ?? ""}`.trim();
+    n.textContent = kind === "hand" ? t("手") : (count === undefined || count === null || count === "" ? t("判断") : t("判断 {{n}}", { n: count }));
     this.el.append(n);
   }
 
   removeMissing(ids) { for (const [id, n] of this.nodes) if (!ids.has(id)) { n.remove(); this.nodes.delete(id); } }
 
   // その場で打つ。打っている間の見え方は、縦書きのまま（同じ要素を書き換えられるようにする）
-  edit(t) {
+  edit(row) {
     if (this.editing) this.finishEdit();
-    const n = this.nodes.get(t.id);
+    const n = this.nodes.get(row.id);
     if (!n) return;
-    this.editing = t.id;
+    this.editing = row.id;
     n.classList.add("editing");
-    n.inner.replaceChildren(t.text || "");
+    n.inner.replaceChildren(row.text || "");
     n.inner.setAttribute("contenteditable", "plaintext-only");
-    n.inner.setAttribute("aria-label", "文字");
+    n.inner.setAttribute("aria-label", t("文字"));
     n.inner.focus();
     const sel = getSelection();
     sel.selectAllChildren(n.inner);
     sel.collapseToEnd();
-    n.inner.oninput = () => { this.checkOverflow(n); if (this.hooks.onEditing) this.hooks.onEditing(t.id, n.inner.innerText); };
+    n.inner.oninput = () => { this.checkOverflow(n); if (this.hooks.onEditing) this.hooks.onEditing(row.id, n.inner.innerText); };
     n.inner.onblur = () => this.finishEdit();
     n.inner.onkeydown = (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); n.inner.blur(); } };
   }

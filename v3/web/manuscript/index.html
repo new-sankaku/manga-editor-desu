@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>V3 原稿</title>
+<title data-i18n>V3 原稿</title>
 <link rel="stylesheet" href="../css/app.css">
 <link rel="stylesheet" href="../common/nav.css">
 <link rel="stylesheet" href="../common/keys.css">
@@ -15,59 +15,59 @@
 <body>
 <div id="app" class="ms">
   <header class="top" data-v3-panel>
-    <div class="brand"><span class="mark"><i data-lucide="book-open"></i></span><span>原稿</span></div>
-    <nav class="pickers" aria-label="作品・話・ページ">
-      <select id="pick-work" class="field" aria-label="作品"></select>
+    <div class="brand"><span class="mark"><i data-lucide="book-open"></i></span><span data-i18n>原稿</span></div>
+    <nav class="pickers" aria-label="作品・話・ページ" data-i18n-attr="aria-label">
+      <select id="pick-work" class="field" aria-label="作品" data-i18n-attr="aria-label"></select>
       <span class="slash">/</span>
-      <select id="pick-episode" class="field" aria-label="話"></select>
+      <select id="pick-episode" class="field" aria-label="話" data-i18n-attr="aria-label"></select>
       <span class="slash">/</span>
-      <select id="pick-page" class="field" aria-label="ページ"></select>
-      <button class="ibtn" id="prev-page" data-key="manuscript.prevSpread" title="前の見開き・ページ" aria-label="前の見開き・ページ"><i data-lucide="chevron-left"></i></button>
-      <button class="ibtn" id="next-page" data-key="manuscript.nextSpread" title="次の見開き・ページ" aria-label="次の見開き・ページ"><i data-lucide="chevron-right"></i></button>
-      <button class="btn sm" id="view-spread" aria-pressed="false"><i data-lucide="columns-2"></i>見開き</button>
+      <select id="pick-page" class="field" aria-label="ページ" data-i18n-attr="aria-label"></select>
+      <button class="ibtn" id="prev-page" data-key="manuscript.prevSpread" title="前の見開き・ページ" aria-label="前の見開き・ページ" data-i18n-attr="title aria-label"><i data-lucide="chevron-left"></i></button>
+      <button class="ibtn" id="next-page" data-key="manuscript.nextSpread" title="次の見開き・ページ" aria-label="次の見開き・ページ" data-i18n-attr="title aria-label"><i data-lucide="chevron-right"></i></button>
+      <button class="btn sm" id="view-spread" aria-pressed="false"><i data-lucide="columns-2"></i><span data-i18n>見開き</span></button>
       <span class="meta" id="reading"></span>
     </nav>
-    <a class="btn sm" id="to-workbench" href="../index.html" data-key="manuscript.mask" title="選んだコマの絵を画像生成の画面で頼む"><i data-lucide="sparkles"></i>コマの絵を頼む</a>
-    <label class="who" id="who-dev">利用者（開発用） <input id="user" class="field" autocomplete="username"></label>
-    <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout">ログアウト</a></span>
+    <a class="btn sm" id="to-workbench" href="../index.html" data-key="manuscript.mask" title="選んだコマの絵を画像生成の画面で頼む" data-i18n-attr="title"><i data-lucide="sparkles"></i><span data-i18n>コマの絵を頼む</span></a>
+    <label class="who" id="who-dev"><span data-i18n>利用者（開発用）</span> <input id="user" class="field" autocomplete="username"></label>
+    <span class="who" id="who-login" hidden><span id="who-name"></span> <a href="/auth/logout" data-i18n>ログアウト</a></span>
   </header>
   <nav class="v3-nav" data-v3-nav="manuscript" data-v3-panel></nav>
 
   <div class="ws">
     <div class="ms-main">
-      <section class="canvas" aria-label="原稿のページ">
+      <section class="canvas" aria-label="原稿のページ" data-i18n-attr="aria-label">
         <div class="stage-host" id="stage"></div>
         <div class="empty" id="stage-empty" hidden></div>
 
-        <div class="ftb" id="tools" role="toolbar" aria-label="道具">
+        <div class="ftb" id="tools" role="toolbar" aria-label="ツール" data-i18n-attr="aria-label">
           <span class="vsep"></span>
-          <button class="tool" id="undo" aria-disabled="true" data-key="edit.undo" title="取り消す"><i data-lucide="undo-2"></i>取り消す</button>
-          <button class="tool" id="redo" aria-disabled="true" data-key="edit.redo" title="やり直す"><i data-lucide="redo-2"></i>やり直す</button>
-          <button class="tool" id="keys-open" data-key="view.help" title="キーの一覧"><i data-lucide="keyboard"></i>キー<kbd></kbd></button>
+          <button class="tool" id="undo" aria-disabled="true" data-key="edit.undo" title="取り消す" data-i18n-attr="title"><i data-lucide="undo-2"></i><span data-i18n>取り消す</span></button>
+          <button class="tool" id="redo" aria-disabled="true" data-key="edit.redo" title="やり直す" data-i18n-attr="title"><i data-lucide="redo-2"></i><span data-i18n>やり直す</span></button>
+          <button class="tool" id="keys-open" data-key="view.help" title="キーの一覧" data-i18n-attr="title"><i data-lucide="keyboard"></i><span data-i18n>キー</span><kbd></kbd></button>
         </div>
 
         <div class="stage-msg" id="stage-msg"></div>
 
         <div class="zoom">
-          <button class="ibtn" id="zoom-out" data-key="manuscript.zoomOut" title="縮める"><i data-lucide="minus"></i></button>
+          <button class="ibtn" id="zoom-out" data-key="manuscript.zoomOut" title="縮める" data-i18n-attr="title"><i data-lucide="minus"></i></button>
           <span class="zoom-v num" id="zoom-v"></span>
-          <button class="ibtn" id="zoom-fit" data-key="manuscript.zoomFit" title="合わせる"><i data-lucide="scan"></i></button>
-          <button class="ibtn" id="zoom-in" data-key="manuscript.zoomIn" title="広げる"><i data-lucide="plus"></i></button>
+          <button class="ibtn" id="zoom-fit" data-key="manuscript.zoomFit" title="合わせる" data-i18n-attr="title"><i data-lucide="scan"></i></button>
+          <button class="ibtn" id="zoom-in" data-key="manuscript.zoomIn" title="広げる" data-i18n-attr="title"><i data-lucide="plus"></i></button>
         </div>
       </section>
 
-      <section class="dock" aria-label="ページの一覧" data-v3-panel>
+      <section class="dock" aria-label="ページの一覧" data-i18n-attr="aria-label" data-v3-panel>
         <div class="dock-h">
-          <span class="lbl">ページ</span>
+          <span class="lbl" data-i18n>ページ</span>
           <span class="meta" id="pages-note"></span>
           <span class="grow"></span>
-          <button class="btn sm" id="page-add"><i data-lucide="file-plus"></i>ページを足す</button>
+          <button class="btn sm" id="page-add"><i data-lucide="file-plus"></i><span data-i18n>ページを足す</span></button>
         </div>
         <div class="pages" id="pages" role="list"></div>
       </section>
     </div>
 
-    <aside class="insp" aria-label="判断・道具・層・確かめ" data-v3-panel>
+    <aside class="insp" aria-label="判断・ツール・レイヤー・確かめ" data-i18n-attr="aria-label" data-v3-panel>
       <div class="itabs" id="itabs" role="tablist"></div>
       <div class="insp-b" id="pane"></div>
     </aside>

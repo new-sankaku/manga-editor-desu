@@ -1,3 +1,4 @@
+import { t } from "../common/i18n.js";
 // 処理の引数の JSON Schema（generation_queue/image_process_registry.py の params_model）から入力欄を作る。
 // 欄の形・初めの値・まとまりはサーバーの x- の印で決める。処理を足しても、この画面のコードは変えない。
 //   x-group    まとまり（「基本」と、処理の open_groups にあるものは開いて出す。ほかは畳んで出す）
@@ -6,7 +7,7 @@
 //   x-labels   選ぶ欄の見出し
 //   x-unit     数の単位
 //   x-presets  よく使う値のボタン（見出し → 値）
-const BASIC = "基本";
+const BASIC = "基本";  // i18n:data（サーバーの x-group と突き合わせる名前）
 
 function plain(prop) {
   // steps のように「空ならつなぎ先の設定」を許す欄は anyOf [型, null] で来る
@@ -63,11 +64,11 @@ export function renderForm(host, schema, initial, onChange, openGroups = []) {
       const label = el("label", { class: "k", for: id, text: p.title || name });
       let row;
       if (widget === "textarea") {
-        const t = el("textarea", { class: "field", id, rows: 3, "data-name": name });
-        t.value = values[name] ?? "";
-        t.addEventListener("input", () => changed(name, t.value));
-        setters[name] = (v) => { t.value = v ?? ""; };
-        row = el("div", { class: "full" }, el("label", { class: "lbl", for: id, text: p.title || name }), t);
+        const ta = el("textarea", { class: "field", id, rows: 3, "data-name": name });
+        ta.value = values[name] ?? "";
+        ta.addEventListener("input", () => changed(name, ta.value));
+        setters[name] = (v) => { ta.value = v ?? ""; };
+        row = el("div", { class: "full" }, el("label", { class: "lbl", for: id, text: p.title || name }), ta);
         kv.append(row);
         continue;
       }
@@ -98,15 +99,15 @@ export function renderForm(host, schema, initial, onChange, openGroups = []) {
         setters[name] = (x) => { r.value = x; show(); };
         v.append(r, out);
       } else if (widget === "text") {
-        const t = el("input", { class: "field", id, "data-name": name });
-        t.value = values[name] ?? "";
-        t.addEventListener("input", () => changed(name, t.value));
-        setters[name] = (x) => { t.value = x ?? ""; };
-        v.append(t);
+        const ti = el("input", { class: "field", id, "data-name": name });
+        ti.value = values[name] ?? "";
+        ti.addEventListener("input", () => changed(name, ti.value));
+        setters[name] = (x) => { ti.value = x ?? ""; };
+        v.append(ti);
       } else {
         const n = el("input", { class: "field num", id, type: "number", step: stepOf(p), "data-name": name,
                                 min: p.minimum, max: p.maximum,
-                                placeholder: p.nullable ? "つなぎ先の設定" : undefined });
+                                placeholder: p.nullable ? t("接続先の設定") : undefined });
         n.value = values[name] ?? "";
         n.addEventListener("input", () => {
           if (n.value === "") changed(name, p.nullable ? null : values[name]);

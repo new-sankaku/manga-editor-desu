@@ -12,6 +12,7 @@ import { rememberWork, storedWork } from "../../common/nav.js";
 import { PRINT_INK, PRINT_PAPER } from "./print_colors.js";
 import { startKeys, km } from "../../common/keys.js";
 import { openHelp } from "../../common/help_overlay.js";
+import { t } from "../../common/i18n.js";
 
 export const S = {
   works: [], workId: null, m: null, episodeId: null, pageId: null, spread: false,
@@ -30,13 +31,13 @@ async function loadWorks() {
   S.works = await api.get("/works");
   const sel = $("#pick-work");
   sel.replaceChildren(...S.works.map((w) => h("option", { value: w.id, text: w.title })));
-  if (!S.works.length) { showEmpty("見てよい作品がありません"); return; }
+  if (!S.works.length) { showEmpty(t("見てよい作品がありません")); return; }
   const want = storedWork() || readPref("work");
   await selectWork(S.works.some((w) => w.id === want) ? want : S.works[0].id);
 }
 
 async function selectWork(id) {
-  if (S.saver && (S.saver.pending() || S.saver.failed)) { toast("保存が済んでから作品を替えてください", "need"); $("#pick-work").value = S.workId; return; }
+  if (S.saver && (S.saver.pending() || S.saver.failed)) { toast(t("保存が済んでから作品を替えてください"), "need"); $("#pick-work").value = S.workId; return; }
   S.workId = id;
   $("#pick-work").value = id;
   writePref("work", id);
@@ -45,8 +46,8 @@ async function selectWork(id) {
   S.preflight = null;
   await reload();
   const eps = S.m.episodes();
-  $("#pick-episode").replaceChildren(...eps.map((e) => h("option", { value: e.id, text: `${e.number} 話${e.title ? ` ${e.title}` : ""}` })));
-  if (!eps.length) { showEmpty("この作品には話がありません"); return; }
+  $("#pick-episode").replaceChildren(...eps.map((e) => h("option", { value: e.id, text: e.title ? t("{{number}} 話 {{title}}", { number: e.number, title: e.title }) : t("{{number}} 話", { number: e.number }) })));
+  if (!eps.length) { showEmpty(t("この作品には話がありません")); return; }
   const wantPage = asked.get("page");
   const pageRow = wantPage ? S.m.find("pages", wantPage) : null;
   const wantEp = pageRow ? pageRow.episode_id : asked.get("episode") || readPref("episode");
@@ -59,7 +60,7 @@ function selectEpisode(id, wantPage = null) {
   $("#pick-episode").value = id;
   writePref("episode", id);
   const pages = S.m.pages(id);
-  if (!pages.length) { S.pageId = null; showEmpty("この話にはページがありません。下のページの一覧から足せます"); draw(); return; }
+  if (!pages.length) { S.pageId = null; showEmpty(t("この話にはページがありません。下のページの一覧から足せます")); draw(); return; }
   const want = wantPage || readPref("page");
   selectPage(pages.some((p) => p.id === want) ? want : pages[0].id);
 }
@@ -143,14 +144,14 @@ export function draw({ refit = false } = {}) {
 function syncPickers() {
   const pages = S.m.pages(S.episodeId);
   const sel = $("#pick-page");
-  sel.replaceChildren(...pages.map((p) => h("option", { value: p.id, text: `${p.number} ページ` })));
+  sel.replaceChildren(...pages.map((p) => h("option", { value: p.id, text: t("{{number}} ページ", { number: p.number }) })));
   if (S.pageId) sel.value = S.pageId;
   const sides = S.m.sides(S.episodeId);
   const b = $("#view-spread");
   b.setAttribute("aria-pressed", String(S.spread && !!sides));
   b.setAttribute("aria-disabled", String(!sides));
-  b.title = sides ? "見開きで見る・1ページで見る" : "1ページ目を左右どちらに置くかが決まっていないので、見開きで並べられません（ページの設定で決めます）";
-  $("#reading").textContent = S.m.work.reading_direction === "rtl" ? "右から読む" : S.m.work.reading_direction === "ltr" ? "左から読む" : "読む向きが未設定";
+  b.title = sides ? t("見開きで見る・1ページで見る") : t("1ページ目を左右どちらに置くかが決まっていないので、見開きで並べられません（ページの設定で決めます）");
+  $("#reading").textContent = S.m.work.reading_direction === "rtl" ? t("右から読む") : S.m.work.reading_direction === "ltr" ? t("左から読む") : t("読む向きが未設定");
   $("#to-workbench").href = workbenchUrl(S.sel && S.sel.kind === "panel" ? S.sel.id : null);
 }
 
@@ -163,7 +164,7 @@ export function workbenchUrl(panelId) {
 // ---------------------------------------------------------------- 変更を送る
 // label：状態の所と取り消しに出す名前。ops：操作。pages：取り消しの記録を載せるページ。reload：済んだら読み直す
 export function change(label, ops, { pages = [S.pageId], reload: re = false, send = null } = {}) {
-  if (S.saver.failed) { toast("保存できていない変更があります。先に「もう一度送る」か「この変更を捨てる」を選んでください", "need"); draw(); return null; }
+  if (S.saver.failed) { toast(t("保存できていない変更があります。先に「もう一度送る」か「この変更を捨てる」を選んでください"), "need"); draw(); return null; }
   let need = re;
   for (const op of ops) if (!S.m.applyLocal(op)) need = true;
   const ids = S.saver.submit({ label, pages, ops, reload: need, send });
@@ -186,13 +187,13 @@ function renderStatus() {
   const sv = S.saver;
   if (!sv) return;
   if (sv.failed) {
-    const n = note(`保存できませんでした（${sv.failed.job.label}）：${api.errorText(sv.failed.error)}。変えた所は画面にだけあります`, "bad");
-    n.append(h("button", { class: "btn sm", onclick: () => sv.retry() }, "もう一度送る"),
-      h("button", { class: "btn sm", onclick: () => { sv.discard(); reload().catch((e) => fail(e, "読み直し")); } }, "この変更を捨てる"));
+    const n = note(t("保存できませんでした（{{label}}）：{{reason}}。変えた所は画面にだけあります", { label: sv.failed.job.label, reason: api.errorText(sv.failed.error) }), "bad");
+    n.append(h("button", { class: "btn sm", onclick: () => sv.retry() }, t("もう一度送る")),
+      h("button", { class: "btn sm", onclick: () => { sv.discard(); reload().catch((e) => fail(e, t("読み直しできませんでした"))); } }, t("この変更を捨てる")));
     host.replaceChildren(n);
   } else {
     const n = sv.pending();
-    host.replaceChildren(n ? note(`保存しています（${n} 件）`, "", "loader") : "");
+    host.replaceChildren(n ? note(t("保存しています（{{count}} 件）", { count: n }), "", "loader") : "");
   }
   syncUndo();
 }
@@ -204,7 +205,8 @@ function syncUndo() {
     const b = $(id);
     b.setAttribute("aria-disabled", String(!ok));
     const e = S.saver.peek(S.pageId, dir);
-    b.title = `${dir === "undo" ? "取り消す (Ctrl+Z)" : "やり直す (Ctrl+Shift+Z・Ctrl+Y)"}${e ? `：${e.label}` : ""}（このページの操作）`;
+    const action = dir === "undo" ? t("取り消す (Ctrl+Z)") : t("やり直す (Ctrl+Shift+Z・Ctrl+Y)");
+    b.title = e ? t("{{action}}：{{label}}（このページの操作）", { action, label: e.label }) : t("{{action}}（このページの操作）", { action });
   }
 }
 
@@ -214,14 +216,14 @@ export async function step(dir) {
   S.stepping = true;
   try {
     const e = await S.saver.step(S.pageId, dir);
-    if (e) toast(`${dir === "undo" ? "取り消しました" : "やり直しました"}：${e.label}`);
-  } catch (e) { fail(e, dir === "undo" ? "取り消し" : "やり直し"); }
-  await reload().catch((e) => fail(e, "読み直し"));
+    if (e) toast(dir === "undo" ? t("取り消しました：{{label}}", { label: e.label }) : t("やり直しました：{{label}}", { label: e.label }));
+  } catch (e) { fail(e, dir === "undo" ? t("取り消しできませんでした") : t("やり直しできませんでした")); }
+  await reload().catch((e) => fail(e, t("読み直しできませんでした")));
   S.stepping = false;
 }
 
 // ---------------------------------------------------------------- ページの上の手の動き → 操作
-const fixedRefuse = () => toast("動かさない印が付いています。右の欄で印を外すと直せます", "need");
+const fixedRefuse = () => toast(t("動かさない印が付いています。右のパネルで印を外すと直せます"), "need");
 
 function nextPanelOrder(pageId) {
   const page = S.m.find("pages", pageId);
@@ -245,18 +247,18 @@ const hooks = {
   },
   onEditing: () => {},
   onEditDone: (id, text) => {
-    const t = S.m.find("text_items", id);
-    if (!t || t.text === text) return;
+    const item = S.m.find("text_items", id);
+    if (!item || item.text === text) return;
     const op = { type: "update_text_item", id, text };
     const len = Array.from(text).length;
     const keep = (l) => (l || []).filter((r) => r.end <= len);
-    const dropped = (t.spans || []).length + (t.ruby || []).length - keep(t.spans).length - keep(t.ruby).length;
+    const dropped = (item.spans || []).length + (item.ruby || []).length - keep(item.spans).length - keep(item.ruby).length;
     if (dropped) {
-      if (S.m.caps.print) op.spans = keep(t.spans);
-      op.ruby = keep(t.ruby);
-      toast(`文字が短くなり、はみ出した一部の書式・ルビを ${dropped} 件外しました（取り消せます）`, "need");
+      if (S.m.caps.print) op.spans = keep(item.spans);
+      op.ruby = keep(item.ruby);
+      toast(t("文字が短くなり、はみ出した一部の書式・ルビを {{count}} 件外しました（取り消せます）", { count: dropped }), "need");
     }
-    change("文字", [op], { pages: [t.page_id] });
+    change(t("文字"), [op], { pages: [item.page_id] });
   },
   onKnife: (panel, through, pageId) => {
     if (panel.fixed) return fixedRefuse();
@@ -265,25 +267,25 @@ const hooks = {
     const op = { type: "split_panel", panel_id: panel.id, through_mm: [r2(through[0]), r2(through[1])], direction: k.direction,
                  gap_mm: gap, new_panel_id: newId() };
     if (k.direction === "slanted") op.angle_deg = k.angle;
-    change("ナイフで分ける", [op], { pages: [pageId], reload: true });
+    change(t("ナイフで分ける"), [op], { pages: [pageId], reload: true });
   },
   onJoinPick: (a, b) => {
-    if (!b) { toast("合わせるもう1つのコマを押してください"); return; }
+    if (!b) { toast(t("合わせるもう1つのコマを押してください")); return; }
     const pa = S.m.find("panels", a), pb = S.m.find("panels", b);
     if (pa.fixed || pb.fixed) return fixedRefuse();
-    if (pa.page_id !== pb.page_id) { toast("合わせられるのは同じページのコマだけです", "need"); return; }
-    change("コマを合わせる", [{ type: "merge_panels", panel_ids: [a, b] }], { pages: [pa.page_id], reload: true });
+    if (pa.page_id !== pb.page_id) { toast(t("合わせられるのは同じページのコマだけです"), "need"); return; }
+    change(t("コマを合わせる"), [{ type: "merge_panels", panel_ids: [a, b] }], { pages: [pa.page_id], reload: true });
   },
   onAdd: (tool, hit, pt) => addAt(tool, hit),
   onImageEdit: (panelId) => {
     const p = S.m.find("panels", panelId);
-    if (!p.image_id || !p.image_placement) { toast("このコマには置いた絵がありません。右の欄の「絵を置く」から置けます", "need"); return; }
+    if (!p.image_id || !p.image_placement) { toast(t("このコマには置いた絵がありません。右のパネルの「絵を置く」から置けます"), "need"); return; }
     if (p.fixed) return fixedRefuse();
     S.imageEdit = panelId;
     S.sel = { kind: "panel", id: panelId, pageId: p.page_id };
     draw();
     S.view.select("image", panelId, false);
-    toast("コマの絵を動かす・大きさを変えられます。Esc で終わります");
+    toast(t("コマの絵を動かす・大きさを変えられます。Esc で終わります"));
   },
   onPanelChange: (id, poly, d) => {
     const p = S.m.find("panels", id);
@@ -292,31 +294,31 @@ const hooks = {
       const b = p.image_placement.dest_box_mm;
       op.image_placement = { ...p.image_placement, dest_box_mm: [r2(b[0] + d[0]), r2(b[1] + d[1]), r2(b[2] + d[0]), r2(b[3] + d[1])] };
     }
-    change(d ? "コマを動かす" : "コマ枠を直す", [op], { pages: [p.page_id] });
+    change(d ? t("コマを動かす") : t("コマ枠を直す"), [op], { pages: [p.page_id] });
   },
   onTextChange: (id, { box, outline, target }) => {
-    const t = S.m.find("text_items", id);
+    const item = S.m.find("text_items", id);
     const op = { type: "update_text_item", id, box_mm: box.map(r2) };
-    if (outline) op.balloon_shape = { ...t.balloon_shape, outline_mm: roundPts(outline) };
+    if (outline) op.balloon_shape = { ...item.balloon_shape, outline_mm: roundPts(outline) };
     if (target) op.tail_target_mm = [r2(target[0]), r2(target[1])];
-    change(t.item_kind === "balloon" ? "フキダシを動かす" : "文字を動かす", [op], { pages: [t.page_id] });
+    change(item.item_kind === "balloon" ? t("フキダシを動かす") : t("文字を動かす"), [op], { pages: [item.page_id] });
   },
   onToneChange: (id, box) => {
-    const t = S.m.find("page_items", id);
+    const item = S.m.find("page_items", id);
     const op = { type: "update_page_item", id, box_mm: box.map(r2) };
-    const tg = t.spec.target;
-    const mp = mapBox(t.box_mm, box);
-    if (t.item_kind === "tone" && (tg.kind === "polygon" || t.spec.center_mm)) {
-      const spec = { ...t.spec };
+    const tg = item.spec.target;
+    const mp = mapBox(item.box_mm, box);
+    if (item.item_kind === "tone" && (tg.kind === "polygon" || item.spec.center_mm)) {
+      const spec = { ...item.spec };
       if (tg.kind === "polygon") spec.target = { ...tg, polygon_mm: roundPts(tg.polygon_mm.map(mp)) };
       if (spec.center_mm) spec.center_mm = mp(spec.center_mm).map(r2);
       op.spec = spec;
     }
-    change("トーンを動かす", [op], { pages: [t.page_id] });
+    change(t("トーンを動かす"), [op], { pages: [item.page_id] });
   },
   onImageChange: (panelId, dest) => {
     const p = S.m.find("panels", panelId);
-    change("コマの絵を動かす", [{ type: "update_panel", id: panelId, image_placement: { ...p.image_placement, dest_box_mm: dest.map(r2) } }], { pages: [p.page_id] });
+    change(t("コマの絵を動かす"), [{ type: "update_panel", id: panelId, image_placement: { ...p.image_placement, dest_box_mm: dest.map(r2) } }], { pages: [p.page_id] });
   },
 };
 
@@ -333,7 +335,7 @@ function addAt(tool, hit) {
     const box = [q[0] - 25, q[1] - 18, q[0] + 25, q[1] + 18].map(r2);
     const op = { type: "add_panel", id: newId(), page_id: page.id, order: nextPanelOrder(page.id),
                  frame: { polygon_mm: [[box[0], box[1]], [box[2], box[1]], [box[2], box[3]], [box[0], box[3]]], bleeds: false } };
-    change("コマを足す", [op], { pages: [page.id], reload: true });
+    change(t("コマを足す"), [op], { pages: [page.id], reload: true });
     return;
   }
   const panel = hit.panel;
@@ -351,7 +353,7 @@ function addAt(tool, hit) {
       if (m.caps.print) { shape.tail_base_width_mm = b.tail_base_width_mm; shape.tail_bend_ratio = b.tail_bend_ratio; op.tail_target_mm = [r2(q[0] - 6), r2(box[3] + 9)]; }
       op.balloon_shape = shape;
     } else op.balloon_shape = { kind: "none" };
-    change(tool === "balloon" ? "フキダシを足す" : "文字を足す", [op], { pages: [page.id] });
+    change(tool === "balloon" ? t("フキダシを足す") : t("文字を足す"), [op], { pages: [page.id] });
     S.sel = { kind: "text", id: op.id, pageId: page.id };
     draw();
     S.view.editText(op.id);
@@ -359,16 +361,16 @@ function addAt(tool, hit) {
   }
   if (tool === "tone") {
     const box = bbox(panel.frame.polygon_mm).map(r2);
-    const t = S.tone;
-    const spec = { kind: t.kind, target: { kind: "panel", panel_id: panel.id }, color: PRINT_INK, density: t.density, angle_deg: 45 };
-    if (["dots", "lines", "gradient"].includes(t.kind)) spec.lines_per_inch = t.lines_per_inch;
-    if (t.kind === "gradient") Object.assign(spec, { density_end: 0, screen_angle_deg: 45, dot_shape: "round", angle_deg: 90 });
-    if (t.kind === "sand" || t.kind === "snow") Object.assign(spec, { grain_mm: 0.3, seed: Math.floor(Math.random() * 1e6) });
-    if (t.kind === "focus_lines") Object.assign(spec, { line_count: 120, center_mm: [r2(q[0]), r2(q[1])], inner_ratio: 0.45, seed: Math.floor(Math.random() * 1e6) });
-    if (t.kind === "speed_lines") Object.assign(spec, { line_count: 60, seed: Math.floor(Math.random() * 1e6), angle_deg: 0 });
+    const tn = S.tone;
+    const spec = { kind: tn.kind, target: { kind: "panel", panel_id: panel.id }, color: PRINT_INK, density: tn.density, angle_deg: 45 };
+    if (["dots", "lines", "gradient"].includes(tn.kind)) spec.lines_per_inch = tn.lines_per_inch;
+    if (tn.kind === "gradient") Object.assign(spec, { density_end: 0, screen_angle_deg: 45, dot_shape: "round", angle_deg: 90 });
+    if (tn.kind === "sand" || tn.kind === "snow") Object.assign(spec, { grain_mm: 0.3, seed: Math.floor(Math.random() * 1e6) });
+    if (tn.kind === "focus_lines") Object.assign(spec, { line_count: 120, center_mm: [r2(q[0]), r2(q[1])], inner_ratio: 0.45, seed: Math.floor(Math.random() * 1e6) });
+    if (tn.kind === "speed_lines") Object.assign(spec, { line_count: 60, seed: Math.floor(Math.random() * 1e6), angle_deg: 0 });
     const stack = Math.max(0, ...m.items(page.id).map((x) => x.stack_order)) + 1;
     const op = { type: "add_page_item", id: newId(), page_id: page.id, panel_id: panel.id, item_kind: "tone", spec, box_mm: box, stack_order: stack };
-    change("トーンを貼る", [op], { pages: [page.id] });
+    change(t("トーンを貼る"), [op], { pages: [page.id] });
     S.sel = { kind: "tone", id: op.id, pageId: page.id };
     draw();
   }
@@ -383,8 +385,8 @@ export function selectedRow() {
 
 // ---------------------------------------------------------------- 道具（4つ目はキーの操作の名前。common/key_catalog.js）
 export const TOOLS = [
-  ["select", "選ぶ", "mouse-pointer-2", "manuscript.select"], ["frame", "コマ枠", "square-dashed", "manuscript.frame"], ["knife", "ナイフ", "slice", "manuscript.knife"],
-  ["balloon", "フキダシ", "message-circle", "manuscript.balloon"], ["text", "文字", "type", "manuscript.text"], ["tone", "トーン", "grid-3x3", "manuscript.tone"], ["hand", "手のひら", "hand", "manuscript.hand"],
+  ["select", t("選ぶ"), "mouse-pointer-2", "manuscript.select"], ["frame", t("コマ枠"), "square-dashed", "manuscript.frame"], ["knife", t("ナイフ"), "slice", "manuscript.knife"],
+  ["balloon", t("フキダシ"), "message-circle", "manuscript.balloon"], ["text", t("文字"), "type", "manuscript.text"], ["tone", t("トーン"), "grid-3x3", "manuscript.tone"], ["hand", t("手のひら"), "hand", "manuscript.hand"],
 ];
 
 export function setTool(tool) {
@@ -406,7 +408,7 @@ export function setFrameMode(mode) {
 
 // ---------------------------------------------------------------- 見開き・ページ送り
 function toggleSpread() {
-  if (!S.m.sides(S.episodeId)) { toast("1ページ目を左右どちらに置くかが決まっていません。ページの設定で決めると見開きで並べられます", "need"); return; }
+  if (!S.m.sides(S.episodeId)) { toast(t("1ページ目を左右どちらに置くかが決まっていません。ページの設定で決めると見開きで並べられます"), "need"); return; }
   S.spread = !S.spread;
   writePref("spread", S.spread ? "1" : "");
   draw({ refit: true });
@@ -442,7 +444,7 @@ export function removeSelected() {
   const pageId = r.page_id;
   S.view.c.discardActiveObject();
   S.sel = null;
-  change("消す", [{ type: "set_removed", target_kind: kind, id: r.id, removed: true }], { pages: [pageId], reload: kind === "panel" });
+  change(t("消す"), [{ type: "set_removed", target_kind: kind, id: r.id, removed: true }], { pages: [pageId], reload: kind === "panel" });
 }
 
 // ---------------------------------------------------------------- キー（決めごと 22章）
@@ -478,13 +480,13 @@ function bindKeys() {
     up: () => { S.view.space = false; $("#stage").classList.remove("space"); },
   });
   // この画面にまだ無い物（22.2 のキーは空けたまま。押すと無いと知らせる）
-  for (const [id, name] of [["manuscript.redline", "赤入れ"], ["manuscript.pen", "ペン"], ["manuscript.erase", "消しゴム"],
-                            ["manuscript.shape", "図形"], ["manuscript.order", "読む順"], ["manuscript.queue", "順番待ち"]]) {
+  for (const [id, name] of [["manuscript.redline", t("赤入れ")], ["manuscript.pen", t("ペン")], ["manuscript.erase", t("消しゴム")],
+                            ["manuscript.shape", t("図形")], ["manuscript.order", t("読む順")], ["manuscript.queue", t("キュー")]]) {
     km.bind(id, () => notHere(name), { missing: true });
   }
 }
 
-function notHere(name) { toast(`「${name}」はこの画面にまだありません（キーは決めごと 22.2 のまま空けています）`, "need"); }
+function notHere(name) { toast(t("「{{name}}」はこの画面にまだありません（キーは決めごと 22.2 のまま空けています）", { name }), "need"); }
 
 // Esc：コマの絵を動かすのをやめる・ナイフとコマ枠の途中をやめる・選ぶのをやめる。することが無ければ false（絵だけ・全画面へ回す）
 function cancel() {
@@ -498,8 +500,8 @@ function cancel() {
 }
 
 export function openWorkbench(panelId = S.sel && S.sel.kind === "panel" ? S.sel.id : null) {
-  if (!panelId) { toast("絵を頼むコマを選んでください（選ぶ道具でコマを押す）", "need"); return; }
-  if (S.saver.pending()) { toast("保存が済んでから開きます"); S.saver.idle().then(() => openWorkbench(panelId), () => {}); return; }
+  if (!panelId) { toast(t("絵を頼むコマを選んでください（選ぶツールでコマを押す）"), "need"); return; }
+  if (S.saver.pending()) { toast(t("保存が済んでから開きます")); S.saver.idle().then(() => openWorkbench(panelId), () => {}); return; }
   location.href = workbenchUrl(panelId);
 }
 
@@ -534,7 +536,7 @@ async function boot() {
   S.spread = readPref("spread") === "1";
   S.view = new PageView($("#stage"), hooks);
   window.__ms = S; // 試験と測定のため（tests/manuscript_ui.mjs が読む）
-  $("#pick-work").addEventListener("change", (e) => selectWork(e.target.value).catch((x) => fail(x, "作品を読むこと")));
+  $("#pick-work").addEventListener("change", (e) => selectWork(e.target.value).catch((x) => fail(x, t("作品を読めませんでした"))));
   $("#pick-episode").addEventListener("change", (e) => selectEpisode(e.target.value));
   $("#pick-page").addEventListener("change", (e) => selectPage(e.target.value));
   $("#view-spread").addEventListener("click", toggleSpread);
@@ -552,11 +554,11 @@ async function boot() {
   });
   panes.init();
   icons();
-  try { await showWho(); } catch (e) { fail(e, "ログインの方式を読むこと"); return; }
+  try { await showWho(); } catch (e) { fail(e, t("ログインの方式を読めませんでした")); return; }
   bindKeys();
   startKeys("manuscript");
-  if (!api.currentUser()) { showEmpty("右上の「利用者」に名前を入れてください"); return; }
-  loadWorks().catch((e) => { fail(e, "作品を読むこと"); showEmpty(`作品を読めませんでした：${api.errorText(e)}`); });
+  if (!api.currentUser()) { showEmpty(t("右上の「利用者」に名前を入れてください")); return; }
+  loadWorks().catch((e) => { fail(e, t("作品を読めませんでした")); showEmpty(t("作品を読めませんでした：{{reason}}", { reason: api.errorText(e) })); });
 }
 
 boot();

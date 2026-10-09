@@ -1,6 +1,7 @@
 // トーンを画面に描く（目安）。正本は値（ToneSpec）で、書き出しの網点はサーバー（print_export/page_render.py）が描く。
 // 画面で網点の1周期が 3 画素より細かくなる倍率では、点を描くと干渉の縞が出るので、同じ濃さの灰色で見せる。
 import { PRINT_INK } from "./print_colors.js";
+import { t } from "../../common/i18n.js";
 const MIN_PERIOD_PX = 3;
 
 function rng(seed) {
@@ -107,5 +108,5 @@ export function drawTone(ctx, spec, box, zoom) {
 }
 
 export const TONE_KINDS = [
-  ["dots", "網点"], ["lines", "線"], ["sand", "砂目"], ["gradient", "グラデ"], ["snow", "雪"], ["focus_lines", "集中線"], ["speed_lines", "スピード線"],
+  ["dots", t("網点")], ["lines", t("線")], ["sand", t("砂目")], ["gradient", t("グラデ")], ["snow", t("雪")], ["focus_lines", t("集中線")], ["speed_lines", t("スピード線")],
 ];

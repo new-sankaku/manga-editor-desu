@@ -8,6 +8,8 @@
 // - 絵だけかどうかは画面ごとに localStorage の v3.view.<画面> に残す（このブラウザだけの見た目の好み）。
 //   全画面は残さない（ブラウザは人の操作の無いときに全画面にさせない）
 // - 変わったら window に "v3-view" の出来事を送る（detail：{ focus, peek, fullscreen }）
+import { t } from "./i18n.js";
+
 let screen = null;
 const S = { focus: false, peek: false };
 const root = document.documentElement;
@@ -77,11 +79,11 @@ function drawBar() {
   const st = viewState();
   if (!bar) {
     bar = document.createElement("div");
-    bar.className = "v3-viewbar"; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", "表示");
+    bar.className = "v3-viewbar"; bar.setAttribute("role", "toolbar"); bar.setAttribute("aria-label", t("表示"));
     bar.append(
-      button("peek", "PanelsTopLeft", "パネル", () => togglePeek()),
-      button("fullscreen", "Fullscreen", "全画面", () => toggleFullscreen()),
-      button("exit", "Minimize2", "抜ける", () => exitOne()));
+      button("peek", "PanelsTopLeft", t("パネル"), () => togglePeek()),
+      button("fullscreen", "Fullscreen", t("全画面"), () => toggleFullscreen()),
+      button("exit", "Minimize2", t("抜ける"), () => exitOne()));
     for (const b of bar.children) {
       b.dataset.key = { peek: "view.peek", fullscreen: "view.fullscreen", exit: "view.exit" }[b.dataset.view];
       b.title = b.textContent;

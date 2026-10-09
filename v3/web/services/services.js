@@ -2,16 +2,17 @@
 // 管理者は全部（GET /services）を見て変えられる。作品の参加者は、その作品から見える項目（GET /works/{id}/services）だけを見る。
 // 口：GET /services、POST /services、PATCH /services/{id}、PUT /routes/{process}、GET /works/{id}/services
 // タブは2つ：「処理ごとの送り先」（行は処理・列はつなぎ先の表）と「つなぎ先」（1つを1枚のカード）。右の欄は置かない（決めごと 4.7）
+import { t } from "../common/i18n.js";
 import { html, render, nothing, api, icon, toast, fail, send, startShell, emptyNote, YNU } from "../common/shell.js";
 import { fieldsHtml, readFields, USAGE_TERMS } from "../common/form_fields.js";
 
 const main = document.getElementById("main");
 main.className = "screen";
-const STATE = { connected: "つながっている", stopped: "止まっている", key_rejected: "キーが通らない", unchecked: "未確認" };
-const APT = { good: ["◎", "得意"], normal: ["○", "ふつう"], poor: ["△", "苦手"] };
-const KIND = { image: "画像", text: "文章" };
-const SEND = { serial: "1件ずつ", parallel: "同時に" };
-const GROUPS = { cheap: "安く", good: "得意を優先", local: "手元だけ", api: "APIだけ" };
+const STATE = { connected: t("接続済み"), stopped: t("停止中"), key_rejected: t("APIキーが無効"), unchecked: t("未確認") };
+const APT = { good: ["◎", t("得意")], normal: ["○", t("ふつう")], poor: ["△", t("苦手")] };
+const KIND = { image: t("画像"), text: t("文章") };
+const SEND = { serial: t("1件ずつ"), parallel: t("同時に") };
+const GROUPS = { cheap: t("安く"), good: t("得意を優先"), local: t("ローカルだけ"), api: t("APIだけ") };
 const S = { workId: null, admin: null, data: null, member: null, tab: "routes", open: null, plan: null, adding: false, why: null, busy: false };
 
 async function load(workId, why = null) {
@@ -21,11 +22,11 @@ async function load(workId, why = null) {
     S.data = await api.get("/services");
     S.admin = true;
   } catch (e) {
-    if (!(e instanceof api.ApiError) || e.status !== 403) { fail(e, "つなぎ先を読む"); S.why = api.errorText(e); draw(); return; }
+    if (!(e instanceof api.ApiError) || e.status !== 403) { fail(e, t("接続先を読み込めませんでした")); S.why = api.errorText(e); draw(); return; }
     S.admin = false;
   }
   if (!S.admin && workId) {
-    try { S.member = await api.get(`/works/${workId}/services`); } catch (e) { fail(e, "つなぎ先を読む"); S.why = api.errorText(e); }
+    try { S.member = await api.get(`/works/${workId}/services`); } catch (e) { fail(e, t("接続先を読み込めませんでした")); S.why = api.errorText(e); }
   }
   draw();
 }
@@ -35,7 +36,8 @@ async function run(what, fn) {
   try { await fn(); } catch (e) { fail(e, what); } finally { S.busy = false; await load(S.workId, S.why); }
 }
 const sendable = (s) => s.state === "connected" && !s.paused;
-const stateLabel = (s) => (s.paused ? "休ませている" : STATE[s.state] || s.state);
+const stateLabel = (s) => (s.paused ? t("一時停止中") : STATE[s.state] || s.state);
+const locLabel = (s) => (s.location === "local" ? t("ローカル") : "API");
 const dot = (s) => html`<span class="dot ${s.paused ? "paused" : s.state}" aria-hidden="true"></span>`;
 
 // ---------------------------------------------------------------- 処理ごとの送り先（管理者）
@@ -47,33 +49,35 @@ function processesOf(kind) {
 }
 function setRoute(process, serviceId) {
   const r = routeOf(process);
-  if (!r) { toast(`「${process}」はまだ送り先が無く、作業（ai_task）と手（ai_action）が決まっていないので、ここでは選べません`, "need"); return; }
+  if (!r) { toast(t("「{{process}}」はまだ送り先が無く、作業（ai_task）と手（ai_action）が決まっていないので、ここでは選べません", { process }), "need"); return; }
   if (r.service_id === serviceId) return;
-  run("送り先を変える", async () => {
+  run(t("送り先を変えられませんでした"), async () => {
     await send("PUT", `/routes/${encodeURIComponent(process)}`, { service_id: serviceId, resend_limit: r.resend_limit,
       regenerate_limit: r.regenerate_limit, ai_task: r.ai_task, ai_action: r.ai_action });
-    toast(`${process} を ${S.data.services.find((s) => s.id === serviceId).name} へ送ります（前は ${S.data.services.find((s) => s.id === r.service_id)?.name || r.service_id}）`);
+    toast(t("{{process}} を {{to}} へ送ります（前は {{from}}）", { process, to: S.data.services.find((s) => s.id === serviceId).name, from: S.data.services.find((s) => s.id === r.service_id)?.name || r.service_id }));
   });
 }
 function matrix(kind) {
   const cols = S.data.services.filter((s) => s.kind === kind);
   const rows = processesOf(kind);
-  if (!cols.length) return emptyNote(`${KIND[kind]}のつなぎ先がありません`);
-  return html`<div class="t-wrap"><div class="mx" style="--n:${cols.length}" role="grid" aria-label="${KIND[kind]}の処理ごとの送り先">
+  if (!cols.length) return emptyNote(t("{{kind}}の接続先がありません", { kind: KIND[kind] }));
+  return html`<div class="t-wrap"><div class="mx" style="--n:${cols.length}" role="grid" aria-label=${t("{{kind}}の処理ごとの送り先", { kind: KIND[kind] })}>
     <span class="mh">${KIND[kind]}</span>
-    ${cols.map((s) => html`<button class="mh" @click=${() => { S.tab = "cons"; S.open = s.id; draw(); }} title="つなぎ先のカードを開く">
-      <span class="row">${dot(s)}<b>${s.name}</b></span><span class="meta">${s.location === "local" ? "手元" : "API"}・${stateLabel(s)}</span></button>`)}
-    ${rows.map((p) => html`<span class="mh">${p}${routeOf(p) ? html`<span class="meta">送り直し ${routeOf(p).resend_limit}・作り直し ${routeOf(p).regenerate_limit}</span>` : html`<span class="meta">送り先なし</span>`}</span>
+    ${cols.map((s) => html`<button class="mh" @click=${() => { S.tab = "cons"; S.open = s.id; draw(); }} title=${t("接続先のカードを開く")}>
+      <span class="row">${dot(s)}<b>${s.name}</b></span><span class="meta">${locLabel(s)}${t("・")}${stateLabel(s)}</span></button>`)}
+    ${rows.map((p) => html`<span class="mh">${p}${routeOf(p) ? html`<span class="meta">${t("送り直し {{resend}}・作り直し {{regenerate}}", { resend: routeOf(p).resend_limit, regenerate: routeOf(p).regenerate_limit })}</span>` : html`<span class="meta">${t("送り先なし")}</span>`}</span>
       ${cols.map((s) => {
         const c = sp(s.id, p);
-        if (!c) return html`<span class="mc x" title="${s.name} はこの処理を受けられない"></span>`;
+        if (!c) return html`<span class="mc x" title=${t("{{name}} はこの処理を受けられない", { name: s.name })}></span>`;
         const on = routeOf(p) && routeOf(p).service_id === s.id;
         const a = APT[c.aptitude];
+        const aptText = a ? a[1] : t("得意さ未記入");
+        const costText = c.cost_per_call ?? t("費用未記入");
         return html`<button class="mc" data-process=${p} data-service=${s.id} aria-pressed=${String(!!on)} ?disabled=${S.busy}
-          aria-label="${p}を${s.name}へ送る ${a ? a[1] : "得意さ未記入"} ${c.cost_per_call ?? "費用未記入"}"
+          aria-label=${t("{{process}}を{{name}}へ送る {{apt}} {{cost}}", { process: p, name: s.name, apt: aptText, cost: costText })}
           @click=${() => setRoute(p, s.id)}>${on ? icon("check") : nothing}<span>${a ? a[0] : "－"}</span>
-          <span class="num meta">${c.cost_per_call == null ? "費用？" : `¥${c.cost_per_call}`}</span>
-          ${on && !sendable(s) ? html`<span class="flag bad">送れない</span>` : nothing}</button>`;
+          <span class="num meta">${c.cost_per_call == null ? t("費用？") : `¥${c.cost_per_call}`}</span>
+          ${on && !sendable(s) ? html`<span class="flag bad">${t("送れない")}</span>` : nothing}</button>`;
       })}`)}
   </div></div>`;
 }
@@ -89,14 +93,14 @@ function planGroup(g) {
     const cost = (s) => sp(s.id, p).cost_per_call;
     const rank = { good: 0, normal: 1, poor: 2 };
     if (g === "cheap" || g === "local" || g === "api") {
-      if (cands.some((s) => cost(s) == null)) { skipped.push([p, "費用が入っていない先がある"]); continue; }
+      if (cands.some((s) => cost(s) == null)) { skipped.push([p, t("費用が入っていない先がある")]); continue; }
       cands.sort((a, b) => cost(a) - cost(b));
     } else {
-      if (cands.some((s) => !sp(s.id, p).aptitude)) { skipped.push([p, "得意さが入っていない先がある"]); continue; }
+      if (cands.some((s) => !sp(s.id, p).aptitude)) { skipped.push([p, t("得意さが入っていない先がある")]); continue; }
       cands.sort((a, b) => rank[sp(a.id, p).aptitude] - rank[sp(b.id, p).aptitude] || (cost(a) ?? Infinity) - (cost(b) ?? Infinity));
     }
-    if (!cands.length) { skipped.push([p, "送れる先が無い"]); continue; }
-    if (!r) { skipped.push([p, "まだ送り先が無い（作業と手が決まっていない）"]); continue; }
+    if (!cands.length) { skipped.push([p, t("送れる先が無い")]); continue; }
+    if (!r) { skipped.push([p, t("まだ送り先が無い（作業と手が決まっていない）")]); continue; }
     if (r.service_id !== cands[0].id) changes.push([p, cands[0]]);
   }
   S.plan = { g, changes, skipped };
@@ -104,38 +108,39 @@ function planGroup(g) {
 }
 function applyPlan() {
   const { changes } = S.plan;
-  run("組を切り替える", async () => {
+  run(t("プリセットを切り替えられませんでした"), async () => {
     for (const [p, s] of changes) {
       const r = routeOf(p);
       await send("PUT", `/routes/${encodeURIComponent(p)}`, { service_id: s.id, resend_limit: r.resend_limit,
         regenerate_limit: r.regenerate_limit, ai_task: r.ai_task, ai_action: r.ai_action });
     }
-    toast(`${changes.length} 件の送り先を変えました`);
+    toast(t("{{count}} 件の送り先を変えました", { count: changes.length }));
   });
 }
 function routesTab() {
-  return html`<section class="card"><div class="sec-h"><span class="lbl">組</span><span class="meta">送り先の全体を1回で切り替えます。自動では切り替えません</span></div>
+  return html`<section class="card"><div class="sec-h"><span class="lbl">${t("プリセット")}</span><span class="meta">${t("送り先の全体を1回で切り替えます。自動では切り替えません")}</span></div>
     <div class="acts">${Object.entries(GROUPS).map(([k, l]) => html`<button class="chip" data-group=${k} aria-pressed=${String(S.plan && S.plan.g === k)} @click=${() => planGroup(k)}>${l}</button>`)}
-      <span class="grow"></span><span class="meta">◎ 得意　○ ふつう　△ 苦手</span></div>
+      <span class="grow"></span><span class="meta">${t("◎ 得意　○ ふつう　△ 苦手")}</span></div>
     ${S.plan ? html`<div class="note" id="group-plan">${icon("info")}<div class="grow">
-      <div>${GROUPS[S.plan.g]}：変わる処理 ${S.plan.changes.length}${S.plan.changes.map(([p, s]) => html`<br>${p} → ${s.name}`)}</div>
-      ${S.plan.skipped.length ? html`<div class="meta">変えない処理：${S.plan.skipped.map(([p, why]) => `${p}（${why}）`).join("、")}</div>` : nothing}
-      <div class="acts"><button class="btn sm primary" @click=${applyPlan} ?disabled=${S.busy || !S.plan.changes.length}>切り替える</button>
-        <button class="btn sm ghost" @click=${() => { S.plan = null; draw(); }}>やめる</button></div></div></div>` : nothing}
-    <span class="meta">いまの並びを組に残す・同じ指示で比べる・得意さと費用をこの表で直すことは、サーバーに口が無いのでできません</span>
+      <div>${t("{{group}}：変わる処理 {{n}}", { group: GROUPS[S.plan.g], n: S.plan.changes.length })}${S.plan.changes.map(([p, s]) => html`<br>${p} → ${s.name}`)}</div>
+      ${S.plan.skipped.length ? html`<div class="meta">${t("変えない処理：")}${S.plan.skipped.map(([p, why]) => t("{{process}}（{{reason}}）", { process: p, reason: why })).join(t("、"))}</div>` : nothing}
+      <div class="acts"><button class="btn sm primary" @click=${applyPlan} ?disabled=${S.busy || !S.plan.changes.length}>${t("切り替える")}</button>
+        <button class="btn sm ghost" @click=${() => { S.plan = null; draw(); }}>${t("やめる")}</button></div></div></div>` : nothing}
+    <span class="meta">${t("いまの並びをプリセットに残す・同じ指示で比べる・得意さと費用をこの表で直すことは、サーバーにAPIが無いのでできません")}</span>
     </section>
     <section class="card">${matrix("image")}</section><section class="card">${matrix("text")}</section>`;
 }
 
 // ---------------------------------------------------------------- つなぎ先（管理者）
-function patch(s, body, what) {
-  run(what, async () => { await send("PATCH", `/services/${s.id}`, body); toast(`${s.name}：${what}ました`); });
+function patch(s, body, done, failed) {
+  run(failed, async () => { await send("PATCH", `/services/${s.id}`, body); toast(done); });
 }
 function saveTerms(e, s) {
   e.preventDefault();
-  const t = readFields(e.target, USAGE_TERMS, "terms.");
-  if (!t) { toast("利用規約の要点を入れてください", "need"); return; }
-  patch(s, { usage_terms: Object.fromEntries(Object.entries(t).filter(([, v]) => v !== null)) }, "利用規約の要点を残し");
+  const terms = readFields(e.target, USAGE_TERMS, "terms.");
+  if (!terms) { toast(t("利用規約の要点を入れてください"), "need"); return; }
+  patch(s, { usage_terms: Object.fromEntries(Object.entries(terms).filter(([, v]) => v !== null)) },
+        t("{{name}}：利用規約の要点を残しました", { name: s.name }), t("利用規約の要点を残せませんでした"));
 }
 function saveConn(e, s) {
   e.preventDefault();
@@ -147,36 +152,36 @@ function saveConn(e, s) {
   if (n !== s.max_concurrency) body.max_concurrency = n;
   const budget = f.get("monthly_budget") === "" ? null : Number(f.get("monthly_budget"));
   if (budget !== s.monthly_budget) body.monthly_budget = budget;
-  if (!Object.keys(body).length) { toast("変わった所がありません"); return; }
-  patch(s, body, "残し");
+  if (!Object.keys(body).length) { toast(t("変わった所がありません")); return; }
+  patch(s, body, t("{{name}}：残しました", { name: s.name }), t("残せませんでした"));
 }
 function card(s) {
   const procs = S.data.processes.filter((p) => p.service_id === s.id);
   const routed = S.data.routes.filter((r) => r.service_id === s.id);
-  const t = s.usage_terms;
+  const terms = s.usage_terms;
   return html`<section class="card con" id="con-${s.id}" data-service=${s.id} ?open=${S.open === s.id}>
     <div class="card-h">${dot(s)}<span class="h2">${s.name}</span>
-      <span class="meta">${KIND[s.kind]}・${s.location === "local" ? "手元" : "API"}・${s.adapter}・${stateLabel(s)}</span>
-      <span class="meta">休ませる</span><button class="sw" role="switch" aria-checked=${String(s.paused)} aria-label="${s.name}を休ませる"
-        @click=${() => patch(s, { paused: !s.paused }, s.paused ? "戻し" : "休ませ")} ?disabled=${S.busy}></button></div>
-    <div class="meta">${routed.length ? `送り先にしている処理 ${routed.length}：${routed.map((r) => r.process).join("・")}` : "送り先にしていない"}${s.paused ? "。休ませた先へ頼んだものは待ちに入り、戻すと順に送ります" : ""}</div>
+      <span class="meta">${[KIND[s.kind], locLabel(s), s.adapter, stateLabel(s)].join(t("・"))}</span>
+      <span class="meta">${t("一時停止")}</span><button class="sw" role="switch" aria-checked=${String(s.paused)} aria-label=${t("{{name}}を一時停止", { name: s.name })}
+        @click=${() => patch(s, { paused: !s.paused }, s.paused ? t("{{name}}：再開しました", { name: s.name }) : t("{{name}}：一時停止しました", { name: s.name }), s.paused ? t("再開できませんでした") : t("一時停止できませんでした"))} ?disabled=${S.busy}></button></div>
+    <div class="meta">${routed.length ? t("送り先にしている処理 {{count}}：{{list}}", { count: routed.length, list: routed.map((r) => r.process).join(t("・")) }) : t("送り先にしていない")}${s.paused ? html` <span>${t("一時停止中の接続先へ頼んだものは待ちに入り、再開すると順に送ります")}</span>` : nothing}</div>
     <form class="form" @submit=${(e) => saveConn(e, s)}>
-      <label class="k">住所</label><input class="field mono" name="endpoint" .value=${s.endpoint || ""}>
-      <span class="k">送り方</span><div class="row wrap">${Object.entries(SEND).map(([k, l]) => html`<button type="button" class="chip" aria-pressed=${String(s.send_mode === k)}
-          @click=${() => s.send_mode !== k && patch(s, { send_mode: k }, "送り方を変え")}>${l}</button>`)}
-        <input class="field num short" name="max_concurrency" type="number" min="1" .value=${String(s.max_concurrency)} aria-label="同時に送る数"><span class="meta">件まで</span></div>
-      <label class="k">月の予算</label><div class="row"><input class="field num" name="monthly_budget" type="number" min="0" .value=${s.monthly_budget == null ? "" : String(s.monthly_budget)}><span class="meta">円</span></div>
-      <div class="full acts"><button class="btn sm" ?disabled=${S.busy}>${icon("save")}残す</button>
-        <span class="meta">APIキーはサーバー（LiteLLM）だけが持ちます。つながるか試す・いまの走り具合・止まったもの・入っているモデルを読む口はまだありません</span></div>
+      <label class="k">URL</label><input class="field mono" name="endpoint" .value=${s.endpoint || ""}>
+      <span class="k">${t("送り方")}</span><div class="row wrap">${Object.entries(SEND).map(([k, l]) => html`<button type="button" class="chip" aria-pressed=${String(s.send_mode === k)}
+          @click=${() => s.send_mode !== k && patch(s, { send_mode: k }, t("{{name}}：送り方を変えました", { name: s.name }), t("送り方を変えられませんでした"))}>${l}</button>`)}
+        <input class="field num short" name="max_concurrency" type="number" min="1" .value=${String(s.max_concurrency)} aria-label=${t("同時に送る数")}><span class="meta">${t("件まで")}</span></div>
+      <label class="k">${t("月の予算")}</label><div class="row"><input class="field num" name="monthly_budget" type="number" min="0" .value=${s.monthly_budget == null ? "" : String(s.monthly_budget)}><span class="meta">${t("円")}</span></div>
+      <div class="full acts"><button class="btn sm" ?disabled=${S.busy}>${icon("save")}${t("残す")}</button>
+        <span class="meta">${t("APIキーはサーバー（LiteLLM）だけが持ちます。接続を試す・いまの実行状況・止まったもの・入っているモデルを読むAPIはまだありません")}</span></div>
     </form>
-    <details class="more"><summary>${icon("chevron-right")}受けられる処理 ${procs.length}</summary>
-      <div class="t-wrap"><table class="t"><tr><th>処理</th><th>得意さ</th><th>1回の費用</th><th>モデル</th></tr>
-      ${procs.map((p) => html`<tr><td>${p.process}</td><td>${APT[p.aptitude] ? APT[p.aptitude].join(" ") : "未記入"}</td>
-        <td class="num">${p.cost_per_call == null ? "未記入" : `¥${p.cost_per_call}`}</td><td class="mono">${p.model || ""}</td></tr>`)}</table></div></details>
-    <details class="more"><summary>${icon("chevron-right")}商用利用の条件 <span class="flag ${t ? "mut" : "warn"}">${t ? `確かめた日 ${t.checked_on}` : "未記録"}</span></summary>
-      ${t ? html`<div class="meta">商用 ${YNU[t.commercial_use]}・出力の権利 ${t.rights_holder}・学習に使われる ${YNU[t.training_use]}・クレジット ${YNU[t.credit_required]}</div>` : nothing}
-      <form class="form" @submit=${(e) => saveTerms(e, s)}>${fieldsHtml(USAGE_TERMS, t || {}, "terms.")}
-        <div class="full acts"><button class="btn sm" ?disabled=${S.busy}>${icon("save")}残す</button></div></form></details>
+    <details class="more"><summary>${icon("chevron-right")}${t("受けられる処理 {{n}}", { n: procs.length })}</summary>
+      <div class="t-wrap"><table class="t"><tr><th>${t("処理")}</th><th>${t("得意さ")}</th><th>${t("1回の費用")}</th><th>${t("モデル")}</th></tr>
+      ${procs.map((p) => html`<tr><td>${p.process}</td><td>${APT[p.aptitude] ? APT[p.aptitude].join(" ") : t("未記入")}</td>
+        <td class="num">${p.cost_per_call == null ? t("未記入") : `¥${p.cost_per_call}`}</td><td class="mono">${p.model || ""}</td></tr>`)}</table></div></details>
+    <details class="more"><summary>${icon("chevron-right")}${t("商用利用の条件")} <span class="flag ${terms ? "mut" : "warn"}">${terms ? t("確かめた日 {{date}}", { date: terms.checked_on }) : t("未記録")}</span></summary>
+      ${terms ? html`<div class="meta">${t("商用 {{commercial}}・出力の権利 {{rights}}・学習に使われる {{training}}・クレジット {{credit}}", { commercial: YNU[terms.commercial_use], rights: terms.rights_holder, training: YNU[terms.training_use], credit: YNU[terms.credit_required] })}</div>` : nothing}
+      <form class="form" @submit=${(e) => saveTerms(e, s)}>${fieldsHtml(USAGE_TERMS, terms || {}, "terms.")}
+        <div class="full acts"><button class="btn sm" ?disabled=${S.busy}>${icon("save")}${t("残す")}</button></div></form></details>
   </section>`;
 }
 function addService(e) {
@@ -184,43 +189,43 @@ function addService(e) {
   const f = new FormData(e.target);
   const body = { name: f.get("name").trim(), kind: f.get("kind"), location: f.get("location"), adapter: f.get("adapter"),
                  endpoint: f.get("endpoint").trim() || null, send_mode: f.get("send_mode"), max_concurrency: Number(f.get("max_concurrency")) };
-  run("つなぎ先を足す", async () => { await api.post("/services", body); S.adding = false; toast(`${body.name} を足しました`); });
+  run(t("接続先を足せませんでした"), async () => { await api.post("/services", body); S.adding = false; toast(t("{{name}} を足しました", { name: body.name })); });
 }
 function consTab() {
   const sel = (name, map) => html`<select class="field" name=${name}>${Object.entries(map).map(([k, l]) => html`<option value=${k}>${l}</option>`)}</select>`;
-  return html`<div class="acts"><button class="btn ghost sm" @click=${() => { S.adding = !S.adding; draw(); }} aria-expanded=${String(S.adding)}>${icon("plus")}つなぎ先を足す</button></div>
-    ${S.adding ? html`<form class="card" @submit=${addService} aria-label="つなぎ先を足す"><div class="form">
-      <span class="k">名前</span><input class="field" name="name" required>
-      <span class="k">種類</span>${sel("kind", KIND)}
-      <span class="k">場所</span>${sel("location", { local: "手元", api: "API" })}
-      <span class="k">送り手</span>${sel("adapter", { comfyui: "ComfyUI", litellm: "LiteLLM", detector: "検出器" })}
-      <span class="k">住所</span><input class="field mono" name="endpoint">
-      <span class="k">送り方</span>${sel("send_mode", SEND)}
-      <span class="k">同時に送る数</span><input class="field" name="max_concurrency" type="number" min="1" value="1">
-      <div class="full acts"><button class="btn primary sm" ?disabled=${S.busy}>足す</button>
-        <span class="meta">手元と登録できるのは、この機械の住所へ直接送る先だけです（サーバーが確かめます）</span></div></div></form>` : nothing}
+  return html`<div class="acts"><button class="btn ghost sm" @click=${() => { S.adding = !S.adding; draw(); }} aria-expanded=${String(S.adding)}>${icon("plus")}${t("接続先を足す")}</button></div>
+    ${S.adding ? html`<form class="card" @submit=${addService} aria-label=${t("接続先を足す")}><div class="form">
+      <span class="k">${t("名前")}</span><input class="field" name="name" required>
+      <span class="k">${t("種類")}</span>${sel("kind", KIND)}
+      <span class="k">${t("場所")}</span>${sel("location", { local: t("ローカル"), api: "API" })}
+      <span class="k">${t("アダプター")}</span>${sel("adapter", { comfyui: "ComfyUI", litellm: "LiteLLM", detector: t("検出器") })}
+      <span class="k">URL</span><input class="field mono" name="endpoint">
+      <span class="k">${t("送り方")}</span>${sel("send_mode", SEND)}
+      <span class="k">${t("同時に送る数")}</span><input class="field" name="max_concurrency" type="number" min="1" value="1">
+      <div class="full acts"><button class="btn primary sm" ?disabled=${S.busy}>${t("足す")}</button>
+        <span class="meta">${t("ローカルとして登録できるのは、このPCのURLへ直接送る先だけです（サーバーが確かめます）")}</span></div></div></form>` : nothing}
     ${Object.entries(KIND).map(([k, l]) => html`<div class="lbl grp">${l}</div><div class="grid wide">${S.data.services.filter((s) => s.kind === k).map(card)}</div>`)}`;
 }
 
 // ---------------------------------------------------------------- 参加者の見え方
 function memberView() {
-  if (!S.member) return emptyNote(S.why || "作品を選んでください。参加者は、その作品から見えるつなぎ先だけを見られます", S.why ? "need" : "");
+  if (!S.member) return emptyNote(S.why || t("作品を選んでください。参加者は、その作品から見える接続先だけを見られます"), S.why ? "need" : "");
   const name = (id) => (S.member.services.find((s) => s.id === id) || {}).name || id;
-  return html`<div class="note">${icon("info")}<span>管理者ではないので、この作品から見える項目だけを出しています。送り先を変えるのは管理者です</span></div>
-    <section class="card"><div class="card-h"><span class="h2">つなぎ先</span></div>
-    <div class="t-wrap"><table class="t" id="member-services"><tr><th>名前</th><th>種類</th><th>場所</th><th>状態</th><th>この作品から</th><th>商用利用の条件</th></tr>
-    ${S.member.services.map((s) => html`<tr data-service=${s.id}><td>${s.name}</td><td>${KIND[s.kind]}</td><td>${s.location === "local" ? "手元" : "API"}</td>
-      <td><span class="row">${dot(s)}${stateLabel(s)}</span></td><td>${s.allowed ? "送ってよい" : html`<span class="flag warn">送れない</span>`}</td>
-      <td>${s.usage_terms ? `商用 ${YNU[s.usage_terms.commercial_use]}（${s.usage_terms.checked_on}）` : html`<span class="flag warn">未記録</span>`}</td></tr>`)}</table></div></section>
-    <section class="card"><div class="card-h"><span class="h2">処理ごとの送り先</span></div>
-    <div class="t-wrap"><table class="t"><tr><th>処理</th><th>送り先</th></tr>${S.member.routes.map((r) => html`<tr><td>${r.process}</td><td>${name(r.service_id)}</td></tr>`)}</table></div></section>`;
+  return html`<div class="note">${icon("info")}<span>${t("管理者ではないので、この作品から見える項目だけを出しています。送り先を変えるのは管理者です")}</span></div>
+    <section class="card"><div class="card-h"><span class="h2">${t("接続先")}</span></div>
+    <div class="t-wrap"><table class="t" id="member-services"><tr><th>${t("名前")}</th><th>${t("種類")}</th><th>${t("場所")}</th><th>${t("状態")}</th><th>${t("この作品から")}</th><th>${t("商用利用の条件")}</th></tr>
+    ${S.member.services.map((s) => html`<tr data-service=${s.id}><td>${s.name}</td><td>${KIND[s.kind]}</td><td>${locLabel(s)}</td>
+      <td><span class="row">${dot(s)}${stateLabel(s)}</span></td><td>${s.allowed ? t("送ってよい") : html`<span class="flag warn">${t("送れない")}</span>`}</td>
+      <td>${s.usage_terms ? t("商用 {{commercial}}（{{date}}）", { commercial: YNU[s.usage_terms.commercial_use], date: s.usage_terms.checked_on }) : html`<span class="flag warn">${t("未記録")}</span>`}</td></tr>`)}</table></div></section>
+    <section class="card"><div class="card-h"><span class="h2">${t("処理ごとの送り先")}</span></div>
+    <div class="t-wrap"><table class="t"><tr><th>${t("処理")}</th><th>${t("送り先")}</th></tr>${S.member.routes.map((r) => html`<tr><td>${r.process}</td><td>${name(r.service_id)}</td></tr>`)}</table></div></section>`;
 }
 
 function draw() {
-  if (S.admin === null) { render(emptyNote(S.why || "読んでいます"), main); return; }
+  if (S.admin === null) { render(emptyNote(S.why || t("読んでいます")), main); return; }
   if (!S.admin) { render(memberView(), main); return; }
-  render(html`<div class="row wrap"><span class="flag mut">全作品で共通</span><span class="h1">生成サービス</span></div>
-    <div class="tabs" role="tablist">${[["routes", "処理ごとの送り先"], ["cons", "つなぎ先"]].map(([k, l]) => html`
+  render(html`<div class="row wrap"><span class="flag mut">${t("全作品で共通")}</span><span class="h1">${t("生成サービス")}</span></div>
+    <div class="tabs" role="tablist">${[["routes", t("処理ごとの送り先")], ["cons", t("接続先")]].map(([k, l]) => html`
       <button class="tab" role="tab" data-tab=${k} aria-selected=${String(S.tab === k)} @click=${() => { S.tab = k; draw(); }}>${l}</button>`)}</div>
     ${S.tab === "routes" ? routesTab() : consTab()}`, main);
   if (S.tab === "cons" && S.open) {

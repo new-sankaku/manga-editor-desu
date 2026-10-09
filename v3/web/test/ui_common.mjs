@@ -15,8 +15,22 @@ export const WEB_DIR = fileURLToPath(new URL("..", import.meta.url));
 export const SHOTS = process.env.SHOTS || null;
 if (SHOTS) mkdirSync(SHOTS, { recursive: true });
 
+// V3_LANG=en を付けると、開くページを全部その言語にする（英語でも図や欄が重ならないかを見るとき）。
+// 試験の確かめは日本語の文言で探すので、言語を変えて通るのは文言を辞書から引く試験（harness_layout_ui）だけ
 export async function openBrowser() {
-  return process.env.PW_WS ? chromium.connect(process.env.PW_WS) : chromium.launch();
+  const browser = await (process.env.PW_WS ? chromium.connect(process.env.PW_WS) : chromium.launch());
+  const lang = process.env.V3_LANG;
+  if (lang) {
+    for (const make of ["newContext", "newPage"]) {
+      const orig = browser[make].bind(browser);
+      browser[make] = async (...args) => {
+        const made = await orig(...args);
+        await made.addInitScript((l) => { try { localStorage.setItem("v3.ui_lang", l); } catch { /* 空のページ */ } }, lang);
+        return made;
+      };
+    }
+  }
+  return browser;
 }
 
 // 画面が描き終わるまで待つ（次の描画を2回待つ）。写しを撮る前に使う

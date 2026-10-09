@@ -9,7 +9,7 @@ export async function readStream(authFetch, url, { onEvent, onOpen, signal }) {
   const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
   // サーバーは何も無くても15秒ごとに生存の知らせを送る（live_stream.py）。35秒何も来なければ切れたとみなす
   let watchdog;
-  const arm = () => { clearTimeout(watchdog); watchdog = setTimeout(() => reader.cancel("無音"), 35000); };
+  const arm = () => { clearTimeout(watchdog); watchdog = setTimeout(() => reader.cancel("無音"), 35000); };  // i18n:dev
   arm();
   try {
     return await pump(reader, onEvent, arm);
