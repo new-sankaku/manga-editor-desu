@@ -49,7 +49,7 @@ async def add_event(session: AsyncSession, work_id: str, kind: str, payload: dic
     event = HarnessEvent(work_id=work_id, stage_run_id=stage_run_id, unit_id=unit_id, kind=kind, payload=payload)
     session.add(event)
     await session.flush()
-    # 知らせはここ1か所で出来事から作る（決めごと 17章。harness_notify.py）
+    # 通知はここ1か所で出来事から作る（決めごと 17章。harness_notify.py）
     await harness_notify.on_event(session, event)
 
 
@@ -59,7 +59,7 @@ async def patch_unit(session: AsyncSession, unit_id: str, patch: dict[str, Any],
     unit = await session.get(HarnessUnit, unit_id, with_for_update=True)
     unknown = set(patch) - set(UNIT_FIELDS)
     if unknown:
-        raise ValueError(f"作業の行に無い項目: {sorted(unknown)}")
+        raise ValueError(f"作業の行に無い項目: {sorted(unknown)}")  # i18n:dev
     for k, v in patch.items():
         setattr(unit, k, v)
     if patch.get("status") in ("done", "cancelled", "failed") and unit.finished_at is None:
@@ -75,7 +75,7 @@ async def patch_stage(session: AsyncSession, stage_run_id: str, patch: dict[str,
     run = await session.get(HarnessStageRun, stage_run_id, with_for_update=True)
     unknown = set(patch) - set(STAGE_FIELDS)
     if unknown:
-        raise ValueError(f"工程の行に無い項目: {sorted(unknown)}")
+        raise ValueError(f"工程の行に無い項目: {sorted(unknown)}")  # i18n:dev
     for k, v in patch.items():
         setattr(run, k, v)
     await session.flush()

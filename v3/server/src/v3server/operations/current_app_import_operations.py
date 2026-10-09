@@ -22,6 +22,7 @@ from v3server.canonical_tables.translation_review_import_tables import (
 )
 from v3server.canonical_tables.work_tree_tables import Episode, Page
 from v3server.current_app_import.import_plan import ImportPlan
+from v3server.messages import m
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.pen_stroke_operations import AddPenStrokes, NewPenStroke
@@ -47,9 +48,9 @@ class ImportCurrentAppProject(OpBase):
 
     async def apply(self, ctx):
         if ctx.work.page_spec is None:
-            raise Invalid("作品のページの寸法（page_spec）を先に決める。コマと文字の位置を mm に直すのに使う")
+            raise Invalid(m("作品のページの寸法（page_spec）を先に決める。コマと文字の位置を mm に直すのに使う"))
         if self.image_origin == "imported" and self.usage_terms is None and self.plan.images:
-            raise Invalid("持ち込んだ絵（image_origin=imported）には利用の条件（usage_terms）が要る")
+            raise Invalid(m("持ち込んだ絵（image_origin=imported）には利用の条件（usage_terms）が要る"))
         session = ctx.session
         last = (await session.execute(select(func.max(Page.number)).where(Page.episode_id == self.episode_id))).scalar()
         first = (last or 0) + 1

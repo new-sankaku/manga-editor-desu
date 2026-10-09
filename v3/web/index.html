@@ -34,7 +34,7 @@
 
       <div class="ftb" role="toolbar" aria-label="ツール" data-i18n-attr="aria-label">
         <button class="tool" data-tool="select" aria-pressed="true" data-key="workbench.select" title="動かす・見る" data-i18n-attr="title"><i data-lucide="hand"></i><span data-i18n>見る</span><kbd></kbd></button>
-        <button class="tool" data-tool="mask" aria-pressed="false" data-key="workbench.mask" title="囲んで頼む" data-i18n-attr="title"><i data-lucide="lasso-select"></i><span data-i18n>囲んで頼む</span><kbd></kbd></button>
+        <button class="tool" data-tool="mask" aria-pressed="false" data-key="workbench.mask" title="囲んで生成" data-i18n-attr="title"><i data-lucide="lasso-select"></i><span data-i18n>囲んで生成</span><kbd></kbd></button>
         <button class="tool" data-tool="extend" aria-pressed="false" data-key="workbench.extend" title="描き足す" data-i18n-attr="title"><i data-lucide="expand"></i><span data-i18n>描き足す</span><kbd></kbd></button>
         <span class="vsep"></span>
         <button class="tool" data-tool="pen" aria-pressed="false" data-key="workbench.pen" title="ペン" data-i18n-attr="title"><i data-lucide="pen-line"></i><span data-i18n>ペン</span><kbd></kbd></button>
@@ -102,16 +102,16 @@
       </div>
     </section>
 
-    <aside class="insp" aria-label="頼む・候補・版" data-i18n-attr="aria-label" data-v3-strip>
+    <aside class="insp" aria-label="生成・候補・バージョン" data-i18n-attr="aria-label" data-v3-strip>
       <div class="itabs" role="tablist">
-        <button class="itab" role="tab" data-tab="ask" aria-selected="true"><i data-lucide="wand-sparkles"></i><span data-i18n>頼む</span></button>
+        <button class="itab" role="tab" data-tab="ask" aria-selected="true"><i data-lucide="wand-sparkles"></i><span data-i18n>生成</span></button>
         <button class="itab" role="tab" data-tab="cands" aria-selected="false"><i data-lucide="layout-grid"></i><span data-i18n>候補</span><span class="count" id="cand-count"></span></button>
-        <button class="itab" role="tab" data-tab="versions" aria-selected="false"><i data-lucide="history"></i><span data-i18n>版</span></button>
+        <button class="itab" role="tab" data-tab="versions" aria-selected="false"><i data-lucide="history"></i><span data-i18n>バージョン</span></button>
       </div>
 
       <div class="insp-b" data-pane="ask">
         <div class="sec">
-          <div class="sec-h"><span class="lbl" data-i18n>頼むこと</span></div>
+          <div class="sec-h"><span class="lbl" data-i18n>依頼の内容</span></div>
           <div class="chips" id="process-list"></div>
           <div class="meta" id="process-hint"></div>
         </div>
@@ -132,7 +132,7 @@
           </div><input class="field num" id="seed" type="number" min="0" step="1" value="0" hidden></div>
         </div>
         <div class="meta" id="service-meta"></div>
-        <button class="btn ai block" id="generate" data-key="workbench.generate" title="頼む" data-i18n-attr="title"><i data-lucide="sparkles"></i><span data-i18n>頼む</span><kbd></kbd></button>
+        <button class="btn ai block" id="generate" data-key="workbench.generate" title="生成" data-i18n-attr="title"><i data-lucide="sparkles"></i><span data-i18n>生成</span><kbd></kbd></button>
         <div id="progress" class="sec"></div>
       </div>
 

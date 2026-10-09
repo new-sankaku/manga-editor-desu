@@ -3,7 +3,7 @@
 試作で分かったこと（V3検証の結果 4-14）
 - 1枚だけ作ると狙いどおりは 0.824。3枚から選ばせると、選んだ33回が全部狙いどおりで、「なし」の3回は全部外れの組と一致した。
 - 名前を伏せないと、名前から答えが読めて甘くなる（p19）。画像は blind_image_copy の写しで見せ、写しの名前の順に並べる。
-- 長い説明を付けたり一度に多く並べたりすると、評価役の答えが変わる（p32）。候補の数・狙いの文の長さは呼ぶ側が決める。
+- 長い説明を付けたり一度に多く並べたりすると、評価モデルの答えが変わる（p32）。候補の数・狙いの文の長さは呼ぶ側が決める。
 """
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,7 +27,7 @@ class CandidatePick:
 def build_candidate_question(target: str, image_names: list[str]) -> str:
     """target は狙いの文（コマの役目・人物・場所など）。image_names は添える順の写しの名前。"""
     if not target.strip():
-        raise ValueError("target が空")
+        raise ValueError("target が空")  # i18n:dev
     names = "\n".join(image_names)
     return f"""添えた{len(image_names)}枚は、どれも漫画の1コマ用に、同じ狙いで作った絵です。添えた順に、次の名前で呼びます。
 {names}
@@ -55,7 +55,7 @@ def parse_candidate_answer(answer: str, image_names: list[str]) -> tuple[str | N
         return None, d.why
     name = Path(pick).name
     if name not in image_names:
-        raise BrokenAnswerError(f"候補に無い名前: {pick}", answer)
+        raise BrokenAnswerError(f"候補に無い名前: {pick}", answer)  # i18n:stored
     return name, d.why
 
 
@@ -68,7 +68,7 @@ async def pick_candidate(
 ) -> CandidatePick:
     """candidates（元の画像の場所）から、狙いに合う1枚を選ばせる。"""
     if len(set(candidates)) != len(candidates):
-        raise ValueError("candidates に同じ画像が重なっている")
+        raise ValueError("candidates に同じ画像が重なっている")  # i18n:dev
     blind = make_blind_copies(candidates, blind_dir, salt)
     ordered = blind.sorted_originals(candidates)
     names = [blind.blind_name(x) for x in ordered]

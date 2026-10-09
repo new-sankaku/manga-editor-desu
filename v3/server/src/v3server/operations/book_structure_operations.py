@@ -16,11 +16,20 @@ from pydantic import Field
 
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Spread
+from v3server.messages import m
 from v3server.name_structure.item_styles import checked_adjustments
 from v3server.operations.operation_base import OpBase, Scope, _changed, get_in_work, page_obj, work_obj
 from v3server.operations.work_tree_operations import validated_placement
 from v3server.print_export.book_layout import check_spreads, episode_pages, episode_spreads
 from v3server.v3_error_types import Invalid
+
+
+def _joined_reasons(broken: list[tuple[Spread, str]]) -> str:
+    """崩れる理由を「; 」でつなぐ。m() でつなぐので、理由が m() の文なら訳せる形のまま残る（"; ".join(…) は普通の str になる）。"""
+    out = ""
+    for _, reason in broken:
+        out = m("{head}; {tail}", head=out, tail=reason) if out else reason
+    return out
 
 
 class ReorderPages(OpBase):
@@ -39,11 +48,11 @@ class ReorderPages(OpBase):
     async def apply(self, ctx):
         pages = await episode_pages(ctx.session, self.episode_id)
         if len(set(self.page_ids)) != len(self.page_ids):
-            raise Invalid("同じページが2回ある")
+            raise Invalid(m("同じページが2回ある"))
         if set(self.page_ids) != {p.id for p in pages}:
-            raise Invalid("話の抜いていないページを全部、1回ずつ渡す")
+            raise Invalid(m("話の削除していないページを全部、1回ずつ渡す"))
         if self.numbers is not None and len(self.numbers) != len(self.page_ids):
-            raise Invalid("番号の数がページの数と違う")
+            raise Invalid(m("番号の数がページの数と違う"))
         before_ids = [p.id for p in pages]
         before_numbers = [p.number for p in pages]
         by_id = {p.id: p for p in pages}
@@ -51,10 +60,10 @@ class ReorderPages(OpBase):
             by_id[pid].number = self.numbers[i] if self.numbers is not None else i + 1
         reordered = sorted(pages, key=lambda p: (p.number, self.page_ids.index(p.id)))
         if [p.id for p in reordered] != self.page_ids:
-            raise Invalid("番号の順が、渡したページの順と合わない")
+            raise Invalid(m("番号の順が、渡したページの順と合わない"))
         broken = check_spreads(reordered, await episode_spreads(ctx.session, self.episode_id), ctx.work)
         if broken:
-            raise Invalid("見開きの組が崩れる。先に見開きを解く: " + "; ".join(m for _, m in broken))
+            raise Invalid(m("見開きの組が崩れる。先に見開きを解く: {reasons}", reasons=_joined_reasons(broken)))
         return {"type": self.type, "episode_id": self.episode_id, "page_ids": before_ids, "numbers": before_numbers}
 
 
@@ -73,13 +82,13 @@ class AddSpread(OpBase):
         first = await ctx.session.get(Page, self.first_page_id)
         second = await ctx.session.get(Page, self.second_page_id)
         if first.episode_id != second.episode_id:
-            raise Invalid("見開きの2ページは同じ話にある")
+            raise Invalid(m("見開きの2ページは同じ話にある"))
         spread = Spread(id=self.id, work_id=ctx.work.id, episode_id=first.episode_id, first_page_id=first.id,
                         second_page_id=second.id, adjustments=[], human_hand_fields=[], removed=False)
         spreads = await episode_spreads(ctx.session, first.episode_id)
         broken = check_spreads(await episode_pages(ctx.session, first.episode_id), spreads + [spread], ctx.work)
         if broken:
-            raise Invalid("見開きにできない: " + "; ".join(m for _, m in broken))
+            raise Invalid(m("見開きにできない: {reasons}", reasons=_joined_reasons(broken)))
         ctx.session.add(spread)
         return {"type": "set_removed", "target_kind": "spread", "id": self.id, "removed": True}
 
@@ -100,12 +109,12 @@ class UpdateSpread(OpBase):
     async def apply(self, ctx):
         spread = await ctx.session.get(Spread, self.id)
         if spread.removed:
-            raise Invalid("解いた見開きは変えられない")
+            raise Invalid(m("解いた見開きは変えられない"))
         changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True, mode="json")
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         if changes.get("adjustments", []) is None:
-            raise Invalid("adjustments は空にできない（外すときは []）")
+            raise Invalid(m("adjustments は空にできない（外すときは []）"))
         if "adjustments" in changes:
             changes["adjustments"] = checked_adjustments(changes["adjustments"])
         image_id = changes.get("image_id", spread.image_id)

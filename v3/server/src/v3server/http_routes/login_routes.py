@@ -15,6 +15,7 @@ from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
+from v3server.messages import m
 from v3server.request_actor import Actor
 from v3server.request_authentication import current_actor
 from v3server.server_settings import get_settings
@@ -28,7 +29,7 @@ def _client() -> Any:
     global _oauth
     s = get_settings()
     if s.auth_mode != "oidc":
-        raise HTTPException(404, "V3_AUTH_MODE=oidc のときだけ使える")
+        raise HTTPException(404, m("V3_AUTH_MODE=oidc のときだけ使える"))
     if _oauth is None:
         _oauth = OAuth()
         _oauth.register(
@@ -40,7 +41,7 @@ def _client() -> Any:
 
 
 def _safe_next(next_path: str | None) -> str:
-    """戻る先はこのサーバーの中の住所だけ（よそのサイトへ飛ばす口にしない）。"""
+    """戻る先はこのサーバーの中の URL だけ（よそのサイトへ飛ばす API にしない）。"""
     if next_path and next_path.startswith("/") and not next_path.startswith("//") and "\\" not in next_path:
         return next_path
     return "/web/"

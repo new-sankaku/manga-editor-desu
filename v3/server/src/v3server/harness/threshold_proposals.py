@@ -11,40 +11,43 @@ from v3server.harness.overall_review_steps import NEEDED as OVERALL_NEEDED
 from v3server.harness.overall_review_steps import PREFIX as OVERALL_PREFIX
 from v3server.harness.panel_drawing_steps import CONDITIONAL_THRESHOLDS, THRESHOLDS
 from v3server.harness.upstream_versions import DRAWING_THRESHOLD_PREFIX
+from v3server.messages import m
 
 RESULTS = "llm_doc/V3検証の結果.md"
 
-# 鍵 → 案。value が None の鍵は、測った数が無いか、測った数から下限・上限を決められないもの
+# 鍵 → 案。value が None の鍵は、測った数が無いか、測った数から下限・上限を決められないもの。
+# 出典（source）・意味（meaning）・いつ読むか（when）は m() で作る（閾値の一覧の返事を作る所で画面の言語になる）
 PROPOSALS: dict[str, dict[str, Any]] = {
     DRAWING_THRESHOLD_PREFIX + "text_score": {
         "value": 0.05,
-        "source": f"{RESULTS}（文字の検出器。文字あり38枚・なし10枚で、0.05 は見つけた33・誤り3、0.1 は31・2、0.2 は24・1、"
-                  "0.3 は全部見逃した）",
+        "source": m("{doc}（文字の検出器。文字あり38枚・なし10枚で、0.05 は見つけた33・誤り3、0.1 は31・2、0.2 は24・1、"
+                    "0.3 は全部見逃した）", doc=RESULTS),
     },
     DRAWING_THRESHOLD_PREFIX + "ccip_threshold": {
         "value": 0.178,
-        "source": f"{RESULTS}（CCIP の既定の閾値。人物を切り抜いて比べると、別の人物を94〜95%「同じ」とした組があった。"
-                  "「違う」で落とす専用に使う）",
+        "source": m("{doc}（CCIP の既定の閾値。人物を切り抜いて比べると、別の人物を94〜95%「同じ」とした組があった。"
+                    "「違う」で落とす専用に使う）", doc=RESULTS),
     },
     DRAWING_THRESHOLD_PREFIX + "person_iou_min": {
         "value": None,
-        "source": f"{RESULTS}（骨格の図を渡したときの IoU は約0.72〜0.81、形の指定なしは0.13前後。下限の値は測っていない）",
+        "source": m("{doc}（骨格の図を渡したときの IoU は約0.72〜0.81、形の指定なしは0.13前後。下限の値は測っていない）",
+                    doc=RESULTS),
     },
-    DRAWING_THRESHOLD_PREFIX + "person_score": {"value": None, "source": "測っていない"},
-    DRAWING_THRESHOLD_PREFIX + "edge_px": {"value": None, "source": "測っていない"},
-    DRAWING_THRESHOLD_PREFIX + "face_covered_max": {"value": None, "source": "測っていない"},
-    OVERALL_PREFIX + "spread_black_max": {"value": None, "source": "測っていない"},
-    OVERALL_PREFIX + "page_white_max": {"value": None, "source": "測っていない"},
+    DRAWING_THRESHOLD_PREFIX + "person_score": {"value": None, "source": m("測っていない")},
+    DRAWING_THRESHOLD_PREFIX + "edge_px": {"value": None, "source": m("測っていない")},
+    DRAWING_THRESHOLD_PREFIX + "face_covered_max": {"value": None, "source": m("測っていない")},
+    OVERALL_PREFIX + "spread_black_max": {"value": None, "source": m("測っていない")},
+    OVERALL_PREFIX + "page_white_max": {"value": None, "source": m("測っていない")},
 }
 
 # 鍵 → 何の閾値か・どの工程が読むか
 MEANINGS: dict[str, dict[str, str]] = {
-    **{DRAWING_THRESHOLD_PREFIX + k: {"meaning": v, "stage": "S4", "when": "いつも"} for k, v in THRESHOLDS.items()},
-    **{DRAWING_THRESHOLD_PREFIX + k: {"meaning": v, "stage": "S4", "when": "条件が揃ったコマ"}
+    **{DRAWING_THRESHOLD_PREFIX + k: {"meaning": v, "stage": "S4", "when": m("いつも")} for k, v in THRESHOLDS.items()},
+    **{DRAWING_THRESHOLD_PREFIX + k: {"meaning": v, "stage": "S4", "when": m("条件が揃ったコマ")}
        for k, v in CONDITIONAL_THRESHOLDS.items()},
-    **{OVERALL_PREFIX + k: {"meaning": v, "stage": "S6", "when": "いつも"} for k, v in OVERALL_NEEDED.items()},
+    **{OVERALL_PREFIX + k: {"meaning": v, "stage": "S6", "when": m("いつも")} for k, v in OVERALL_NEEDED.items()},
 }
-MEANINGS[DRAWING_THRESHOLD_PREFIX + "face_covered_max"]["stage"] = "S4・S5"
+MEANINGS[DRAWING_THRESHOLD_PREFIX + "face_covered_max"]["stage"] = m("S4・S5")
 
 
 def threshold_rows(current: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:

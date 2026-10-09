@@ -27,10 +27,10 @@ class Settings(BaseSettings):
     )
     # 1回の要求の本体の上限（バイト）。絵・PSD のアップロードも含む。超えたら 413（http_routes/request_size_limit.py）
     request_max_bytes: int = Field(gt=0)
-    # 外から入る絵（アップロード・生成した絵・PSD の層）の画素数の上限（幅×高さ）。Pillow の Image.MAX_IMAGE_PIXELS 以下にする
+    # 外から入る絵（アップロード・生成した絵・PSD のレイヤー）のピクセル数の上限（幅×高さ）。Pillow の Image.MAX_IMAGE_PIXELS 以下にする
     # （image_intake.check_pixel_count）
     image_max_pixels: int = Field(gt=0)
-    # 戻す PSD の層の数の上限（グループも数える。print_export/psd_import_matching.read_psd）
+    # 戻す PSD のレイヤーの数の上限（グループも数える。print_export/psd_import_matching.read_psd）
     psd_max_layers: int = Field(gt=0)
     # 今のアプリのプロジェクト（.lz4）をほどいた中身の上限（バイト。入れ子の入れ物も合わせた合計）。
     # 送る本体は request_max_bytes で止まるが、LZ4 は小さな本体から大きくほどけるため（current_app_import/project_file_reader.py）
@@ -45,13 +45,13 @@ class Settings(BaseSettings):
     auth_mode: Literal["oidc", "dev_header"]
     # 本番のイメージ（Dockerfile）は 1 にしてある。1 のとき dev_header では起動しない
     forbid_dev_header: bool = False
-    # 発行元（トークンの iss と同じ文字列。利用者のブラウザが開く住所）
+    # 発行元（トークンの iss と同じ文字列。利用者のブラウザが開く URL）
     oidc_issuer: str | None = None
-    # サーバーが発行元の設定を読みに行く住所（コンテナの中からは発行元の公開の住所に届かないことがあるため別に持つ）
+    # サーバーが発行元の設定を読みに行く URL（コンテナの中からは発行元の公開の URL に届かないことがあるため別に持つ）
     oidc_discovery_url: str | None = None
     oidc_client_id: str | None = None
     oidc_client_secret: str | None = None
-    # 利用者がこのサーバーを開く住所（https://...）。ログインから戻る先とクッキーの Secure を決める
+    # 利用者がこのサーバーを開く URL（https://...）。ログインから戻る先とクッキーの Secure を決める
     public_url: str | None = None
     # セッションのクッキーに署名する鍵
     session_secret: str | None = None
@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     lock_ttl_seconds: int
 
     # ---- 絵のファイルの置き場（image_file_storage.py）
-    # local: サーバーの手元のフォルダ（開発用。V3_IMAGE_DIR）。s3: S3互換の置き場（本番は SeaweedFS）
+    # local: サーバーのローカルのフォルダ（開発用。V3_IMAGE_DIR）。s3: S3互換の置き場（本番は SeaweedFS）
     image_store: Literal["local", "s3"]
     image_dir: str | None = None
     s3_endpoint_url: str | None = None
@@ -87,7 +87,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _required_by_mode(self) -> "Settings":
         if self.auth_mode == "dev_header" and self.forbid_dev_header:
-            raise ValueError("このイメージでは V3_AUTH_MODE=dev_header を使えない（V3_FORBID_DEV_HEADER=1）")
+            raise ValueError("このイメージでは V3_AUTH_MODE=dev_header を使えない（V3_FORBID_DEV_HEADER=1）")  # i18n:dev
         if self.auth_mode == "oidc":
             _require(self, _OIDC_FIELDS, "V3_AUTH_MODE=oidc")
         if self.image_store == "s3":
@@ -98,7 +98,7 @@ class Settings(BaseSettings):
 def _require(s: Settings, fields: tuple[str, ...], why: str) -> None:
     missing = [f"V3_{f.upper()}" for f in fields if getattr(s, f) in (None, "")]
     if missing:
-        raise ValueError(f"{why} には {', '.join(missing)} が要る")
+        raise ValueError(f"{why} には {', '.join(missing)} が要る")  # i18n:dev
 
 
 @lru_cache

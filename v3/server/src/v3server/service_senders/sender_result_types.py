@@ -1,4 +1,4 @@
-"""つなぎ先の呼び方。1回送って結果か失敗を返すだけ。送り直しと待ちは generation_queue/generation_workflow.py が持つ。
+"""接続先の呼び方。1回送って結果か失敗を返すだけ。送り直しと待ちは generation_queue/generation_workflow.py が持つ。
 
 失敗の種類（V3細部の決めごと 4.5）
 - rate_limited: 回数・同時実行の制限。待って同じ先に送り直す

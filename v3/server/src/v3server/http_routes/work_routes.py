@@ -1,4 +1,4 @@
-"""作品・参加者・操作・出来事の口。"""
+"""作品・参加者・操作・出来事の API。"""
 
 
 from typing import Annotated, Literal
@@ -116,7 +116,7 @@ async def get_work(work_id: str, session: SessionDep, authz: AuthzDep, actor: Ac
             for la in await all_of(PanelLayer)
         ],
         # 10.4 で足した表は、列をそのまま返す。ペンの線は返さない（1冊分の点は大きすぎる）。
-        # 線は層ごとに GET /works/{id}/layers/{layer_id}/pen-strokes で区切って取る（pen_stroke_routes.py）
+        # 線はレイヤーごとに GET /works/{id}/layers/{layer_id}/pen-strokes で区切って取る（pen_stroke_routes.py）
         **{name: [all_columns(x) for x in await all_of(model)]
            for name, model in (("page_items", PageItem),
                                ("annotation_items", AnnotationItem), ("panel_templates", PanelTemplate),
@@ -159,7 +159,7 @@ async def get_members(work_id: str, authz: AuthzDep, actor: ActorDep):
 async def submit_op(work_id: str, op: Annotated[Op, Field(discriminator="type")], session: SessionDep,
                     authz: AuthzDep, actor: ActorDep):
     event = await operation_submit_and_undo.submit(session, authz, actor, work_id, op)
-    # AIの変更が人の手の所に当たって判断待ちに置いた分（id・表・行・項目）。無ければ空
+    # AIの変更が手動編集の所に当たって判断待ちに置いた分（id・表・行・項目）。無ければ空
     return {"event_id": event.id, "seq": event.seq, "held_changes": event.held_changes or []}
 
 

@@ -13,6 +13,7 @@ import math
 import random
 from typing import Literal
 
+from v3server.messages import m, text_of
 from v3server.panel_layout.panel_geometry import (
     polygon_area,
     polygon_centroid,
@@ -37,7 +38,7 @@ def line_normal(direction: Literal["horizontal", "vertical", "slanted"], angle_d
     if direction == "vertical":
         return (1.0, 0.0)
     if angle_deg is None:
-        raise FrameEditError("斜めに切るときは角度が要る")
+        raise FrameEditError(m("斜めに切るときは角度が要る"))
     a = math.radians(angle_deg)
     return (-math.sin(a), math.cos(a))
 
@@ -83,16 +84,17 @@ def split_polygon(poly: list[Point], through: Point, normal: Point, gap_mm: floa
                   ) -> tuple[list[Point], list[Point]]:
     """(線の n の向きの側, 反対の側) を返す。どちらかが無い・細すぎるなら FrameEditError。"""
     if not polygon_is_convex(poly):
-        raise FrameEditError("凹んだ枠は1本の線で2つに分けられないことがあるので切らない")
+        raise FrameEditError(m("凹んだ枠は1本の線で2つに分けられないことがあるので切らない"))
     c = normal[0] * through[0] + normal[1] * through[1]
     a = _clip_half_plane(poly, normal, c + gap_mm / 2)
     b = _clip_half_plane(poly, (-normal[0], -normal[1]), -(c - gap_mm / 2))
     if len(a) < 3 or len(b) < 3 or polygon_area(a) <= EPS or polygon_area(b) <= EPS:
-        raise FrameEditError("切る線が枠を横切っていない（または間の幅が枠より広い）")
+        raise FrameEditError(m("切る線が枠を横切っていない（または間の幅が枠より広い）"))
     for side in (a, b):
         w = min_width(side)
         if w < min_width_mm:
-            raise FrameEditError(f"分けた形の幅 {w:.1f}mm が、コマの最小の大きさ {min_width_mm}mm より細い")
+            raise FrameEditError(m("分けた形の幅 {width}mm が、コマの最小の大きさ {minimum}mm より細い",
+                                   width=f"{w:.1f}", minimum=min_width_mm))
     return a, b
 
 
@@ -156,7 +158,8 @@ def random_split(poly: list[Point], horizontal_cuts: int, vertical_cuts: int, ga
                 return split_polygon(piece, through, n, gap, min_width_mm)
             except FrameEditError as e:
                 last = e
-        raise FrameEditError(f"{attempts_per_cut} 回試しても切れなかった: {last}")
+        raise FrameEditError(m("{attempts} 回試しても切れなかった: {reason}", attempts=attempts_per_cut,
+                               reason=text_of(last) if last is not None else None))
 
     rows = [poly]
     for _ in range(horizontal_cuts):
@@ -187,7 +190,7 @@ FrameShape = Literal["rect", "triangle", "pentagon", "hexagon", "rhombus", "trap
 def shape_polygon(shape: FrameShape, box: tuple[float, float, float, float]) -> list[Point]:
     x0, y0, x1, y1 = box
     if x1 <= x0 or y1 <= y0:
-        raise FrameEditError(f"図形の箱が正しくない: {box}")
+        raise FrameEditError(m("図形の箱が正しくない: {box}", box=box))
     cx, cy, rx, ry = (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2, (y1 - y0) / 2
 
     def regular(n: int, start_deg: float = -90) -> list[Point]:
@@ -224,4 +227,4 @@ def shape_polygon(shape: FrameShape, box: tuple[float, float, float, float]) -> 
             hy = -(13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t))
             pts.append((cx + rx * hx / 16, cy + ry * (hy + 2.5) / 15))
         return pts
-    raise FrameEditError(f"知らない形: {shape}")
+    raise FrameEditError(m("知らない形: {shape}", shape=shape))

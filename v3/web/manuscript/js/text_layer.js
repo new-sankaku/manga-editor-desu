@@ -144,7 +144,7 @@ export class TextLayer {
     n.classList.toggle("over", over);
   }
 
-  // 人の手・判断待ちの印。x, y：原稿の mm。印の大きさは拡大しても変わらない（--inv で戻す）
+  // 手動編集・判断待ちの印。x, y：原稿の mm。印の大きさは拡大しても変わらない（--inv で戻す）
   mark(key, x, y, kind, title, count) {
     const n = document.createElement("div");
     n.className = `mk mk-${kind}`;

@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry, WorkPlan
 from v3server.canonical_tables.page_item_tables import AnnotationItem
 from v3server.canonical_tables.text_and_layer_tables import TextItem
+from v3server.messages import m
 from v3server.operations.operation_base import OpBase, Scope, page_obj, work_obj
 from v3server.operations.row_snapshot import RowChanges
 from v3server.v3_error_types import Invalid
@@ -49,7 +50,7 @@ async def find_matches(session: AsyncSession, work_id: str, query: str, kinds: s
                        page_ids: list[str] | None = None, replaceable_only: bool = False) -> list[tuple[Any, str]]:
     """(行, 項目) の一覧。大文字・小文字も含めて、そのままの文字で探す。"""
     if not query:
-        raise Invalid("探す文字が空")
+        raise Invalid(m("探す文字が空"))
     out = []
     for kind, model, field, replaceable in SEARCH_FIELDS:
         if kind not in kinds or (replaceable_only and not replaceable):
@@ -87,16 +88,16 @@ class ReplaceText(OpBase):
 
     async def apply(self, ctx):
         if self.find == self.replace:
-            raise Invalid("置き換える前と後が同じ")
+            raise Invalid(m("置き換える前と後が同じ"))
         matches = await find_matches(ctx.session, ctx.work.id, self.find, set(self.kinds), self.page_ids,
                                      replaceable_only=True)
         if not matches:
-            raise Invalid("当たる所が無い")
+            raise Invalid(m("一致する所が無い"))
         by_obj: dict[str, tuple[Any, dict[str, Any]]] = {}
         for obj, field in matches:
             new = getattr(obj, field).replace(self.find, self.replace)
             if field == "text" and getattr(obj, "ruby", None) and len(new) != len(obj.text):
-                raise Invalid(f"文字 {obj.id} にルビがあり、置き換えで字数が変わる（ルビを先に直す）")
+                raise Invalid(m("文字 {id} にルビがあり、置き換えで字数が変わる（ルビを先に直す）", id=obj.id))
             by_obj.setdefault(f"{obj.__tablename__}:{obj.id}", (obj, {}))[1][field] = new
         rc = RowChanges(ctx)
         page_ids = set()

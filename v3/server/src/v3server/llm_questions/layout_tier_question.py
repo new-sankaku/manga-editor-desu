@@ -16,7 +16,7 @@ from v3server.name_structure.reading_direction import ReadingDirection
 def build_layout_tier_question(page: NamePage, reading_direction: ReadingDirection) -> str:
     """page のコマ（番号・大きさ・中身）を台本として渡す問いの文。"""
     if not page.panels:
-        raise ValueError("page にコマが無い")
+        raise ValueError("page にコマが無い")  # i18n:dev
     if reading_direction == "right_to_left":
         page_way, cell_way = "右から左、上から下", "右から左"
     else:
@@ -69,7 +69,7 @@ def parse_layout_tier_answer(answer: str) -> LayoutTiers:
     d = read_answer(answer, _TierAnswer)
     numbers = [c.n for r in d.rows for c in r.cells]
     if len(numbers) != len(set(numbers)):
-        raise BrokenAnswerError("同じコマ番号が2回以上ある", answer)
+        raise BrokenAnswerError("同じコマ番号が2回以上ある", answer)  # i18n:stored
     return LayoutTiers(
         rows=[[c.n for c in r.cells] for r in d.rows],
         row_height_ratios=[r.h for r in d.rows],

@@ -8,7 +8,7 @@
 
 生成した絵の PNG から、文字の欄（tEXt・iTXt・zTXt）を外してから置く。ComfyUI は既定で指示文と手順（prompt・workflow）を
 PNG に書き込むので、そのまま置くと、絵を落とした人・書き出した原稿に指示文が残る。指示と手順は呼び出しの記録（call_logs）と
-絵の details に残る。画素は変えない（読み直して同じ画素で書き直す）。"""
+絵の details に残る。ピクセルは変えない（読み直して同じピクセルで書き直す）。"""
 
 import io
 import pathlib
@@ -22,6 +22,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.image_file_tables import ImageIntakeScreening
 from v3server.image_file_storage import StoredImage, staged_file, store_image_file
+from v3server.messages import m, text_of
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid
 
@@ -35,7 +36,7 @@ class JudgeVerdict:
 
 
 # (手段の名前, 判定する関数)。関数は (絵の中身, 作品の id, 入口) を受け取る
-# （判定の手段を足すと、絵を1回メモリに読む。手段が決まったら、ファイルの住所で渡す形を考える）
+# （判定の手段を足すと、絵を1回メモリに読む。手段が決まったら、ファイルのパスで渡す形を考える）
 IntakeJudge = Callable[[bytes, str, IntakeEntry], Awaitable[JudgeVerdict]]
 INTAKE_JUDGES: list[tuple[str, IntakeJudge]] = []
 
@@ -61,7 +62,7 @@ def strip_png_text(data: bytes) -> bytes:
 
 
 def check_pixel_count(path: pathlib.Path) -> None:
-    """画素数の上限（V3_IMAGE_MAX_PIXELS）を、画素を展開する前に確かめる（展開すると膨らむ絵で、メモリを食い潰さないため）。
+    """ピクセル数の上限（V3_IMAGE_MAX_PIXELS）を、ピクセルを展開する前に確かめる（展開すると膨らむ絵で、メモリを食い潰さないため）。
 
     Pillow は Image.MAX_IMAGE_PIXELS を超えると警告、その2倍で止める（DecompressionBombWarning・DecompressionBombError）。
     ここでは警告も止めとして扱う。上限が Pillow の値より大きい設定は、後で絵を開く所（縮小画像・書き出し）で警告が出るので断る。"""
@@ -75,16 +76,17 @@ def check_pixel_count(path: pathlib.Path) -> None:
             with Image.open(path) as im:
                 width, height = im.size
     except (Image.DecompressionBombError, Image.DecompressionBombWarning) as e:
-        raise Invalid(f"絵の画素が多すぎる: {e}") from e
+        raise Invalid(m("絵のピクセルが多すぎる: {reason}", reason=text_of(e))) from e
     except Exception as e:
-        raise Invalid(f"絵として読めない: {e}") from e
+        raise Invalid(m("絵として読めない: {reason}", reason=text_of(e))) from e
     if width * height > limit:
-        raise Invalid(f"絵の画素が多すぎる: {width}×{height}（上限 {limit} 画素。V3_IMAGE_MAX_PIXELS）")
+        raise Invalid(m("絵のピクセルが多すぎる: {width}×{height}（上限 {limit} ピクセル。V3_IMAGE_MAX_PIXELS）",
+                        width=width, height=height, limit=limit))
 
 
 async def take_in_image(session: AsyncSession, work_id: str, data: bytes, entry: IntakeEntry, *,
                         commit: bool = True) -> StoredImage:
-    """手元にある中身（生成した絵・PSD から取った層など）を入口に通す。"""
+    """手元にある中身（生成した絵・PSD から取ったレイヤーなど）を入口に通す。"""
     with staged_file(data) as path:
         check_pixel_count(path)
         if entry == "generated":
@@ -122,5 +124,5 @@ async def _take_in_staged(session: AsyncSession, work_id: str, path: pathlib.Pat
         await session.commit()
     blocked = [r for r in rows if r.status == "blocked"]
     if blocked:
-        raise Invalid(f"入口の判定で止めた（{blocked[0].judge}）: {blocked[0].detail}")
+        raise Invalid(m("入口の判定で止めた（{judge}）: {detail}", judge=blocked[0].judge, detail=blocked[0].detail))
     return stored

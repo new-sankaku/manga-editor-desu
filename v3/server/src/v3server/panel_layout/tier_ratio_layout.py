@@ -5,6 +5,7 @@
 - 段の横線は揃う（段ごとに全幅で割るので、作り方から揃う）。
 - ノド側には断ち切りを伸ばさない。
 縦線を段ごとにずらす・見開きの左右で横線をずらすは、比の決め方で決まるので、ここでは直さず検査（frame_shape_checks）で見つける。"""
+from v3server.messages import m
 from v3server.name_structure.name_draft_schema import NameDraft, NamePage, PanelFrame
 from v3server.name_structure.reading_direction import PageSpec, ReadingDirection
 from v3server.panel_layout.panel_geometry import FLOAT_EPS, Box, rect_polygon
@@ -17,33 +18,36 @@ class LayoutInputError(ValueError):
 
 def validate_tier_input(page: NamePage, spec: PageSpec) -> tuple[list[float], list[list[float]]]:
     if page.spread:
-        raise LayoutInputError(f"{page.page}ページ：見開きのページの割りは、まだ計算できない")
+        raise LayoutInputError(m("{page}ページ：見開きのページの割りは、まだ計算できない", page=page.page))
     if page.rows is None:
-        raise LayoutInputError(f"{page.page}ページ：段の割り（rows）が決まっていない")
+        raise LayoutInputError(m("{page}ページ：段の割り（rows）が決まっていない", page=page.page))
     undecided_shape = [p.n for p in page.panels if p.shape is None]
     if undecided_shape:
         # 断ち切りにするかは形で決まるので、未定のまま計算しない
-        raise LayoutInputError(f"{page.page}ページ：形が未定のコマ {undecided_shape} がある")
+        raise LayoutInputError(m("{page}ページ：形が未定のコマ {panels} がある", page=page.page, panels=undecided_shape))
     if page.row_height_ratios is None or page.cell_width_ratios is None:
-        raise LayoutInputError(f"{page.page}ページ：段の高さの比かコマの幅の比が決まっていない")
+        raise LayoutInputError(m("{page}ページ：段の高さの比かコマの幅の比が決まっていない", page=page.page))
     hs, ws = page.row_height_ratios, page.cell_width_ratios
     if len(hs) != len(page.rows) or len(ws) != len(page.rows):
-        raise LayoutInputError(f"{page.page}ページ：段の数 {len(page.rows)} と比の数（高さ {len(hs)}・幅 {len(ws)}）が合わない")
+        raise LayoutInputError(m("{page}ページ：段の数 {rows} と比の数（高さ {heights}・幅 {widths}）が合わない",
+                                 page=page.page, rows=len(page.rows), heights=len(hs), widths=len(ws)))
     for i, (row, wr) in enumerate(zip(page.rows, ws, strict=False)):
         if not row:
-            raise LayoutInputError(f"{page.page}ページ：{i + 1}段目にコマが無い")
+            raise LayoutInputError(m("{page}ページ：{row}段目にコマが無い", page=page.page, row=i + 1))
         if len(row) != len(wr):
-            raise LayoutInputError(f"{page.page}ページ：{i + 1}段目のコマ {len(row)} と幅の比 {len(wr)} の数が合わない")
+            raise LayoutInputError(m("{page}ページ：{row}段目のコマ {panels} と幅の比 {ratios} の数が合わない",
+                                     page=page.page, row=i + 1, panels=len(row), ratios=len(wr)))
     if any(h <= 0 for h in hs) or any(w <= 0 for wr in ws for w in wr):
-        raise LayoutInputError(f"{page.page}ページ：比に0以下がある")
+        raise LayoutInputError(m("{page}ページ：比に0以下がある", page=page.page))
     seq = [n for row in page.rows for n in row]
     if sorted(seq) != sorted(p.n for p in page.panels) or len(set(seq)) != len(seq):
-        raise LayoutInputError(f"{page.page}ページ：段に並べたコマの番号と、ページのコマの番号が合わない")
+        raise LayoutInputError(m("{page}ページ：段に並べたコマの番号と、ページのコマの番号が合わない", page=page.page))
     if page.cut_slants is not None:
         if len(page.cut_slants) != len(page.rows) or any(len(k) != len(r) - 1 for k, r in zip(page.cut_slants, page.rows, strict=False)):
-            raise LayoutInputError(f"{page.page}ページ：区切りの傾きの数が、段ごとの区切りの数（コマ数−1）と合わない")
+            raise LayoutInputError(m("{page}ページ：区切りの傾きの数が、段ごとの区切りの数（コマ数−1）と合わない",
+                                     page=page.page))
     if spec.gutter_x_mm >= spec.gutter_y_mm:
-        raise LayoutInputError("規格の左右の隙間が上下の隙間より狭くない")
+        raise LayoutInputError(m("規格の左右の隙間が上下の隙間より狭くない"))
     return hs, ws
 
 
@@ -51,7 +55,7 @@ def tier_boxes(page: NamePage, spec: PageSpec, direction: ReadingDirection) -> d
     """段と比から、各コマの四角（基本枠の座標・mm）を計算する。右から読む作品は段の中を右から、左から読む作品は左から並べる。"""
     hs, ws = validate_tier_input(page, spec)
     if page.cut_slants is not None and any(k != 0 for row in page.cut_slants for k in row):
-        raise LayoutInputError(f"{page.page}ページ：斜めの区切りは constrained_tier_layout で計算する")
+        raise LayoutInputError(m("{page}ページ：斜めの区切りは constrained_tier_layout で計算する", page=page.page))
     W, H = spec.frame_width_mm, spec.frame_height_mm
     avail_h = H - spec.gutter_y_mm * (len(hs) - 1)
     out: dict[int, Box] = {}

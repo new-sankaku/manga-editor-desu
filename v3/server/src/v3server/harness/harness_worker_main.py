@@ -1,6 +1,6 @@
 """ハーネスの作業者（`uv run python -m v3server.harness.harness_worker_main`）。
 
-工程の進行役と作業の流れ（キュー v3-harness）と、上流の変化を見る所（upstream_watch）と、知らせを外へ届ける所
+工程の進行役と作業の流れ（キュー v3-harness）と、上流の変化を見る所（upstream_watch）と、通知を外へ届ける所
 （harness_notify）を1つのプロセスで動かす。
 生成・検出器・LLM の送信は今の作業者（queue_worker_main）が受ける。ハーネスは順番待ちに頼むだけ。
 """
@@ -30,14 +30,14 @@ class HarnessWorker:
         queue_calls.configure(self.client)
         self.worker = Worker(self.client, task_queue=HARNESS_QUEUE, workflows=[StageWorkflow, WorkUnitWorkflow],
                              activities=ACTIVITIES,
-                             # 取り消しは生存の知らせの返事で届く。既定の間引き（生存の時間切れの8割）では人の
+                             # 取り消しは生存の通知の返事で届く。既定の間引き（生存の時間切れの8割）では人の
                              # 「今すぐ止める」が十数秒遅れるので、1秒に1回は送る
                              max_heartbeat_throttle_interval=timedelta(seconds=1),
                              default_heartbeat_throttle_interval=timedelta(seconds=1))
         self.tasks.append(asyncio.create_task(self.worker.run()))
         if self.watch:
             self.tasks.append(asyncio.create_task(upstream_watch.run_forever(self.client)))
-            # 知らせを外（Webhook）へ届ける。作品の決まりで送り先を入れたときだけ届けが積まれる
+            # 通知を外（Webhook）へ届ける。作品の決まりで送り先を入れたときだけ届けが積まれる
             self.tasks.append(asyncio.create_task(harness_notify.send_pending_forever()))
 
     async def shutdown(self) -> None:

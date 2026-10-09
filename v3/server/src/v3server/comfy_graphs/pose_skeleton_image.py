@@ -25,7 +25,7 @@ COLORS = [(255, 0, 0), (255, 85, 0), (255, 170, 0), (255, 255, 0), (170, 255, 0)
 LIMB_BRIGHTNESS = 0.6
 # 立ち姿の肩幅と腕の広がり（人物の枠の高さに対する割合）
 STANDING_WIDTH_RATIO = 0.27
-# 線の太さ：人物の高さに対する割合と、最小の画素。xinsir は太い線で学習している（配布元の説明）
+# 線の太さ：人物の高さに対する割合と、最小のピクセル。xinsir は太い線で学習している（配布元の説明）
 LINE_WIDTH_RATIO = 0.018
 LINE_WIDTH_MIN_PX = 4
 
@@ -41,7 +41,7 @@ class FigureBox:
 
 
 def figure_box_pixels(width: int, height: int, box: FigureBox) -> tuple[int, int, int, int]:
-    """割合の枠を、生成する絵の画素の枠 (x0, y0, x1, y1) にする。"""
+    """割合の枠を、生成する絵のピクセルの枠 (x0, y0, x1, y1) にする。"""
     return round(box.x0 * width), round(box.y0 * height), round(box.x1 * width), round(box.y1 * height)
 
 
@@ -55,7 +55,7 @@ def draw_standing_pose(width: int, height: int, box: FigureBox) -> Image.Image:
     x0, y0, x1, y1 = figure_box_pixels(width, height, box)
     fh = y1 - y0
     if fh <= 0 or x1 <= x0:
-        raise ValueError(f'人物の枠が空です: {box}')
+        raise ValueError(f'人物の枠が空です: {box}')  # i18n:stored
     fw = fh * STANDING_WIDTH_RATIO
     cx = (x0 + x1) / 2
     pts = [(cx + (nx - 0.5) * fw, y0 + ny * fh) for nx, ny in STANDING_KEYPOINTS]

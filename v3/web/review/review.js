@@ -1,5 +1,5 @@
 // 確認：ページと作品の確認の状態（下書き・確認待ち・承認・直しが要る）を移し、コメントと記録を見る。
-// 口：GET /works/{id}、GET /works/{id}/review-records、操作 set_review_status（取り消しは reverts_record_id）
+// API：GET /works/{id}、GET /works/{id}/review-records、操作 set_review_status（取り消しは reverts_record_id）
 // 移り方と出せる人はサーバー（operations/review_operations.py）が決める。画面は今の状態から移れる先だけボタンにする
 import { t } from "../common/i18n.js";
 import { html, render, nothing, live, api, icon, toast, fail, op, startShell, emptyNote, screenHref, fmtDate,
@@ -11,7 +11,7 @@ main.className = "screen side-r";
 // 今の状態 → [移る先, ボタンの文字, 印, 出す側か決める側か]
 const MOVES = {
   draft: [["in_review", t("確認に出す"), "send", "submit"]],
-  in_review: [["approved", t("承認する"), "check", "decide"], ["needs_changes", t("直しを頼む"), "message-square-warning", "decide"], ["draft", t("出したのを引っ込める"), "undo-2", "submit"]],
+  in_review: [["approved", t("承認する"), "check", "decide"], ["needs_changes", t("修正を依頼"), "message-square-warning", "decide"], ["draft", t("出したのを引っ込める"), "undo-2", "submit"]],
   needs_changes: [["in_review", t("直して出し直す"), "send", "submit"]],
   approved: [["draft", t("承認を開け直す"), "lock-open", "decide"]],
 };
@@ -102,7 +102,7 @@ function sidePanel() {
     <div class="card-h"><span class="h2">${targetName(kind, id)}</span><span class="flag ${REVIEW_FLAG[st]}" id="cur-status">${REVIEW[st]}</span></div>
     ${kind === "page" ? html`<div class="acts"><a class="btn ghost sm" href=${screenHref("manuscript")}>${icon("pen-tool")}${t("原稿で見る")}</a>
       <a class="btn ghost sm" href=${screenHref("translation")}>${icon("languages")}${t("翻訳で見る")}</a></div>` : nothing}
-    <label class="lbl" for="comment">${t("コメント（直しを頼むときは要る）")}</label>
+    <label class="lbl" for="comment">${t("コメント（修正を依頼するときは必須）")}</label>
     <textarea class="field" id="comment" rows="3" .value=${live(S.comment)} @input=${(e) => { S.comment = e.target.value; }}></textarea>
     <div class="acts">${MOVES[st].map(([to, label, ic, side]) => html`<button class="btn ${to === "approved" ? "primary" : ""} sm" data-move=${to}
       title=${side === "decide" ? t("決める側（作者・編集者）") : t("出す側")} ?disabled=${S.busy} @click=${() => move(to)}>${icon(ic)}${label}</button>`)}</div>
@@ -117,7 +117,7 @@ function sidePanel() {
   </section>`;
 }
 
-// ---------------------------------------------------------------- 読み通す（絵だけのとき。V3細部の決めごと 22.5）
+// ---------------------------------------------------------------- 読み通す（集中モードのとき。V3細部の決めごと 22.5）
 // ページを1枚ずつ大きく出す。← → は作品の読む向きに合わせる（右から左の作品では ← が次）。PageDown・PageUp は向きによらず次・前
 function readPages() { return S.work && S.episodeId ? episodePages(S.work, S.episodeId) : []; }
 function readIndex() {

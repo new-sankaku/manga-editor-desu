@@ -13,6 +13,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from v3server.messages import m, text_of
+
 Color = Annotated[str, Field(pattern=r"^#[0-9A-Fa-f]{6}$")]
 Polygon = Annotated[list[tuple[float, float]], Field(min_length=3)]
 
@@ -59,7 +61,7 @@ class Adjustments(_Strict):
     @model_validator(mode="after")
     def _one_blend(self):
         if sum(1 for a in self.items if a.kind == "blend") > 1:
-            raise ValueError("重ね方は1つだけ")
+            raise ValueError(m("重ね方は1つだけ"))
         return self
 
 
@@ -70,7 +72,7 @@ def checked_adjustments(items: list[dict]) -> list[dict]:
     try:
         return Adjustments.model_validate({"items": items}).model_dump(mode="json")["items"]
     except ValueError as e:
-        raise Invalid(f"仕上げの値が正しくない: {e}") from e
+        raise Invalid(m("仕上げの値が正しくない: {reason}", reason=text_of(e))) from e
 
 
 def blend_mode_of(adjustments: list[dict]) -> str:
@@ -145,10 +147,10 @@ def check_ruby(text: str, ruby: list[dict] | None) -> None:
     spans = sorted((r["start"], r["end"]) for r in ruby)
     for s, e in spans:
         if e <= s or e > len(text):
-            raise ValueError(f"ルビの範囲 {s}〜{e} が文字（{len(text)}文字）の外か、空")
+            raise ValueError(m("ルビの範囲 {start}〜{end} が文字（{length}文字）の外か、空", start=s, end=e, length=len(text)))
     for (_, e0), (s1, _) in zip(spans, spans[1:], strict=False):
         if s1 < e0:
-            raise ValueError("ルビの範囲が重なっている")
+            raise ValueError(m("ルビの範囲が重なっている"))
 
 
 class BalloonShape(_Strict):
@@ -170,14 +172,14 @@ class BalloonShape(_Strict):
     def _kind(self):
         if self.kind == "none":
             if self.preset or self.outline_mm or self.tail_base_width_mm is not None or self.tail_bend_ratio is not None:
-                raise ValueError("線を描かないフキダシには型も外形もしっぽも無い")
+                raise ValueError(m("線を描かないフキダシには型も外形もしっぽも無い"))
             return self
         if self.outline_mm is None:
-            raise ValueError("フキダシの外形（outline_mm）が要る")
+            raise ValueError(m("フキダシの外形（outline_mm）が要る"))
         if self.kind == "preset" and not self.preset:
-            raise ValueError("型のフキダシには型の名前（preset）が要る")
+            raise ValueError(m("型のフキダシには型の名前（preset）が要る"))
         if self.kind == "custom" and self.preset:
-            raise ValueError("自分で描いたフキダシには型の名前が無い")
+            raise ValueError(m("自分で描いたフキダシには型の名前が無い"))
         return self
 
 
@@ -249,7 +251,7 @@ class ToneSpec(_Strict):
                 "speed_lines": ("line_count", "seed")}[self.kind]
         missing = [k for k in need if getattr(self, k) is None]
         if missing:
-            raise ValueError(f"{self.kind} には {missing} が要る")
+            raise ValueError(m("{kind} には {fields} が要る", kind=self.kind, fields=missing))
         return self
 
 
@@ -287,13 +289,13 @@ class ShapeSpec(_Strict):
     @model_validator(mode="after")
     def _kind(self):
         if self.kind in ("polygon", "symbol") and (not self.points_mm or len(self.points_mm) < 3):
-            raise ValueError(f"{self.kind} には3つ以上の点（points_mm）が要る")
+            raise ValueError(m("{kind} には3つ以上の点（points_mm）が要る", kind=self.kind))
         if self.kind == "path" and (not self.points_mm or len(self.points_mm) < 2):
-            raise ValueError("path には2つ以上の点が要る")
+            raise ValueError(m("path には2つ以上の点が要る"))
         if self.kind == "symbol" and not self.symbol_name:
-            raise ValueError("絵記号には名前（symbol_name）が要る")
+            raise ValueError(m("絵記号には名前（symbol_name）が要る"))
         if self.kind in ("rect", "ellipse") and self.points_mm:
-            raise ValueError(f"{self.kind} は箱いっぱいに描くので点を持たない")
+            raise ValueError(m("{kind} は箱いっぱいに描くので点を持たない", kind=self.kind))
         if self.stroke is None and self.fill is None:
-            raise ValueError("線も塗りも無い図形は見えない")
+            raise ValueError(m("線も塗りも無い図形は見えない"))
         return self

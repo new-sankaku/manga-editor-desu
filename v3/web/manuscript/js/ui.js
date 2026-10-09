@@ -1,4 +1,4 @@
-// 画面の部品を作る小さな道具（画像生成の画面 js/app.js と同じ形・同じ言い方）
+// 画面の部品を作る小さなヘルパー（画像生成の画面 js/app.js と同じ形・同じ言い方）
 import * as api from "../../js/api.js";
 import { PRINT_INK } from "./print_colors.js";
 

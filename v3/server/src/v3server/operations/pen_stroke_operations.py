@@ -28,6 +28,7 @@ from v3server.canonical_tables.text_and_layer_tables import PanelLayer, Protecte
 from v3server.canonical_tables.work_tree_tables import Panel
 from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke
 from v3server.hand_tools.vector_strokes import EraseMode, PointerType, StrokeValues, erase, moved, stroke_box
+from v3server.messages import m, text_of
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -37,9 +38,9 @@ from v3server.v3_error_types import Invalid
 async def _hand_layer(session, work_id: str, layer_id: str) -> PanelLayer:
     layer = await get_in_work(session, PanelLayer, layer_id, work_id)
     if layer.role != "human_hand":
-        raise Invalid("ペンの線を持てるのは人の手の層（role=human_hand）だけ")
+        raise Invalid(m("ペンの線を持てるのは手描きレイヤー（role=human_hand）だけ"))
     if layer.removed:
-        raise Invalid("抜いた層には描けない")
+        raise Invalid(m("削除したレイヤーには描けない"))
     return layer
 
 
@@ -50,15 +51,15 @@ def _layer_scope(layer: PanelLayer) -> Scope:
 
 async def _strokes(session, work_id: str, ids: list[str]) -> list[PenStroke]:
     if not ids or len(set(ids)) != len(ids):
-        raise Invalid("線の id が空か、重なっている")
+        raise Invalid(m("線の id が空か、重なっている"))
     out = []
     for i in ids:
         s = await get_in_work(session, PenStroke, i, work_id)
         if s.removed:
-            raise Invalid(f"線 {i} はもう消してある")
+            raise Invalid(m("線 {id} はもう消してある", id=i))
         out.append(s)
     if len({s.layer_id for s in out}) != 1:
-        raise Invalid("一度に扱えるのは1つの層の線だけ")
+        raise Invalid(m("一度に扱えるのは1つのレイヤーの線だけ"))
     return out
 
 
@@ -84,7 +85,7 @@ class NewPenStroke(StrokeValues):
     @model_validator(mode="after")
     def _mouse_has_no_pressure(self):
         if self.pointer_type == "mouse" and any(p[2] is not None for p in self.points):
-            raise ValueError("マウスの線は筆圧を持たない（筆圧は null で送る）")
+            raise ValueError(m("マウスの線は筆圧を持たない（筆圧は null で送る）"))
         return self
 
 
@@ -101,10 +102,10 @@ class AddPenStrokes(OpBase):
         top = await _top_order(ctx.session, layer.id)
         given = [v.id for v in self.strokes if v.id]
         if len(set(given)) != len(given):
-            raise Invalid("線の id が重なっている")
+            raise Invalid(m("線の id が重なっている"))
         for i in given:
             if await ctx.session.get(PenStroke, i) is not None:
-                raise Invalid(f"線 {i} はもうある")
+                raise Invalid(m("線 {id} はもうある", id=i))
         rc = RowChanges(ctx)
         for i, v in enumerate(self.strokes):
             values = {k: x for k, x in _values(v).items() if k not in ("id", "pointer_type")}
@@ -135,7 +136,7 @@ class UpdatePenStrokes(OpBase):
         layer = await _hand_layer(ctx.session, ctx.work.id, strokes[0].layer_id)
         changes = self.model_dump(exclude={"type", "ids", "move_mm"}, exclude_unset=True, mode="json")
         if not changes and self.move_mm is None:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         rc = RowChanges(ctx)
         for s in strokes:
             one = dict(changes)
@@ -145,7 +146,7 @@ class UpdatePenStrokes(OpBase):
             try:
                 checked = _values(StrokeValues.model_validate(current | one))
             except ValueError as e:
-                raise Invalid(f"線 {s.id} をその値にできない: {e}") from e
+                raise Invalid(m("線 {id} をその値にできない: {reason}", id=s.id, reason=text_of(e))) from e
             rc.change(s, {k: checked[k] for k in one})
         rc.bump_strokes(layer)
         return rc.inverse([layer.page_id], "ペンの線を変えた取り消し")
@@ -211,7 +212,7 @@ class ErasePenStrokes(OpBase):
                 top += 1
                 rc.created(_stroke_row(ctx, layer, base | {"points": [list(p) for p in piece]}, top, s.pointer_type))
         if not touched:
-            raise Invalid("消しゴムがどの線にも触れていない")
+            raise Invalid(m("消しゴムがどの線にも触れていない"))
         rc.bump_strokes(layer)
         return rc.inverse([layer.page_id], "線の消しゴムの取り消し")
 
@@ -255,7 +256,8 @@ class SetStrokeCache(OpBase):
 
         layer = await _hand_layer(ctx.session, ctx.work.id, self.layer_id)
         if self.stroke_revision != layer.stroke_revision:
-            raise Invalid(f"控えは線の版 {self.stroke_revision} から作ったが、今の版は {layer.stroke_revision}。描き直して上げる")
+            raise Invalid(m("線の画像は線のバージョン {made_from} から作ったが、今のバージョンは {current}。描き直して上げる",
+                            made_from=self.stroke_revision, current=layer.stroke_revision))
         await RegisterImage(id=self.image_id, role="human_hand", origin="human_drawn", page_id=layer.page_id,
                             panel_id=layer.panel_id, sha256=self.result.sha256, media_type=self.result.media_type,
                             width=self.result.width, height=self.result.height,
@@ -266,7 +268,7 @@ class SetStrokeCache(OpBase):
         rc = RowChanges(ctx)
         rc.change(layer, {"image_id": self.image_id, "placement": placement})
         rc.set_plain(layer, {"image_stroke_revision": self.stroke_revision})
-        return rc.inverse([layer.page_id], "線の控えを付けた取り消し")
+        return rc.inverse([layer.page_id], "線の画像を付けた取り消し")
 
 
 class ErasePixels(OpBase):
@@ -295,17 +297,17 @@ class ErasePixels(OpBase):
         if self.layer_id is not None:
             target = await get_in_work(ctx.session, PanelLayer, self.layer_id, ctx.work.id)
             if target.panel_id != panel.id:
-                raise Invalid("層がそのコマの物ではない")
+                raise Invalid(m("レイヤーがそのコマの物ではない"))
             if target.role == "human_hand" and await _top_order(ctx.session, target.id) >= 0:
-                raise Invalid("ペンの線を持つ層は、線の消しゴム（erase_pen_strokes）で消す")
+                raise Invalid(m("ペンの線を持つレイヤーは、線の消しゴム（erase_pen_strokes）で消す"))
             role = target.role
         else:
             target, role = panel, "panel_art"
         if target.image_id != self.base_image_id:
-            raise Invalid("消している間に絵が替わった。今の絵で消し直す")
+            raise Invalid(m("消している間に絵が替わった。今の絵で消し直す"))
         base = await ctx.session.get(ImageFile, self.base_image_id)
         if (base.width, base.height) != (self.result.width, self.result.height):
-            raise Invalid("消した後の絵の大きさが元の絵と違う")
+            raise Invalid(m("消した後の絵の大きさが元の絵と違う"))
         await RegisterImage(id=self.result_image_id, role=role, origin="human_edited", page_id=panel.page_id,
                             panel_id=panel.id, based_on_image_id=self.base_image_id, sha256=self.result.sha256,
                             media_type=self.result.media_type, width=self.result.width, height=self.result.height,
@@ -316,4 +318,4 @@ class ErasePixels(OpBase):
         rc.created(ProtectedRegion(id=new_id(), work_id=ctx.work.id, image_id=self.result_image_id,
                                    page_id=panel.page_id, polygon_px=None, mask_sha256=self.erase_mask_sha256,
                                    note="消しゴムで消した所", created_by=ctx.actor.id, removed=False))
-        return rc.inverse([panel.page_id], "画素の消しゴムの取り消し")
+        return rc.inverse([panel.page_id], "ピクセルの消しゴムの取り消し")

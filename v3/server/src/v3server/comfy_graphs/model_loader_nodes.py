@@ -1,6 +1,6 @@
 """画像生成の処理（generation_queue/image_process_registry.py）が使う、モデルを読むノードとサンプラーの設定。
 
-つなぎ先と処理の組ごとの中身（ServiceProcess.comfy_graph_settings）の形をここで決める。値はどれも人が入れる。ここに既定値は置かない
+接続先と処理の組ごとの中身（ServiceProcess.comfy_graph_settings）の形をここで決める。値はどれも人が入れる。ここに既定値は置かない
 （モデル名は環境ごとに利用者が選ぶ。V3細部の決めごと 12章）。
 
 モデルの読み方は2つ。
@@ -63,7 +63,7 @@ class DiffusionSettings(_Strict):
     # 画面は「作る」の大きさの初めの値にも使う
     native_long_side: int = Field(ge=64, le=4096)
     # 形の指定（線画・落書き・骨格・奥行き）に使う ControlNet のファイル名。多用途版（xinsir union promax。Apache-2.0）を想定。
-    # 無ければ null と書く（そのつなぎ先では形の指定を受けない）
+    # 無ければ null と書く（その接続先では形の指定を受けない）
     controlnet_name: str | None
 
 

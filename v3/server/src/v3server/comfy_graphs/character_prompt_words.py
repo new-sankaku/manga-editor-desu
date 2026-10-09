@@ -59,11 +59,11 @@ def shot_prompt(quality_words: str, style_words: str, target: ShotTarget,
     parts = [quality_words, style_words, target.add_words]
     if target.has_person:
         if character is None:
-            raise ValueError('人物を入れる狙いですが、人物の言葉がありません')
+            raise ValueError('人物を入れる狙いですが、人物の言葉がありません')  # i18n:dev
         parts.append(character_words(character))
     if target.has_place:
         if place_words is None:
-            raise ValueError('場所を入れる狙いですが、場所の言葉がありません')
+            raise ValueError('場所を入れる狙いですが、場所の言葉がありません')  # i18n:dev
         parts.append(place_words)
     return _join(parts)
 

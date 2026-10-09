@@ -1,4 +1,4 @@
-// V3 画像生成の画面。作品・ページ・コマを選び、処理を頼み、候補から選んで採用し、人の手で直し、版を戻す。
+// V3 画像生成の画面。作品・ページ・コマを選び、処理を依頼し、候補から選んで採用し、手動で直し、バージョンを戻す。
 // 処理の一覧と入力欄の形はサーバー（GET /works/{id}/image-processes）から来る。処理を足しても、この画面は変えない。
 import * as api from "./api.js";
 import { t, lang } from "../common/i18n.js";
@@ -14,16 +14,16 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const ACTIVE = new Set(["queued", "running", "waiting_limit", "waiting_budget"]);
 const STATUS = { queued: t("順番待ち"), running: t("作っている"), waiting_limit: t("回数の上限で待ち"), waiting_budget: t("予算で待ち"),
                  stopped: t("止まった"), done: t("できた"), cancelled: t("取り消した") };
-const ORIGIN = { generated: t("AIが作った"), human_drawn: t("人が描いた"), imported: t("取り込んだ"), human_edited: t("人が直した") };
+const ORIGIN = { generated: t("AIが作った"), human_drawn: t("手描き"), imported: t("取り込んだ"), human_edited: t("手動で修正") };
 const POLL_MS = pollMs(1500);
 const THUMB = 256;
-const PEN_INK = "#000000";   // 色の決め打ちを許す：ペンの線の色は絵の中身（墨）で、画面の色ではない（色の組を替えても変えない）
+const PEN_INK = "#000000";   // 色の決め打ちを許す：ペンの線の色は絵の中身（墨）で、画面の色ではない（カラーテーマを替えても変えない）
 
 // 取り消しの記録のうち、囲みの差分が持ってよい大きさ（全部のコマを合わせて）。超えたら古い物から捨てる
 const MASK_HISTORY_BYTES = 256 * 1024 * 1024;
 // 候補を読めなかったとき、次に読むまでの最長の間
 const POLL_MAX_MS = 30000;
-// 線を描いてから、線の控え（人の手の層の絵）を上げるまで待つ間。頼む前・コマを替える前には待たずに上げる
+// 線を描いてから、線の画像（手描きレイヤーの絵）を上げるまで待つ間。生成する前・コマを替える前には待たずに上げる
 const CACHE_IDLE_MS = 4000;
 
 const S = {
@@ -36,16 +36,16 @@ const S = {
   hist: new Map(), undoing: false,
   // 画面に出ている囲みがどのコマの物か。コマを替えるときに外へ出して masks に持つ
   shownPanel: null, shownViewing: false, masks: new Map(), showSeq: 0,
-  // 囲みを塗ってから、まだ頼んでいない（囲みは保存しないので、閉じると消える。閉じる前に聞く）
+  // 囲みを塗ってから、まだ生成していない（囲みは保存しないので、閉じると消える。閉じる前に聞く）
   maskUnsent: false,
-  // 描いている人の手の層（コマごと1つ）
+  // 描いている手描きレイヤー（コマごと1つ）
   hand: null,
   sending: false,
 };
 
 let stage;
 
-// ---------------------------------------------------------------- 知らせ
+// ---------------------------------------------------------------- 通知
 function toast(msg, kind = "") {
   const box = $("#toast");
   box.replaceChildren(note(msg, kind));
@@ -63,7 +63,7 @@ function fail(e, message = "") {
   console.error(e);
   toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
 }
-// 線と層の id は画面で作る（保存を待たずに取り消しの記録に載せるため）。http の画面でも使えるよう getRandomValues で作る
+// 線とレイヤーの id は画面で作る（保存を待たずに取り消しの記録に載せるため）。http の画面でも使えるよう getRandomValues で作る
 function newId() { return Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, "0")).join(""); }
 
 function h(tag, attrs = {}, ...kids) {
@@ -80,8 +80,8 @@ function h(tag, attrs = {}, ...kids) {
 }
 function pressed(group, btn) { for (const b of group.children) if (b.tagName === "BUTTON") b.setAttribute("aria-pressed", String(b === btn)); }
 
-// ---------------------------------------------------------------- コマの絵の画素と mm
-// コマの絵の置き場（切り抜きの画素 → 基本枠の mm）から、絵の画素と mm の比と原点を出す。回転・傾き・反転があれば null
+// ---------------------------------------------------------------- コマの絵のピクセルと mm
+// コマの絵の置き場（切り抜きのピクセル → 基本枠の mm）から、絵のピクセルと mm の比と原点を出す。回転・傾き・反転があれば null
 function pxFrame(placement) {
   if (!placement) return null;
   if ((placement.rotation_deg || 0) !== 0 || (placement.skew_x_deg || 0) !== 0 || (placement.skew_y_deg || 0) !== 0
@@ -132,7 +132,7 @@ function livePanels() {
 const panel = () => (S.work ? S.work.panels.find((p) => p.id === S.panelId) : null);
 
 async function selectPanel(id) {
-  // 前のコマの線の控えは、待たずに上げておく（失敗は知らせる）
+  // 前のコマの線の画像は、待たずに上げておく（失敗は知らせる）
   if (S.hand && S.hand.dirty) uploadCache(S.hand).catch((e) => fail(e, t("線の画像をサーバーに送れませんでした")));
   S.panelId = id;
   $("#pick-panel").value = id;
@@ -148,7 +148,7 @@ async function selectPanel(id) {
   await Promise.all([loadCandidates(), loadVersions()]);
 }
 
-// 今のコマの行と層だけを読み直す（作品全体は読まない）
+// 今のコマの行とレイヤーだけを読み直す（作品全体は読まない）
 async function refreshPanelRow() {
   const at = S.panelId;
   const r = await api.get(`/works/${S.workId}/panels/${at}/layers`);
@@ -165,8 +165,8 @@ function showEmpty(text) {
   e.hidden = false;
 }
 
-// コマの絵を出す。imageId を渡すと、その版を見る（描けない）。
-// 読んでいる間にコマや版を替えたら、古い読み込みの結果は捨てる（showSeq）。
+// コマの絵を出す。imageId を渡すと、そのバージョンを見る（描けない）。
+// 読んでいる間にコマやバージョンを替えたら、古い読み込みの結果は捨てる（showSeq）。
 // 同じコマの絵を出し直すときは、拡大・位置と囲みをそのままにする（消しゴム・採用の後も囲みは消えない）。
 async function refreshPanel(imageId) {
   const token = ++S.showSeq;
@@ -207,7 +207,7 @@ async function refreshPanel(imageId) {
   syncPenBar();
 }
 
-// 人の手の範囲（囲めない所）。数はサーバーの見出しから読む
+// 手動編集の範囲（囲めない所）。数はサーバーのヘッダーから読む
 async function loadProtected(imageId) {
   const protPath = `/works/${S.workId}/images/${imageId}/protected-mask`;
   const headers = await api.imageHeaders(protPath);
@@ -232,7 +232,7 @@ function dropMask(panelId, why) {
 const handLayerOf = (layers) => layers.filter((l) => l.role === "human_hand" && !l.removed)
   .sort((a, b) => b.stack_order - a.stack_order)[0];
 
-// コマの層を、コマの絵の画素の上の位置に出す。描く先の人の手の層は canvas（S.hand）で出し、ほかは絵で出す
+// コマのレイヤーを、コマの絵のピクセルの上の位置に出す。描く先の手描きレイヤーは canvas（S.hand）で出し、ほかは絵で出す
 async function panelLayers(p, frame, size) {
   const out = [];
   if (!frame) return out;
@@ -248,12 +248,12 @@ async function panelLayers(p, frame, size) {
     out.push({ image, opacity: l.opacity, x: (f.ox - frame.ox) / frame.sx, y: (f.oy - frame.oy) / frame.sy,
                w: image.naturalWidth * f.sx / frame.sx, h: image.naturalHeight * f.sy / frame.sy });
   }
-  // 描く先の層がまだ無くても、描いた線を出す canvas は一番上に置く（最初の線で層を作る）
+  // 描く先のレイヤーがまだ無くても、描いた線を出す canvas は一番上に置く（最初の線でレイヤーを作る）
   if (!target) out.push({ canvas: hand.canvas, opacity: 1, x: 0, y: 0, w: size.w, h: size.h });
   return out;
 }
 
-// ---------------------------------------------------------------- 道具
+// ---------------------------------------------------------------- ツール
 function setTool(tool) {
   S.tool = tool;
   for (const b of $$(".ftb .tool[data-tool]")) b.setAttribute("aria-pressed", String(b.dataset.tool === tool));
@@ -261,7 +261,7 @@ function setTool(tool) {
   $("#pen-bar").hidden = tool !== "pen";
   $("#erase-bar").hidden = tool !== "erase";
   stage.setTool(tool);
-  km.setTool(tool);   // "workbench:mask" のキー（多角形の Enter・Esc）は囲む道具の間だけ効く
+  km.setTool(tool);   // "workbench:mask" のキー（多角形の Enter・Esc）は囲むツールの間だけ効く
   syncPenBar();
 }
 
@@ -288,7 +288,7 @@ function renderProcesses() {
       title: blocked ? t("コマに絵があるときに使えます") : sp.hint, text: sp.label,
       onclick: () => { if (!blocked) selectProcess(sp.name); } }));
   }
-  // 選んでいた処理がまだ使えるなら、入力欄と道具はそのままにする（採用・描いた後に入れた値や道具を変えない）
+  // 選んでいた処理がまだ使えるなら、入力欄とツールはそのままにする（採用・描いた後に入れた値やツールを変えない）
   const keep = S.proc && S.processes.find((x) => x.name === S.proc.name);
   if (keep && usable(keep)) { S.proc = keep; renderInputNotes(); syncMask(); return; }
   const first = S.processes.find(usable);
@@ -321,13 +321,13 @@ function onFormChange(name) {
   if (name === "control") renderInputNotes();
 }
 
-// 描き足す量（入力欄）を、画面の枠（絵の画素）にする
+// 描き足す量（入力欄）を、画面の枠（絵のピクセル）にする
 function syncExtendFromForm() {
   const v = S.form.values();
   const notes = $("#extend-note");
   if (v.unit === "frame") {
     stage.setExtend({ left: 0, top: 0, right: 0, bottom: 0 });
-    if (notes) notes.textContent = t("コマの枠までの量は、頼むときにサーバーがコマの置き場から決めます。枠を動かすと「ピクセルで」に変わります");
+    if (notes) notes.textContent = t("コマの枠までの量は、生成するときにサーバーがコマの置き場から決めます。枠を動かすと「ピクセルで」に変わります");
     return;
   }
   let k = 1;
@@ -353,7 +353,7 @@ function renderInputNotes() {
   host.replaceChildren();
   if (!S.proc) return;
   if (S.proc.source === "required" && !S.image) host.append(note(t("コマに絵があるときに使えます"), "need"));
-  if (S.proc.mask === "required") host.append(note(t("描き直す所を、画面の「囲んで頼む」で塗ってください。塗った所だけを描き直します"), "", "lasso-select"));
+  if (S.proc.mask === "required") host.append(note(t("描き直す所を、画面の「囲んで生成」で塗ってください。塗った所だけを描き直します"), "", "lasso-select"));
   if (S.proc.mask === "optional") host.append(note(t("画面で塗ると、その所だけを直します。塗らなければ絵の全体に指示を効かせます"), "", "lasso-select"));
   if (S.proc.source === "required" && S.protectedCount) {
     host.append(note(t("橙の所は手動編集の範囲（{{count}} か所）です。塗れず、描き直しません。できた絵にも元のピクセルを戻します", { count: S.protectedCount }), "need", "shield"));
@@ -402,11 +402,11 @@ function showServiceMeta() {
     ...(st.loras || [])].filter(Boolean).join(t("・")) : "";
 }
 
-// ---------------------------------------------------------------- 頼む
+// ---------------------------------------------------------------- 生成
 function countN() { return Number($("#count [aria-pressed=true]").dataset.n); }
 function seedMode() { return $("#seed-mode [aria-pressed=true]").dataset.m; }
 
-// 送っている間は「頼む」を押せなくする（disabled なのでキーボードの Enter でも押せない）。2回押しても1組だけ送る
+// 送っている間は「生成」を押せなくする（disabled なのでキーボードの Enter でも押せない）。2回押しても1組だけ送る
 async function generate(over = {}) {
   if (S.sending) return;
   const btn = $("#generate");
@@ -423,7 +423,7 @@ async function send(over) {
   if (!over.proc && spec.mask !== "none") {
     const m = stage.maskPngBase64();
     if (m) { body.mask = { png_base64: m }; S.maskUnsent = false; }
-    else if (spec.mask === "required") { toast(t("描き直す所を塗ってください（囲んで頼む）"), "need"); setTool("mask"); return; }
+    else if (spec.mask === "required") { toast(t("描き直す所を塗ってください（囲んで生成）"), "need"); setTool("mask"); return; }
   }
   if (params.control && params.control !== "none") {
     if (!S.control) { toast(t("形の指定に使う絵を選んでください"), "need"); return; }
@@ -432,20 +432,20 @@ async function send(over) {
   const svc = over.service_id || $("#service").value;
   if (svc && svc !== spec.route_service_id) body.service_id = svc;
   try {
-    // 描いた線と消した所の保存が済み、線の控えが今の線と合ってから頼む（古い控えはサーバーが断る）
+    // 描いた線と消した所の保存が済み、線の画像が今の線と合ってから生成する（古い線の画像はサーバーが断る）
     await idleSaves();
     if (S.hand && S.hand.dirty) await uploadCache(S.hand);
     if (spec.source === "required" && !over.source_image_id) body.source_image_id = S.viewing || panel().image_id;
     const r = await api.post(`/works/${S.workId}/panels/${S.panelId}/generate`, body);
-    toast(t("{{label}}を {{count}} 件頼みました", { label: spec.label, count: r.jobs.length }));
+    toast(t("{{label}}を {{count}} 件依頼しました", { label: spec.label, count: r.jobs.length }));
     showTab("cands");
     await loadCandidates();
   } catch (e) { fail(e, t("{{label}}を頼めませんでした", { label: spec.label })); }
 }
 
 // ---------------------------------------------------------------- 候補
-// 進み具合はポーリングで見る（EventSource は X-V3-User を付けられない）。
-// 読めなかったときは知らせを重ねず、1つの状態（renderStatus）に出し、次に読むまでの間を倍にしていく（最長 POLL_MAX_MS）
+// 進行状況はポーリングで見る（EventSource は X-V3-User を付けられない）。
+// 読めなかったときは通知を重ねず、1つの状態（renderStatus）に出し、次に読むまでの間を倍にしていく（最長 POLL_MAX_MS）
 async function loadCandidates() {
   clearTimeout(S.poll);
   const at = `${S.workId}/${S.panelId}`;
@@ -459,7 +459,7 @@ async function loadCandidates() {
   } catch (e) {
     if (at !== `${S.workId}/${S.panelId}`) return;
     S.pollFails += 1;
-    S.link = { text: t("候補と進み具合を読めません：{{reason}}", { reason: api.errorText(e) }) };
+    S.link = { text: t("候補と進行状況を読めません：{{reason}}", { reason: api.errorText(e) }) };
   }
   if (S.pollFails || S.sets.some((s) => s.jobs.some((j) => ACTIVE.has(j.status)))) {
     const wait = S.pollFails ? Math.min(POLL_MAX_MS, POLL_MS * 2 ** S.pollFails) : POLL_MS;
@@ -482,7 +482,7 @@ function renderCandidates(currentId) {
   host.replaceChildren();
   const waiting = S.sets.reduce((n, s) => n + s.images.filter((i) => !i.discarded).length, 0);
   $("#cand-count").textContent = waiting ? String(waiting) : "";
-  if (!S.sets.length) { host.append(h("div", { class: "meta", text: t("まだ頼んでいません") })); return; }
+  if (!S.sets.length) { host.append(h("div", { class: "meta", text: t("まだ生成していません") })); return; }
   const variation = S.processes.find((p) => p.name === "variation");
   const presets = Object.entries(variation ? variation.params_schema.properties.strength["x-presets"] || {} : {})
     .sort((a, b) => a[1] - b[1]);
@@ -634,7 +634,7 @@ function syncUndo() {
 
 async function undoRedo(dir) {
   if (S.undoing) return;
-  if (S.viewing) { toast(t("昔の版を見ている間は取り消せません。「今の絵に戻る」を押してください"), "need"); return; }
+  if (S.viewing) { toast(t("前のバージョンを見ている間は取り消せません。「今の絵に戻る」を押してください"), "need"); return; }
   const h = hist();
   const [from, to] = dir === "undo" ? [h.undo, h.redo] : [h.redo, h.undo];
   const entry = from.pop();
@@ -724,7 +724,7 @@ async function discardSaves() {
 
 function savingCount() { return Q.jobs.length + (S.hand && S.hand.uploading ? 1 : 0); }
 
-// 保存と、サーバーとのつながりの状態を、画面の左下の1か所に出す
+// 保存と、サーバーとの接続の状態を、画面の左下の1か所に出す
 function renderStatus() {
   const host = $("#stage-msg");
   if (Q.failed) {
@@ -745,7 +745,7 @@ function renderStatus() {
   host.replaceChildren(n ? note(t("保存しています（{{count}} 件）", { count: n }), "", "loader") : "");
 }
 
-// ---------------------------------------------------------------- 採用・却下・版
+// ---------------------------------------------------------------- 採用・却下・バージョン
 async function submitOps(...bodies) {
   const ids = [];
   for (const b of bodies) ids.push((await api.op(S.workId, b)).event_id);
@@ -788,7 +788,7 @@ async function loadVersions() {
   for (const v of list) {
     const im = h("img", { alt: "" });
     const th = h("div", { class: "th" }, im);
-    api.showIn(im, `/works/${S.workId}/images/${v.id}/thumbnail?size=128`).catch((e) => fail(e, t("版の小さい絵を読み込めませんでした")));
+    api.showIn(im, `/works/${S.workId}/images/${v.id}/thumbnail?size=128`).catch((e) => fail(e, t("バージョンのサムネイルを読み込めませんでした")));
     const proc = v.details && v.details.process;
     const label = proc ? (S.processes.find((p) => p.name === proc) || {}).label || proc : ORIGIN[v.origin] || v.origin;
     host.append(h("div", { class: `vrow${v.current ? " cur" : ""}`, "data-version": v.id }, th,
@@ -807,7 +807,7 @@ async function view(v, label) {
   $("#viewing-text").textContent = t("{{label}}（{{width}}×{{height}}）を見ています。描いたり囲んだりはできません", { label, width: v.width, height: v.height });
   $("#viewing").hidden = false;
   setTool("select");
-  await refreshPanel(v.id).catch((e) => fail(e, t("版を表示できませんでした")));
+  await refreshPanel(v.id).catch((e) => fail(e, t("バージョンを表示できませんでした")));
 }
 
 // ---------------------------------------------------------------- 比べる
@@ -847,10 +847,10 @@ async function renderCompare() {
     wrap, h("figcaption", { text: t("左：{{left}}　右：{{right}}", { left: S.compareNames[0], right: S.compareNames[1] }) })));
 }
 
-// ---------------------------------------------------------------- 人の手で描く（ペン）
-// S.hand：今のコマの、描く先の人の手の層。canvas はコマの絵と同じ画素の大きさで、層の控えの絵そのもの。
-// 線は描いている間にこの canvas へ描き（stage.js）、離したら保存を後ろで送る。控えの絵（stroke-cache）は、
-// 描き終えて CACHE_IDLE_MS 経ったとき・頼む前・コマを替える前に、この canvas をそのまま上げる（全部の線を描き直さない）。
+// ---------------------------------------------------------------- 手動で描く（ペン）
+// S.hand：今のコマの、描く先の手描きレイヤー。canvas はコマの絵と同じピクセルの大きさで、レイヤーの線の画像そのもの。
+// 線は描いている間にこの canvas へ描き（stage.js）、離したら保存を後ろで送る。線の画像（stroke-cache）は、
+// 描き終えて CACHE_IDLE_MS 経ったとき・生成する前・コマを替える前に、この canvas をそのまま上げる（全部の線を描き直さない）。
 // { panelId, layerId, layerNew, canvas, strokes: [サーバーの形の線], dirty, version, blocked, timer, uploading }
 
 async function prepareHand(p, frame, size, target) {
@@ -867,10 +867,10 @@ async function prepareHand(p, frame, size, target) {
   if (!target.visible) { hand.blocked = t("手描きレイヤーを隠しているので描けません"); return hand; }
   const cacheOk = target.image_id && target.stroke_revision === target.image_stroke_revision && aligned(target, frame);
   if (cacheOk) {
-    // 控えが今の線と合っていれば、その絵をそのまま使う（線は読まない）
+    // 線の画像が今の線と合っていれば、その絵をそのまま使う（線は読まない）
     const { image } = await api.image(`/works/${S.workId}/images/${target.image_id}/file`);
     canvas.getContext("2d").drawImage(image, 0, 0);
-    // 線は id だけ読む（控えを上げるときに、画面の線とサーバーの線が同じかを比べるため）
+    // 線は id だけ読む（線の画像を上げるときに、画面の線とサーバーの線が同じかを比べるため）
     const { strokes } = await readStrokes(target.id, false);
     if (S.hand === hand && !hand.strokes.length) hand.strokes = strokes;
     return hand;
@@ -879,7 +879,7 @@ async function prepareHand(p, frame, size, target) {
   return hand;
 }
 
-// 控えの絵が、コマの絵の画素にぴったり重なる置き場か
+// 線の画像が、コマの絵のピクセルにぴったり重なる置き場か
 function aligned(layer, frame) {
   const f = layer.placement && pxFrame(layer.placement);
   if (!f) return false;
@@ -888,7 +888,7 @@ function aligned(layer, frame) {
     && near(f.sx / frame.sx, 1) && near(f.sy / frame.sy, 1);
 }
 
-// 層の線をサーバーから区切って読み、canvas を描き直す。控えが線と合っていなければ dirty にする
+// レイヤーの線をサーバーから区切って読み、canvas を描き直す。線の画像が線と合っていなければ dirty にする
 async function reloadHand(hand) {
   if (!hand || !hand.layerId || hand.layerNew) return;
   hand.forceReload = false;
@@ -923,7 +923,7 @@ function drawServerStroke(ctx, s, f) {
 }
 
 function penBegin() {
-  if (S.viewing) throw new Error(t("昔の版を見ている間は描けません"));
+  if (S.viewing) throw new Error(t("前のバージョンを見ている間は描けません"));
   if (!syncPenBar()) throw new Error($("#pen-note").textContent);
   return { canvas: S.hand.canvas, widthPx: stage.penWidthPx, color: PEN_INK };
 }
@@ -943,7 +943,7 @@ function onPenStroke(points, pointerType) {
     makeLayer = { type: "add_panel_layer", id: hand.layerId, panel_id: hand.panelId, role: "human_hand", stack_order: top + 1 };
   }
   const workId = S.workId;
-  // 層を作る操作が通った後で線が通らなかったときは、もう一度送るときに層を作り直さない
+  // レイヤーを作る操作が通った後で線が通らなかったときは、もう一度送るときにレイヤーを作り直さない
   let layerEvent = null;
   const ids = enqueue(t("ペンの線"), async () => {
     const out = [];
@@ -957,7 +957,7 @@ function onPenStroke(points, pointerType) {
     out.push((await api.op(workId, { type: "add_pen_strokes", layer_id: hand.layerId, strokes: [stroke] })).event_id);
     return out;
   }, "pen");
-  // 層を作った線は、層ごと1回で取り消せる
+  // レイヤーを作った線は、レイヤーごと1回で取り消せる
   pushUndo({ kind: "server", ids, refresh: "hand" }, hand.panelId);
   ids.then(() => scheduleUpload(hand), () => {});
 }
@@ -967,7 +967,7 @@ function scheduleUpload(hand) {
   hand.timer = setTimeout(() => uploadCache(hand).catch((e) => fail(e, t("線の画像をサーバーに送れませんでした"))), CACHE_IDLE_MS);
 }
 
-// 控えの絵を上げる。サーバーの線（id だけ読む）が画面の線と同じなら、canvas をそのまま上げる。
+// 線の画像を上げる。サーバーの線（id だけ読む）が画面の線と同じなら、canvas をそのまま上げる。
 // 違えば（ほかの人が描いた・取り消した）線を読み直して描き直してから上げる
 async function uploadCache(hand) {
   clearTimeout(hand.timer);
@@ -982,7 +982,7 @@ async function uploadCache(hand) {
       rev = await reloadHand(hand);
       clearTimeout(hand.timer);
     }
-    // 鉛筆でない線がある層は描き直せないので、控えも上げない（サーバーの控えのままにする）
+    // 鉛筆でない線があるレイヤーは描き直せないので、線の画像も上げない（サーバーの線の画像のままにする）
     if (hand.blocked) return;
     const version = hand.version;
     const blob = await new Promise((resolve) => hand.canvas.toBlob(resolve, "image/png"));
@@ -1001,14 +1001,14 @@ async function uploadCache(hand) {
   return hand.uploading;
 }
 
-// ---------------------------------------------------------------- 人の手で消す（画素の消しゴム）
+// ---------------------------------------------------------------- 手動で消す（ピクセルの消しゴム）
 function eraseBegin() {
-  if (S.viewing) throw new Error(t("昔の版を見ている間は消せません"));
+  if (S.viewing) throw new Error(t("前のバージョンを見ている間は消せません"));
   if (!S.image) throw new Error(t("消す絵がありません"));
   return true;
 }
 
-// 消した所は stage.js が絵の写しから先に消して見せている。サーバーの答え（新しい版）が来たら、その絵に替える
+// 消した所は stage.js が絵の写しから先に消して見せている。サーバーの答え（新しいバージョン）が来たら、その絵に替える
 function onErase(points, widthPx) {
   const panelId = S.panelId, workId = S.workId;
   const ids = enqueue(t("消しゴム"), async () => {
@@ -1058,7 +1058,7 @@ function bindUi() {
   bs.addEventListener("input", () => { $("#brush-size-v").textContent = bs.value; stage.setBrushPx(Number(bs.value)); });
   const es = $("#erase-size");
   es.addEventListener("input", () => { $("#erase-size-v").textContent = es.value; stage.erasePx = Number(es.value); stage.syncCursor(); });
-  // 囲みの「反転・全部・消す」は昔の版を見ている間は使えない（塗る筆と同じ。maskBegin）
+  // 囲みの「反転・全部・消す」は昔のバージョンを見ている間は使えない（塗る筆と同じ。maskBegin）
   const maskOp = (fn) => () => { if (maskBegin()) fn(); };
   $("#mask-invert").addEventListener("click", maskOp(() => stage.invertMask()));
   $("#mask-fill").addEventListener("click", maskOp(() => stage.fillMask()));
@@ -1084,8 +1084,8 @@ function bindUi() {
   $("#compare-close").addEventListener("click", () => { $("#compare").hidden = true; });
   $("#keys-open").addEventListener("click", () => openHelp());
   window.addEventListener("online", () => { if (S.link) loadCandidates(); if (Q.failed) retrySaves(); });
-  window.addEventListener("offline", () => { S.link = { text: t("ネットにつながっていません"), at: Date.now() + POLL_MAX_MS }; renderStatus(); });
-  // 保存していない線・消した所・まだ頼んでいない囲みがあるときは、閉じる前に聞く
+  window.addEventListener("offline", () => { S.link = { text: t("ネットワークに接続していません"), at: Date.now() + POLL_MAX_MS }; renderStatus(); });
+  // 保存していない線・消した所・まだ生成していない囲みがあるときは、閉じる前に聞く
   window.addEventListener("beforeunload", (e) => {
     if (Q.jobs.length || (S.hand && (S.hand.dirty || S.hand.uploading)) || S.maskUnsent) e.preventDefault();
   });
@@ -1118,7 +1118,7 @@ function bindKeys() {
   km.bind("workbench.compareClose", () => !$("#compare").hidden && press("#compare-close"));
   km.bind("workbench.polyClose", () => stage.polygonKey("Enter"));
   km.bind("workbench.polyCancel", () => stage.polygonKey("Escape"));
-  // Space を押している間だけ「見る（動かす）」にし、離したら前の道具へ戻す
+  // Space を押している間だけ「見る（動かす）」にし、離したら前のツールへ戻す
   let before = null;
   km.bind("workbench.pan", {
     down: () => { if (S.tool !== "select") { before = S.tool; setTool("select"); } },
@@ -1126,7 +1126,7 @@ function bindKeys() {
   });
 }
 
-// Ctrl+S：保存の具合を知らせる（描いた線と消した所は、描いた後に後ろで送っている）
+// Ctrl+S：保存の状態を知らせる（描いた線と消した所は、描いた後に後ろで送っている）
 function showSaveState() {
   if (Q.failed) toast(t("保存できていない変更があります（{{label}}）。左下の「もう一度送る」か「この変更を捨てる」を選んでください", { label: Q.failed.job.label }), "bad");
   else if (savingCount() || (S.hand && S.hand.dirty)) toast(t("保存しています（{{count}} 件）。済むと左下の印が消えます", { count: savingCount() || 1 }));
@@ -1134,7 +1134,7 @@ function showSaveState() {
 }
 
 function maskBegin() {
-  if (S.viewing) { toast(t("昔の版を見ている間は囲めません。「今の絵に戻る」を押してください"), "need"); return false; }
+  if (S.viewing) { toast(t("前のバージョンを見ている間は囲めません。「今の絵に戻る」を押してください"), "need"); return false; }
   return true;
 }
 
@@ -1162,7 +1162,7 @@ stage = new Stage($("#stage"), {
   onMaskEdit: (edit) => { S.maskUnsent = true; pushUndo({ kind: "mask", edit }); },
   onRefuse: (msg) => toast(msg, "need"),
 });
-// 開発者ツールと画面の試験（test/image_generation_ui.mjs・persistence_e2e.mjs）から絵の画素の位置と保存の待ち行列を調べるため
+// 開発者ツールと画面の試験（test/image_generation_ui.mjs・persistence_e2e.mjs）から絵のピクセルの位置と保存のキューを調べるため
 window.v3Stage = stage;
 window.__wb = { S, Q };
 bindUi();

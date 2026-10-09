@@ -1,5 +1,5 @@
 """絵から作り直す（文の指示と変える強さ）。元の絵を VAE で潜在に移し、変える強さ（denoise）だけ描き直す。
-人の手の範囲は最後に元の画素で貼り戻す（source_and_masks.py）。出来上がりは元の絵と同じ大きさ。"""
+手動編集の範囲は最後に元のピクセルで貼り戻す（source_and_masks.py）。出来上がりは元の絵と同じ大きさ。"""
 from __future__ import annotations
 
 from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph

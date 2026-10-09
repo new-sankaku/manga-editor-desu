@@ -1,7 +1,7 @@
-"""中身まで見るヘルスチェック。口（GET /health/ready）と、コンテナのヘルスチェック（python -m v3server.health_checks）で使う。
+"""中身まで見るヘルスチェック。API（GET /health/ready）と、コンテナのヘルスチェック（python -m v3server.health_checks）で使う。
 
 - api: DB・OpenFGA・Temporal・絵の置き場に届くか
-- worker: 上に加えて、制御と書き出しの待ち行列を作業者が取りに来ているか（Temporal に問い合わせる）
+- worker: 上に加えて、制御と書き出しのキューを作業者が取りに来ているか（Temporal に問い合わせる）
 """
 
 import asyncio
@@ -47,7 +47,7 @@ async def _pollers(client: Client) -> None:
             namespace=client.namespace, task_queue=TaskQueue(name=queue),
             task_queue_type=TaskQueueType.TASK_QUEUE_TYPE_WORKFLOW))
         if not r.pollers:
-            raise RuntimeError(f"待ち行列 {queue} を取りに来る作業者がいない")
+            raise RuntimeError(f"キュー {queue} を取りに来る作業者がいない")
 
 
 async def readiness(client: Client, include_workers: bool = False) -> dict[str, Any]:

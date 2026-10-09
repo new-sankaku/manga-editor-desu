@@ -4,7 +4,7 @@
   同じ run_export をこの段で行う）。候補は1つ（同じ原稿を同じ形で書き出しても同じ物になるため）
 - 検査（プログラム）：入稿前の確かめ（preflight。解像度・裁ち落とし・色・安全線・文字の組み）。重さが error の問題は
   指摘にする。候補は落とさない（直すのは人。落としても同じ物を書き出し直すだけ）
-- 人が書き出した物を見て採る（提出）。採っても外へは送らない（入稿先へ送る口は無い。人が持ち出す）
+- 人が書き出した物を見て採る（提出）。採っても外へは送らない（入稿先へ送る API は無い。人が持ち出す）
 """
 
 from typing import Any, Literal
@@ -49,7 +49,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     c.spec_of(unit, "export", ExportSpec)
     async with get_sessionmaker()() as session:
         if not await episode_pages(session, unit.target_id):
-            raise q.blocked("話にページが無い")
+            raise q.blocked("話にページが無い")  # i18n:stored
     return {"cost": 0, "job_ids": []}
 
 
@@ -79,7 +79,7 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                         run = await session.get(ExportRun, run.id)
                         run.status, run.detail = "failed", str(e)
                         await session.commit()
-                        raise q.blocked(f"{f.format} を書き出せない: {e}") from e
+                        raise q.blocked(f"{f.format} を書き出せない: {e}") from e  # i18n:stored
                     await session.commit()
                 runs.append({"run_id": run.id, "format": f.format, "files": [o["file"] for o in run.outputs
                                                                              if "file" in o]})
@@ -93,7 +93,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
     def measure(items):
         if not s.text_render_script:
-            raise q.blocked("V3_TEXT_RENDER_SCRIPT が無い。文字の組み方を確かめられない")
+            raise q.blocked("V3_TEXT_RENDER_SCRIPT が無い。文字の組み方を確かめられない")  # i18n:stored
         return measure_texts(items, s.node_executable, s.text_render_script)
 
     async def judge(cand) -> list[dict[str, Any]]:
@@ -120,7 +120,7 @@ async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         cand = await c.picked_content(session, args)
         return {"candidate_id": cand.id, "exports": [e["run_id"] for e in cand.content["exports"]],
-                "note": "人が提出すると決めた。入稿先へ送る口は無い（人が持ち出す）"}
+                "note": "人が提出すると決めた。入稿先へ送る API は無い（人が持ち出す）"}
 
 
 async def discard_round(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

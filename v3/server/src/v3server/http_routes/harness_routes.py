@@ -1,4 +1,4 @@
-"""AIハーネスの口（llm_doc/V3ハーネスの実装.md 6章）。
+"""AIハーネスの API（llm_doc/V3ハーネスの実装.md 6章）。
 
 工程を始める・今の状態（snapshot）・作業の中身・人の操作（Update を流れへ渡す）・確認待ちの一覧・生の状態（SSE）。
 人の操作の可否は流れの側の検証（validator）が決める。断られたら 409 で理由を返す。
@@ -50,6 +50,7 @@ from v3server.harness.structure_steps import StructureSpec
 from v3server.harness.threshold_proposals import threshold_rows
 from v3server.harness.unit_workflow import Control, LimitChange, Review, WorkUnitWorkflow
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, TemporalDep, require
+from v3server.messages import m, text_of
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.v3_error_types import Invalid, Locked, NotFound
 
@@ -101,7 +102,7 @@ class RerunBody(BaseModel):
 def _check_spec(stage: str, spec: dict[str, Any]) -> None:
     unknown = set(spec) - {key for key, _ in SPEC_MODELS.values()}
     if unknown:
-        raise Invalid(f"知らない決めごと: {sorted(unknown)}")
+        raise Invalid(m("知らない決めごと: {keys}", keys=str(sorted(unknown))))
     for i, s in enumerate(STAGES):
         kind = UNIT_KIND_OF_STAGE.get(s)
         if kind not in SPEC_MODELS or i < STAGES.index(stage):
@@ -109,7 +110,7 @@ def _check_spec(stage: str, spec: dict[str, Any]) -> None:
         key, model = SPEC_MODELS[kind]
         if key not in spec:
             if s == stage:
-                raise Invalid(f"{stage} を始めるには spec.{key} が要る")
+                raise Invalid(m("{stage} を始めるには spec.{key} が要る", stage=stage, key=key))
             continue
         model.model_validate(spec[key])
 
@@ -123,7 +124,7 @@ async def _call(fn):
         raise Locked(getattr(cause, "message", None) or str(cause)) from e
     except RPCError as e:
         if e.status == RPCStatusCode.NOT_FOUND:
-            raise NotFound("流れが動いていない（終わったか、まだ始まっていない）") from e
+            raise NotFound(m("流れが動いていない（終わったか、まだ始まっていない）")) from e
         raise
 
 
@@ -132,13 +133,13 @@ async def start_stage(work_id: str, body: StartStage, session: SessionDep, authz
                       actor: ActorDep):
     await require(authz, actor, "can_manage", work_obj(work_id))
     if actor.kind != "human":
-        raise Invalid("工程は人が始める")
+        raise Invalid(m("工程は人が始める"))
     await get_in_work(session, Episode, body.episode_id, work_id)
     try:
         check_completion(body.limits.completion)
         _check_spec(body.stage, body.spec)
     except ValueError as e:
-        raise Invalid(str(e)) from e
+        raise Invalid(text_of(e)) from e
     run = HarnessStageRun(work_id=work_id, episode_id=body.episode_id, stage=body.stage, status="queued",
                           requested_by=actor.id, limits=body.limits.model_dump(), spec=body.spec,
                           workflow_id=stage_workflow_id(body.episode_id))
@@ -150,7 +151,7 @@ async def start_stage(work_id: str, body: StartStage, session: SessionDep, authz
                                       task_queue=HARNESS_QUEUE)
     except WorkflowAlreadyStartedError as e:
         await session.rollback()
-        raise Locked("この話の工程の進行役はもう動いている（取り消してから始める）") from e
+        raise Locked(m("この話の工程の進行役はもう動いている（取り消してから始める）")) from e
     await session.commit()
     return {"stage_run_id": run.id, "workflow_id": run.workflow_id}
 
@@ -190,16 +191,16 @@ async def unit_review(work_id: str, unit_id: str, body: ReviewBody, session: Ses
                       temporal: TemporalDep, actor: ActorDep):
     await require(authz, actor, "can_manage", work_obj(work_id))
     if actor.kind != "human":
-        raise Invalid("判断は人がする")
+        raise Invalid(m("判断は人がする"))
     handle = await _unit_handle(session, temporal, work_id, unit_id)
     unit = await session.get(HarnessUnit, unit_id)
     if body.action == "answer" and not getattr(STEP_MODULES[unit.kind], "TAKES_ANSWERS", False):
         # 答えを読まない種類に答えると、答えが黙って捨てられる。断る
-        raise Invalid(f"{unit.kind} の作業は質問を返さない（答えを次の文脈に入れない）")
+        raise Invalid(m("{kind} の作業は質問を返さない（答えを次の文脈に入れない）", kind=unit.kind))
     if body.action == "approve" and body.candidate_id is not None:
         cand = await session.get(HarnessCandidate, body.candidate_id)
         if cand is None or cand.unit_id != unit_id:
-            raise Invalid("この作業の候補でない")
+            raise Invalid(m("この作業の候補でない"))
         why = getattr(STEP_MODULES[unit.kind], "not_approvable", lambda c: None)(cand)
         if why:
             raise Invalid(why)
@@ -218,7 +219,7 @@ async def unit_limits(work_id: str, unit_id: str, body: LimitsBody, session: Ses
 async def _stage_handle(session, temporal, work_id: str, stage_run_id: str):
     run = await get_in_work(session, HarnessStageRun, stage_run_id, work_id)
     if run.status in ("done", "cancelled"):
-        raise Locked(f"この工程の実行は終わっている（{run.status}）")
+        raise Locked(m("この工程の実行は終わっている（{status}）", status=run.status))
     return temporal.get_workflow_handle(run.workflow_id)
 
 
@@ -235,7 +236,7 @@ async def stage_approve(work_id: str, stage_run_id: str, session: SessionDep, au
                         temporal: TemporalDep, actor: ActorDep):
     await require(authz, actor, "can_manage", work_obj(work_id))
     if actor.kind != "human":
-        raise Invalid("工程の承認は人がする")
+        raise Invalid(m("工程の承認は人がする"))
     handle = await _stage_handle(session, temporal, work_id, stage_run_id)
     return await _call(lambda: handle.execute_update(StageWorkflow.approve, actor.id))
 
@@ -257,15 +258,15 @@ async def stage_spec(work_id: str, stage_run_id: str, body: SpecBody, session: S
     再開（resume）で続く。"""
     await require(authz, actor, "can_manage", work_obj(work_id))
     if actor.kind != "human":
-        raise Invalid("決めごとは人が決める")
+        raise Invalid(m("決めごとは人が決める"))
     run = await get_in_work(session, HarnessStageRun, stage_run_id, work_id)
     if run.status in ("done", "cancelled"):
-        raise Locked(f"終わった工程の実行（{run.status}）")
+        raise Locked(m("終わった工程の実行（{status}）", status=run.status))
     merged = {**run.spec, **body.spec}
     try:
         _check_spec(run.stage, merged)
     except ValueError as e:
-        raise Invalid(str(e)) from e
+        raise Invalid(text_of(e)) from e
     run.spec = merged
     units = (await session.execute(select(HarnessUnit).where(
         HarnessUnit.stage_run_id == run.id, HarnessUnit.status.not_in(["done", "cancelled", "failed"])))).scalars().all()
@@ -283,7 +284,7 @@ async def dismiss_stale(work_id: str, mark_id: str, session: SessionDep, authz: 
     await require(authz, actor, "can_manage", work_obj(work_id))
     mark = await get_in_work(session, HarnessStaleMark, mark_id, work_id)
     if mark.status != "open":
-        raise Locked(f"もう閉じている（{mark.status}）")
+        raise Locked(m("もう閉じている（{status}）", status=mark.status))
     mark.status, mark.resolved_at = "dismissed", now()
     unit = await session.get(HarnessUnit, mark.unit_id)
     await add_event(session, work_id, "stale_resolved", {"mark_id": mark.id, "unit_id": unit.id, "status": "dismissed",
@@ -300,14 +301,14 @@ async def get_review_items(work_id: str, session: SessionDep, authz: AuthzDep, a
     try:
         items = await review_items(session, work_id, kind, stage, page_id, stage_run_id)
     except ValueError as e:
-        raise Invalid(f"{e}（{', '.join(KINDS)}）") from e
+        raise Invalid(m("{reason}（{kinds}）", reason=text_of(e), kinds=", ".join(KINDS))) from e
     return {"items": items}
 
 
 @router.get("/works/{work_id}/harness/stream")
 async def get_stream(work_id: str, request: Request, authz: AuthzDep, actor: ActorDep,
                      after: int | None = None, last_event_id: str | None = Header(default=None)):
-    """SSE。Last-Event-ID（か ?after=）の続きから流す。画面は fetch で読む（見出しで名乗るため EventSource は使わない）。"""
+    """SSE。Last-Event-ID（か ?after=）の続きから流す。画面は fetch で読む（ヘッダーで名乗るため EventSource は使わない）。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     start = after if after is not None else int(last_event_id) if last_event_id else 0
     return StreamingResponse(live_stream.stream(work_id, start, request.is_disconnected),
@@ -342,7 +343,7 @@ NOTIFY_FIELDS = ("id", "kind", "level", "title", "stage_run_id", "unit_id", "eve
 @router.get("/works/{work_id}/harness/notifications")
 async def list_notifications(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
                              unread: bool = False, limit: int = Query(default=50, ge=1, le=500)):
-    """アプリの中の知らせの一覧（新しい順）。外へ届けた記録も添える。"""
+    """アプリの中の通知の一覧（新しい順）。外へ届けた記録も添える。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     q = select(HarnessNotification).where(HarnessNotification.work_id == work_id)
     if unread:
@@ -372,7 +373,7 @@ async def read_notification(work_id: str, notification_id: str, session: Session
 
 @router.get("/works/{work_id}/harness/notification-settings")
 async def get_notification_settings(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """作品の知らせの決まり。行が無ければ、全部の種類をアプリの中の一覧にだけ出す（外へは送らない）。"""
+    """作品の通知のルール。行が無ければ、全部の種類をアプリの中の一覧にだけ出す（外へは送らない）。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     row = await session.get(HarnessNotificationSetting, work_id)
     current = None if row is None else {
@@ -388,10 +389,10 @@ async def put_notification_settings(work_id: str, body: NotificationSettings, se
                                     actor: ActorDep):
     await require(authz, actor, "can_manage", work_obj(work_id))
     if actor.kind != "human":
-        raise Invalid("知らせの決まりは人が決める")
+        raise Invalid(m("通知のルールは人が決める"))
     data = body.model_dump(mode="json")
     row = await session.get(HarnessNotificationSetting, work_id)
-    # 鍵は読み出しの口で返さないので、画面は鍵を送らずに保存する。secret を書かなかった送り先は同じ URL の今の鍵を
+    # 鍵は読み出しの API で返さないので、画面は鍵を送らずに保存する。secret を書かなかった送り先は同じ URL の今の鍵を
     # 使い、空の文字（""）を書いたら鍵を外す
     old = {w["url"]: w.get("secret") for w in (row.webhooks if row is not None else [])}
     for given, w in zip(body.webhooks, data["webhooks"], strict=True):

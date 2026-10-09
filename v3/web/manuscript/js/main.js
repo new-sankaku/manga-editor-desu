@@ -134,7 +134,7 @@ export function draw({ refit = false } = {}) {
   if (refit) S.view.fitted = false;
   S.view.imageEdit = S.imageEdit;
   S.view.setScene(sl, S.m, viewOpts());
-  if (S.sel && !S.view.select(S.sel.kind, S.sel.id, false)) { /* 道具によっては選べない：右の欄だけ出す */ }
+  if (S.sel && !S.view.select(S.sel.kind, S.sel.id, false)) { /* ツールによっては選べない：右のパネルだけ出す */ }
   syncPickers();
   panes.render();
   renderStatus();
@@ -328,7 +328,7 @@ function mapBox(a, b) {
   return ([x, y]) => [b[0] + (x - a[0]) * sx, b[1] + (y - a[1]) * sy];
 }
 
-// 押した所に、道具に応じた物を足す
+// 押した所に、ツールに応じた物を足す
 function addAt(tool, hit) {
   const page = hit.slot.page, q = hit.q, m = S.m;
   if (tool === "frame") {
@@ -383,7 +383,7 @@ export function selectedRow() {
   return r && !r.removed ? r : null;
 }
 
-// ---------------------------------------------------------------- 道具（4つ目はキーの操作の名前。common/key_catalog.js）
+// ---------------------------------------------------------------- ツール（4つ目はキーの操作の名前。common/key_catalog.js）
 export const TOOLS = [
   ["select", t("選ぶ"), "mouse-pointer-2", "manuscript.select"], ["frame", t("コマ枠"), "square-dashed", "manuscript.frame"], ["knife", t("ナイフ"), "slice", "manuscript.knife"],
   ["balloon", t("フキダシ"), "message-circle", "manuscript.balloon"], ["text", t("文字"), "type", "manuscript.text"], ["tone", t("トーン"), "grid-3x3", "manuscript.tone"], ["hand", t("手のひら"), "hand", "manuscript.hand"],
@@ -449,7 +449,7 @@ export function removeSelected() {
 
 // ---------------------------------------------------------------- キー（決めごと 22章）
 // キーは common/keymap.js の1か所で受け、ここでは操作の名前（common/key_catalog.js の manuscript.*）に処理を結ぶだけ。
-// 文字を打っている間・IME の変換中は keymap.js が止める。Esc は「道具 → 画面 → 絵だけ → 全画面」の順に1つずつ抜ける
+// 文字を打っている間・IME の変換中は keymap.js が止める。Esc は「ツール → 画面 → 集中モード → 全画面」の順に1つずつ抜ける
 function bindKeys() {
   const tool = (t) => () => setTool(t);
   km.bind("manuscript.select", tool("select"));
@@ -486,9 +486,9 @@ function bindKeys() {
   }
 }
 
-function notHere(name) { toast(t("「{{name}}」はこの画面にまだありません（キーは決めごと 22.2 のまま空けています）", { name }), "need"); }
+function notHere(name) { toast(t("「{{name}}」はこの画面にまだありません（キーは空けています）", { name }), "need"); }
 
-// Esc：コマの絵を動かすのをやめる・ナイフとコマ枠の途中をやめる・選ぶのをやめる。することが無ければ false（絵だけ・全画面へ回す）
+// Esc：コマの絵を動かすのをやめる・ナイフとコマ枠の途中をやめる・選ぶのをやめる。することが無ければ false（集中モード・全画面へ回す）
 function cancel() {
   const active = S.view.c.getActiveObject();
   const midTool = S.tool === "knife" || S.tool === "frame";
@@ -500,7 +500,7 @@ function cancel() {
 }
 
 export function openWorkbench(panelId = S.sel && S.sel.kind === "panel" ? S.sel.id : null) {
-  if (!panelId) { toast(t("絵を頼むコマを選んでください（選ぶツールでコマを押す）"), "need"); return; }
+  if (!panelId) { toast(t("絵を生成するコマを選んでください（選ぶツールでコマを押す）"), "need"); return; }
   if (S.saver.pending()) { toast(t("保存が済んでから開きます")); S.saver.idle().then(() => openWorkbench(panelId), () => {}); return; }
   location.href = workbenchUrl(panelId);
 }

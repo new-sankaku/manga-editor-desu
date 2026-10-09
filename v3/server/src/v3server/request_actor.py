@@ -15,7 +15,7 @@ class Actor:
         if self.kind == "human":
             return self.id
         if self.on_behalf_of is None:
-            raise ValueError("AIの操作には頼んだ人が要る")
+            raise ValueError("AIの操作には頼んだ人が要る")  # i18n:dev
         return self.on_behalf_of
 
     def holds(self, holder_kind: str, holder_id: str) -> bool:

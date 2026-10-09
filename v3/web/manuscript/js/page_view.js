@@ -102,7 +102,7 @@ export class PageView {
   fit() {
     const e = this.extent();
     if (!e) return;
-    // 上の道具の帯（約 56px）の下に収める
+    // 上のツールの帯（約 56px）の下に収める
     const W = this.c.width, H = this.c.height, pad = 24, top = 60;
     const z = Math.max(MIN_Z, Math.min((W - pad * 2) / (e[2] - e[0]), (H - pad - top) / (e[3] - e[1])));
     this.vpt = [z, 0, 0, z, (W - (e[2] - e[0]) * z) / 2 - e[0] * z, top + (H - pad - top - (e[3] - e[1]) * z) / 2 - e[1] * z];
@@ -168,7 +168,7 @@ export class PageView {
       else if (e.shiftKey) this.panBy(-e.deltaY * unit, 0);
       else this.panBy(-e.deltaX * unit, -e.deltaY * unit);
     }, { passive: false });
-    // 手のひら：道具の手のひら・スペースを押している間・真ん中のボタン。fabric より先に受ける
+    // 手のひら：ツールの手のひら・スペースを押している間・真ん中のボタン。fabric より先に受ける
     host.addEventListener("pointerdown", (e) => {
       if (this.commitT) this.commit();
       if (this.tool === "hand" || this.space || e.button === 1) {
@@ -210,7 +210,7 @@ export class PageView {
 
   // ---------------------------------------------------------------- 物を作る
   // slots：[{ page, ox, oy, x, trimW, trimH, bleed }]。data：{ model, opts }
-  // 色の組を差し替えたあと：色を読み直して作り直す
+  // カラーテーマを差し替えたあと：色を読み直して作り直す
   retheme() {
     readTheme(this.pv);
     this.rebuild();
@@ -291,7 +291,7 @@ export class PageView {
 
     const prefStyle = (m.work.preferences || {}).frame_style || null;
     const panels = m.panels(page.id);
-    // コマの地の色（絵の下）とコマの絵・層
+    // コマの地の色（絵の下）とコマの絵・レイヤー
     for (const p of panels) {
       const poly = shift(p.frame.polygon_mm, ox, oy);
       const style = p.frame_style || prefStyle;
@@ -339,7 +339,7 @@ export class PageView {
       for (const x of list) { if (!x.t.joined_to_previous) flush(); run.push(x); }
       flush();
     }
-    // 人の手・判断待ちの印
+    // 手動編集・判断待ちの印
     this.marks(page, panels, texts, ox, oy);
   }
 
@@ -562,7 +562,7 @@ export class PageView {
     for (const it of this.model.items(page.id)) add(it, it.box_mm[2] + ox, it.box_mm[1] + oy, "tone");
   }
 
-  // ---------------------------------------------------------------- 道具
+  // ---------------------------------------------------------------- ツール
   setTool(tool, sub = {}) {
     this.tool = tool;
     Object.assign(this, sub);
@@ -705,7 +705,7 @@ export class PageView {
     if (!row) return;
     if (row.fixed) { this.hooks.onRefuse(t("動かさない印の付いた文字は直せません")); return; }
     this.c.discardActiveObject();
-    // 文字の道具で押したとき（mouse:down の中）に欄へフォーカスを移しても、そのあとのブラウザの既定の動き
+    // 文字のツールで押したとき（mouse:down の中）に欄へフォーカスを移しても、そのあとのブラウザの既定の動き
     // （押した所へフォーカスを移す）で欄から外れ、打つ前に終わっていた。押す出来事が終わってから打てる状態にする
     setTimeout(() => { const cur = this.model.find("text_items", id); if (cur) this.text.edit(cur); }, 0);
   }
@@ -794,7 +794,7 @@ export class PageView {
     setTimeout(() => { this.c.remove(it); this.c.requestRenderAll(); }, 1600);
   }
 
-  // 選んだ物の見た目が変わったので、描いた物の控え（fabric の cache）を捨てて描き直す
+  // 選んだ物の見た目が変わったので、描いた物のキャッシュ（fabric の cache）を捨てて描き直す
   touch() { for (const o of this.c.getObjects()) o.dirty = true; this.c.requestRenderAll(); }
 
   // ---------------------------------------------------------------- 外から選ぶ

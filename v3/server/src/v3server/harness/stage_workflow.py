@@ -102,13 +102,13 @@ class StageWorkflow:
     @control.validator
     def _check_control(self, c: StageControl) -> None:
         if c.action not in ("pause", "resume", "cancel"):
-            raise ValueError(f"知らない操作: {c.action}")
+            raise ValueError(f"知らない操作: {c.action}")  # i18n:stored
         if self.status in ("done", "cancelled") or self.cancel_by:
-            raise ValueError(f"終わった工程（{self.status}）は操作できない")
+            raise ValueError(f"終わった工程（{self.status}）は操作できない")  # i18n:stored
         if c.action == "pause" and self.paused_by:
-            raise ValueError("もう止めている")
+            raise ValueError("もう一時停止中")  # i18n:stored
         if c.action == "resume" and not self.paused_by and self.status != "blocked":
-            raise ValueError("止まっていない")
+            raise ValueError("止まっていない")  # i18n:stored
 
     @workflow.update
     async def approve(self, by: str) -> dict[str, Any]:
@@ -118,7 +118,7 @@ class StageWorkflow:
     @approve.validator
     def _check_approve(self, by: str) -> None:
         if self.status != "awaiting_review":
-            raise ValueError(f"工程の検査が終わって判断待ちになってから承認する（今は {self.status}）")
+            raise ValueError(f"工程の検査が終わって判断待ちになってから承認する（今は {self.status}）")  # i18n:stored
 
     @workflow.update
     async def rerun(self, r: Rerun) -> dict[str, Any]:
@@ -128,12 +128,12 @@ class StageWorkflow:
     @rerun.validator
     def _check_rerun(self, r: Rerun) -> None:
         if not r.unit_ids:
-            raise ValueError("作り直す作業を選ぶ")
+            raise ValueError("作り直す作業を選ぶ")  # i18n:stored
         if self.cancel_by or self.status in ("done", "cancelled"):
-            raise ValueError("終わった工程では作り直せない")
+            raise ValueError("終わった工程では作り直せない")  # i18n:stored
         busy = [u for u in r.unit_ids if u in self.running]
         if busy:
-            raise ValueError(f"動いている作業は作り直せない（先に取り消す）: {busy}")
+            raise ValueError(f"動いている作業は作り直せない（先に取り消す）: {busy}")  # i18n:stored
 
     @workflow.query
     def state(self) -> dict[str, Any]:

@@ -20,6 +20,7 @@ from typing import Literal
 import numpy as np
 from PIL import Image
 
+from v3server.messages import m
 from v3server.v3_error_types import Invalid
 
 MARKER_RE = re.compile(r"\[([0-9a-f]{32}(?:-[a-z]+)?)\]\s*$")
@@ -77,16 +78,17 @@ def read_psd(path: str | pathlib.Path, *, max_pixels: int, max_layers: int) -> l
     try:
         psd = PSDImage.open(path)
     except Exception as e:
-        raise Invalid(f"PSD として読めない: {e}") from e
+        raise Invalid(m("PSD として読めない: {reason}", reason=str(e))) from e
     if psd.width * psd.height > max_pixels:
-        raise Invalid(f"PSD の画素が多すぎる: {psd.width}×{psd.height}（上限 {max_pixels} 画素。V3_IMAGE_MAX_PIXELS）")
+        raise Invalid(m("PSD のピクセルが多すぎる: {width}×{height}（上限 {limit} ピクセル。V3_IMAGE_MAX_PIXELS）",
+                        width=psd.width, height=psd.height, limit=max_pixels))
     layers = list(psd.descendants())
     if len(layers) > max_layers:
-        raise Invalid(f"PSD の層が多すぎる: {len(layers)}（上限 {max_layers}。V3_PSD_MAX_LAYERS）")
+        raise Invalid(m("PSD のレイヤーが多すぎる: {count}（上限 {limit}。V3_PSD_MAX_LAYERS）", count=len(layers), limit=max_layers))
     for layer in layers:
         if layer.width * layer.height > max_pixels:
-            raise Invalid(f"PSD の層「{clean_name(layer.name)}」の画素が多すぎる: {layer.width}×{layer.height}"
-                          f"（上限 {max_pixels} 画素）")
+            raise Invalid(m("PSD のレイヤー「{name}」のピクセルが多すぎる: {width}×{height}（上限 {limit} ピクセル）",
+                            name=clean_name(layer.name), width=layer.width, height=layer.height, limit=max_pixels))
     out: list[ReadLayer] = []
 
     def walk(group, parent_marker):
@@ -146,16 +148,16 @@ def match_layers(read: list[ReadLayer], exported: dict[str, ExportedLayer]) -> l
             out.append(Match("unchanged" if same else "changed", layer.marker, layer, ex))
         else:
             unmarked.append(layer)
-    gone = {m: ex for m, ex in exported.items() if m not in seen}
+    gone = {marker: ex for marker, ex in exported.items() if marker not in seen}
     for layer in unmarked:
-        renamed = next((m for m, ex in gone.items()
+        renamed = next((marker for marker, ex in gone.items()
                         if same_pixels(layer.image, layer.left, layer.top, ex.image, ex.left, ex.top)), None)
         if renamed is not None:
             out.append(Match("renamed", renamed, layer, gone.pop(renamed)))
         elif layer.image.getchannel("A").getbbox() is not None:
             out.append(Match("new", None, layer))
-    for m, ex in gone.items():
-        out.append(Match("missing", m, None, ex))
+    for marker, ex in gone.items():
+        out.append(Match("missing", marker, None, ex))
     return out
 
 
@@ -185,18 +187,18 @@ def import_actions(matches: list[Match], px_to_mm) -> list[ImportAction]:
         return (x0, y0, x1, y1)
 
     out = []
-    for m in matches:
-        if m.kind == "changed":
-            ex = m.exported
-            img = crop_to(m.layer, ex.left, ex.top, ex.image.width, ex.image.height)
-            out.append(ImportAction("changed", m.marker, ex.table, img, box(ex.left, ex.top, img.width, img.height),
-                                    layer_name=m.layer.name))
-        elif m.kind == "new":
-            la = m.layer
+    for found in matches:
+        if found.kind == "changed":
+            ex = found.exported
+            img = crop_to(found.layer, ex.left, ex.top, ex.image.width, ex.image.height)
+            out.append(ImportAction("changed", found.marker, ex.table, img, box(ex.left, ex.top, img.width, img.height),
+                                    layer_name=found.layer.name))
+        elif found.kind == "new":
+            la = found.layer
             bb = la.image.getchannel("A").getbbox()
             img = la.image.crop(bb)
             out.append(ImportAction("new", None, None, img, box(la.left + bb[0], la.top + bb[1], img.width, img.height),
                                     parent_marker=la.parent_marker, layer_name=la.name))
-        elif m.kind == "missing":
-            out.append(ImportAction("missing", m.marker, m.exported.table))
+        elif found.kind == "missing":
+            out.append(ImportAction("missing", found.marker, found.exported.table))
     return out

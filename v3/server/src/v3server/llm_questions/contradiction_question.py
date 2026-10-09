@@ -31,20 +31,20 @@ class ScriptLine:
 def script_lines_text(lines: list[ScriptLine]) -> str:
     """台本の行を「番号（第n話）中身」で並べる。伏線の問いでも使う。"""
     if not lines:
-        raise ValueError("台本の行が空")
+        raise ValueError("台本の行が空")  # i18n:dev
     ids = [x.line_id for x in lines]
     if len(ids) != len(set(ids)):
-        raise ValueError("台本の行の番号が重なっている")
+        raise ValueError("台本の行の番号が重なっている")  # i18n:dev
     return "\n".join(f"{x.line_id}（第{x.episode}話）{x.text}" for x in lines)
 
 
 def build_contradiction_question(settings: str, lines: list[ScriptLine], views: list[str]) -> str:
     """views は CONTRADICTION_VIEWS の名前の並び。全部を1回で聞くか、観点ごとに分けて聞くかは呼ぶ側が決める。"""
     if not views:
-        raise ValueError("views が空")
+        raise ValueError("views が空")  # i18n:dev
     unknown = [v for v in views if v not in CONTRADICTION_VIEWS]
     if unknown:
-        raise ValueError(f"知らない観点: {unknown}")
+        raise ValueError(f"知らない観点: {unknown}")  # i18n:dev
     vs = "\n".join(f"・{v}：{CONTRADICTION_VIEWS[v]}" for v in views)
     return f"""次は漫画の台本と、その設定です。台本の中で、設定や前の行と食い違っている行を探してください。
 

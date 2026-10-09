@@ -31,6 +31,7 @@ from v3server.canonical_tables.text_and_layer_tables import (
 )
 from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m
 from v3server.operations.human_hand_guard import change_with_human_hand
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
 from v3server.v3_error_types import HumanHandProtected, Invalid
@@ -105,16 +106,16 @@ class ResolveHeldChange(OpBase):
 
     async def apply(self, ctx):
         if ctx.actor.kind != "human":
-            raise HumanHandProtected("判断待ちを決めるのは人だけ")
+            raise HumanHandProtected(m("判断待ちを決めるのは人だけ"))
         held = await ctx.session.get(HeldAiChange, self.id)
         if held.kind != "field_change":
             return await self._apply_choice(ctx, held)
         if self.decision == "choose":
-            raise Invalid("field_change は accept か reject で決める")
+            raise Invalid(m("field_change は accept か reject で決める"))
         target = await ctx.session.get(HELD_TARGETS[held.target_table], held.target_id)
         if self.decision == "reopen":
             if held.status not in ("accepted", "rejected"):
-                raise Invalid("決めていない判断待ちは戻せない")
+                raise Invalid(m("決めていない判断待ちは戻せない"))
             before_status = held.status
             if before_status == "accepted" and self.restore is not None:
                 restore = dict(self.restore)
@@ -123,7 +124,7 @@ class ResolveHeldChange(OpBase):
             held.status = "open"
             return {"type": self.type, "id": self.id, "decision": "accept" if before_status == "accepted" else "reject"}
         if held.status != "open":
-            raise Invalid(f"判断待ちは {held.status}。決められるのは open だけ")
+            raise Invalid(m("判断待ちは {status}。決められるのは open だけ", status=held.status))
         if self.decision == "reject":
             held.status = "rejected"
             return {"type": self.type, "id": self.id, "decision": "reopen"}
@@ -140,7 +141,7 @@ class ResolveHeldChange(OpBase):
 
         if self.decision == "reopen":
             if held.status not in ("accepted", "rejected") or self.restore is None:
-                raise Invalid("決めていない判断待ちは戻せない")
+                raise Invalid(m("決めていない判断待ちは戻せない"))
             undo = self.restore.get("undo")
             if undo is not None:
                 if undo["type"] == "restore_rows":
@@ -154,11 +155,11 @@ class ResolveHeldChange(OpBase):
             held.status, held.chosen = "open", None
             return again
         if held.status != "open":
-            raise Invalid(f"判断待ちは {held.status}。決められるのは open だけ")
+            raise Invalid(m("判断待ちは {status}。決められるのは open だけ", status=held.status))
         choice = {"accept": "accept", "reject": "reject"}.get(self.decision) if self.decision != "choose" else self.choice
         # 選べる手は判断待ちの行ごと（言語の版の PSD では絵として採る手が無い。psd_import_operations.py）
         if held.choices is None or choice not in held.choices:
-            raise Invalid(f"{held.kind} で選べる手は {held.choices}")
+            raise Invalid(m("{kind} で選べる手は {choices}", kind=held.kind, choices=str(held.choices)))
         params = self.params or {}
         payload = held.payload or {}
         undo: dict[str, Any] | None = None
@@ -176,13 +177,14 @@ class ResolveHeldChange(OpBase):
             elif choice in ("adopt_as_image", "add_as_layer"):
                 panel_id = params.get("panel_id") or payload.get("panel_id")
                 if panel_id is None:
-                    raise Invalid("どのコマに置くか（params.panel_id）が要る")
+                    raise Invalid(m("どのコマに置くか（params.panel_id）が要る"))
                 await _add_hand_layer(ctx, rc, panel_id, payload["image_id"], payload["box_mm"])
                 if held.kind == "psd_text_pixels":
                     rc.remove(await target())
             elif choice == "remove_item":
                 if payload.get("synthetic"):
-                    raise Invalid("この層（紙・グループなど）は書き出しで作った物で、抜く物が無い。keep で閉じる")
+                    raise Invalid(m(
+                        "このレイヤー（紙・グループなど）は書き出しで作った物で、削除する物が無い。keep で閉じる"))
                 rc.remove(await target())
             undo = rc.inverse([held.page_id] if held.page_id else [], f"判断待ち {held.id} の取り消し")
         held.status = "rejected" if choice in _NOTHING else "accepted"

@@ -13,6 +13,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Panel
+from v3server.messages import m, text_of
 from v3server.name_structure.item_styles import (
     Adjustment,
     Adjustments,
@@ -67,13 +68,13 @@ class TextItemValues(BaseModel):
     @model_validator(mode="after")
     def _consistent(self):
         if self.box_mm is not None and (self.box_mm[2] <= self.box_mm[0] or self.box_mm[3] <= self.box_mm[1]):
-            raise ValueError(f"文字の箱の範囲が正しくない: {self.box_mm}")
+            raise ValueError(m("文字の箱の範囲が正しくない: {box}", box=self.box_mm))
         if self.item_kind == "drawn_sfx" and (self.balloon_kind is not None or self.speaker is not None):
-            raise ValueError("描き文字には話者と吹き出しの種類が無い")
+            raise ValueError(m("描き文字には話者とフキダシの種類が無い"))
         if self.item_kind == "drawn_sfx" and self.tail_target_mm is not None:
-            raise ValueError("描き文字にはしっぽが無い")
+            raise ValueError(m("描き文字にはしっぽが無い"))
         if self.item_kind == "drawn_sfx" and self.balloon_shape is not None:
-            raise ValueError("描き文字にはフキダシの形が無い")
+            raise ValueError(m("描き文字にはフキダシの形が無い"))
         check_ruby(self.text, [r.model_dump() for r in self.ruby])
         check_spans(self.text, [sp.model_dump() for sp in self.spans])
         Adjustments(items=self.adjustments)
@@ -87,7 +88,7 @@ def _check_text_values(values: dict[str, Any]) -> dict[str, Any]:
     try:
         return TextItemValues.model_validate(values).model_dump(mode="json")
     except ValueError as e:
-        raise Invalid(f"文字の値が正しくない: {e}") from e
+        raise Invalid(m("文字の値が正しくない: {reason}", reason=text_of(e))) from e
 
 
 def _item_scope(page_id: str, panel_id: str, item_id: str) -> Scope:
@@ -175,14 +176,14 @@ class UpdateTextItem(OpBase):
         item = await ctx.session.get(TextItem, self.id)
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True, mode="json")
         if not changes and self.human_hand_fields is None:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         for k in ("ruby", "spans", "transform", "opacity", "adjustments"):
             if k in changes and changes[k] is None:
-                raise Invalid(f"{k} は空にできない（ルビ・仕上げを外すときは []、置き方を戻すときは {{}}）")
+                raise Invalid(m("{field} は空にできない（ルビ・仕上げを外すときは []、置き方を戻すときは {{}}）", field=k))
         if "panel_id" in changes:
             panel = await get_in_work(ctx.session, Panel, changes["panel_id"], ctx.work.id)
             if panel.page_id != item.page_id:
-                raise Invalid("文字を動かせるのは同じページのコマの間だけ")
+                raise Invalid(m("文字を動かせるのは同じページのコマの間だけ"))
         merged = {k: getattr(item, k) for k in _TEXT_FIELDS} | {k: v for k, v in changes.items() if k != "panel_id"}
         checked = _check_text_values(merged)
         changes = {k: checked.get(k, v) for k, v in changes.items()}
@@ -218,7 +219,7 @@ class AddPanelLayer(OpBase):
         placement = await validated_placement(ctx.session, ctx.work.id, self.placement, self.image_id)
         require_actor_may(ctx.actor, ctx.work, ROW_TASK["panel_layers"], "decide")
         if ctx.actor.kind == "ai" and self.role == "human_hand":
-            raise Invalid("人の手の層はAIが作れない")
+            raise Invalid(m("手描きレイヤーはAIが作れない"))
         adjustments = checked_adjustments(self.adjustments)
         marks = ["image_id", "opacity", "placement", "role", "stack_order", "visible"] if ctx.actor.kind == "human" else []
         if adjustments and ctx.actor.kind == "human":
@@ -258,20 +259,20 @@ class UpdatePanelLayer(OpBase):
         layer = await ctx.session.get(PanelLayer, self.id)
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         for k in ("role", "stack_order", "visible", "opacity", "adjustments"):
             if k in changes and changes[k] is None:
-                raise Invalid(f"{k} は空にできない")
+                raise Invalid(m("{field} は空にできない", field=k))
         if "adjustments" in changes:
             changes["adjustments"] = checked_adjustments(changes["adjustments"])
         if "image_id" in changes and layer.stroke_revision > 0:
-            raise Invalid("ペンの線を持つ層の絵は線から作る控え。絵を替えるときは set_stroke_cache を使う")
+            raise Invalid(m("ペンの線を持つレイヤーの絵は線から作る画像。絵を替えるときは set_stroke_cache を使う"))
         if changes.get("image_id") is not None:
             await get_in_work(ctx.session, ImageFile, changes["image_id"], ctx.work.id)
         if "placement" in changes:
             changes["placement"] = await validated_placement(ctx.session, ctx.work.id, changes["placement"],
                                                              changes.get("image_id", layer.image_id))
         if ctx.actor.kind == "ai" and (layer.role == "human_hand" or changes.get("role") == "human_hand"):
-            raise Invalid("人の手の層はAIが変えられない")
+            raise Invalid(m("手描きレイヤーはAIが変えられない"))
         before = change_with_human_hand(ctx, layer, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}

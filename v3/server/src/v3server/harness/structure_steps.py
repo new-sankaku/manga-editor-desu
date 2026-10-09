@@ -6,7 +6,7 @@
   見せ場と伏線のページがその話の中にあるか。外れたら落とす
 - 観点ごとの判定（LLM）：spec.structure.views（頼む人が渡す観点の言葉）ごとに判定させ、指摘として出す。
   判定の精度は測っていないので候補は落とさない（未検証）
-- 評価役は置かない。指摘の少ない案を初めの候補にする。人が採ると構成（EpisodeOutline）を採った人の操作として書く
+- 評価モデルは置かない。指摘の少ない案を初めの候補にする。人が採ると構成（EpisodeOutline）を採った人の操作として書く
 """
 
 import hashlib
@@ -62,7 +62,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             await q.require_route(session, "structure_views")
         plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == unit.work_id))).scalar_one_or_none()
         if plan is None or not (plan.synopsis or "").strip():
-            raise q.blocked("企画のあらすじが無い（S0 で書く）")
+            raise q.blocked("企画のあらすじが無い（S0 で書く）")  # i18n:stored
         ep = await session.get(Episode, unit.target_id)
         chars = await characters_by_name(session, unit.work_id)
         earlier = await earlier_outlines(session, unit.work_id, ep)
@@ -103,7 +103,8 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             judged = parse_structure_views_answer(text, spec.views)
         except BrokenAnswerError as e:
-            raise ApplicationError(f"観点の判定の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+            raise ApplicationError(  # i18n:stored
+                f"観点の判定の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
         return out + [c.finding(f"観点：{v.view}", v.ok, False, v.why, judge="llm") for v in judged]
 
     result = await c.check_candidates(unit, args, judge)
@@ -114,7 +115,8 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return await c.pick_fewest_flags(unit, args, "指摘の少ない案（構成の評価役は置かない。観点の判定は指摘として出す）")
+    return await c.pick_fewest_flags(
+        unit, args, "指摘の少ない案（構成の評価モデルは置かない。観点の判定は指摘として出す）")
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

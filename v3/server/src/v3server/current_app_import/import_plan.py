@@ -440,7 +440,7 @@ class _PageBuilder:
         box, center = self.ctx.box_mm(obj)
         panel_id = self.guid_to_panel.get(obj.get("guid")) or self.panel_at(center)
         if panel_id is None:
-            self.entry(i, kind, obj, "unmapped", "コマの外の絵は V3 で置く所が無い（層はコマに属する）")
+            self.entry(i, kind, obj, "unmapped", "コマの外の絵は V3 で置く所が無い（レイヤーはコマに属する）")
             return
         cx, cy = int(obj.get("cropX") or 0), int(obj.get("cropY") or 0)
         crop = [cx, cy, cx + round(float(obj["width"])), cy + round(float(obj["height"]))]
@@ -458,7 +458,7 @@ class _PageBuilder:
                         f" {i + 1}番目の物（{name or obj.get('type')}）。{self.origin_note}"))
         notes = []
         if kind != "image":
-            notes.append("トーン・効果線は今のアプリでは絵なので、絵の層として入れた（網点の値には戻せない）")
+            notes.append("トーン・効果線は今のアプリでは絵なので、絵のレイヤーとして入れた（網点の値には戻せない）")
         if obj.get("filters"):
             notes.append(f"絵の効果（filters: {[f.get('type') for f in obj['filters']]}）は移していない")
         if obj.get("globalCompositeOperation") not in (None, "source-over"):
@@ -492,7 +492,7 @@ class _PageBuilder:
         """path（グループのときはその中の path）を、コマの人の手の層のペンの線にする。1つの物は1つの報告の行。"""
         notes = ["筆は鉛筆（pencil）として入れた（今のアプリの path は筆の種類を持たない）",
                  "点の時刻は今のアプリに無いので 0 を入れた（筆圧も無いので null）",
-                 "控えの絵は画面が線から描く。画面で開いて描くまで、書き出しと入稿前の確かめは止まる"]
+                 "線の画像は画面が線から描く。画面で開いて描くまで、書き出しと入稿前の確かめは止まる"]
         strokes: list[tuple[list[Point], dict[str, Any]]] = []
         for path in paths:
             if path.get("stroke") is not None and not isinstance(path.get("stroke"), str):
@@ -532,7 +532,7 @@ class _PageBuilder:
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         panel_id = self.panel_at(((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2))
         if panel_id is None:
-            self.entry(i, "pen_stroke", obj, "unmapped", "コマの外の線は V3 で置く所が無い（層はコマに属する）")
+            self.entry(i, "pen_stroke", obj, "unmapped", "コマの外の線は V3 で置く所が無い（レイヤーはコマに属する）")
             return
         layer = next((la for la in self.plan.stroke_layers if la.panel_id == panel_id), None)
         if layer is None:
@@ -613,10 +613,10 @@ def build_import_plan(project: CurrentAppProject, spec: PageSpec, reading_direct
             builder.entry(None, "history", None, "not_needed", f"取り消しの記録 {page.history_count} 件は移さない（最後の姿だけ）")
         if page.fonts:
             builder.entry(None, "fonts", None, "unmapped",
-                          f"プロジェクトに入っていた書体 {len(page.fonts)} 個は受ける口が無い（V3 の書体は V3_FONT_DIR に置く）")
+                          f"プロジェクトに入っていた書体 {len(page.fonts)} 個は受ける API が無い（V3 の書体は V3_FONT_DIR に置く）")
         if page.reference_sheets:
             builder.entry(None, "reference_sheets", None, "unmapped",
-                          f"参照の絵 {len(page.reference_sheets)} 枚は受ける口が無い（設定資料に人が入れ直す）")
+                          f"参照の絵 {len(page.reference_sheets)} 枚は受ける API が無い（設定資料に人が入れ直す）")
         for name in page.other_files:
             builder.entry(None, "file", None, "unmapped", f"読む対象でないファイル {name}")
     if base_prompts:

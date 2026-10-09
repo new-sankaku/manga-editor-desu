@@ -9,10 +9,12 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from v3server.messages import m
+
 # 完成条件の名前
 COMPLETION = {
     "checks_pass": "検査を通った候補がある",
-    "evaluator_pick": "評価役が1枚を選んだ",
+    "evaluator_pick": "評価モデルが1枚を選んだ",
     "human_approve": "人が採用した",
 }
 
@@ -27,7 +29,7 @@ class UnitLimits(BaseModel):
     max_attempts: int = Field(ge=1, le=50)
     # 1回に作る候補の数（設計 8.1 の k）
     candidates_per_attempt: int = Field(ge=1, le=8)
-    # 費用の上限（呼び出しの記録の費用の合計。つなぎ先の単価の単位）
+    # 費用の上限（呼び出しの記録の費用の合計。接続先の単価の単位）
     budget_cost: float = Field(ge=0)
     # 時間の上限（段を動かした秒の合計。判断待ち・一時停止・送り先の順番待ちは数えない）
     budget_seconds: float = Field(gt=0)
@@ -43,11 +45,11 @@ class UnitLimits(BaseModel):
     # 直させる段の回数の上限（1回の生成の中で。0 なら直させず、検査で全部落ちたらすぐ全部を作り直す）。
     # 上限に達しても落ちたままなら、全部を作り直すことを出来事（fix_fallback）に書いてから作り直す
     max_fix_rounds: int = Field(ge=0, le=5)
-    # 評価役に同じ問いを何回聞くか。答えが割れたら「割れた」として数える
+    # 評価モデルに同じ問いを何回聞くか。答えが割れたら「割れた」として数える
     eval_repeats: int = Field(ge=1, le=5)
     # 評価が割れた回数がこれに達したら止める
     disagreement_stop: int = Field(ge=1)
-    # 判断待ちがこの秒を超えたら、知らせを出す（締切。決めごと 19章）。止めはしない
+    # 判断待ちがこの秒を超えたら、通知を出す（締切。決めごと 19章）。止めはしない
     review_notice_seconds: float = Field(gt=0)
     # 通信の失敗の送り直し（RetryPolicy。品質の作り直しとは別。決めごと 4.5）
     resend_limit: int = Field(ge=0, le=10)
@@ -65,21 +67,23 @@ class StageLimits(BaseModel):
 def check_completion(names: list[str]) -> None:
     unknown = [n for n in names if n not in COMPLETION]
     if unknown:
-        raise ValueError(f"知らない完成条件: {unknown}（{', '.join(COMPLETION)}）")
+        raise ValueError(m("知らない完成条件: {unknown}（{known}）", unknown=unknown, known=", ".join(COMPLETION)))
 
 
 def check_limit_change(limits: dict[str, Any], used: dict[str, float], new: dict[str, Any]) -> dict[str, Any]:
     """走っている作業の上限を変える。使った分より小さくはできない。変えた後の上限を返す（Update の検証から呼ぶ）。"""
     unknown = set(new) - set(UnitLimits.model_fields)
     if unknown:
-        raise ValueError(f"知らない上限: {sorted(unknown)}")
+        raise ValueError(f"知らない上限: {sorted(unknown)}")  # i18n:stored
     merged = UnitLimits.model_validate({**limits, **new}).model_dump()
     if merged["max_attempts"] < used["attempt"]:
-        raise ValueError(f"回数の上限 {merged['max_attempts']} が、もう使った {used['attempt']} 回より小さい")
+        raise ValueError(  # i18n:stored
+            f"回数の上限 {merged['max_attempts']} が、もう使った {used['attempt']} 回より小さい")
     if merged["budget_cost"] < used["cost"]:
-        raise ValueError(f"費用の上限 {merged['budget_cost']} が、もう使った {used['cost']} より小さい")
+        raise ValueError(f"費用の上限 {merged['budget_cost']} が、もう使った {used['cost']} より小さい")  # i18n:stored
     if merged["budget_seconds"] < used["seconds"]:
-        raise ValueError(f"時間の上限 {merged['budget_seconds']} 秒が、もう使った {used['seconds']:.0f} 秒より小さい")
+        raise ValueError(  # i18n:stored
+            f"時間の上限 {merged['budget_seconds']} 秒が、もう使った {used['seconds']:.0f} 秒より小さい")
     return merged
 
 
@@ -90,7 +94,7 @@ def stop_reason(limits: dict[str, Any], s: dict[str, Any]) -> str | None:
     if s["errors_in_row"] >= limits["error_stop"]:
         return f"エラーが{s['errors_in_row']}回続いた"
     if s["disagreements"] >= limits["disagreement_stop"]:
-        return f"評価役の答えが{s['disagreements']}回割れた"
+        return f"評価モデルの答えが{s['disagreements']}回割れた"
     if s["attempt"] >= limits["max_attempts"]:
         return f"上限回数（{limits['max_attempts']}回）に達した"
     if s["cost_used"] >= limits["budget_cost"]:

@@ -6,12 +6,12 @@
 - 人の操作（Update。検証つき）
   - control：pause（now は今の段を取り消して止める。boundary は段の切れ目で止める）・resume・cancel_step（今の段だけ
     取り消して次の回へ）・cancel_unit（作業を取り消す。今の回の候補を却下にしてから cancelled）
-  - review：approve（候補か人が直した絵を採る）・reject（理由つき。止まるだけで、人が再開すると作り直す。理由は次の回の
-    文脈の問いに入る。上限の redo_on_reject を入れたときだけ、すぐ作り直す。決めごと 5.3）・edit（人が直した絵
-    から続ける。人の手の範囲は今の仕組みで貼り戻す）・answer（作業役が人へ返した質問に答える。答えはそれまでの答えと
+  - review：approve（候補か手動で修正した絵を採る）・reject（理由つき。止まるだけで、人が再開すると作り直す。理由は次の回の
+    文脈の問いに入る。上限の redo_on_reject を入れたときだけ、すぐ作り直す。決めごと 5.3）・edit（手動で修正した絵
+    から続ける。手動編集の範囲は今の仕組みで貼り戻す）・answer（作業役が人へ返した質問に答える。答えはそれまでの答えと
     一緒に次の回の文脈の問いに入る。却下ではないが、今の回の候補は使わないので却下にする）
   - set_limits：上限を変える（使った分より小さくはできない）
-- 工程の進行役からの知らせ（Signal）：parent_control（工程の一時停止・取り消しを伝える）・upstream_changed（上流が
+- 工程の進行役からの通知（Signal）：parent_control（工程の一時停止・取り消しを伝える）・upstream_changed（上流が
   変わった。作り直しが要る変化なら、段の切れ目で止めて人に聞く。自動で作り直さない）
 - 取り消しは活動の取り消しで届け、活動が依頼を取り消して止まり終わるまで待つ（WAIT_CANCELLATION_COMPLETED）。
   半端な候補は discard_round で却下にする（候補の一覧に残さない）
@@ -121,19 +121,19 @@ class WorkUnitWorkflow:
     @control.validator
     def _check_control(self, c: Control) -> None:
         if c.action not in CONTROL_ACTIONS:
-            raise ValueError(f"知らない操作: {c.action}")
+            raise ValueError(f"知らない操作: {c.action}")  # i18n:stored
         if self.status in ("done", "cancelled", "failed"):
-            raise ValueError(f"終わった作業（{self.status}）は操作できない")
+            raise ValueError(f"終わった作業（{self.status}）は操作できない")  # i18n:stored
         if c.action == "pause" and c.mode not in ("now", "boundary"):
-            raise ValueError("pause は mode に now か boundary を渡す")
+            raise ValueError("pause は mode に now か boundary を渡す")  # i18n:stored
         if c.action == "pause" and self.status in ("paused", "cancelling"):
-            raise ValueError(f"今は {self.status}")
+            raise ValueError(f"今は {self.status}")  # i18n:stored
         if c.action == "resume" and self.status not in ("paused", "stopped", "blocked") and self.pause_mode is None:
-            raise ValueError(f"止まっていない（{self.status}）")
+            raise ValueError(f"止まっていない（{self.status}）")  # i18n:stored
         if c.action == "cancel_step" and (self.current is None or self.step in ("cut_out", "finalize")):
-            raise ValueError("取り消せる段が動いていない")
+            raise ValueError("取り消せるステップが動いていない")  # i18n:stored
         if c.action == "cancel_unit" and self.cancel_unit_by:
-            raise ValueError("もう取り消している")
+            raise ValueError("もう取り消している")  # i18n:stored
 
     @workflow.signal
     def parent_control(self, c: Control) -> None:
@@ -168,17 +168,17 @@ class WorkUnitWorkflow:
     @review.validator
     def _check_review(self, r: Review) -> None:
         if self.status != "awaiting_review" or self.decision is not None:
-            raise ValueError(f"判断待ちでない（{self.status}）")
+            raise ValueError(f"判断待ちでない（{self.status}）")  # i18n:stored
         if r.action not in REVIEW_ACTIONS:
-            raise ValueError(f"知らない判断: {r.action}")
+            raise ValueError(f"知らない判断: {r.action}")  # i18n:stored
         if r.action == "approve" and (r.candidate_id is None) == (r.image_id is None):
-            raise ValueError("採用は candidate_id か image_id のどちらか1つを渡す")
+            raise ValueError("採用は candidate_id か image_id のどちらか1つを渡す")  # i18n:stored
         if r.action == "reject" and not (r.reason or "").strip():
-            raise ValueError("却下には理由が要る（次の回の問いに入る）")
+            raise ValueError("却下には理由が要る（次の回の問いに入る）")  # i18n:stored
         if r.action == "answer" and not (r.reason or "").strip():
-            raise ValueError("答え（reason）が要る（次の回の問いに入る）")
+            raise ValueError("答え（reason）が要る（次の回の問いに入る）")  # i18n:stored
         if r.action == "edit" and not r.image_id:
-            raise ValueError("人が直した絵（image_id）を渡す")
+            raise ValueError("手動で修正した絵（image_id）を渡す")  # i18n:stored
 
     @workflow.update
     async def set_limits(self, c: LimitChange) -> dict[str, Any]:
@@ -190,7 +190,7 @@ class WorkUnitWorkflow:
     @set_limits.validator
     def _check_limits(self, c: LimitChange) -> None:
         if self.status in ("done", "cancelled", "failed"):
-            raise ValueError("終わった作業の上限は変えられない")
+            raise ValueError("終わった作業の上限は変えられない")  # i18n:stored
         check_limit_change(self.limits, self._used(), c.limits)
 
     @workflow.signal
@@ -245,7 +245,7 @@ class WorkUnitWorkflow:
         if self.cancel_unit_by:
             raise _UnitCancelled()
         if self.pause_mode:
-            await self._hold("paused", "人が止めた")
+            await self._hold("paused", "人が一時停止した")
         if self.upstream_stop:
             reasons = "、".join(sorted({e["reason"] for e in self.upstream if e["effect"] == "redraw"}))
             await self._hold("stopped", f"上流が変わった（{reasons}）。続けるか、取り消して作り直すかを人が決める",
@@ -425,9 +425,9 @@ class WorkUnitWorkflow:
                         answers = [*answers, d.reason]
                         await self._discard(attempt, "人が質問に答えた（次の回で答えを入れて作り直す）", d.by)
                         continue
-                    edit_image = d.image_id  # 人が直した絵から生成へ戻る（文脈はそのまま）
+                    edit_image = d.image_id  # 手動で修正した絵から生成へ戻る（文脈はそのまま）
                 except _StepCancelled as c:
-                    await self._discard(attempt, "段を取り消した", c.by)
+                    await self._discard(attempt, "ステップを取り消した", c.by)
                     await self._rec({"status": "running"}, "step_cancelled", {"by": c.by, "attempt": attempt})
                 except ActivityError as e:
                     cause = e.cause

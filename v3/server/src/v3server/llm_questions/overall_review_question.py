@@ -43,7 +43,7 @@ class _Summaries(BaseModel):
 def parse_page_summary_answer(answer: str, count: int) -> list[PageSummary]:
     got = read_answer(answer, _Summaries).pages
     if sorted(p.image for p in got) != list(range(1, count + 1)):
-        raise BrokenAnswerError(f"絵の番号が 1〜{count} にそろっていない", answer)
+        raise BrokenAnswerError(f"絵の番号が 1〜{count} にそろっていない", answer)  # i18n:stored
     return sorted(got, key=lambda p: p.image)
 
 
@@ -60,5 +60,5 @@ def parse_outline_compare_answer(answer: str, pages: set[int]) -> list[Gap]:
     got = read_answer(answer, _Gaps).gaps
     unknown = sorted({g.page for g in got} - pages)
     if unknown:
-        raise BrokenAnswerError(f"無いページの番号がある: {unknown}", answer)
+        raise BrokenAnswerError(f"無いページの番号がある: {unknown}", answer)  # i18n:stored
     return got

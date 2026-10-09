@@ -17,6 +17,7 @@ from typing import Literal
 
 from kiwisolver import Expression, Solver, UnsatisfiableConstraint, Variable, strength
 
+from v3server.messages import m
 from v3server.name_structure.name_draft_schema import NameDraft, NamePage, PanelFrame
 from v3server.name_structure.reading_direction import PageSpec, ReadingDirection
 from v3server.panel_layout.panel_geometry import Box, polygon_bbox
@@ -114,11 +115,11 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
     固定した枠は、崩れても出力では動かさない（人の枠を計算で書き換えない）。崩れたときは周りのコマが解いた位置になるので、
     重なりや隙間は検査（frame_shape_checks）でも出る。ページの全部のコマを固定したときは何も計算しない。"""
     if min_panel_mm <= 0:
-        raise LayoutInputError("コマの最小の大きさは0より大きくなければならない")
+        raise LayoutInputError(m("コマの最小の大きさは0より大きくなければならない"))
     page_ns = {p.n for p in page.panels}
     stray = sorted(set(pinned) - page_ns)
     if stray:
-        raise LayoutInputError(f"{page.page}ページ：固定する枠のコマ {stray} がこのページに無い")
+        raise LayoutInputError(m("{page}ページ：固定する枠のコマ {panels} がこのページに無い", page=page.page, panels=stray))
     if page_ns and page_ns <= set(pinned):
         return ConstrainedPageLayout(frames={n: pinned[n] for n in sorted(page_ns)}, broken=[])
     hs_ratio, ws_ratio = validate_tier_input(page, spec)
@@ -131,24 +132,24 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
         if isinstance(c, bool):
             # 両辺が定数のとき（1段に1コマで幅が基本枠の幅に決まる等）は、比べた結果がそのまま来る
             if not c:
-                raise LayoutConflictError(f"{page.page}ページ：必須の制約が両立しない（{what}）")
+                raise LayoutConflictError(m("{page}ページ：必須の制約が両立しない（{what}）", page=page.page, what=what))
             return
         try:
             s.addConstraint(c)
         except UnsatisfiableConstraint as e:
-            raise LayoutConflictError(f"{page.page}ページ：必須の制約が両立しない（{what}）") from e
+            raise LayoutConflictError(m("{page}ページ：必須の制約が両立しない（{what}）", page=page.page, what=what)) from e
 
     nrows = len(page.rows)
     t = [Variable(f"t{i}") for i in range(nrows)]
     b = [Variable(f"b{i}") for i in range(nrows)]
     h = [b[i] - t[i] for i in range(nrows)]
     hs = Variable("hs")
-    add(t[0] == 0, "基本枠の上の辺")
-    add(b[-1] == H, "基本枠の下の辺")
+    add(t[0] == 0, m("基本枠の上の辺"))
+    add(b[-1] == H, m("基本枠の下の辺"))
     for i in range(nrows):
-        add(h[i] >= min_panel_mm, f"{i + 1}段目の最小の高さ")
+        add(h[i] >= min_panel_mm, m("{row}段目の最小の高さ", row=i + 1))
         if i + 1 < nrows:
-            add(t[i + 1] == b[i] + gy, f"{i + 1}段目と{i + 2}段目の隙間")
+            add(t[i + 1] == b[i] + gy, m("{row}段目と{next_row}段目の隙間", row=i + 1, next_row=i + 2))
 
     pinned_rows = {i for i, row in enumerate(page.rows) if any(n in pinned for n in row)}
     cells: list[_Cell] = []
@@ -169,15 +170,15 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
                          right_top=W if last else xl[v], right_k=0.0 if last else ks[v])
             w_top = cell.right_top - cell.left_top
             w_bot = w_top + (cell.right_k - cell.left_k) * h[i]
-            add(w_top >= min_panel_mm, f"コマ{n}の上端の最小の幅")
-            add(w_bot >= min_panel_mm, f"コマ{n}の下端の最小の幅")
+            add(w_top >= min_panel_mm, m("コマ{panel}の上端の最小の幅", panel=n))
+            add(w_bot >= min_panel_mm, m("コマ{panel}の下端の最小の幅", panel=n))
             if n not in pinned:
                 # 斜めのコマの幅は高さの真ん中で測る（面積÷高さ。線形のまま書ける）
                 mean_w = w_top + (cell.right_k - cell.left_k) * h[i] / 2
-                add((mean_w == ws * cell.ratio) | strength.medium, f"コマ{n}の幅の比")
+                add((mean_w == ws * cell.ratio) | strength.medium, m("コマ{panel}の幅の比", panel=n))
             cells.append(cell)
         if i not in pinned_rows:
-            add((h[i] == hs * hs_ratio[i]) | strength.medium, f"{i + 1}段目の高さの比")
+            add((h[i] == hs * hs_ratio[i]) | strength.medium, m("{row}段目の高さの比", row=i + 1))
 
     # 人が固定した枠（強）。外接する四角の4辺を合わせる。斜めの辺の外側の x は傾きの符号で決まるので線形のまま書ける
     for c in cells:
@@ -187,7 +188,7 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
         left_out = c.left_top + min(0.0, c.left_k) * h[c.row]
         right_out = c.right_top + max(0.0, c.right_k) * h[c.row]
         for expr, val in ((t[c.row], y0), (b[c.row], y1), (left_out, x0), (right_out, x1)):
-            add((expr == val) | strength.strong, f"コマ{c.n}の固定した枠")
+            add((expr == val) | strength.strong, m("コマ{panel}の固定した枠", panel=c.n))
     s.updateVariables()
 
     frames: dict[int, PanelFrame] = {}
@@ -207,12 +208,16 @@ def constrained_page_frames(page: NamePage, spec: PageSpec, direction: ReadingDi
             continue
         if c.row not in pinned_rows and abs(hv - hs_v * hs_ratio[c.row]) > _SOLVE_TOL:
             broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="高さの比",
-                                           wanted=f"{hs_ratio[c.row]}", got=f"高さ {round(hv, 3)}（比の1あたり {round(hs_v, 3)}）"))
+                                           wanted=f"{hs_ratio[c.row]}",
+                                           got=m("高さ {height}（比の1あたり {unit}）", height=round(hv, 3),
+                                                 unit=round(hs_v, 3))))
         mean_w = (rt - lt) + (c.right_k - c.left_k) * hv / 2
         ws_v = ws_vars[c.row].value()
         if abs(mean_w - ws_v * c.ratio) > _SOLVE_TOL:
             broken.append(BrokenConstraint(page=page.page, panel=c.n, kind="幅の比",
-                                           wanted=f"{c.ratio}", got=f"幅 {round(mean_w, 3)}（比の1あたり {round(ws_v, 3)}）"))
+                                           wanted=f"{c.ratio}",
+                                           got=m("幅 {width}（比の1あたり {unit}）", width=round(mean_w, 3),
+                                                 unit=round(ws_v, 3))))
         shape = next(p.shape for p in page.panels if p.n == c.n)
         moved = False
         if shape == "断ち切り":
@@ -229,7 +234,7 @@ def constrained_layout_draft(draft: NameDraft, pinned: Mapping[int, PanelFrame],
     known = {p.n for p in draft.all_panels()}
     stray = sorted(set(pinned) - known)
     if stray:
-        raise LayoutInputError(f"固定する枠のコマ {stray} がネームに無い")
+        raise LayoutInputError(m("固定する枠のコマ {panels} がネームに無い", panels=stray))
     pages = []
     broken: list[BrokenConstraint] = []
     for page, side in zip(draft.pages, page_sides(draft), strict=False):

@@ -45,7 +45,7 @@ def test_工程の承認待ちを知らせる():
 
 
 def test_知らない種類と範囲の外の割合は断る():
-    with pytest.raises(ValueError, match="知らない知らせの種類"):
+    with pytest.raises(ValueError, match="知らない通知の種類"):
         NotificationSettings(kinds=["mail"])
     with pytest.raises(ValueError):
         NotificationSettings(kinds=[], budget_near_ratio=1.5)

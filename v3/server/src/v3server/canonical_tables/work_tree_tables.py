@@ -78,9 +78,9 @@ class Page(Base):
     number: Mapped[int] = mapped_column(Integer)
     # 段の割り（見開きか・段ごとのコマの番号・段の高さの比・コマの幅の比）。人が引いても、AIが決めても同じ形
     layout: Mapped[dict[str, Any]] = mapped_column(default=dict)
-    # 人の手の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
+    # 手動編集の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
-    # 抜いたページは消さずに残す（V3細部の決めごと 15章）
+    # 削除したページは消さずに残す（V3細部の決めごと 15章）
     removed: Mapped[bool] = mapped_column(Boolean, default=False)
     # ページの種類（name_structure/print_settings.py の PageKind：cover・color_page・body・blank）。未定なら無い
     page_kind: Mapped[str | None] = mapped_column(String(16))
@@ -137,7 +137,7 @@ class Panel(Base):
     adjustments: Mapped[list[Any]] = mapped_column(default=list)
     # 人が掛けた「動かさない」。人もAIも変えられない。外せるのは人だけ
     fixed: Mapped[bool] = mapped_column(Boolean, default=False)
-    # 人の手の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
+    # 手動編集の印が付いた項目の名前（V3細部の決めごと 10.2）。AIはこの項目を変えられない
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     # 人の確定印（V3ハーネス設計 9.2）。付いたコマはAIが何も変えられない
     human_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)

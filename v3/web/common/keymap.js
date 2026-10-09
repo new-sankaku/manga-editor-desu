@@ -2,10 +2,10 @@
 // - 何のキーが何をするかは key_catalog.js。画面は bind(id, 処理) で処理を結ぶだけ
 // - キーの書き方と1回の押し方の照合は tinykeys 3.0.0（vendor/tinykeys-3.0.0）の parseKeybinding・matchKeyBindingPress。
 //   "$mod" は Windows・Linux で Ctrl、Mac で Cmd（tinykeys が navigator.platform で決める）
-// - 効く順：今の道具（"画面:道具"）→ 画面 → どの画面でも。処理が false を返したら次の候補へ回す（Esc の順など）
+// - 効く順：今のツール（"画面:ツール"）→ 画面 → どの画面でも。処理が false を返したら次の候補へ回す（Esc の順など）
 // - 文字を打っている間（IME の変換中：isComposing か keyCode 229）は何も効かない。入力の欄の中では where が
 //   "input"・"any" の物だけが効く
-// - 利用者が変えたキーは、サーバーの利用者ごとの設定（GET・PUT /me/settings の other.keymap）に残す
+// - 利用者が変えたキーは、サーバーの利用者ごとの設定（GET・PUT /me/settings の other.keymap）に保存する
 import { parseKeybinding, matchKeyBindingPress } from "../vendor/tinykeys-3.0.0/tinykeys.modern.js";
 import { t } from "./i18n.js";
 import { KEYS, SCOPES } from "./key_catalog.js";
@@ -64,7 +64,7 @@ export function bind(id, fn, opts = {}) {
   handlers.set(id, fn);
   applyHints();
 }
-// 道具を選んだら呼ぶ（"画面:道具" の項目が効くようになる）。道具の項目が無い画面は呼ばなくてよい
+// ツールを選んだら呼ぶ（"画面:ツール" の項目が効くようになる）。ツールの項目が無い画面は呼ばなくてよい
 export function setTool(t) { tool = t || null; }
 // キーを変える画面がキーを拾う間、ここで受けない
 export function suspend(on) { suspended += on ? 1 : -1; if (on) releaseAll(); }
@@ -119,7 +119,7 @@ export function keyFromEvent(e, allowModifierOnly = false) {
   if (e.altKey) mods.push("Alt");
   if (e.shiftKey) mods.push("Shift");
   let key = e.key === " " ? "Space" : e.key.length === 1 ? e.key.toLowerCase() : e.key;
-  // Mac の Option は文字を変える（⌥+L が ¬ になる）。位置（e.code）で残す
+  // Mac の Option は文字を変える（⌥+L が ¬ になる）。位置（e.code）で保存する
   if (IS_MAC && e.altKey && /^(Key|Digit)/.test(e.code)) key = e.code;
   return [...mods, key].join("+");
 }
@@ -180,7 +180,7 @@ async function save(next) {
   changed();
 }
 function same(a, b) { return a.length === b.length && a.every((x, i) => normalize(x) === normalize(b[i])); }
-// 1つの操作のキーを決めて残す。初めの割り当てと同じなら、変えた印を消す
+// 1つの操作のキーを決めて保存する。初めの割り当てと同じなら、変えた印を消す
 export function setKeys(id, keys) {
   const next = { ...overrides };
   if (same(keys, entry(id).keys)) delete next[id]; else next[id] = keys;

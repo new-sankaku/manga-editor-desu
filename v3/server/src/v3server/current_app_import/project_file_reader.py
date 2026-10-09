@@ -30,6 +30,8 @@ from typing import Any
 
 import lz4.frame
 
+from v3server.messages import m
+
 
 class ProjectFileError(ValueError):
     pass
@@ -72,7 +74,8 @@ class UnpackBudget:
 
     def refuse(self, want: int) -> None:
         if want > self.left:
-            raise ProjectFileError(f"ほどいた中身が上限（{self.max_bytes} バイト。V3_CURRENT_APP_IMPORT_MAX_BYTES）を超える")
+            raise ProjectFileError(m("ほどいた中身が上限（{limit} バイト。V3_CURRENT_APP_IMPORT_MAX_BYTES）を超える",
+                                     limit=self.max_bytes))
 
     def decompress(self, data: bytes) -> bytes:
         d = lz4.frame.LZ4FrameDecompressor()
@@ -80,7 +83,7 @@ class UnpackBudget:
         out = d.decompress(data, max_length=self.left + 1)
         self.refuse(len(out))
         if not d.eof:
-            raise ProjectFileError("LZ4 の中身が途中で切れている")
+            raise ProjectFileError(m("LZ4 の中身が途中で切れている"))
         self.left -= len(out)
         return out
 
@@ -88,25 +91,25 @@ class UnpackBudget:
 def unpack_container(data: bytes, budget: UnpackBudget) -> list[tuple[str, bytes]]:
     """入れ物を (名前, 中身) の並びにほどく。"""
     if len(data) < 4:
-        raise ProjectFileError("ファイルが短すぎる（今のアプリのプロジェクトではない）")
+        raise ProjectFileError(m("ファイルが短すぎる（今のアプリのプロジェクトではない）"))
     (header_size,) = struct.unpack("<I", data[:4])
     if header_size <= 0 or header_size > len(data) - 4:
-        raise ProjectFileError("見出しの長さが正しくない（今のアプリのプロジェクトではない）")
+        raise ProjectFileError(m("見出しの長さが正しくない（今のアプリのプロジェクトではない）"))
     try:
         header = json.loads(data[4:4 + header_size].decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as e:
-        raise ProjectFileError(f"見出しを読めない: {e}") from e
+        raise ProjectFileError(m("見出しを読めない: {reason}", reason=str(e))) from e
     if not isinstance(header, list) or not all(isinstance(h, dict) and "name" in h and "size" in h for h in header):
-        raise ProjectFileError("見出しの形が正しくない")
+        raise ProjectFileError(m("見出しの形が正しくない"))
     if not all(isinstance(h["size"], int) and h["size"] >= 0 for h in header):
-        raise ProjectFileError("見出しの大きさが正しくない")
+        raise ProjectFileError(m("見出しの大きさが正しくない"))
     budget.refuse(sum(h["size"] for h in header))
     try:
         body = budget.decompress(data[4 + header_size:])
     except RuntimeError as e:
-        raise ProjectFileError(f"LZ4 の中身をほどけない: {e}") from e
+        raise ProjectFileError(m("LZ4 の中身をほどけない: {reason}", reason=str(e))) from e
     if sum(h["size"] for h in header) != len(body):
-        raise ProjectFileError("見出しの大きさの合計と、ほどいた中身の大きさが合わない")
+        raise ProjectFileError(m("見出しの大きさの合計と、ほどいた中身の大きさが合わない"))
     out, offset = [], 0
     for h in header:
         out.append((str(h["name"]), body[offset:offset + h["size"]]))
@@ -117,7 +120,7 @@ def unpack_container(data: bytes, budget: UnpackBudget) -> list[tuple[str, bytes
 def _json_file(files: dict[str, bytes], name: str, required: bool) -> Any:
     if name not in files:
         if required:
-            raise ProjectFileError(f"ページの中に {name} が無い")
+            raise ProjectFileError(m("ページの中に {name} が無い", name=name))
         return None
     return json.loads(files[name].decode("utf-8"))
 
@@ -126,17 +129,17 @@ def read_page(index: int, entries: list[tuple[str, bytes]]) -> CurrentAppPage:
     files = dict(entries)
     states = sorted(n for n in files if n.startswith("state_") and n.endswith(".json"))
     if not states:
-        raise ProjectFileError(f"{index + 1}ページ目に state_*.json が無い")
+        raise ProjectFileError(m("{page}ページ目に state_*.json が無い", page=index + 1))
     state = json.loads(files[states[-1]].decode("utf-8"))
     # 保存は JSON の文字をもう1回 JSON にしている（js/layer/image-history-management.js の captureState）
     if isinstance(state, str):
         state = json.loads(state)
     if not isinstance(state, dict) or not isinstance(state.get("objects"), list):
-        raise ProjectFileError(f"{index + 1}ページ目の {states[-1]} が fabric.js のキャンバスの形でない")
+        raise ProjectFileError(m("{page}ページ目の {file} が fabric.js のキャンバスの形でない", page=index + 1, file=states[-1]))
     info = _json_file(files, "canvas_info.json", required=True)
     for k in ("width", "height", "pageWidthMm", "pageHeightMm"):
         if not isinstance(info.get(k), (int, float)) or info[k] <= 0:
-            raise ProjectFileError(f"{index + 1}ページ目の canvas_info.json に {k} が無い")
+            raise ProjectFileError(m("{page}ページ目の canvas_info.json に {key} が無い", page=index + 1, key=k))
     stored = {n[:-4]: files[n].decode("utf-8") for n in files if n.endswith(".img")}
     known = set(states) | {n for n in files if n.endswith(".img")} | {
         "canvas_info.json", "text2img_basePrompt.json", "fonts.json", "reference_sheets.json", "preview-image.jpeg"}
@@ -159,15 +162,15 @@ def read_project_file(data: bytes, max_unpacked_bytes: int) -> CurrentAppProject
         # 並びは保存した時のページの順（js/project-management.js が btmProjectsMap の順に包む）
         return CurrentAppProject(pages=[read_page(i, unpack_container(part, budget)) for i, (_, part) in enumerate(outer)],
                                  single_page=False)
-    raise ProjectFileError(f"今のアプリのプロジェクトの中身でない: {names[:5]}")
+    raise ProjectFileError(m("今のアプリのプロジェクトの中身でない: {names}", names=names[:5]))
 
 
 def data_url_bytes(value: str) -> bytes:
     """.img に入っている data URL（data:image/png;base64,...）の中身。base64 でない data URL は読まない（止める）。"""
     head, sep, body = value.partition(",")
     if not sep or not head.startswith("data:") or not head.endswith(";base64"):
-        raise ProjectFileError(f"絵が base64 の data URL でない: {value[:40]}")
+        raise ProjectFileError(f"絵が base64 の data URL でない: {value[:40]}")  # i18n:stored
     try:
         return base64.b64decode(body, validate=True)
     except binascii.Error as e:
-        raise ProjectFileError(f"絵の base64 を読めない: {e}") from e
+        raise ProjectFileError(f"絵の base64 を読めない: {e}") from e  # i18n:stored

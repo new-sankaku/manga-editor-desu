@@ -1,13 +1,13 @@
-"""ペン・消しゴムの口のうち、絵を受け取る・作るもの（V3細部の決めごと 10.1）。線そのものの操作（足す・選んで変える・消す・
+"""ペン・消しゴムの API のうち、絵を受け取る・作るもの（V3細部の決めごと 10.1）。線そのものの操作（足す・選んで変える・消す・
 線の消しゴム）は POST /works/{id}/ops に add_pen_strokes などを送る（operations/pen_stroke_operations.py）。
 
 - POST /works/{id}/layers/{layer_id}/stroke-cache：画面が線から描いた控えの絵を上げる（SetStrokeCache）。
   控えは画面が描く（今のアプリの筆を画面が持っているので、見えている絵と控えが同じになる）。サーバーは筆を描かない
-- POST /works/{id}/panels/{panel_id}/erase-pixels：線を持たない絵を画素の消しゴムで消す（ErasePixels）。
+- POST /works/{id}/panels/{panel_id}/erase-pixels：線を持たない絵をピクセルの消しゴムで消す（ErasePixels）。
   消した後の絵と消した所のマスクはここで作り、入口を通して置く
-- GET /works/{id}/panels/{panel_id}/layers：そのコマの層だけ（作品全体を読み直さずに、変わったコマだけを取る）
-- GET /works/{id}/layers/{layer_id}/pen-strokes：その層の線を重ねる順に、区切って返す（after・limit）。
-  作品全体の口（GET /works/{id}）は線を返さない（1冊分の線の点は大きすぎる）
+- GET /works/{id}/panels/{panel_id}/layers：そのコマのレイヤーだけ（作品全体を読み直さずに、変わったコマだけを取る）
+- GET /works/{id}/layers/{layer_id}/pen-strokes：そのレイヤーの線を重ねる順に、区切って返す（after・limit）。
+  作品全体の API（GET /works/{id}）は線を返さない（1冊分の線の点は大きすぎる）
 """
 
 import json
@@ -25,6 +25,7 @@ from v3server.hand_tools.pen_stroke_raster import PixelEraserStroke, erase_pixel
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, require, row
 from v3server.image_file_storage import read_image, store_image
 from v3server.image_intake import take_in_image
+from v3server.messages import m, text_of
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.operations.pen_stroke_operations import ErasePixels, SetStrokeCache, StoredResult
@@ -39,7 +40,7 @@ def _json(text: str, what: str):
     try:
         return json.loads(text)
     except ValueError as e:
-        raise Invalid(f"{what} が JSON ではない: {e}") from e
+        raise Invalid(m("{what} が JSON ではない: {reason}", what=what, reason=text_of(e))) from e
 
 
 @router.post("/works/{work_id}/layers/{layer_id}/stroke-cache")
@@ -64,14 +65,14 @@ async def erase_image_pixels(work_id: str, panel_id: str, strokes: Annotated[str
     try:
         parsed = _STROKES.validate_python(_json(strokes, "strokes"))
     except ValidationError as e:
-        raise Invalid(f"strokes が正しくない: {e}") from e
+        raise Invalid(m("strokes が正しくない: {reason}", reason=text_of(e))) from e
     if not parsed:
-        raise Invalid("消しゴムの線が無い")
+        raise Invalid(m("消しゴムの線が無い"))
     panel = await get_in_work(session, Panel, panel_id, work_id)
     await require(authz, actor, "can_draw", page_obj(panel.page_id))
     target = await get_in_work(session, PanelLayer, layer_id, work_id) if layer_id else panel
     if target.image_id is None:
-        raise Invalid("消す絵が無い")
+        raise Invalid(m("消す絵が無い"))
     base = await get_in_work(session, ImageFile, target.image_id, work_id)
     png, mask = erase_pixels(read_image(base.sha256), parsed)
     stored = await take_in_image(session, work_id, png, "human_upload")
@@ -102,8 +103,8 @@ async def panel_layers(work_id: str, panel_id: str, session: SessionDep, authz: 
 async def layer_pen_strokes(work_id: str, layer_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
                             after: int = -1, limit: Annotated[int, Query(ge=1, le=2000)] = 500,
                             points: bool = True):
-    """抜いていない線を stack_order の順に返す。next_after が null でなければ、after=next_after で続きを取る。
-    points=false なら点を省く（画面が持っている線と同じかを確かめるとき）。stroke_revision は読んだ時点の層の線の版。"""
+    """削除していない線を stack_order の順に返す。next_after が null でなければ、after=next_after で続きを取る。
+    points=false なら点を省く（画面が持っている線と同じかを確かめるとき）。stroke_revision は読んだ時点のレイヤーの線のバージョン。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     layer = await get_in_work(session, PanelLayer, layer_id, work_id)
     q = (select(PenStroke).where(PenStroke.layer_id == layer.id, PenStroke.removed.is_(False),

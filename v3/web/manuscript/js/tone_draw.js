@@ -1,5 +1,5 @@
 // トーンを画面に描く（目安）。正本は値（ToneSpec）で、書き出しの網点はサーバー（print_export/page_render.py）が描く。
-// 画面で網点の1周期が 3 画素より細かくなる倍率では、点を描くと干渉の縞が出るので、同じ濃さの灰色で見せる。
+// 画面で網点の1周期が 3 ピクセルより細かくなる倍率では、点を描くと干渉の縞が出るので、同じ濃さの灰色で見せる。
 import { PRINT_INK } from "./print_colors.js";
 import { t } from "../../common/i18n.js";
 const MIN_PERIOD_PX = 3;
@@ -25,7 +25,7 @@ function rgba(hex, a) {
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 
-// ctx：mm の座標（box の左上が原点でなく、呼んだ側の座標）。box：[x0,y0,x1,y1]。zoom：1mm が何画素か
+// ctx：mm の座標（box の左上が原点でなく、呼んだ側の座標）。box：[x0,y0,x1,y1]。zoom：1mm が何ピクセルか
 export function drawTone(ctx, spec, box, zoom) {
   const [x0, y0, x1, y1] = box;
   const w = x1 - x0, h = y1 - y0;

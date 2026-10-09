@@ -10,7 +10,7 @@ import { t } from "../common/i18n.js";
 const BASIC = "基本";  // i18n:data（サーバーの x-group と突き合わせる名前）
 
 function plain(prop) {
-  // steps のように「空ならつなぎ先の設定」を許す欄は anyOf [型, null] で来る
+  // steps のように「空なら接続先の設定」を許す欄は anyOf [型, null] で来る
   if (prop.anyOf) {
     const t = prop.anyOf.find((x) => x.type !== "null");
     return { ...prop, ...t, nullable: true };

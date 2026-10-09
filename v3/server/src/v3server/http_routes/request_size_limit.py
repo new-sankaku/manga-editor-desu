@@ -1,21 +1,24 @@
 """要求の本体の大きさの上限（V3_REQUEST_MAX_BYTES。点検5 3-1）。
 
-全部の口にかける（口ごとに書かない）。Content-Length が上限を超えていれば読まずに 413 を返す。
+全部の API にかける（API ごとに書かない）。Content-Length が上限を超えていれば読まずに 413 を返す。
 Content-Length が無い・偽っている要求も、読んだ量を数えて上限を超えたところで止める。
 アップロードは Starlette が一時ファイルに書くので（UploadFile）、上限までは円盤に書かれる。
 """
 
 import json
 
+from starlette.datastructures import Headers
 from starlette.exceptions import HTTPException
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
+from v3server.messages import m, render, request_lang
 from v3server.server_settings import get_settings
 
 
-def _too_large_body(limit: int) -> bytes:
-    return json.dumps({"code": "too_large", "detail": f"要求の本体が上限（{limit} バイト。V3_REQUEST_MAX_BYTES）を超えた"},
-                      ensure_ascii=False).encode()
+def _too_large_body(limit: int, lang: str) -> bytes:
+    # ここは自分で返事を作るので、呼び出しの言語（X-V3-Lang）もここで決める（http_app_factory.py の失敗の返事を通らない）
+    detail = render(m("要求の本体が上限（{limit} バイト。V3_REQUEST_MAX_BYTES）を超えた", limit=limit), lang)
+    return json.dumps({"code": "too_large", "detail": detail}, ensure_ascii=False).encode()
 
 
 class RequestSizeLimit:
@@ -27,9 +30,10 @@ class RequestSizeLimit:
             await self.app(scope, receive, send)
             return
         limit = get_settings().request_max_bytes
+        lang = request_lang(Headers(scope=scope))
         declared = dict(scope["headers"]).get(b"content-length")
         if declared is not None and declared.isdigit() and int(declared) > limit:
-            body = _too_large_body(limit)
+            body = _too_large_body(limit, lang)
             await send({"type": "http.response.start", "status": 413,
                         "headers": [(b"content-type", b"application/json"), (b"content-length", str(len(body)).encode())]})
             await send({"type": "http.response.body", "body": body})
@@ -43,7 +47,7 @@ class RequestSizeLimit:
                 received += len(message.get("body", b""))
                 if received > limit:
                     # FastAPI は本体を読む途中の HTTPException をそのまま返す（ほかの例外は 400 にする）
-                    raise HTTPException(413, _too_large_body(limit).decode())
+                    raise HTTPException(413, _too_large_body(limit, lang).decode())
             return message
 
         await self.app(scope, counted, send)

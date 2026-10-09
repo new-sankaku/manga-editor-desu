@@ -3,12 +3,12 @@
 // キーを変える画面（key_settings.js）は、ここの全部を出す。重なりの確かめも、ここの全部で行う。
 //
 // 1つの項目：
-//   id：操作の名前（画面の名前.操作）。利用者が変えたキーはこの id で残す
-//   scope：効く所。"global"（どの画面でも）・画面の id（nav.js の SCREENS）・"画面の id:道具"（その道具を選んでいる間）
+//   id：操作の名前（画面の名前.操作）。利用者が変えたキーはこの id で保存する
+//   scope：効く所。"global"（どの画面でも）・画面の id（nav.js の SCREENS）・"画面の id:ツール"（そのツールを選んでいる間）
 //   label：すること（キーの一覧と設定に出す）
 //   keys：初めのキー。tinykeys の書き方（"$mod+z" の $mod は Windows・Linux で Ctrl、Mac で Cmd。"g 1" は G のあと 1）
 //   where："input" は文字を打つ欄の中だけで効く。"any" は欄の中でも外でも効く。書かないときは欄の外だけ
-//   chain：true は、同じキーの物を「道具 → 画面 → どの画面でも」の順に試し、処理が false を返したら次へ回す
+//   chain：true は、同じキーの物を「ツール → 画面 → どの画面でも」の順に試し、処理が false を返したら次へ回す
 //          （Esc・Tab など）。chain どうしは重なりとして出さない
 //   hold：true は、押している間だけ効く（離すと戻る）。Space で手のひら、Alt でスポイトなど
 //   current：今のアプリ（js/shortcut.js）での割り当て。「今のアプリのキーを読み込む」で使う。違わない物は書かない
@@ -18,21 +18,21 @@ import { t } from "./i18n.js";
 export const SCOPES = {
   global: t("どの画面でも"),
   works: t("作品と話"), plan: t("企画"), structure: t("構成"), materials: t("設定資料"), harness: t("工程"), manuscript: t("原稿"),
-  workbench: t("画像生成"), "workbench:mask": t("画像生成・囲んで頼む"),
+  workbench: t("画像生成"), "workbench:mask": t("画像生成・囲んで生成"),
   translation: t("翻訳"), review: t("確認"), export: t("書き出し"), import: t("取り込み"), services: t("生成サービス"),
 };
 
 export const KEYS = [
   // ---------------------------------------------------------------- どの画面でも
   { id: "view.help", scope: "global", label: t("キーの一覧"), keys: ["Shift+?"], current: ["F1"] },
-  { id: "view.focus", scope: "global", label: t("絵だけにする（パネルを隠す）・戻す"), keys: ["Shift+F"] },
+  { id: "view.focus", scope: "global", label: t("集中モードにする（パネルを隠す）・戻す"), keys: ["Shift+F"] },
   { id: "view.fullscreen", scope: "global", label: t("全画面にする・戻す"), keys: ["$mod+Shift+F"] },
-  { id: "view.peek", scope: "global", label: t("絵だけのとき、パネルを出す・隠す"), keys: ["Tab"], chain: true },
-  { id: "view.exit", scope: "global", label: t("絵だけ・全画面から抜ける（順に1つずつ）"), keys: ["Escape"], chain: true },
+  { id: "view.peek", scope: "global", label: t("集中モードのとき、パネルを出す・隠す"), keys: ["Tab"], chain: true },
+  { id: "view.exit", scope: "global", label: t("集中モード・全画面を終了（順に1つずつ）"), keys: ["Escape"], chain: true },
   { id: "input.leave", scope: "global", label: t("入力の欄から出る"), keys: ["Escape"], where: "input", chain: true },
   { id: "edit.undo", scope: "global", label: t("取り消す"), keys: ["$mod+z"] },
   { id: "edit.redo", scope: "global", label: t("やり直す"), keys: ["$mod+Shift+z", "$mod+y"] },
-  { id: "save.state", scope: "global", label: t("保存の具合を見る"), keys: ["$mod+s"] },
+  { id: "save.state", scope: "global", label: t("保存の状態を見る"), keys: ["$mod+s"] },
   { id: "search.focus", scope: "global", label: t("探す欄に入る"), keys: ["/"] },
   { id: "go.plan", scope: "global", label: t("企画へ"), keys: ["g 1"] },
   { id: "go.structure", scope: "global", label: t("構成へ"), keys: ["g 2"] },
@@ -49,14 +49,14 @@ export const KEYS = [
 
   // ---------------------------------------------------------------- 画像生成
   { id: "workbench.select", scope: "workbench", label: t("見る（動かす）"), keys: ["v", "h"] },
-  { id: "workbench.mask", scope: "workbench", label: t("囲んで頼む"), keys: ["l"] },
+  { id: "workbench.mask", scope: "workbench", label: t("囲んで生成"), keys: ["l"] },
   { id: "workbench.extend", scope: "workbench", label: t("描き足す"), keys: [] },
   { id: "workbench.pen", scope: "workbench", label: t("ペン"), keys: ["b"] },
   { id: "workbench.erase", scope: "workbench", label: t("消しゴム"), keys: ["e"] },
   { id: "workbench.zoomIn", scope: "workbench", label: t("広げる"), keys: ["+", "Shift++", "="], current: ["$mod+8"] },
   { id: "workbench.zoomOut", scope: "workbench", label: t("縮める"), keys: ["-"], current: ["$mod+9"] },
   { id: "workbench.zoomFit", scope: "workbench", label: t("合わせる"), keys: [], current: ["$mod+0"] },
-  { id: "workbench.generate", scope: "workbench", label: t("頼む"), keys: ["$mod+Enter"], where: "any" },
+  { id: "workbench.generate", scope: "workbench", label: t("生成"), keys: ["$mod+Enter"], where: "any" },
   { id: "workbench.pan", scope: "workbench", label: t("押している間、手のひら（ドラッグで動かす）"), keys: ["Space"], hold: true },
   { id: "workbench.compareClose", scope: "workbench", label: t("比べるを閉じる"), keys: ["Escape"], chain: true },
   { id: "workbench.polyClose", scope: "workbench:mask", label: t("多角形を閉じる"), keys: ["Enter"], chain: true },
@@ -78,9 +78,9 @@ export const KEYS = [
   { id: "manuscript.reject", scope: "manuscript", label: t("却下・このまま"), keys: ["x"] },
   { id: "manuscript.pick", scope: "manuscript", label: t("候補を選ぶ・赤入れの選択肢を選ぶ（1〜6）"), keys: ["1", "2", "3", "4", "5", "6"] },
   { id: "manuscript.instruct", scope: "manuscript", label: t("指示の欄に入る"), keys: ["i"] },
-  { id: "manuscript.ask", scope: "manuscript", label: t("頼む（指示の欄の中で）"), keys: ["$mod+Enter"], where: "any" },
+  { id: "manuscript.ask", scope: "manuscript", label: t("生成（指示の欄の中で）"), keys: ["$mod+Enter"], where: "any" },
   { id: "manuscript.select", scope: "manuscript", label: t("選ぶ"), keys: ["v"] },
-  { id: "manuscript.mask", scope: "manuscript", label: t("選んだコマの絵を画像生成の画面で頼む（囲んで頼む）"), keys: ["l"] },
+  { id: "manuscript.mask", scope: "manuscript", label: t("選んだコマの絵を画像生成の画面で生成（囲んで生成）"), keys: ["l"] },
   { id: "manuscript.redline", scope: "manuscript", label: t("赤入れ"), keys: ["r"] },
   { id: "manuscript.pen", scope: "manuscript", label: t("ペン"), keys: ["b"] },
   { id: "manuscript.erase", scope: "manuscript", label: t("消しゴム"), keys: ["e"] },

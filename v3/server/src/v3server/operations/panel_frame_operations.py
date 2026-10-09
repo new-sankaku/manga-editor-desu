@@ -25,6 +25,7 @@ from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.threshold_and_finding_tables import Threshold
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m, text_of
 from v3server.name_structure.item_styles import FrameStyle
 from v3server.name_structure.name_draft_schema import PanelFrame
 from v3server.name_structure.reading_direction import PageSpec
@@ -66,19 +67,19 @@ async def min_panel_mm(session: AsyncSession, work_id: str) -> float:
     t = (await session.execute(select(Threshold).where(
         Threshold.work_id == work_id, Threshold.key == MIN_PANEL_KEY))).scalar_one_or_none()
     if t is None or t.status == "rejected":
-        raise Invalid(f"閾値 {MIN_PANEL_KEY} が無い。コマの最小の大きさが決まらないので割りを計算しない")
+        raise Invalid(m("閾値 {key} が無い。コマの最小の大きさが決まらないので割りを計算しない", key=MIN_PANEL_KEY))
     return float(t.value["value"])
 
 
 def page_spec_of(work) -> PageSpec:
     if not work.page_spec:
-        raise Invalid("作品の寸法（page_spec）が決まっていないので、コマの間が分からない")
+        raise Invalid(m("作品の寸法（page_spec）が決まっていないので、コマの間が分からない"))
     return PageSpec.model_validate(work.page_spec)
 
 
 def _poly(panel: Panel) -> list[tuple[float, float]]:
     if not panel.frame:
-        raise Invalid(f"コマ {panel.id} には枠がまだ無い")
+        raise Invalid(m("コマ {id} には枠がまだ無い", id=panel.id))
     return [tuple(p) for p in panel.frame["polygon_mm"]]
 
 
@@ -134,7 +135,7 @@ class _Plan:
         rc = RowChanges(ctx)
         if ctx.actor.kind == "ai" and self.touched_human_hand():
             # 何も変えない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
-            hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0], "人の手の印の付いたコマ・文字に当たる")
+            hold_ai_operation(ctx, op.model_dump(mode="json"), target, page_ids[0], "手動編集の印の付いたコマ・文字に当たる")
             return rc.inverse(page_ids, label)
         # 足す行を先に書き出す。変える値が足す行を指す（文字の panel_id を新しいコマへ移すなど）と、同じ書き出しの中では
         # 行を入れる前に値を変えることがあり、text_items_panel_id_fkey で止まった（2026-10-08。panels と image_files の
@@ -193,7 +194,7 @@ class SplitPanel(OpBase):
         require_actor_may(ctx.actor, ctx.work, "panel_layout", "decide")
         panel = await ctx.session.get(Panel, self.panel_id)
         if panel.removed:
-            raise Invalid("抜いたコマは分けられない")
+            raise Invalid(m("削除したコマは分けられない"))
         spec = page_spec_of(ctx.work)
         gap = self.gap_mm
         if gap is None:
@@ -204,7 +205,7 @@ class SplitPanel(OpBase):
             a, b = split_polygon(_poly(panel), self.through_mm, line_normal(self.direction, self.angle_deg), gap,
                                  await min_panel_mm(ctx.session, ctx.work.id))
         except FrameEditError as e:
-            raise Invalid(f"分けられない: {e}") from e
+            raise Invalid(m("分けられない: {reason}", reason=text_of(e))) from e
         big, small = (a, b) if polygon_area(a) >= polygon_area(b) else (b, a)
         small_first = reading_first(small, big, ctx.work.reading_direction) == 0
         plan = _Plan()
@@ -234,27 +235,27 @@ class MergePanels(OpBase):
         a = await get_in_work(session, Panel, self.panel_ids[0], work.id)
         b = await get_in_work(session, Panel, self.panel_ids[1], work.id)
         if a.page_id != b.page_id:
-            raise Invalid("合わせられるのは同じページのコマだけ")
+            raise Invalid(m("合わせられるのは同じページのコマだけ"))
         return await _shift_scope(session, work, a.page_id, min(a.order, b.order),
                                   [("panel", a.id), ("panel", b.id)])
 
     async def apply(self, ctx):
         require_actor_may(ctx.actor, ctx.work, "panel_layout", "decide")
         if self.panel_ids[0] == self.panel_ids[1]:
-            raise Invalid("同じコマは合わせられない")
+            raise Invalid(m("同じコマは合わせられない"))
         a, b = [await ctx.session.get(Panel, i) for i in self.panel_ids]
         if a.removed or b.removed:
-            raise Invalid("抜いたコマは合わせられない")
+            raise Invalid(m("削除したコマは合わせられない"))
         spec = page_spec_of(ctx.work)
         pa, pb = _poly(a), _poly(b)
         if not are_adjacent(pa, pb, max(spec.gutter_x_mm, spec.gutter_y_mm)):
-            raise Invalid("隣り合っていない2つのコマは合わせられない（間がコマの間より広い）")
+            raise Invalid(m("隣り合っていない2つのコマは合わせられない（間がコマの間より広い）"))
         hull = merged_polygon(pa, pb)
         others = [p for p in await _live_work_panels(ctx.session, ctx.work.id)
                   if p.page_id == a.page_id and p.id not in (a.id, b.id) and p.frame]
         for p in others:
             if polygon_overlap_area(hull, _poly(p)) > 1e-6:
-                raise Invalid(f"合わせた形がほかのコマ（番号 {p.order}）に重なる")
+                raise Invalid(m("合わせた形がほかのコマ（番号 {order}）に重なる", order=p.order))
         keep, gone = (a, b) if polygon_area(pa) >= polygon_area(pb) else (b, a)
         plan = _Plan()
         plan.change(keep, {"frame": _frame(hull, a.frame.get("bleeds", False) or b.frame.get("bleeds", False))}
@@ -286,7 +287,7 @@ class RandomSplitPanel(OpBase):
     async def apply(self, ctx):
         require_actor_may(ctx.actor, ctx.work, "panel_layout", "decide")
         if self.horizontal_cuts + self.vertical_cuts == 0:
-            raise Invalid("切る数が0")
+            raise Invalid(m("切る数が0"))
         panel = await ctx.session.get(Panel, self.panel_id)
         spec = page_spec_of(ctx.work)
         try:
@@ -294,10 +295,10 @@ class RandomSplitPanel(OpBase):
                                   spec.gutter_y_mm, await min_panel_mm(ctx.session, ctx.work.id), self.seed,
                                   RANDOM_SPLIT_ATTEMPTS_PER_CUT, ctx.work.reading_direction)
         except FrameEditError as e:
-            raise Invalid(f"割れない: {e}") from e
+            raise Invalid(m("割れない: {reason}", reason=text_of(e))) from e
         ids = self.new_panel_ids or [new_id() for _ in pieces[1:]]
         if len(ids) != len(pieces) - 1:
-            raise Invalid(f"新しいコマの id は {len(pieces) - 1} 個要る")
+            raise Invalid(m("新しいコマの id は {count} 個要る", count=len(pieces) - 1))
         big = max(range(len(pieces)), key=lambda i: polygon_area(pieces[i]))
         plan = _Plan()
         pages = [panel.page_id] + await _shift_orders(plan, ctx.session, ctx.work.id, panel.order, len(pieces) - 1,
@@ -344,7 +345,7 @@ class AddShapePanel(OpBase):
         try:
             poly = shape_polygon(self.shape, self.box_mm)
         except FrameEditError as e:
-            raise Invalid(str(e)) from e
+            raise Invalid(text_of(e)) from e
         style = (self.frame_style.model_copy(update={"shape": self.shape}).model_dump(mode="json")
                  if self.frame_style else None)
         rc = RowChanges(ctx)
@@ -368,14 +369,14 @@ class SavePanelTemplate(OpBase):
         spec = page_spec_of(ctx.work)
         panels = [p for p in await _live_work_panels(ctx.session, ctx.work.id) if p.page_id == self.page_id and p.frame]
         if not panels:
-            raise Invalid("枠のあるコマが無い")
+            raise Invalid(m("枠のあるコマが無い"))
         frames = [{"polygon": [[x / spec.frame_width_mm, y / spec.frame_height_mm] for x, y in _poly(p)],
                    "bleeds": p.frame.get("bleeds", False), "frame_style": p.frame_style}
                   for p in sorted(panels, key=lambda p: p.order)]
         rc = RowChanges(ctx)
         rc.created(PanelTemplate(id=self.id, work_id=ctx.work.id, name=self.name, frames=frames,
                                  created_by=ctx.actor.id, human_hand_fields=["frames", "name"], removed=False))
-        return rc.inverse([], "コマの型を残す")
+        return rc.inverse([], "コマの型を保存する")
 
 
 class ApplyPanelTemplate(OpBase):
@@ -400,7 +401,7 @@ class ApplyPanelTemplate(OpBase):
         require_actor_may(ctx.actor, ctx.work, "panel_layout", "decide")
         tpl = await ctx.session.get(PanelTemplate, self.template_id)
         if tpl.removed:
-            raise Invalid("抜いた型は当てられない")
+            raise Invalid(m("削除した型は当てられない"))
         spec = page_spec_of(ctx.work)
         current = [p for p in await _live_work_panels(ctx.session, ctx.work.id) if p.page_id == self.page_id]
         for p in current:
@@ -408,10 +409,10 @@ class ApplyPanelTemplate(OpBase):
             layers = (await ctx.session.execute(select(PanelLayer.id).where(
                 PanelLayer.panel_id == p.id, PanelLayer.removed.is_(False)))).first()
             if p.image_id or texts or items or layers:
-                raise Invalid(f"コマ（番号 {p.order}）に中身がある。先に中身を動かすか、コマを抜く")
+                raise Invalid(m("コマ（番号 {order}）に中身がある。先に中身を動かすか、コマを削除する", order=p.order))
         ids = self.new_panel_ids or [new_id() for _ in tpl.frames]
         if len(ids) != len(tpl.frames):
-            raise Invalid(f"新しいコマの id は {len(tpl.frames)} 個要る")
+            raise Invalid(m("新しいコマの id は {count} 個要る", count=len(tpl.frames)))
         plan = _Plan()
         plan.removes.extend(current)
         for i, (f, pid) in enumerate(zip(tpl.frames, ids, strict=False)):

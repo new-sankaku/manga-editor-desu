@@ -1,4 +1,4 @@
-"""依頼（順番待ち）の口。"""
+"""依頼（順番待ち）の API。"""
 
 
 from typing import Any
@@ -18,6 +18,7 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
+from v3server.messages import m
 from v3server.operations.operation_base import work_obj
 from v3server.v3_error_types import Invalid, NotFound
 
@@ -84,7 +85,7 @@ async def retry_job(work_id: str, job_id: str, session: SessionDep, authz: Authz
     """止まったものの「もう一度」。いまの処理ごとの送り先へ、同じ中身で新しく頼む。"""
     job = await _job_in_work(session, work_id, job_id)
     if job.status != "stopped":
-        raise Invalid("止まったものだけもう一度頼める")
+        raise Invalid(m("止まったものだけもう一度依頼できる"))
     new_job = await job_start_and_control.enqueue(session, authz, temporal, actor, work_id, job.process, job.request, "human",
                                     job.page_id)
     return row(new_job, *JOB_FIELDS)

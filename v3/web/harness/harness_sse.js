@@ -1,5 +1,5 @@
-// SSE を fetch で読む（EventSource は X-V3-User も X-V3-Request も付けられない）。見出しは呼び手が渡す authFetch が付ける。切れたら呼び手に知らせ、呼び手が snapshot を取り直して
-// last_event_id の続きからつなぎ直す（harness.js の connect）。
+// SSE を fetch で読む（EventSource は X-V3-User も X-V3-Request も付けられない）。ヘッダーは呼び出し元が渡す authFetch が付ける。切れたら呼び出し元に知らせ、呼び出し元が snapshot を取り直して
+// last_event_id の続きから再接続する（harness.js の connect）。
 // 形は https://html.spec.whatwg.org/multipage/server-sent-events.html の「event stream の解釈」に合わせる（id・event・data・retry）。
 
 export async function readStream(authFetch, url, { onEvent, onOpen, signal }) {
@@ -7,7 +7,7 @@ export async function readStream(authFetch, url, { onEvent, onOpen, signal }) {
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
   onOpen();
   const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
-  // サーバーは何も無くても15秒ごとに生存の知らせを送る（live_stream.py）。35秒何も来なければ切れたとみなす
+  // サーバーは何も無くても15秒ごとにハートビートを送る（live_stream.py）。35秒何も来なければ切れたとみなす
   let watchdog;
   const arm = () => { clearTimeout(watchdog); watchdog = setTimeout(() => reader.cancel("無音"), 35000); };  // i18n:dev
   arm();
@@ -21,7 +21,7 @@ async function pump(reader, onEvent, arm) {
   let ev = { id: null, event: "message", data: [] };
   for (;;) {
     const { value, done } = await reader.read();
-    if (done) return;  // 送り手が閉じた（か無音で切った）。呼び手は切断として扱う
+    if (done) return;  // 送り手が閉じた（か無音で切った）。呼び出し元は切断として扱う
     arm();
     buf += value;
     let nl;
@@ -33,7 +33,7 @@ async function pump(reader, onEvent, arm) {
         ev = { id: null, event: "message", data: [] };
         continue;
       }
-      if (line.startsWith(":")) continue;  // 生存の知らせ
+      if (line.startsWith(":")) continue;  // ハートビート
       const i = line.indexOf(":");
       const field = i < 0 ? line : line.slice(0, i);
       const val = i < 0 ? "" : line.slice(i + 1).replace(/^ /, "");

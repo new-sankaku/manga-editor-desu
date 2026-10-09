@@ -1,14 +1,14 @@
-"""生成サービスの画面の口のうち、つなぎ先の様子を読む口と、組・比べ。
+"""生成サービスの画面の API のうち、接続先の様子を読む API と、プリセット・比べ。
 
-- POST /services/{id}/connection-test：つながるかを試し、結果を Service.state に入れる（connected・stopped・key_rejected）
-- GET  /services/{id}/status：つなぎ先の側で走っている・待っている数（ComfyUI の /queue）と、このつなぎ先への依頼の
+- POST /services/{id}/connection-test：接続を試し、結果を Service.state に入れる（connected・stopped・key_rejected）
+- GET  /services/{id}/status：接続先の側で走っている・待っている数（ComfyUI の /queue）と、この接続先への依頼の
   状態ごとの数と、止まった依頼（status=stopped。新しい順に 50 件）
 - GET  /services/{id}/models：入っているモデル（ComfyUI の /object_info と /system_stats、LiteLLM の /v1/models）
-- GET・POST /service-sets、PUT・DELETE /service-sets/{id}：管理者が作った組（処理ごとの送り先の並び）を残す
-- POST /service-sets/{id}/apply：組を当てる。送り先が決まっている処理だけ、送り先のつなぎ先を替える（送り直しの回数・作業と手は
+- GET・POST /service-sets、PUT・DELETE /service-sets/{id}：管理者が作ったプリセット（処理ごとの送り先の並び）を残す
+- POST /service-sets/{id}/apply：プリセットを当てる。送り先が決まっている処理だけ、送り先の接続先を替える（送り直しの回数・作業と手は
   今の送り先のまま）。送り先がまだ無い処理は、回数を決められないので断る（先に PUT /routes/{process}）。1回の確定で全部当てる
-- POST /works/{id}/service-comparisons：同じ指示を、いくつものつなぎ先へ1件ずつ頼む（job_start_and_control.enqueue の
-  service_id。送ってよい先の決まりと作業のAIの関与は、1件ずつに同じにかかる）。GET で、頼んだ依頼の状態と結果を並べて返す
+- POST /works/{id}/service-comparisons：同じ指示を、いくつもの接続先へ1件ずつ頼む（job_start_and_control.enqueue の
+  service_id。送ってよい先のルールと作業のAIの関与は、1件ずつに同じにかかる）。GET で、頼んだ依頼の状態と結果を並べて返す
 どれも管理者（system:main の admin）だけ。比べるのは作品の中の依頼なので、依頼を出せる人（enqueue が確かめる）。
 """
 
@@ -31,6 +31,7 @@ from v3server.http_routes.http_dependencies import (
     row,
 )
 from v3server.http_routes.job_routes import JOB_FIELDS
+from v3server.messages import m
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.service_senders.service_inspection import (
     InspectionError,
@@ -93,12 +94,12 @@ async def service_models(service_id: str, session: SessionDep, authz: AuthzDep, 
         return {"ok": False, "state": e.state, "detail": e.detail}
 
 
-# ---------------------------------------------------------------- 組
+# ---------------------------------------------------------------- プリセット
 
 
 class ServiceSetBody(BaseModel):
     name: str = Field(min_length=1)
-    # {処理の名前: つなぎ先の id}
+    # {処理の名前: 接続先の id}
     routes: dict[str, str] = Field(min_length=1)
 
 
@@ -109,7 +110,8 @@ async def _check_set_routes(session, routes: dict[str, str]) -> None:
     for process, service_id in routes.items():
         if await session.scalar(select(ServiceProcess.id).where(
                 ServiceProcess.service_id == service_id, ServiceProcess.process == process)) is None:
-            raise Invalid(f"つなぎ先 {service_id} は {process} を受けられない（先に処理の中身を登録する）")
+            raise Invalid(m("接続先 {id} は {process} を受けられない（先に処理の中身を登録する）", id=service_id,
+                            process=process))
 
 
 @router.get("/service-sets")
@@ -122,7 +124,7 @@ async def list_service_sets(session: SessionDep, authz: AuthzDep, actor: ActorDe
 async def create_service_set(body: ServiceSetBody, session: SessionDep, authz: AuthzDep, actor: ActorDep):
     await require(authz, actor, "admin", SYSTEM_OBJ)
     if await session.scalar(select(ServiceSet.id).where(ServiceSet.name == body.name)) is not None:
-        raise Invalid(f"組 {body.name} はもうある")
+        raise Invalid(m("プリセット {name} はもうある", name=body.name))
     await _check_set_routes(session, body.routes)
     s = ServiceSet(name=body.name, routes=body.routes, created_by=actor.id)
     session.add(s)
@@ -139,7 +141,7 @@ async def update_service_set(set_id: str, body: ServiceSetBody, session: Session
     if s is None:
         raise NotFound(f"service_sets:{set_id}")
     if await session.scalar(select(ServiceSet.id).where(ServiceSet.name == body.name, ServiceSet.id != set_id)):
-        raise Invalid(f"組 {body.name} はもうある")
+        raise Invalid(m("プリセット {name} はもうある", name=body.name))
     await _check_set_routes(session, body.routes)
     s.name, s.routes = body.name, body.routes
     await session.commit()
@@ -168,7 +170,8 @@ async def apply_service_set(set_id: str, session: SessionDep, authz: AuthzDep, a
         select(ProcessRoute).where(ProcessRoute.process.in_(list(s.routes))))).scalars()}
     missing = sorted(set(s.routes) - set(routes))
     if missing:
-        raise Invalid(f"送り先がまだ無い処理がある（先に PUT /routes/{{process}} で決める）: {', '.join(missing)}")
+        raise Invalid(m("送り先がまだ無い処理がある（先に PUT /routes/{{process}} で決める）: {processes}",
+                        processes=", ".join(missing)))
     changed = []
     for process, service_id in sorted(s.routes.items()):
         if routes[process].service_id != service_id:
@@ -194,9 +197,9 @@ COMPARISON_FIELDS = ("id", "work_id", "process", "page_id", "request", "jobs", "
 @router.post("/works/{work_id}/service-comparisons", status_code=201)
 async def compare_services(work_id: str, body: ComparisonBody, session: SessionDep, authz: AuthzDep,
                            temporal: TemporalDep, actor: ActorDep):
-    """同じ指示を、選んだつなぎ先へ1件ずつ頼む。1件でも断られたら、そこで止めて理由を返す（頼み終えた依頼は残る）。"""
+    """同じ指示を、選んだ接続先へ1件ずつ頼む。1件でも断られたら、そこで止めて理由を返す（頼み終えた依頼は残る）。"""
     if len(set(body.service_ids)) != len(body.service_ids):
-        raise Invalid("同じつなぎ先が2回ある")
+        raise Invalid(m("同じ接続先が2回ある"))
     jobs = []
     for sid in body.service_ids:
         job = await job_start_and_control.enqueue(session, authz, temporal, actor, work_id, body.process, body.request,

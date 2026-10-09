@@ -21,6 +21,7 @@ from v3server.generation_queue.image_process_registry import (
 )
 from v3server.generation_queue.known_processes import KNOWN_PROCESSES
 from v3server.image_intake import strip_png_text
+from v3server.messages import render_tree
 from v3server.operations.image_placement_carry import Geometry, Version, carry, cover, placement_for, relation
 from v3server.service_senders import comfyui_sender
 from v3server.service_senders.comfyui_sender import call_comfyui
@@ -215,7 +216,7 @@ def test_outpaint_preparation_pads_and_shifts_protected(store):
 
 
 def test_outpaint_mm_must_be_resolved_first(store):
-    with pytest.raises(Invalid, match="画素"):
+    with pytest.raises(Invalid, match="ピクセル"):
         finish_image_process(_req(store, "outpaint", {**initial("outpaint"), "left": 5}))
 
 
@@ -232,7 +233,7 @@ def test_preparation_refusals(store):
         finish_image_process(_req(store, "image_to_image", {**initial("image_to_image"), "control": "lineart"}))
     r = _req(store, "image_to_image", initial("image_to_image"))
     r["prepared_inputs"] = [e for e in r["prepared_inputs"] if e["purpose"] != "protected_mask"]
-    with pytest.raises(Invalid, match="人の手"):
+    with pytest.raises(Invalid, match="手動編集"):
         finish_image_process(r)
 
 
@@ -495,3 +496,29 @@ def test_初めから開くまとまりは入力欄にある():
         groups = {p.get("x-group") for p in describe(spec)["params_schema"]["properties"].values()}
         for g in spec.open_groups:
             assert g in groups, (spec.name, g)
+
+
+def _japanese_values(value, path=""):
+    """入れ子の中の、日本語の字が入った値（辞書のキーは見ない）。"""
+    if isinstance(value, dict):
+        return [hit for key, item in value.items() for hit in _japanese_values(item, f"{path}/{key}")]
+    if isinstance(value, list):
+        return [hit for i, item in enumerate(value) for hit in _japanese_values(item, f"{path}/{i}")]
+    if isinstance(value, str) and any("぀" <= c <= "鿿" for c in value):
+        return [(path, value)]
+    return []
+
+
+@pytest.mark.parametrize("name", list(SPECS))
+def test_画面に出す名前はスキーマを通った後も英語にできる(name):
+    """欄・選択肢・まとまりの名前は、JSON Schema を作った後も m() の物のまま残る（pydantic が普通の文字列に直さない）。
+    英語で残ってよい日本語は、画面が突き合わせる「基本」だけ。"""
+    described = describe(SPECS[name])
+    ja = described["params_schema"]["properties"]
+    en = render_tree({k: v for k, v in described.items() if k != "params_schema"} | {"properties": ja}, "en")
+    left = {text for _, text in _japanese_values(en)}
+    assert left <= {"基本"}, left
+    assert "⚠" not in json.dumps(en, ensure_ascii=False)
+    # 画面はまとまりの名前を、開いて出すまとまり（open_groups）と突き合わせる。英語でも同じ名前になる
+    groups = {p["x-group"] for p in en["properties"].values()}
+    assert set(en["open_groups"]) <= groups

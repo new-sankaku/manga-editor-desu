@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.text_and_layer_tables import TextItem
 from v3server.canonical_tables.work_tree_tables import Page, Panel, Work
+from v3server.messages import m
 from v3server.name_structure.name_draft_schema import (
     Balloon,
     NameDraft,
@@ -80,7 +81,7 @@ def name_panel_from_row(row: Panel, items: list[TextItem]) -> NamePanel:
 
 def name_page_from_rows(page: Page, panels: list[Panel], items_by_panel: dict[str, list[TextItem]]) -> NamePage:
     if "spread" not in page.layout:
-        raise Invalid(f"page:{page.id} は見開きかどうか（layout.spread）がまだ決まっていない")
+        raise Invalid(m("page:{id} は見開きかどうか（layout.spread）がまだ決まっていない", id=page.id))
     return NamePage.model_validate({**page.layout, "page": page.number, "panels": [
         name_panel_from_row(p, items_by_panel.get(p.id, [])) for p in sorted(panels, key=lambda p: p.order)]})
 
@@ -114,7 +115,7 @@ async def text_items_of_panels(session: AsyncSession, panel_ids: list[str],
 def _name_draft(work: Work, pages: list[NamePage]) -> NameDraft:
     """寸法と1ページ目の位置が作品に無ければ止める（既定の値で補わない）。"""
     if work.page_spec is None or work.first_page_is_left is None:
-        raise Invalid("作品の page_spec と first_page_is_left がまだ決まっていない")
+        raise Invalid(m("作品の page_spec と first_page_is_left がまだ決まっていない"))
     return NameDraft(reading_direction=READING_DIRECTION[work.reading_direction],
                      page_spec=PageSpec.model_validate(work.page_spec),
                      first_page_is_left=work.first_page_is_left, pages=pages)

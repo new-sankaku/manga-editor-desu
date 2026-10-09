@@ -1,6 +1,6 @@
 // 設定資料：人物・場所・小物・その他。名前・特徴・服・絵と、生成の設定（見た目の指示・入れない指示・追加学習・参照の絵・seed）。
-// AIが企画から抜き出した案（proposal_state=proposed）は、人が採る・採らないを決める。
-// 口：GET /works/{id}（material_entries）、POST /works/{id}/images（絵を置く）、GET /works/{id}/images/{id}/thumbnail、
+// AIが企画から抽出した案（proposal_state=proposed）は、人が採る・採らないを決める。
+// API：GET /works/{id}（material_entries）、POST /works/{id}/images（絵を置く）、GET /works/{id}/images/{id}/thumbnail、
 //     操作 add_material_entry・update_material_entry・decide_material_proposal・set_removed
 import { html, render, nothing, api, icon, toast, fail, op, startShell, emptyNote, loadThumbs } from "../common/shell.js";
 import { t } from "../common/i18n.js";
@@ -67,7 +67,7 @@ function imageGrid(ids, onRemove) {
   return html`<div class="thumbs">${ids.map((id) => html`<div class="thumb paper"><img data-thumb=${thumb(id)} alt=${t("設定資料の絵")}>
     <button class="ibtn x" title=${t("外す")} aria-label=${t("この絵を外す")} @click=${() => onRemove(id)}>${icon("x")}</button></div>`)}</div>`;
 }
-// 絵を置く（人が描いた絵か、持ち込んだ絵）。持ち込んだ絵は利用規約の要点が要る（V3細部の決めごと 20章）
+// 絵を置く（手描きの絵か、持ち込んだ絵）。持ち込んだ絵は利用規約の要点が要る（V3細部の決めごと 20章）
 async function upload(form, role) {
   const file = form.elements.file.files[0];
   if (!file) { toast(t("絵のファイルを選んでください"), "need"); return null; }
@@ -97,7 +97,7 @@ function uploadForm(label, role, onDone) {
     <form class="form" @submit=${submit}>
       <label class="k">${t("ファイル")}</label><input class="field" type="file" name="file" accept="image/*">
       <label class="k">${t("出どころ")}</label><select class="field" name="origin" @change=${(e) => { origin = e.target.value; e.target.form.querySelector(".terms").hidden = origin !== "imported"; }}>
-        <option value="human_drawn">${t("人が描いた")}</option><option value="imported">${t("持ち込んだ")}</option></select>
+        <option value="human_drawn">${t("手描き")}</option><option value="imported">${t("持ち込んだ")}</option></select>
       <div class="full terms" hidden><div class="form">${fieldsHtml(USAGE_TERMS, {}, "terms.")}</div></div>
       <div class="full acts"><button class="btn sm" ?disabled=${S.busy}>${icon("image-plus")}${t("置く")}</button></div>
     </form></details>`;
@@ -146,7 +146,7 @@ function detail() {
   d.generation.reference_image_ids ??= [];
   return html`<form class="card" aria-label=${d.name} @submit=${saveSafe}>
     <div class="card-h"><span class="h1">${d.name}</span><span class="flag ${d.proposal_state === "adopted" ? "on" : d.proposal_state === "proposed" ? "warn" : "mut"}">${STATE[d.proposal_state]}</span>
-      ${d.human_hand_fields.length ? html`<span class="meta">${t("人が書いた項目はAIが変えません")}</span>` : nothing}</div>
+      ${d.human_hand_fields.length ? html`<span class="meta">${t("手動で入力した項目はAIが変えません")}</span>` : nothing}</div>
     ${d.proposal_state !== "adopted" ? html`<div class="note need">${icon("triangle-alert")}<span>${t("AIの案です。採るまで描く工程には使いません")}</span>
       <span class="grow"></span><button type="button" class="btn sm primary" @click=${() => decide("adopted")}>${t("採る")}</button>
       ${d.proposal_state === "proposed" ? html`<button type="button" class="btn sm" @click=${() => decide("rejected")}>${t("採らない")}</button>` : nothing}</div>` : nothing}
@@ -172,11 +172,11 @@ function detail() {
         ${d.image_ids.filter((id) => !d.generation.reference_image_ids.includes(id)).map((id) => html`<button type="button" class="btn ghost sm"
           @click=${() => { d.generation.reference_image_ids = [...d.generation.reference_image_ids, id]; draw(); }}>${icon("plus")}<img class="mini" data-thumb=${`/works/${S.workId}/images/${id}/thumbnail?size=64`} alt="">${t("参照にする")}</button>`)}` : nothing}</div>
       ${uploadForm(t("参照の絵を置く"), "reference", (id) => { d.generation.reference_image_ids = [...d.generation.reference_image_ids, id]; draw(); })}
-      <span class="meta">${t("設定資料の生成の設定が、絵を作る依頼で読まれるかは、サーバーの処理の手順しだいです（V3点検の結果 3章：まだ作画に渡っていない）")}</span></section>
+      <span class="meta">${t("設定資料の生成の設定が、絵を作る依頼で読まれるかは、サーバーの処理の手順しだいです")}</span></section>
     <div class="acts"><button class="btn primary" ?disabled=${S.busy}>${icon("save")}${t("残す")}</button>
       <button type="button" class="btn ghost" @click=${() => select(S.sel)}>${t("直したのをやめる")}</button>
       <span class="grow"></span>
-      <button type="button" class="btn ghost sm" @click=${() => run(t("設定資料を抜けませんでした"), async () => { await op(S.workId, { type: "set_removed", target_kind: "material_entry", id: S.sel, removed: true }); S.sel = null; })}>${icon("trash-2")}${t("抜く")}</button></div>
+      <button type="button" class="btn ghost sm" @click=${() => run(t("設定資料を削除できませんでした"), async () => { await op(S.workId, { type: "set_removed", target_kind: "material_entry", id: S.sel, removed: true }); S.sel = null; })}>${icon("trash-2")}${t("削除")}</button></div>
   </form>`;
 }
 

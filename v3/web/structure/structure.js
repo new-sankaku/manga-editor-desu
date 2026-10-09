@@ -1,6 +1,6 @@
-// 構成：話ごとのページの並び（台割り）。ページを足す・抜く・戻す・並べ替える、見開きにする・解く、
+// 構成：話ごとのページの並び（台割り）。ページを足す・削除する・戻す・並べ替える、見開きにする・解く、
 // ページの種類・色の種類・解像度・ノンブルの出し方、ページの割り当て、締切と見込みの1行（V3細部の決めごと 8・15・19章）。
-// 口：GET /works/{id}、GET /works/{id}/progress、GET /works/{id}/review-records、
+// API：GET /works/{id}、GET /works/{id}/progress、GET /works/{id}/review-records、
 //     操作 add_page・set_removed・assign_page、
 //     worktree-agent-a4222899f5500b610 の reorder_pages・add_spread・update_page（page_kind・color_mode・dpi・nombre_display）
 import { t } from "../common/i18n.js";
@@ -118,7 +118,7 @@ function lineup() {
       <button class="btn sm" @click=${addPage} ?disabled=${S.busy}>${icon("plus")}${t("ページを足す")}</button></div>
     ${headLine()}
     ${ps.length ? html`<div class="pages">${ps.map(pageTile)}</div>` : emptyNote(t("この話にはページがまだありません"))}
-    ${removed.length ? html`<details class="more"><summary>${icon("chevron-right")}${t("抜いたページ {{n}}", { n: removed.length })}</summary>
+    ${removed.length ? html`<details class="more"><summary>${icon("chevron-right")}${t("削除したページ {{n}}", { n: removed.length })}</summary>
       <div class="list">${removed.map((p) => html`<div class="item"><span class="nm">${t("{{number}} ページ目", { number: p.number })}</span>
         <button class="btn sm" @click=${() => setRemoved("page", p.id, false, t("ページを戻せませんでした"), t("ページを戻しました"))}>${icon("undo-2")}${t("戻す")}</button></div>`)}</div></details>` : nothing}
   </section>`;
@@ -139,7 +139,7 @@ function pagePanel() {
       <button class="btn sm" @click=${() => move(p.id, 1)} ?disabled=${S.busy || i < 0 || i >= ps.length - 1}>${icon("arrow-right")}${t("後ろへ")}</button>
       ${sp ? html`<button class="btn sm" @click=${() => setRemoved("spread", sp.id, true, t("見開きを解けませんでした"), t("見開きを解きました"))}>${icon("columns-2")}${t("見開きを解く")}</button>`
            : html`<button class="btn sm" @click=${() => makeSpread(p.id)} ?disabled=${S.busy || i >= ps.length - 1}>${icon("book-open")}${t("次のページと見開きにする")}</button>`}
-      <button class="btn ghost sm" @click=${() => setRemoved("page", p.id, true, t("ページを抜けませんでした"), t("ページを抜きました"))} ?disabled=${S.busy}>${icon("trash-2")}${t("抜く")}</button>
+      <button class="btn ghost sm" @click=${() => setRemoved("page", p.id, true, t("ページを削除できませんでした"), t("ページを削除しました"))} ?disabled=${S.busy}>${icon("trash-2")}${t("削除")}</button>
     </div>
     <form class="form" @submit=${(e) => savePage(e, p)}>
       <span class="sub-h">${t("入稿の形")}</span>

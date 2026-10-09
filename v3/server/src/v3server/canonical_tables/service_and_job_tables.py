@@ -1,4 +1,4 @@
-"""つなぎ先と送り先、順番待ちの依頼と呼び出しの記録。"""
+"""接続先と送り先、順番待ちの依頼と呼び出しの記録。"""
 
 
 from datetime import datetime
@@ -20,11 +20,11 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from v3server.canonical_tables.table_base import Base, new_id
 
-# ---------------------------------------------------------------- つなぎ先と送り先
+# ---------------------------------------------------------------- 接続先と送り先
 
 
 class Service(Base):
-    """つなぎ先（V3細部の決めごと 4.1・4.7）。手元とAPIを同じ形で持つ。"""
+    """接続先（V3細部の決めごと 4.1・4.7）。ローカルとAPIを同じ形で持つ。"""
 
     __tablename__ = "services"
 
@@ -32,18 +32,18 @@ class Service(Base):
     name: Mapped[str] = mapped_column(Text, unique=True)
     # image / text
     kind: Mapped[str] = mapped_column(String(8))
-    # local / api。local は手元のPCで、外へ出ない
+    # local / api。local はローカルのPCで、外へ出ない
     location: Mapped[str] = mapped_column(String(8))
     # 呼び方: comfyui / litellm
     adapter: Mapped[str] = mapped_column(String(16))
-    # local の住所（ComfyUI）。litellm はサーバーの設定の住所を使う
+    # local の URL（ComfyUI）。litellm はサーバーの設定の URL を使う
     endpoint: Mapped[str | None] = mapped_column(Text)
     # serial=1件ずつ / parallel=同時にN件まで（同 4.2）
     send_mode: Mapped[str] = mapped_column(String(8))
     max_concurrency: Mapped[int] = mapped_column(Integer, default=1)
     # connected / stopped / key_rejected / unchecked
     state: Mapped[str] = mapped_column(String(16), default="unchecked")
-    # 人が手で止める（休ませる）。止めている間に頼んだものは待ちに入る
+    # 人が手で止める（一時停止）。止めている間に頼んだものは待ちに入る
     paused: Mapped[bool] = mapped_column(Boolean, default=False)
     # 予算: 月の上限（円）。None は上限なし
     monthly_budget: Mapped[float | None] = mapped_column(Numeric(12, 2))
@@ -52,7 +52,7 @@ class Service(Base):
 
 
 class ServiceProcess(Base):
-    """つなぎ先と処理の組ごとの中身・得意さ・費用（同 4.7）。"""
+    """接続先と処理の組ごとの中身・得意さ・費用（同 4.7）。"""
 
     __tablename__ = "service_processes"
     __table_args__ = (UniqueConstraint("service_id", "process"),)
@@ -93,7 +93,7 @@ class ProcessRoute(Base):
 
 
 class WorkDestination(Base):
-    """作品の送ってよい先。手元（local）は外へ出ないので常に送ってよい。API はここに載ったものだけ（V3ハーネス設計 17章の6）。"""
+    """作品の送ってよい先。ローカル（local）は外へ出ないので常に送ってよい。API はここに載ったものだけ（V3ハーネス設計 17章の6）。"""
 
     __tablename__ = "work_destinations"
 
@@ -159,7 +159,7 @@ class CallLog(Base):
     outcome: Mapped[str] = mapped_column(String(8))
     # この依頼のこの回の鍵（"{job_id}:{attempt}"）。送る前に置く。送り先には渡していない（受け付ける先があるかは未検証）
     idempotency_key: Mapped[str | None] = mapped_column(String(80))
-    # 受け取った答え。output・model・settings など送り手の返事と、置き場に置いた絵の sha256（image_sha256s）
+    # 受け取った答え。output・model・settings などアダプターの返事と、置き場に置いた絵の sha256（image_sha256s）
     result: Mapped[dict[str, Any] | None] = mapped_column()
     failure_kind: Mapped[str | None] = mapped_column(String(32))
     detail: Mapped[str | None] = mapped_column(Text)

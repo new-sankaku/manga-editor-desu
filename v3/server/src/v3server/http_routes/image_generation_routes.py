@@ -1,8 +1,8 @@
-"""画像生成の画面（v3/web/）の口。処理の一覧・頼む・候補・版・縮めた絵。説明は llm_doc/V3画像生成の機能と画面.md。
+"""画像生成の画面（v3/web/）の API。処理の一覧・頼む・候補・バージョン・縮めた絵。説明は llm_doc/V3画像生成の機能と画面.md。
 
-採る・却下する・前の版に戻すは操作の窓口（POST /works/{id}/ops の adopt_image・set_image_discarded）を通す。取り消しも同じ。
-進み具合は画面が数秒ごとに見に来る（GET /works/{id}/panels/{id}/candidates）。SSE にしない理由：ブラウザの EventSource は
-見出し（X-V3-User）を付けられない。状態は作業者が PostgreSQL に書くので、見に来た時に読めば足りる。
+採る・却下する・前のバージョンに戻すは操作の窓口（POST /works/{id}/ops の adopt_image・set_image_discarded）を通す。取り消しも同じ。
+進行状況は画面が数秒ごとに見に来る（GET /works/{id}/panels/{id}/candidates）。SSE にしない理由：ブラウザの EventSource は
+ヘッダー（X-V3-User）を付けられない。状態は作業者が PostgreSQL に書くので、見に来た時に読めば足りる。
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDe
 from v3server.http_routes.image_file_routes import IMAGE_FIELDS
 from v3server.http_routes.job_routes import JOB_FIELDS
 from v3server.image_file_storage import read_image
+from v3server.messages import m
 from v3server.operations.image_placement_carry import frame_bbox
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.v3_error_types import Invalid, NotFound
@@ -43,11 +44,11 @@ RANDOM_SEED_LIMIT = 2**32
 
 
 def settings_summary(settings: dict[str, Any] | None) -> dict[str, Any] | None:
-    """つなぎ先の中身から、画面に出す要点（モデル・追加学習・得意な大きさ・形の指定を使えるか）。"""
+    """接続先の中身から、画面に出す要点（モデル・追加学習・得意な大きさ・形の指定を使えるか）。"""
     if not settings:
         return None
-    m = settings.get("model") or {}
-    model = m.get("checkpoint_name") or m.get("unet_name") or settings.get("unet_name")
+    chosen = settings.get("model") or {}
+    model = chosen.get("checkpoint_name") or chosen.get("unet_name") or settings.get("unet_name")
     return {"model": model, "loras": [x.get("name") for x in settings.get("loras", [])],
             "native_long_side": settings.get("native_long_side"),
             "controlnet": settings.get("controlnet_name") is not None,
@@ -64,7 +65,7 @@ async def list_works(session: SessionDep, authz: AuthzDep, actor: ActorDep):
 
 @router.get("/works/{work_id}/image-processes")
 async def list_image_processes(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """画像生成の処理ごとの説明・入力欄の形・送り先・選べるつなぎ先。"""
+    """画像生成の処理ごとの説明・入力欄の形・送り先・選べる接続先。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     sps = (await session.execute(select(ServiceProcess).where(ServiceProcess.process.in_(list(SPECS))))).scalars().all()
     services = {s.id: s for s in (await session.execute(select(Service))).scalars().all()}
@@ -110,7 +111,7 @@ class GenerateBody(BaseModel):
 def _one_of(value: BaseModel, what: str) -> dict[str, Any]:
     given = {k: v for k, v in value.model_dump().items() if v is not None}
     if len(given) != 1:
-        raise Invalid(f"{what} は {', '.join(type(value).model_fields)} のどれか1つで渡す")
+        raise Invalid(m("{what} は {fields} のどれか1つで渡す", what=what, fields=", ".join(type(value).model_fields)))
     return given
 
 
@@ -121,21 +122,21 @@ async def generate(work_id: str, panel_id: str, body: GenerateBody, session: Ses
     panel = await get_in_work(session, Panel, panel_id, work_id)
     spec = spec_for(body.process)
     if body.seed_mode == "fixed" and body.seed is None:
-        raise Invalid("種を固定するときは seed を渡す")
+        raise Invalid(m("種を固定するときは seed を渡す"))
     if body.seed_mode == "random" and body.seed is not None:
-        raise Invalid("種を乱数にするときは seed を渡さない")
+        raise Invalid(m("種を乱数にするときは seed を渡さない"))
     params = body.params
     inputs: list[dict[str, Any]] = []
     if spec.source == "required":
         if body.source_image_id is None:
-            raise Invalid(f"{spec.label} は元の絵（source_image_id）が要る")
+            raise Invalid(m("{process} は元の絵（source_image_id）が要る", process=spec.label))
         src = await get_in_work(session, ImageFile, body.source_image_id, work_id)
         inputs.append({"node": "source", "input": "image", "image_id": src.id, "purpose": "source"})
         if spec.name == "outpaint":
             placement = panel.image_placement if panel.image_id == src.id else None
             params = resolve_outpaint(params, placement, frame_bbox(panel.frame), (src.width, src.height))
     elif body.source_image_id is not None:
-        raise Invalid(f"{spec.label} は元の絵を受けない")
+        raise Invalid(m("{process} は元の絵を受けない", process=spec.label))
     if body.mask is not None:
         inputs.append({"node": "redraw_mask", "input": "image", "purpose": "mask", **_one_of(body.mask, "mask")})
     if body.control is not None:
@@ -145,7 +146,7 @@ async def generate(work_id: str, panel_id: str, body: GenerateBody, session: Ses
     seeds = ([body.seed + i for i in range(body.count)] if body.seed_mode == "fixed"
              else [secrets.randbelow(RANDOM_SEED_LIMIT) for _ in range(body.count)])
     if max(seeds) > SEED_MAX:
-        raise Invalid("種が上限を超える")
+        raise Invalid(m("種が上限を超える"))
     jobs = []
     for seed in seeds:
         request: dict[str, Any] = {
@@ -181,7 +182,7 @@ def _job_brief(work_id: str, job: Job) -> dict[str, Any]:
 
 @router.get("/works/{work_id}/panels/{panel_id}/candidates")
 async def list_candidates(work_id: str, panel_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """このコマに頼んだ画像生成の候補を、頼んだまとまりごとに新しい順で。進み具合もここで見る。"""
+    """このコマに頼んだ画像生成の候補を、頼んだまとまりごとに新しい順で。進行状況もここで見る。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     panel = await get_in_work(session, Panel, panel_id, work_id)
     jobs = [j for j in (await session.execute(
@@ -217,20 +218,20 @@ async def list_candidates(work_id: str, panel_id: str, session: SessionDep, auth
 
 @router.get("/works/{work_id}/jobs/{job_id}/protected-mask")
 async def get_protected_mask(work_id: str, job_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """その依頼で描き直さなかった人の手の範囲（白）。出来上がりの絵と同じ大きさ（描き足すでは広げた後の位置）。"""
+    """その依頼で描き直さなかった手動編集の範囲（白）。出来上がりの絵と同じ大きさ（描き足すでは広げた後の位置）。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     job = await session.get(Job, job_id)
     if job is None or job.work_id != work_id:
         raise NotFound(f"jobs:{job_id}")
     prot = _protected_entry(job)
     if prot is None:
-        raise NotFound(f"jobs:{job_id} に人の手の範囲のマスクが無い")
+        raise NotFound(m("jobs:{id} に手動編集の範囲のマスクが無い", id=job_id))
     return Response(read_image(prot["sha256"]), media_type=prot["media_type"])
 
 
 @router.get("/works/{work_id}/panels/{panel_id}/versions")
 async def list_versions(work_id: str, panel_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """このコマの絵の版（based_on の鎖）。却下した候補は除く。今の絵と、その祖先（別のコマの絵でも）を含む。"""
+    """このコマの絵のバージョン（based_on の鎖）。却下した候補は除く。今の絵と、その祖先（別のコマの絵でも）を含む。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     panel = await get_in_work(session, Panel, panel_id, work_id)
     imgs = {i.id: i for i in (await session.execute(
@@ -240,7 +241,7 @@ async def list_versions(work_id: str, panel_id: str, session: SessionDep, authz:
     while cur is not None and len(imgs) < 10_000:
         imgs.setdefault(cur.id, cur)
         cur = await session.get(ImageFile, cur.based_on_image_id) if cur.based_on_image_id else None
-    # 候補のうち採っていない物は、版の一覧には出さない（候補の一覧で見る）。人の絵と、採った物の祖先は出す
+    # 候補のうち採っていない物は、バージョンの一覧には出さない（候補の一覧で見る）。人の絵と、採った物の祖先は出す
     ancestors = set()
     cur_id = panel.image_id
     while cur_id is not None and cur_id in imgs and cur_id not in ancestors:
@@ -263,7 +264,7 @@ async def _adopted_ids(session, work_id: str, panel_id: str) -> set[str]:
 @router.get("/works/{work_id}/images/{image_id}/thumbnail")
 async def get_thumbnail(work_id: str, image_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
                         size: int = Query(ge=32, le=1024)):
-    """長い辺を size にした絵（候補の一覧・版の一覧）。中身は変わらないので、ブラウザに長く持たせる。"""
+    """長い辺を size にした絵（候補の一覧・バージョンの一覧）。中身は変わらないので、ブラウザに長く持たせる。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     img = await get_in_work(session, ImageFile, image_id, work_id)
     with Image.open(io.BytesIO(read_image(img.sha256))) as im:
@@ -277,7 +278,7 @@ async def get_thumbnail(work_id: str, image_id: str, session: SessionDep, authz:
 
 @router.get("/works/{work_id}/images/{image_id}/protected-mask")
 async def get_image_protected_mask(work_id: str, image_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """この絵を元に頼んだときに描き直さない人の手の範囲（白）。画面で囲めない所として見せる。
+    """この絵を元に頼んだときに描き直さない手動編集の範囲（白）。画面で囲めない所として見せる。
     依頼を受けるとき（input_image_preparation.py）と同じ範囲・同じ描き方。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     img = await get_in_work(session, ImageFile, image_id, work_id)

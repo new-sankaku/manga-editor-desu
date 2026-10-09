@@ -42,7 +42,7 @@ def polygon_centroid(poly: Polygon) -> Point:
     """面積の重心。面積が0の多角形は頂点の平均を返さず、例外にする（誤った中心を返さない）。"""
     a = polygon_signed_area(poly)
     if abs(a) < FLOAT_EPS:
-        raise ValueError("面積が0の多角形には重心が無い")
+        raise ValueError("面積が0の多角形には重心が無い")  # i18n:dev
     cx = cy = 0.0
     n = len(poly)
     for i in range(n):
@@ -153,7 +153,7 @@ def polygon_overlap_area(a: Polygon, b: Polygon) -> float:
     elif polygon_is_convex(a):
         clipped = _clip_by_convex(b, a)
     else:
-        raise ValueError("両方とも凹の多角形の重なりは計算できない")
+        raise ValueError("両方とも凹の多角形の重なりは計算できない")  # i18n:dev
     return polygon_area(clipped) if len(clipped) >= 3 else 0.0
 
 
@@ -213,7 +213,7 @@ def shrink_polygon(poly: Polygon, distance: float) -> list[Point]:
         dx, dy = x - cx, y - cy
         d = math.hypot(dx, dy)
         if d == 0:
-            raise ValueError("頂点が中心と重なっているので縮められない")
+            raise ValueError("頂点が中心と重なっているので縮められない")  # i18n:dev
         out.append((x - dx / d * distance, y - dy / d * distance))
     return out
 
@@ -223,7 +223,7 @@ def ellipse_box_coverage(ellipse_box: Box, target: Box) -> float:
     試作 p47 では楕円を画素に塗って数えた。ここでは横を細かく分けて縦の長さを足す。"""
     t_area = box_area(target)
     if t_area <= 0:
-        raise ValueError("覆われる側の四角の面積が0")
+        raise ValueError("覆われる側の四角の面積が0")  # i18n:dev
     ex0, ey0, ex1, ey1 = ellipse_box
     cx, cy = (ex0 + ex1) / 2, (ey0 + ey1) / 2
     rx, ry = (ex1 - ex0) / 2, (ey1 - ey0) / 2

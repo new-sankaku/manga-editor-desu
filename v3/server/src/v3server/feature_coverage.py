@@ -42,18 +42,18 @@ ROWS_10_4: dict[str, object] = {
                 "random_split_panel"]},
     "ナイフ": {"ops": ["split_panel"]},
     "フキダシの型・自分で描くフキダシ": {"ops": ["add_text_item", "update_text_item"]},
-    "文字・文字の飾り・書体を足す": {"ops": ["add_text_item", "update_text_item", "set_work_settings"]},
+    "文字・文字の飾り・フォントを足す": {"ops": ["add_text_item", "update_text_item", "set_work_settings"]},
     "ペンの種類・消しゴム": {"ops": ["add_pen_strokes", "update_pen_strokes", "erase_pen_strokes", "erase_pixels"]},
     "トーン・集中線・スピード線": {"ops": ["add_page_item", "update_page_item"]},
     "絵記号": {"ops": ["add_page_item", "update_page_item"]},
     "位置・角度・拡大・傾き・反転・不透明度": {
         "ops": ["update_panel", "update_panel_layer", "update_text_item", "update_page_item"]},
-    "白黒化・明るさ・ぼかし・重ね方・まとめて戻す": {
+    "白黒化・明るさ・ぼかし・合成モード・まとめて戻す": {
         "ops": ["update_panel", "update_panel_layer", "update_text_item", "update_page_item", "reset_adjustments"]},
-    "層の一覧（見せる・動かさない・順番）": {"ops": ["update_panel_layer", "update_page_item", "set_fixed"]},
+    "レイヤーの一覧（見せる・動かさない・順番）": {"ops": ["update_panel_layer", "update_page_item", "set_fixed"]},
     "絵を作る・絵から作り直す・囲んで直す・角度を変える・拡大・背景を抜く・絵から指示を読む": {
         "routes": ["POST /works/{work_id}/jobs", "POST /works/{work_id}/images/{image_id}/read-prompt"]},
-    "手順・モデル・シード・参照": {"ops": ["add_material_entry", "update_material_entry"],
+    "ワークフロー・モデル・シード・参照": {"ops": ["add_material_entry", "update_material_entry"],
                                    "routes": ["PUT /services/{service_id}/processes/{process}", "POST /works/{work_id}/jobs"]},
     "設定資料（人物・小物・背景・その他）": {
         "ops": ["add_material_entry", "update_material_entry", "decide_material_proposal", "set_removed"]},
@@ -71,7 +71,7 @@ ROWS_10_4: dict[str, object] = {
                    "GET /works/{work_id}/exports/{run_id}/files/{name}",
                    "POST /works/{work_id}/exports/{run_id}/pages/{page_id}/psd",
                    "POST /works/{work_id}/preflight"]},
-    "マス目・基本枠・印の表示": SCREEN,
+    "グリッド・基本枠・印の表示": SCREEN,
     "言語・自動保存・設定": {"ops": ["set_work_settings"], "routes": ["GET /me/settings", "PUT /me/settings"]},
     "探す・置き換え": {"ops": ["replace_text"], "routes": ["GET /works/{work_id}/search"]},
     "統計の一覧": EXCLUDED,

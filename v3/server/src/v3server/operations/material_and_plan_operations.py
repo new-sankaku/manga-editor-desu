@@ -19,6 +19,7 @@ from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Episode
 from v3server.llm_questions.structure_question import Outline
+from v3server.messages import m, text_of
 from v3server.operations.ai_involvement import require_actor_may, require_ai_may_change_fields
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -104,7 +105,7 @@ def _checked(values: dict[str, Any]) -> dict[str, Any]:
     try:
         return MaterialValues.model_validate(values).model_dump(mode="json")
     except ValueError as e:
-        raise Invalid(f"設定資料の値が正しくない: {e}") from e
+        raise Invalid(m("設定資料の値が正しくない: {reason}", reason=text_of(e))) from e
 
 
 class SetWorkPlan(OpBase):
@@ -124,9 +125,9 @@ class SetWorkPlan(OpBase):
     async def apply(self, ctx):
         changes = self.model_dump(exclude={"type"}, exclude_unset=True, mode="json")
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         if changes.get("exclusions", []) is None:
-            raise Invalid("exclusions は空にできない（無くすときは []）")
+            raise Invalid(m("exclusions は空にできない（無くすときは []）"))
         rc = RowChanges(ctx)
         plan = (await ctx.session.execute(select(WorkPlan).where(WorkPlan.work_id == ctx.work.id))).scalar_one_or_none()
         if plan is None:
@@ -200,7 +201,7 @@ class UpdateMaterialEntry(OpBase):
         entry = await ctx.session.get(MaterialEntry, self.id)
         changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True, mode="json")
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         merged = {k: getattr(entry, k) for k in MaterialValues.model_fields} | changes
         checked = _checked(merged)
         changes = {k: checked[k] for k in changes}
@@ -223,10 +224,10 @@ class DecideMaterialProposal(OpBase):
 
     async def apply(self, ctx):
         if ctx.actor.kind != "human":
-            raise HumanHandProtected("案を採るのは人だけ")
+            raise HumanHandProtected(m("案を採るのは人だけ"))
         entry = await ctx.session.get(MaterialEntry, self.id)
         if entry.proposal_state == self.state:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         before = entry.proposal_state
         entry.proposal_state = self.state
         return {**self.model_dump(), "state": before}
@@ -250,7 +251,8 @@ class SetEpisodeOutline(OpBase):
         try:
             value = Outline.model_validate(self.outline).model_dump(mode="json")
         except ValidationError as e:
-            raise Invalid(f"構成の形が合わない: {e.errors()[0]['loc']} {e.errors()[0]['msg']}") from e
+            first = e.errors()[0]
+            raise Invalid(m("構成の形が合わない: {loc} {msg}", loc=str(first["loc"]), msg=first["msg"])) from e
         rc = RowChanges(ctx)
         row = (await ctx.session.execute(select(EpisodeOutline).where(
             EpisodeOutline.episode_id == self.episode_id))).scalar_one_or_none()

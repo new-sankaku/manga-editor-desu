@@ -1,10 +1,10 @@
 """画像生成の処理に渡すマスクと絵を、依頼を受けるときに描く（numpy と Pillow だけ。ComfyUI の側では読んで使うだけ）。
 
-- 描き直す範囲のマスク：広げる（grow）→ ぼかす（feather。外側へだけ）→ 人の手の範囲を引く。人の手の範囲は最後に引くので、
-  ぼかしで人の範囲へにじむことは無い（ComfyUI の側でも最後に元の画素で貼り戻す。comfy_graphs/source_and_masks.py）。
+- 描き直す範囲のマスク：広げる（grow）→ ぼかす（feather。外側へだけ）→ 手動編集の範囲を引く。手動編集の範囲は最後に引くので、
+  ぼかしで人の範囲へにじむことは無い（ComfyUI の側でも最後に元のピクセルで貼り戻す。comfy_graphs/source_and_masks.py）。
   ここまでの物を、描いた絵を重ねるときのなじませるマスクにし、白黒にした物（binarize）を描くときのマスクにする
 - 描き足す：元の絵を広げた分の真ん中に置き、外側を埋める（周りの色を流し込む・端を伸ばす・折り返す・灰色）。広げた所のマスクは、
-  広げた辺から内側へぼかしの幅だけ 1→0 へ下げる。人の手の範囲は広げた絵の上の位置へずらす
+  広げた辺から内側へぼかしの幅だけ 1→0 へ下げる。手動編集の範囲は広げた絵の上の位置へずらす
 - 囲んだ所だけ大きくして直す：マスクの白い所を囲む四角に余白を足し、絵の内側に収めた切り出しの四角を決める
 
 マスクの絵は白黒の RGB（赤のチャンネルを読む。ai-verification.md 1.1 の原因B）。
@@ -17,6 +17,7 @@ from typing import Literal
 import numpy as np
 from PIL import Image, ImageFilter
 
+from v3server.messages import m
 from v3server.v3_error_types import Invalid
 
 Fill = Literal["diffuse", "edge", "mirror", "gray"]
@@ -27,7 +28,8 @@ def to_array(data: bytes, size: tuple[int, int] | None = None) -> np.ndarray:
     """マスクの PNG を 0〜1 の float 配列（高さ×幅）にする。size があれば大きさを確かめる。"""
     im = Image.open(io.BytesIO(data))
     if size is not None and im.size != size:
-        raise Invalid(f"マスクの大きさ {im.size[0]}x{im.size[1]} が元の絵 {size[0]}x{size[1]} と違う")
+        raise Invalid(m("マスクの大きさ {mask_width}x{mask_height} が元の絵 {width}x{height} と違う",
+                        mask_width=im.size[0], mask_height=im.size[1], width=size[0], height=size[1]))
     if im.mode in ("RGBA", "LA"):
         # 透明な所は塗っていない所とみなす（画面のマスクは透明の上に塗る）
         rgba = im.convert("RGBA")
@@ -80,7 +82,7 @@ def _max_1d(a: np.ndarray, radius: int, axis: int) -> np.ndarray:
 def grow(mask: np.ndarray, px: int) -> np.ndarray:
     """白い所を px だけ広げる（正方形の窓）。0 なら変えない。"""
     if px < 0:
-        raise Invalid("広げる量は0以上")
+        raise Invalid(m("広げる量は0以上"))
     return _max_1d(_max_1d(mask, px, 0), px, 1)
 
 
@@ -89,7 +91,7 @@ def feather(mask: np.ndarray, px: int) -> np.ndarray:
     マスクの値が 1 に届かないと描き直しが効かないことがある。調査 2.1 の Stabilize Mask と同じ問題）。
     ガウスぼかし（半径 px/2）の 0.5 以上を 1 にし、0.5 未満を 2 倍する。0 なら変えない。"""
     if px < 0:
-        raise Invalid("ぼかしの幅は0以上")
+        raise Invalid(m("ぼかしの幅は0以上"))
     if px == 0:
         return mask
     im = Image.fromarray(np.clip(np.rint(mask * 255), 0, 255).astype(np.uint8), mode="L")
@@ -98,7 +100,7 @@ def feather(mask: np.ndarray, px: int) -> np.ndarray:
 
 
 def redraw_mask(mask: np.ndarray, protected: np.ndarray, grow_px: int, feather_px: int) -> np.ndarray:
-    """描き直す範囲（広げる→ぼかす→人の手の範囲を引く）。"""
+    """描き直す範囲（広げる→ぼかす→手動編集の範囲を引く）。"""
     out = feather(grow((mask >= 0.5).astype(np.float32), grow_px), feather_px)
     return np.where(protected >= 0.5, 0.0, out).astype(np.float32)
 
@@ -116,7 +118,7 @@ def crop_box(mask: np.ndarray, padding_px: int) -> tuple[int, int, int, int]:
     """マスクの白い所を囲む四角に余白を足して、絵の内側に収めた (x, y, 幅, 高さ)。白い所が無ければ断る。"""
     ys, xs = np.nonzero(mask > 0)
     if len(xs) == 0:
-        raise Invalid("描き直す範囲が空（人の手の範囲を引いた後に何も残っていない）")
+        raise Invalid(m("描き直す範囲が空（手動編集の範囲を引いた後に何も残っていない）"))
     h, w = mask.shape
     x0, y0 = max(0, int(xs.min()) - padding_px), max(0, int(ys.min()) - padding_px)
     x1, y1 = min(w, int(xs.max()) + 1 + padding_px), min(h, int(ys.max()) + 1 + padding_px)
@@ -139,7 +141,7 @@ def _up(a: np.ndarray, size: tuple[int, int]) -> np.ndarray:
 
 def diffuse_fill(a: np.ndarray, known: np.ndarray) -> np.ndarray:
     """known の外を、周りの色を流し込んで埋める（push-pull。半分ずつ縮めて色の平均を作り、広げ直して空いた所に入れる）。
-    調査の「余白を先に埋める（LaMa、または色を流し込む）」の後の方。known の所は元の画素のまま。"""
+    調査の「余白を先に埋める（LaMa、または色を流し込む）」の後の方。known の所は元のピクセルのまま。"""
     w = known.astype(np.float32)
     levels = [(a.astype(np.float32) * w[..., None], w)]
     while max(levels[-1][1].shape) > 1:

@@ -148,13 +148,13 @@ async def test_人が変えた層の項目はAIが変えず判断待ちに置く
     assert not ev.held_changes
     assert (await layer(api, wid, a, blue))["opacity"] == 0.9
     # 人の手の層は AI が作れない・変えられない
-    with pytest.raises(Exception, match="人の手の層"):
+    with pytest.raises(Exception, match="手描きレイヤー"):
         await ai_op(authz, wid, a, {"type": "add_panel_layer", "panel_id": panel, "role": "human_hand",
                                     "stack_order": 9})
     hand = uuid.uuid4().hex
     assert (await op(api, wid, a, {"type": "add_panel_layer", "id": hand, "panel_id": panel, "role": "human_hand",
                                    "stack_order": 9})).status_code == 200
-    with pytest.raises(Exception, match="人の手の層"):
+    with pytest.raises(Exception, match="手描きレイヤー"):
         await ai_op(authz, wid, a, {"type": "update_panel_layer", "id": hand, "visible": False})
     # 固定の層は AI も変えられない（判断待ちにもしない）
     assert (await op(api, wid, a, {"type": "set_fixed", "target_kind": "panel_layer", "id": blue,

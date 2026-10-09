@@ -17,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Spread, Work
+from v3server.messages import m
 from v3server.name_structure.print_settings import NombreSettings, PrintSettings
 from v3server.name_structure.reading_direction import PageSpec
 
@@ -34,13 +35,16 @@ def page_sides(count: int, first_page_is_left: bool) -> list[Side]:
 def spread_problem(first_index: int, second_index: int, sides: list[Side], reading_direction: str) -> str | None:
     """見開きの2ページの位置が組として正しくなければ、その理由。"""
     if second_index != first_index + 1:
-        return f"見開きの2ページが隣り合っていない（{first_index + 1}ページ目と{second_index + 1}ページ目）"
+        return m("見開きの2ページが隣り合っていない（{first}ページ目と{second}ページ目）",
+                 first=first_index + 1, second=second_index + 1)
     want = ("right", "left") if reading_direction == "rtl" else ("left", "right")
     got = (sides[first_index], sides[second_index])
     if got != want:
-        side = {"left": "左", "right": "右"}
-        return (f"見開きの前のページが{side[got[0]]}・後ろのページが{side[got[1]]}になる（{first_index + 1}・{second_index + 1}ページ目）。"
-                f"この読む向きでは前が{side[want[0]]}・後ろが{side[want[1]]}")
+        side = {"left": m("左"), "right": m("右")}
+        return m("見開きの前のページが{got_first}・後ろのページが{got_second}になる（{first}・{second}ページ目）。"
+                 "この読む向きでは前が{want_first}・後ろが{want_second}",
+                 got_first=side[got[0]], got_second=side[got[1]], first=first_index + 1, second=second_index + 1,
+                 want_first=side[want[0]], want_second=side[want[1]])
     return None
 
 
@@ -68,13 +72,13 @@ def check_spreads(pages: list[Page], spreads: list[Spread], work: Work) -> list[
     for s in spreads:
         for pid in (s.first_page_id, s.second_page_id):
             if pid in used:
-                out.append((s, f"ページ {pid} が2つの見開きに入っている"))
+                out.append((s, m("ページ {id} が2つの見開きに入っている", id=pid)))
             used[pid] = s.id
         if s.first_page_id not in index or s.second_page_id not in index:
-            out.append((s, "見開きのページが抜かれているか、別の話にある"))
+            out.append((s, m("見開きのページが削除されているか、別の話にある")))
             continue
         if sides is None:
-            out.append((s, "1ページ目を左に置くか（作品の first_page_is_left）が決まっていないので、見開きの左右を決められない"))
+            out.append((s, m("1ページ目を左に置くか（作品の first_page_is_left）が決まっていないので、見開きの左右を決められない")))
             continue
         problem = spread_problem(index[s.first_page_id], index[s.second_page_id], sides, work.reading_direction)
         if problem:
@@ -165,7 +169,7 @@ async def plan_pages(session: AsyncSession, work: Work, page_ids: list[str]) -> 
     for pid in page_ids:
         page = await session.get(Page, pid)
         if page is None or page.work_id != work.id or page.removed:
-            raise BookLayoutError(f"ページ {pid} が無いか、抜かれている")
+            raise BookLayoutError(f"ページ {pid} が無いか、削除されている")  # i18n:stored
         by_episode.setdefault(page.episode_id, []).append(pid)
     for episode_id, wanted in by_episode.items():
         episode = await session.get(Episode, episode_id)

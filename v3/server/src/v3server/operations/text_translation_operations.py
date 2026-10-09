@@ -18,6 +18,7 @@ from v3server.canonical_tables.text_and_layer_tables import TextItem
 from v3server.canonical_tables.translation_review_import_tables import (
     TextItemTranslation,
 )
+from v3server.messages import m
 from v3server.operations.ai_involvement import (
     ROW_TASK,
     require_actor_may,
@@ -40,7 +41,7 @@ def _scope(item: TextItem) -> Scope:
 def _source_language(work) -> str:
     lang = (work.preferences or {}).get("language")
     if not lang:
-        raise Invalid("作品の言語（set_work_settings の preferences.language）を先に決める。どれが元の言語か分からない")
+        raise Invalid(m("作品の言語（set_work_settings の preferences.language）を先に決める。どれが元の言語か分からない"))
     return lang
 
 
@@ -67,14 +68,14 @@ class SetTextTranslation(OpBase):
 
     async def apply(self, ctx):
         if self.language == _source_language(ctx.work):
-            raise Invalid(f"{self.language} は作品の言語。元の文字は update_text_item で変える")
+            raise Invalid(m("{language} は作品の言語。元の文字は update_text_item で変える", language=self.language))
         item = await ctx.session.get(TextItem, self.text_item_id)
         row = (await ctx.session.execute(select(TextItemTranslation).where(
             TextItemTranslation.text_item_id == item.id, TextItemTranslation.language == self.language))).scalar()
         changes = self.model_dump(include=set(TRANSLATION_FIELDS), exclude_unset=True)
         if row is None:
             if self.text is None:
-                raise Invalid("訳文を足すときは text が要る")
+                raise Invalid(m("訳文を足すときは text が要る"))
             require_actor_may(ctx.actor, ctx.work, ROW_TASK["text_item_translations"], "decide")
             require_ai_may_change_fields(ctx.actor, ctx.work, "text_item_translations", set(changes))
             marks = sorted(k for k, v in changes.items() if v is not None) if ctx.actor.kind == "human" else []
@@ -84,16 +85,16 @@ class SetTextTranslation(OpBase):
             return {"type": "set_text_translation_removed", "id": self.id, "removed": True}
         if row.removed:
             if self.text is None:
-                raise Invalid("抜いた訳文の文字へ足すときは text が要る")
+                raise Invalid(m("削除した訳文の文字へ足すときは text が要る"))
             require_actor_may(ctx.actor, ctx.work, ROW_TASK["text_item_translations"], "decide")
             # 取り消しは抜き直す（抜いてある間の訳文は読まれないので、前の訳文には戻さない。翻訳者も取り消せる形にする）
             row.removed = False
             change_with_human_hand(ctx, row, changes, self.human_hand_fields)
             return {"type": "set_text_translation_removed", "id": row.id, "removed": True}
         if not changes and self.human_hand_fields is None:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         if "text" in changes and changes["text"] is None:
-            raise Invalid("訳文を空にするときは set_text_translation_removed で抜く")
+            raise Invalid(m("訳文を空にするときは set_text_translation_removed で削除する"))
         before = change_with_human_hand(ctx, row, changes, self.human_hand_fields)
         return {"type": self.type, "text_item_id": self.text_item_id, "language": self.language, **before}
 

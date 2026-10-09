@@ -12,6 +12,7 @@ from typing import Literal
 from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer
 from v3server.canonical_tables.work_tree_tables import Panel
+from v3server.messages import m
 from v3server.operations.image_placement_carry import Version, frame_bbox, geometry_to_parent, placement_for
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj
 from v3server.operations.text_and_layer_operations import UpdatePanelLayer
@@ -59,18 +60,18 @@ class AdoptImage(OpBase):
         panel = await ctx.session.get(Panel, self.panel_id)
         img = await get_in_work(ctx.session, ImageFile, self.image_id, ctx.work.id)
         if img.discarded:
-            raise Invalid("却下した絵は採れない（先に却下を外す）")
+            raise Invalid(m("却下した絵は採れない（先に却下を外す）"))
         if self.layer_id is not None:
             layer = await get_in_work(ctx.session, PanelLayer, self.layer_id, ctx.work.id)
             if layer.panel_id != panel.id:
-                raise Invalid(f"層 {layer.id} はコマ {panel.id} の物ではない")
+                raise Invalid(m("レイヤー {layer} はコマ {panel} の物ではない", layer=layer.id, panel=panel.id))
             cur_id, cur_pl = layer.image_id, layer.placement
             if cur_id is None:
                 cur_id, cur_pl = panel.image_id, panel.image_placement
         else:
             cur_id, cur_pl = panel.image_id, panel.image_placement
         if cur_id == img.id and self.layer_id is None:
-            raise Invalid("もうこの絵になっている")
+            raise Invalid(m("もうこの絵になっている"))
         versions = await load_versions(ctx.session, [i for i in (cur_id, img.id) if i])
         placement, _ = placement_for(cur_pl, versions.get(cur_id) if cur_id else None, versions[img.id], versions,
                                      frame_bbox(panel.frame))
@@ -87,16 +88,16 @@ class SetImageDiscarded(OpBase):
     async def scope(self, session, work):
         img = await get_in_work(session, ImageFile, self.image_id, work.id)
         if img.page_id is None:
-            raise Invalid("ページに付いていない絵は、候補として却下できない")
+            raise Invalid(m("ページに付いていない絵は、候補として却下できない"))
         return Scope("can_draw", page_obj(img.page_id), [("page", img.page_id)])
 
     async def apply(self, ctx):
         img = await ctx.session.get(ImageFile, self.image_id)
         if img.discarded == self.discarded:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         in_use = [p.id for p in (await ctx.session.execute(
             Panel.__table__.select().where(Panel.image_id == img.id, Panel.removed.is_(False)))).all()]
         if self.discarded and in_use:
-            raise Invalid(f"コマ {in_use[0]} で使っている絵は却下できない")
+            raise Invalid(m("コマ {panel} で使っている絵は却下できない", panel=in_use[0]))
         img.discarded = self.discarded
         return {**self.model_dump(), "discarded": not self.discarded}

@@ -20,6 +20,7 @@ from typing import Any
 
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange
+from v3server.messages import m
 from v3server.operations.ai_involvement import (
     HUMAN_EDITABLE_FIELDS,
     require_ai_may_change_fields,
@@ -39,7 +40,8 @@ def is_human_held(obj) -> bool:
 def refuse_if_fixed(obj) -> None:
     """人が「動かさない」を掛けた行は、誰も変えられない。"""
     if getattr(obj, "fixed", False):
-        raise FixedByPerson(f"{obj.__tablename__}:{obj.id} は人が「動かさない」にしている。先に人が外す")
+        raise FixedByPerson(m("{table}:{id} は人が「動かさない」にしている。先に人が外す",
+                              table=obj.__tablename__, id=obj.id))
 
 
 def touches_human_hand(obj, fields: set[str]) -> bool:
@@ -111,7 +113,7 @@ def change_with_human_hand(ctx, obj, changes: dict[str, Any], explicit_hand_fiel
     """
     actor = ctx.actor
     if explicit_hand_fields is not None and actor.kind == "ai":
-        raise HumanHandProtected("人の手の印を変えられるのは人だけ")
+        raise HumanHandProtected(m("手動編集の印を変えられるのは人だけ"))
     if ai_change is None:
         ai_change = actor.kind == "ai"
     if ai_change:

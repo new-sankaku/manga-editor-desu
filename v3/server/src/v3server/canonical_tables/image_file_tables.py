@@ -21,9 +21,9 @@ class ImageFile(Base):
     # 絵の役目：コマの絵・線画・ベタ・トーン・着彩・背景・人の手・ページの原稿・参照・設定資料
     role: Mapped[str] = mapped_column(String(32))
     # 出どころ：generated（生成）・human_drawn（人が描いた）・imported（外から持ち込んだ）・
-    # human_edited（前の版に人が外のソフトなどで手を入れた）
+    # human_edited（前のバージョンに人が外のソフトなどで手を入れた）
     origin: Mapped[str] = mapped_column(String(16))
-    # 元にした版（作り直し・囲んで直す・人が手を入れた絵の、元の絵）。最初の版は無い
+    # 元にしたバージョン（作り直し・囲んで直す・人が手を入れた絵の、元の絵）。最初のバージョンは無い
     based_on_image_id: Mapped[str | None] = mapped_column(ForeignKey("image_files.id"), index=True)
     # 利用の条件（usage_terms_schema.py の UsageTerms）。持ち込んだ絵は必須。生成した絵は使ったサービスの条件を見る
     usage_terms: Mapped[dict[str, Any] | None] = mapped_column()

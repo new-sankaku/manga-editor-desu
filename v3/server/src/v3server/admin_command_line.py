@@ -1,6 +1,6 @@
 """管理の操作。`uv run python -m v3server.admin_command_line grant-admin <利用者>`
 
-つなぎ先と処理ごとの送り先は全作品で共通なので、サーバーの管理者（system:main の admin）だけが変えられる。
+接続先と処理ごとの送り先は全作品で共通なので、サーバーの管理者（system:main の admin）だけが変えられる。
 最初の管理者は画面から作れないので、ここで付ける。
 """
 

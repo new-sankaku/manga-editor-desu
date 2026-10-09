@@ -23,7 +23,7 @@ export class Saver {
   }
 
   // ops を1つの記録として送る。pages：記録を載せるページの id。reload：済んだ後にサーバーから読み直すか
-  // send：ops を送る代わりに使う関数（絵を上げるなど、口が操作でないとき）。出来事の id の並びを返す
+  // send：ops を送る代わりに使う関数（絵を上げるなど、API が操作でないとき）。出来事の id の並びを返す
   submit({ label, pages, ops = [], reload = false, send = null }) {
     const started = performance.now();
     const ids = new Promise((resolve, reject) => {

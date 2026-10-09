@@ -14,12 +14,12 @@ from v3server.service_senders.sender_result_types import (
 
 
 async def call_litellm(service: Service, sp: ServiceProcess, request: dict[str, Any]) -> AdapterResult:
-    """文章・VLM。LiteLLM Proxy の OpenAI 互換の口へ送る。APIキーは LiteLLM だけが持つ（11章の鍵）。"""
+    """文章・VLM。LiteLLM Proxy の OpenAI 互換の API へ送る。APIキーは LiteLLM だけが持つ（11章の鍵）。"""
     settings = get_settings()
     if settings.litellm_master_key is None:
-        raise AdapterError("transport", "LITELLM_MASTER_KEY が設定されていない")
+        raise AdapterError("transport", "LITELLM_MASTER_KEY が設定されていない")  # i18n:stored
     if sp.model is None:
-        raise AdapterError("refused", f"{service.name} の {sp.process} にモデルが決まっていない")
+        raise AdapterError("refused", f"{service.name} の {sp.process} にモデルが決まっていない")  # i18n:stored
     params = request.get("params", {})
     body = {"model": sp.model, "messages": request["messages"], **params}
     try:
@@ -30,7 +30,7 @@ async def call_litellm(service: Service, sp: ServiceProcess, request: dict[str, 
                 headers={"Authorization": f"Bearer {settings.litellm_master_key}"},
             )
     except httpx.TimeoutException as e:
-        raise AdapterError("transport", f"時間切れ: {e}") from e
+        raise AdapterError("transport", f"時間切れ: {e}") from e  # i18n:stored
     except httpx.TransportError as e:
         raise AdapterError("transport", str(e)) from e
 

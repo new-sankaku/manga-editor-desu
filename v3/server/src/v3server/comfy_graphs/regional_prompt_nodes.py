@@ -9,13 +9,13 @@ from dataclasses import dataclass
 
 from v3server.comfy_graphs.comfy_node_graph import ComfyNodeGraph, Node
 
-# ConditioningSetArea の幅・高さ・位置は 8 画素刻み（ComfyUI の入力の定義）
+# ConditioningSetArea の幅・高さ・位置は 8 ピクセル刻み（ComfyUI の入力の定義）
 AREA_STEP = 8
 
 
 @dataclass(frozen=True)
 class RegionPrompt:
-    """1つの範囲の文。位置と大きさは生成する絵の画素。"""
+    """1つの範囲の文。位置と大きさは生成する絵のピクセル。"""
 
     text: str
     x: int
@@ -50,11 +50,11 @@ def regional_positive(graph: ComfyNodeGraph, positive, clip, regions: list[Regio
 
 def _check(regions: list[RegionPrompt]) -> None:
     if not regions:
-        raise ValueError('範囲が1つもありません')
+        raise ValueError('範囲が1つもありません')  # i18n:stored
     for r in regions:
         for name in ('x', 'y', 'width', 'height'):
             if getattr(r, name) % AREA_STEP:
-                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} 画素刻みではありません')
+                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} ピクセル刻みではありません')  # i18n:stored
 
 
 def apply_regional_prompts(graph: ComfyNodeGraph, sampler: Node, clip_source: Node, regions: list[RegionPrompt]) -> Node:
@@ -65,11 +65,11 @@ def apply_regional_prompts(graph: ComfyNodeGraph, sampler: Node, clip_source: No
     白黒では 2/6〜3/6 で、ほかは複数コマのページの絵になった。白黒の2人はこれだけでは足りない。
     """
     if not regions:
-        raise ValueError('範囲が1つもありません')
+        raise ValueError('範囲が1つもありません')  # i18n:stored
     for r in regions:
         for name in ('x', 'y', 'width', 'height'):
             if getattr(r, name) % AREA_STEP:
-                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} 画素刻みではありません')
+                raise ValueError(f'範囲の {name}={getattr(r, name)} が {AREA_STEP} ピクセル刻みではありません')  # i18n:stored
     combined = None
     for r in regions:
         enc = graph.add('CLIPTextEncode', text=r.text, clip=clip_source[1])

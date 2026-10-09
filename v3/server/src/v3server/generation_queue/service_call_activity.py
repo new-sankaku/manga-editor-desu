@@ -54,8 +54,8 @@ async def _heartbeat_forever() -> None:
 
 
 def _image_details(job: Job, inputs: list[str]) -> dict:
-    """登録する絵の details。画像生成の処理（image_process）なら、処理・引数・シード・候補のまとまり・つなぎ先と、
-    元の絵の画素との対応（geometry：新しい画素 = 元の画素 × scale + offset。置き場を引き継ぐときに使う）を書く。"""
+    """登録する絵の details。画像生成の処理（image_process）なら、処理・引数・シード・候補のまとまり・接続先と、
+    元の絵のピクセルとの対応（geometry：新しいピクセル = 元のピクセル × scale + offset。置き場を引き継ぐときに使う）を書く。"""
     details: dict = {"input_image_ids": inputs} if inputs else {}
     ip = job.request.get("image_process")
     if ip is not None:
@@ -112,7 +112,7 @@ async def call_service(job_id: str) -> None:
     """依頼を1回送り、答えを正本に入れる。作業者が途中で落ちて Temporal がやり直しても、二重に送らず二重に登録しない。
 
     1. 前の回が答えを受け取って残していれば（received）、送らずにそれを使う（3へ）
-    2. 送る前に、鍵と費用の取り置きを持った呼び出しの記録（sending）を確定する。予算はつなぎ先の行を FOR UPDATE で取ってから
+    2. 送る前に、鍵と費用の取り置きを持った呼び出しの記録（sending）を確定する。予算は接続先の行を FOR UPDATE で取ってから
        確かめるので、並んだ依頼が同時に上限を超えない。送って失敗したら取り置きを外す（failed）。
        受け取ったら、絵を置き場に置き、答えと入口の判定の記録を1回で確定する（received）
     3. 絵の登録・答えの取り込み・呼び出しの記録（ok）・依頼の終わり（done）を1回で確定する。途中で落ちても何も残らず、
@@ -166,7 +166,7 @@ async def _reserve(session, job: Job, service: Service, sp, attempt: int, stop) 
         await stop("destination_not_allowed", f"{service.name} はこの作品の送ってよい先に無い")
     if sp is None:
         await stop("refused", f"{service.name} は {job.process} を受けられない")
-    # 予算：つなぎ先の行を取ってから数え、取り置きを足して確定するまで、ほかの依頼はここで待つ
+    # 予算：接続先の行を取ってから数え、取り置きを足して確定するまで、ほかの依頼はここで待つ
     await session.execute(select(Service.id).where(Service.id == service.id).with_for_update())
     if service.monthly_budget is not None:
         spent = await _month_cost(session, service.id)
@@ -185,7 +185,7 @@ async def _send_and_keep(session, job: Job, service: Service, sp, call: CallLog,
     """送り、受け取った答えを残す（received）。絵は置き場に置き、入口の判定の記録と同じ確定に入れる。"""
     started = time.monotonic()
     # 送っている間も生存を知らせる。人が取り消すと、その返事で CancelledError がここに届き、
-    # 送り手（comfyui_sender.py）が送り先の物を止める
+    # アダプター（comfyui_sender.py）が送り先の物を止める
     heartbeat = asyncio.create_task(_heartbeat_forever())
     try:
         result = await ADAPTERS[service.adapter](service, sp, job.request)
@@ -228,7 +228,7 @@ async def _finish(session, job_id: str, service: Service, call: CallLog, stop) -
             except (V3Error, RuntimeError) as e:
                 await session.rollback()
                 raise ApplicationError(f"絵の登録を断られた: {e}", {"retry_after": None}, type="refused",
-                                       non_retryable=True) from e
+                                       non_retryable=True) from e  # i18n:stored
         if job.process in KNOWN_PROCESSES:
             # 答えを読み、要るものを正本に入れる（依頼した人の代わりのAIとして、操作の窓口を通す）
             actor = Actor(kind="ai", id=f"service:{service.id}", on_behalf_of=job.requested_by)
@@ -243,7 +243,7 @@ async def _finish(session, job_id: str, service: Service, call: CallLog, stop) -
             except V3Error as e:
                 await session.rollback()
                 raise ApplicationError(f"答えを正本に入れるのを断られた: {e}", {"retry_after": None}, type="refused",
-                                       non_retryable=True) from e
+                                       non_retryable=True) from e  # i18n:stored
     except ApplicationError:
         raise
     except BaseException:

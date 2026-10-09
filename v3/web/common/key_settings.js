@@ -2,7 +2,7 @@
 // - 全部の画面の操作を、効く所ごとに出す（common/key_catalog.js の全部）
 // - 「足す」を押してからキーを押すと割り当てる（Esc でやめる）。重なる相手があれば、その場で出し、
 //   「相手から外して割り当てる」か「やめる」を選ぶ（Photoshop・Krita の、重なりをその場で知らせて選ばせるやり方）
-// - 残す先はサーバーの利用者ごとの設定（/me/settings の other.keymap）。どのブラウザでも同じ割り当てになる
+// - 保存先はサーバーの利用者ごとの設定（/me/settings の other.keymap）。どのブラウザでも同じ割り当てになる
 // - 初めに戻す（1つずつ・全部）。今のアプリ（js/shortcut.js）のキーを読み込む（違う物だけを並べ、選んで読み込む）
 import { html, render, nothing } from "../vendor/lit-html-3.2.1/lit-html.js";
 import { live } from "../vendor/lit-html-3.2.1/directives/live.js";

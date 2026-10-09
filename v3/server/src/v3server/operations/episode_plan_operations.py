@@ -17,6 +17,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile
 from v3server.canonical_tables.material_and_setting_tables import MaterialEntry
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Episode, Volume
+from v3server.messages import m, text_of
 from v3server.operations.ai_involvement import require_actor_may, require_ai_may_change_fields
 from v3server.operations.material_and_plan_operations import LoraUse
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
@@ -43,16 +44,16 @@ async def _checked_plan_values(session, work_id: str, values: dict[str, Any]) ->
     if "cast_entry_ids" in values:
         ids = values["cast_entry_ids"]
         if ids is None or len(set(ids)) != len(ids):
-            raise Invalid("cast_entry_ids は重ならない id の並び（無くすときは []）")
+            raise Invalid(m("cast_entry_ids は重ならない id の並び（無くすときは []）"))
         for i in ids:
             entry = await get_in_work(session, MaterialEntry, i, work_id)
             if entry.removed or entry.proposal_state != "adopted":
-                raise Invalid(f"設定資料 {i} は抜かれているか、採っていない案")
+                raise Invalid(m("設定資料 {id} は削除されているか、採っていない案", id=i))
     if "generation_defaults" in values:
         try:
             g = EpisodeGeneration.model_validate(values["generation_defaults"] or {})
         except ValueError as e:
-            raise Invalid(f"話の生成の中身が正しくない: {e}") from e
+            raise Invalid(m("話の生成の中身が正しくない: {reason}", reason=text_of(e))) from e
         for i in g.reference_image_ids:
             await get_in_work(session, ImageFile, i, work_id)
         values["generation_defaults"] = g.model_dump(mode="json")
@@ -93,7 +94,7 @@ class SetEpisodePlan(OpBase):
     async def apply(self, ctx):
         changes = self.model_dump(include=set(PLAN_FIELDS), exclude_unset=True, mode="json")
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         changes = await _checked_plan_values(ctx.session, ctx.work.id, changes)
         rc = RowChanges(ctx)
         plan = await _plan_of(ctx, rc, self.episode_id, set(changes))
@@ -130,17 +131,17 @@ class CarryOverEpisodePlan(OpBase):
 
     async def apply(self, ctx):
         if ctx.actor.kind != "human":
-            raise Invalid("前の話から引き継ぐのは人だけ")
+            raise Invalid(m("前の話から引き継ぐのは人だけ"))
         episode = await ctx.session.get(Episode, self.episode_id)
         source = (await ctx.session.get(Episode, self.from_episode_id) if self.from_episode_id
                   else await previous_episode(ctx.session, episode))
         if source is None:
-            raise Invalid("引き継ぐ前の話が無い（最初の話か、前の話が抜かれている）")
+            raise Invalid(m("引き継ぐ前の話が無い（最初の話か、前の話が削除されている）"))
         if source.id == episode.id:
-            raise Invalid("同じ話からは引き継げない")
+            raise Invalid(m("同じ話からは引き継げない"))
         src = (await ctx.session.execute(select(EpisodePlan).where(EpisodePlan.episode_id == source.id))).scalar()
         if src is None:
-            raise Invalid("前の話に構成（出る人物・話の生成の中身）が無い")
+            raise Invalid(m("前の話に構成（出る人物・話の生成の中身）が無い"))
         values = await _checked_plan_values(ctx.session, ctx.work.id, {
             # 前の話の後で抜いた・採らなかった設定資料は写さない
             "cast_entry_ids": [i for i in src.cast_entry_ids
@@ -203,12 +204,12 @@ class UpdateForeshadowing(OpBase):
         row = await ctx.session.get(Foreshadowing, self.id)
         changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True)
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         for k in ("text", "planted_episode_id", "state"):
             if k in changes and changes[k] is None:
-                raise Invalid(f"{k} は空にできない")
+                raise Invalid(m("{field} は空にできない", field=k))
         if row.removed:
-            raise Invalid("抜いた伏線は set_removed で戻してから変える")
+            raise Invalid(m("削除した伏線は set_removed で戻してから変える"))
         rc = RowChanges(ctx)
         rc.change(row, changes)
         return rc.inverse([], "伏線を変えた取り消し")

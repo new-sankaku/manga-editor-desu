@@ -139,7 +139,7 @@ async def upstream_of(session: AsyncSession, kind: str, work_id: str, target_id:
                 EpisodeOutline.episode_id == target_id, EpisodeOutline.removed.is_(False)))).scalar_one_or_none()
             out["outline"] = _entry(fingerprint(row.outline) if row else None, "recheck", "構成")
         return out
-    raise ValueError(f"知らない作業の種類: {kind}")
+    raise ValueError(f"知らない作業の種類: {kind}")  # i18n:dev
 
 
 def stale_entries(used: dict[str, dict[str, Any]], current: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:

@@ -65,6 +65,7 @@ from v3server.llm_questions.redo_instruction_question import (
     parse_tags_answer,
 )
 from v3server.llm_questions.shot_angle_question import build_shot_angle_question, parse_shot_angle_answer
+from v3server.messages import m
 from v3server.operations.image_candidate_operations import AdoptImage, SetImageDiscarded
 from v3server.operations.image_placement_carry import frame_bbox
 from v3server.operations.operation_submit_and_undo import submit
@@ -74,15 +75,15 @@ __all__ = ["DrawingSpec", "THRESHOLDS", "CONDITIONAL_THRESHOLDS", "HUMAN_ONLY_VI
 
 # 作画の検査が必ず読む閾値（値の形は {"value": 数}）
 THRESHOLDS = {
-    "person_score": "人物の検出の score の下限",
-    "edge_px": "見切れとみなす、枠が絵の端から何画素以内か",
-    "text_score": "絵の中の文字の検出の score の下限",
+    "person_score": m("人物の検出の score の下限"),
+    "edge_px": m("見切れとみなす、枠が絵の端から何ピクセル以内か"),
+    "text_score": m("絵の中の文字の検出の score の下限"),
 }
 # 検査の条件が揃ったコマでだけ読む閾値
 CONDITIONAL_THRESHOLDS = {
-    "person_iou_min": "ネームの人物の範囲と検出した人物の重なり（IoU）の下限（ネームに人物の範囲があるコマ）",
-    "ccip_threshold": "同じ人物とみなす CCIP の差の上限（設定資料に人物の絵があるコマ）",
-    "face_covered_max": "顔が吹き出しに隠れてよい割合の上限（吹き出しを置いたコマ）",
+    "person_iou_min": m("ネームの人物の範囲と検出した人物の重なり（IoU）の下限（ネームに人物の範囲があるコマ）"),
+    "ccip_threshold": m("同じ人物とみなす CCIP の差の上限（設定資料に人物の絵があるコマ）"),
+    "face_covered_max": m("顔がフキダシに隠れてよい割合の上限（フキダシを置いたコマ）"),
 }
 # 手段が無く、人の確認に回す観点（設計 8.2）
 HUMAN_ONLY_VIEWS = ("背景", "視線", "ぼやけ・線の潰れ", "服・アクセサリー・小物")
@@ -101,12 +102,12 @@ async def drawing_thresholds(session, work_id: str) -> dict[str, dict[str, Any]]
     if missing:
         raise q.blocked("作画の検査の閾値が未設定: " + "、".join(f"{DRAWING_THRESHOLD_PREFIX}{k}（{THRESHOLDS[k]}）"
                                                      for k in missing), missing=[DRAWING_THRESHOLD_PREFIX + k
-                                                                                 for k in missing])
+                                                                                 for k in missing])  # i18n:stored
     return {k: {"value": float(t.value["value"]), "status": t.status, "source": t.source} for k, t in got.items()}
 
 
 async def text_boxes_mm(session, panel_id: str) -> list[list[float]]:
-    """コマに置いた文字（吹き出し・語り・擬音）の範囲（ページの mm）。仕上げ（S5）で人が置く。置く前は空。"""
+    """コマに置いた文字（フキダシ・語り・擬音）の範囲（ページの mm）。仕上げ（S5）で人が置く。置く前は空。"""
     rows = (await session.execute(select(TextItem.box_mm).where(
         TextItem.panel_id == panel_id, TextItem.removed.is_(False), TextItem.box_mm.is_not(None)))).scalars().all()
     return [list(b) for b in rows]
@@ -115,7 +116,7 @@ async def text_boxes_mm(session, panel_id: str) -> list[list[float]]:
 def _require(th: dict[str, Any], keys: list[str]) -> None:
     missing = [k for k in keys if k not in th]
     if missing:
-        raise q.blocked("このコマの検査に要る閾値が未設定: " + "、".join(
+        raise q.blocked("このコマの検査に要る閾値が未設定: " + "、".join(  # i18n:stored
             f"{DRAWING_THRESHOLD_PREFIX}{k}（{CONDITIONAL_THRESHOLDS[k]}）" for k in missing),
             missing=[DRAWING_THRESHOLD_PREFIX + k for k in missing])
 
@@ -144,10 +145,10 @@ async def cut_out(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         panel = await session.get(Panel, unit.target_id)
         if panel is None or panel.removed:
-            raise ApplicationError("コマが無い（消された）", type="refused", non_retryable=True)
+            raise ApplicationError("コマが無い（消された）", type="refused", non_retryable=True)  # i18n:stored
         if panel.human_confirmed:
             raise ApplicationError("人の確定印のあるコマは、AIが作り直さない（設計 9.2）", type="refused",
-                                   non_retryable=True)
+                                   non_retryable=True)  # i18n:stored
         DrawingSpec.model_validate(unit.spec.get("drawing"))
         return {"panel_id": panel.id, "page_id": panel.page_id, "people": panel_people_names(panel)}
 
@@ -166,11 +167,11 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         for name in panel_people_names(panel):
             m = chars.get(name)
             if m is None:
-                raise q.blocked(f"設定資料に人物 {name} が無い（採った人物だけを使う）", character=name)
+                raise q.blocked(f"設定資料に人物 {name} が無い（採った人物だけを使う）", character=name)  # i18n:stored
             prompt = (m.generation or {}).get("prompt")
             if not prompt:
                 raise q.blocked(f"設定資料の人物 {name} に生成の言葉（generation.prompt）が無い。特徴の言葉は毎回全部入れる"
-                                "（試作 p17）ので、人が設定資料に書く", character=name)
+                                "（試作 p17）ので、人が設定資料に書く", character=name)  # i18n:stored
             fixed.append(prompt)
             people.append({"name": name, "prompt": prompt, "reference_image_id": (m.image_ids or [None])[0]})
             if (m.generation or {}).get("negative_prompt"):
@@ -202,7 +203,8 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     try:
         tags = parse_tags_answer(text)
     except BrokenAnswerError as e:
-        raise ApplicationError(f"タグの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+        raise ApplicationError(  # i18n:stored
+            f"タグの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
     prompt = ", ".join(p.strip() for p in [spec.quality_words, spec.style_words, *fixed, ", ".join(tags)] if p.strip())
     async with get_sessionmaker()() as session:
         cost = await q.jobs_cost(session, [job_id])
@@ -221,7 +223,7 @@ def _image_request(process: str, params: dict[str, Any], seed: int, set_id: str,
         "image_process": {"name": process, "params": params, "seed": seed, "candidate_set_id": set_id[:32],
                           "requested_params": params},
         "register": _register(panel, role),
-        # 進み具合の鍵は候補の id（画面は候補ごとに段数と途中の絵を出す。背景と描き足しは同じ鍵を順に使う）
+        # 進行状況の鍵は候補の id（画面は候補ごとに段数と途中の絵を出す。背景と描き足しは同じ鍵を順に使う）
         "progress_key": cand_id,
     }
     if inputs:
@@ -246,7 +248,7 @@ def _first_requests(spec: DrawingSpec, ctx: dict[str, Any], panel: Panel, cand: 
     plan, text = ctx["plan"], {"prompt": ctx["prompt"], "negative_prompt": ctx["negative_prompt"]}
     w, h = plan["size"]
     if source:
-        # 人が直した絵から続ける（人の手の範囲は今の仕組みで貼り戻す）
+        # 手動で修正した絵から続ける（手動編集の範囲は今の仕組みで貼り戻す）
         params = {**spec.redraw_params, **text}
         return "draw", "image_to_image", _image_request(
             "image_to_image", params, cand.seed, set_id, panel, cand.id, "panel_art",
@@ -304,12 +306,13 @@ async def _job_row(session, job_id: str) -> dict[str, Any]:
 
 
 async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    """args: attempt, context（文脈の段の答え）, seeds, edit_image_id（人が直した絵から続けるとき）"""
+    """args: attempt, context（文脈の段の答え）, seeds, edit_image_id（手動で修正した絵から続けるとき）"""
     spec = DrawingSpec.model_validate(unit.spec["drawing"])
     ctx, attempt, k = args["context"], args["attempt"], unit.limits["candidates_per_attempt"]
     source = args.get("edit_image_id")
     if source and spec.redraw_params is None:
-        raise q.blocked("人が直した絵から続けるには、作業の決めごとに redraw_params（image_to_image の引数）が要る")
+        raise q.blocked(  # i18n:stored
+            "手動で修正した絵から続けるには、作業の決めごとに redraw_params（image_to_image の引数）が要る")
     plan = ctx["plan"]
     set_id = f"{unit.id}a{attempt}"
     cand_ids, first_jobs = [], []
@@ -382,9 +385,10 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         await session.commit()
     refused = [o for o in out if o["failure_kind"] == "refused"]
     if refused and len(refused) == len(out):
-        raise ApplicationError(f"生成が全部断られた: {jobs[0].failure_detail}", type="refused", non_retryable=True)
+        raise ApplicationError(  # i18n:stored
+            f"生成が全部断られた: {jobs[0].failure_detail}", type="refused", non_retryable=True)
     if not any(o["image_id"] for o in out):
-        raise ApplicationError("生成が全部止まった", {"kinds": [o["failure_kind"] for o in out]},
+        raise ApplicationError("生成が全部止まった", {"kinds": [o["failure_kind"] for o in out]},  # i18n:stored
                                type="generation_failed", non_retryable=True)
     return {"candidates": out, "cost": cost, "job_ids": all_job_ids, "route": "edit" if source else plan["route"],
             "placement": plan["placement"], "used": plan["used"], "missing": plan["missing"]}
@@ -429,7 +433,7 @@ def match_people(want: list[list[float]], got: list[list[float]]) -> list[tuple[
 
 
 def covered_ratio(face: list[float], balloons: list[list[float]]) -> float:
-    """顔の枠のうち、吹き出しの枠に隠れる割合（吹き出しどうしの重なりは数え過ぎないよう 1 で切る）。"""
+    """顔の枠のうち、フキダシの枠に隠れる割合（フキダシどうしの重なりは数え過ぎないよう 1 で切る）。"""
     area = (face[2] - face[0]) * (face[3] - face[1])
     if area <= 0:
         return 0.0
@@ -469,7 +473,7 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
     W, H = img.width, img.height
     if not skip_size:
         want = tuple(plan["size"])
-        findings.append(_finding("大きさ", (W, H) == want, None, f"{W}x{H}（頼んだ {want[0]}x{want[1]}）"))
+        findings.append(_finding("大きさ", (W, H) == want, None, f"{W}x{H}（依頼した {want[0]}x{want[1]}）"))
     form_p = {"edge_px": int(th["edge_px"]["value"]), "score_threshold": th["person_score"]["value"]}
     pj, _ = await _detect(unit, f"{unit.id}:c{cand.id}:detect_person", "detect_person", "/person_face_head",
                           {"image": img.sha256}, form_p)
@@ -517,7 +521,7 @@ async def _check_one(unit: HarnessUnit, cand: HarnessCandidate, img: ImageFile, 
                                  f"いちばん隠れた顔 {worst:.0%}（上限 {hi:.0%}）。顔の検出 {len(faces)}"))
     else:
         findings.append(_finding("顔と吹き出しの重なり", None, None,
-                                 "吹き出しを置いていない（仕上げ S5 で置いた後に検査する）"))
+                                 "フキダシを置いていない（仕上げ S5 で置いた後に検査する）"))
     texts = tjob.result.get("texts", [])
     findings.append({**_finding("絵の中の文字・吹き出し", not texts, th["text_score"], f"文字の範囲 {len(texts)}"),
                      "fix": {"kind": "text", "boxes_px": [_xyxy(t) for t in texts]} if texts else None})
@@ -609,7 +613,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             judged = parse_shot_angle_answer(text, len(cands))
         except BrokenAnswerError as e:
-            raise ApplicationError(f"写す範囲・角度の答えの形が崩れた: {e}", type="broken_response",
+            raise ApplicationError(f"写す範囲・角度の答えの形が崩れた: {e}", type="broken_response",  # i18n:stored
                                    non_retryable=True) from e
         for c, j in zip(cands, judged, strict=True):
             if want_shot:
@@ -647,7 +651,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         if targets is None:
             continue
         if spec.fix is None:
-            why_not = "作業の決めごとに fix（直させる段の引数）が無い"
+            why_not = "作業の決めごとに fix（直させるステップの引数）が無い"
             continue
         fixable.append(c.id)
     failed_names = sorted({x["name"] for c in current if c.check_verdict == "drop" for x in c.check["findings"]
@@ -778,7 +782,8 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             outcomes = await compare_pairs(ask, pairs, criterion, os.path.join(tmp, f"blind{r}"),
                                            salt=f"{unit.id}:a{attempt}:r{r}")
         except BrokenAnswerError as e:
-            raise ApplicationError(f"評価役の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+            raise ApplicationError(  # i18n:stored
+                f"評価モデルの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
         score = {c.id: {"wins": 0, "ties": 0, "losses": 0} for c in cands}
         for o in outcomes:
             a, b = cid_of[o.pair.left], cid_of[o.pair.right]
@@ -815,7 +820,7 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    """人の採用。args: by（採用した人）, candidate_id か image_id（人が直した絵）。"""
+    """人の採用。args: by（採用した人）, candidate_id か image_id（手動で修正した絵）。"""
     actor = Actor(kind="human", id=args["by"])
     async with get_sessionmaker()() as session:
         image_id = args.get("image_id")

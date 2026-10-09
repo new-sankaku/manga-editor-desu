@@ -120,16 +120,16 @@ def render_depth_and_line(boxes: list[Box], camera: Camera, width: int, height: 
     線は、当たった面が変わる所と、奥行きが飛ぶ所に引く。
     """
     if not boxes:
-        raise ValueError('箱が1つもありません')
+        raise ValueError('箱が1つもありません')  # i18n:stored
     if line.thickness_px < 1:
-        raise ValueError('線の太さは1画素以上にしてください')
+        raise ValueError('線の太さは1ピクセル以上にしてください')  # i18n:stored
     d = camera_rays(width, height, camera).reshape(-1, 3)
     best, face = _hit_boxes(boxes, np.array(camera.position, dtype=np.float64), d)
     best = best.reshape(height, width)
     face = face.reshape(height, width)
     finite = np.isfinite(best)
     if not finite.any():
-        raise ValueError('カメラから箱が1つも見えません')
+        raise ValueError('カメラから箱が1つも見えません')  # i18n:stored
     far = np.percentile(best[finite], FAR_PERCENTILE)
     depth = np.clip(1 - best / far, 0, 1)
     depth[~finite] = 0

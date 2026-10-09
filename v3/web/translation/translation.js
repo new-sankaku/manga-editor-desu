@@ -1,13 +1,13 @@
 // 翻訳：ページごとに、元の文字（作品の言語）と訳文を左右に並べて直す。
-// 口：GET /works/{id}（ページ・コマ・文字の並び）、GET /works/{id}/translations?language=（訳文と訳文の無い文字）
-//     操作 set_text_translation（足す・変える）・set_text_translation_removed（抜く）。翻訳者の役でも出せる（決めるのはサーバー）
-// 訳す言語は ?lang= と localStorage の v3.lang に残す
+// API：GET /works/{id}（ページ・コマ・文字の並び）、GET /works/{id}/translations?language=（訳文と訳文の無い文字）
+//     操作 set_text_translation（足す・変える）・set_text_translation_removed（削除）。翻訳者の役でも出せる（決めるのはサーバー）
+// 訳す言語は ?lang= と localStorage の v3.lang に保存する
 import { t } from "../common/i18n.js";
 import { html, render, nothing, live, api, icon, toast, fail, op, startShell, emptyNote, screenHref,
          TEXT_DIR, REVIEW, REVIEW_FLAG, reviewStates, episodePages, storedEpisode, rememberEpisode, episodePicker } from "../common/shell.js";
 
 const main = document.getElementById("main");
-const KIND = { balloon: t("吹き出し"), caption: t("ナレーション"), drawn_sfx: t("描き文字") };
+const KIND = { balloon: t("フキダシ"), caption: t("ナレーション"), drawn_sfx: t("描き文字") };
 const KIND_ORDER = ["balloon", "caption", "drawn_sfx"];
 // 言語の欄の候補。ここに無い言語も手で入れられる（形はサーバーの LANGUAGE_PATTERN と同じ）
 const LANG_HINTS = [["en", t("英語")], ["zh-Hans", t("中国語（簡体）")], ["zh-Hant", t("中国語（繁体）")], ["ko", t("韓国語")], ["fr", t("フランス語")], ["es", t("スペイン語")], ["de", t("ドイツ語")]];
@@ -22,7 +22,7 @@ function storedLang() {
   try { return localStorage.getItem("v3.lang") || ""; } catch { return ""; }
 }
 function keepLang(l) {
-  try { localStorage.setItem("v3.lang", l); } catch { /* 残せない環境では URL だけ */ }
+  try { localStorage.setItem("v3.lang", l); } catch { /* 保存できない環境では URL だけ */ }
   const u = new URL(location.href); if (l) u.searchParams.set("lang", l); else u.searchParams.delete("lang");
   history.replaceState(null, "", u);
 }
@@ -68,7 +68,7 @@ async function save(item) {
   if (d.writing_direction !== undefined && d.writing_direction !== (cur?.writing_direction ?? null)) body.writing_direction = d.writing_direction;
   if (d.font_size_pt !== undefined && d.font_size_pt !== (cur?.font_size_pt ?? null)) body.font_size_pt = d.font_size_pt;
   if (!cur && !body.text) { toast(t("新しく訳すときは訳文を入れてください"), "need"); return; }
-  if (body.text === "") { toast(t("訳文を空にするときは「抜く」を使ってください"), "need"); return; }
+  if (body.text === "") { toast(t("訳文を空にするときは「削除」を使ってください"), "need"); return; }
   if (Object.keys(body).length === 3) { S.drafts.delete(item.id); draw(); return; }
   S.saving.add(item.id); draw();
   try {
@@ -81,8 +81,8 @@ async function removeTr(item) {
   const cur = S.tr.translations.find((t) => t.text_item_id === item.id);
   try {
     await op(S.workId, { type: "set_text_translation_removed", id: cur.id, removed: true });
-    S.drafts.delete(item.id); await loadTr(); toast(t("訳文を抜きました"));
-  } catch (e) { fail(e, t("訳文を抜けませんでした")); }
+    S.drafts.delete(item.id); await loadTr(); toast(t("訳文を削除しました"));
+  } catch (e) { fail(e, t("訳文を削除できませんでした")); }
   draw();
 }
 function edit(item, key, value) {
@@ -96,7 +96,7 @@ function pairRow(item) {
   const dir = d.writing_direction !== undefined ? d.writing_direction : (cur?.writing_direction ?? null);
   const size = d.font_size_pt !== undefined ? d.font_size_pt : (cur?.font_size_pt ?? null);
   const dirty = S.drafts.has(item.id);
-  const human = cur?.human_hand_fields?.length ? html`<span class="flag mut" title=${t("人が直した項目")}>${t("人が直した：{{fields}}", { fields: cur.human_hand_fields.map((f) => FIELD[f] || f).join(t("・")) })}</span>` : nothing;
+  const human = cur?.human_hand_fields?.length ? html`<span class="flag mut" title=${t("手動で修正した項目")}>${t("手動で修正：{{fields}}", { fields: cur.human_hand_fields.map((f) => FIELD[f] || f).join(t("・")) })}</span>` : nothing;
   return html`<div class="pair" data-item=${item.id}>
     <div class="v"><div class="row wrap meta"><span class="flag mut">${KIND[item.item_kind] || item.item_kind}</span>${item.speaker ? html`<span>${item.speaker}</span>` : nothing}</div>
       <div class="src" lang=${S.tr.source_language || ""}>${item.text}</div></div>
@@ -110,7 +110,7 @@ function pairRow(item) {
           @change=${(e) => edit(item, "font_size_pt", e.target.value === "" ? null : Number(e.target.value))}>
         <button class="btn primary sm" data-save ?disabled=${!dirty || S.saving.has(item.id)} @click=${() => save(item)}>${icon("save")}${t("残す")}</button>
         ${dirty ? html`<button class="btn ghost sm" @click=${() => { S.drafts.delete(item.id); draw(); }}>${t("戻す")}</button>` : nothing}
-        ${cur ? html`<button class="btn ghost sm" @click=${() => removeTr(item)}>${icon("trash-2")}${t("抜く")}</button>` : nothing}
+        ${cur ? html`<button class="btn ghost sm" @click=${() => removeTr(item)}>${icon("trash-2")}${t("削除")}</button>` : nothing}
       </div></div></div>`;
 }
 
@@ -139,7 +139,7 @@ function draw() {
       <label class="row"><input type="checkbox" .checked=${S.onlyMissing} @change=${(e) => { S.onlyMissing = e.target.checked; draw(); }}>${t("訳の無い文字だけ")}</label>
       ${S.tr ? html`<span class="meta">${t("この作品で訳の無い文字 {{n}}", { n: S.tr.missing_text_item_ids.length })}</span>` : nothing}
     </div>
-    ${src ? nothing : html`<div class="note need">${icon("triangle-alert")}<span>${t("作品の言語が決まっていません。どれが元の言語か分からないので訳せません。「企画」の決めごとで入れてください")}</span><a class="btn sm" href=${screenHref("plan")}>${t("企画へ")}</a></div>`}
+    ${src ? nothing : html`<div class="note need">${icon("triangle-alert")}<span>${t("作品の言語が決まっていません。どれが元の言語か分からないので訳せません。「企画」の作品の設定で入れてください")}</span><a class="btn sm" href=${screenHref("plan")}>${t("企画へ")}</a></div>`}
     ${src && S.lang === src ? html`<div class="note need">${icon("triangle-alert")}<span>${t("{{lang}} は作品の言語です。元の文字は原稿の画面で直します", { lang: src })}</span></div>` : nothing}
   </section>`;
   let body = nothing;

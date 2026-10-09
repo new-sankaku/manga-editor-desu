@@ -36,6 +36,7 @@ from v3server.llm_questions.settings_sheet_question import (
     parse_settings_sheet_answer,
 )
 from v3server.llm_questions.structure_question import outline_text
+from v3server.messages import m
 from v3server.operations.material_and_plan_operations import AddMaterialEntry
 from v3server.operations.operation_submit_and_undo import submit
 
@@ -53,7 +54,7 @@ class SettingsSpec(BaseModel):
     @model_validator(mode="after")
     def _range(self) -> "SettingsSpec":
         if self.character_min > self.character_max:
-            raise ValueError("character_min が character_max より大きい")
+            raise ValueError(m("character_min が character_max より大きい"))
         return self
 
 
@@ -76,7 +77,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             await q.require_route(session, "imported_text")
         plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == unit.work_id))).scalar_one_or_none()
         if plan is None or not (plan.synopsis or "").strip():
-            raise q.blocked("企画のあらすじが無い（S0 で書く）")
+            raise q.blocked("企画のあらすじが無い（S0 で書く）")  # i18n:stored
         rows = (await session.execute(
             select(Episode, EpisodeOutline).join(EpisodeOutline, EpisodeOutline.episode_id == Episode.id)
             .where(Episode.work_id == unit.work_id, Episode.removed.is_(False), EpisodeOutline.removed.is_(False))
@@ -91,7 +92,8 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             got = parse_memory_with_suspicious_answer(text)
         except BrokenAnswerError as e:
-            raise ApplicationError(f"原稿の記憶の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+            raise ApplicationError(  # i18n:stored
+                f"原稿の記憶の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
         memory, suspicious = [got.memory], got.suspicious
     question = build_settings_sheet_question(plan.synopsis, plan.audience, outlines, memory, spec.model_description,
                                              spec.character_min, spec.character_max, args.get("reject_reason"))
@@ -134,7 +136,8 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             pairs = parse_distinguish_answer(text, {x["name"] for x in chars})
         except BrokenAnswerError as e:
-            raise ApplicationError(f"見分けの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+            raise ApplicationError(  # i18n:stored
+                f"見分けの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
         return out + [c.finding("見分け", not pairs, False,
                                 "取り違えそうな組は無い" if not pairs
                                 else "；".join(f"{p.a} と {p.b}：{p.why}" for p in pairs), judge="llm")]
@@ -147,7 +150,8 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return await c.pick_fewest_flags(unit, args, "指摘の少ない案（設定資料の評価役は置かない。見分けの判定は指摘として出す）")
+    return await c.pick_fewest_flags(
+        unit, args, "指摘の少ない案（設定資料の評価モデルは置かない。見分けの判定は指摘として出す）")
 
 
 async def finalize(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:

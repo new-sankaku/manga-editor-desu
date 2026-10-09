@@ -1,7 +1,7 @@
 """絵のファイルの置き場。中身の sha256 を名前にして置くので、同じ絵は1つだけ置かれ、置いた物は書き換えない。
 置き場は設定 V3_IMAGE_STORE で選ぶ（V3サーバーの土台 1.3。s3 は 1.4.2）。
-- local: サーバーの手元のフォルダ（V3_IMAGE_DIR）。開発用
-- s3: S3互換の置き場（本番は SeaweedFS）。キーは手元のフォルダと同じ `<先頭2文字>/<sha256>`
+- local: サーバーのローカルのフォルダ（V3_IMAGE_DIR）。開発用
+- s3: S3互換の置き場（本番は SeaweedFS）。キーはローカルのフォルダと同じ `<先頭2文字>/<sha256>`
 選んだ置き場に届かなければ止める。もう一方の置き場を代わりに使うことはしない。
 
 置く前の中身は、どちらの置き場でも一度サーバーの一時ファイルに少しずつ書く（アップロードを丸ごとメモリに読まないため。点検5 3-1）。
@@ -24,6 +24,7 @@ from botocore.config import Config
 from botocore.exceptions import ClientError
 from PIL import Image
 
+from v3server.messages import m, text_of
 from v3server.server_settings import get_settings
 from v3server.v3_error_types import Invalid
 
@@ -142,7 +143,7 @@ def _key(sha256: str) -> str:
 
 @contextmanager
 def staged_file(source: BinaryIO | bytes) -> Iterator[pathlib.Path]:
-    """中身を一時ファイルに少しずつ書き、その住所を渡す。抜けるときに残っていれば消す（置いたら残らない）。
+    """中身を一時ファイルに少しずつ書き、そのパスを渡す。抜けるときに残っていれば消す（置いたら残らない）。
     アップロードを丸ごとメモリに読まないため（点検5 3-1）。"""
     fd, name = tempfile.mkstemp(dir=image_store().staging_dir(), suffix=".part")
     path = pathlib.Path(name)
@@ -166,16 +167,16 @@ def _sha256_of(path: pathlib.Path) -> str:
 
 
 def inspect_image_file(path: pathlib.Path) -> StoredImage:
-    """形式・大きさ・解像度を読む（画素は展開しない）。絵として読めない、または受け付けない形式なら止める。"""
+    """形式・大きさ・解像度を読む（ピクセルは展開しない）。絵として読めない、または受け付けない形式なら止める。"""
     try:
         with Image.open(path) as im:
             im.verify()
         with Image.open(path) as im:
             fmt, (w, h), dpi = im.format, im.size, im.info.get("dpi")
     except Exception as e:
-        raise Invalid(f"絵として読めない: {e}") from e
+        raise Invalid(m("絵として読めない: {reason}", reason=text_of(e))) from e
     if fmt not in ACCEPTED_FORMATS:
-        raise Invalid(f"受け付けない形式: {fmt}")
+        raise Invalid(m("受け付けない形式: {format}", format=fmt))
     return StoredImage(_sha256_of(path), ACCEPTED_FORMATS[fmt], w, h, round(float(dpi[0])) if dpi else None)
 
 

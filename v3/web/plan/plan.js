@@ -1,8 +1,8 @@
-// 企画：企画の文（あらすじ・読者・入れないもの・メモ）、作品の決めごと（媒体・向き・判型・ページの寸法・言語）、
-// 入稿の設定（色と解像度・2階調・安全線・ページ数の決まり・ノンブル・写植の組版）、作業ごとのAIの関与。
-// 口：GET /works/{id}、GET /works/{id}/ai-involvement、POST /works/{id}/plan/extract-characters、
+// 企画：企画の文（あらすじ・読者・入れないもの・メモ）、作品の設定（媒体・向き・判型・ページの寸法・言語）、
+// 入稿の設定（色と解像度・2階調・安全線・ページ数のルール・ノンブル・写植の組版）、作業ごとのAIの関与。
+// API：GET /works/{id}、GET /works/{id}/ai-involvement、POST /works/{id}/plan/extract-characters、
 //     操作 set_work_plan・set_work_settings・set_ai_involvement
-// 入稿の設定（preferences.print・nombre・typesetting）は worktree-agent-a4222899f5500b610 の口。まだ base に無い
+// 入稿の設定（preferences.print・nombre・typesetting）は worktree-agent-a4222899f5500b610 の API。まだ base に無い
 import { t } from "../common/i18n.js";
 import { html, render, nothing, api, icon, toast, fail, op, startShell, emptyNote, screenHref,
          MEDIUM, READING, TEXT_DIR, COLOR_MODE, PAGE_KIND, NOMBRE } from "../common/shell.js";
@@ -50,9 +50,9 @@ function savePlan(e) {
   run(t("企画を保存できませんでした"), async () => { await op(S.workId, { type: "set_work_plan", ...changes }); toast(t("企画を保存しました")); });
 }
 function extract() {
-  run(t("人物を抜き出せませんでした"), async () => {
+  run(t("人物を抽出できませんでした"), async () => {
     const job = await api.post(`/works/${S.workId}/plan/extract-characters`, { params: {} });
-    toast(t("人物を抜き出す依頼を入れました（{{status}}）。できた案は「設定資料」に案として入ります", { status: job.status }));
+    toast(t("人物を抽出する依頼を入れました（{{status}}）。できた案は「設定資料」に案として入ります", { status: job.status }));
   });
 }
 function planCard() {
@@ -60,15 +60,15 @@ function planCard() {
   const hand = new Set(p ? p.human_hand_fields : []);
   return html`<section class="card" aria-label=${t("企画の文")}>
     <div class="card-h"><span class="h2">${t("企画")}</span>
-      <button class="btn ai-o sm" @click=${extract} ?disabled=${S.busy || !p} title=${t("企画の文から人物を抜き出して、設定資料に案として入れる")}>${icon("users")}${t("人物を抜き出す")}</button></div>
+      <button class="btn ai-o sm" @click=${extract} ?disabled=${S.busy || !p} title=${t("企画の文から人物を抽出して、設定資料に案として入れる")}>${icon("users")}${t("人物を抽出")}</button></div>
     <form class="form" @submit=${savePlan}>
       ${fieldsHtml(PLAN, p)}
       <div class="full acts"><button class="btn primary" ?disabled=${S.busy}>${icon("save")}${t("保存")}</button>
-        ${hand.size ? html`<span class="meta">${t("人が書いた項目：{{fields}}（AIは変えずに判断待ちに置きます）", { fields: dot([...hand].map((k) => PLAN.find((f) => f.key === k)?.label || k)) })}</span>` : nothing}</div>
+        ${hand.size ? html`<span class="meta">${t("手動で入力した項目：{{fields}}（AIは変えずに判断待ちに置きます）", { fields: dot([...hand].map((k) => PLAN.find((f) => f.key === k)?.label || k)) })}</span>` : nothing}</div>
     </form></section>`;
 }
 
-// ---------------------------------------------------------------- 作品の決めごと
+// ---------------------------------------------------------------- 作品の設定
 const WORK = [
   { key: "title", label: t("題") },
   { key: "medium", label: t("媒体"), type: "select", options: MEDIUM },
@@ -101,12 +101,12 @@ function saveWork(e) {
   if (lang !== ((w.preferences || {}).language ?? null)) body.preferences = { ...(w.preferences || {}), language: lang };
   if (spec && JSON.stringify(spec) !== JSON.stringify(w.page_spec)) body.page_spec = spec;
   if (Object.keys(body).length === 1) { toast(t("変わった所がありません")); return; }
-  run(t("決めごとを保存できませんでした"), async () => { await op(S.workId, body); toast(t("決めごとを保存しました")); });
+  run(t("作品の設定を保存できませんでした"), async () => { await op(S.workId, body); toast(t("作品の設定を保存しました")); });
 }
 function workCard() {
   const w = S.work.work;
-  return html`<section class="card" aria-label=${t("決めごと")}>
-    <div class="card-h"><span class="h2">${t("決めごと")}</span><span class="meta">${t("作品で共通")}</span></div>
+  return html`<section class="card" aria-label=${t("作品の設定")}>
+    <div class="card-h"><span class="h2">${t("作品の設定")}</span><span class="meta">${t("作品で共通")}</span></div>
     <form class="form" @submit=${saveWork}>
       ${fieldsHtml(WORK, w)}
       <span class="sub-h">${t("ページの寸法")}</span>

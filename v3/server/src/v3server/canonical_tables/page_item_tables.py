@@ -2,10 +2,10 @@
 
 - PageItem：トーン・集中線・スピード線（item_kind=tone）と、図形・絵記号（item_kind=shape）
 - AnnotationItem：赤入れ（ページかコマの範囲に付ける指摘。人もAIも付ける。開いている・済んだ、の状態を持つ）
-- PenStroke：ペンの線（人の手の層ごと。点・筆圧・時刻・筆・太さ・色・種・描いた機器）。線が正本で、層の絵は線から作った控え
+- PenStroke：ペンの線（手描きレイヤーごと。点・筆圧・時刻・筆・太さ・色・種・描いた機器）。線が正本で、レイヤーの絵は線から作った控え
 - PanelTemplate：コマの型（作品ごとに人が保存した枠の並び）
 
-どれも人が直せる。人が変えた項目には人の手の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。
+どれも人が直せる。人が変えた項目には手動編集の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。
 """
 
 from datetime import datetime
@@ -70,7 +70,7 @@ class AnnotationItem(Base):
 
 
 class PenStroke(Base):
-    """ペンの線1本（V3細部の決めごと 10.1 のペン・消しゴム）。線そのものが正本で、絵は線から作った控え（層の image_id）。
+    """ペンの線1本（V3細部の決めごと 10.1 のペン・消しゴム）。線そのものが正本で、絵は線から作った控え（レイヤーの image_id）。
 
     今のアプリ（fabric.js の筆。js/sidebar/pen/pen-tools.js）と同じく、1本ずつ選んで動かす・消す・太さや色や筆を変えられる。
     点は基本枠の mm で持つ（控えの絵をどの解像度でも作り直せる）。乱れのある筆（クレヨン・スプレーなど）は seed で同じ絵に戻す。
@@ -82,7 +82,7 @@ class PenStroke(Base):
     work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
     page_id: Mapped[str] = mapped_column(ForeignKey("pages.id"), index=True)
     panel_id: Mapped[str] = mapped_column(ForeignKey("panels.id"), index=True)
-    # 描いた層（人の手の層）
+    # 描いたレイヤー（手描きレイヤー）
     layer_id: Mapped[str] = mapped_column(ForeignKey("panel_layers.id"), index=True)
     # 筆（hand_tools/vector_strokes.py の Brush）
     brush: Mapped[str] = mapped_column(String(24))
@@ -103,7 +103,7 @@ class PenStroke(Base):
     box_y0_mm: Mapped[float] = mapped_column(Float)
     box_x1_mm: Mapped[float] = mapped_column(Float)
     box_y1_mm: Mapped[float] = mapped_column(Float)
-    # 層の中で重ねる順（小さいほど下）
+    # レイヤーの中で重ねる順（小さいほど下）
     stack_order: Mapped[int] = mapped_column(Integer)
     created_by: Mapped[str] = mapped_column(String(128))
     fixed: Mapped[bool] = mapped_column(Boolean, default=False)

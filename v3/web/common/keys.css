@@ -1,9 +1,9 @@
-/* キーの一覧・キーを変える窓・絵だけ・全画面（common/keys.js）。色は common/theme.css の名前だけを使う。幅は決め打ちにしない */
+/* キーの一覧・キーを変える窓・集中モード・全画面（common/keys.js）。色は common/theme.css の名前だけを使う。幅は決め打ちにしない */
 
-/* 絵だけ：[data-v3-panel] を隠す。Tab（data-peek）の間は出す。画面ごとの残し方は、その画面の CSS が html[data-focus] を見て決める */
+/* 集中モード：[data-v3-panel] を隠す。Tab（data-peek）の間は出す。画面ごとの残し方は、その画面の CSS が html[data-focus] を見て決める */
 html[data-focus]:not([data-peek]) [data-v3-panel]{display:none !important}
 
-/* 絵だけ・全画面の間の小さい帯（右下） */
+/* 集中モード・全画面の間の小さい帯（右下） */
 .v3-viewbar{position:fixed;right:12px;bottom:12px;z-index:30;display:flex;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-2);font:12px/1.4 var(--font);color:var(--ink-2)}
 .v3-viewbar-b{border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;min-height:30px;padding:0 9px;border-radius:var(--r-sm);display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
 .v3-viewbar-b:hover{background:var(--surface-2);color:var(--ink)}
@@ -11,7 +11,7 @@ html[data-focus]:not([data-peek]) [data-v3-panel]{display:none !important}
 .v3-viewbar-b kbd{font:11px var(--font);color:var(--ink-4)}
 .v3-viewbar-b .lucide{width:16px;height:16px;flex:0 0 auto}
 
-/* 帯（common/nav.js）の右の、絵だけ・全画面・キーのボタン */
+/* 帯（common/nav.js）の右の、集中モード・全画面・キーのボタン */
 .v3-nav-tools{margin-left:auto;display:inline-flex;align-items:center;gap:2px}
 .v3-nav-b{min-height:30px;padding:0 8px;display:inline-flex;align-items:center;gap:5px;color:var(--ink-3);font-weight:500;border-radius:var(--r-sm);white-space:nowrap}
 .v3-nav-b:hover{color:var(--ink);background:var(--surface-3)}

@@ -30,6 +30,7 @@ from v3server.canonical_tables.work_tree_tables import Panel
 from v3server.comfy_graphs.pose_skeleton_image import FigureBox, draw_standing_pose
 from v3server.generation_queue.image_process_registry import spec_for
 from v3server.harness import queue_calls as q
+from v3server.messages import m
 from v3server.operations.image_placement_carry import frame_bbox
 
 ControlName = Literal["pose", "depth", "lineart"]
@@ -67,7 +68,7 @@ class FixSpec(BaseModel):
     params: dict[str, Any]
     # 直す所の種類ごとの言葉。inpaint は文の後ろに足す言葉、instruction_edit は指示の文そのもの
     words: dict[Literal["text", "face"], str]
-    # 落ちた範囲を囲む前に広げる画素
+    # 落ちた範囲を囲む前に広げるピクセル
     grow_px: int = Field(ge=0, le=512)
 
 
@@ -81,11 +82,11 @@ class DrawingSpec(BaseModel):
     quality_words: str
     style_words: str
     negative_words: str
-    # 長い辺の画素（コマの縦横比で短い辺を決める。8の倍数に丸める）
+    # 長い辺のピクセル（コマの縦横比で短い辺を決める。8の倍数に丸める）
     long_side: int = Field(ge=64, le=4096)
     # 処理の引数のうち、文・大きさ以外（形の指定など。処理の形でそのまま確かめる）
     base_params: dict[str, Any]
-    # 人が直した絵から続けるときの、変える強さなど（image_to_image の引数のうち文・大きさ以外）
+    # 手動で修正した絵から続けるときの、変える強さなど（image_to_image の引数のうち文・大きさ以外）
     redraw_params: dict[str, Any] | None = None
     # 人物の置き場の渡し方（どちらか1つ）。region：人物ごとの範囲に文を当てる / pose：骨格の図を形の指定で渡す
     person_placement: Literal["region", "pose"]
@@ -106,7 +107,7 @@ class DrawingSpec(BaseModel):
         if self.redraw_params is not None:
             spec_for("image_to_image").params_model.model_validate({**self.redraw_params, **text})
         if self.person_placement == "region" and self.region_strength is None:
-            raise ValueError("person_placement=region には region_strength が要る")
+            raise ValueError(m("person_placement=region には region_strength が要る"))
         if self.background is not None:
             spec_for("text_to_image").params_model.model_validate(
                 {**self.background.params, **text, "width": 64, "height": 64})
@@ -122,10 +123,10 @@ class DrawingSpec(BaseModel):
 def size_for_frame(frame: dict[str, Any] | None, long_side: int) -> tuple[int, int]:
     box = frame_bbox(frame)
     if box is None:
-        raise q.blocked("コマの枠が無い。ネームで枠を決めてから作画する")
+        raise q.blocked("コマの枠が無い。ネームで枠を決めてから作画する")  # i18n:stored
     w, h = box[2] - box[0], box[3] - box[1]
     if w <= 0 or h <= 0:
-        raise q.blocked("コマの枠の大きさが0")
+        raise q.blocked("コマの枠の大きさが0")  # i18n:stored
     if w >= h:
         return long_side // 8 * 8, max(64, math.floor(long_side * h / w / 8) * 8)
     return max(64, math.floor(long_side * w / h / 8) * 8), long_side // 8 * 8
@@ -145,7 +146,7 @@ def box_px(box: list[float], width: int, height: int) -> list[int]:
 
 
 def region_px8(box: list[float], width: int, height: int) -> dict[str, int]:
-    """割合の箱を、範囲ごとの文の 8 画素刻みの範囲にする（絵の外へは出さない）。"""
+    """割合の箱を、範囲ごとの文の 8 ピクセル刻みの範囲にする（絵の外へは出さない）。"""
     x = min(width - 8, math.floor(box[0] * width / 8) * 8)
     y = min(height - 8, math.floor(box[1] * height / 8) * 8)
     w = max(8, math.ceil((box[2] - box[0]) * width / 8) * 8)
@@ -154,7 +155,7 @@ def region_px8(box: list[float], width: int, height: int) -> dict[str, int]:
 
 
 def aspect_crop(img_w: int, img_h: int, want_w: int, want_h: int, box: list[float] | None) -> tuple[list[int], str]:
-    """正本の絵から切り出す範囲（画素）。ネームに切り出す範囲（background_crop）があればそれ、無ければ絵の真ん中を
+    """正本の絵から切り出す範囲（ピクセル）。ネームに切り出す範囲（background_crop）があればそれ、無ければ絵の真ん中を
     コマの縦横比でいちばん大きく取る（取り方を返して道の記録に書く）。"""
     if box is not None:
         return box_px(box, img_w, img_h), "ネームの切り出す範囲（background_crop）"
@@ -193,7 +194,8 @@ def scene_image(scene: dict[str, Any], view: str, width: int, height: int, bg: B
 def control_fields(spec: DrawingSpec, name: ControlName, invert: bool) -> dict[str, Any]:
     use = spec.controls.get(name)
     if use is None:
-        raise q.blocked(f"作業の決めごとの controls に {name} の効き（strength・end）が無い。この形の指定を使うには要る")
+        raise q.blocked(  # i18n:stored
+            f"作業の決めごとの controls に {name} の効き（strength・end）が無い。この形の指定を使うには要る")
     return {"control": "lineart" if name == "lineart" else name, "control_strength": use.strength,
             "control_end": use.end, "control_invert": invert}
 
@@ -264,13 +266,14 @@ async def plan_panel(session, work_id: str, panel: Panel, spec: DrawingSpec, peo
         if c.get("background_crop") is None:
             missing.append(how)
         if not figs and spec.redraw_params is None:
-            raise q.blocked("人物のいないコマで正本の背景を使うには、作業の決めごとに redraw_params が要る")
+            raise q.blocked(  # i18n:stored
+                "人物のいないコマで正本の背景を使うには、作業の決めごとに redraw_params が要る")
         return {**plan, "route": "background_crop", "location": loc.name, "view": view,
                 "background": {"image_id": img.id, "crop_px": crop, "how": how},
                 "size": [crop[2] - crop[0], crop[3] - crop[1]]}
     if (scene.get("cameras") or {}).get(view) and scene.get("boxes"):
         if not location_prompt:
-            raise q.blocked(f"設定資料の場所 {loc.name} に背景の生成の言葉（generation.prompt）が無い")
+            raise q.blocked(f"設定資料の場所 {loc.name} に背景の生成の言葉（generation.prompt）が無い")  # i18n:stored
         used.append(f"場所 {loc.name} の箱の3D（向き {view} のカメラ）から{'奥行き' if spec.background.control == 'depth' else '線画'}を描いた")
         return {**plan, "route": "background_3d", "location": loc.name, "view": view,
                 "background": {"scene3d": scene, "prompt": location_prompt}}

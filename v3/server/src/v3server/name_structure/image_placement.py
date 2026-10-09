@@ -3,6 +3,7 @@
 import numpy as np
 from pydantic import model_validator
 
+from v3server.messages import m
 from v3server.name_structure.item_transform import ItemTransform, transform_matrix
 
 
@@ -16,10 +17,10 @@ class ImagePlacement(ItemTransform):
     def _boxes(self):
         x0, y0, x1, y1 = self.crop_px
         if x0 < 0 or y0 < 0 or x1 <= x0 or y1 <= y0:
-            raise ValueError(f"切り抜きの範囲が正しくない: {self.crop_px}")
+            raise ValueError(m("切り抜きの範囲が正しくない: {crop}", crop=self.crop_px))
         a, b, c, d = self.dest_box_mm
         if c <= a or d <= b:
-            raise ValueError(f"置き場の範囲が正しくない: {self.dest_box_mm}")
+            raise ValueError(m("置き場の範囲が正しくない: {box}", box=self.dest_box_mm))
         return self
 
     def fits_image(self, width: int, height: int) -> bool:

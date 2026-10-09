@@ -20,6 +20,7 @@ from v3server.generation_queue.queue_names_and_priority import (
     QUEUE_ENTRY_WAIT,
     job_priority,
 )
+from v3server.messages import m
 from v3server.openfga_permissions import Authz
 from v3server.operations.ai_involvement import require_ai_may
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
@@ -44,7 +45,7 @@ async def enqueue(
     service_id: str | None = None,
 ) -> Job:
     """処理ごとの送り先（ProcessRoute）へ1件頼む。送り先は人が決めたものだけを使う。
-    service_id を渡すと、その処理を受けられる別のつなぎ先へ送る（画面でつなぎ先を選ぶ）。その先も送ってよい先の決まりにかける。
+    service_id を渡すと、その処理を受けられる別の接続先へ送る（画面で接続先を選ぶ）。その先も送ってよい先のルールにかける。
     何の作業の処理か（ai_task・ai_action）は送り先（ProcessRoute）から読む。"""
     if page_id is not None:
         await get_in_work(session, Page, page_id, work_id)
@@ -52,13 +53,14 @@ async def enqueue(
     else:
         relation, obj = "can_manage", work_obj(work_id)
     if not await authz.check(actor.permission_user, relation, obj):
-        raise Forbidden(f"{actor.permission_user} に {obj} の {relation} が無い")
+        raise Forbidden(m("{user} に {object} の {relation} が無い", user=actor.permission_user, object=obj,
+                          relation=relation))
 
     route = await session.get(ProcessRoute, process)
     if route is None:
-        raise Invalid(f"{process} の送り先が決まっていない")
+        raise Invalid(m("{process} の送り先が決まっていない", process=process))
     if route.ai_task is None or route.ai_action is None:
-        raise Invalid(f"{process} が何の作業の処理か（ai_task・ai_action）が決まっていない")
+        raise Invalid(m("{process} が何の作業の処理か（ai_task・ai_action）が決まっていない", process=process))
     check_process_task(process, route.ai_task, route.ai_action)
     # 頼んだのが人でもAIでも、処理をするのはAI。作業のAIの関与で許されていなければ受けない
     require_ai_may(await session.get(Work, work_id), route.ai_task, route.ai_action)
@@ -68,10 +70,11 @@ async def enqueue(
         raise NotFound(f"services:{service_id}")
     if service_id is not None and await session.scalar(select(ServiceProcess.id).where(
             ServiceProcess.service_id == service.id, ServiceProcess.process == process)) is None:
-        raise Invalid(f"{service.name} は {process} を受けられない（先に処理の中身を登録する）")
+        raise Invalid(m("{service} は {process} を受けられない（先に処理の中身を登録する）", service=service.name,
+                        process=process))
     if not await is_allowed(session, work_id, service):
         # 別の先へは回さない。人が送ってよい先に足すか、送り先を変える
-        raise Forbidden(f"{service.name} はこの作品の送ってよい先に無い")
+        raise Forbidden(m("{service} はこの作品の送ってよい先に無い", service=service.name))
 
     job = Job(
         work_id=work_id,
@@ -94,8 +97,8 @@ async def enqueue(
 
 
 async def _start_and_wait_until_queued(session: AsyncSession, temporal: Client, job: Job, inp: JobInput) -> None:
-    """流れを始め、送信をつなぎ先の待ち行列に入れ終えるまで待つ（generation_workflow.py の until_queued）。
-    入れ終えてから返すので、続けて頼んだ依頼は頼んだ順に待ち行列に入る（V3細部の決めごと 4.4「同じ扱いの中は、頼んだ順」）。
+    """流れを始め、送信を接続先のキューに入れ終えるまで待つ（generation_workflow.py の until_queued）。
+    入れ終えてから返すので、続けて頼んだ依頼は頼んだ順にキューに入る（V3細部の決めごと 4.4「同じ扱いの中は、頼んだ順」）。
     流れを始めただけで返すと、続けて頼んだ依頼の送信が前後して入った（2026-10-08 実測。V3サーバーの土台 7章）。
     制御の作業者が動いておらず QUEUE_ENTRY_WAIT を超えたら、流れを終わらせ、依頼を止めて知らせる。"""
     start = WithStartWorkflowOperation(
@@ -115,7 +118,8 @@ async def _start_and_wait_until_queued(session: AsyncSession, temporal: Client, 
         # WorkflowUpdateRPCTimeoutOrCancelledError に変えて投げる。時間を超えたときだけここで扱う
         if not limit.expired():
             raise
-        detail = f"{QUEUE_ENTRY_WAIT.total_seconds():.0f} 秒待っても待ち行列に入らなかった（制御の作業者が動いていない）"
+        detail = m("{seconds} 秒待ってもキューに入らなかった（制御の作業者が動いていない）",
+                   seconds=f"{QUEUE_ENTRY_WAIT.total_seconds():.0f}")
         try:
             await temporal.get_workflow_handle(job.workflow_id).terminate(detail)
         except RPCError as not_started:
@@ -124,16 +128,16 @@ async def _start_and_wait_until_queued(session: AsyncSession, temporal: Client, 
                 raise
         job.status, job.failure_kind, job.failure_detail = "stopped", "queue_not_running", detail
         await session.commit()
-        raise QueueNotRunning(f"jobs:{job.id} {detail}") from e
+        raise QueueNotRunning(m("jobs:{id} {detail}", id=job.id, detail=detail)) from e
 
 
 async def cancel(temporal: Client, job: Job) -> None:
     if job.workflow_id is None:
-        raise NotFound(f"jobs:{job.id} は流れていない")
+        raise NotFound(m("jobs:{id} は流れていない", id=job.id))
     await temporal.get_workflow_handle(job.workflow_id).cancel()
 
 
 async def resume(temporal: Client, job: Job) -> None:
     if job.status != "waiting_budget":
-        raise Invalid("予算の上限で待っているものだけ続けられる")
+        raise Invalid(m("予算の上限で待っているものだけ続けられる"))
     await temporal.get_workflow_handle(job.workflow_id).signal(GenerationJob.resume)

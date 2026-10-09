@@ -1,12 +1,12 @@
-"""今のアプリのプロジェクトの取り込み・訳文・確認の状態と進み具合の口（V3点検の結果 5章の6）。
+"""今のアプリのプロジェクトの取り込み・訳文・確認の状態と進行状況の API（V3点検の結果 5章の6）。
 
 - POST /works/{id}/episodes/{eid}/current-app-imports：今のアプリのプロジェクト（.lz4）を取り込む（作者だけ）。
   ファイルを読み、絵を入口に通し、行の案と報告を作って ImportCurrentAppProject を窓口に出す
 - GET  /works/{id}/current-app-imports：取り込みの報告の一覧（新しい順。entries は返さず数だけ。?episode_id= で絞る）
 - GET  /works/{id}/current-app-imports/{report_id}：取り込みの報告（入れた物・入れられなかった物と理由）
-- GET  /works/{id}/translations?language=：言語ごとの訳文と、訳文の無い文字と、抜いた訳文
+- GET  /works/{id}/translations?language=：言語ごとの訳文と、訳文の無い文字と、削除した訳文
 - GET  /works/{id}/review-records：確認の記録（コメントつき）
-- GET  /works/{id}/progress：話ごとの進み具合と締切の見込み（未検証。review_progress.py）
+- GET  /works/{id}/progress：話ごとの進行状況と締切の見込み（未検証。review_progress.py）
 訳文・確認の状態を変えるのは窓口の操作（set_text_translation・set_text_translation_removed・set_review_status）。
 """
 
@@ -45,6 +45,7 @@ from v3server.http_routes.http_dependencies import (
     row,
 )
 from v3server.image_intake import take_in_image
+from v3server.messages import m, text_of
 from v3server.name_structure.reading_direction import PageSpec
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.current_app_import_operations import ImportCurrentAppProject
@@ -68,7 +69,7 @@ RECORD_FIELDS = ("id", "target_kind", "target_id", "from_status", "to_status", "
 async def _work(session, work_id: str) -> Work:
     work = await session.get(Work, work_id)
     if work is None:
-        raise NotFound(f"作品 {work_id}")
+        raise NotFound(m("作品 {id}", id=work_id))
     return work
 
 
@@ -83,19 +84,19 @@ async def import_current_app_project(
     work = await _work(session, work_id)
     await get_in_work(session, Episode, episode_id, work_id)
     if work.page_spec is None:
-        raise Invalid("作品のページの寸法（page_spec）を先に決める")
+        raise Invalid(m("作品のページの寸法（page_spec）を先に決める"))
     terms = None
     if usage_terms is not None:
         try:
             terms = UsageTerms.model_validate_json(usage_terms)
         except ValidationError as e:
-            raise Invalid(f"usage_terms の形が正しくない: {e.errors()[0]['msg']}") from e
+            raise Invalid(m("usage_terms の形が正しくない: {reason}", reason=e.errors()[0]["msg"])) from e
     data = await project.read()
     name = project.filename or "project.lz4"
     try:
         parsed = read_project_file(data, get_settings().current_app_import_max_bytes)
     except (ProjectFileError, json.JSONDecodeError, UnicodeDecodeError) as e:
-        raise Invalid(f"今のアプリのプロジェクトとして読めない: {e}") from e
+        raise Invalid(m("今のアプリのプロジェクトとして読めない: {reason}", reason=text_of(e))) from e
     taken: dict[str, TakenImage] = {}
     for key, value in referenced_image_keys(parsed).items():
         try:
@@ -135,10 +136,10 @@ async def get_current_app_import(work_id: str, report_id: str, session: SessionD
 
 @router.get("/works/{work_id}/translations")
 async def list_translations(work_id: str, language: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """言語の訳文と、訳文の無い文字（抜いていないページ・文字だけ）と、抜いた訳文。
-    抜いた訳文のある文字へ足すと、その行を戻して書き直す（set_text_translation）。"""
+    """言語の訳文と、訳文の無い文字（削除していないページ・文字だけ）と、削除した訳文。
+    削除した訳文のある文字へ足すと、その行を戻して書き直す（set_text_translation）。"""
     if not re.match(LANGUAGE_PATTERN, language):
-        raise Invalid(f"言語の形が正しくない: {language}")
+        raise Invalid(m("言語の形が正しくない: {language}", language=language))
     await require(authz, actor, "can_view", work_obj(work_id))
     work = await _work(session, work_id)
     items = (await session.execute(select(TextItem).join(Page, Page.id == TextItem.page_id).where(

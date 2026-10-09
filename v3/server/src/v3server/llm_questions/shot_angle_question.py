@@ -22,7 +22,7 @@ def _quoted(literal) -> str:
 def build_shot_angle_question(image_count: int) -> str:
     """画像は呼ぶ側が image_count 枚、この順に添える。画像は添えた順の番号で呼ぶ（ファイルの名前を答えに使わせない）。"""
     if image_count < 1:
-        raise ValueError("image_count は1以上")
+        raise ValueError("image_count は1以上")  # i18n:dev
     return f"""添えた{image_count}枚の画像は、どれも漫画の1コマ用の絵です。画像は添えた順に1から番号で呼びます。
 
 各画像について、3つを判定してください。
@@ -51,5 +51,5 @@ def parse_shot_angle_answer(answer: str, image_count: int) -> list[ShotAngleJudg
     items = read_answer(answer, _ShotAngleAnswer).items
     got = sorted(x.image for x in items)
     if got != list(range(1, image_count + 1)):
-        raise BrokenAnswerError(f"画像の番号が 1〜{image_count} に揃っていない: {got}", answer)
+        raise BrokenAnswerError(f"画像の番号が 1〜{image_count} に揃っていない: {got}", answer)  # i18n:stored
     return sorted(items, key=lambda x: x.image)

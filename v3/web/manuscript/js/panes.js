@@ -1,4 +1,4 @@
-// 右の欄（判断・道具・層・確かめ）と、下のページの一覧。
+// 右のパネル（判断・ツール・レイヤー・確かめ）と、下のページの一覧。
 // どの欄も今の正本（S.m）から作り直す。値を変えたら main.js の change で操作を送る（ここで正本を直に書き換えない）。
 import * as api from "../../js/api.js";
 import { S, change, draw, reload, selectPage, setTool, setFrameMode, removeSelected, selectedRow, workbenchUrl, openWorkbench, TOOLS } from "./main.js";
@@ -90,7 +90,7 @@ function decide(x, decision) {
 export function heldStep(d) { if (!S.held.length) return; openTab("held"); heldFocus = (heldFocus + d + S.held.length) % S.held.length; const x = S.held[heldFocus]; jump({ page_id: x.page_id, location: { table: x.target_table, id: x.target_id } }); render(); }
 export function heldDecide(d) { if (S.tab !== "held" || !S.held[heldFocus]) return; decide(S.held[heldFocus], d); }
 
-// ---------------------------------------------------------------- 道具
+// ---------------------------------------------------------------- ツール
 function toolsPane() {
   const out = [];
   const r = selectedRow();
@@ -165,7 +165,7 @@ function common(r, kind) {
   const held = S.held.filter((x) => x.target_id === r.id);
   return [
     h("div", { class: "row wrap" },
-      hand.length ? flag(t("手動編集：{{fields}}", { fields: hand.map(fieldName).join(t("・")) }), "warn", t("人が変えた所。AIの案はここを直接は変えず、判断待ちになります")) : flag(t("手動編集の印なし"), "mut"),
+      hand.length ? flag(t("手動編集：{{fields}}", { fields: hand.map(fieldName).join(t("・")) }), "warn", t("手動で変更した所。AIの案はここを直接は変えず、判断待ちになります")) : flag(t("手動編集の印なし"), "mut"),
       held.length ? h("button", { class: "flag warn", onclick: () => openTab("held") }, t("判断待ち {{count}} 件", { count: held.length })) : null),
     h("div", { class: "row wrap" },
       h("button", { class: "btn sm", "aria-pressed": String(!!r.fixed), onclick: () => change(r.fixed ? t("動かさない印を外す") : t("動かさない印を付ける"), [{ type: "set_fixed", target_kind: kind, id: r.id, fixed: !r.fixed }], { pages: [r.page_id] }) },
@@ -188,12 +188,12 @@ function panelPane(p) {
   sec(t("コマの絵"),
     p.image_id ? h("div", { class: "row wrap" }, flag(p.image_placement ? t("置いてある") : t("置き場が決まっていない"), p.image_placement ? "mut" : "warn"), h("span", { class: "meta", text: t("重ねたレイヤー {{count}} 枚", { count: layers.length }) })) : note(t("このコマには絵がありません")),
     h("div", { class: "row wrap" },
-      h("a", { class: "btn sm ai-o", href: workbenchUrl(p.id), onclick: (e) => { e.preventDefault(); openWorkbench(p.id); } }, h("i", { "data-lucide": "sparkles" }), t("このコマの絵を頼む"), h("kbd", { text: "L" })),
+      h("a", { class: "btn sm ai-o", href: workbenchUrl(p.id), onclick: (e) => { e.preventDefault(); openWorkbench(p.id); } }, h("i", { "data-lucide": "sparkles" }), t("このコマの絵を生成"), h("kbd", { text: "L" })),
       p.image_id && p.image_placement ? h("button", { class: "btn sm", onclick: () => S.view.hooks.onImageEdit(p.id) }, h("i", { "data-lucide": "move" }), t("絵を動かす")) : null),
     placeImageForm(p))];
 }
 
-// 絵を置く：手元のファイルを上げてコマの絵にし、コマの外接の四角を覆う大きさで置く
+// 絵を置く：ローカルのファイルを上げてコマの絵にし、コマの外接の四角を覆う大きさで置く
 function placeImageForm(p) {
   const origin = h("select", { class: "field", "aria-label": t("絵の出どころ") }, h("option", { value: "human_drawn", text: t("自分で描いた絵") }), h("option", { value: "imported", text: t("持ち込んだ絵") }));
   const src = h("input", { class: "field", placeholder: t("出どころ（持ち込んだ絵のとき。例：撮った写真の元）"), "aria-label": t("出どころの説明") });
@@ -328,12 +328,12 @@ function pagePane(page) {
     out.push(h("button", { class: "btn sm", onclick: () => change(t("見開きにする"), [{ type: "add_spread", id: newId(), first_page_id: a.id, second_page_id: b.id }], { pages: [a.id, b.id], reload: true }) },
       h("i", { "data-lucide": "book-open" }), t("{{first}}–{{second}} ページを見開きにする", { first: a.number, second: b.number })));
   } else if (sides) out.push(h("p", { class: "meta", text: t("向かいのページが無いので見開きにできません") }));
-  out.push(h("div", { class: "row wrap" }, h("button", { class: "btn sm ghost", onclick: () => removePage(page) }, h("i", { "data-lucide": "trash-2" }), t("このページを抜く"))));
+  out.push(h("div", { class: "row wrap" }, h("button", { class: "btn sm ghost", onclick: () => removePage(page) }, h("i", { "data-lucide": "trash-2" }), t("このページを削除"))));
   return out;
 }
 
 function removePage(page) {
-  change(t("ページを抜く"), [{ type: "set_removed", target_kind: "page", id: page.id, removed: true }], { pages: [page.id], reload: true });
+  change(t("ページを削除"), [{ type: "set_removed", target_kind: "page", id: page.id, removed: true }], { pages: [page.id], reload: true });
 }
 
 async function addPage() {
@@ -344,7 +344,7 @@ async function addPage() {
   if (ids) { await ids.catch(() => {}); await S.saver.idle().catch(() => {}); selectPage(id); }
 }
 
-// ---------------------------------------------------------------- 層・見せる物
+// ---------------------------------------------------------------- レイヤー・見せる物
 function layersPane() {
   const out = [];
   const sh = S.show, lk = S.lock;
@@ -357,7 +357,7 @@ function layersPane() {
   out.push(sec(t("触らない（画面だけ）"),
     h("div", { class: "chips" }, tog(lk, "frame", t("コマ枠"), true), tog(lk, "balloon", t("フキダシ・文字"), true), tog(lk, "sfx", t("描き文字"), true), tog(lk, "tone", t("トーン"), true))));
   if (!S.pageId) return out;
-  // トーン・図形（ページの層）
+  // トーン・図形（ページのレイヤー）
   const items = S.m.items(S.pageId);
   const itemRow = (row, i) => {
     const up = (ch, label) => change(label, [{ type: "update_page_item", id: row.id, ...ch }], { pages: [row.page_id] });
@@ -376,7 +376,7 @@ function layersPane() {
       h("button", { class: "ibtn", title: t("下へ"), "aria-label": t("下へ"), disabled: i === 0, onclick: () => swap(-1) }, h("i", { "data-lucide": "chevron-down" })));
   };
   out.push(sec(t("トーン・図形（上ほど手前）"), items.length ? h("div", { class: "list" }, [...items].map(itemRow).reverse()) : h("p", { class: "meta", text: t("このページにトーン・図形はありません") })));
-  // コマの層
+  // コマのレイヤー
   const rows = [];
   for (const p of S.m.panels(S.pageId)) {
     const ls = S.m.layers(p.id);
@@ -451,7 +451,7 @@ export function jump(x) {
   if (kind === "tone" && S.tool !== "tone") setTool("tone");
   if (kind !== "tone" && !["select", "frame"].includes(S.tool) && kind === "panel") setTool("select");
   S.sel = { kind, id: owner.id, pageId };
-  // 選ぶと右の欄は「道具」に替わる（onSelect）。一覧（判断・確かめ）から飛んだときは一覧のまま、次の項目へ進めるようにする
+  // 選ぶと右のパネルは「ツール」に替わる（onSelect）。一覧（判断・確かめ）から飛んだときは一覧のまま、次の項目へ進めるようにする
   const tab = S.tab;
   S.view.select(kind, owner.id, false);
   S.view.flash(pageId, box);

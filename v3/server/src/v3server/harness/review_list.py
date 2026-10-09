@@ -5,7 +5,7 @@
 - check_failed：検査で外れた候補（落ちた・指摘だけの物）。最後の回の物だけ
 - candidates：判断待ちの作業（採用・却下・直す）
 - stale：古い印（作り直すか、このままでよいかを人が決める）
-- held_ai_change：保留したAIの変更（人の手の印のある所をAIが変えようとした。既存の held_ai_changes）
+- held_ai_change：保留したAIの変更（手動編集の印のある所をAIが変えようとした。既存の held_ai_changes）
 - stage_review：工程の検査が終わり、次へ進める承認を待つ工程
 
 並びは工程の前のものから（決めごと 5.2）、同じ工程の中は古い順。
@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from v3server.canonical_tables.harness_tables import HarnessCandidate, HarnessStageRun, HarnessStaleMark, HarnessUnit
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange
 from v3server.harness.harness_states import STAGE_ORDER, STAGE_TITLES
+from v3server.messages import m
 
 KINDS = ("stopped", "check_failed", "candidates", "stale", "held_ai_change", "stage_review")
 
@@ -34,7 +35,7 @@ async def review_items(session: AsyncSession, work_id: str, kinds: list[str] | N
     want = set(kinds or KINDS)
     unknown = want - set(KINDS)
     if unknown:
-        raise ValueError(f"知らない種類: {sorted(unknown)}")
+        raise ValueError(m("知らない種類: {unknown}", unknown=sorted(unknown)))
     q = select(HarnessUnit).where(HarnessUnit.work_id == work_id)
     if stage:
         q = q.where(HarnessUnit.stage == stage)
@@ -68,10 +69,11 @@ async def review_items(session: AsyncSession, work_id: str, kinds: list[str] | N
         marks = (await session.execute(select(HarnessStaleMark).where(
             HarnessStaleMark.unit_id.in_(list(by_id)), HarnessStaleMark.status == "open")
             .order_by(HarnessStaleMark.created_at))).scalars().all()
-        for m in marks:
-            u = by_id[m.unit_id]
-            out.append(_item("stale", u.stage, m.created_at, mark_id=m.id, unit_id=u.id, page_id=u.page_id,
-                             target_id=u.target_id, effect=m.effect, reason=m.reason, upstream_key=m.upstream_key))
+        for mark in marks:
+            u = by_id[mark.unit_id]
+            out.append(_item("stale", u.stage, mark.created_at, mark_id=mark.id, unit_id=u.id, page_id=u.page_id,
+                             target_id=u.target_id, effect=mark.effect, reason=mark.reason,
+                             upstream_key=mark.upstream_key))
     if "held_ai_change" in want and stage is None and stage_run_id is None:
         hq = select(HeldAiChange).where(HeldAiChange.work_id == work_id, HeldAiChange.status == "open")
         if page_id:

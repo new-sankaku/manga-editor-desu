@@ -84,8 +84,8 @@ def parse_structure_views_answer(answer: str, views: list[str]) -> list[ViewJudg
     got = read_answer(answer, _Views).views
     unknown = sorted({v.view for v in got} - set(views))
     if unknown:
-        raise BrokenAnswerError(f"聞いていない観点がある: {unknown}", answer)
+        raise BrokenAnswerError(f"聞いていない観点がある: {unknown}", answer)  # i18n:stored
     missing = sorted(set(views) - {v.view for v in got})
     if missing:
-        raise BrokenAnswerError(f"答えの無い観点がある: {missing}", answer)
+        raise BrokenAnswerError(f"答えの無い観点がある: {missing}", answer)  # i18n:stored
     return got

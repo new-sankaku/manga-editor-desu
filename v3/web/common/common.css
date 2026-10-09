@@ -87,7 +87,7 @@ details.more>.form{margin-top:10px}
 .field.short{width:auto;flex:0 1 7em}
 .field.auto{width:auto;flex:0 0 auto}
 .issue>.v{display:flex;flex-direction:column;gap:2px;min-width:0}
-/* 確認の「読み通す」（絵だけのとき。review/review.js）。ページは紙（.paper）で、画面の高さに合わせて大きく出す */
+/* 確認の「読み通す」（集中モードのとき。review/review.js）。ページは紙（.paper）で、画面の高さに合わせて大きく出す */
 .reader{display:flex;flex-direction:column;gap:10px;align-items:center;min-height:calc(100vh - 80px)}
 .reader-h{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;justify-content:center}
 .reader-b{display:flex;align-items:center;gap:12px;width:100%;justify-content:center;flex:1 1 auto}

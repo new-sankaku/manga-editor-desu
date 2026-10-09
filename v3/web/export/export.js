@@ -1,6 +1,6 @@
 // 書き出し：ページを選び、形式（PNG・PDF・PSD）・見開きの出し方・言語・解像度を決め、色の種類をページに決める。
-// 先に入稿前の確かめを走らせて問題を出し、そのあと書き出しの進み具合とファイルを出す（V3細部の決めごと 7・13章）。
-// 口：GET /works/{id}、GET /works/{id}/review-records、POST /works/{id}/exports、GET /works/{id}/exports/{run}、
+// 先に入稿前の確かめを走らせて問題を出し、そのあと書き出しの進行状況とファイルを出す（V3細部の決めごと 7・13章）。
+// API：GET /works/{id}、GET /works/{id}/review-records、POST /works/{id}/exports、GET /works/{id}/exports/{run}、
 //     GET /works/{id}/exports/{run}/files/{name}、POST /works/{id}/preflight、操作 update_page（color_mode）
 import { t } from "../common/i18n.js";
 import { pollMs } from "../common/poll_interval.js";
@@ -79,7 +79,7 @@ async function poll() {
   if (!r || r.status === "done" || r.status === "failed") return;
   await new Promise((ok) => setTimeout(ok, POLL_MS));
   if (S.run !== r) return;
-  try { S.run = await api.get(`/works/${S.workId}/exports/${r.id}`); } catch (e) { fail(e, t("書き出しの進み具合を読み込めませんでした")); return; }
+  try { S.run = await api.get(`/works/${S.workId}/exports/${r.id}`); } catch (e) { fail(e, t("書き出しの進行状況を読み込めませんでした")); return; }
   draw();
   poll();
 }
@@ -140,7 +140,7 @@ function runCard() {
   const r = S.run;
   if (!r) return nothing;
   const active = r.status === "queued" || r.status === "running";
-  return html`<section class="card" aria-label=${t("書き出しの進み具合")} id="run">
+  return html`<section class="card" aria-label=${t("書き出しの進行状況")} id="run">
     <div class="card-h"><span class="h2">${t("書き出し")}</span><span class="flag ${r.status === "done" ? "on" : r.status === "failed" ? "bad" : "ai"}">${RUN[r.status] || r.status}</span>
       ${active ? icon("loader", "spin") : nothing}</div>
     <div class="meta">${[FORMAT[r.format], t("{{count}} ページ", { count: r.page_ids.length }), r.dpi ? `${r.dpi}dpi` : "", r.language, r.spread_output ? SPREAD[r.spread_output] : ""].filter(Boolean).join(t("・"))}</div>

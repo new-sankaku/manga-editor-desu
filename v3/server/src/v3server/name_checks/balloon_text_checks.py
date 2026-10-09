@@ -1,5 +1,6 @@
 """吹き出しの検査（試作 p27 `check.py`、V3ハーネス設計 6章）。
 文字数・行数・数（課題159・237）と、配置の後にだけ見られる順と交差（課題153・154）。"""
+from v3server.messages import m
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
@@ -16,12 +17,13 @@ from v3server.panel_layout.reading_direction_mirror import (
     to_right_to_left_box,
 )
 
+# 閾値の鍵と意味。意味は API がその場で返す（GET /name-checks/threshold-keys）ので、訳せる形で持つ
 THRESHOLD_KEYS = {
-    "balloon_chars_max": "吹き出し1つの文字数の上限（改行と空白は数えない）",
-    "balloon_lines_max": "吹き出し1つの行数の上限",
-    "balloons_per_panel_max": "1コマの吹き出しの数の上限",
-    "balloons_per_page_max": "1ページの吹き出しの数の上限",
-    "page_chars_max": "1ページのセリフの文字数の上限",
+    "balloon_chars_max": m("吹き出し1つの文字数の上限（改行と空白は数えない）"),
+    "balloon_lines_max": m("吹き出し1つの行数の上限"),
+    "balloons_per_panel_max": m("1コマの吹き出しの数の上限"),
+    "balloons_per_page_max": m("1ページの吹き出しの数の上限"),
+    "page_chars_max": m("1ページのセリフの文字数の上限"),
 }
 
 

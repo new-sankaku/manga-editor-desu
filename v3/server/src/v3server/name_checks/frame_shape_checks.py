@@ -7,6 +7,7 @@ import math
 import numpy as np
 from PIL import Image, ImageDraw
 
+from v3server.messages import m
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
@@ -40,12 +41,13 @@ from v3server.panel_layout.reading_direction_mirror import (
     to_right_to_left_polygon,
 )
 
+# 閾値の鍵と意味。意味は API がその場で返す（GET /name-checks/threshold-keys）ので、訳せる形で持つ
 THRESHOLD_KEYS = {
-    "panel_gap_min_mm": "コマどうしの隙間の下限（mm）",
-    "panel_short_side_min_mm": "コマの短い辺の下限（mm）",
-    "empty_area_max_mm2": "どのコマにも隙間にも入らない場所の上限（mm²、1ページ）",
-    "row_cut_offset_min_mm": "上下の段の縦線のずれの下限（mm）",
-    "facing_row_line_offset_min_mm": "向かい合う2ページの段の横線のずれの下限（mm）",
+    "panel_gap_min_mm": m("コマどうしの隙間の下限（mm）"),
+    "panel_short_side_min_mm": m("コマの短い辺の下限（mm）"),
+    "empty_area_max_mm2": m("どのコマにも隙間にも入らない場所の上限（mm²、1ページ）"),
+    "row_cut_offset_min_mm": m("上下の段の縦線のずれの下限（mm）"),
+    "facing_row_line_offset_min_mm": m("向かい合う2ページの段の横線のずれの下限（mm）"),
 }
 
 # 空きの面積を数えるときの、1mm あたりの画素の数。測る精度であって、判定の閾値ではない
@@ -251,14 +253,14 @@ def check_frame_reading_order(draft: NameDraft, thresholds: Thresholds) -> Check
     for pg in draft.pages:
         bb = rtl_bboxes(pg, draft)
         ns = sorted(bb)
-        for k, m in zip(ns, ns[1:], strict=False):
-            a, b = bb[k], bb[m]
+        for k, nxt in zip(ns, ns[1:], strict=False):
+            a, b = bb[k], bb[nxt]
             vov = min(a[3], b[3]) - max(a[1], b[1])
             if b[3] <= a[1] + FLOAT_EPS:
-                findings.append(Finding(page=pg.page, panel=m, note=f"コマ{k}より上にある"))
+                findings.append(Finding(page=pg.page, panel=nxt, note=f"コマ{k}より上にある"))
             elif vov > FLOAT_EPS and b[0] >= a[2] - FLOAT_EPS and b[1] >= a[1] - FLOAT_EPS:
                 side = "右" if draft.reading_direction == "right_to_left" else "左"
-                findings.append(Finding(page=pg.page, panel=m, note=f"コマ{k}と同じ高さで{side}にある"))
+                findings.append(Finding(page=pg.page, panel=nxt, note=f"コマ{k}と同じ高さで{side}にある"))
     return fixed_rule_result("frame_reading_order", title, findings)
 
 
@@ -294,16 +296,16 @@ def check_gutter_ratio(draft: NameDraft, thresholds: Thresholds) -> CheckResult:
         side_gaps, stack_gaps = [], []
         for n in polys:
             best_side = best_stack = math.inf
-            for m in polys:
-                if m == n:
+            for other in polys:
+                if other == n:
                     continue
-                a, b = bb[n], bb[m]
+                a, b = bb[n], bb[other]
                 yov = min(a[3], b[3]) - max(a[1], b[1])
                 xov = min(a[2], b[2]) - max(a[0], b[0])
                 if yov > FLOAT_EPS and xov <= FLOAT_EPS:
-                    best_side = min(best_side, polygon_distance(polys[n], polys[m]))
+                    best_side = min(best_side, polygon_distance(polys[n], polys[other]))
                 elif xov > FLOAT_EPS and yov <= FLOAT_EPS:
-                    best_stack = min(best_stack, polygon_distance(polys[n], polys[m]))
+                    best_stack = min(best_stack, polygon_distance(polys[n], polys[other]))
             if best_side < math.inf:
                 side_gaps.append(best_side)
             if best_stack < math.inf:

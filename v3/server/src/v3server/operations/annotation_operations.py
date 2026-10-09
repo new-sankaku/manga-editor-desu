@@ -12,6 +12,7 @@ from v3server.canonical_tables.page_item_tables import AnnotationItem
 from v3server.canonical_tables.service_and_job_tables import Job
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m
 from v3server.operations.ai_involvement import Task, require_actor_may
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, work_obj
 from v3server.operations.row_snapshot import RowChanges
@@ -24,7 +25,7 @@ def _region(region: Polygon | None) -> list[list[float]] | None:
     if region is None:
         return None
     if len(region) < 3:
-        raise Invalid("範囲は3つ以上の点で囲む")
+        raise Invalid(m("範囲は3つ以上の点で囲む"))
     return [[float(x), float(y)] for x, y in region]
 
 
@@ -44,7 +45,7 @@ class AddAnnotation(OpBase):
         if self.panel_id is not None:
             panel = await get_in_work(session, Panel, self.panel_id, work.id)
             if panel.page_id != self.page_id:
-                raise Invalid("コマとページが合わない")
+                raise Invalid(m("コマとページが合わない"))
         return Scope("can_comment", work_obj(work.id), [("page", self.page_id)])
 
     async def apply(self, ctx):
@@ -79,10 +80,10 @@ class UpdateAnnotation(OpBase):
         item = await ctx.session.get(AnnotationItem, self.id)
         changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True, mode="json")
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         for k in ("body", "about_task", "status"):
             if k in changes and changes[k] is None:
-                raise Invalid(f"{k} は空にできない")
+                raise Invalid(m("{field} は空にできない", field=k))
         if "region_mm" in changes:
             changes["region_mm"] = _region(changes["region_mm"])
         rc = RowChanges(ctx)
@@ -105,7 +106,7 @@ class RecordAnnotationJob(OpBase):
         item = await ctx.session.get(AnnotationItem, self.id)
         await get_in_work(ctx.session, Job, self.job_id, ctx.work.id)
         if self.job_id in item.job_ids:
-            raise Invalid("すでに残してある")
+            raise Invalid(m("すでに残してある"))
         rc = RowChanges(ctx)
         rc.set_plain(item, {"job_ids": [*item.job_ids, self.job_id]})
         return rc.inverse([item.page_id], "赤入れの依頼の記録の取り消し")

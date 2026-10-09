@@ -15,6 +15,7 @@ from v3server.canonical_tables.image_file_tables import ImageFile, ImageIntakeSc
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import ProtectedRegion
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m
 from v3server.operations.ai_involvement import image_role_task, require_actor_may
 from v3server.operations.operation_base import (
     OpBase,
@@ -46,7 +47,7 @@ async def register_image_scope(session, work_id: str, page_id: str | None,
     if panel_id is not None:
         panel = await get_in_work(session, Panel, panel_id, work_id)
         if page_id is not None and page_id != panel.page_id:
-            raise Invalid("コマとページが合わない")
+            raise Invalid(m("コマとページが合わない"))
         page_id = panel.page_id
     if page_id is not None:
         await get_in_work(session, Page, page_id, work_id)
@@ -82,22 +83,22 @@ class RegisterImage(OpBase):
     async def apply(self, ctx):
         # 出どころを偽れない：AIが登録するのは生成した絵だけ。人は描いた絵・持ち込んだ絵・手を入れた絵
         if (ctx.actor.kind == "ai") != (self.origin == "generated"):
-            raise Invalid(f"{ctx.actor.kind} は origin={self.origin} の絵を登録できない")
+            raise Invalid(m("{actor} は origin={origin} の絵を登録できない", actor=ctx.actor.kind, origin=self.origin))
         if self.origin == "generated" and self.job_id is None:
-            raise Invalid("生成した絵には依頼（job_id）が要る")
+            raise Invalid(m("生成した絵には依頼（job_id）が要る"))
         if self.origin == "imported" and (not self.source_note or self.usage_terms is None):
-            raise Invalid("持ち込んだ絵には元（source_note）と利用の条件（usage_terms）を書く")
+            raise Invalid(m("持ち込んだ絵には元（source_note）と利用の条件（usage_terms）を書く"))
         if self.origin == "human_edited" and self.based_on_image_id is None:
-            raise Invalid("手を入れた絵には元の版（based_on_image_id）が要る")
+            raise Invalid(m("手動で修正した絵には元のバージョン（based_on_image_id）が要る"))
         if self.based_on_image_id is not None:
             await get_in_work(ctx.session, ImageFile, self.based_on_image_id, ctx.work.id)
         # 生成した絵は候補（案）。コマに使うかは別に選ぶ
         require_actor_may(ctx.actor, ctx.work, image_role_task(self.role), "propose")
         status = await intake_status(ctx.session, ctx.work.id, self.sha256)
         if status is None:
-            raise Invalid("入口（image_intake.py）を通っていない絵は登録できない")
+            raise Invalid(m("入口（image_intake.py）を通っていない絵は登録できない"))
         if status == "blocked":
-            raise Invalid("入口の判定で止めた絵は登録できない")
+            raise Invalid(m("入口の判定で止めた絵は登録できない"))
         ctx.session.add(ImageFile(
             id=self.id, work_id=ctx.work.id, page_id=self.page_id, panel_id=self.panel_id, role=self.role,
             origin=self.origin, job_id=self.job_id, based_on_image_id=self.based_on_image_id,
@@ -127,7 +128,7 @@ class AddProtectedRegion(OpBase):
     async def apply(self, ctx):
         img = await ctx.session.get(ImageFile, self.image_id)
         if any(not (0 <= x <= img.width and 0 <= y <= img.height) for x, y in self.polygon_px):
-            raise Invalid(f"範囲が絵（{img.width}x{img.height}）の外に出ている")
+            raise Invalid(m("範囲が絵（{width}x{height}）の外に出ている", width=img.width, height=img.height))
         ctx.session.add(ProtectedRegion(id=self.id, work_id=ctx.work.id, image_id=img.id, page_id=img.page_id,
                                         polygon_px=[list(p) for p in self.polygon_px], note=self.note,
                                         created_by=ctx.actor.id, removed=False))
@@ -149,9 +150,9 @@ class SetProtectedRegionRemoved(OpBase):
 
     async def apply(self, ctx):
         if ctx.actor.kind != "human":
-            raise HumanHandProtected("人の手の範囲を変えられるのは人だけ")
+            raise HumanHandProtected(m("手動編集の範囲を変えられるのは人だけ"))
         region = await ctx.session.get(ProtectedRegion, self.id)
         if region.removed == self.removed:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         region.removed = self.removed
         return {**self.model_dump(), "removed": not self.removed}

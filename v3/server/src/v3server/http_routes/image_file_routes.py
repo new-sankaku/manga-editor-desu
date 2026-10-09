@@ -1,5 +1,5 @@
-"""絵のファイルの口。人が描いた絵・外から持ち込んだ絵・人が手を入れた絵を受け取る。生成した絵は順番待ちの作業者が同じ操作で登録する。
-どの絵も入口（image_intake.py）を通る。版の出どころ・人の手の範囲・判断待ちもここで読む。"""
+"""絵のファイルの API。人が描いた絵・外から持ち込んだ絵・人が手を入れた絵を受け取る。生成した絵は順番待ちの作業者が同じ操作で登録する。
+どの絵も入口（image_intake.py）を通る。バージョンの出どころ・手動編集の範囲・判断待ちもここで読む。"""
 
 import json
 from typing import Annotated, Literal
@@ -24,6 +24,7 @@ from v3server.http_routes.http_dependencies import (
 )
 from v3server.image_file_storage import read_image
 from v3server.image_intake import take_in_upload
+from v3server.messages import m, text_of
 from v3server.operations import operation_submit_and_undo
 from v3server.operations.image_file_operations import ImageRole, RegisterImage, register_image_scope
 from v3server.operations.image_provenance import episode_image_provenance, lineage
@@ -46,7 +47,7 @@ def _usage_terms(text: str | None) -> UsageTerms | None:
     try:
         return UsageTerms.model_validate(json.loads(text))
     except (ValueError, ValidationError) as e:
-        raise Invalid(f"usage_terms が正しくない: {e}") from e
+        raise Invalid(m("usage_terms が正しくない: {reason}", reason=text_of(e))) from e
 
 
 async def _upload(session, authz, actor, work_id: str, image: UploadFile, role: str, origin: str, page_id, panel_id,
@@ -75,7 +76,7 @@ async def upload_image(work_id: str, session: SessionDep, authz: AuthzDep, actor
                        source_note: Annotated[str | None, Form()] = None,
                        based_on_image_id: Annotated[str | None, Form()] = None,
                        usage_terms: Annotated[str | None, Form(description="UsageTerms の JSON")] = None):
-    """人が描いた絵・持ち込んだ絵・前の版に手を入れた絵を置いて登録する。コマに使うかは、別に update_panel の image_id で選ぶ
+    """人が描いた絵・持ち込んだ絵・前のバージョンに手を入れた絵を置いて登録する。コマに使うかは、別に update_panel の image_id で選ぶ
     （まとめて行うのは /works/{id}/panels/{panel_id}/image）。"""
     op, event_id = await _upload(session, authz, actor, work_id, image, role, origin, page_id, panel_id, source_note,
                                  based_on_image_id, usage_terms)
@@ -89,7 +90,7 @@ async def replace_panel_image(work_id: str, panel_id: str, session: SessionDep, 
                               source_note: Annotated[str | None, Form()] = None,
                               usage_terms: Annotated[str | None, Form()] = None,
                               role: Annotated[ImageRole, Form()] = "panel_art"):
-    """コマの絵を、置いた・持ち込んだ・手を入れた絵に替える。今の絵は消さず、新しい版の元（based_on_image_id）として残る。
+    """コマの絵を、置いた・持ち込んだ・手を入れた絵に替える。今の絵は消さず、新しいバージョンの元（based_on_image_id）として残る。
     登録と選ぶのは2つの出来事。選ぶ方を取り消すと、前の絵に戻る。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     panel = await get_in_work(session, Panel, panel_id, work_id)
@@ -120,7 +121,7 @@ async def get_image_file(work_id: str, image_id: str, session: SessionDep, authz
 
 @router.get("/works/{work_id}/images/{image_id}/lineage")
 async def get_image_lineage(work_id: str, image_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """この版から元の版までの、誰が・どこから・どの条件で。"""
+    """このバージョンから元のバージョンまでの、誰が・どこから・どの条件で。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     return await lineage(session, await get_in_work(session, ImageFile, image_id, work_id))
 
@@ -128,7 +129,7 @@ async def get_image_lineage(work_id: str, image_id: str, session: SessionDep, au
 @router.get("/works/{work_id}/episodes/{episode_id}/image-provenance")
 async def get_episode_image_provenance(work_id: str, episode_id: str, session: SessionDep, authz: AuthzDep,
                                        actor: ActorDep):
-    """どのコマ・層にどの出どころの絵を使っているか（V3細部の決めごと 20章の一覧の元）。"""
+    """どのコマ・レイヤーにどの出どころの絵を使っているか（V3細部の決めごと 20章の一覧の元）。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     await get_in_work(session, Episode, episode_id, work_id)
     return await episode_image_provenance(session, episode_id)
@@ -145,7 +146,7 @@ async def list_protected_regions(work_id: str, image_id: str, session: SessionDe
 @router.get("/works/{work_id}/held-changes")
 async def list_held_changes(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep,
                             status: str | None = "open"):
-    """AIの案が人の手の所を変えようとして、判断待ちになっているもの。決めるのは操作 resolve_held_change。"""
+    """AIの案が手動編集の所を変えようとして、判断待ちになっているもの。決めるのは操作 resolve_held_change。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     q = select(HeldAiChange).where(HeldAiChange.work_id == work_id)
     if status is not None:

@@ -9,8 +9,8 @@ TextEncodeQwenImage21 の3つ目の出力は、元の絵の大きさの空の潜
 直した後の処理：
 - 出力は 32 の倍数に丸められる（V3検証の結果 1-15。1216→1248）。切り出した大きさへ戻す
 - 色を元の絵に合わせる（ComfyUI 標準の ColorTransfer。参照は切り出した元の絵）。p26 で背景だけ色が付いた件への手当て。効き方は未検証
-- 囲んだ範囲があれば、なじませるマスク（blend_mask）で元の絵に重ね、範囲の外は元の画素に戻す
-- 人の手の範囲は必ず元の画素で貼り戻す
+- 囲んだ範囲があれば、なじませるマスク（blend_mask）で元の絵に重ね、範囲の外は元のピクセルに戻す
+- 手動編集の範囲は必ず元のピクセルで貼り戻す
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ class EditSettings(_Strict):
     vae_name: str = Field(min_length=1)
     # モデルにだけ効く追加学習。strength_clip は使わない
     loras: list[LoraUse]
-    # TextEncodeQwenImage21 の resolution（元の絵をおよそ resolution×resolution の画素にして渡す。32 の倍数）
+    # TextEncodeQwenImage21 の resolution（元の絵をおよそ resolution×resolution のピクセルにして渡す。32 の倍数）
     resolution: int = Field(ge=0, le=4096, multiple_of=32)
     # QwenImage21Cache の device・dtype
     cache_device: Literal["auto", "gpu", "cpu", "off"]
@@ -61,7 +61,7 @@ def build_instruction_edit(settings: EditSettings, instruction: str, negative_te
                            filename_prefix: str) -> ComfyNodeGraph:
     """crop（x, y, 幅, 高さ）があれば、そこだけ切り出してモデルに渡し、戻すときに元の大きさへ直して同じ場所に重ねる。"""
     if crop is not None and not use_region:
-        raise ValueError("切り出しは囲んだ範囲があるときだけ")
+        raise ValueError("切り出しは囲んだ範囲があるときだけ")  # i18n:stored
     g = ComfyNodeGraph()
     model = g.add('UNETLoader', unet_name=settings.unet_name, weight_dtype=settings.weight_dtype)[0]
     for lora in settings.loras:

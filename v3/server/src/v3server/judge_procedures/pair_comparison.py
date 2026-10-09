@@ -25,7 +25,7 @@ PairSide = Literal["left", "right", "tie"]
 
 @dataclass(frozen=True)
 class ImagePair:
-    """比べる2枚（元の画像の場所）。left・right は呼ぶ側の呼び方で、評価役に見せる A・B とは別。"""
+    """比べる2枚（元の画像の場所）。left・right は呼ぶ側の呼び方で、評価モデルに見せる A・B とは別。"""
 
     left: str
     right: str
@@ -49,7 +49,7 @@ def build_pair_question(criterion: str, image_names: list[str], pair_lines: list
     """criterion は「AとBのどちらが〜かを答えてください。」のような、比べる観点の文。
     image_names は添える順の写しの名前。pair_lines は（組の番号, A の名前, B の名前）。"""
     if not criterion.strip():
-        raise ValueError("criterion が空")
+        raise ValueError("criterion が空")  # i18n:dev
     names = "\n".join(image_names)
     pairs = "\n".join(f"組{i}：A＝{a}　B＝{b}" for i, a, b in pair_lines)
     return f"""添えた画像は、どれも漫画の1コマ用の絵です。添えた順に、次の名前で呼びます。
@@ -75,7 +75,7 @@ def parse_pair_answer(answer: str, pair_count: int) -> dict[int, AnswerChoice]:
     items = read_answer(answer, _PairAnswer).pairs
     ids = sorted(x.id for x in items)
     if ids != list(range(1, pair_count + 1)):
-        raise BrokenAnswerError(f"組の番号が 1〜{pair_count} に揃っていない: {ids}", answer)
+        raise BrokenAnswerError(f"組の番号が 1〜{pair_count} に揃っていない: {ids}", answer)  # i18n:stored
     return {x.id: x.choice for x in items}
 
 
@@ -114,9 +114,9 @@ async def compare_pairs(
     """pairs を左右入れ替えて2回聞き、組ごとの結果を pairs の順で返す。
     答えの形が崩れていれば BrokenAnswerError をそのまま出す（片方の回だけで結果を作らない）。"""
     if not pairs:
-        raise ValueError("pairs が空")
+        raise ValueError("pairs が空")  # i18n:dev
     if any(p.left == p.right for p in pairs):
-        raise ValueError("同じ画像どうしの組がある")
+        raise ValueError("同じ画像どうしの組がある")  # i18n:dev
     blind = make_blind_copies([x for p in pairs for x in (p.left, p.right)], blind_dir, salt)
 
     # 並びから狙いの順が読めないよう、組も写しの名前の順に並べる（左右を入れ替えても同じ順）

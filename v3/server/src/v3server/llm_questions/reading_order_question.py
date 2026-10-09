@@ -21,7 +21,7 @@ def build_reading_order_question(
 ) -> str:
     """画像は呼ぶ側が1枚添える。frame_width・frame_height は画像の座標の目盛り（基本枠の大きさ）。"""
     if frame_width <= 0 or frame_height <= 0:
-        raise ValueError("目盛りは正の値")
+        raise ValueError("目盛りは正の値")  # i18n:dev
     way = "右から左、上から下" if reading_direction == "right_to_left" else "左から右、上から下"
     slanted = "枠の辺が斜めのコマもあります。" if has_slanted_panels else ""
     return f"""添えた画像は、漫画の1ページのコマ割りです。コマには番号が振られていません。{slanted}
@@ -49,7 +49,7 @@ def assign_points_to_panels(
     座標の数がコマの数と違うときは、答えの形が崩れているとして BrokenAnswerError。
     同じコマに2つの座標が当たるのは判定の外れとして返す（呼ぶ側が正しい順と比べる）。"""
     if not panel_centers:
-        raise ValueError("panel_centers が空")
+        raise ValueError("panel_centers が空")  # i18n:dev
     if len(points) != len(panel_centers):
-        raise BrokenAnswerError(f"座標の数 {len(points)} がコマの数 {len(panel_centers)} と違う", answer)
+        raise BrokenAnswerError(f"座標の数 {len(points)} がコマの数 {len(panel_centers)} と違う", answer)  # i18n:stored
     return [min(panel_centers, key=lambda n: math.dist(panel_centers[n], p)) for p in points]

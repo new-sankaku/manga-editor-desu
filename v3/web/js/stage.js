@@ -1,10 +1,10 @@
-// 絵を見て、囲む・描き足す枠を動かす・ペンで描く・画素を消す所（fabric.js。vendor/fabric-7.4.0）。
-// 座標は絵の画素（1単位 = 元の絵の 1 画素）。拡大と移動は fabric の viewportTransform で行う。
+// 絵を見て、囲む・描き足す枠を動かす・ペンで描く・ピクセルを消す所（fabric.js。vendor/fabric-7.4.0）。
+// 座標は絵のピクセル（1単位 = 元の絵の 1 ピクセル）。拡大と移動は fabric の viewportTransform で行う。
 // 手の出来事は PointerEvent で受ける（enablePointerEvents）。ペンタブレットの筆圧・pointerType が届き、
 // 間の点（getCoalescedEvents）も拾う。
-// 囲んだ範囲は fabric の図形ではなく、絵と同じ大きさの画素のマスク（offscreen の canvas）に塗る。
-// 送るのは画素のマスクなので、見えている物と送る物が同じになる。人の手の範囲は、塗るたびにマスクから引く（塗れない）。
-// 塗るときに触るのは、線が当たった所の画素だけ（全画素を読まない）。1回の変更はタイルの差分で覚える（mask_tiles.js）。
+// 囲んだ範囲は fabric の図形ではなく、絵と同じ大きさのピクセルのマスク（offscreen の canvas）に塗る。
+// 送るのはピクセルのマスクなので、見えている物と送る物が同じになる。手動編集の範囲は、塗るたびにマスクから引く（塗れない）。
+// 塗るときに触るのは、線が当たった所のピクセルだけ（全ピクセルを読まない）。1回の変更はタイルの差分で覚える（mask_tiles.js）。
 import { MaskEdit } from "./mask_tiles.js";
 import { drawSegment } from "./pen_render.js";
 import { canvasColors } from "../common/theme_colors.js";
@@ -14,7 +14,7 @@ const { Canvas, FabricImage, Rect, Polyline, Circle, Point } = window.fabric;
 export class Stage {
   constructor(host, hooks) {
     this.host = host;
-    this.col = canvasColors();   // 絵の上に描く色（色の組から読む）
+    this.col = canvasColors();   // 絵の上に描く色（カラーテーマから読む）
     // { onExtend(e), penBegin() → {canvas, widthPx, color}, onPenStroke(points, pointerType), eraseBegin(),
     //   onErase(points, widthPx), onMaskEdit(edit), maskBegin() → 塗ってよいか, onRefuse(message) }
     this.hooks = hooks;
@@ -50,7 +50,7 @@ export class Stage {
   }
 
   // ---------------------------------------------------------------- 絵を出す
-  // layers：[{ image か canvas, x, y, w, h, opacity }]。canvas の層（描いている人の手の層）は、描くたびに描き直す。
+  // layers：[{ image か canvas, x, y, w, h, opacity }]。canvas のレイヤー（描いている手描きレイヤー）は、描くたびに描き直す。
   // keepView：拡大と位置をそのままにする（同じコマの絵を替えたとき）。
   // keepMask：囲んだ範囲を残す。絵の大きさが違えば残せないので消して、戻り値の maskKept を false にする
   async show({ image, protectedCanvas, layers, keepView = false, keepMask = false }) {
@@ -124,7 +124,7 @@ export class Stage {
     this.syncCursor();
   }
 
-  // ---------------------------------------------------------------- 道具
+  // ---------------------------------------------------------------- ツール
   setTool(tool) {
     const extendChanged = (tool === "extend") !== (this.tool === "extend");
     this.tool = tool;
@@ -137,7 +137,7 @@ export class Stage {
     }
     this.c.defaultCursor = tool === "select" ? "grab" : "crosshair";
     this.syncCursor();
-    // 描き足す枠を出す・しまうときだけ合わせ直す（ほかの道具に替えても拡大はそのまま）
+    // 描き足す枠を出す・しまうときだけ合わせ直す（ほかのツールに替えても拡大はそのまま）
     if (extendChanged) this.fit();
     this.prepareErase();
     this.c.requestRenderAll();
@@ -170,10 +170,10 @@ export class Stage {
 
   beginEdit() { this.edit = new MaskEdit(this.maskBox); }
 
-  // rect に塗る前に、その所の前の画素を覚える
+  // rect に塗る前に、その所の前のピクセルを覚える
   touch(rect) { this.edit.touch(this.maskCanvas, rect, this.maskBox); }
 
-  // 塗った後：人の手の範囲を引き、塗った所の外接の箱を広げ、画面を描き直す
+  // 塗った後：手動編集の範囲を引き、塗った所の外接の箱を広げ、画面を描き直す
   painted(rect, grow = true) {
     this.subtractProtected(rect);
     if (grow) this.maskBox = this.maskBox ? [Math.min(this.maskBox[0], rect[0]), Math.min(this.maskBox[1], rect[1]),
@@ -228,7 +228,7 @@ export class Stage {
     this.painted(this.whole());
     this.endEdit();
   }
-  // 反転：塗った色で全体を埋めた上から、今の囲みを抜く（画素ごとの計算をしない）
+  // 反転：塗った色で全体を埋めた上から、今の囲みを抜く（ピクセルごとの計算をしない）
   invertMask() {
     if (!this.maskCanvas) return;
     this.beginEdit();
@@ -247,7 +247,7 @@ export class Stage {
     this.endEdit();
   }
 
-  // 囲んだ所があるか。塗った所の外接の箱の中だけを読む（頼むときに1回）
+  // 囲んだ所があるか。塗った所の外接の箱の中だけを読む（生成するときに1回）
   hasMask() {
     if (!this.maskCanvas || !this.maskBox) return false;
     const r = this.clip(this.maskBox);
@@ -269,7 +269,7 @@ export class Stage {
     return c.toDataURL("image/png").split(",")[1];
   }
 
-  // コマを替える前に、囲みを外へ出す。持つのは塗った所の箱の画素だけ（絵の全体の canvas は捨てる）。囲みが無ければ null
+  // コマを替える前に、囲みを外へ出す。持つのは塗った所の箱のピクセルだけ（絵の全体の canvas は捨てる）。囲みが無ければ null
   takeMask() {
     if (!this.maskCanvas || !this.maskBox) return null;
     const r = this.clip(this.maskBox);
@@ -477,7 +477,7 @@ export class Stage {
     try { return fn(); } catch (err) { this.hooks.onRefuse && this.hooks.onRefuse(err.message); return null; }
   }
 
-  // 画素の消しゴム：保存を待たずに、絵の写し（canvas）から消して見せる。サーバーの答えが来たら、その絵に替わる
+  // ピクセルの消しゴム：保存を待たずに、絵の写し（canvas）から消して見せる。サーバーの答えが来たら、その絵に替わる
   baseCanvas() {
     const el = this.base.getElement();
     if (el instanceof HTMLCanvasElement) return el;

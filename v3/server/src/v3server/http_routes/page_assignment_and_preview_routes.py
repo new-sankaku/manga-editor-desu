@@ -1,11 +1,11 @@
-"""構成と確認の画面が読む口：ページの割り当ての一覧と、ページの下見の絵。
+"""構成と確認の画面が読む API：ページの割り当ての一覧と、ページの下見の絵。
 
 - GET /works/{id}/page-assignments：ページごとに、割り当てた人（assign_page）。割り当ては OpenFGA の組
-  （page:{id} の assigned）にだけあるので、ページごとに読む。抜いたページも返す（removed で分かる）
-- GET /works/{id}/pages/{page_id}/preview?size=：ページ1枚を小さく描いた PNG（長い辺が size 画素）。
+  （page:{id} の assigned）にだけあるので、ページごとに読む。削除したページも返す（removed で分かる）
+- GET /works/{id}/pages/{page_id}/preview?size=：ページ1枚を小さく描いた PNG（長い辺が size ピクセル）。
   書き出しと同じ描き方（print_export/page_render.py）で、塗り足し込みのページを描く。描いた絵は page_previews に控え、
-  ページの中身から作る鍵（page_content_key）が同じ間は描き直さない。中身（コマ・層・文字・トーン・絵・作品の寸法と設定）が
-  変わると鍵が変わるので、古い絵は返らない。描けないとき（寸法が無い・線の控えが古いなど）は理由を返して止める
+  ページの中身から作る鍵（page_content_key）が同じ間は描き直さない。中身（コマ・レイヤー・文字・トーン・絵・作品の寸法と設定）が
+  変わると鍵が変わるので、古い絵は返らない。描けないとき（寸法が無い・線の画像が古いなど）は理由を返して止める
 """
 
 import asyncio
@@ -22,6 +22,7 @@ from v3server.canonical_tables.service_set_and_preview_tables import PagePreview
 from v3server.canonical_tables.work_tree_tables import Page, Work
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, require
 from v3server.image_file_storage import read_image, store_image
+from v3server.messages import m, text_of
 from v3server.operations.operation_base import get_in_work, page_obj, work_obj
 from v3server.print_export.export_runner import ExportRefused, load_page_content, render_page_image
 from v3server.print_export.page_render import PageContent, RenderRefused
@@ -71,22 +72,22 @@ async def get_page_preview(work_id: str, page_id: str, session: SessionDep, auth
     await require(authz, actor, "can_view", work_obj(work_id))
     page = await get_in_work(session, Page, page_id, work_id)
     if page.removed:
-        raise NotFound(f"ページ {page_id} は抜かれている")
+        raise NotFound(m("ページ {id} は削除されている", id=page_id))
     work = await session.get(Work, work_id)
     try:
         content = await load_page_content(session, work, page_id)
     except ExportRefused as e:
-        raise Invalid(f"ページを描けない: {e}") from e
+        raise Invalid(m("ページを描けない: {reason}", reason=text_of(e))) from e
     key = page_content_key(content, size)
     cached = await session.get(PagePreview, (page_id, size))
     if cached is not None and cached.content_key == key:
         return Response(read_image(cached.sha256), media_type="image/png", headers={"X-V3-Preview-Cache": "hit"})
-    # 長い辺が size 画素になる解像度で描く（塗り足し込み）
+    # 長い辺が size ピクセルになる解像度で描く（塗り足し込み）
     dpi = size / (max(canvas_size_mm(content.spec)) / 25.4)
     try:
         img = await asyncio.to_thread(render_page_image, content, dpi)
     except (ExportRefused, RenderRefused, TextRenderError) as e:
-        raise Invalid(f"ページを描けない: {e}") from e
+        raise Invalid(m("ページを描けない: {reason}", reason=text_of(e))) from e
     scale = size / max(img.size)
     if scale < 1:
         img = img.resize((max(1, round(img.width * scale)), max(1, round(img.height * scale))), Image.Resampling.LANCZOS)

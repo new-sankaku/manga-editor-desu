@@ -1,4 +1,4 @@
-/* V3 画像生成の画面。色は共通の組の名前（common/theme.css）だけを使い、色の値を書かない。部品の名前は画面の試作（v3poc/screen/index.html）に合わせる。 */
+/* V3 画像生成の画面。色は共通のカラーテーマの名前（common/theme.css）だけを使い、色の値を書かない。部品の名前は画面の試作（v3poc/screen/index.html）に合わせる。 */
 @import url("../common/theme.css");
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -94,7 +94,7 @@ details.more>.kv{margin-top:10px}
 .flag.mut{background:var(--surface-3);color:var(--ink-2)}
 .flag.on{background:var(--ink);color:var(--on)}
 
-/* ---------- 浮かぶ道具の帯 ---------- */
+/* ---------- 浮かぶツールの帯 ---------- */
 .ftb{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh-2);z-index:8;white-space:nowrap;max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none}
 .ftb::-webkit-scrollbar{display:none}
 .ftb>*{flex:0 0 auto}
@@ -110,7 +110,7 @@ details.more>.kv{margin-top:10px}
 .empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-3);text-align:center;padding:24px}
 .viewing{position:absolute;left:50%;top:112px;transform:translateX(-50%);z-index:8;display:flex;gap:6px;align-items:center;background:var(--ai-tint);border:1px solid var(--ai-line);color:var(--ai-ink);border-radius:10px;padding:4px 6px 4px 10px;box-shadow:var(--sh-1);max-width:calc(100% - 24px);flex-wrap:wrap}
 
-/* ---------- 右の欄のタブ ---------- */
+/* ---------- 右のパネルのタブ ---------- */
 .itabs{flex:0 0 auto;display:flex;gap:4px;padding:6px 14px 0;border-bottom:1px solid var(--line)}
 .itab{height:36px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-weight:500;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px}
 .itab:hover{color:var(--ink)}
@@ -136,7 +136,7 @@ details.more>.kv{margin-top:10px}
 .params{font-size:12px}
 .params .k{color:var(--ink-3)}
 
-/* ---------- 版 ---------- */
+/* ---------- バージョン ---------- */
 .vrow{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px;border-radius:var(--r);border:1px solid var(--line)}
 .vrow.cur{border-color:var(--ink)}
 .vrow .th{width:64px;aspect-ratio:1;background:var(--surface-3);border-radius:6px;display:grid;place-items:center;overflow:hidden}
@@ -145,7 +145,7 @@ details.more>.kv{margin-top:10px}
 .vtree{display:flex;flex-direction:column;gap:6px}
 .vtree .depth{border-left:2px solid var(--line);margin-left:8px;padding-left:8px;display:flex;flex-direction:column;gap:6px}
 
-/* ---------- 頼んだ物の進み具合 ---------- */
+/* ---------- 依頼した物の進行状況 ---------- */
 .job{display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:12px}
 .job .s{color:var(--ink-3)}
 .spin{animation:spin 1.1s linear infinite}
@@ -178,7 +178,7 @@ details.more>.kv{margin-top:10px}
 .keys-t th{text-align:left;white-space:nowrap;padding:4px 12px 4px 0;font-weight:normal;vertical-align:top}
 .keys-t td{padding:4px 0}
 
-/* ---------- 絵だけ（common/fullscreen.js。V3細部の決めごと 22.5）：絵と候補の帯だけを残す。Tab の間（data-peek）はふつうに戻す ---------- */
+/* ---------- 集中モード（common/fullscreen.js。V3細部の決めごと 22.5）：絵と候補の帯だけを残す。Tab の間（data-peek）はふつうに戻す ---------- */
 html[data-focus]:not([data-peek]) .ws{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto}
 html[data-focus]:not([data-peek]) .insp[data-v3-strip]{border-left:0;border-top:1px solid var(--line);max-height:34vh}
 html[data-focus]:not([data-peek]) .insp[data-v3-strip]>.itabs,

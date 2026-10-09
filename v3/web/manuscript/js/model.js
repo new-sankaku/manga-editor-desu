@@ -14,7 +14,7 @@ export class Model {
   constructor(data) {
     this.data = data;
     // 原稿として出す形（見開き・ページの種類・色と解像度・ノンブル・文字の一部の書式・組版・入稿前の確かめ）を
-    // サーバーが持っているか。持っていない版のサーバーでは、その欄を出さずに「このサーバーにはありません」と出す
+    // サーバーが持っているか。持っていないバージョンのサーバーでは、その欄を出さずに「このサーバーにはありません」と出す
     this.caps = { print: Array.isArray(data.spreads) };
   }
 
@@ -60,7 +60,7 @@ export class Model {
 
   spec() { return this.work.page_spec; }
 
-  // 人の手の印を付ける（サーバーの human_hand_guard.change_with_human_hand と同じく、人が変えた項目に付く）
+  // 手動編集の印を付ける（サーバーの human_hand_guard.change_with_human_hand と同じく、手動で変更した項目に付く）
   mark(row, fields) {
     if (!row.human_hand_fields) row.human_hand_fields = [];
     for (const f of fields) if (!row.human_hand_fields.includes(f)) row.human_hand_fields.push(f);

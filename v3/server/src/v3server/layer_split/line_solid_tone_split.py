@@ -59,11 +59,11 @@ def grey_array(image: Image.Image, size: tuple[int, int]) -> np.ndarray:
 def split_line_solid_tone(picture: np.ndarray, line_art: np.ndarray, th: SplitThresholds) -> LayerSplit:
     """picture（白黒の絵、灰色の uint8）を、line_art（黒地に白い線、同じ大きさ）を使って3層に分ける。"""
     if picture.ndim != 2 or line_art.ndim != 2:
-        raise ValueError('絵と線画は灰色の2次元の配列で渡してください')
+        raise ValueError('絵と線画は灰色の2次元の配列で渡してください')  # i18n:dev
     if picture.shape != line_art.shape:
-        raise ValueError(f'絵 {picture.shape} と線画 {line_art.shape} の大きさが違います')
+        raise ValueError(f'絵 {picture.shape} と線画 {line_art.shape} の大きさが違います')  # i18n:dev
     if not th.solid_below <= th.paper_white_from:
-        raise ValueError('ベタの閾値が紙の白の閾値より明るくなっています')
+        raise ValueError('ベタの閾値が紙の白の閾値より明るくなっています')  # i18n:dev
     pic = picture.astype(np.int16)
     is_line = line_art >= th.line_on_from
     is_solid = (pic < th.solid_below) & ~is_line
@@ -86,5 +86,5 @@ def split_line_solid_tone(picture: np.ndarray, line_art: np.ndarray, th: SplitTh
 def mean_difference(picture: np.ndarray, recomposed: np.ndarray) -> float:
     """元の絵と重ね直した絵の差の平均（0〜255）。分け方で失った量の目安。"""
     if picture.shape != recomposed.shape:
-        raise ValueError('大きさが違います')
+        raise ValueError('大きさが違います')  # i18n:dev
     return float(np.abs(picture.astype(np.int16) - recomposed.astype(np.int16)).mean())

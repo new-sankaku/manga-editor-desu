@@ -44,7 +44,7 @@ from v3server.harness.harness_states import HUMAN_APPROVE_STAGES, STAGES, UNIT_K
 from v3server.harness.upstream_versions import upstream_of
 from v3server.v3_error_types import V3Error
 
-# 段の活動の生存の知らせ（秒）。取り消しはこの返事で届く。2秒から1秒にした（test_harness_perf.py で測った）
+# 段の活動の生存の通知（秒）。取り消しはこの返事で届く。2秒から1秒にした（test_harness_perf.py で測った）
 HEARTBEAT_SECONDS = 1
 STEP_MODULES = {"plan_interview": plan_interview_steps, "structure": structure_steps,
                 "settings_sheet": settings_sheet_steps, "name_draft": name_draft_steps,
@@ -81,7 +81,7 @@ async def _beat() -> None:
 @activity.defn
 async def run_step(inp: StepInput) -> dict[str, Any]:
     if inp.step not in STEP_FUNCTIONS:
-        raise ApplicationError(f"知らない段: {inp.step}", non_retryable=True)
+        raise ApplicationError(f"知らないステップ: {inp.step}", non_retryable=True)  # i18n:stored
     async with get_sessionmaker()() as session:
         unit = await session.get(HarnessUnit, inp.unit_id)
         fn = getattr(STEP_MODULES[unit.kind], inp.step)
@@ -108,7 +108,7 @@ async def run_step(inp: StepInput) -> dict[str, Any]:
     except V3Error as e:
         # 操作の窓口が断った（権限・ロック・形）。人が直すまで進めない
         status, detail = "failed", {"type": "blocked", "message": str(e)}
-        raise q.blocked(f"操作が断られた: {e}") from e
+        raise q.blocked(f"操作が断られた: {e}") from e  # i18n:stored
     finally:
         beat.cancel()
         if inp.step != "discard_round":
@@ -213,7 +213,8 @@ async def rerun_units(inp: RecordInput) -> list[str]:
         for uid in inp.patch["unit_ids"]:
             old = await session.get(HarnessUnit, uid)
             if old is None or old.stage_run_id != inp.target_id:
-                raise ApplicationError(f"この工程の作業でない: {uid}", type="refused", non_retryable=True)
+                raise ApplicationError(  # i18n:stored
+                    f"この工程の作業でない: {uid}", type="refused", non_retryable=True)
             again = (await session.execute(select(HarnessUnit).where(HarnessUnit.rerun_of == uid))).scalars().all()
             pending = [u for u in again if u.status not in ("done", "cancelled", "failed")]
             if pending:
@@ -269,7 +270,7 @@ async def _check_name_stage(session, run: HarnessStageRun) -> dict[str, Any]:
     report = run_name_checks(draft, values)
     unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]
     if unset:
-        raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)
+        raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)  # i18n:stored
     lines = [ScriptLine(f"p{pg.page}-{pn.n}-{i}", ep.number, b.text)
              for pg in draft.pages for pn in pg.panels for i, b in enumerate(pn.balloons or []) if b.text.strip()]
     plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == run.work_id))).scalar_one_or_none()
@@ -289,7 +290,8 @@ async def _check_name_stage(session, run: HarnessStageRun) -> dict[str, Any]:
         text, _ = await _ask_stage(run, "foreshadow", "foreshadow", build_foreshadow_issues_question(settings, lines))
         out["foreshadow"] = [i.model_dump() for i in parse_foreshadow_issues_answer(text, lines)]
     except BrokenAnswerError as e:
-        raise ApplicationError(f"台本の問いの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+        raise ApplicationError(  # i18n:stored
+            f"台本の問いの答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
     return out
 
 
@@ -337,7 +339,7 @@ async def stage_check(stage_run_id: str) -> dict[str, Any]:
                 else:
                     result.update(await _stage_results(session, run))
             except V3Error as e:
-                raise q.blocked(f"工程の検査ができない: {e}") from e
+                raise q.blocked(f"工程の検査ができない: {e}") from e  # i18n:stored
             await patch_stage(session, run.id, {"stage_check": result})
             await session.commit()
             return result

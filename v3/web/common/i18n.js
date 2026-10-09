@@ -14,12 +14,12 @@ const LANG_KEY = "v3.ui_lang";
 function chosenLang() {
   if (typeof location === "undefined") return "ja";  // 画面の無い所（Node の試験が計算のモジュールを読むとき）は、書いた文言のまま
   let v = new URLSearchParams(location.search).get("ui") || "";
-  if (!v) { try { v = localStorage.getItem(LANG_KEY) || ""; } catch { /* 残せない環境では URL の ui だけ */ } }
+  if (!v) { try { v = localStorage.getItem(LANG_KEY) || ""; } catch { /* 保存できない環境では URL の ui だけ */ } }
   return LANGS.some(([k]) => k === v) ? v : "ja";
 }
 export const lang = chosenLang();
 export function setLang(code) {
-  try { localStorage.setItem(LANG_KEY, code); } catch { /* 残せない環境では URL で渡す */ }
+  try { localStorage.setItem(LANG_KEY, code); } catch { /* 保存できない環境では URL で渡す */ }
   const u = new URL(location.href);
   u.searchParams.set("ui", code);
   location.replace(u);

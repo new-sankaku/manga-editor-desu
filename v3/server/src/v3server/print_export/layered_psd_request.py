@@ -57,7 +57,7 @@ def psd_layers_from_nodes(nodes: list[Node], png_dir: pathlib.Path, offset: tupl
                                 hidden=n.hidden, blend_mode=n.blend, opacity=n.opacity))
             continue
         if n.image is None:
-            raise ValueError(f"層 {n.full_name} に絵が無い")
+            raise ValueError(f"レイヤー {n.full_name} に絵が無い")  # i18n:stored
         path = png_dir / f"{n.marker}.png"
         n.image.save(path)
         text = None
@@ -75,7 +75,7 @@ def build_psd_request(width: int, height: int, composite_png: pathlib.Path | Non
     def check(ls: list[PsdLayer]):
         for la in ls:
             if la.text is not None and la.png_path is None:
-                raise ValueError(f"文字の層 {la.name} は、文字の情報と描いた画像（png_path）の両方が要る")
+                raise ValueError(f"文字のレイヤー {la.name} は、文字の情報と描いた画像（png_path）の両方が要る")  # i18n:stored
             if la.children:
                 check(la.children)
 
@@ -98,7 +98,7 @@ def write_layered_psd(request: dict, node_executable: str, writer_script: pathli
     done = subprocess.run([node_executable, str(writer_script)], input=json.dumps(request, ensure_ascii=False),
                           capture_output=True, text=True, encoding="utf-8", timeout=timeout_seconds)
     if done.returncode != 0:
-        raise PsdWriterError(f"PSD の書き出しが失敗しました（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")
+        raise PsdWriterError(f"PSD の書き出しが失敗しました（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")  # i18n:stored
     return json.loads(done.stdout)
 
 

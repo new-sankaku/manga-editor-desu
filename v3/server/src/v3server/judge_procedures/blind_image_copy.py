@@ -1,7 +1,7 @@
-"""評価役に見せる画像の、名前を伏せた写し（試作 p19・p32・p33）。
+"""評価モデルに見せる画像の、名前を伏せた写し（試作 p19・p32・p33）。
 
 ファイル名に狙い（感情・段・候補の番号など）が入ったまま見せると、名前から答えが読めて判定が甘くなる
-（p19 で、名前のまま 92/96 が一致し、伏せると 84/96）。評価役には必ずこの写しを見せる。
+（p19 で、名前のまま 92/96 が一致し、伏せると 84/96）。評価モデルには必ずこの写しを見せる。
 写しの名前は、元の場所と salt から作る。並べる順も写しの名前の順にして、並びから答えが読めないようにする。
 """
 import hashlib
@@ -39,9 +39,9 @@ def _blind_name(original: str, salt: str) -> str:
 def make_blind_copies(originals: list[str], dest_dir: str, salt: str) -> BlindCopies:
     """originals の写しを dest_dir に作る。salt は判定ごとに変えてよい（同じ salt なら同じ名前になる）。"""
     if not originals:
-        raise ValueError("originals が空")
+        raise ValueError("originals が空")  # i18n:dev
     if not salt:
-        raise ValueError("salt が空")
+        raise ValueError("salt が空")  # i18n:dev
     dest = Path(dest_dir)
     dest.mkdir(parents=True, exist_ok=True)
     mapping: dict[str, Path] = {}
@@ -51,7 +51,7 @@ def make_blind_copies(originals: list[str], dest_dir: str, salt: str) -> BlindCo
             raise FileNotFoundError(original)
         path = dest / _blind_name(original, salt)
         if path in mapping.values():
-            raise ValueError(f"写しの名前が重なった: {path.name}")
+            raise ValueError(f"写しの名前が重なった: {path.name}")  # i18n:dev
         shutil.copyfile(src, path)
         mapping[original] = path
     return BlindCopies(mapping)

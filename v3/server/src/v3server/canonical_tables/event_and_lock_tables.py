@@ -38,7 +38,7 @@ class Event(Base):
     payload: Mapped[dict[str, Any]] = mapped_column()
     # 取り消すときに流す操作。取り消せない出来事（ロックなど）は空
     inverse: Mapped[dict[str, Any] | None] = mapped_column()
-    # この操作で置いた判断待ち（AIの変更が人の手の所に当たった分。id・表・行・項目）。無ければ空
+    # この操作で置いた判断待ち（AIの変更が手動編集の所に当たった分。id・表・行・項目）。無ければ空
     held_changes: Mapped[list[Any] | None] = mapped_column()
     # この操作で変えた行と項目（前の値と後の値）。取り消しが後の変更を上書きしないかを見る（operations/field_change_record.py）。
     # この仕組みより前の出来事は空

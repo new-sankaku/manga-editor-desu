@@ -2,7 +2,7 @@
 
 - WorkPlan：企画（あらすじ・読者・入れないもの）。作品に1行
 - MaterialEntry：設定資料の1件（人物・小物・背景・その他）。名前・特徴・服・絵と、人物ごとの生成の設定。
-  AIが抜き出した人物は proposal_state=proposed の案として入り、人が採る（adopted）か採らない（rejected）
+  AIが抽出した人物は proposal_state=proposed の案として入り、人が採る（adopted）か採らない（rejected）
 - UserSetting：利用者ごとの設定（言語・自動保存など）。作品のデータではないので操作の窓口を通さない
 - ExportRun：書き出しの依頼と結果
 """
@@ -48,7 +48,7 @@ class MaterialEntry(Base):
     notes: Mapped[str | None] = mapped_column(Text)
     # adopted（使う）・proposed（AIの案。人が決めるまで使わない）・rejected（採らない）
     proposal_state: Mapped[str] = mapped_column(String(16))
-    # 案を作った依頼（AIが抜き出したとき）
+    # 案を作った依頼（AIが抽出したとき）
     job_id: Mapped[str | None] = mapped_column(ForeignKey("jobs.id"))
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     removed: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -89,9 +89,9 @@ class ExportRun(Base):
     # queued・running・done・failed
     status: Mapped[str] = mapped_column(String(16), default="queued")
     detail: Mapped[str | None] = mapped_column(Text)
-    # [{"page_id": .., "file": 書き出しのフォルダの中の名前, "bytes": ..}]。PSD は層の記録（layers・offset_px）も持つ
+    # [{"page_id": .., "file": 書き出しのフォルダの中の名前, "bytes": ..}]。PSD はレイヤーの記録（layers・offset_px）も持つ
     outputs: Mapped[list[Any]] = mapped_column(default=list)
-    # 書き出し終えたページ（page_ids のうち、ファイルにし終えた物。進み具合を画面に出す）
+    # 書き出し終えたページ（page_ids のうち、ファイルにし終えた物。進行状況を画面に出す）
     done_page_ids: Mapped[list[Any]] = mapped_column(default=list, server_default="[]")
     workflow_id: Mapped[str | None] = mapped_column(String(128))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

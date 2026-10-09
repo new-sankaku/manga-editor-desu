@@ -39,7 +39,7 @@ def _origin(obj: dict[str, Any], key: str) -> float:
     if isinstance(v, (int, float)):
         return float(v) - 0.5
     if v not in _ORIGIN:
-        raise GeometryError(f"知らない {key}: {v}")
+        raise GeometryError(f"知らない {key}: {v}")  # i18n:stored
     return _ORIGIN[v]
 
 
@@ -93,7 +93,7 @@ def _centered(pts: list[Point]) -> list[Point]:
 def polygon_points(obj: dict[str, Any]) -> list[Point]:
     pts = obj.get("points")
     if not isinstance(pts, list) or len(pts) < 3:
-        raise GeometryError("多角形の点が3つ無い")
+        raise GeometryError("多角形の点が3つ無い")  # i18n:stored
     return [(float(p["x"]), float(p["y"])) for p in pts]
 
 
@@ -111,7 +111,7 @@ def path_points(path: list[Any]) -> list[list[Point]]:
     start: Point = (0.0, 0.0)
     for cmd in path:
         if not isinstance(cmd, list) or not cmd:
-            raise GeometryError(f"線の命令の形が正しくない: {cmd}")
+            raise GeometryError(f"線の命令の形が正しくない: {cmd}")  # i18n:stored
         op, args = cmd[0], [float(v) for v in cmd[1:]]
         if op == "M":
             if len(cur) > 1:
@@ -145,7 +145,7 @@ def path_points(path: list[Any]) -> list[list[Point]]:
             cur = []
         else:
             # fabric 5 は読み込むときに H・V・A などを M・L・Q・C・Z に直す。それ以外が来たら止める
-            raise GeometryError(f"読めない線の命令: {op}")
+            raise GeometryError(f"読めない線の命令: {op}")  # i18n:stored
     if len(cur) > 1:
         rings.append(cur)
     return rings
@@ -195,7 +195,7 @@ def css_color(v: Any) -> tuple[str, float] | None:
     if v is None or v == "" or v == "transparent":
         return None
     if not isinstance(v, str):
-        raise GeometryError(f"色の形でない: {v!r}")
+        raise GeometryError(f"色の形でない: {v!r}")  # i18n:stored
     m = _RGBA.match(v.strip())
     if m:
         r, g, b, a = int(m[1]), int(m[2]), int(m[3]), float(m[4])
@@ -203,5 +203,5 @@ def css_color(v: Any) -> tuple[str, float] | None:
     try:
         rgb = ImageColor.getrgb(v)
     except ValueError as e:
-        raise GeometryError(f"読めない色: {v}") from e
+        raise GeometryError(f"読めない色: {v}") from e  # i18n:stored
     return "#{:02x}{:02x}{:02x}".format(*rgb[:3]), (rgb[3] / 255 if len(rgb) == 4 else 1.0)

@@ -1,9 +1,9 @@
 // サーバーとのやり取り。ログインの方式はサーバーが決める（GET /auth/mode。request_authentication.py）。
-// - oidc: ログインはクッキーのセッション。書き換えの口には X-V3-Request: 1 を付ける。401 ならログインの画面へ
+// - oidc: ログインはクッキーのセッション。書き換えの API には X-V3-Request: 1 を付ける。401 ならログインの画面へ
 // - dev_header: 開発と試験だけ。名前の欄の値を X-V3-User で送る
-// 絵も同じ口から取るので、<img src> に URL を直接は入れず、取ってきて blob の URL にする。
+// 絵も同じ API から取るので、<img src> に URL を直接は入れず、取ってきて blob の URL にする。
 // blob の URL は絵を読み終えたらすぐ解放する（revokeObjectURL）。取ってきた中身（Blob）は大きさの上限つきで持つ。
-import { t } from "../common/i18n.js";
+import { t, lang } from "../common/i18n.js";
 const USER_KEY = "v3.user";
 let authMode = null;
 let me = null;
@@ -45,10 +45,11 @@ export class ApiError extends Error {
   }
 }
 
-// 口を呼ぶ所はここ1か所（作品をまたぐ画面の common/shell.js の raw もここを通す）。名乗りの見出しと
+// API を呼ぶ所はここ1か所（作品をまたぐ画面の common/shell.js の raw もここを通す）。名乗りのヘッダーと
 // X-V3-Request を付け、届かなければ NetworkError、oidc で 401 ならログインの画面へ移る
 export async function authFetch(path, init = {}) {
-  const headers = { ...(init.headers || {}), "X-V3-Request": "1" };
+  // X-V3-Lang：サーバーが返す失敗の文を、画面の言語で受け取る（v3server/messages.py）
+  const headers = { ...(init.headers || {}), "X-V3-Request": "1", "X-V3-Lang": lang };
   if (authMode === "dev_header") {
     if (!memoUser) throw new ApiError(401, t("利用者の名前を入れてください"));
     headers["X-V3-User"] = memoUser;
@@ -61,8 +62,8 @@ export async function authFetch(path, init = {}) {
   } catch (e) {
     // fetch が答えを受け取れない（回線が切れた・サーバーが止まった）。英語の「Failed to fetch」をそのまま見せない
     throw new NetworkError(navigator.onLine === false
-      ? t("オフラインです。回線がつながったら、もう一度してください")
-      : t("サーバーにつながりません。サーバーが止まっているか、回線が切れています"));
+      ? t("オフラインです。ネットワークに接続してから、もう一度操作してください")
+      : t("サーバーに接続できません。サーバーが止まっているか、回線が切れています"));
   }
   if (r.status === 401 && authMode === "oidc") { toLogin(); return new Promise(() => {}); }
   return r;
@@ -127,7 +128,7 @@ export async function image(path) {
   try { return { image: await loadImage(url), headers }; } finally { URL.revokeObjectURL(url); }
 }
 
-// 絵の見出しだけ（中身は読み込まない）
+// 絵のヘッダーだけ（中身は読み込まない）
 export async function imageHeaders(path) { return (await fetchBlob(path)).headers; }
 
 // <img> に絵を出す。読み終えたら blob の URL を解放する
@@ -141,7 +142,7 @@ export async function showIn(img, path) {
   return img;
 }
 
-// 手元のファイルを絵として読む（URL は読み終えたら解放する）
+// ローカルのファイルを絵として読む（URL は読み終えたら解放する）
 export async function fileImage(file) {
   const url = URL.createObjectURL(file);
   try { return await loadImage(url); } finally { URL.revokeObjectURL(url); }
@@ -157,7 +158,7 @@ export async function loadImage(url) {
 }
 
 // 白黒のマスク（白い所が範囲）を、色を付けた半透明の絵にする。候補の小さい絵と画面の上で使う。
-// 画素ごとの計算はせず、SVG の feColorMatrix（明るさを不透明度にする。index.html の #v3-lum-to-alpha）で
+// ピクセルごとの計算はせず、SVG の feColorMatrix（明るさを不透明度にする。index.html の #v3-lum-to-alpha）で
 // 描いてから色を重ねる。同じマスク・同じ大きさの物は作り直さない（マスクの中身は URL で決まる）。
 // maxSide を渡すと、長い辺をその大きさまで縮めて作る（小さい絵用）
 const overlayCache = new Map();

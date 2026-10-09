@@ -1,9 +1,9 @@
 """Temporal の作業者をまとめて動かす。`uv run python -m v3server.generation_queue.queue_worker_main`
 
-- 制御の待ち行列: 依頼の流れと、状態の書き込み
-- 書き出しの待ち行列（v3-export）: 書き出し（PNG・PDF・PSD）。print_export/export_workflow.py
-- つなぎ先ごとの待ち行列: 送信。同時実行数は「1件ずつ」なら1、「同時にN件まで」ならN
-- つなぎ先の表を数秒ごとに読み直し、休ませた・数を変えた先の作業者を止めて作り直す
+- 制御のキュー: 依頼の流れと、状態の書き込み
+- 書き出しのキュー（v3-export）: 書き出し（PNG・PDF・PSD）。print_export/export_workflow.py
+- 接続先ごとのキュー: 送信。同時実行数は「1件ずつ」なら1、「同時にN件まで」ならN
+- 接続先の表を数秒ごとに読み直し、一時停止した・数を変えた先の作業者を止めて作り直す
 """
 
 import asyncio
@@ -103,7 +103,7 @@ class WorkerSet:
             await self._export_task
 
     async def keep_reloading(self) -> None:
-        """つなぎ先の一覧を RELOAD_SECONDS ごとに読み直す。
+        """接続先の一覧を RELOAD_SECONDS ごとに読み直す。
 
         PostgreSQL に届かない間（再起動・compose の down と up）は、今動いている作業者のまま続け、次の回に読み直す。
         前は読み直しの失敗でプロセスごと終わり、PostgreSQL が戻っても生成・書き出し・ハーネスが進まなかった

@@ -1,6 +1,6 @@
-// canvas（fabric.js と 2D の canvas）で描く色を、色の組（common/theme.css の名前）から読む1か所。
+// canvas（fabric.js と 2D の canvas）で描く色を、カラーテーマ（common/theme.css の名前）から読む1か所。
 // CSS の変数は canvas に効かないので、getComputedStyle で値を読んで渡す。JS に色の値を書かない（test/theme_check.mjs）。
-// 名前が組に無いときは止める（色を補わない）。
+// 名前がテーマに無いときは止める（色を補わない）。
 
 function raw(name) {
   const v = getComputedStyle(document.documentElement).getPropertyValue(`--${name}`).trim();
@@ -32,6 +32,6 @@ export function canvasColors() {
     extendFill: themeColor("mask", 0.06),   // 描き足す枠の中
     handle: themeColor("on"),               // 枠の角のつまみの縁
     pointer: themeColor("pointer"),         // ペンの先の輪
-    protectRgb: themeRgb("protect"),        // 人の手の範囲（api.maskOverlay に渡す [r,g,b]）
+    protectRgb: themeRgb("protect"),        // 手動編集の範囲（api.maskOverlay に渡す [r,g,b]）
   };
 }

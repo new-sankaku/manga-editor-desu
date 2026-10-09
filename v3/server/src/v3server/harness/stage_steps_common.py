@@ -4,7 +4,7 @@
 
 - 検査の指摘は {"name", "ok", "drops", "detail"}。drops=True の指摘が ok=False なら候補を落とす（形・数のように
   プログラムで決まる物）。drops=False は指摘だけ（LLM の判定・仮の閾値。精度を測っていない物で候補を落とさない）
-- 評価役を置かない工程は、指摘の少ない候補を初めの候補にする（選ぶのは人）
+- 評価モデルを置かない工程は、指摘の少ない候補を初めの候補にする（選ぶのは人）
 """
 
 from collections.abc import Awaitable, Callable
@@ -35,7 +35,8 @@ def human(by: str) -> Actor:
 def spec_of(unit: HarnessUnit, key: str, model):
     """作業の決めごと。無ければ blocked（工程の決めごとを PUT .../stages/{id}/spec で足してから再開する）。"""
     if key not in (unit.spec or {}):
-        raise q.blocked(f"作業の決めごと spec.{key} が無い。工程の決めごとに足してから再開する", spec=key)
+        raise q.blocked(  # i18n:stored
+            f"作業の決めごと spec.{key} が無い。工程の決めごとに足してから再開する", spec=key)
     return model.model_validate(unit.spec[key])
 
 
@@ -43,11 +44,11 @@ async def cut_out_episode(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, 
     async with get_sessionmaker()() as session:
         if unit.target_kind == "work":
             if await session.get(Work, unit.target_id) is None:
-                raise ApplicationError("作品が無い", type="refused", non_retryable=True)
+                raise ApplicationError("作品が無い", type="refused", non_retryable=True)  # i18n:stored
             return {"work_id": unit.target_id}
         ep = await session.get(Episode, unit.target_id)
         if ep is None or ep.removed:
-            raise ApplicationError("話が無い（消された）", type="refused", non_retryable=True)
+            raise ApplicationError("話が無い（消された）", type="refused", non_retryable=True)  # i18n:stored
         return {"episode_id": ep.id}
 
 
@@ -90,7 +91,8 @@ async def ask_candidates(unit: HarnessUnit, args: dict[str, Any], step: str, que
     async with get_sessionmaker()() as session:
         cost = await q.jobs_cost(session, job_ids)
     if not any(o["status"] == "generated" for o in out):
-        raise ApplicationError("案が1つも読めなかった（答えの形が崩れた）", type="broken_response", non_retryable=True)
+        raise ApplicationError(  # i18n:stored
+            "案が1つも読めなかった（答えの形が崩れた）", type="broken_response", non_retryable=True)
     return {"candidates": out, "cost": cost, "job_ids": job_ids}
 
 
@@ -118,7 +120,7 @@ async def thresholds_of(session, work_id: str, prefix: str, needed: dict[str, st
     got = {t.key[len(prefix):]: t for t in rows if t.status != "rejected"}
     missing = [k for k in needed if k not in got]
     if missing:
-        raise q.blocked("閾値が未設定: " + "、".join(f"{prefix}{k}（{needed[k]}）" for k in missing),
+        raise q.blocked("閾値が未設定: " + "、".join(f"{prefix}{k}（{needed[k]}）" for k in missing),  # i18n:stored
                         missing=[prefix + k for k in missing])
     return {k: {"value": float(t.value["value"]), "status": t.status, "source": t.source} for k, t in got.items()}
 
@@ -194,5 +196,5 @@ async def discard_candidates(unit: HarnessUnit, args: dict[str, Any],
 async def picked_content(session, args: dict[str, Any]) -> HarnessCandidate:
     cand = await session.get(HarnessCandidate, args["candidate_id"])
     if cand is None or cand.content is None:
-        raise ApplicationError("採る候補に中身が無い", type="refused", non_retryable=True)
+        raise ApplicationError("採る候補に中身が無い", type="refused", non_retryable=True)  # i18n:stored
     return cand

@@ -30,16 +30,16 @@ const FORWARD = [
   ["cut_out", "context"], ["context", "generate"], ["generate", "check"], ["check", "evaluate"],
   ["evaluate", "review"], ["review", "finalize"], ["finalize", "end"],
 ];
-// 辺のラベルは短く（図の上）。全文は辺に指を置いたときの説明と、横の欄の「戻った回数」に出す。
+// 辺のラベルは短く（図の上）。全文は辺に指を置いたときの説明と、横のパネルの「戻った回数」に出す。
 // 検査→直させるは隣の列へ入る短い線で、ラベルを置く長さが無い。行き先の「直させる」が中身を言うので、図にはラベルを出さない
-const SKIPS = [["check", "review", t("評価なし"), t("評価の段を使わない")], ["evaluate", "end", t("判断なし"), t("人の判断を使わない")]];
+const SKIPS = [["check", "review", t("評価なし"), t("評価のステップを使わない")], ["evaluate", "end", t("判断なし"), t("人の判断を使わない")]];
 export const RETRY_EDGES = [
   ["check", "fix", "", t("落ちた所だけ直す")],
   ["fix", "check", t("検査し直す"), t("直した候補だけ検査し直す")],
   ["check", "context", t("作り直す"), t("直せない・直す上限で全部を作り直す")],
   ["evaluate", "context", t("選べない"), t("評価で選べない・割れた")],
   ["review", "context", t("却下"), t("却下（理由つき）")],
-  ["review", "generate", t("直した絵から"), t("人が直した絵から続ける")],
+  ["review", "generate", t("直した絵から"), t("手動で修正した絵から続ける")],
 ];
 export const EDGE_TEXT = Object.fromEntries([...SKIPS, ...RETRY_EDGES].map(([a, b, , full]) => [`${a}>${b}`, full]));
 
@@ -63,7 +63,7 @@ export const isHumanWait = (s) => HUMAN.has(s);
 // ------------------------------------------------------------------ 色と文字
 
 // 図の色は harness.css の状態の色の呼び名（theme.css の変数から作る）を読む。色の値はここに書かない。
-// Cytoscape は CSS の変数も color-mix() も読めないので、要素の color に当ててブラウザに解かせ、1画素の canvas で rgb にする
+// Cytoscape は CSS の変数も color-mix() も読めないので、要素の color に当ててブラウザに解かせ、1ピクセルの canvas で rgb にする
 const probe = document.createElement("i");
 probe.style.display = "none";
 document.documentElement.append(probe);
@@ -85,14 +85,14 @@ const C = Object.fromEntries(Object.entries({
   groupBg: "--h-group-bg",
 }).map(([k, name]) => [k, token(name)]));
 probe.remove();
-// 文字の形は theme.css の --font-mono。図の文字の大きさの計り（canvas）と Cytoscape に同じ物を渡す
+// フォントは theme.css の --font-mono。図の文字の大きさの計り（canvas）と Cytoscape に同じ物を渡す
 const MONO = getComputedStyle(document.documentElement).getPropertyValue("--font-mono").trim();
 if (!MONO) throw new Error("文字の変数 --font-mono がありません"); // i18n:dev
 
 export const FONT = 12;        // 図の文字（ノード・辺・枠）。全体を見たときもこれより小さくしない（fit の下限が 1 倍）
 const LH = 1.35;               // 行の高さ（文字の大きさの倍）
 const PAD_X = 12, PAD_Y = 8;   // ノードの中の余白
-const BAND = 10;               // 工程の図の作業のノードの下の、進み具合の棒の帯
+const BAND = 10;               // 工程の図の作業のノードの下の、進行状況の棒の帯
 const LABEL_PAD = 3;           // 辺のラベルの下地の余白
 const FRAME_PAD = 12;          // 枠の中の余白
 const MARGIN = 24;             // 全体を見るときの、図のまわりの余白
@@ -154,7 +154,7 @@ const STYLE = [
   { selector: "edge.traversed", style: { "line-color": C.hot, "target-arrow-color": C.hot, width: 3 } },
 ];
 
-// ------------------------------------------------------------------ ELK の決まり
+// ------------------------------------------------------------------ ELK の設定
 
 const LAYERED = {
   "elk.algorithm": "layered",
@@ -196,7 +196,7 @@ export class HarnessGraph {
     this.cy.on("mouseover", "edge", (e) => this.handlers.onHover?.(e.target.data("note") || ""));
     this.cy.on("mouseout", "edge", () => this.handlers.onHover?.(""));
     this.cy.on("render", () => this._queueOverlay());
-    // 箱の大きさが変わったら（右の欄の高さが変わって左の列が伸びた・縮んだなど）合わせ直す。fit が自分で変えた大きさでは呼ばない
+    // 箱の大きさが変わったら（右のパネルの高さが変わって左の列が伸びた・縮んだなど）合わせ直す。fit が自分で変えた大きさでは呼ばない
     new ResizeObserver(() => {
       const wrap = this.container.parentElement;
       if (this._fitSize && this._fitSize !== `${wrap.clientWidth}x${wrap.clientHeight}`) this.fit();
@@ -312,7 +312,7 @@ export class HarnessGraph {
     const zh = (base - 2 * MARGIN) / bb.h;
     let z = Math.min(MAX_ZOOM, zw, Math.max(1, zh));
     if (z < 1) z = 1;
-    // 図が箱より高いときは箱を高くする（切らない）。低いときは箱を埋めたまま真ん中に置く。絵だけの画面では箱は画面いっぱいのまま
+    // 図が箱より高いときは箱を高くする（切らない）。低いときは箱を埋めたまま真ん中に置く。集中モードの画面では箱は画面いっぱいのまま
     const need = Math.ceil(bb.h * z + 2 * MARGIN);
     if (!focus && need > base) wrap.style.minHeight = `${need}px`;
     cy.resize();
@@ -407,7 +407,7 @@ export class HarnessGraph {
     if (this._sizeUnits(stage) || added) this._relayout();
   }
 
-  // 1つの工程の作業のノードは同じ大きさにそろえる（3行。下に進み具合の帯）
+  // 1つの工程の作業のノードは同じ大きさにそろえる（3行。下に進行状況の帯）
   _sizeUnits(stage) {
     const ns = this.cy.nodes('[kind="unit"]').filter((n) => this.where.get(n.data("unit_id"))?.[0] === `group:${stage}`);
     const folded = this.cy.nodes(".folded").filter((n) => n.data("stage") === stage);
@@ -495,7 +495,7 @@ export class HarnessGraph {
   _stageCandidates() {
     const out = [];
     for (const wrap of [0, 2, 1, 0.3]) for (const page of [40, 4, 1.5, 0.3]) for (const group of [1, 3, 8]) out.push(this._stageElk(page, group, wrap));
-    // 電話の幅：折り返しても2つ並ぶと入らないので、段を縦に1列に並べ、ページも縦に積む案
+    // スマートフォンの幅：折り返しても2つ並ぶと入らないので、段を縦に1列に並べ、ページも縦に積む案
     for (const group of [0.3, 1]) out.push(this._stageElk(0.3, group, "down"));
     return out;
   }
@@ -670,7 +670,7 @@ export class HarnessGraph {
   }
 
   // dir は "RIGHT"（段を横に並べる）か "DOWN"（縦に並べる。箱の幅に横向きが入らないとき）。
-  // 縦のときは辺を全部 x と y を入れ替えた向きにする（上→左、下→右、右→下、左→上）。並び順の決まりはそのまま効く
+  // 縦のときは辺を全部 x と y を入れ替えた向きにする（上→左、下→右、右→下、左→上）。並び順のルールはそのまま効く
   _unitElk(dir) {
     const cy = this.cy;
     const TURN = dir === "DOWN" ? { NORTH: "WEST", SOUTH: "EAST", EAST: "SOUTH", WEST: "NORTH" } : null;
@@ -1008,7 +1008,7 @@ function groupProgress(rows) {
   return [...by.values()];
 }
 
-const PSTATE_JA = { pending: t("送った"), running: t("描いている"), finished: t("描き終えた"), unavailable: t("進み具合を受け取れない"),
+const PSTATE_JA = { pending: t("送った"), running: t("描いている"), finished: t("描き終えた"), unavailable: t("進行状況を受け取れない"),
                     interrupted: t("中断"), error: t("止まった") };
 const pctOf = (r) => (r.max ? Math.round((100 * (r.value || 0)) / r.max) : 0);
 

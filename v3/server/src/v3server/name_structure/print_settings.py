@@ -13,6 +13,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from v3server.messages import m
 from v3server.name_structure.item_styles import Color
 
 PageKind = Literal["cover", "color_page", "body", "blank"]
@@ -90,9 +91,9 @@ class PrintSettings(_Strict):
     def _all_modes(self):
         missing = {"bilevel", "grayscale", "color"} - set(self.dpi_by_color_mode)
         if missing:
-            raise ValueError(f"色の種類 {sorted(missing)} の解像度が無い")
+            raise ValueError(m("色の種類 {modes} の解像度が無い", modes=sorted(missing)))
         if any(v <= 0 for v in self.dpi_by_color_mode.values()):
-            raise ValueError("解像度は正の数")
+            raise ValueError(m("解像度は正の数"))
         return self
 
 
@@ -132,7 +133,7 @@ class NombreSettings(_Strict):
     def _all_kinds(self):
         missing = {"cover", "color_page", "body", "blank"} - set(self.display_by_kind)
         if missing:
-            raise ValueError(f"ページの種類 {sorted(missing)} のノンブルの出し方が無い")
+            raise ValueError(m("ページの種類 {kinds} のノンブルの出し方が無い", kinds=sorted(missing)))
         return self
 
 
@@ -169,7 +170,7 @@ class TextSpan(_Strict):
     @model_validator(mode="after")
     def _something(self):
         if self.font_family is None and self.size_ratio is None and self.embolden_ratio is None and self.color is None:
-            raise ValueError("書式が1つも無い")
+            raise ValueError(m("書式が1つも無い"))
         return self
 
 
@@ -180,7 +181,7 @@ def check_spans(text: str, spans: list[dict] | None) -> None:
     n = len(text)
     for s, e in rng:
         if e <= s or e > n:
-            raise ValueError(f"書式の範囲 {s}〜{e} が文字（{n}文字）の外か、空")
+            raise ValueError(m("書式の範囲 {start}〜{end} が文字（{length}文字）の外か、空", start=s, end=e, length=n))
     for (_, e0), (s1, _) in zip(rng, rng[1:], strict=False):
         if s1 < e0:
-            raise ValueError("書式の範囲が重なっている")
+            raise ValueError(m("書式の範囲が重なっている"))

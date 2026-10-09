@@ -1,9 +1,9 @@
-"""作品と話の進み具合（V3点検の結果 5章の6・V3細部の決めごと 19章）。
+"""作品と話の進行状況（V3点検の結果 5章の6・V3細部の決めごと 19章）。
 
 - 話ごと：状態ごとのページの数、確認待ちのページ、締切
 - 見込み（未検証）：この作品で1枚にかかった時間 =（今 − 作品を作った時）÷ 承認したページの数。
   話の残りのページ（承認していないページ）を番号の順に1枚ずつ足して、それぞれの終わる時を出す。
-  締切より後になるページに印を付ける。待ち行列の時間（19章）はまだ入れていない。
+  締切より後になるページに印を付ける。キューの時間（19章）はまだ入れていない。
   承認したページが無い作品では、1枚の時間を出せないので見込みは出さない（理由を返す）。当たるかは作ってみるまで未検証
 """
 
@@ -16,9 +16,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.translation_review_import_tables import ReviewState
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Work
+from v3server.messages import m
 from v3server.operations.review_operations import REVIEW_STATUSES
 
-ESTIMATE_NOTE = ("未検証。1枚の時間は（今 − 作品を作った時）÷ 承認したページの数。待ち行列の時間は入れていない")
+# 成功の返事に入れる文。m() に包んでおくと、返事を作る所が呼び出しの言語で出す
+ESTIMATE_NOTE = m("未検証。1枚の時間は（今 − 作品を作った時）÷ 承認したページの数。キューの時間は入れていない")
 
 
 @dataclass
@@ -33,7 +35,7 @@ def estimate(now: datetime, work_created_at: datetime, approved_in_work: int, re
     """話の見込み。remaining は承認していないページ（番号の順）。"""
     if approved_in_work == 0:
         return {"per_page_seconds": None, "projected_finish": None, "on_track": None, "late_page_ids": [],
-                "reason": "この作品で承認したページがまだ無いので、1枚にかかる時間を出せない", "note": ESTIMATE_NOTE}
+                "reason": m("この作品で承認したページがまだ無いので、1枚にかかる時間を出せない"), "note": ESTIMATE_NOTE}
     per_page = (now - work_created_at) / approved_in_work
     finishes = [(p, now + per_page * (n + 1)) for n, p in enumerate(remaining)]
     projected = finishes[-1][1] if finishes else now

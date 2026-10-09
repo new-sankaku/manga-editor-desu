@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.event_and_lock_tables import Event, Lock, UndoConflict
 from v3server.canonical_tables.work_tree_tables import Work
+from v3server.messages import m, text_of
 from v3server.openfga_permissions import Authz
 from v3server.operations.all_operation_types import op_adapter
 from v3server.operations.field_change_record import find_undo_conflicts, merge_hand_marks, record_field_changes
@@ -81,22 +82,23 @@ async def conflicting_locks(
 
 
 def locked_error(lock: Lock) -> Locked:
-    return Locked(
-        f"{lock.target_kind}:{lock.target_id} は {lock.holder_kind}:{lock.holder_id} がロック中（{lock.reason}）"
-    )
+    return Locked(m("{target_kind}:{target_id} は {holder_kind}:{holder_id} がロック中（{reason}）",
+                    target_kind=lock.target_kind, target_id=lock.target_id, holder_kind=lock.holder_kind,
+                    holder_id=lock.holder_id, reason=lock.reason))
 
 
 async def check_may_submit(session: AsyncSession, authz: Authz, actor: Actor, work: Work, op: OpBase) -> None:
     """op を出してよいか（AIが出せる操作か・権限・ロック）。submit が当てる前に確かめるのと同じもの。
     ファイルを置く口（絵のアップロード）は、ファイルを書く前にここで確かめる。"""
     if actor.kind == "ai" and not op.ai_may_submit:
-        raise Forbidden(f"{op.type} はAIが出せない操作")
+        raise Forbidden(m("{op} はAIが出せない操作", op=op.type))
     await check_scope(session, authz, actor, await op.scope(session, work))
 
 
 async def check_scope(session: AsyncSession, authz: Authz, actor: Actor, scope: Scope) -> None:
     if not await authz.check(actor.permission_user, scope.relation, scope.object):
-        raise Forbidden(f"{actor.permission_user} に {scope.object} の {scope.relation} が無い")
+        raise Forbidden(m("{user} に {object} の {relation} が無い",
+                          user=actor.permission_user, object=scope.object, relation=scope.relation))
     for lock in await conflicting_locks(session, actor, scope.lock_targets, scope.page_tree):
         raise locked_error(lock)
 
@@ -124,11 +126,11 @@ async def submit(
                 await session.execute(select(Event.id).where(Event.undoes_event_id == undoes_event_id))
             ).first()
             if already is not None:
-                raise NotUndoable("すでに取り消している")
+                raise NotUndoable(m("すでに取り消している"))
             undone = await session.get(Event, undoes_event_id)
             if undone.field_changes is None:
-                raise NotUndoable("この出来事には変えた項目の記録が無い（記録を始める前の出来事）。"
-                                  "後の変更とぶつかるかを確かめられないので取り消さない")
+                raise NotUndoable(m("この出来事には変えた項目の記録が無い（記録を始める前の出来事）。"
+                                    "後の変更とぶつかるかを確かめられないので取り消さない"))
         await check_may_submit(session, authz, actor, work, op)
 
         ctx = ApplyContext(session=session, work=work, actor=actor)
@@ -141,7 +143,7 @@ async def submit(
                 raise UndoConflictError(_conflict_message(conflicts), conflicts)
             await merge_hand_marks(session, undone, recorded)
         if not commit and (ctx.tuple_writes or ctx.tuple_deletes):
-            raise Invalid(f"{op.type} は権限の組を書くので、ほかの操作とまとめて確定できない")
+            raise Invalid(m("{op} は権限の組を書くので、ほかの操作とまとめて確定できない", op=op.type))
         event = append_event(
             session, work, actor, op.type, op.model_dump(mode="json"), inverse, undoes_event_id, ctx.held_changes,
             recorded.changes,
@@ -166,11 +168,18 @@ async def submit(
 
 
 def _conflict_message(conflicts: list[dict[str, Any]]) -> str:
-    parts = []
+    # 並べる所も m() でつなぐ（"・".join(…) にすると普通の str になり、訳せなくなる）
+    parts = ""
     for c in conflicts:
-        by = "・".join(f"{e['seq']}番 {e['op_type']}（{e['actor_kind']}:{e['actor_id']}）" for e in c["events"])
-        parts.append(f"{c['table']}:{c['id']} の {c['field']} を後で {by or '記録の無い変更'} が変えている")
-    return "取り消すと後の変更を上書きするので取り消さない。" + "／".join(parts)
+        by = ""
+        for e in c["events"]:
+            one = m("{seq}番 {op}（{actor_kind}:{actor_id}）", seq=e["seq"], op=e["op_type"],
+                    actor_kind=e["actor_kind"], actor_id=e["actor_id"])
+            by = m("{head}・{tail}", head=by, tail=one) if by else one
+        part = m("{table}:{id} の {field} を後で {by} が変えている", table=c["table"], id=c["id"], field=c["field"],
+                 by=by or m("記録の無い変更"))
+        parts = m("{head}／{tail}", head=parts, tail=part) if parts else part
+    return m("取り消すと後の変更を上書きするので取り消さない。{conflicts}", conflicts=parts)
 
 
 async def _record_undo_conflict(session: AsyncSession, actor: Actor, work_id: str, event_id: str,
@@ -180,7 +189,7 @@ async def _record_undo_conflict(session: AsyncSession, actor: Actor, work_id: st
                           conflicts=err.conflicts)
     session.add(record)
     await session.commit()
-    return UndoConflictError(str(err), err.conflicts, record.id)
+    return UndoConflictError(text_of(err), err.conflicts, record.id)
 
 
 async def undo(session: AsyncSession, authz: Authz, actor: Actor, work_id: str, event_id: str) -> Event:
@@ -189,7 +198,7 @@ async def undo(session: AsyncSession, authz: Authz, actor: Actor, work_id: str, 
     if event is None or event.work_id != work_id:
         raise NotFound(f"events:{event_id}")
     if event.inverse is None:
-        raise NotUndoable(f"{event.op_type} は取り消せない")
+        raise NotUndoable(m("{op} は取り消せない", op=event.op_type))
     inverse = event.inverse
     await session.rollback()
     return await submit(session, authz, actor, work_id, inverse, undoes_event_id=event_id)

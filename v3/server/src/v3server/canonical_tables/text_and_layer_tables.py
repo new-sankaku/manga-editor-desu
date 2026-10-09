@@ -1,5 +1,5 @@
-"""コマの中の文字（吹き出し・ナレーションの箱・描き文字）と、コマの絵の層と、人の手の範囲（AIが描き直さない所）。
-どれも人が直接直せる。人が変えた項目には人の手の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。"""
+"""コマの中の文字（フキダシ・ナレーションの箱・描き文字）と、コマの絵のレイヤーと、手動編集の範囲（AIが描き直さない所）。
+どれも人が直接直せる。人が変えた項目には手動編集の印が付き、AIの変更が当たると判断待ちになる（operations/human_hand_guard.py）。"""
 
 from datetime import datetime
 from typing import Any
@@ -19,7 +19,7 @@ class TextItem(Base):
     work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
     page_id: Mapped[str] = mapped_column(ForeignKey("pages.id"), index=True)
     panel_id: Mapped[str] = mapped_column(ForeignKey("panels.id"), index=True)
-    # balloon（吹き出し）・caption（ナレーションの箱）・drawn_sfx（描き文字の擬音）
+    # balloon（フキダシ）・caption（ナレーションの箱）・drawn_sfx（描き文字の擬音）
     item_kind: Mapped[str] = mapped_column(String(16))
     # コマの中の読む順（同じ item_kind の中で）
     order: Mapped[int] = mapped_column(Integer)
@@ -59,8 +59,8 @@ class TextItem(Base):
 
 
 class PanelLayer(Base):
-    """コマの絵の層1枚（線画・ベタ・トーン・着彩・背景・文字など。V3細部の決めごと 10.3）。
-    1枚の絵だけのコマは Panel.image_id を使い、層に分けたコマはここに並べる。"""
+    """コマの絵のレイヤー1枚（線画・ベタ・トーン・着彩・背景・文字など。V3細部の決めごと 10.3）。
+    1枚の絵だけのコマは Panel.image_id を使い、レイヤーに分けたコマはここに並べる。"""
 
     __tablename__ = "panel_layers"
 
@@ -81,16 +81,16 @@ class PanelLayer(Base):
     adjustments: Mapped[list[Any]] = mapped_column(default=list)
     # 人が掛けた「動かさない」。人もAIも変えられない。外せるのは人だけ
     fixed: Mapped[bool] = mapped_column(Boolean, default=False)
-    # ペンの線（pen_strokes）の版。線を足す・変える・消すたびに1つ増える
+    # ペンの線（pen_strokes）のバージョン。線を足す・変える・消すたびに1つ増える
     stroke_revision: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
-    # 今の絵（image_id）を、線のどの版から作ったか。stroke_revision と違えば、絵は古い控え
+    # 今の絵（image_id）を、線のどのバージョンから作ったか。stroke_revision と違えば、絵は古い控え
     image_stroke_revision: Mapped[int | None] = mapped_column(Integer)
     human_hand_fields: Mapped[list[Any]] = mapped_column(default=list)
     removed: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class ProtectedRegion(Base):
-    """人の手の範囲（V3細部の決めごと 10.2）。この絵（と、同じ大きさのまま続く後の版）をAIが描き直すときは、
+    """手動編集の範囲（V3細部の決めごと 10.2）。この絵（と、同じ大きさのまま続く後のバージョン）をAIが描き直すときは、
     この範囲を描き直す範囲から外す（generation_queue/input_image_preparation.py がマスクにして必ず渡す）。
     人だけが足せる・外せる。"""
 
@@ -100,7 +100,7 @@ class ProtectedRegion(Base):
     work_id: Mapped[str] = mapped_column(ForeignKey("works.id"), index=True)
     image_id: Mapped[str] = mapped_column(ForeignKey("image_files.id"), index=True)
     page_id: Mapped[str | None] = mapped_column(ForeignKey("pages.id"), index=True)
-    # 絵の画素の座標の多角形 [[x, y], ...]。消しゴム・PSD の戻しで決めた範囲は多角形でなくマスクの絵で持つ
+    # 絵のピクセルの座標の多角形 [[x, y], ...]。消しゴム・PSD の戻しで決めた範囲は多角形でなくマスクの絵で持つ
     polygon_px: Mapped[list[Any] | None] = mapped_column()
     # 範囲のマスクの絵（白が範囲。置き場の sha256。絵と同じ大きさ）。多角形とどちらか一方
     mask_sha256: Mapped[str | None] = mapped_column(String(64))
@@ -111,7 +111,7 @@ class ProtectedRegion(Base):
 
 
 class ProtectedMaskCache(Base):
-    """人の手の範囲を重ねたマスクの絵の控え（generation_queue/protected_mask_cache.py）。
+    """手動編集の範囲を重ねたマスクの絵の控え（generation_queue/protected_mask_cache.py）。
     key は絵の大きさと、範囲の並び（古い順。id と中身）の sha256。範囲を外すと並びが変わるので別の key になる。
     消すたびに範囲が1つ増えるので、1つ前の並びの控えに新しい範囲だけを重ねる。"""
 
@@ -126,9 +126,9 @@ class ProtectedMaskCache(Base):
 
 class HeldAiChange(Base):
     """判断待ち（V3細部の決めごと 5章・10.2）。人が決めるまで正本に入れない変更。
-    - field_change：AIの変更が人の手の印の付いた項目に当たった。人が「採る」と、その値が人の判断として入る（人の手の印が付く）
-    - ai_operation：AIの操作（コマを分ける・合わせるなど、1項目に分けられないもの）が人の手の所に当たった。payload が操作
-    - psd_*：人が直した PSD を戻したときに、当てられなかった層（operations/psd_import_operations.py）。choices から選ぶ"""
+    - field_change：AIの変更が手動編集の印の付いた項目に当たった。人が「採る」と、その値が人の判断として入る（手動編集の印が付く）
+    - ai_operation：AIの操作（コマを分ける・合わせるなど、1項目に分けられないもの）が手動編集の所に当たった。payload が操作
+    - psd_*：人が直した PSD を戻したときに、当てられなかったレイヤー（operations/psd_import_operations.py）。choices から選ぶ"""
 
     __tablename__ = "held_ai_changes"
 

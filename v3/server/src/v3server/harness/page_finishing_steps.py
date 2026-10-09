@@ -1,11 +1,11 @@
 """仕上げ（S5）の作業の段。対象は話。人だけが置く工程（設計 5 の表：プログラム中心）。
 
-吹き出し・文字・擬音の置き場は人が置く。AIは置かない（生成の段は、人が置いた今の状態を候補の中身として写すだけで、
+フキダシ・文字・擬音の置き場は人が置く。AIは置かない（生成の段は、人が置いた今の状態を候補の中身として写すだけで、
 LLM・画像生成を呼ばない）。プログラムと検出器・VLM は検査だけをする。
 
-- 検査（プログラム）：ネームの検査（6章。内側の枠・吹き出しの順・交差・しっぽの向き・文字数など）を今の話に当てる。
+- 検査（プログラム）：ネームの検査（6章。内側の枠・フキダシの順・交差・しっぽの向き・文字数など）を今の話に当てる。
   閾値が無い検査があれば blocked
-- 検査（検出器）：絵のあるコマで、顔が吹き出しに隠れる割合（p47）。閾値は作画と同じ harness.drawing.face_covered_max
+- 検査（検出器）：絵のあるコマで、顔がフキダシに隠れる割合（p47）。閾値は作画と同じ harness.drawing.face_covered_max
   （コマの絵がコマの枠いっぱいに置かれているとして比べる。絵の置き方 image_placement は見ない。未検証）
 - 検査（VLM）：コマの枠だけを描いた絵から読む順を判定させ（p11・p45）、コマの順と比べる
 - どの指摘でも候補は落とさない（直すのは人。落とすと同じ物を写し直すだけになる）。人が見て採る（完成条件に
@@ -41,7 +41,7 @@ from v3server.name_checks.name_check_runner import run_name_checks
 from v3server.operations.image_placement_carry import frame_bbox
 from v3server.operations.name_draft_conversion import READING_DIRECTION, name_draft_of_episode
 
-# 読む順の判定に渡す絵の、1mm あたりの画素（枠の線が見える大きさ。精度との関係は未検証）
+# 読む順の判定に渡す絵の、1mm あたりのピクセル（枠の線が見える大きさ。精度との関係は未検証）
 FRAME_IMAGE_PX_PER_MM = 4
 
 cut_out = c.cut_out_episode
@@ -61,7 +61,7 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         work = await session.get(Work, unit.work_id)
         if work.page_spec is None:
-            raise q.blocked("作品の寸法（page_spec）がまだ決まっていない")
+            raise q.blocked("作品の寸法（page_spec）がまだ決まっていない")  # i18n:stored
         await q.require_route(session, "reading_order")
     return {"cost": 0, "job_ids": []}
 
@@ -78,7 +78,8 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                 pages.append({"page_id": p.id, "number": p.number, "texts": len(texts), "balloons_placed": placed,
                               "panels": len(panels), "with_image": sum(1 for x in panels if x.image_id)})
         if not any(p["texts"] or p["balloons_placed"] for p in pages):
-            raise q.blocked("吹き出し・文字がまだ置かれていない。仕上げは人が置く工程なので、置いてから再開する")
+            raise q.blocked(  # i18n:stored
+                "フキダシ・文字がまだ置かれていない。仕上げは人が置く工程なので、置いてから再開する")
         return {"pages": pages, "by": "人が置いた今の状態（AIは置かない）"}
 
     return await c.one_candidate(unit, args, snapshot, "仕上げは人が置く工程。候補は人が置いた今の状態の1つだけ")
@@ -114,7 +115,8 @@ async def _reading_order(unit: HarnessUnit, work: Work, page: Page, panels: list
     try:
         got = assign_points_to_panels(parse_reading_order_answer(text), centers, text)
     except BrokenAnswerError as e:
-        raise ApplicationError(f"読む順の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
+        raise ApplicationError(  # i18n:stored
+            f"読む順の答えの形が崩れた: {e}", type="broken_response", non_retryable=True) from e
     want = list(range(len(framed)))
     return (c.finding(f"読む順（{page.number}ページ）", got == want, False,
                       "コマの順と同じ" if got == want else f"判定の順 {[g + 1 for g in got]}（コマの順 1〜{len(want)}）",
@@ -167,7 +169,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             report = run_name_checks(draft, values)
             unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]
             if unset:
-                raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)
+                raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)  # i18n:stored
             pages = [(pg, await _panels(session, pg.id)) for pg in await _pages(session, unit.target_id)]
             th = await drawing_thresholds(session, unit.work_id)
         out = [c.finding(r.title, None if r.status == "データなし" else r.status == "合格", False,

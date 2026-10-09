@@ -12,6 +12,7 @@ from v3server.canonical_tables.threshold_and_finding_tables import (
     FindingReaction,
     Threshold,
 )
+from v3server.messages import m
 from v3server.name_structure.item_styles import FrameStyle
 from v3server.name_structure.print_settings import NombreSettings, PrintSettings, Typesetting
 from v3server.name_structure.reading_direction import PageSpec
@@ -61,7 +62,7 @@ class SetWorkSettings(OpBase):
     async def apply(self, ctx):
         changes = self.model_dump(exclude={"type"}, exclude_unset=True)
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         before = _changed(ctx.work, changes)
         return {"type": self.type, **before}
 
@@ -80,7 +81,7 @@ class SetAiInvolvement(OpBase):
         current = dict(ctx.work.ai_involvement or {})
         before = current.get(self.task)
         if before == self.mode:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         if self.mode is None:
             current.pop(self.task)
         else:
@@ -99,7 +100,7 @@ class SetMember(OpBase):
 
     async def scope(self, session, work):
         if self.role not in WORK_ROLES:
-            raise Invalid(f"役が無い: {self.role}")
+            raise Invalid(m("役が無い: {role}", role=self.role))
         return Scope("can_manage", work_obj(work.id))
 
     async def apply(self, ctx):
@@ -123,7 +124,7 @@ class AllowDestination(OpBase):
         if service is None:
             raise NotFound(f"services:{self.service_id}")
         if is_local(service):
-            raise Invalid("手元のつなぎ先は常に送ってよい。足す・外すのは、手元と言えない先だけ（allowed_destinations.py）")
+            raise Invalid(m("ローカルの接続先は常に送ってよい。足す・外すのは、ローカルと言えない先だけ（allowed_destinations.py）"))
         row = await ctx.session.get(WorkDestination, (ctx.work.id, self.service_id))
         if self.allowed and row is None:
             ctx.session.add(WorkDestination(work_id=ctx.work.id, service_id=self.service_id))
@@ -144,7 +145,7 @@ class SetThreshold(OpBase):
 
     async def scope(self, session, work):
         if self.value is not None and (self.source is None or self.status is None):
-            raise Invalid("閾値には出典と検証の状態が要る")
+            raise Invalid(m("閾値には出典と検証の状態が要る"))
         return Scope("can_manage", work_obj(work.id))
 
     async def apply(self, ctx):

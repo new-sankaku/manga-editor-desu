@@ -15,6 +15,8 @@ from dataclasses import dataclass
 
 from PIL import Image
 
+from v3server.messages import m
+
 FONT_SUFFIXES = (".ttf", ".otf", ".ttc")
 
 
@@ -24,13 +26,14 @@ class TextRenderError(RuntimeError):
 
 def font_path(font_dir: str | None, family: str) -> str:
     if not font_dir:
-        raise TextRenderError("V3_FONT_DIR が無い。書体のファイルが無いので文字を描けない")
+        raise TextRenderError(m("V3_FONT_DIR が無い。書体のファイルが無いので文字を描けない"))
     root = pathlib.Path(font_dir)
     found = [p for p in root.rglob("*") if p.suffix.lower() in FONT_SUFFIXES and p.stem == family]
     if not found:
-        raise TextRenderError(f"書体 {family} のファイルが {font_dir} に無い（ファイルの名前から拡張子を除いたものが書体の名前）")
+        raise TextRenderError(m("書体 {family} のファイルが {folder} に無い（ファイルの名前から拡張子を除いたものが書体の名前）",
+                                family=family, folder=font_dir))
     if len(found) > 1:
-        raise TextRenderError(f"書体 {family} のファイルが2つ以上ある: {[str(p) for p in found]}")
+        raise TextRenderError(m("書体 {family} のファイルが2つ以上ある: {files}", family=family, files=[str(p) for p in found]))
     return str(found[0])
 
 
@@ -50,7 +53,8 @@ def _call(req: dict, node_executable: str, script: str, timeout_seconds: float) 
     done = subprocess.run([node_executable, script], input=json.dumps(req, ensure_ascii=False), capture_output=True,
                           text=True, encoding="utf-8", timeout=timeout_seconds)
     if done.returncode != 0:
-        raise TextRenderError(f"文字を描けなかった（終了コード {done.returncode}）: {done.stderr.strip()[:500]}")
+        raise TextRenderError(m("文字を描けなかった（終了コード {code}）: {stderr}", code=done.returncode,
+                                stderr=done.stderr.strip()[:500]))
     return json.loads(done.stdout)["items"]
 
 
@@ -64,10 +68,11 @@ def _run(items: list[dict], node_executable: str, script: str, timeout_seconds: 
             image = None
             if not measure_only:
                 if info["missing_chars"]:
-                    raise TextRenderError(f"文字 {it['id']} の書体に無い字がある: {''.join(info['missing_chars'])}"
-                                          "（ほかの書体では描かない。書体を替えるか、文字の一部の書式で書体を選ぶ）")
+                    raise TextRenderError(m("文字 {id} の書体に無い字がある: {chars}"
+                                            "（ほかの書体では描かない。書体を替えるか、文字の一部の書式で書体を選ぶ）",
+                                            id=it["id"], chars="".join(info["missing_chars"])))
                 if info["opaque_pixels"] == 0:
-                    raise TextRenderError(f"文字 {it['id']} を描いたが、見える画素が無い（文字が空 など）")
+                    raise TextRenderError(m("文字 {id} を描いたが、見えるピクセルが無い（文字が空 など）", id=it["id"]))
                 image = Image.open(io.BytesIO(pathlib.Path(it["output_path"]).read_bytes())).convert("RGBA")
             out.append(RenderedText(image, info["block_w"], info["block_h"], info["overflow"], info["lines"],
                                     info["missing_chars"]))

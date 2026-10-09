@@ -540,7 +540,7 @@ async def test_展開すると膨らむ絵は画素数の上限で断る(api, au
     assert len(bomb) < get_settings().request_max_bytes
     r = await upload(api, wid, a, data=bomb)
     assert r.status_code == 422, r.text
-    assert "画素が多すぎる" in r.json()["detail"]
+    assert "ピクセルが多すぎる" in r.json()["detail"]
     # 設定の上限（Pillow の上限より小さい値）でも止める
     monkeypatch.setattr(get_settings(), "image_max_pixels", 64 * 32 - 1)
     r = await upload(api, wid, a)
@@ -628,7 +628,7 @@ async def test_人が手を入れた絵を元にAIが描き直すとき_人の�
         "input_images": [{"node": "3", "input": "image", "image_id": second, "purpose": "source"}]}}
     # マスクを入れる所の無い依頼は受けない
     r = await api.post(f"/works/{wid}/jobs", headers=h(a), json=base)
-    assert r.status_code == 422 and "人の手の範囲" in r.json()["detail"]
+    assert r.status_code == 422 and "手動編集の範囲" in r.json()["detail"]
     # 依頼する側は prepared_inputs を書けない
     forged = {**base, "request": {**base["request"], "prepared_inputs": []}}
     assert (await api.post(f"/works/{wid}/jobs", headers=h(a), json=forged)).status_code == 422

@@ -2,7 +2,7 @@
 // 使い方：<nav class="v3-nav" data-v3-nav="<この画面の id>"></nav> と
 //         <link rel="stylesheet" href="…/common/nav.css"> と <script type="module" src="…/common/nav.js"></script> を置く。
 // 読み込まれると [data-v3-nav] の全部にリンクを入れる。リンクの先は v3/web からの相対で決める（このファイルの場所から求める）。
-// 選んでいる作品は ?work=<id> で次の画面へ渡し、localStorage の v3.work にも残す（読めない環境では URL だけ）。
+// 選んでいる作品は ?work=<id> で次の画面へ渡し、localStorage の v3.work にも保存する（読めない環境では URL だけ）。
 import { t, LANGS, lang, setLang } from "./i18n.js";
 
 const ROOT = new URL("../", import.meta.url);
@@ -30,7 +30,7 @@ export function storedWork() {
   try { return localStorage.getItem(WORK_KEY) || ""; } catch { return ""; }
 }
 export function rememberWork(id) {
-  try { if (id) localStorage.setItem(WORK_KEY, id); else localStorage.removeItem(WORK_KEY); } catch { /* 残せない環境では URL だけで渡す */ }
+  try { if (id) localStorage.setItem(WORK_KEY, id); else localStorage.removeItem(WORK_KEY); } catch { /* 保存できない環境では URL だけで渡す */ }
   const u = new URL(location.href);
   if (id) u.searchParams.set("work", id); else u.searchParams.delete("work");
   history.replaceState(null, "", u);
@@ -81,7 +81,7 @@ function langSelect() {
   return sel;
 }
 
-// 帯の右に置くボタン（絵だけ・全画面・キー）。common/keys.js の startKeys が入れる（キーを始めていない画面には出さない）
+// 帯の右に置くボタン（集中モード・全画面・キー）。common/keys.js の startKeys が入れる（キーを始めていない画面には出さない）
 let tools = null;
 export function setNavTools(make) {
   tools = make;

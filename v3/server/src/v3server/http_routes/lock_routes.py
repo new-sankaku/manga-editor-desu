@@ -1,4 +1,4 @@
-"""ロックの口。"""
+"""ロックの API。"""
 
 
 from typing import Literal

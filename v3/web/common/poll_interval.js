@@ -1,4 +1,4 @@
-// 進み具合を読みに行く間（ミリ秒）。画面の試験だけが、localStorage の v3.test.poll_ms で短くする（V3画面の一覧.md 4章）。
+// 進行状況を読みに行く間（ミリ秒）。画面の試験だけが、localStorage の v3.test.poll_ms で短くする（V3画面の一覧.md 4章）。
 // 試験の外では入れない値なので、入っていなければ画面ごとに決めた間を使う。入っているときは画面の端に出して隠さない。
 import { t } from "./i18n.js";
 
@@ -14,7 +14,7 @@ export function pollMs(normalMs) {
     const tag = document.createElement("div");
     tag.id = "v3-test-poll";
     tag.className = "meta";
-    tag.textContent = t("試験の設定：進み具合を {{ms}}ms ごとに読む（{{key}}）", { ms, key: KEY });
+    tag.textContent = t("試験の設定：進行状況を {{ms}}ms ごとに読む（{{key}}）", { ms, key: KEY });
     tag.style.cssText = "position:fixed;left:4px;bottom:4px;pointer-events:none;z-index:9999";
     document.body.appendChild(tag);
   }

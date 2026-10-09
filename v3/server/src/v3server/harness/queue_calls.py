@@ -1,10 +1,10 @@
-"""ハーネスの活動から、生成・検出器・評価役・LLM を頼む所。どれも今の順番待ち（job_start_and_control.enqueue →
+"""ハーネスの活動から、生成・検出器・評価モデル・LLM を頼む所。どれも今の順番待ち（job_start_and_control.enqueue →
 GenerationJob → service_call_activity.call_service）を通す。作品ごとの公平さ・予算・送ってよい先・AIの関与・送り直しが同じにかかる。
 
 - 依頼には harness_key（作業・回・段・何枚目）を入れる。活動が落ちて送り直されても、同じ鍵の依頼があればそれを使う
   （重ねて頼まない）。依頼の行はあるのに流れが始まっていなければ（enqueue の途中で落ちた）、流れだけ始める
-- 待つ間は生存を知らせる（heartbeat）。取り消しはこの知らせの返事で届く。届いたら、終わっていない依頼を取り消し、
-  止まるまで待ってから取り消しを返す（ComfyUI に送った物は、取り消しを受けた送り手が /queue の delete か
+- 待つ間は生存を知らせる（heartbeat）。取り消しはこの通知の返事で届く。届いたら、終わっていない依頼を取り消し、
+  止まるまで待ってから取り消しを返す（ComfyUI に送った物は、取り消しを受けたアダプターが /queue の delete か
   prompt_id 付きの /interrupt で止める。comfyui_sender.py）
 - 待つ間の様子（順番待ち・予算で待つ・制限で待つ）を作業の行と出来事に書く（画面の「送り先を待つ」）
 """
@@ -42,7 +42,7 @@ HARNESS_PROCESSES = {
     "detect_identity": "harness_detect_identity",  # 検出器：同じ人物か（/identity_ccip。「違う」で落とす専用）
     "detect_age": "harness_detect_age",          # 検出器：年齢区分の確率（/age_rating。記録だけ）
     "shot_angle": "harness_shot_angle",          # VLM：写す範囲・角度・向き（shot_angle_question）
-    "pair": "harness_pair",                      # VLM の評価役：2枚を左右を入れ替えて比べる（judge_procedures/pair_comparison）
+    "pair": "harness_pair",          # VLM の評価モデル：2枚を左右を入れ替えて比べる（judge_procedures/pair_comparison）
     "name_draft": "harness_name_draft",          # LLM：ネームの案（name_draft_question）
     "layout_tiers": "harness_layout_tiers",      # LLM：ページの段の割り（layout_tier_question）
     "reading_order": "harness_reading_order",    # VLM：コマの読む順（reading_order_question。ネームの下絵を見せる）
@@ -94,7 +94,8 @@ def blocked(detail: str, **details: Any) -> ApplicationError:
 async def require_route(session, key: str) -> str:
     process = HARNESS_PROCESSES.get(key, key)
     if await session.get(ProcessRoute, process) is None:
-        raise blocked(f"処理 {process} の送り先が決まっていない（つなぎ先の画面で送り先を決める）", process=process)
+        raise blocked(  # i18n:stored
+            f"処理 {process} の送り先が決まっていない（接続先の画面で送り先を決める）", process=process)
     return process
 
 
@@ -114,7 +115,7 @@ async def ensure_job(session, unit: HarnessUnit, key: str, process: str, request
         return await job_start_and_control.enqueue(session, await authz(), temporal(), actor, unit.work_id, process,
                                                    {**request, "harness_key": key}, "ai", page_id)
     except V3Error as e:
-        raise blocked(f"{process} を頼めない: {e}", process=process) from e
+        raise blocked(f"{process} を依頼できない: {e}", process=process) from e  # i18n:stored
 
 
 async def _start_if_missing(session, job: Job) -> None:
@@ -177,7 +178,7 @@ async def wait_jobs(unit_id: str | None, job_ids: list[str]) -> list[Job]:
                 seen = t
                 if clock is not None and clock.limit is not None and clock.waited > clock.limit:
                     await asyncio.shield(_cancel_and_wait(job_ids))
-                    raise ApplicationError(
+                    raise ApplicationError(  # i18n:stored
                         f"送り先の順番待ちが待ちの上限（{clock.limit:g} 秒）を超えた。上限を上げるか、空いてから再開する",
                         {"waited_seconds": clock.waited}, type="wait_limit", non_retryable=True)
                 state, counts = _wait_state(jobs)

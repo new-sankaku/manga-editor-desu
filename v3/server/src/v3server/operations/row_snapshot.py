@@ -26,6 +26,7 @@ from v3server.canonical_tables.text_and_layer_tables import (
 )
 from v3server.canonical_tables.translation_review_import_tables import ElementGenerationSetting, TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m
 from v3server.operations.human_hand_guard import change_with_human_hand, json_value, refuse_if_fixed
 from v3server.operations.operation_base import ApplyContext, OpBase, Scope, page_obj, work_obj
 from v3server.v3_error_types import Invalid, NotFound
@@ -98,7 +99,7 @@ class RestoreRows(OpBase):
     async def scope(self, session, work):
         for table in self.snapshot:
             if table not in ROW_MODELS:
-                raise Invalid(f"戻せない表: {table}")
+                raise Invalid(m("戻せない表: {table}", table=table))
         locks = [("page", p) for p in self.page_ids]
         if set(self.snapshot) == {"annotation_items"}:
             # 赤入れだけなら、赤入れを付けられる人が戻せる
@@ -109,7 +110,7 @@ class RestoreRows(OpBase):
 
     async def apply(self, ctx):
         if ctx.actor.kind != "human":
-            raise Invalid("まとめて戻す操作は人だけが出せる")
+            raise Invalid(m("まとめて戻す操作は人だけが出せる"))
         now: dict[str, dict[str, dict[str, Any]]] = {}
         stroke_layers: set[str] = set()
         for table, rows in self.snapshot.items():

@@ -16,6 +16,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal
 
+from v3server.messages import m
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.v3_error_types import Invalid
 
@@ -125,7 +126,7 @@ def carry(placement: dict[str, Any], old_size: tuple[int, int], new_size: tuple[
     t = [min(max(t[0], 0), W), min(max(t[1], 0), H), min(max(t[2], 0), W), min(max(t[3], 0), H)]
     crop = [int(round(v)) for v in t]
     if crop[2] <= crop[0] or crop[3] <= crop[1]:
-        raise Invalid("今の切り抜きが新しい版の外にある。置き場を引き継げない")
+        raise Invalid(m("今の切り抜きが新しいバージョンの外にある。置き場を引き継げない"))
     box = [a + (crop[0] - mx0) * kx, b + (crop[1] - my0) * ky, c + (crop[2] - mx1) * kx, d + (crop[3] - my1) * ky]
     out = {**pl.model_dump(mode="json"), "crop_px": crop, "dest_box_mm": box}
     return ImagePlacement.model_validate(out).model_dump(mode="json")
@@ -148,6 +149,6 @@ def placement_for(current_placement: dict[str, Any] | None, old: Version | None,
             return carry(current_placement, (old.width, old.height), (new.width, new.height), g), "aligned"
     box = frame_box or (tuple(current_placement["dest_box_mm"]) if current_placement else None)
     if box is None:
-        raise Invalid("コマに枠も置き場も無いので、絵をどこに置くか決められない")
+        raise Invalid(m("コマに枠も置き場も無いので、絵をどこに置くか決められない"))
     keep = {k: v for k, v in (current_placement or {}).items() if k not in ("crop_px", "dest_box_mm")}
     return cover(new.width, new.height, box, keep), "cover"

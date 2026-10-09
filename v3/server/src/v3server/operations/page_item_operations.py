@@ -13,6 +13,7 @@ from v3server.canonical_tables.page_item_tables import PageItem
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m, text_of
 from v3server.name_structure.item_styles import ShapeSpec, ToneSpec, checked_adjustments
 from v3server.name_structure.item_transform import ItemTransform
 from v3server.operations.ai_involvement import (
@@ -32,19 +33,19 @@ def checked_spec(item_kind: str, spec: dict[str, Any]) -> dict[str, Any]:
     try:
         return model.model_validate(spec).model_dump(mode="json")
     except ValueError as e:
-        raise Invalid(f"{item_kind} の中身が正しくない: {e}") from e
+        raise Invalid(m("{kind} の中身が正しくない: {reason}", kind=item_kind, reason=text_of(e))) from e
 
 
 def checked_transform(t: dict[str, Any]) -> dict[str, Any]:
     try:
         return ItemTransform.model_validate(t).model_dump(mode="json")
     except ValueError as e:
-        raise Invalid(f"置き方（回転・傾き・反転）が正しくない: {e}") from e
+        raise Invalid(m("置き方（回転・傾き・反転）が正しくない: {reason}", reason=text_of(e))) from e
 
 
 def checked_box(box: list[float] | tuple[float, ...]) -> list[float]:
     if len(box) != 4 or box[2] <= box[0] or box[3] <= box[1]:
-        raise Invalid(f"箱の範囲が正しくない: {box}")
+        raise Invalid(m("箱の範囲が正しくない: {box}", box=box))
     return [float(v) for v in box]
 
 
@@ -53,7 +54,7 @@ async def _check_tone_target(session, work_id: str, page_id: str, panel_id: str 
     if target.get("kind") == "panel":
         panel = await get_in_work(session, Panel, target["panel_id"], work_id)
         if panel.page_id != page_id or (panel_id is not None and panel_id != panel.id):
-            raise Invalid("トーンを貼るコマが、置くページ・コマと合わない")
+            raise Invalid(m("トーンを貼るコマが、置くページ・コマと合わない"))
 
 
 def _item_scope(page_id: str, panel_id: str | None, item_id: str) -> Scope:
@@ -86,7 +87,7 @@ class AddPageItem(OpBase):
         if self.panel_id is not None:
             panel = await get_in_work(session, Panel, self.panel_id, work.id)
             if panel.page_id != self.page_id:
-                raise Invalid("コマとページが合わない")
+                raise Invalid(m("コマとページが合わない"))
         return _item_scope(self.page_id, self.panel_id, self.id)
 
     async def apply(self, ctx):
@@ -129,14 +130,14 @@ class UpdatePageItem(OpBase):
         item = await ctx.session.get(PageItem, self.id)
         changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True, mode="json")
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         for k, v in changes.items():
             if v is None and k != "panel_id":
-                raise Invalid(f"{k} は空にできない")
+                raise Invalid(m("{field} は空にできない", field=k))
         if changes.get("panel_id") is not None:
             panel = await get_in_work(ctx.session, Panel, changes["panel_id"], ctx.work.id)
             if panel.page_id != item.page_id:
-                raise Invalid("動かせるのは同じページのコマの間だけ")
+                raise Invalid(m("動かせるのは同じページのコマの間だけ"))
         if "spec" in changes:
             changes["spec"] = checked_spec(item.item_kind, changes["spec"])
             if item.item_kind == "tone":
@@ -182,7 +183,7 @@ class SetFixed(OpBase):
     async def apply(self, ctx):
         obj = await ctx.session.get(FIXABLE[self.target_kind], self.id)
         if obj.fixed == self.fixed:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         obj.fixed = self.fixed
         return {**self.model_dump(), "fixed": not self.fixed}
 
@@ -215,7 +216,7 @@ class ResetAdjustments(OpBase):
             objs, page_id = [obj], obj.page_id
         objs = [o for o in objs if o.adjustments]
         if not objs:
-            raise Invalid("外す仕上げが無い")
+            raise Invalid(m("外す仕上げが無い"))
         rc = RowChanges(ctx)
         for o in objs:
             rc.change(o, {"adjustments": []})

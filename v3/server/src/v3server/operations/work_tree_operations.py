@@ -13,6 +13,7 @@ from v3server.canonical_tables.page_item_tables import AnnotationItem, PageItem,
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import PanelLayer, TextItem
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel, Spread, Volume
+from v3server.messages import m
 from v3server.name_structure.image_placement import ImagePlacement
 from v3server.name_structure.item_styles import FrameStyle, checked_adjustments
 from v3server.name_structure.name_draft_schema import PanelFrame
@@ -49,11 +50,12 @@ async def validated_placement(session, work_id: str, placement: dict[str, Any] |
     if placement is None:
         return None
     if image_id is None:
-        raise Invalid("絵が決まっていないので、切り抜きと置き場を決められない")
+        raise Invalid(m("絵が決まっていないので、切り抜きと置き場を決められない"))
     pl = ImagePlacement.model_validate(placement)
     img = await get_in_work(session, ImageFile, image_id, work_id)
     if not pl.fits_image(img.width, img.height):
-        raise Invalid(f"切り抜き {pl.crop_px} が絵の大きさ {img.width}x{img.height} の外に出ている")
+        raise Invalid(m("切り抜き {crop} が絵の大きさ {width}x{height} の外に出ている",
+                        crop=pl.crop_px, width=img.width, height=img.height))
     return pl.model_dump(mode="json")
 
 
@@ -112,7 +114,7 @@ class UpdateEpisode(OpBase):
         episode = await ctx.session.get(Episode, self.id)
         changes = self.model_dump(exclude={"type", "id"}, exclude_unset=True)
         if not changes:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         before = _changed(episode, changes)
         return {"type": self.type, "id": self.id, **{k: _jsonable(v) for k, v in before.items()}}
 
@@ -234,12 +236,12 @@ class UpdatePanel(OpBase):
         panel = await ctx.session.get(Panel, self.id)
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         if "human_confirmed" in changes and ctx.actor.kind == "ai":
-            raise HumanHandProtected("人の確定印を変えられるのは人だけ")
+            raise HumanHandProtected(m("人の確定印を変えられるのは人だけ"))
         if "adjustments" in changes:
             if changes["adjustments"] is None:
-                raise Invalid("adjustments は空にできない（外すときは []）")
+                raise Invalid(m("adjustments は空にできない（外すときは []）"))
             changes["adjustments"] = checked_adjustments(changes["adjustments"])
         if "image_id" in changes and changes["image_id"] is not None:
             await get_in_work(ctx.session, ImageFile, changes["image_id"], ctx.work.id)
@@ -273,9 +275,9 @@ class UpdatePage(OpBase):
         page = await ctx.session.get(Page, self.id)
         changes = self.model_dump(exclude={"type", "id", "human_hand_fields"}, exclude_unset=True)
         if not changes and self.human_hand_fields is None:
-            raise Invalid("変える項目がない")
+            raise Invalid(m("変える項目がない"))
         if ctx.actor.kind == "ai" and set(changes) & _PRINT_FIELDS:
-            raise HumanHandProtected("ページの種類・色の種類・解像度・ノンブルの出し方を変えるのは人だけ")
+            raise HumanHandProtected(m("ページの種類・色の種類・解像度・ノンブルの出し方を変えるのは人だけ"))
         before = change_with_human_hand(ctx, page, changes, self.human_hand_fields)
         return {"type": self.type, "id": self.id, **before}
 
@@ -322,17 +324,17 @@ class SetRemoved(OpBase):
         refuse_if_fixed(obj)
         if ctx.actor.kind == "ai":
             if self.target_kind in ("volume", "episode", "panel_template", "spread"):
-                raise HumanHandProtected("巻・話・コマの型・見開きを抜く・戻すのは人だけ")
+                raise HumanHandProtected(m("巻・話・コマの型・見開きを削除する・戻すのは人だけ"))
             task = ROW_TASK[obj.__tablename__]
             require_actor_may(ctx.actor, ctx.work, field_task(obj, task), ROW_ACTION.get(obj.__tablename__, "decide"))
         if obj.removed == self.removed:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         if self.target_kind == "spread" and not self.removed:
             await _refuse_broken_spread(ctx, obj)
         # 人の手の印か確定印の付いた行にAIが当たったら、抜かずに判断待ちに置く（human_hand_guard.py）
         if not remove_or_hold(ctx, obj, self.removed):
             # 何も変えていない。取り消すと、置いた判断待ちを下げるだけになる（窓口が包む）
-            return {"type": "restore_rows", "label": "抜く・戻すを判断待ちにした取り消し",
+            return {"type": "restore_rows", "label": "削除する・戻すを判断待ちにした取り消し",
                     "page_ids": [p for p in [page_id_of(obj)] if p], "snapshot": {obj.__tablename__: {}}}
         return {**self.model_dump(), "removed": not self.removed}
 
@@ -342,10 +344,13 @@ async def _refuse_broken_spread(ctx, spread) -> None:
     from v3server.print_export.book_layout import check_spreads, episode_pages, episode_spreads
 
     others = [s for s in await episode_spreads(ctx.session, spread.episode_id) if s.id != spread.id]
-    broken = [m for s, m in check_spreads(await episode_pages(ctx.session, spread.episode_id), others + [spread],
+    broken = [text for s, text in check_spreads(await episode_pages(ctx.session, spread.episode_id), others + [spread],
                                           ctx.work) if s.id == spread.id]
     if broken:
-        raise Invalid("見開きに戻せない: " + "; ".join(broken))
+        reasons = broken[0]
+        for text in broken[1:]:  # 理由を1つずつつなぐ（"; ".join だと、中の文を訳せる形が落ちる）
+            reasons = m("{head}; {tail}", head=reasons, tail=text)
+        raise Invalid(m("見開きに戻せない: {reasons}", reasons=reasons))
 
 
 def _jsonable(v):

@@ -23,6 +23,7 @@ from v3server.canonical_tables.translation_review_import_tables import (
     ReviewState,
 )
 from v3server.canonical_tables.work_tree_tables import Page
+from v3server.messages import m
 from v3server.operations.operation_base import (
     OpBase,
     Scope,
@@ -45,7 +46,7 @@ def move_kind(before: str, after: str) -> Literal["submit", "decide"]:
         return "submit"
     if (before, after) in DECIDE_MOVES:
         return "decide"
-    raise Invalid(f"{before} から {after} へは移せない")
+    raise Invalid(m("{before} から {after} へは移せない", before=before, after=after))
 
 
 async def current_status(session, target_kind: str, target_id: str) -> str:
@@ -72,9 +73,9 @@ class SetReviewStatus(OpBase):
             return before, move_kind(before, self.status)
         rec = await get_in_work(session, ReviewRecord, self.reverts_record_id, work.id)
         if (rec.target_kind, rec.target_id) != (self.target_kind, self.target_id):
-            raise Invalid("取り消す記録の対象が違う")
+            raise Invalid(m("取り消す記録の対象が違う"))
         if rec.to_status != before or rec.from_status != self.status:
-            raise Invalid("取り消す記録のあとに状態が変わっている。今の状態から移し直す")
+            raise Invalid(m("取り消す記録のあとに状態が変わっている。今の状態から移し直す"))
         # 取り消しの取り消しもあるので、取り消しでない元の記録までたどる
         root = rec
         while root.reverts_record_id is not None:
@@ -85,9 +86,9 @@ class SetReviewStatus(OpBase):
         if self.target_kind == "page":
             page = await get_in_work(session, Page, self.target_id, work.id)
             if page.removed:
-                raise Invalid("抜いたページの状態は変えない")
+                raise Invalid(m("削除したページの状態は変えない"))
         elif self.target_id != work.id:
-            raise Invalid("作品の状態は、その作品の id を target_id に渡す")
+            raise Invalid(m("作品の状態は、その作品の id を target_id に渡す"))
         _, kind = await self._move(session, work)
         if kind == "decide":
             return Scope("can_approve", work_obj(work.id))
@@ -99,7 +100,7 @@ class SetReviewStatus(OpBase):
         session = ctx.session
         before, _ = await self._move(session, ctx.work)
         if self.reverts_record_id is None and self.status == "needs_changes" and not (self.comment or "").strip():
-            raise Invalid("直しが要るにするときは、何を直すかをコメントに書く")
+            raise Invalid(m("直しが要るにするときは、何を直すかをコメントに書く"))
         row = (await session.execute(select(ReviewState).where(
             ReviewState.target_kind == self.target_kind, ReviewState.target_id == self.target_id))).scalar()
         if row is None:

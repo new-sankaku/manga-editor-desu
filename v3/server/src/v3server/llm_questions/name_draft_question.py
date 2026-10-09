@@ -56,9 +56,9 @@ def build_name_draft_question(
 ) -> str:
     """ネームを作る問いの文。characters は（名前, 人物と話し方の説明）の並び。"""
     if page_count < 1:
-        raise ValueError("page_count は1以上")
+        raise ValueError("page_count は1以上")  # i18n:dev
     if not characters:
-        raise ValueError("characters が空")
+        raise ValueError("characters が空")  # i18n:dev
     charas = "\n".join(f"{name}（{profile}）" for name, profile in characters)
     row_from = "右" if reading_direction == "right_to_left" else "左"
     return f"""あなたは日本の漫画のネームを切る人です。次のあらすじから、{page_count}ページの読み切りのネームを作ってください。
@@ -116,5 +116,5 @@ def parse_name_draft_answer(
     missing = draft.undecided_fields()
     if missing:
         raise BrokenAnswerError(f"欠けた欄がある: {', '.join(f'{k}（{v[0]} ほか{len(v)}か所）' for k, v in missing.items())}",
-                                answer)
+                                answer)  # i18n:stored
     return draft

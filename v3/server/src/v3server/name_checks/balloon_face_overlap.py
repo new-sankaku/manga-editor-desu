@@ -2,6 +2,7 @@
 試作 p47：重ねた後の絵だけから顔の検出器で隠れを見つける手は、4割隠れても顔が見つかり（81→76）、使えなかった。
 吹き出しを置く側は重ねる前の顔の位置を知っているので、楕円と顔の四角の重なりの計算だけで分かる。
 同じコマの人物の顔だけを見る（吹き出しがコマをまたいで隣のコマの顔を隠す場合は見ない）。"""
+from v3server.messages import m
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
@@ -13,8 +14,9 @@ from v3server.name_checks.check_report_types import (
 from v3server.name_structure.name_draft_schema import NameDraft
 from v3server.panel_layout.panel_geometry import ellipse_box_coverage
 
+# 閾値の鍵と意味。意味は API がその場で返す（GET /name-checks/threshold-keys）ので、訳せる形で持つ
 THRESHOLD_KEYS = {
-    "face_covered_ratio_max": "吹き出し1つが顔の四角を覆う割合の上限（0〜1）",
+    "face_covered_ratio_max": m("吹き出し1つが顔の四角を覆う割合の上限（0〜1）"),
 }
 
 

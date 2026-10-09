@@ -1,9 +1,9 @@
-"""ComfyUI の進み具合（段数）と途中の絵を受け、service_call_progress の表に書く（llm_doc/V3ハーネスの実装.md 6章）。
+"""ComfyUI の進行状況（段数）と途中の絵を受け、service_call_progress の表に書く（llm_doc/V3ハーネスの実装.md 6章）。
 
 - 依頼の request に progress_key があるときだけ使う（comfyui_sender.py）。/prompt に client_id として同じ鍵を渡すと、
   ComfyUI はその鍵の WebSocket にだけ途中の絵を送る
-- 進み具合は Temporal の履歴に流さない（AIハーネスのオープンソース実装の調査 5.1 の8）。画面へは SSE で送る
-- WebSocket につながらなければ、表の state を unavailable にして生成は続ける（画面に「進み具合を受け取れない」と出す）
+- 進行状況は Temporal の履歴に流さない（AIハーネスのオープンソース実装の調査 5.1 の8）。画面へは SSE で送る
+- WebSocket に接続できなければ、表の state を unavailable にして生成は続ける（画面に「進行状況を受け取れない」と出す）
 - 書く回数は鍵ごとに WRITE_INTERVAL 秒に1回まで。終わり・止まった・失敗は必ず書く
 
 WebSocket の中身（ComfyUI のソースで確かめた。llm_doc/V3調査/AIハーネスのオープンソース実装の調査.md 3.16）
@@ -127,7 +127,7 @@ class ProgressListener:
 
     async def stop(self, final_state: str | None) -> None:
         if self._task is None:
-            # つながらなかった。unavailable のまま残す
+            # 接続できなかった。unavailable のまま残す
             return
         self._task.cancel()
         try:

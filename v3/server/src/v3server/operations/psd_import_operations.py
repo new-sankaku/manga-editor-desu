@@ -33,6 +33,7 @@ from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, PanelLayer, TextItem
 from v3server.canonical_tables.translation_review_import_tables import TextItemTranslation
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m
 from v3server.operations.held_change_operations import CHOICES
 from v3server.operations.image_file_operations import RegisterImage
 from v3server.operations.operation_base import OpBase, Scope, get_in_work, page_obj, work_obj
@@ -84,25 +85,25 @@ class ApplyPsdImport(OpBase):
 
     async def apply(self, ctx):
         if ctx.actor.kind != "human":
-            raise Invalid("PSD を戻すのは人だけ")
+            raise Invalid(m("PSD を戻すのは人だけ"))
         run = await get_in_work(ctx.session, ExportRun, self.export_run_id, ctx.work.id)
         if run.format != "psd" or run.status != "done" or self.page_id not in run.page_ids:
-            raise Invalid("このページを PSD に書き出し終えた記録ではない")
+            raise Invalid(m("このページを PSD に書き出し終えた記録ではない"))
         pages = [self.page_id]
         if self.other_page_id is not None:
             pages.append(self.other_page_id)
             if not any(set(o.get("page_ids") or []) == set(pages) for o in run.outputs):
-                raise Invalid("この2ページを見開きの1枚に書き出した記録ではない")
+                raise Invalid(m("この2ページを見開きの1枚に書き出した記録ではない"))
         rc = RowChanges(ctx)
         # 訳文に差し替えて書き出した PSD なら、その言語（文字の層は訳文へ当てる）
         own = (ctx.work.preferences or {}).get("language")
         self._language = run.language if run.language is not None and run.language != own else None
         for e in self.entries:
             if e.page_id is not None and e.page_id not in pages:
-                raise Invalid(f"層のページ {e.page_id} は戻し先のページではない")
+                raise Invalid(m("レイヤーのページ {page_id} は戻し先のページではない", page_id=e.page_id))
             self._page = e.page_id or self.page_id
             if e.kind in ("changed", "new") and (e.image is None or e.box_mm is None):
-                raise Invalid(f"{e.kind} の層には絵（image）と置き場（box_mm）が要る")
+                raise Invalid(m("{kind} のレイヤーには絵（image）と置き場（box_mm）が要る", kind=e.kind))
             if e.kind == "changed":
                 await self._changed(ctx, rc, e)
             elif e.kind == "new":
@@ -116,9 +117,9 @@ class ApplyPsdImport(OpBase):
         if obj is None or obj.work_id != ctx.work.id:
             return None
         if table != "pages" and obj.page_id != self._page:
-            raise Invalid(f"{table}:{rid} はこのページの物ではない")
+            raise Invalid(m("{table}:{id} はこのページの物ではない", table=table, id=rid))
         if table == "pages" and obj.id != self._page:
-            raise Invalid(f"ページ {rid} は戻し先のページではない")
+            raise Invalid(m("ページ {id} は戻し先のページではない", id=rid))
         return obj
 
     async def _register(self, ctx, e: PsdImportEntry, **kw) -> str:
@@ -139,7 +140,7 @@ class ApplyPsdImport(OpBase):
                 TextItemTranslation.removed.is_(False)))
             if tr is None:
                 choices = ["discard"] if kind == "psd_text_pixels" else ["keep"]
-                reason = f"{reason}（{self._language} の訳文は書き出した後に抜かれた）"
+                reason = f"{reason}（{self._language} の訳文は書き出した後に削除された）"
             else:
                 table, target_id = "text_item_translations", tr.id
                 if kind == "psd_text_pixels":
@@ -168,31 +169,31 @@ class ApplyPsdImport(OpBase):
 
     async def _changed(self, ctx, rc, e: PsdImportEntry) -> None:
         if e.marker is None:
-            raise Invalid("変わった層には印（marker）が要る")
+            raise Invalid(m("変わったレイヤーには印（marker）が要る"))
         base, suffix = split_marker(e.marker)
         table = SUFFIX_TABLE.get(suffix) if suffix else e.table
         if table not in MODELS:
-            raise Invalid(f"印 {e.marker} の表 {table} は戻せない")
+            raise Invalid(m("印 {marker} の表 {table} は戻せない", marker=e.marker, table=table))
         obj = await self._row(ctx, table, base)
         if obj is None or getattr(obj, "removed", False):
             await self._hold(ctx, rc, "psd_unmatched_layer", "pages", self._page, e, None, False,
-                             "どのページの物でもない層（見開きの絵・見開きの紙）の画素が変わった"
-                             if obj is None and table == "pages" else "書き出した後に、元の物が抜かれた")
+                             "どのページの物でもないレイヤー（見開きの絵・見開きの紙）のピクセルが変わった"
+                             if obj is None and table == "pages" else "書き出した後に、元の物が削除された")
             return
         panel_id = obj.id if table == "panels" else getattr(obj, "panel_id", None)
         if getattr(obj, "fixed", False):
             await self._hold(ctx, rc, "psd_unmatched_layer", table, obj.id, e, panel_id, False,
-                             "人が「動かさない」にしている物の層が変わった")
+                             "人が「動かさない」にしている物のレイヤーが変わった")
             return
         if table == "panels" and suffix == "image" and obj.image_id is not None:
             await self._replace(ctx, rc, e, obj, "panel_art", "image_id", "image_placement")
         elif table == "panel_layers" and suffix is None and obj.stroke_revision == 0 and obj.image_id is not None:
             await self._replace(ctx, rc, e, obj, obj.role, "image_id", "placement")
         elif table == "text_items" and suffix is None:
-            await self._hold(ctx, rc, "psd_text_pixels", table, obj.id, e, panel_id, False, "文字の層の画素が変わった")
+            await self._hold(ctx, rc, "psd_text_pixels", table, obj.id, e, panel_id, False, "文字のレイヤーのピクセルが変わった")
         else:
             await self._hold(ctx, rc, "psd_vector_changed", table, obj.id, e, panel_id, table == "pages",
-                             "線や形の値から描いた層の画素が変わった")
+                             "線や形の値から描いたレイヤーのピクセルが変わった")
 
     async def _new(self, ctx, rc, e: PsdImportEntry) -> None:
         panel = None
@@ -206,7 +207,7 @@ class ApplyPsdImport(OpBase):
         if panel is None or panel.fixed:
             await self._hold(ctx, rc, "psd_unmatched_layer", "pages", self._page, e,
                              panel.id if panel is not None else None, False,
-                             "どのコマにも入っていない新しい層" if panel is None else "「動かさない」のコマに入った新しい層")
+                             "どのコマにも入っていない新しいレイヤー" if panel is None else "「動かさない」のコマに入った新しいレイヤー")
             return
         iid = await self._register(ctx, e, role="human_hand", origin="human_drawn", panel_id=panel.id)
         layers = [la for la in (await ctx.session.execute(
@@ -222,14 +223,14 @@ class ApplyPsdImport(OpBase):
 
     async def _missing(self, ctx, rc, e: PsdImportEntry) -> None:
         if e.marker is None:
-            raise Invalid("無くなった層には印（marker）が要る")
+            raise Invalid(m("無くなったレイヤーには印（marker）が要る"))
         base, suffix = split_marker(e.marker)
         table = SUFFIX_TABLE.get(suffix) if suffix else e.table
         if table not in MODELS:
-            raise Invalid(f"印 {e.marker} の表 {table} は戻せない")
+            raise Invalid(m("印 {marker} の表 {table} は戻せない", marker=e.marker, table=table))
         obj = await self._row(ctx, table, base)
         if obj is None or getattr(obj, "removed", False):
             return
         panel_id = obj.id if table == "panels" else getattr(obj, "panel_id", None)
         await self._hold(ctx, rc, "psd_layer_missing", table, obj.id, e, panel_id, suffix is not None,
-                         "書き出した層が PSD に無い")
+                         "書き出したレイヤーが PSD に無い")

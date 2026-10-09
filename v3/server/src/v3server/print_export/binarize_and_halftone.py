@@ -27,7 +27,7 @@ _ROWS_PER_CHUNK = 512
 
 def _check_gray(gray: np.ndarray) -> None:
     if gray.ndim != 2 or gray.dtype != np.uint8:
-        raise ValueError("灰色の画像は uint8 の2次元配列で渡してください")
+        raise ValueError("灰色の画像は uint8 の2次元配列で渡してください")  # i18n:dev
 
 
 @cache
@@ -44,7 +44,7 @@ def _threshold_cell(shape: str) -> np.ndarray:
         dv = np.abs(v - 0.5) * 2
         f = 1 - np.maximum(1 - du, 1 - dv)
     else:
-        raise ValueError(f"網点の形が不明です: {shape}")
+        raise ValueError(f"網点の形が不明です: {shape}")  # i18n:dev
     ranks = np.argsort(np.argsort(f.ravel())).reshape(f.shape)
     cell = (ranks + 0.5) / f.size
     cell.setflags(write=False)
@@ -60,7 +60,7 @@ def halftone_screen(gray: np.ndarray, dpi: float, lines_per_inch: float, angle_d
     """
     _check_gray(gray)
     if dpi <= 0 or lines_per_inch <= 0:
-        raise ValueError("dpi と線数は正の数で渡してください")
+        raise ValueError("dpi と線数は正の数で渡してください")  # i18n:dev
     cell = _threshold_cell(dot_shape)
     period = dpi / lines_per_inch
     a = np.radians(angle_deg)
@@ -84,7 +84,7 @@ def binarize(gray: np.ndarray, threshold: int) -> np.ndarray:
     """閾値より暗い画素を黒（True）にする。閾値は 1..255。"""
     _check_gray(gray)
     if not 1 <= threshold <= 255:
-        raise ValueError("閾値は 1 から 255 で渡してください")
+        raise ValueError("閾値は 1 から 255 で渡してください")  # i18n:dev
     return gray < threshold
 
 
@@ -95,5 +95,5 @@ def compose_line_and_tone(line_gray: np.ndarray, tone_gray: np.ndarray, line_thr
     線を網点に通すと縁が点々に切れるので、層を分けて別々に2値にする。
     """
     if line_gray.shape != tone_gray.shape:
-        raise ValueError("線の層とトーンの層の大きさが違います")
+        raise ValueError("線のレイヤーとトーンのレイヤーの大きさが違います")  # i18n:dev
     return binarize(line_gray, line_threshold) | halftone_screen(tone_gray, dpi, lines_per_inch, angle_deg, dot_shape)

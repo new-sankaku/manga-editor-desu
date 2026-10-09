@@ -21,6 +21,7 @@ from v3server.canonical_tables.name_proposal_tables import NameProposal
 from v3server.canonical_tables.table_base import new_id
 from v3server.canonical_tables.text_and_layer_tables import HeldAiChange, TextItem
 from v3server.canonical_tables.work_tree_tables import Episode, Page, Panel
+from v3server.messages import m
 from v3server.name_structure.name_draft_schema import NamePage
 from v3server.operations.ai_involvement import (
     HUMAN_EDITABLE_FIELDS,
@@ -71,13 +72,13 @@ class SubmitNameProposal(OpBase):
     async def apply(self, ctx):
         # AIの操作はAIの案、人の操作は人の案か取り込みの案（作り手を偽れない）
         if (ctx.actor.kind == "ai") != (self.made_by == "ai"):
-            raise Invalid(f"{ctx.actor.kind} は made_by={self.made_by} の案を出せない")
+            raise Invalid(m("{actor} は made_by={made_by} の案を出せない", actor=ctx.actor.kind, made_by=self.made_by))
         if self.source_document is not None and self.made_by != "imported":
-            raise Invalid("元の文書を持てるのは取り込んだ案だけ")
+            raise Invalid(m("元の文書を持てるのは取り込んだ案だけ"))
         require_actor_may(ctx.actor, ctx.work, self.task, "propose")
         numbers = [p.page for p in self.pages]
         if len(set(numbers)) != len(numbers):
-            raise Invalid("同じページ番号が2つある")
+            raise Invalid(m("同じページ番号が2つある"))
         ctx.session.add(NameProposal(
             id=self.id, work_id=ctx.work.id, episode_id=self.episode_id, made_by=self.made_by, task=self.task,
             submitted_by_kind=ctx.actor.kind, submitted_by_id=ctx.actor.id, job_id=self.job_id,
@@ -100,9 +101,9 @@ class SetNameProposalStatus(OpBase):
     async def apply(self, ctx):
         prop = await ctx.session.get(NameProposal, self.id)
         if prop.status == "applied":
-            raise Invalid("採用した案は、採用を取り消してから変える")
+            raise Invalid(m("採用した案は、採用を取り消してから変える"))
         if prop.status == self.status:
-            raise Invalid("すでにその状態")
+            raise Invalid(m("すでにその状態"))
         before = prop.status
         prop.status = self.status
         return {"type": self.type, "id": self.id, "status": before}
@@ -185,7 +186,7 @@ class ApplyNameProposal(OpBase):
     async def apply(self, ctx):
         prop = await ctx.session.get(NameProposal, self.id)
         if prop.status != "open":
-            raise Invalid(f"案は {prop.status}。未決の案だけ採用できる")
+            raise Invalid(m("案は {status}。未決の案だけ採用できる", status=prop.status))
         # AIが採用するのは、案の作業を任されているときだけ（書く項目ごとにも human_hand_guard が確かめる）
         require_actor_may(ctx.actor, ctx.work, prop.task, "decide")
         pages, panels_by_page = await episode_rows(ctx.session, prop.episode_id)
@@ -248,7 +249,7 @@ class RestoreNameSnapshot(OpBase):
     async def apply(self, ctx):
         prop = await ctx.session.get(NameProposal, self.proposal_id)
         if prop.status != "applied":
-            raise Invalid("採用していない案は戻せない")
+            raise Invalid(m("採用していない案は戻せない"))
         for kind, model in (("pages", Page), ("panels", Panel), ("text_items", TextItem)):
             for rid, values in self.snapshot.get(kind, {}).items():
                 obj = await ctx.session.get(model, rid)

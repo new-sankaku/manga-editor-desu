@@ -11,6 +11,7 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.work_tree_tables import Work
+from v3server.messages import m, text_of
 from v3server.name_structure.name_draft_schema import PanelFrame
 from v3server.openfga_permissions import Authz
 from v3server.operations.ai_proposal_flow import submit_ai_proposal
@@ -41,7 +42,7 @@ async def propose_panel_layout(session: AsyncSession, authz: Authz, requester: A
     try:
         laid, broken = constrained_layout_draft(draft, pinned, await min_panel_mm(session, work_id))
     except LayoutInputError as e:
-        raise Invalid(f"コマ割りを計算できない: {e}") from e
+        raise Invalid(m("コマ割りを計算できない: {reason}", reason=text_of(e))) from e
     actor = Actor(kind="ai", id=PROGRAM_ID, on_behalf_of=requester.permission_user)
     op = SubmitNameProposal(episode_id=episode_id, made_by="ai", task="panel_layout", pages=laid.pages,
                             note=f"コマ割りの計算。固定した枠 {sorted(pinned)}")

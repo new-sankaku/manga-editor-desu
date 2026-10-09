@@ -16,6 +16,7 @@ MangaImport は、既存の漫画や人が描いたネームの絵を外の解�
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from v3server.messages import m
 from v3server.name_structure.name_draft_schema import (
     Balloon,
     NamePage,
@@ -49,7 +50,7 @@ def _to_mm(spec: PageSpec, covers: ImageCovers):
 
     def conv(x: float, y: float) -> tuple[float, float]:
         if not (0.0 <= x <= 1.0 and 0.0 <= y <= 1.0):
-            raise MangaImportError(f"座標が 0〜1 の外: {(x, y)}")
+            raise MangaImportError(m("座標が 0〜1 の外: {point}", point=(x, y)))
         return (x * w - shift - ox, y * h - shift - oy)
     return conv
 
@@ -69,13 +70,13 @@ def _shape(panel: dict[str, Any], points: list[tuple[float, float]]) -> str | No
         return "四角" if _is_axis_rect(points) else "斜め"
     if kind == "inferred":
         return None
-    raise MangaImportError(f"知らないコマの形: {kind!r}")
+    raise MangaImportError(m("知らないコマの形: {kind}", kind=repr(kind)))
 
 
 def read_manga_import(doc: dict[str, Any], spec: PageSpec, covers: ImageCovers, first_page_number: int,
                       first_panel_number: int) -> ReadResult:
     if doc.get("format") != "manga-editor-import" or doc.get("version") != 1:
-        raise MangaImportError("format=manga-editor-import・version=1 の文書ではない")
+        raise MangaImportError(m("format=manga-editor-import・version=1 の文書ではない"))
     conv = _to_mm(spec, covers)
     result = ReadResult(pages=[])
     n = first_panel_number
@@ -86,7 +87,7 @@ def read_manga_import(doc: dict[str, Any], spec: PageSpec, covers: ImageCovers, 
         for p in panels_in:
             pts = [tuple(xy) for xy in p["points"]]
             if len(pts) < 3:
-                raise MangaImportError(f"コマ {p.get('id')} の頂点が3つより少ない")
+                raise MangaImportError(m("コマ {id} の頂点が3つより少ない", id=p.get("id")))
             poly = [conv(x, y) for x, y in pts]
             number_of[p["id"]] = n
             built[p["id"]] = {"n": n, "shape": _shape(p, pts), "frame": PanelFrame(polygon_mm=poly,
@@ -96,12 +97,12 @@ def read_manga_import(doc: dict[str, Any], spec: PageSpec, covers: ImageCovers, 
         for b in sorted(page.get("balloons", []), key=lambda b: b["reading_order"]):
             if b.get("excluded"):
                 result.dropped.append({"page_index": page["index"], "balloon_id": b.get("id"), "text": b.get("text"),
-                                       "reason": f"解析が除外した（{b.get('exclusion_reason')}）"})
+                                       "reason": m("解析が除外した（{reason}）", reason=b.get("exclusion_reason"))})
                 continue
             target = built.get(b.get("panel_id"))
             if target is None:
                 result.dropped.append({"page_index": page["index"], "balloon_id": b.get("id"), "text": b.get("text"),
-                                       "reason": "どのコマにも属さない"})
+                                       "reason": m("どのコマにも属さない")})
                 continue
             box = b["bbox"]
             x0, y0 = conv(box["x"], box["y"])
@@ -111,5 +112,5 @@ def read_manga_import(doc: dict[str, Any], spec: PageSpec, covers: ImageCovers, 
         result.pages.append(NamePage(page=first_page_number + pi, spread=False,
                                      panels=[NamePanel(**v) for v in built.values()]))
     if not result.pages:
-        raise MangaImportError("ページが無い")
+        raise MangaImportError(m("ページが無い"))
     return result

@@ -242,7 +242,7 @@ async def test_つなぎ先を試す_走り具合_止まったもの_入って�
     r = await api.patch(f"/services/{sid}", headers=h(admin), json={"endpoint": "http://127.0.0.1:1/unreachable"})
     assert r.status_code == 200, r.text
     r = (await api.post(f"/services/{sid}/connection-test", headers=h(admin))).json()
-    assert not r["ok"] and r["state"] == "stopped" and "つながらない" in r["detail"]
+    assert not r["ok"] and r["state"] == "stopped" and "接続できない" in r["detail"]
     assert (await api.post(f"/services/{sid}/connection-test", headers=h(user()))).status_code == 403
 
 

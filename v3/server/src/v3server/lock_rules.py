@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from v3server.canonical_tables.event_and_lock_tables import Lock
 from v3server.canonical_tables.work_tree_tables import Page, Panel
+from v3server.messages import m
 from v3server.openfga_permissions import Authz
 from v3server.operations.operation_base import get_in_work, page_obj
 from v3server.operations.operation_submit_and_undo import (
@@ -41,9 +42,9 @@ async def _page_of(session: AsyncSession, work_id: str, kind: str, target_id: st
         return target_id
     if kind == "panel":
         return (await get_in_work(session, Panel, target_id, work_id)).page_id
-    # 個別（吹き出し・人物など）はコマの中の物。どのページかは呼ぶ側が渡す
+    # 個別（フキダシ・人物など）はコマの中の物。どのページかは呼ぶ側が渡す
     if page_id is None:
-        raise NotFound("個別のロックにはページが要る")
+        raise NotFound(m("個別のロックにはページが要る"))
     await get_in_work(session, Page, page_id, work_id)
     return page_id
 
@@ -63,7 +64,8 @@ async def acquire(
         work = await lock_work(session, work_id)
         page_id = await _page_of(session, work_id, target_kind, target_id, page_id)
         if not await authz.check(actor.permission_user, "can_draw", page_obj(page_id)):
-            raise Forbidden(f"{actor.permission_user} に {page_obj(page_id)} の can_draw が無い")
+            raise Forbidden(m("{user} に {object} の {relation} が無い", user=actor.permission_user,
+                              object=page_obj(page_id), relation="can_draw"))
 
         if target_kind == "page":
             conflicts = await conflicting_locks(session, actor, [("page", page_id)], page_tree=page_id)
@@ -130,7 +132,7 @@ async def release(session: AsyncSession, actor: Actor, work_id: str, lock_id: st
         if lock is None or lock.work_id != work_id:
             raise NotFound(f"locks:{lock_id}")
         if not actor.holds(lock.holder_kind, lock.holder_id):
-            raise Forbidden("自分のロックだけ外せる。AIのロックを取り返すときは取得する")
+            raise Forbidden(m("自分のロックだけ外せる。AIのロックを取り返すときは取得する"))
         append_event(
             session, work, actor, "lock_released",
             {"lock_id": lock.id, "target_kind": lock.target_kind, "target_id": lock.target_id},

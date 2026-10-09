@@ -64,7 +64,7 @@ def parse_settings_sheet_answer(answer: str) -> SettingsSheet:
     out = read_answer(answer, SettingsSheet)
     names = [c.name for c in out.characters] + [x.name for x in out.locations]
     if len(names) != len(set(names)):
-        raise BrokenAnswerError("同じ名前が2回ある", answer)
+        raise BrokenAnswerError("同じ名前が2回ある", answer)  # i18n:stored
     return out
 
 
@@ -82,5 +82,5 @@ def parse_distinguish_answer(answer: str, names: set[str]) -> list[Confusable]:
     got = read_answer(answer, _Confusables).confusable
     unknown = sorted({x for c in got for x in (c.a, c.b)} - names)
     if unknown:
-        raise BrokenAnswerError(f"設定に無い名前がある: {unknown}", answer)
+        raise BrokenAnswerError(f"設定に無い名前がある: {unknown}", answer)  # i18n:stored
     return got

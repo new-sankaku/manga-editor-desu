@@ -591,7 +591,7 @@ async def test_書き出し_PNG_PDF_PSDと_直したPSDの戻し(api, authz, wor
 
     psd_run = await export("psd")
     assert psd_run["status"] == "done", psd_run["detail"]
-    assert "画素" in psd_run["note"]
+    assert "ピクセル" in psd_run["note"]
     out = psd_run["outputs"][0]
     markers = {la["marker"] for la in out["layers"]}
     assert f"{p['id']}-image" in markers and t["id"] in markers and f"{ids['page1']}-paper" in markers

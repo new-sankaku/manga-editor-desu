@@ -1,5 +1,5 @@
 // 取り込み：今のアプリのプロジェクト（.lz4）を話に取り込み、取り込みの報告（入れた物・形を変えて入れた物・入れられなかった物と理由）を出す。
-// 口：POST /works/{id}/episodes/{eid}/current-app-imports（作者だけ）、GET /works/{id}/current-app-imports/{report_id}
+// API：POST /works/{id}/episodes/{eid}/current-app-imports（作者だけ）、GET /works/{id}/current-app-imports/{report_id}
 // 報告の id は ?report= に残す（開き直しても同じ報告を出す）
 import { t } from "../common/i18n.js";
 import { html, render, nothing, api, icon, toast, fail, startShell, emptyNote, screenHref,
@@ -55,13 +55,13 @@ function formCard() {
   const ep = S.work.episodes.find((x) => x.id === S.episodeId);
   return html`<form class="card" @submit=${submit} aria-label=${t("取り込む")}>
     <div class="card-h"><span class="h2">${t("今のアプリのプロジェクトを取り込む")}</span></div>
-    ${S.work.work.page_spec ? nothing : html`<div class="note need">${icon("triangle-alert")}<span>${t("作品のページの寸法が決まっていません。先に「企画」の決めごとで入れてください")}</span>
+    ${S.work.work.page_spec ? nothing : html`<div class="note need">${icon("triangle-alert")}<span>${t("作品のページの寸法が決まっていません。先に「企画」の作品の設定で入れてください")}</span>
       <a class="btn sm" href=${screenHref("plan")}>${t("企画へ")}</a></div>`}
     <div class="form">
       <span class="k">${t("話")}</span>${episodePicker(S.work, S.episodeId, (id) => { S.episodeId = id; rememberEpisode(id); draw(); })}
       <label class="k" for="project">${t("ファイル")}</label><div class="v"><input class="field" id="project" name="project" type="file" accept=".lz4">
         <span class="meta">${ep ? t("今のアプリで保存したプロジェクト（.lz4）。ページは{{name}}の後ろに足されます", { name: episodeName(ep) }) : t("今のアプリで保存したプロジェクト（.lz4）。ページはこの話の後ろに足されます")}</span></div>
-      <span class="k">${t("絵の出どころ")}</span><div class="seg" role="radiogroup">${[["human_drawn", t("人が描いた")], ["imported", t("持ち込んだ")]].map(([k, l]) => html`
+      <span class="k">${t("絵の出どころ")}</span><div class="seg" role="radiogroup">${[["human_drawn", t("手描き")], ["imported", t("持ち込んだ")]].map(([k, l]) => html`
         <button type="button" data-origin=${k} aria-pressed=${String(S.origin === k)} @click=${() => { S.origin = k; draw(); }}>${l}</button>`)}</div>
       ${S.origin === "imported" ? html`<span class="sub-h">${t("利用規約の要点（持ち込んだ絵に付けます）")}</span>${fieldsHtml(USAGE_TERMS, {}, "terms.")}` : nothing}
       <div class="full acts"><button class="btn primary" ?disabled=${S.busy || !S.work.work.page_spec}>${S.busy ? icon("loader", "spin") : icon("upload")}${t("取り込む")}</button>
@@ -79,7 +79,7 @@ function reportCard() {
   return html`<section class="card" aria-label=${t("取り込みの報告")} id="report">
     <div class="card-h"><span class="h2">${t("取り込みの報告")}</span><span class="meta">${[r.source_file_name, fmtDate(r.created_at), r.created_by].join(t("・"))}</span>
       <button class="btn ghost sm" @click=${() => { S.report = null; keepReport(null); draw(); }}>${icon("x")}${t("閉じる")}</button></div>
-    <div class="meta mono">${[`sha256 ${r.source_sha256.slice(0, 16)}…`, t("絵の出どころ {{origin}}", { origin: r.image_origin === "imported" ? t("持ち込んだ") : t("人が描いた") })].join(t("・"))}</div>
+    <div class="meta mono">${[`sha256 ${r.source_sha256.slice(0, 16)}…`, t("絵の出どころ {{origin}}", { origin: r.image_origin === "imported" ? t("持ち込んだ") : t("手描き") })].join(t("・"))}</div>
     <div class="row wrap"><span class="flag mut">${t("ページ {{n}}", { n: c.pages })}</span><span class="flag mut">${t("元の物 {{n}}", { n: c.source_objects })}</span>
       ${Object.entries(STATUS).map(([k, [l, cls]]) => html`<button class="chip" data-status=${k} aria-pressed=${String(S.filter.has(k))}
         @click=${() => { if (S.filter.has(k)) S.filter.delete(k); else S.filter.add(k); draw(); }}><span class="flag ${cls}">${c[k]}</span>${l}</button>`)}</div>

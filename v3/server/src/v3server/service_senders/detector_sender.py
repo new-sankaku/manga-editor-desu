@@ -1,9 +1,9 @@
 """検出器のプロセス（v3/detector_server）へ送る。絵は置き場（image_file_storage）から sha256 で読んで送る。
 
 依頼の request の形
-- endpoint: 検出器の口（DETECTOR_ENDPOINTS のどれか）
+- endpoint: 検出器の API（DETECTOR_ENDPOINTS のどれか）
 - images: 項目の名前 → 絵の sha256（同一キャラ判定は image_a・image_b、ほかは image）
-- form: 閾値など、口ごとの項目（省略した項目は検出器の側で imgutils の既定に任せる）
+- form: 閾値など、API ごとの項目（省略した項目は検出器の側で imgutils の既定に任せる）
 """
 
 from typing import Any
@@ -14,7 +14,7 @@ from v3server.canonical_tables.service_and_job_tables import Service, ServicePro
 from v3server.image_file_storage import read_image
 from v3server.service_senders.sender_result_types import AdapterError, AdapterResult
 
-# 検出器の口と、要る絵の項目
+# 検出器の API と、要る絵の項目
 DETECTOR_ENDPOINTS: dict[str, tuple[str, ...]] = {
     "/person_face_head": ("image",),
     "/text_regions": ("image",),
@@ -27,21 +27,21 @@ DETECTOR_ENDPOINTS: dict[str, tuple[str, ...]] = {
 async def call_detector(service: Service, sp: ServiceProcess, request: dict[str, Any]) -> AdapterResult:
     endpoint = request.get("endpoint")
     if endpoint not in DETECTOR_ENDPOINTS:
-        raise AdapterError("refused", f"検出器に無い口: {endpoint}")
+        raise AdapterError("refused", f"検出器に無い API: {endpoint}")  # i18n:stored
     images = request.get("images", {})
     missing = [k for k in DETECTOR_ENDPOINTS[endpoint] if k not in images]
     if missing:
-        raise AdapterError("refused", f"絵が足りない: {missing}")
+        raise AdapterError("refused", f"絵が足りない: {missing}")  # i18n:stored
     try:
         files = {k: (f"{k}.png", read_image(images[k]), "application/octet-stream") for k in DETECTOR_ENDPOINTS[endpoint]}
     except FileNotFoundError as e:
-        raise AdapterError("refused", f"置き場に絵が無い: {e}") from e
+        raise AdapterError("refused", f"置き場に絵が無い: {e}") from e  # i18n:stored
     form = {k: str(v) for k, v in request.get("form", {}).items()}
     try:
         async with httpx.AsyncClient(base_url=service.endpoint, timeout=300) as client:
             r = await client.post(endpoint, files=files, data=form)
     except httpx.TimeoutException as e:
-        raise AdapterError("transport", f"時間切れ: {e}") from e
+        raise AdapterError("transport", f"時間切れ: {e}") from e  # i18n:stored
     except httpx.TransportError as e:
         raise AdapterError("transport", str(e)) from e
     if r.status_code >= 500:

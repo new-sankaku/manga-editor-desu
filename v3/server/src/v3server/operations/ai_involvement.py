@@ -18,6 +18,7 @@ AIの手の種類（ACTIONS）
 from typing import Literal, get_args
 
 from v3server.canonical_tables.work_tree_tables import Work
+from v3server.messages import m
 from v3server.request_actor import Actor
 from v3server.v3_error_types import AiInvolvementRefused, Invalid
 
@@ -29,14 +30,15 @@ TASKS: tuple[str, ...] = get_args(Task)
 MODES: tuple[str, ...] = get_args(Mode)
 
 TASK_TITLES = {
-    "plan": "企画（S0）",
-    "structure": "構成（S1）",
-    "settings_material": "設定資料（S2）",
-    "name": "ネームの中身（S3。場面・人物・セリフ）",
-    "panel_layout": "コマ割り（S3。枠・読む順・段の割り）",
-    "drawing": "作画（S4。コマの絵・層・絵の置き方）",
-    "finishing": "仕上げ（S5。文字の置き場・書体と飾り・しっぽ・フキダシの形・トーン・図形・絵の仕上げ）",
-    "translation": "翻訳（元の言語のほかの言語の文字）",
+    "plan": m("企画（S0）"),
+    "structure": m("構成（S1）"),
+    "settings_material": m("設定資料（S2）"),
+    "name": m("ネームの中身（S3。場面・人物・セリフ）"),
+    "panel_layout": m("コマ割り（S3。枠・読む順・段の割り）"),
+    "drawing": m("作画（S4。コマの絵・レイヤー・絵の置き方）"),
+    "finishing": m(
+        "仕上げ（S5。文字の置き場・書体と飾り・しっぽ・フキダシの形・トーン・図形・絵の仕上げ）"),
+    "translation": m("翻訳（元の言語のほかの言語の文字）"),
 }
 
 _ALLOWED: dict[str, frozenset[str]] = {
@@ -119,7 +121,7 @@ def image_role_task(role: str) -> str:
 def mode_of(work: Work, task: str) -> tuple[str, bool]:
     """(関与, 作品が選んだか)。選んでいなければ設計の既定。"""
     if task not in TASKS:
-        raise Invalid(f"知らない作業: {task}")
+        raise Invalid(m("知らない作業: {task}", task=task))
     chosen = (work.ai_involvement or {}).get(task)
     if chosen is None:
         return DESIGN_DEFAULT_MODE, False
@@ -135,8 +137,9 @@ def require_ai_may(work: Work, task: str, action: str) -> None:
     """AIの手（action）が、その作業（task）の関与で許されていなければ止める。"""
     if not ai_may(work, task, action):
         mode, chosen = mode_of(work, task)
-        how = "作品が選んだ" if chosen else "設計の既定"
-        raise AiInvolvementRefused(f"{TASK_TITLES[task]} のAIの関与は {mode}（{how}）。AIの {action} は許されていない")
+        how = m("作品が選んだ") if chosen else m("設計の既定")
+        raise AiInvolvementRefused(m("{task} のAIの関与は {mode}（{how}）。AIの {action} は許されていない",
+                                     task=TASK_TITLES[task], mode=mode, how=how, action=action))
 
 
 def require_actor_may(actor: Actor, work: Work, task: str, action: str) -> None:

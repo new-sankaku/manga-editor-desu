@@ -1,17 +1,17 @@
-"""ハーネスの知らせ（決めごと 17章）。
+"""ハーネスの通知（決めごと 17章）。
 
 - 出す所は1か所：ハーネスの出来事を足す所（harness_record.add_event）が、出来事ごとに rules() を通す。出来事を足す
-  所はどの段・どの口からでもここを通るので、知らせの漏れが出ない
+  所はどの段・どの口からでもここを通るので、通知の漏れが出ない
 - 出す先
   - アプリの中の一覧（harness_notifications）。作品の決まりの行が無ければ、全部の種類をここにだけ出す
   - 外：作品の決まり（harness_notification_settings.webhooks）で入れた Webhook にだけ出す。既定では送らない
     （自動で走る機能は既定で止める。決めごと 17章）。送るのは send_pending_forever（ハーネスの作業者の中で回す）
-  - メール：送る所は作っていない。CHANNEL_SENDERS に "email" の送り手を足し、決まりの検査（NotificationSettings）で
+  - メール：送る所は作っていない。CHANNEL_SENDERS に "email" のアダプターを足し、決まりの検査（NotificationSettings）で
     受けるようにすれば、同じ届けた記録（harness_notification_deliveries）と送り直しで動く
-  - ブラウザの知らせ：知らせを足すと出来事 notification も足すので、画面は SSE で受けて出す
+  - ブラウザの通知：通知を足すと出来事 notification も足すので、画面は SSE で受けて出す
 - 判断待ちが長い（review_notice）：届いた回数が作品の決まりの escalate_after_notices 以上なら level を escalated に
   上げ、Webhook の種類の絞り込みを越えて全部の送り先へ送る
-- 招いた人の赤入れ・締切（19章）の知らせは、ハーネスの出来事に無いので出していない（未実装）
+- 招いた人の赤入れ・締切（19章）の通知は、ハーネスの出来事に無いので出していない（未実装）
 """
 
 import asyncio
@@ -36,15 +36,17 @@ from v3server.canonical_tables.harness_tables import (
 )
 from v3server.canonical_tables.table_base import new_id
 from v3server.database_engine import get_sessionmaker
+from v3server.messages import m
 
 log = logging.getLogger(__name__)
 
+# 種類 → 説明。通知のルールの返事（GET …/harness/notification-settings の kinds）に入り、返事を作る所で画面の言語になる
 KINDS = {
-    "generated": "候補ができて人の判断を待っている",
-    "failed": "作業が止まった・失敗した（閾値未設定・上限・エラー・断られた）",
-    "budget_near": "作業の費用が予算の上限に近づいた",
-    "review_overdue": "判断待ちが長い",
-    "stage_review": "工程の承認を待っている",
+    "generated": m("候補ができて人の判断を待っている"),
+    "failed": m("作業が止まった・失敗した（閾値未設定・上限・エラー・断られた）"),
+    "budget_near": m("作業の費用が予算の上限に近づいた"),
+    "review_overdue": m("判断待ちが長い"),
+    "stage_review": m("工程の承認を待っている"),
 }
 STOP_STATUSES = ("stopped", "blocked", "failed")
 # Webhook の送り直し：回数の上限と、間（秒。回ごとに倍）
@@ -70,7 +72,7 @@ class NotificationSettings(BaseModel):
 
     kinds: list[str]
     webhooks: list[Webhook] = Field(default_factory=list)
-    # 判断待ちの知らせが何回目から escalated にするか（無ければ上げない）
+    # 判断待ちの通知が何回目から escalated にするか（無ければ上げない）
     escalate_after_notices: int | None = Field(default=None, ge=1)
     # 費用がこの割合に達したら budget_near（無ければ出さない。割合は人が決める）
     budget_near_ratio: float | None = Field(default=None, gt=0, lt=1)
@@ -79,12 +81,13 @@ class NotificationSettings(BaseModel):
     def _known_kinds(self) -> "NotificationSettings":
         unknown = {*self.kinds, *(k for w in self.webhooks for k in (w.kinds or []))} - set(KINDS)
         if unknown:
-            raise ValueError(f"知らない知らせの種類: {sorted(unknown)}（{', '.join(KINDS)}）")
+            raise ValueError(m("知らない通知の種類: {unknown}（{known}）", unknown=sorted(unknown),
+                               known=", ".join(KINDS)))
         return self
 
 
 def rules(kind: str, payload: dict[str, Any], s: NotificationSettings | None) -> list[dict[str, Any]]:
-    """出来事1つから出す知らせ（種類・重さ・題・同じ物を2回出さない鍵）。"""
+    """出来事1つから出す通知（種類・重さ・題・同じ物を2回出さない鍵）。"""
     out = []
     uid, status, attempt = payload.get("unit_id"), payload.get("status"), payload.get("attempt")
     if kind == "unit" and uid and status == "awaiting_review":
@@ -104,7 +107,7 @@ def rules(kind: str, payload: dict[str, Any], s: NotificationSettings | None) ->
         n = int(payload.get("waited_notices") or 0)
         escalate = s is not None and s.escalate_after_notices is not None and n >= s.escalate_after_notices
         out.append({"kind": "review_overdue", "level": "escalated" if escalate else "warn",
-                    "title": f"判断待ちが長くなっています（知らせ {n} 回目）", "dedupe": f"{uid}:overdue:{attempt}:{n}"})
+                    "title": f"判断待ちが長くなっています（通知 {n} 回目）", "dedupe": f"{uid}:overdue:{attempt}:{n}"})
     if kind == "stage" and status == "awaiting_review" and payload.get("stage_run_id"):
         out.append({"kind": "stage_review", "level": "info", "title": f"{payload.get('stage')} の工程の承認を待っています",
                     "dedupe": f"{payload['stage_run_id']}:stage_review"})
@@ -120,7 +123,7 @@ async def settings_of(session: AsyncSession, work_id: str) -> NotificationSettin
 
 
 async def on_event(session: AsyncSession, event: HarnessEvent) -> None:
-    """出来事を足した直後に呼ぶ（add_event の中）。知らせを足し、外への届けを待ちに積む。"""
+    """出来事を足した直後に呼ぶ（add_event の中）。通知を足し、外への届けを待ちに積む。"""
     if event.kind == "notification":
         return
     # 決まりの行を読む前に、決まりに関係なく出す物があるかを見る（多くの出来事は何も出さない）
@@ -155,7 +158,7 @@ async def _send_webhook(target: str, body: dict[str, Any], s: NotificationSettin
     headers = {"Content-Type": "application/json"}
     hook = next((w for w in s.webhooks if str(w.url) == target), None)
     if hook is None:
-        raise RuntimeError("作品の決まりから送り先が外された")
+        raise RuntimeError("作品の通知のルールから送り先が外された")
     if hook.secret:
         headers["X-V3-Signature"] = "sha256=" + hmac.new(hook.secret.encode(), data, hashlib.sha256).hexdigest()
     async with httpx.AsyncClient(timeout=SEND_TIMEOUT_SECONDS) as client:
@@ -171,7 +174,7 @@ def now() -> datetime:
 
 
 async def send_pending_once(limit: int = 20) -> int:
-    """届けていない知らせを送る。送れた・諦めた数を返す。"""
+    """届けていない通知を送る。送れた・諦めた数を返す。"""
     done = 0
     async with get_sessionmaker()() as session:
         rows = (await session.execute(
@@ -188,7 +191,7 @@ async def send_pending_once(limit: int = 20) -> int:
             d.attempts += 1
             try:
                 if s is None:
-                    raise RuntimeError("作品の知らせの決まりが消された")
+                    raise RuntimeError("作品の通知のルールが消された")
                 await CHANNEL_SENDERS[d.channel](d.target, body, s)
                 d.status, d.sent_at, d.last_error = "sent", now(), None
                 done += 1

@@ -5,6 +5,7 @@ LLM の41中15は形が1種だけ（市販は最低2種）。1ページの数で
 import statistics
 from typing import TypedDict
 
+from v3server.messages import m
 from v3server.name_checks.check_report_types import (
     Bound,
     CheckResult,
@@ -22,14 +23,15 @@ from v3server.panel_layout.panel_geometry import (
     polygon_bbox,
 )
 
+# 閾値の鍵と意味。意味は API がその場で返す（GET /name-checks/threshold-keys）ので、訳せる形で持つ
 THRESHOLD_KEYS = {
-    "aspect_wide_min": "横長とみなす縦横比（幅÷高さ）の下限（形の種類を数える境目）",
-    "aspect_tall_max": "縦長とみなす縦横比（幅÷高さ）の上限（形の種類を数える境目）",
-    "area_cv_median_min": "面積のばらつき（標準偏差÷平均）の、ページの中央値の下限",
-    "area_max_min_median_min": "いちばん大きいコマ÷いちばん小さいコマの、ページの中央値の下限",
-    "single_shape_page_ratio_max": "形が1種類だけのページの割合の上限",
-    "full_width_ratio_median_max": "基本枠の幅いっぱいのコマの割合の、ページの中央値の上限",
-    "top_aligned_ratio_median_max": "上の辺がほかのコマと揃うコマの割合の、ページの中央値の上限",
+    "aspect_wide_min": m("横長とみなす縦横比（幅÷高さ）の下限（形の種類を数える境目）"),
+    "aspect_tall_max": m("縦長とみなす縦横比（幅÷高さ）の上限（形の種類を数える境目）"),
+    "area_cv_median_min": m("面積のばらつき（標準偏差÷平均）の、ページの中央値の下限"),
+    "area_max_min_median_min": m("いちばん大きいコマ÷いちばん小さいコマの、ページの中央値の下限"),
+    "single_shape_page_ratio_max": m("形が1種類だけのページの割合の上限"),
+    "full_width_ratio_median_max": m("基本枠の幅いっぱいのコマの割合の、ページの中央値の上限"),
+    "top_aligned_ratio_median_max": m("上の辺がほかのコマと揃うコマの割合の、ページの中央値の上限"),
 }
 
 _NO_FRAME = "枠の無いコマがある（コマ割りの計算の前）"

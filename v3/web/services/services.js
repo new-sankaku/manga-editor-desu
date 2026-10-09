@@ -1,7 +1,7 @@
-// 生成サービス：つなぎ先と、処理ごとの送り先（全作品で共通。V3細部の決めごと 4.7）。
+// 生成サービス：接続先と、処理ごとの送り先（全作品で共通。V3細部の決めごと 4.7）。
 // 管理者は全部（GET /services）を見て変えられる。作品の参加者は、その作品から見える項目（GET /works/{id}/services）だけを見る。
-// 口：GET /services、POST /services、PATCH /services/{id}、PUT /routes/{process}、GET /works/{id}/services
-// タブは2つ：「処理ごとの送り先」（行は処理・列はつなぎ先の表）と「つなぎ先」（1つを1枚のカード）。右の欄は置かない（決めごと 4.7）
+// API：GET /services、POST /services、PATCH /services/{id}、PUT /routes/{process}、GET /works/{id}/services
+// タブは2つ：「処理ごとの送り先」（行は処理・列は接続先の表）と「接続先」（1つを1枚のカード）。右のパネルは置かない（決めごと 4.7）
 import { t } from "../common/i18n.js";
 import { html, render, nothing, api, icon, toast, fail, send, startShell, emptyNote, YNU } from "../common/shell.js";
 import { fieldsHtml, readFields, USAGE_TERMS } from "../common/form_fields.js";
@@ -82,7 +82,7 @@ function matrix(kind) {
   </div></div>`;
 }
 
-// 組：送り先の全体を1回で切り替える。送れる先だけから選ぶ。選べる先が無い処理は変えない（決めごと 4.7）
+// プリセット：送り先の全体を1回で切り替える。送れる先だけから選ぶ。選べる先が無い処理は変えない（決めごと 4.7）
 function planGroup(g) {
   const changes = [], skipped = [];
   for (const kind of Object.keys(KIND)) for (const p of processesOf(kind)) {
@@ -131,7 +131,7 @@ function routesTab() {
     <section class="card">${matrix("image")}</section><section class="card">${matrix("text")}</section>`;
 }
 
-// ---------------------------------------------------------------- つなぎ先（管理者）
+// ---------------------------------------------------------------- 接続先（管理者）
 function patch(s, body, done, failed) {
   run(failed, async () => { await send("PATCH", `/services/${s.id}`, body); toast(done); });
 }
@@ -164,7 +164,7 @@ function card(s) {
       <span class="meta">${[KIND[s.kind], locLabel(s), s.adapter, stateLabel(s)].join(t("・"))}</span>
       <span class="meta">${t("一時停止")}</span><button class="sw" role="switch" aria-checked=${String(s.paused)} aria-label=${t("{{name}}を一時停止", { name: s.name })}
         @click=${() => patch(s, { paused: !s.paused }, s.paused ? t("{{name}}：再開しました", { name: s.name }) : t("{{name}}：一時停止しました", { name: s.name }), s.paused ? t("再開できませんでした") : t("一時停止できませんでした"))} ?disabled=${S.busy}></button></div>
-    <div class="meta">${routed.length ? t("送り先にしている処理 {{count}}：{{list}}", { count: routed.length, list: routed.map((r) => r.process).join(t("・")) }) : t("送り先にしていない")}${s.paused ? html` <span>${t("一時停止中の接続先へ頼んだものは待ちに入り、再開すると順に送ります")}</span>` : nothing}</div>
+    <div class="meta">${routed.length ? t("送り先にしている処理 {{count}}：{{list}}", { count: routed.length, list: routed.map((r) => r.process).join(t("・")) }) : t("送り先にしていない")}${s.paused ? html` <span>${t("一時停止中の接続先へ送った依頼は待ちに入り、再開すると順に送ります")}</span>` : nothing}</div>
     <form class="form" @submit=${(e) => saveConn(e, s)}>
       <label class="k">URL</label><input class="field mono" name="endpoint" .value=${s.endpoint || ""}>
       <span class="k">${t("送り方")}</span><div class="row wrap">${Object.entries(SEND).map(([k, l]) => html`<button type="button" class="chip" aria-pressed=${String(s.send_mode === k)}

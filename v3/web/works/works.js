@@ -1,5 +1,5 @@
-// 作品と話：作品の一覧と作成、話（巻・話・締切）、参加者と役、話ごとの進み具合（V3細部の決めごと 15・16・19章）。
-// 口：GET/POST /works、GET /works/{id}、GET /works/{id}/members、GET /works/{id}/progress、
+// 作品と話：作品の一覧と作成、話（巻・話・締切）、参加者と役、話ごとの進行状況（V3細部の決めごと 15・16・19章）。
+// API：GET/POST /works、GET /works/{id}、GET /works/{id}/members、GET /works/{id}/progress、
 //     操作 add_volume・add_episode・update_episode・set_member
 import { t } from "../common/i18n.js";
 import { html, render, nothing, api, icon, toast, fail, op, startShell, emptyNote, screenHref,
@@ -146,7 +146,7 @@ function episodesCard() {
         <span class="k">${t("題")}</span><input class="field" name="title">
         <span class="k">${t("締切")}</span><input class="field" name="deadline" type="datetime-local">
         <div class="full acts"><button class="btn primary" ?disabled=${S.busy}>${icon("plus")}${t("足す")}</button>
-          <span class="meta">${t("人物・設定資料の引き継ぎ（決めごと 15章）はサーバーにまだ無いので、この画面ではしません")}</span></div>
+          <span class="meta">${t("人物・設定資料の引き継ぎはサーバーにまだ無いので、この画面ではしません")}</span></div>
       </div></form>` : nothing}
   </section>`;
 }

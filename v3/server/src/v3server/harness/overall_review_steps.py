@@ -6,7 +6,7 @@
 - 検査（プログラム）：見開きの黒の割合（harness.overall.spread_black_max）と、ページの白の割合
   （harness.overall.page_white_max）。閾値が無ければ blocked。値は作品ごとに人が決める（7章。未検証）
 - 指摘で候補は落とさない（候補は今の原稿を測った物で、落としても同じ物を測り直すだけ。直すのは人）
-- 評価役は置かない。人が見て採る（完成）
+- 評価モデルは置かない。人が見て採る（完成）
 """
 
 import base64
@@ -31,11 +31,13 @@ from v3server.llm_questions.overall_review_question import (
     parse_page_summary_answer,
 )
 from v3server.llm_questions.structure_question import outline_text
+from v3server.messages import m
 from v3server.print_export.book_layout import episode_pages, page_sides
 from v3server.print_export.export_runner import ExportRefused, render_page_preview
 
 PREFIX = "harness.overall."
-NEEDED = {"spread_black_max": "見開きの黒い画素の割合の上限（0〜1）", "page_white_max": "ページの白い画素の割合の上限（0〜1）"}
+NEEDED = {"spread_black_max": m("見開きの黒いピクセルの割合の上限（0〜1）"),
+          "page_white_max": m("ページの白いピクセルの割合の上限（0〜1）")}
 # 黒・白の割合を測るためにページを描く解像度。割合を見るだけなので、細い線が消えない程度の値（解像度による差は未検証）
 PREVIEW_DPI = 72
 # 黒・白と数える明るさの境（0〜255）。灰色のトーンをどちらにも数えないための境で、閾値ではない（未検証）
@@ -48,7 +50,8 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         work = await session.get(Work, unit.work_id)
         if work.page_spec is None or work.first_page_is_left is None:
-            raise q.blocked("作品の寸法（page_spec）と1ページ目の位置（first_page_is_left）がまだ決まっていない")
+            raise q.blocked(  # i18n:stored
+                "作品の寸法（page_spec）と1ページ目の位置（first_page_is_left）がまだ決まっていない")
         await q.require_route(session, "page_summary")
         th = await c.thresholds_of(session, unit.work_id, PREFIX, NEEDED)
         outline = (await session.execute(select(EpisodeOutline).where(
@@ -82,10 +85,10 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
                 try:
                     images.append(await render_page_preview(session, work, p.id, PREVIEW_DPI))
                 except ExportRefused as e:
-                    raise q.blocked(f"ページ {p.number} を描けない: {e}") from e
+                    raise q.blocked(f"ページ {p.number} を描けない: {e}") from e  # i18n:stored
             rd, first_left = work.reading_direction, work.first_page_is_left
         if not pages:
-            raise q.blocked("話にページが無い")
+            raise q.blocked("話にページが無い")  # i18n:stored
         ratios = [_ratios(im) for im in images]
         rows = [{"page_id": p.id, "number": p.number, "black": b, "white": w} for p, (b, w) in zip(pages, ratios, strict=True)]
         openings = [{"pages": [pages[a].number, pages[b].number], "black": (ratios[a][0] + ratios[b][0]) / 2}
@@ -103,7 +106,7 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         try:
             summaries = [(numbers[s.image - 1], s.summary) for s in parse_page_summary_answer(text, len(numbers))]
         except BrokenAnswerError as e:
-            raise ApplicationError(f"ページの要約の答えの形が崩れた: {e}", type="broken_response",
+            raise ApplicationError(f"ページの要約の答えの形が崩れた: {e}", type="broken_response",  # i18n:stored
                                    non_retryable=True) from e
         gaps = None
         if ctx["outline"] is not None:
@@ -114,7 +117,7 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             try:
                 gaps = [g.model_dump() for g in parse_outline_compare_answer(text, set(numbers))]
             except BrokenAnswerError as e:
-                raise ApplicationError(f"構成との比べの答えの形が崩れた: {e}", type="broken_response",
+                raise ApplicationError(f"構成との比べの答えの形が崩れた: {e}", type="broken_response",  # i18n:stored
                                        non_retryable=True) from e
         async with get_sessionmaker()() as session:
             cost = await q.jobs_cost(session, job_ids)

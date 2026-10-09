@@ -1,5 +1,6 @@
 """写す範囲・角度・人物の並びの検査（試作 p27 `check.py`、V3ハーネス設計 6章）。
 同じ範囲と角度の連続・寄りの連続・全身の間隔・場面の中の距離の組み合わせ・場所を見せるコマ・目の高さ以外の割合・人数・会話する2人の左右。"""
+from v3server.messages import m
 from v3server.name_checks.check_report_types import (
     CheckResult,
     Finding,
@@ -13,14 +14,15 @@ from v3server.name_checks.check_report_types import (
 from v3server.name_structure.name_draft_schema import NameDraft, NamePanel, ShotRange
 from v3server.panel_layout.reading_direction_mirror import page_reading_sequence
 
+# 閾値の鍵と意味。意味は API がその場で返す（GET /name-checks/threshold-keys）ので、訳せる形で持つ
 THRESHOLD_KEYS = {
-    "same_shot_angle_next_max": "前のコマと同じ範囲・同じ角度になる回数の上限（1話）",
-    "close_shot_run_max": "寄り（胸から上・顔・部分）が続く数の上限",
-    "pages_without_full_body_max": "全身か、それより広く写すコマが無いページが続く数の上限",
-    "shot_classes_per_scene_min": "1つの場面の中の距離の種類（遠・中・寄り）の数の下限",
-    "unusual_angle_ratio_max": "目の高さ以外の角度のコマの割合の上限（1話）",
-    "characters_max": "登場人物の数の上限（1話）",
-    "people_per_panel_max": "1コマに写る人物の数の上限",
+    "same_shot_angle_next_max": m("前のコマと同じ範囲・同じ角度になる回数の上限（1話）"),
+    "close_shot_run_max": m("寄り（胸から上・顔・部分）が続く数の上限"),
+    "pages_without_full_body_max": m("全身か、それより広く写すコマが無いページが続く数の上限"),
+    "shot_classes_per_scene_min": m("1つの場面の中の距離の種類（遠・中・寄り）の数の下限"),
+    "unusual_angle_ratio_max": m("目の高さ以外の角度のコマの割合の上限（1話）"),
+    "characters_max": m("登場人物の数の上限（1話）"),
+    "people_per_panel_max": m("1コマに写る人物の数の上限"),
 }
 
 # 課題35「寄りや胸から上の絵ばかり続く」の寄り

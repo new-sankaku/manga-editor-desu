@@ -1,11 +1,11 @@
-"""つなぎ先の様子を読む：つながるか・いま走っている数・入っているモデル（生成サービスの画面）。
+"""接続先の様子を読む：接続できるか・いま走っている数・入っているモデル（生成サービスの画面）。
 
-送り手（comfyui_sender.py など）と同じ住所へ、読むだけの口を呼ぶ。正本も依頼も変えない。
-- ComfyUI：/system_stats（版・機械）、/queue（走っている・待っている数）、/object_info（ノードの選べる値。名前が
+アダプター（comfyui_sender.py など）と同じ URL へ、読むだけの API を呼ぶ。正本も依頼も変えない。
+- ComfyUI：/system_stats（バージョン・PC）、/queue（走っている・待っている数）、/object_info（ノードの選べる値。名前が
   *_name の選択肢をモデルの一覧として返す。どの入力がモデルかは ComfyUI が決めていないので、名前で拾う。拾い漏れはありうる）
-- LiteLLM：/v1/models（つないだモデルの名前）。住所はつなぎ先ではなく設定の V3_LITELLM_URL（送り手と同じ）
+- LiteLLM：/v1/models（接続したモデルの名前）。URL は接続先ではなく設定の V3_LITELLM_URL（アダプターと同じ）
 - 検出器：/health
-口の呼び出しは _client の1か所で作る（試験はここを差し替える）。
+API の呼び出しは _client の1か所で作る（試験はここを差し替える）。
 """
 
 from typing import Any
@@ -13,6 +13,7 @@ from typing import Any
 import httpx
 
 from v3server.canonical_tables.service_and_job_tables import Service
+from v3server.messages import m
 from v3server.server_settings import get_settings
 from v3server.service_senders.comfyui_sender import combo_options
 
@@ -20,7 +21,7 @@ TIMEOUT = 15
 
 
 class InspectionError(Exception):
-    """つなぎ先が答えなかった・答えの形が違う。state は Service.state に入れる値。"""
+    """接続先が答えなかった・答えの形が違う。state は Service.state に入れる値。"""
 
     def __init__(self, state: str, detail: str):
         super().__init__(detail)
@@ -36,10 +37,10 @@ def _target(service: Service) -> tuple[str, dict[str, str]]:
     if service.adapter == "litellm":
         s = get_settings()
         if s.litellm_master_key is None:
-            raise InspectionError("key_rejected", "LITELLM_MASTER_KEY が設定されていない")
+            raise InspectionError("key_rejected", m("LITELLM_MASTER_KEY が設定されていない"))
         return s.litellm_url, {"Authorization": f"Bearer {s.litellm_master_key}"}
     if not service.endpoint:
-        raise InspectionError("stopped", f"{service.name} の住所（endpoint）が無い")
+        raise InspectionError("stopped", m("{service} の URL（endpoint）が無い", service=service.name))
     return service.endpoint, {}
 
 
@@ -49,26 +50,29 @@ async def _get_json(service: Service, path: str) -> Any:
         async with _client(base, headers) as client:
             r = await client.get(path)
     except httpx.HTTPError as e:
-        raise InspectionError("stopped", f"{path} につながらない: {type(e).__name__}: {e}") from e
+        raise InspectionError("stopped", m("{path} に接続できない: {error}: {reason}", path=path,
+                                           error=type(e).__name__, reason=str(e))) from e
     if r.status_code in (401, 403):
-        raise InspectionError("key_rejected", f"{path} が {r.status_code} を返した（鍵が通らない）")
+        raise InspectionError("key_rejected", m("{path} が {status} を返した（鍵が通らない）", path=path,
+                                                status=r.status_code))
     if r.status_code >= 400:
-        raise InspectionError("stopped", f"{path} が {r.status_code} を返した: {r.text[:200]}")
+        raise InspectionError("stopped", m("{path} が {status} を返した: {body}", path=path, status=r.status_code,
+                                           body=r.text[:200]))
     try:
         return r.json()
     except ValueError as e:
-        raise InspectionError("stopped", f"{path} の答えが JSON でない") from e
+        raise InspectionError("stopped", m("{path} の答えが JSON でない", path=path)) from e
 
 
 HEALTH_PATH = {"comfyui": "/system_stats", "litellm": "/v1/models", "detector": "/health"}
 
 
 async def connection_test(service: Service) -> dict[str, Any]:
-    """つながるかを試す。答えた中身（版・機械など）を返す。つながらなければ InspectionError。"""
+    """接続を試す。答えた中身（バージョン・PC など）を返す。接続できなければ InspectionError。"""
     body = await _get_json(service, HEALTH_PATH[service.adapter])
     if service.adapter == "comfyui":
         if not isinstance(body, dict) or "system" not in body:
-            raise InspectionError("stopped", "/system_stats の形が ComfyUI と違う")
+            raise InspectionError("stopped", m("/system_stats の形が ComfyUI と違う"))
         return {"system": body.get("system"), "devices": body.get("devices", [])}
     if service.adapter == "litellm":
         return {"model_count": len(_model_ids(body))}
@@ -77,18 +81,19 @@ async def connection_test(service: Service) -> dict[str, Any]:
 
 def _model_ids(body: Any) -> list[str]:
     if not isinstance(body, dict) or not isinstance(body.get("data"), list):
-        raise InspectionError("stopped", "/v1/models の形が OpenAI 互換と違う")
-    return sorted(str(m.get("id")) for m in body["data"] if isinstance(m, dict) and m.get("id"))
+        raise InspectionError("stopped", m("/v1/models の形が OpenAI 互換と違う"))
+    return sorted(str(entry.get("id")) for entry in body["data"] if isinstance(entry, dict) and entry.get("id"))
 
 
 async def running_state(service: Service) -> dict[str, Any]:
-    """つなぎ先の側で走っている・待っている数（ComfyUI だけ。ほかは口が無いので None）。"""
+    """接続先の側で走っている・待っている数（ComfyUI だけ。ほかは API が無いので None）。"""
     if service.adapter != "comfyui":
-        return {"running": None, "pending": None, "note": f"{service.adapter} には待ち行列を読む口が無い"}
+        return {"running": None, "pending": None,
+                "note": m("{adapter} にはキューを読む API が無い", adapter=service.adapter)}
     q = await _get_json(service, "/queue")
     if not isinstance(q, dict) or not isinstance(q.get("queue_running"), list) \
             or not isinstance(q.get("queue_pending"), list):
-        raise InspectionError("stopped", "/queue の形が ComfyUI と違う")
+        raise InspectionError("stopped", m("/queue の形が ComfyUI と違う"))
     return {"running": len(q["queue_running"]), "pending": len(q["queue_pending"])}
 
 
@@ -111,9 +116,9 @@ async def installed_models(service: Service) -> dict[str, Any]:
     if service.adapter == "comfyui":
         info = await _get_json(service, "/object_info")
         if not isinstance(info, dict):
-            raise InspectionError("stopped", "/object_info の形が ComfyUI と違う")
+            raise InspectionError("stopped", m("/object_info の形が ComfyUI と違う"))
         stats = await _get_json(service, "/system_stats")
         return {"models": models_from_object_info(info), "system_stats": stats}
     if service.adapter == "litellm":
         return {"models": {"model": _model_ids(await _get_json(service, "/v1/models"))}}
-    return {"models": {}, "note": "検出器のモデルは検出器の側で決まる（読む口が無い）"}
+    return {"models": {}, "note": m("検出器のモデルは検出器の側で決まる（読む API が無い）")}

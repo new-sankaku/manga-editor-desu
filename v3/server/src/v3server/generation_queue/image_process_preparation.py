@@ -5,10 +5,10 @@ request.image_process の形: {"name": 処理, "params": 引数, "seed": シー�
 
 ここで行うこと
 - 引数を処理の形（image_process_registry.py）で確かめる。prepared はサーバーが書く（書いてあれば断る）
-- 元の絵・描き直す範囲・人の手の範囲の数を、処理の決まり（source・mask）と合わせる。元の絵がある処理は、人の手の範囲の
+- 元の絵・描き直す範囲・手動編集の範囲の数を、処理のルール（source・mask）と合わせる。元の絵がある処理は、手動編集の範囲の
   マスク（protected_mask）を必ず持つ（範囲が無ければ全部黒）
 - 処理の prepare でマスクと絵を描き、置き場に置いて、prepared_inputs の入れ先を名前のノード（source・redraw_mask・
-  blend_mask・protected_mask）へ書き直す。描いた値（大きさ・切り出し・出来上がりと元の絵の画素の対応）を image_process.prepared に書く
+  blend_mask・protected_mask）へ書き直す。描いた値（大きさ・切り出し・出来上がりと元の絵のピクセルの対応）を image_process.prepared に書く
 """
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ from v3server.comfy_graphs.source_and_masks import BLEND_MASK, CONTROL, PROTECTE
 from v3server.generation_queue import image_process_inputs as mk
 from v3server.generation_queue.image_process_registry import PrepIn, parse_params, spec_for
 from v3server.image_file_storage import read_image, store_image
+from v3server.messages import m
 from v3server.v3_error_types import Invalid
 
 SEED_MAX = 2**53 - 1
@@ -36,38 +37,38 @@ def _slot(node: str, entry: dict[str, Any], stored=None, **extra) -> dict[str, A
 def finish_image_process(request: dict[str, Any]) -> dict[str, Any]:
     ip = request["image_process"]
     if not isinstance(ip, dict):
-        raise Invalid("image_process は辞書で渡す")
+        raise Invalid(m("image_process は辞書で渡す"))
     if "prepared" in ip:
-        raise Invalid("image_process.prepared はサーバーが書く。依頼に入れられない")
+        raise Invalid(m("image_process.prepared はサーバーが書く。依頼に入れられない"))
     spec = spec_for(ip.get("name", ""))
     params = parse_params(spec, ip.get("params"))
     seed = ip.get("seed")
     if not isinstance(seed, int) or isinstance(seed, bool) or not 0 <= seed <= SEED_MAX:
-        raise Invalid(f"image_process.seed は 0〜{SEED_MAX} の整数")
+        raise Invalid(m("image_process.seed は 0〜{max} の整数", max=SEED_MAX))
     entries = request.get("prepared_inputs", [])
     by = {k: [e for e in entries if e["purpose"] == k]
           for k in ("source", "mask", "protected_mask", "reference", "control")}
     if len(by["control"]) > 1:
-        raise Invalid("形の指定の絵は1枚")
+        raise Invalid(m("形の指定の絵は1枚"))
     has_control = bool(by["control"])
     if by["reference"]:
-        raise Invalid(f"{spec.label} は参照の絵を受けない")
+        raise Invalid(m("{label} は参照の絵を受けない", label=spec.label))
     if spec.source == "none":
         if len(entries) != len(by["control"]):
-            raise Invalid(f"{spec.label} は元の絵を受けない")
+            raise Invalid(m("{label} は元の絵を受けない", label=spec.label))
         out = spec.prepare(params, PrepIn(None, None, None, None, has_control))
         return {**request, "prepared_inputs": [_slot(CONTROL, e) for e in by["control"]],
                 "image_process": {**ip, "params": params.model_dump(), "prepared": out.info}}
     if len(by["source"]) != 1:
-        raise Invalid(f"{spec.label} は元の絵（purpose=source）を1枚渡す")
+        raise Invalid(m("{label} は元の絵（purpose=source）を1枚渡す", label=spec.label))
     if len(by["protected_mask"]) != 1:
-        raise Invalid(f"{spec.label} は人の手の範囲のマスク（protected_mask_input）を必ず渡す")
+        raise Invalid(m("{label} は手動編集の範囲のマスク（protected_mask_input）を必ず渡す", label=spec.label))
     if len(by["mask"]) > 1:
-        raise Invalid("描き直す範囲のマスクは1つ")
+        raise Invalid(m("描き直す範囲のマスクは1つ"))
     if by["mask"] and spec.mask == "none":
-        raise Invalid(f"{spec.label} は描き直す範囲を受けない")
+        raise Invalid(m("{label} は描き直す範囲を受けない", label=spec.label))
     if not by["mask"] and spec.mask == "required":
-        raise Invalid(f"{spec.label} は描き直す範囲（purpose=mask）が要る")
+        raise Invalid(m("{label} は描き直す範囲（purpose=mask）が要る", label=spec.label))
 
     src, prot = by["source"][0], by["protected_mask"][0]
     source_bytes = read_image(src["sha256"])

@@ -1,7 +1,7 @@
-/* AIハーネスの画面。色は common/theme.css（明るい砂の組だけ。暗い色の組は持たない）。細い線と、等幅の小さいラベル。
+/* AIハーネスの画面。色は common/theme.css（明るい砂のテーマだけ。暗いカラーテーマは持たない）。細い線と、等幅の小さいラベル。
    幅は決め打ちしない（図と横のパネルは grid の割合で分け、狭い画面では縦に積む）。 */
 :root{
-  /* 色は common/theme.css の変数だけを使う（色の値をここに書かない。組を替えれば図も画面も替わる）。
+  /* 色は common/theme.css の変数だけを使う（色の値をここに書かない。テーマを替えれば図も画面も替わる）。
      ここは工程の図の状態の呼び名を theme.css の変数に結ぶだけ。図（harness_graph.js）もこの呼び名を getComputedStyle で読む。
      下地・やり直し・古い・光・斜線（--run-bg・--retry・--stale・--stale-tint・--hot-glow・--hot-glow-2・--bad-stripe）は theme.css の変数をそのまま使う */
   --bg-2:var(--surface-2);
@@ -50,7 +50,7 @@ input,textarea{font:12px var(--sans);color:var(--ink);background:var(--surface);
 .layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,30%);grid-template-areas:"graph side" "table table";
   gap:12px;padding:12px 16px}
 @media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"graph" "side" "table"}}
-/* 絵だけ（common/fullscreen.js が html に data-focus を付ける）：図だけを画面いっぱいに出す。見張る画面として使う */
+/* 集中モード（common/fullscreen.js が html に data-focus を付ける）：図だけを画面いっぱいに出す。見張る画面として使う */
 html[data-focus]:not([data-peek]) .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"graph";padding:8px}
 html[data-focus]:not([data-peek]) .graph-wrap{height:calc(100vh - 16px - 40px)}
 .graph-box{grid-area:graph;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-width:0}
@@ -64,7 +64,7 @@ html[data-focus]:not([data-peek]) .graph-wrap{height:calc(100vh - 16px - 40px)}
 .lg.st-paused{border:2px solid var(--pause);background:var(--pause-bg)}
 .lg.stale{background:color-mix(in srgb,var(--stale) 35%,transparent);border-color:var(--stale)}
 #fit{margin-left:auto}
-/* 図の箱は左の列の残りを埋める（右の欄が高いときも下に空きを残さない）。図が高いときは fit が min-height を上げる */
+/* 図の箱は左の列の残りを埋める（右のパネルが高いときも下に空きを残さない）。図が高いときは fit が min-height を上げる */
 /* 狭い窓で図が倍率 1 でも入らないときは、fit が図の幅を広げ、箱の中だけ横に動かせるようにする（ページは横に動かない） */
 .graph-wrap{position:relative;flex:1 0 auto;min-height:clamp(320px,52vh,640px);overflow-x:auto;overflow-y:hidden}
 .graph{position:absolute;inset:0}
@@ -73,7 +73,7 @@ html[data-focus]:not([data-peek]) .graph-wrap{height:calc(100vh - 16px - 40px)}
   box-shadow:0 0 0 4px var(--hot-glow),0 0 14px var(--hot-glow-2);transition:opacity .4s}
 .hz-marker.retry{background:var(--bad)}
 .hz-marker.arrived{opacity:0}
-/* 図の中の進み具合：ノードの下の帯に、候補ごとの棒を横に並べる（ノードからはみ出さない） */
+/* 図の中の進行状況：ノードの下の帯に、候補ごとの棒を横に並べる（ノードからはみ出さない） */
 .hz-progress{position:absolute;left:0;top:0;display:flex;gap:2px}
 .hz-progress .hz-bar{flex:1 1 0;height:100%}
 .hz-bar{position:relative;background:var(--bg-2);border:1px solid var(--line)}

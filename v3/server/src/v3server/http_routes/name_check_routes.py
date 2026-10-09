@@ -1,4 +1,4 @@
-"""ネームの検査を回す口。今のページとコマも、採用する前の案も、同じ検査にかける（人が作ってもAIが作っても同じ）。
+"""ネームの検査を回す API。今のページとコマも、採用する前の案も、同じ検査にかける（人が作ってもAIが作っても同じ）。
 
 閾値は作品の Threshold の表から、ネームの検査の鍵の行だけを読む。値の形は {"value": 数}。
 検証の状態が rejected の行は使わない。unverified の行は使い、結果に状態を添える（V3ハーネス設計 7章）。"""
@@ -18,6 +18,7 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
+from v3server.messages import m
 from v3server.name_checks.name_check_runner import ALL_THRESHOLD_KEYS, run_name_checks
 from v3server.operations.name_draft_conversion import (
     name_draft_of_episode,
@@ -44,7 +45,7 @@ async def name_check_thresholds(session, work_id: str) -> tuple[dict[str, float]
         if t.status == "rejected":
             continue
         if set(t.value) != {"value"} or not isinstance(t.value["value"], (int, float)):
-            raise Invalid(f"閾値 {t.key} の値の形が {{'value': 数}} でない: {t.value}")
+            raise Invalid(m("閾値 {key} の値の形が {{'value': 数}} でない: {value}", key=t.key, value=str(t.value)))
         values[t.key] = float(t.value["value"])
         used[t.key] = {"value": t.value["value"], "source": t.source, "status": t.status}
     return values, used
@@ -67,7 +68,7 @@ async def run_checks(work_id: str, episode_id: str, body: NameCheckRequest, sess
     else:
         prop = await get_in_work(session, NameProposal, body.proposal_id, work_id)
         if prop.episode_id != episode_id:
-            raise Invalid("案の話が合わない")
+            raise Invalid(m("案の話が合わない"))
         draft = name_draft_of_proposal(work, prop.pages)
     values, used = await name_check_thresholds(session, work_id)
     report = run_name_checks(draft, values)

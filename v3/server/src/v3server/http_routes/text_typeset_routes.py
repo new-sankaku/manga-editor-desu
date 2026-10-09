@@ -1,9 +1,9 @@
-"""文字1つを書き出しと同じ組み方で組み、行の切れ目と字の置き場を返す口（原稿の画面が使える）。
+"""文字1つを書き出しと同じ組み方で組み、行の切れ目と字の置き場を返す API（原稿の画面が使える）。
 
 - POST /works/{id}/text-items/{text_id}/typeset  本体 {"dpi": 数}
   組むのは v3/psd_writer/text_layout.js（書き出し・入稿前の確かめと同じ。print_export/text_render.py の layout_texts）。
   文字の大きさ・書体・組版・色が決まっていない文字は、書き出しと同じ理由で止める（補わない）。
-  返す座標は画素（dpi で組んだ値。文字のブロックの左上が原点）と、箱の左上を原点にしたミリ。
+  返す座標はピクセル（dpi で組んだ値。文字のブロックの左上が原点）と、箱の左上を原点にしたミリ。
   縦書きの字の x は列の真ん中・y は字の上端、横書きの字の x は字の左端・y は基準線。hanging はぶら下げた句読点（箱の外に出る）
 """
 
@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from v3server.canonical_tables.text_and_layer_tables import TextItem
 from v3server.canonical_tables.work_tree_tables import Work
 from v3server.http_routes.http_dependencies import ActorDep, AuthzDep, SessionDep, require
+from v3server.messages import m, text_of
 from v3server.operations.operation_base import get_in_work, work_obj
 from v3server.print_export.page_render import MM_PER_INCH, RenderRefused, text_job
 from v3server.print_export.text_render import TextRenderError, font_path, layout_texts
@@ -23,7 +24,7 @@ router = APIRouter()
 
 
 class TypesetBody(BaseModel):
-    # 組む解像度（画素の値はこの解像度。ミリの値は解像度によらない）
+    # 組む解像度（ピクセルの値はこの解像度。ミリの値は解像度によらない）
     dpi: float = Field(gt=0, le=2400)
 
 
@@ -33,18 +34,18 @@ async def typeset_text(work_id: str, text_id: str, body: TypesetBody, session: S
     await require(authz, actor, "can_view", work_obj(work_id))
     t = await get_in_work(session, TextItem, text_id, work_id)
     if t.box_mm is None:
-        raise Invalid(f"文字 {text_id} の箱（box_mm）が決まっていない")
+        raise Invalid(m("文字 {id} の箱（box_mm）が決まっていない", id=text_id))
     work = await session.get(Work, work_id)
     if work is None:
         raise NotFound(f"works:{work_id}")
     s = get_settings()
     if not s.text_render_script:
-        raise Invalid("V3_TEXT_RENDER_SCRIPT が無い。文字を組めない")
+        raise Invalid(m("V3_TEXT_RENDER_SCRIPT が無い。文字を組めない"))
     try:
         job = text_job(t, work.preferences, work.text_direction, body.dpi, lambda f: font_path(s.font_dir, f))
         (out,) = layout_texts([job], s.node_executable, s.text_render_script)
     except (RenderRefused, TextRenderError) as e:
-        raise Invalid(str(e)) from e
+        raise Invalid(text_of(e)) from e
     mm = MM_PER_INCH / body.dpi
     lay = out["layout"]
     ox, oy = lay["block_origin"]

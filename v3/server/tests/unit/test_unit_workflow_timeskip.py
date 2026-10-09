@@ -282,7 +282,7 @@ async def test_段の取り消しは_段が成功で終わっても捨てずに�
         assert (await h.result())["picked"] == "c2"
     # 1回目の生成は成功で終わったが、頼まれた段の取り消しを当てて回を捨て、2回目から作り直す
     assert [r.extra["attempt"] for r in s.events("step_cancelled")] == [1]
-    assert s.called("discard_round")[0]["reason"] == "段を取り消した"
+    assert s.called("discard_round")[0]["reason"] == "ステップを取り消した"
     assert [a for st, a, _ in s.steps if st == "check"] == [2]
 
 

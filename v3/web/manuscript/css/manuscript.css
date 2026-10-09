@@ -1,4 +1,4 @@
-/* V3 原稿の画面。色・部品は ../css/app.css（画像生成の画面）の明るい組をそのまま使い、ここでは原稿の画面だけの所を足す。暗い色の組は持たない。 */
+/* V3 原稿の画面。色・部品は ../css/app.css（画像生成の画面）の明るいテーマをそのまま使い、ここでは原稿の画面だけの所を足す。暗いカラーテーマは持たない。 */
 .ms .ws{grid-template-columns:minmax(0,1fr) minmax(300px,30%)}
 .ms-main{min-width:0;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto}
 .ms .canvas{min-height:240px}
@@ -28,7 +28,7 @@
 .mk-hand{background:var(--need-tint);color:var(--need-ink);border:calc(1px * var(--inv)) solid var(--need-line)}
 .mk-held{background:var(--need);color:var(--on);transform:translate(-100%,60%)}
 
-/* 右の欄 */
+/* 右のパネル */
 .ms .insp-b{gap:14px}
 .ms .insp-b .kv .v .row .field.num{width:auto;flex:1 1 4.5em;min-width:3.5em}
 .ms .kv .v>.field.num{flex:1 1 auto}

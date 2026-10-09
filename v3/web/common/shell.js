@@ -2,7 +2,7 @@
 // - 上の帯：画面の名前・作品を選ぶ欄・利用者（名乗り方は js/api.js の loadAuth で読む。今はローカルの dev_header で、
 //   画像生成の画面と同じ localStorage の v3.user を「利用者（開発用）」の欄に出す。oidc ならログインした名前とログアウト）
 // - 描き方は lit-html（vendor/lit-html-3.2.1）。画面ごとに状態を持ち、変わったら draw() で全体を描き直す
-// - 正本を変えるのは操作の窓口（POST /works/{id}/ops）だけ。op() はその薄い包み
+// - 正本を変えるのは操作の窓口（POST /works/{id}/ops）だけ。op() はその薄いラッパー
 import { html, render, nothing } from "../vendor/lit-html-3.2.1/lit-html.js";
 import { live } from "../vendor/lit-html-3.2.1/directives/live.js";
 import { repeat } from "../vendor/lit-html-3.2.1/directives/repeat.js";
@@ -25,7 +25,7 @@ export function icon(name, cls = "") {
   return svg;
 }
 
-// ---------------------------------------------------------------- 知らせ（画像生成の画面の toast と同じ見た目）
+// ---------------------------------------------------------------- 通知（画像生成の画面の toast と同じ見た目）
 export function toast(msg, kind = "") {
   const box = document.getElementById("toast");
   const ic = kind === "bad" ? "circle-alert" : kind === "need" ? "triangle-alert" : "info";
@@ -39,7 +39,7 @@ export function fail(e, message = "") {
   toast(message ? `${message}：${api.errorText(e)}` : api.errorText(e), "bad");
 }
 
-// js/api.js に無い PUT・PATCH（つなぎ先と送り先）と、ファイルを取る GET。失敗の形は api.js と同じ（ApiError・NetworkError）
+// js/api.js に無い PUT・PATCH（接続先と送り先）と、ファイルを取る GET。失敗の形は api.js と同じ（ApiError・NetworkError）
 export async function send(method, path, json) {
   const r = await raw(path, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(json) });
   const text = await r.text();
@@ -88,7 +88,7 @@ export async function startShell({ screen, needsWork = true, onWork }) {
   const top = document.getElementById("top");
   const state = { works: [], workId: null, error: null };
   await api.loadAuth();
-  // キー・絵だけ・全画面（common/keys.js）。画面ごとのキーは、画面が km.bind で結ぶ
+  // キー・集中モード・全画面（common/keys.js）。画面ごとのキーは、画面が km.bind で結ぶ
   await startKeys(screen);
   const drawTop = () => render(html`
     <div class="brand"><span class="mark">${icon(s.icon)}</span><span>${s.label}</span></div>
@@ -120,7 +120,7 @@ export async function startShell({ screen, needsWork = true, onWork }) {
     state.workId = state.works.some((w) => w.id === want) ? want : (state.works[0] ? state.works[0].id : null);
     rememberWork(state.workId);
     drawTop();
-    await onWork(state.workId, state.works.length ? null : t("見てよい作品がありません。「作品と話」で作るか、作者に招いてもらってください"));
+    await onWork(state.workId, state.works.length ? null : t("見てよい作品がありません。「作品と話」で作るか、作者に招待してもらってください"));
   }
   await load();
   return { reload: load, setWorks: (works, id) => { state.works = works; pick(id); } };
@@ -132,7 +132,7 @@ export function reviewStates(records) {
   for (const r of records) m.set(`${r.target_kind}:${r.target_id}`, r.to_status);
   return (kind, id) => m.get(`${kind}:${id}`) || "draft";
 }
-// 話の抜いていないページ（番号の順）
+// 話の削除していないページ（番号の順）
 export function episodePages(work, episodeId, removed = false) {
   return work.pages.filter((p) => p.episode_id === episodeId && p.removed === removed).sort((a, b) => a.number - b.number);
 }
@@ -144,7 +144,7 @@ export function storedEpisode(work) {
   return (eps.find((e) => e.id === want) || eps[0] || null)?.id || null;
 }
 export function rememberEpisode(id) {
-  try { localStorage.setItem("v3.episode", id || ""); } catch { /* 残せない環境では URL だけ */ }
+  try { localStorage.setItem("v3.episode", id || ""); } catch { /* 保存できない環境では URL だけ */ }
   const u = new URL(location.href);
   if (id) u.searchParams.set("episode", id); else u.searchParams.delete("episode");
   history.replaceState(null, "", u);
@@ -155,7 +155,7 @@ export function episodePicker(work, current, onPick) {
     ${eps.map((e) => html`<option value=${e.id} ?selected=${e.id === current}>${episodeName(e)}</option>`)}</select>`;
 }
 
-// <img data-thumb="/works/…/thumbnail?size=…"> を、利用者の見出しつきで取って出す（js/api.js の showIn）。描いた後に呼ぶ
+// <img data-thumb="/works/…/thumbnail?size=…"> を、利用者のヘッダーつきで取って出す（js/api.js の showIn）。描いた後に呼ぶ
 export function loadThumbs(root = document) {
   for (const img of root.querySelectorAll("img[data-thumb]")) {
     if (img.dataset.loaded === img.dataset.thumb) continue;

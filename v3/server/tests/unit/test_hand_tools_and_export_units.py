@@ -341,9 +341,9 @@ def test_psd_round_trip_matching(tmp_path):
     from psd_tools import PSDImage
 
     n_layers = len(list(PSDImage.open(psd_path).descendants()))
-    with pytest.raises(Invalid, match="層が多すぎる"):
+    with pytest.raises(Invalid, match="レイヤーが多すぎる"):
         read_psd(psd_path, max_pixels=w * h, max_layers=n_layers - 1)
-    with pytest.raises(Invalid, match="画素が多すぎる"):
+    with pytest.raises(Invalid, match="ピクセルが多すぎる"):
         read_psd(psd_path, max_pixels=w * h - 1, max_layers=n_layers)
     read = read_psd(psd_path, max_pixels=w * h, max_layers=n_layers)
     matches = match_layers(read, exported)

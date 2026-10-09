@@ -5,7 +5,7 @@
   その候補だけ落とす
 - 検査：今のネームの検査（name_check_runner）を案に当てる。確定の閾値で不合格なら落とし、仮の閾値なら指摘だけ。
   閾値が無い検査があれば blocked（閾値未設定）で止める
-- 評価：ネームの良し悪しを選ぶ評価役は置かない（数で見られるのは形だけ。V3検証の結果 2-16）。指摘の少ない案を
+- 評価：ネームの良し悪しを選ぶ評価モデルは置かない（数で見られるのは形だけ。V3検証の結果 2-16）。指摘の少ない案を
   初めの候補として並べ、選ぶのは人
 - 確定：人の採用で ApplyNameProposal を人の操作として通す
 """
@@ -51,7 +51,8 @@ def _ai(unit: HarnessUnit) -> Actor:
 async def _work(session, unit: HarnessUnit) -> Work:
     work = await session.get(Work, unit.work_id)
     if work.page_spec is None or work.first_page_is_left is None:
-        raise q.blocked("作品の寸法（page_spec）と1ページ目の位置（first_page_is_left）がまだ決まっていない")
+        raise q.blocked(  # i18n:stored
+            "作品の寸法（page_spec）と1ページ目の位置（first_page_is_left）がまだ決まっていない")
     return work
 
 
@@ -60,7 +61,7 @@ async def cut_out(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         ep = await session.get(Episode, unit.target_id)
         if ep is None or ep.removed:
-            raise ApplicationError("話が無い（消された）", type="refused", non_retryable=True)
+            raise ApplicationError("話が無い（消された）", type="refused", non_retryable=True)  # i18n:stored
         await _work(session, unit)
         return {"episode_id": ep.id}
 
@@ -72,10 +73,10 @@ async def context(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
         await q.require_route(session, "name_draft")
         plan = (await session.execute(select(WorkPlan).where(WorkPlan.work_id == unit.work_id))).scalar_one_or_none()
         if plan is None or not (plan.synopsis or "").strip():
-            raise q.blocked("企画のあらすじが無い（S0 で人が書く）")
+            raise q.blocked("企画のあらすじが無い（S0 で人が書く）")  # i18n:stored
         chars = await characters_by_name(session, unit.work_id)
         if not chars:
-            raise q.blocked("設定資料に採った人物が無い（S2 で人が採る）")
+            raise q.blocked("設定資料に採った人物が無い（S2 で人が採る）")  # i18n:stored
         characters = [(n, m.traits or "") for n, m in sorted(chars.items())]
         _, used = await name_check_thresholds(session, unit.work_id)
         plot = plan.synopsis
@@ -128,7 +129,8 @@ async def generate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
     async with get_sessionmaker()() as session:
         cost = await q.jobs_cost(session, job_ids)
     if not any(o["proposal_id"] for o in out):
-        raise ApplicationError("案が1つも読めなかった（答えの形が崩れた）", type="broken_response", non_retryable=True)
+        raise ApplicationError(  # i18n:stored
+            "案が1つも読めなかった（答えの形が崩れた）", type="broken_response", non_retryable=True)
     return {"candidates": out, "cost": cost, "job_ids": job_ids}
 
 
@@ -146,7 +148,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             report = run_name_checks(name_draft_of_proposal(work, prop.pages), values)
             unset = [r.threshold_key or r.check_id for r in report.results if r.status == "閾値未設定"]
             if unset:
-                raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)
+                raise q.blocked("ネームの検査の閾値が未設定: " + "、".join(unset), missing=unset)  # i18n:stored
             findings = []
             for r in report.results:
                 status = used.get(r.threshold_key, {}).get("status") if r.threshold_key else None
@@ -167,7 +169,7 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    """評価役は置かない。指摘の少ない案を初めの候補にする（選ぶのは人）。"""
+    """評価モデルは置かない。指摘の少ない案を初めの候補にする（選ぶのは人）。"""
     async with get_sessionmaker()() as session:
         cands = (await session.execute(select(HarnessCandidate).where(
             HarnessCandidate.unit_id == unit.id, HarnessCandidate.attempt == args["attempt"],
@@ -184,7 +186,7 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             c.picked = c.id == best.id
             c.evaluation = {"flags": flags(c), "by": "program"}
         await session.commit()
-        return {"picked": best.id, "why": ["指摘の少ない案（評価役は置かない）"], "picks": [best.id], "cost": 0,
+        return {"picked": best.id, "why": ["指摘の少ない案（評価モデルは置かない）"], "picks": [best.id], "cost": 0,
                 "job_ids": [], "disagree": False, "failure": None}
 
 

@@ -19,9 +19,9 @@ _REDO_CHOICES = """新しいタグの列の作り方には、次のような手�
 
 def _head(panel_content: str, model_description: str) -> str:
     if not panel_content.strip():
-        raise ValueError("panel_content が空")
+        raise ValueError("panel_content が空")  # i18n:dev
     if not model_description.strip():
-        raise ValueError("model_description が空")
+        raise ValueError("model_description が空")  # i18n:dev
     return f"""次の漫画の1コマを、画像生成のモデルに渡すタグの列にしてください。
 
 渡す先のモデル：{model_description}
@@ -43,12 +43,12 @@ def build_redo_tags_question(
 ) -> str:
     """reason は採用されなかった理由。人が理由を付けなかったときは None を渡す（理由なしと書く）。"""
     if not previous_tags:
-        raise ValueError("previous_tags が空")
+        raise ValueError("previous_tags が空")  # i18n:dev
     if reason is None:
         ask = "このタグの列で作った絵は採用されませんでした。理由は分かりません。\n" + _REDO_CHOICES
     else:
         if not reason.strip():
-            raise ValueError("reason が空の文字列。理由が無いときは None を渡す")
+            raise ValueError("reason が空の文字列。理由が無いときは None を渡す")  # i18n:dev
         ask = f"このタグの列で作った絵は採用されませんでした。採用されなかった理由：{reason}\n" + _REDO_CHOICES
     return (
         _head(panel_content, model_description)
@@ -65,5 +65,5 @@ def parse_tags_answer(answer: str) -> list[str]:
     """答えをタグの並びに読む（前後の空白を除き、空のタグは捨てる）。タグが1つも無ければ BrokenAnswerError。"""
     tags = [t.strip() for t in read_answer(answer, _TagsAnswer).tags.split(",") if t.strip()]
     if not tags:
-        raise BrokenAnswerError("タグが1つも無い", answer)
+        raise BrokenAnswerError("タグが1つも無い", answer)  # i18n:stored
     return tags

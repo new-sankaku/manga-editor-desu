@@ -1,13 +1,13 @@
 """AIハーネスの正本（llm_doc/V3ハーネスの実装.md 4章）。
 
 - 工程の実行（HarnessStageRun）：1話の1工程。工程の進行役（親ワークフロー）が1つ持つ
-- 作業（HarnessUnit）：作業の決めごと（対象・完成条件・上限・予算・依頼した人・使った上流の版）と、その実行の記録
+- 作業（HarnessUnit）：作業の決めごと（対象・完成条件・上限・予算・依頼した人・使った上流のバージョン）と、その実行の記録
 - 段（HarnessStep）：作業の中の1段（切り出し・文脈・生成・検査・評価・判断待ち・確定）の1回分
 - 候補（HarnessCandidate）：生成の1枚。検査の結果・評価・落とした理由を持つ
 - 出来事（HarnessEvent）：画面へ送る状態の変化の列（SSE の元。追記のみ）
-- 古い印（HarnessStaleMark）：使った上流の版と今の版が違う。結果に付く印で、実行の状態ではない
+- 古い印（HarnessStaleMark）：使った上流のバージョンと今のバージョンが違う。結果に付く印で、実行の状態ではない
 - 見た出来事の位置（HarnessWatchCursor）：上流の変化を見る所が、作品ごとにどこまで読んだか
-- 送信の進み具合（ServiceCallProgress）：ComfyUI の段数と途中の絵。Temporal の履歴には流さない
+- 送信の進行状況（ServiceCallProgress）：ComfyUI の段数と途中の絵。Temporal の履歴には流さない
 
 状態の名前は llm_doc/V3調査/AIハーネスのオープンソース実装の調査.md 6章に合わせる（harness/harness_states.py）。
 """
@@ -77,7 +77,7 @@ class HarnessUnit(Base):
     limits: Mapped[dict[str, Any]] = mapped_column()
     spec: Mapped[dict[str, Any]] = mapped_column(default=dict)
     requested_by: Mapped[str] = mapped_column(String(128))
-    # 切り出したときの上流の版 {上流の鍵: 版}。古いかは今の版と比べて決める
+    # 切り出したときの上流のバージョン {上流の鍵: バージョン}。古いかは今のバージョンと比べて決める
     upstream_used: Mapped[dict[str, Any]] = mapped_column(default=dict)
     status: Mapped[str] = mapped_column(String(24), default="queued")
     current_step: Mapped[str | None] = mapped_column(String(16))
@@ -190,7 +190,7 @@ class HarnessWatchCursor(Base):
 
 
 class ServiceCallProgress(Base):
-    """送信の進み具合（comfyui_progress.py が書く）。鍵は依頼の request.progress_key。"""
+    """送信の進行状況（comfyui_progress.py が書く）。鍵は依頼の request.progress_key。"""
 
     __tablename__ = "service_call_progress"
 
@@ -223,7 +223,7 @@ class EpisodeOutline(Base):
 
 
 class HarnessNotification(Base):
-    """知らせ（決めごと 17章）。アプリの中の一覧の1行。外への送り先へは HarnessNotificationDelivery で届ける。"""
+    """通知（決めごと 17章）。アプリの中の一覧の1行。外への送り先へは HarnessNotificationDelivery で届ける。"""
 
     __tablename__ = "harness_notifications"
 
@@ -237,7 +237,7 @@ class HarnessNotification(Base):
     stage_run_id: Mapped[str | None] = mapped_column(ForeignKey("harness_stage_runs.id"))
     unit_id: Mapped[str | None] = mapped_column(ForeignKey("harness_units.id"))
     event_id: Mapped[int | None] = mapped_column(BigInteger)
-    # 同じ知らせを2回出さない鍵（作業・種類・回など）
+    # 同じ通知を2回出さない鍵（作業・種類・回など）
     dedupe_key: Mapped[str | None] = mapped_column(String(160), unique=True)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     read_by: Mapped[str | None] = mapped_column(String(128))
@@ -245,7 +245,7 @@ class HarnessNotification(Base):
 
 
 class HarnessNotificationSetting(Base):
-    """作品ごとの知らせの決まり。行が無い作品は、アプリの中の一覧だけに出す（外へは送らない。決めごと 17章）。"""
+    """作品ごとの通知のルール。行が無い作品は、アプリの中の一覧だけに出す（外へは送らない。決めごと 17章）。"""
 
     __tablename__ = "harness_notification_settings"
 

@@ -3,6 +3,7 @@
 枠の座標は使わない（ネームの宣言の大きさ・形で数える）。数で見られるのは形だけで、良し悪しは描く人の判定が要る（p27）。"""
 from collections.abc import Callable
 
+from v3server.messages import m
 from v3server.name_checks.check_report_types import (
     Bound,
     CheckResult,
@@ -27,20 +28,21 @@ from v3server.panel_layout.reading_direction_mirror import (
     page_sides,
 )
 
+# 閾値の鍵と意味。意味は API がその場で返す（GET /name-checks/threshold-keys）ので、訳せる形で持つ
 THRESHOLD_KEYS = {
-    "panels_per_page_max": "1ページのコマ数の上限",
-    "panels_per_page_min": "1ページのコマ数の下限",
-    "rows_per_page_max": "1ページの段の数の上限",
-    "rows_per_page_min": "1ページの段の数の下限",
-    "cells_per_row_max": "1段のコマ数の上限",
-    "same_size_run_max": "同じ大きさのコマが続く数の上限",
-    "same_row_pattern_next_page_max": "段の割り（段ごとのコマ数）が次のページと同じになる回数の上限（1話）",
-    "pages_without_big_max": "「大」のコマが無いページの数の上限（1話）",
-    "big_panels_per_page_max": "1ページの「大」のコマの数の上限",
-    "deformed_panels_per_page_max": "1ページの斜めのコマの数の上限",
-    "frameless_or_bleed_per_page_max": "1ページの枠なし・断ち切りのコマの数の上限",
-    "talk_panel_deformed_max": "会話だけのコマで四角でないものの数の上限（1話）",
-    "spreads_max": "見開きの数の上限（1話）",
+    "panels_per_page_max": m("1ページのコマ数の上限"),
+    "panels_per_page_min": m("1ページのコマ数の下限"),
+    "rows_per_page_max": m("1ページの段の数の上限"),
+    "rows_per_page_min": m("1ページの段の数の下限"),
+    "cells_per_row_max": m("1段のコマ数の上限"),
+    "same_size_run_max": m("同じ大きさのコマが続く数の上限"),
+    "same_row_pattern_next_page_max": m("段の割り（段ごとのコマ数）が次のページと同じになる回数の上限（1話）"),
+    "pages_without_big_max": m("「大」のコマが無いページの数の上限（1話）"),
+    "big_panels_per_page_max": m("1ページの「大」のコマの数の上限"),
+    "deformed_panels_per_page_max": m("1ページの斜めのコマの数の上限"),
+    "frameless_or_bleed_per_page_max": m("1ページの枠なし・断ち切りのコマの数の上限"),
+    "talk_panel_deformed_max": m("会話だけのコマで四角でないものの数の上限（1話）"),
+    "spreads_max": m("見開きの数の上限（1話）"),
 }
 
 _SIZE_RANK: dict[PanelSize, int] = {"小": 0, "中": 1, "大": 2}

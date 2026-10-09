@@ -1,4 +1,4 @@
-"""つなぎ先と処理ごとの送り先（全作品で共通）の口。"""
+"""接続先と処理ごとの送り先（全作品で共通）の API。"""
 
 
 from typing import Any, Literal
@@ -23,12 +23,13 @@ from v3server.http_routes.http_dependencies import (
     require,
     row,
 )
+from v3server.messages import m
 from v3server.operations.ai_involvement import Task
 from v3server.operations.operation_base import work_obj
 from v3server.usage_terms_schema import UsageTerms
 from v3server.v3_error_types import Invalid, NotFound
 
-# ---------------------------------------------------------------- つなぎ先と処理ごとの送り先（全作品で共通）
+# ---------------------------------------------------------------- 接続先と処理ごとの送り先（全作品で共通）
 
 router = APIRouter()
 
@@ -98,21 +99,21 @@ ROUTE_FIELDS = ("process", "service_id", "resend_limit", "regenerate_limit", "ai
 
 
 def _require_local_proven(location: str, adapter: str, endpoint: str | None) -> None:
-    """local と登録するなら、手元と言えること（allowed_destinations.proves_local）。言えなければ断る（api で登録する）。"""
+    """local と登録するなら、ローカルと言えること（allowed_destinations.proves_local）。言えなければ断る（api で登録する）。"""
     if location != "local":
         return
     ok, why = proves_local(adapter, endpoint)
     if not ok:
-        raise Invalid(f"local と言えない（{why}）。api として登録し、作品ごとに送ってよい先へ載せる")
+        raise Invalid(m("local と言えない（{reason}）。api として登録し、作品ごとに送ってよい先へ載せる", reason=why))
 
 
-# 作品の参加者に見せる項目。住所（endpoint）・月の予算・処理ごとの費用と中身は、管理者だけが見る
+# 作品の参加者に見せる項目。URL（endpoint）・月の予算・処理ごとの費用と中身は、管理者だけが見る
 MEMBER_SERVICE_FIELDS = ("id", "name", "kind", "state", "paused", "usage_terms")
 
 
 @router.get("/works/{work_id}/services")
 async def list_work_services(work_id: str, session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """作品の参加者が見るつなぎ先：名前・種類・手元か・状態・利用規約の要点と、この作品から送ってよいか。
+    """作品の参加者が見る接続先：名前・種類・ローカルか・状態・利用規約の要点と、この作品から送ってよいか。
     処理ごとの送り先は、処理の名前と送り先の id だけ。"""
     await require(authz, actor, "can_view", work_obj(work_id))
     services = (await session.execute(select(Service).order_by(Service.name))).scalars().all()
@@ -127,7 +128,7 @@ async def list_work_services(work_id: str, session: SessionDep, authz: AuthzDep,
 
 @router.get("/services")
 async def list_services(session: SessionDep, authz: AuthzDep, actor: ActorDep):
-    """つなぎ先の全部（住所・予算・費用・中身を含む）。管理者だけ。作品の参加者は /works/{id}/services。"""
+    """接続先の全部（URL・予算・費用・中身を含む）。管理者だけ。作品の参加者は /works/{id}/services。"""
     await require(authz, actor, "admin", SYSTEM_OBJ)
     services = (await session.execute(select(Service).order_by(Service.name))).scalars().all()
     sps = (await session.execute(select(ServiceProcess))).scalars().all()
@@ -152,7 +153,7 @@ async def create_service(body: NewService, session: SessionDep, authz: AuthzDep,
 @router.patch("/services/{service_id}")
 async def patch_service(service_id: str, body: ServicePatch, session: SessionDep, authz: AuthzDep,
                         actor: ActorDep):
-    """休ませる・戻す、送り方を変える。作業者は数秒で作り直される（generation_queue/queue_worker_main.py）。"""
+    """一時停止・再開、送り方を変える。作業者は数秒で作り直される（generation_queue/queue_worker_main.py）。"""
     await require(authz, actor, "admin", SYSTEM_OBJ)
     service = await session.get(Service, service_id)
     if service is None:
@@ -189,7 +190,7 @@ def _check_graph_settings(process: str, settings: dict[str, Any] | None) -> None
     if settings is None:
         return
     if process not in SPECS:
-        raise Invalid(f"comfy_graph_settings は画像生成の処理（{', '.join(SPECS)}）だけに入れる")
+        raise Invalid(m("comfy_graph_settings は画像生成の処理（{processes}）だけに入れる", processes=", ".join(SPECS)))
     parse_settings(SPECS[process], settings)
 
 
@@ -204,12 +205,12 @@ async def patch_service_process(service_id: str, process: str, body: ServiceProc
         )
     ).scalar_one_or_none()
     if sp is None:
-        raise NotFound(f"services:{service_id} の処理 {process}")
+        raise NotFound(m("services:{id} の処理 {process}", id=service_id, process=process))
     changes = body.model_dump(exclude_unset=True)
     if not changes:
-        raise Invalid("変える項目がない")
+        raise Invalid(m("変える項目がない"))
     if "comfy_check_choices" in changes and changes["comfy_check_choices"] is None:
-        raise Invalid("comfy_check_choices は true か false")
+        raise Invalid(m("comfy_check_choices は true か false"))
     _check_graph_settings(process, changes.get("comfy_graph_settings"))
     for k, v in changes.items():
         setattr(sp, k, v)
@@ -238,7 +239,7 @@ async def put_route(process: str, body: RouteBody, session: SessionDep, authz: A
         )
     ).scalar_one_or_none()
     if sp is None:
-        raise Invalid("そのつなぎ先はこの処理を受けられない（先に処理の中身を登録する）")
+        raise Invalid(m("その接続先はこの処理を受けられない（先に処理の中身を登録する）"))
     route = await session.get(ProcessRoute, process)
     if route is None:
         route = ProcessRoute(process=process, **body.model_dump())

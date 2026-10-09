@@ -120,7 +120,7 @@ def draw_page_rough(page: NamePage, spec: PageSpec, style: RoughStyle) -> Image.
     """ネームの1ページのラフ。枠はコマ割りの計算（tier_ratio_layout）の後にだけあるので、枠の無いコマがあれば例外にする。"""
     missing = [p.n for p in page.panels if p.frame is None]
     if missing:
-        raise ValueError(f"{page.page}ページ：枠の無いコマがある {missing}")
+        raise ValueError(f"{page.page}ページ：枠の無いコマがある {missing}")  # i18n:dev
     c = _Canvas(spec, style)
     _draw_frames(c, {p.n: p.frame.polygon_mm for p in page.panels})
     font = _font(style)

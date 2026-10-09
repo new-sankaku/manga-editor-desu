@@ -20,6 +20,7 @@ import numpy as np
 import shapely
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from v3server.messages import m
 from v3server.name_structure.item_styles import Color
 
 Brush = Literal["pencil", "double_outline", "pattern", "vertical_lines", "horizontal_lines", "crayon", "circle", "ink",
@@ -52,18 +53,19 @@ class StrokeValues(BaseModel):
     @model_validator(mode="after")
     def _check(self):
         if (self.brush in COLORLESS_BRUSHES) != (self.color is None):
-            raise ValueError(f"{self.brush} は色を{'持たない' if self.brush in COLORLESS_BRUSHES else '持つ'}")
+            raise ValueError(m("{brush} は色を持たない", brush=self.brush) if self.brush in COLORLESS_BRUSHES
+                             else m("{brush} は色を持つ", brush=self.brush))
         if self.brush in SEEDED_BRUSHES and self.seed is None:
-            raise ValueError(f"{self.brush} は乱れのある筆なので seed が要る")
+            raise ValueError(m("{brush} は乱れのある筆なので seed が要る", brush=self.brush))
         pressures = [p[2] for p in self.points]
         if any(p is None for p in pressures) and any(p is not None for p in pressures):
-            raise ValueError("1本の線の中で、筆圧のある点と無い点が混ざっている")
+            raise ValueError(m("1本の線の中で、筆圧のある点と無い点が混ざっている"))
         for p in pressures:
             if p is not None and not 0 <= p <= 1:
-                raise ValueError(f"筆圧は 0〜1: {p}")
+                raise ValueError(m("筆圧は 0〜1: {pressure}", pressure=p))
         times = [p[3] for p in self.points]
         if any(b < a for a, b in zip(times, times[1:], strict=False)):
-            raise ValueError("点の時刻が描いた順に並んでいない")
+            raise ValueError(m("点の時刻が描いた順に並んでいない"))
         return self
 
 
@@ -198,8 +200,9 @@ def stroke_cache_problem(layer) -> str | None:
     if layer.stroke_revision <= 0:
         return None
     if layer.image_id is None:
-        return f"層 {layer.id} の線の控えの絵が無い（線の版 {layer.stroke_revision}）。画面で開いて線から描いて上げる"
+        return m("レイヤー {id} の線の画像が無い（線のバージョン {revision}）。画面で開いて線から描いて上げる",
+                 id=layer.id, revision=layer.stroke_revision)
     if layer.image_stroke_revision != layer.stroke_revision:
-        return (f"層 {layer.id} の絵は古い控え（線の版 {layer.image_stroke_revision}、今は {layer.stroke_revision}）。"
-                "画面で描き直して上げる")
+        return m("レイヤー {id} の絵は古い線の画像（線のバージョン {image_revision}、今は {revision}）。画面で描き直して上げる",
+                 id=layer.id, image_revision=layer.image_stroke_revision, revision=layer.stroke_revision)
     return None

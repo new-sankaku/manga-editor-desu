@@ -23,7 +23,7 @@ from v3server.request_actor import Actor
 async def submit_ai_proposal(session: AsyncSession, authz: Authz, ai_actor: Actor, work_id: str,
                              op: SubmitNameProposal) -> dict[str, Any]:
     if ai_actor.kind != "ai" or op.made_by != "ai":
-        raise ValueError("AIの案だけを流す")
+        raise ValueError("AIの案だけを流す")  # i18n:dev
     await operation_submit_and_undo.submit(session, authz, ai_actor, work_id, op)
     work = await session.get(Work, work_id)
     out: dict[str, Any] = {"proposal_id": op.id, "applied": False, "held_change_ids": []}

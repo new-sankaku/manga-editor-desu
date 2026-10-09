@@ -4,9 +4,9 @@
 - 生成：k 個の答えを LLM に頼む。答えは「人への質問」と「企画の案」のどちらか、または両方
 - 検査（プログラム）：必須項目（spec.plan.required_fields。頼む人が決める）がそろっているか。そろっていない案は、
   質問があれば指摘だけ（人が答える）、質問も無ければ落とす
-- 評価役は置かない（企画の良し悪しの判定器は無い）。指摘の少ない案を初めの候補にする
+- 評価モデルは置かない（企画の良し悪しの判定器は無い）。指摘の少ない案を初めの候補にする
 - 人：質問に答える（review の answer）か、案を採る。採ると、採った人の操作として企画を書く（ネームの案を採るのと
-  同じ。人が中身を見て決めた物なので人の手の印が付く）。必須項目のそろわない案は採れない（口で断る）
+  同じ。人が中身を見て決めた物なので手動編集の印が付く）。必須項目のそろわない案は採れない（口で断る）
 """
 
 from typing import Any, Literal
@@ -26,6 +26,7 @@ from v3server.llm_questions.plan_interview_question import (
     missing_fields,
     parse_plan_interview_answer,
 )
+from v3server.messages import m
 from v3server.operations.material_and_plan_operations import SetWorkPlan
 from v3server.operations.operation_submit_and_undo import submit
 
@@ -85,15 +86,15 @@ async def check(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
 
 
 async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
-    return await c.pick_fewest_flags(unit, args, "指摘の少ない案（企画の評価役は置かない）")
+    return await c.pick_fewest_flags(unit, args, "指摘の少ない案（企画の評価モデルは置かない）")
 
 
 def not_approvable(cand: HarnessCandidate) -> str | None:
     content = cand.content or {}
     if not content.get("plan"):
-        return "企画の案の無い候補（質問だけ）は採れない。質問に答える（answer）"
+        return m("企画の案の無い候補（質問だけ）は採れない。質問に答える（answer）")
     if any(f["name"] == "必須項目" and f["ok"] is False for f in (cand.check or {}).get("findings", [])):
-        return "必須項目のそろわない案は採れない。質問に答えるか却下して作り直す"
+        return m("必須項目のそろわない案は採れない。質問に答えるか却下して作り直す")
     return None
 
 

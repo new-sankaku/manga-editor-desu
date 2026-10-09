@@ -12,6 +12,7 @@ from functools import lru_cache
 
 from PIL import Image, ImageCms
 
+from v3server.messages import m
 from v3server.name_structure.print_settings import ColorOutput
 
 _INTENTS = {
@@ -29,10 +30,10 @@ class CmykRefused(ValueError):
 def profile_path(icc_dir: str | None, co: ColorOutput) -> pathlib.Path:
     """プロファイルのファイル。置き場が無い・ファイルが無い・CMYK のプロファイルでないときは止める。"""
     if not icc_dir:
-        raise CmykRefused("カラーを CMYK にする設定があるのに、ICC プロファイルのフォルダ（V3_ICC_DIR）が無い")
+        raise CmykRefused(m("カラーを CMYK にする設定があるのに、ICC プロファイルのフォルダ（V3_ICC_DIR）が無い"))
     path = pathlib.Path(icc_dir) / co.profile
     if not path.is_file():
-        raise CmykRefused(f"ICC プロファイル {co.profile} が {icc_dir} に無い")
+        raise CmykRefused(m("ICC プロファイル {profile} が {folder} に無い", profile=co.profile, folder=icc_dir))
     _check(str(path), path.stat().st_mtime_ns)
     return path
 
@@ -42,10 +43,10 @@ def _check(path: str, _mtime: int) -> str:
     try:
         prof = ImageCms.getOpenProfile(path)
     except (OSError, ImageCms.PyCMSError) as e:
-        raise CmykRefused(f"ICC プロファイル {path} が読めない: {e}") from e
+        raise CmykRefused(m("ICC プロファイル {path} が読めない: {error}", path=path, error=str(e))) from e
     space = prof.profile.xcolor_space.strip()
     if space != "CMYK":
-        raise CmykRefused(f"ICC プロファイル {path} は CMYK でない（{space}）")
+        raise CmykRefused(m("ICC プロファイル {path} は CMYK でない（{space}）", path=path, space=space))
     return ImageCms.getProfileDescription(prof).strip()
 
 
@@ -66,7 +67,7 @@ def profile_description(icc_dir: str | None, co: ColorOutput) -> str:
 def to_cmyk(img: Image.Image, icc_dir: str | None, co: ColorOutput) -> Image.Image:
     """RGB の絵を CMYK に。返す絵の info["icc_profile"] に入稿先のプロファイルを付ける。"""
     if img.mode != "RGB":
-        raise CmykRefused(f"CMYK にするのは RGB の絵だけ（{img.mode}）")
+        raise CmykRefused(f"CMYK にするのは RGB の絵だけ（{img.mode}）")  # i18n:stored
     path = profile_path(icc_dir, co)
     t, icc = _transform(str(path), path.stat().st_mtime_ns, co.intent, co.black_point_compensation)
     out = t.apply(img)

@@ -6,6 +6,8 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from v3server.messages import m
+
 YesNoUnknown = Literal["yes", "no", "unknown"]
 
 
@@ -30,5 +32,5 @@ class UsageTerms(BaseModel):
     @model_validator(mode="after")
     def _where_checked(self):
         if not self.terms_url and not self.terms_note:
-            raise ValueError("規約・許諾のURL（terms_url）か、確かめた所の説明（terms_note）が要る")
+            raise ValueError(m("規約・許諾のURL（terms_url）か、確かめた所の説明（terms_note）が要る"))
         return self

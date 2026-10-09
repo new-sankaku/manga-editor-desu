@@ -54,7 +54,7 @@ class PlanInterviewAnswer(BaseModel):
 def parse_plan_interview_answer(answer: str) -> PlanInterviewAnswer:
     out = read_answer(answer, PlanInterviewAnswer)
     if not out.questions and out.plan is None:
-        raise BrokenAnswerError("質問も企画の案も無い", answer)
+        raise BrokenAnswerError("質問も企画の案も無い", answer)  # i18n:stored
     return out
 
 

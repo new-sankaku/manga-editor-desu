@@ -9,9 +9,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.datastructures import Headers
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 from temporalio.client import Client
 
 from v3server.database_engine import get_sessionmaker
@@ -38,6 +44,7 @@ from v3server.http_routes import (
 )
 from v3server.http_routes.request_size_limit import RequestSizeLimit
 from v3server.image_file_storage import image_store
+from v3server.messages import Message, current_lang, render, render_tree, request_lang, set_current_lang, text_of
 from v3server.openfga_permissions import open_authz
 from v3server.request_authentication import DEV_MODE_WARNING
 from v3server.server_settings import get_settings
@@ -70,7 +77,26 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="V3 サーバー", lifespan=lifespan)
+class LocalizedJSONResponse(JSONResponse):
+    """返事の中の m() の文（処理の名前・項目の名前・成功の返事に入れた失敗の理由など）を、呼び出しの言語で出す。"""
+
+    def render(self, content) -> bytes:
+        return super().render(render_tree(content, current_lang()))
+
+
+class RequestLanguage:
+    """呼び出しの言語（X-V3-Lang）を、その呼び出しの間だけ覚える。返事を作る所（上の LocalizedJSONResponse）が読む。"""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http":
+            set_current_lang(request_lang(Headers(scope=scope)))
+        await self.app(scope, receive, send)
+
+
+app = FastAPI(title="V3 サーバー", lifespan=lifespan, default_response_class=LocalizedJSONResponse)
 _settings = get_settings()
 if _settings.auth_mode == "oidc":
     assert _settings.session_secret and _settings.public_url  # 設定の読み込みで確かめてある
@@ -86,6 +112,7 @@ else:
         return response
 # 最後に足した物がいちばん外で動く。本体の大きさの上限は、ログインの確かめより前に止める
 app.add_middleware(RequestSizeLimit)
+app.add_middleware(RequestLanguage)
 
 _STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid: 422, HumanHandProtected: 409,
            AiInvolvementRefused: 409, FixedByPerson: 409, QueueNotRunning: 503, UndoConflictError: 409}
@@ -93,8 +120,31 @@ _STATUS = {NotFound: 404, Forbidden: 403, Locked: 409, NotUndoable: 409, Invalid
 
 @app.exception_handler(V3Error)
 async def v3_error(request: Request, exc: V3Error):
+    # 失敗の文は、呼び出しの言語（X-V3-Lang）で出す。m() で作っていない文はそのまま出る（v3server/messages.py）
+    detail = render(text_of(exc), request_lang(request.headers))
     return JSONResponse(status_code=_STATUS.get(type(exc), 400),
-                        content={"code": exc.code, "detail": str(exc), **(exc.extra or {})})
+                        content={"code": exc.code, "detail": detail, **(exc.extra or {})})
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error(request: Request, exc: StarletteHTTPException):
+    """HTTPException の文も、呼び出しの言語で出す（中身は FastAPI の既定の返事と同じ）。"""
+    exc.detail = render(exc.detail, request_lang(request.headers))
+    return await http_exception_handler(request, exc)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError):
+    """入力の確かめ（pydantic）で、こちらの決まりに掛かった文を、呼び出しの言語で出す。
+
+    pydantic は確かめの中の ValueError を「Value error, 文」にして返す。元の例外が m() の文を持っていれば、その文に差し替える。
+    型の違いなど pydantic が作る文（英語）は、そのまま返す。"""
+    lang, errors = request_lang(request.headers), []
+    for error in exc.errors():
+        cause = (error.get("ctx") or {}).get("error")
+        text = text_of(cause) if isinstance(cause, BaseException) else None
+        errors.append({**error, "msg": render(text, lang)} if isinstance(text, Message) else error)
+    return JSONResponse(status_code=422, content={"detail": jsonable_encoder(errors)})
 
 
 for _routes in (login_routes, work_routes, lock_routes, job_routes, service_routes, name_proposal_routes, image_file_routes,
