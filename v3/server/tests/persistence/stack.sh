@@ -70,7 +70,8 @@ stop() {
 case "${1:-}" in
   up) "${COMPOSE[@]}" up -d --wait postgres temporal openfga ;;
   down) "${COMPOSE[@]}" down ;;
-  wipe) "${COMPOSE[@]}" down -v; rm -rf "$PE_DIR" ;;
+  # 先に3つのプロセスを止める。止めずに pid のファイルを消すと、残ったサーバーが次の回の口をふさぐ（2026-10-09 に見た）
+  wipe) for n in api workers comfy; do stop "$n"; done; "${COMPOSE[@]}" down -v; rm -rf "$PE_DIR" ;;
   restart-infra) "${COMPOSE[@]}" restart postgres temporal openfga ;;
   migrate) cd "$SERVER" && uv run alembic upgrade head ;;
   grant-admin) cd "$SERVER" && uv run python -m v3server.admin_command_line grant-admin "$2" ;;
