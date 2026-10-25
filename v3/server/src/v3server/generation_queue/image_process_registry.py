@@ -161,9 +161,10 @@ class InstructionEditParams(_Params):
     # 空の潜在から描くモデル（Qwen-Image 2.1）なので、変える強さは無い（comfy_graphs/instruction_edit_graph.py）
     instruction: str = _f(m("直す指示"), "", widget="textarea", min_length=1)
     negative_prompt: str = _f(m("入れないもの"), "", widget="textarea")
-    # 直した後に色を元の絵に合わせる（ComfyUI 標準の ColorTransfer）。初めの値は未検証
+    # 直した後に色を元の絵に合わせる（ComfyUI 標準の ColorTransfer）。初めの値は合わせない。GPU の実機（2026-10-25）で、
+    # 平均と広がりで合わせると「スカートを赤に」が茶色に戻り、肌の色も抜けた。背景を変える指示では服の色が変わった
     color_match: Literal["none", "reinhard_lab", "mkl_lab", "histogram"] = _f(
-        m("色を元の絵に合わせる"), "reinhard_lab", group=m("直した後"), widget="select",
+        m("色を元の絵に合わせる"), "none", group=m("直した後"), widget="select",
         labels={"none": m("合わせない"), "reinhard_lab": m("平均と広がり（Lab）"),
                 "mkl_lab": m("色の分布（Lab・MKL）"), "histogram": m("ヒストグラム")})
     color_strength: float = _f(m("合わせる強さ"), 1.0, group=m("直した後"), widget="slider", ge=0, le=1)

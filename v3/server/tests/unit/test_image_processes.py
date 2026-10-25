@@ -324,7 +324,7 @@ def test_control_requires_controlnet_in_settings_and_inserts_union():
 
 
 def test_instruction_edit_graph_crops_region_and_restores_size():
-    params = {**initial("instruction_edit"), "instruction": "笑顔にする"}
+    params = {**initial("instruction_edit"), "instruction": "笑顔にする", "color_match": "reinhard_lab"}
     p = build_prompt("instruction_edit", EDIT, params, 3, _info("e", use_region=True, crop=[8, 8, 32, 24]), "x")
     assert classes(p).count("TextEncodeQwenImage21") == 1 and "QwenImage21Cache" in classes(p)
     enc_id, enc = next((k, n) for k, n in p.items() if n["class_type"] == "TextEncodeQwenImage21")
@@ -332,6 +332,9 @@ def test_instruction_edit_graph_crops_region_and_restores_size():
     ks = next(n for n in p.values() if n["class_type"] == "KSampler")
     assert ks["inputs"]["latent_image"] == [enc_id, 2] and ks["inputs"]["denoise"] == 1.0  # 元の絵の大きさの空の潜在
     assert "LoraLoaderModelOnly" in classes(p) and "CropMask" in classes(p)
+    # Qwen-Image 2.1 の VAE は4チャンネルで返すので、透明度を捨ててから色合わせと貼り戻しへ渡す
+    split = next(n for n in p.values() if n["class_type"] == "SplitImageWithAlpha")
+    assert p[split["inputs"]["image"][0]]["class_type"] == "VAEDecode"
     assert "blend_mask" in p and "redraw_mask" not in p
     back = [n for n in p.values() if n["class_type"] == "ImageScale"]
     assert any(n["inputs"]["width"] == 32 and n["inputs"]["height"] == 24 for n in back)

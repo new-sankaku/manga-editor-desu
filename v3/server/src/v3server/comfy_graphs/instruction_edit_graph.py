@@ -80,6 +80,9 @@ def build_instruction_edit(settings: EditSettings, instruction: str, negative_te
                 resolution=settings.resolution, vae=vae, **{'images.image_1': part})
     decoded = g.add('VAEDecode', samples=add_sampler(g, settings.sampler, model, enc[0], enc[1], enc[2], seed, 1.0),
                     vae=vae)[0]
+    # Qwen-Image 2.1 の VAE は透明度付き（4チャンネル）で返す。ColorTransfer と貼り戻しは3チャンネルしか受けないので、
+    # 透明度を捨てる（GPU の ComfyUI 0.42.0 で ColorTransfer が断った。2026-10-25）
+    decoded = g.add('SplitImageWithAlpha', image=decoded)[0]
     out = resize(g, decoded, pw, ph)
     if color_match != 'none':
         out = g.add('ColorTransfer', image_target=out, image_ref=part, method=color_match, source_stats='per_frame',

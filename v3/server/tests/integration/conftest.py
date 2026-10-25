@@ -114,8 +114,11 @@ async def api(authz, temporal):
     app.state.temporal = temporal
     async def no_packed_text(response: httpx.Response) -> None:
         """残す文（ms()）の包みが、文に戻されないまま返事に出ていないか。どの試験の、どの返事でも見る。"""
-        if response.headers.get("content-type", "").startswith("text/event-stream"):
+        kind = response.headers.get("content-type", "")
+        if kind.startswith("text/event-stream"):
             return  # 流し続ける返事は読み切れない。SSE は SSE の試験が見る
+        if not (kind.startswith("text/") or "json" in kind):
+            return  # 絵・PDF・PSD は文ではない。中のバイトの並びが偶然に包みの印になる（GPU の絵の PNG で起きた）
         await response.aread()
         assert not has_packed(response.text), f"{response.request.method} {response.request.url}: 包んだ文がそのまま出ている"
 
