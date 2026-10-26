@@ -1,0 +1,235 @@
+{
+ "unit": {
+  "unit_id": "7ee8651165754ad9bfd6487617a62190",
+  "stage_run_id": "619fa28fd65d48539bb9e9e713b42736",
+  "kind": "panel_drawing",
+  "target_id": "9ed7698a96b644d383236c45c5ac002e",
+  "page_id": "66079718048e475ca34a300e429ecb32",
+  "status": "awaiting_review",
+  "step": "evaluate",
+  "attempt": 1,
+  "max_attempts": 2,
+  "cost_used": 4.0,
+  "budget_cost": 1000.0,
+  "seconds_used": 21.700582153000106,
+  "budget_seconds": 1800.0,
+  "candidates": 2,
+  "stop_reason": null,
+  "step_started_at": null,
+  "live": {
+   "jobs": {
+    "queued": 1
+   }
+  }
+ },
+ "candidates": [
+  {
+   "id": "b330def0bdff4232b3894a2743f2d5b8",
+   "k_index": 0,
+   "picked": false,
+   "check_verdict": "flag",
+   "check": {
+    "findings": [
+     {
+      "ok": true,
+      "name": "大きさ",
+      "detail": "1024x680（依頼した 1024x680）",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "name": "人数",
+      "detail": "検出 1 人・ネーム 1 人",
+      "threshold_status": "verified"
+     },
+     {
+      "ok": false,
+      "drop": false,
+      "name": "見切れ",
+      "detail": "端に接した人物 1（B）",
+      "threshold_status": "verified"
+     },
+     {
+      "ok": null,
+      "name": "人物の位置（IoU）",
+      "detail": "ネームに人物の範囲が無いので比べない",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "顔と吹き出しの重なり",
+      "detail": "フキダシを置いていない（仕上げ S5 で置いた後に検査する）",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "fix": null,
+      "name": "絵の中の文字・吹き出し",
+      "detail": "文字の範囲 0",
+      "threshold_status": "verified"
+     },
+     {
+      "ok": null,
+      "name": "手",
+      "detail": "手の検出 0。崩れの判定器は無いので人が見る",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "年齢区分",
+      "detail": "いちばん高い区分 safe（記録だけ。判定に使わない）",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "同じ人物（CCIP）",
+      "detail": "設定資料の アオイ に絵が無いので比べない",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "drop": false,
+      "name": "写す範囲",
+      "detail": "VLM 胸から上・ネーム 胸から上",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "drop": false,
+      "name": "角度",
+      "detail": "VLM 目の高さ・ネーム 目の高さ",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "背景",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "視線",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "ぼやけ・線の潰れ",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "服・アクセサリー・小物",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     }
+    ]
+   }
+  },
+  {
+   "id": "4f1997ec86ed4ce09ad503b914c442bc",
+   "k_index": 1,
+   "picked": true,
+   "check_verdict": "flag",
+   "check": {
+    "findings": [
+     {
+      "ok": true,
+      "name": "大きさ",
+      "detail": "1024x680（依頼した 1024x680）",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "name": "人数",
+      "detail": "検出 1 人・ネーム 1 人",
+      "threshold_status": "verified"
+     },
+     {
+      "ok": false,
+      "drop": false,
+      "name": "見切れ",
+      "detail": "端に接した人物 1（TB）",
+      "threshold_status": "verified"
+     },
+     {
+      "ok": null,
+      "name": "人物の位置（IoU）",
+      "detail": "ネームに人物の範囲が無いので比べない",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "顔と吹き出しの重なり",
+      "detail": "フキダシを置いていない（仕上げ S5 で置いた後に検査する）",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "fix": null,
+      "name": "絵の中の文字・吹き出し",
+      "detail": "文字の範囲 0",
+      "threshold_status": "verified"
+     },
+     {
+      "ok": null,
+      "name": "手",
+      "detail": "手の検出 2。崩れの判定器は無いので人が見る",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "年齢区分",
+      "detail": "いちばん高い区分 r15（記録だけ。判定に使わない）",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "同じ人物（CCIP）",
+      "detail": "設定資料の アオイ に絵が無いので比べない",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "drop": false,
+      "name": "写す範囲",
+      "detail": "VLM 胸から上・ネーム 胸から上",
+      "threshold_status": null
+     },
+     {
+      "ok": true,
+      "drop": false,
+      "name": "角度",
+      "detail": "VLM 目の高さ・ネーム 目の高さ",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "背景",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "視線",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "ぼやけ・線の潰れ",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     },
+     {
+      "ok": null,
+      "name": "服・アクセサリー・小物",
+      "detail": "手段が無い。人が確かめる",
+      "threshold_status": null
+     }
+    ]
+   }
+  }
+ ]
+}
