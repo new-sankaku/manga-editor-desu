@@ -1,6 +1,7 @@
 # 手元の Windows から、V3 のサーバーと試験を Linux で動かすための作業用のコンテナ（llm_doc/V3サーバーの土台.md 1.1.1）。
 # 入れる物：Python 3.13・uv・Node 22・Playwright とブラウザ（画面の試験）・明朝のフォント（組版の試験）・poppler-utils（書き出した PDF を試験が調べる）・
-# ps と pkill（試験の道具がプロセスを止めるのに使う）・docker の CLI と compose・socat（通し試験 e2e が、試験用の compose を自分で起こして、そのポートへつなぐ）。
+# ps と pkill（試験の道具がプロセスを止めるのに使う）・docker の CLI と compose・socat（通し試験 e2e が、試験用の compose を自分で起こして、そのポートへつなぐ）・
+# gcc と g++（検出器の仮想環境を作るとき、Python 3.13 用の配布物が無い bchlib と numpy 1.26.4 を組み立てる）。
 # リポジトリは載せない（動かすときに /repo へ bind する）。仮想環境は /venv（ボリューム）に作る。
 #   docker build -t v3dev v3/dev_container
 FROM node:22-bookworm-slim AS node
@@ -16,7 +17,7 @@ ENV UV_PROJECT_ENVIRONMENT=/venv UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=never PYT
     NODE_PATH=/usr/local/lib/node_modules PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers
 # Playwright の版は CI（.github/workflows/v3-server.yml）と同じにする
 RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
- && apt-get update && apt-get install -y --no-install-recommends curl git procps socat poppler-utils fonts-ipafont-mincho \
+ && apt-get update && apt-get install -y --no-install-recommends curl git procps socat gcc g++ libc6-dev poppler-utils fonts-ipafont-mincho \
  && npm install -g --no-audit --no-fund playwright@1.56.1 \
  && node /usr/local/lib/node_modules/playwright/cli.js install --with-deps chromium \
  && rm -rf /var/lib/apt/lists/* /root/.npm

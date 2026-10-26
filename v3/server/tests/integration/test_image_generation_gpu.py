@@ -248,3 +248,22 @@ async def test_形の指定_線画と骨格で文から作る(api, gpu):
         "params": {**initial("text_to_image"), "prompt": PROMPT, "width": W, "height": H, "control": "pose",
                    "control_invert": False}})
     assert arr(img["bytes"]).shape == (H, W, 3)
+
+
+MONO = ("masterpiece, best quality, monochrome, greyscale, manga, screentone, lineart, 1girl, school uniform, "
+        "standing, classroom")
+
+
+async def test_白黒の漫画の絵_seedを変えると別の絵になり_同じseedに戻すと同じ絵になる(api, gpu):
+    body = {"process": "text_to_image", "params": {**initial("text_to_image"), "prompt": MONO,
+                                                    "negative_prompt": "color", "width": W, "height": H}}
+    # ComfyUI は直前と同じ依頼の結果を使い回すので、間に別の seed を挟んで同じ seed を描き直させる
+    a = arr((await run(api, gpu, "mono_seed3", {**body, "seed": 3}))["bytes"])
+    b = arr((await run(api, gpu, "mono_seed4", {**body, "seed": 4}))["bytes"])
+    a2 = arr((await run(api, gpu, "mono_seed3_again", {**body, "seed": 3}))["bytes"])
+    spread = [float((x.max(axis=2) - x.min(axis=2)).mean()) for x in (a, b, a2)]
+    other, again = float(np.abs(a - b).mean()), float(np.abs(a - a2).mean())
+    print(f"色の幅（RGB の最大−最小の平均）{spread}・seed 3 と 4 の差 {other:.2f}・seed 3 と 3 の差 {again:.3f}")
+    assert all(s < 8 for s in spread), spread
+    assert other > 20, other
+    assert again < 1, again
