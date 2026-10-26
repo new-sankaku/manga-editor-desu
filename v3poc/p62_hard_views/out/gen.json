@@ -1,0 +1,843 @@
+{
+ "ckpt": "illustrious\\waiIllustriousSDXL_v160.safetensors",
+ "controlnet": "xinsir\\union-sdxl-1.0-promax.safetensors",
+ "union_type": "openpose",
+ "steps": 25,
+ "cfg": 5.0,
+ "sampler": "euler_ancestral",
+ "scheduler": "normal",
+ "size": {
+  "back_full": [
+   832,
+   1216
+  ],
+  "back_34": [
+   832,
+   1216
+  ],
+  "look_back": [
+   832,
+   1216
+  ],
+  "profile_walk": [
+   832,
+   1216
+  ],
+  "profile_face": [
+   832,
+   1216
+  ],
+  "lying_side": [
+   1216,
+   832
+  ],
+  "crouch_back": [
+   832,
+   1216
+  ],
+  "two_profile": [
+   1216,
+   832
+  ],
+  "head_down": [
+   832,
+   1216
+  ]
+ },
+ "prompts": {
+  "back_full": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, from behind, facing away, back, back of head, standing, full body",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, facing viewer, looking back, face"
+  },
+  "back_34": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, from behind, facing away, three-quarter view, looking ahead, standing, full body",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, facing viewer, looking back"
+  },
+  "look_back": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, from behind, back, looking back, looking over shoulder, profile, full body, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, facing viewer, looking at viewer"
+  },
+  "profile_walk": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, from side, profile, walking, facing left, full body, side view",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, facing viewer, three-quarter view"
+  },
+  "profile_face": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, from side, profile, side view, facing left, close-up, portrait",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, facing viewer, three-quarter view"
+  },
+  "lying_side": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, lying, on side, on floor, full body, from side",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, standing, sitting"
+  },
+  "crouch_back": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, from behind, facing away, back, squatting, full body, back of head",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, facing viewer, looking back, face"
+  },
+  "two_profile": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 2girls, short black bob hair, school blazer, pleated skirt, classroom, face-to-face, from side, profile, looking at another, upper body, side view",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, facing viewer"
+  },
+  "head_down": {
+   "prompt": "best quality, monochrome, greyscale, manga, screentone, 1girl, solo, short black bob hair, school blazer, pleated skirt, classroom, head down, looking down, face hidden, hair over eyes, full body, standing",
+   "negative": "lowres, bad anatomy, bad hands, extra digits, fewer digits, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry, looking at viewer, eyes visible"
+  }
+ },
+ "runs": [
+  {
+   "view": "back_full",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_full",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_full",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_full",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_full",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_full",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_full",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_full",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_full",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_full",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_full",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_full",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_34",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_34",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_34",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_34",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_34",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_34",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "back_34",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_34",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_34",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_34",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_34",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "back_34",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "look_back",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "look_back",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "look_back",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "look_back",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "look_back",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "look_back",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "look_back",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "look_back",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "look_back",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "look_back",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "look_back",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "look_back",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_walk",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_face",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_face",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_face",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_face",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_face",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_face",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_face",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_face",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_face",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_face",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_face",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "profile_face",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "lying_side",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "lying_side",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "lying_side",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "lying_side",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "lying_side",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "lying_side",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "lying_side",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "lying_side",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "lying_side",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "lying_side",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "lying_side",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "lying_side",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "crouch_back",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "two_profile",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "two_profile",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "two_profile",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "two_profile",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "two_profile",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "two_profile",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "head_down",
+   "mode": "C8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "head_down",
+   "mode": "C8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "head_down",
+   "mode": "C8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "head_down",
+   "mode": "C8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "head_down",
+   "mode": "C8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "head_down",
+   "mode": "C8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "head_down",
+   "mode": "C10",
+   "seed": 2001,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "head_down",
+   "mode": "C10",
+   "seed": 2002,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "head_down",
+   "mode": "C10",
+   "seed": 2003,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "head_down",
+   "mode": "C10",
+   "seed": 2004,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "head_down",
+   "mode": "C10",
+   "seed": 2005,
+   "strength": 1.0,
+   "end": 1.0
+  },
+  {
+   "view": "head_down",
+   "mode": "C10",
+   "seed": 2006,
+   "strength": 1.0,
+   "end": 1.0
+  }
+ ]
+}

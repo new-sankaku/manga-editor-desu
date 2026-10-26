@@ -58,6 +58,7 @@ from v3server.harness.upstream_versions import (
 )
 from v3server.image_file_storage import read_image, store_image
 from v3server.judge_procedures.pair_comparison import ImagePair, compare_pairs
+from v3server.llm_questions.ai_look_signs import AI_LOOK_SIGNS
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError
 from v3server.llm_questions.redo_instruction_question import (
     build_first_tags_question,
@@ -789,7 +790,8 @@ async def evaluate(unit: HarnessUnit, args: dict[str, Any]) -> dict[str, Any]:
             fh.write(read_image(img.sha256))
         path_of[cid], cid_of[p] = p, cid
     pairs = [ImagePair(path_of[a.id], path_of[b.id]) for a, b in itertools.combinations(cands, 2)]
-    criterion = f"狙い「{target}」に、AとBのどちらの絵が合っているかを答えてください。"  # i18n:prompt
+    criterion = (f"狙い「{target}」に合っているかと、いかにもAIで作ったと見える所（{AI_LOOK_SIGNS}）が少ないかの両方で、"
+                 "AとBのどちらの絵が良いかを答えてください。この作品では、AIらしさが強い絵は狙いに合っていても採用されません。")  # i18n:prompt
     job_ids: list[str] = []
     rounds, tops, scores_by_repeat = [], [], []
     for r in range(repeats):

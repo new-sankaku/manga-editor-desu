@@ -3,6 +3,7 @@ import json
 
 import pytest
 
+from v3server.llm_questions.ai_look_signs import AI_LOOK_SIGNS
 from v3server.llm_questions.answer_json_reader import (
     BROKEN_RESPONSE_KIND,
     BrokenAnswerError,
@@ -233,6 +234,10 @@ def test_shot_angle():
 
 def test_redo_tags():
     assert "渡す先のモデル：説明" in build_first_tags_question("教室で泣く", "説明")
+    # AIらしい絵は採用しないことと、その避け方の手を、初めの問いと作り直しの問いの両方に入れる
+    for question in (build_first_tags_question("教室で泣く", "説明"),
+                     build_redo_tags_question("教室で泣く", "説明", ["1girl"], None)):
+        assert AI_LOOK_SIGNS in question and "何も足さない" in question
     no_reason = build_redo_tags_question("教室で泣く", "説明", ["a", "b"], None)
     assert "a, b" in no_reason and "理由：" not in no_reason
     assert "採用されなかった理由：顔が小さい" in build_redo_tags_question("教室で泣く", "説明", ["a"], "顔が小さい")

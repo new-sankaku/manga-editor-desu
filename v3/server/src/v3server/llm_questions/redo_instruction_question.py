@@ -6,6 +6,7 @@
 """
 from pydantic import BaseModel
 
+from v3server.llm_questions.ai_look_signs import AI_LOOK_SIGNS
 from v3server.llm_questions.answer_json_reader import BrokenAnswerError, read_answer
 from v3server.messages import ms
 
@@ -16,6 +17,13 @@ _REDO_CHOICES = """新しいタグの列の作り方には、次のような手�
 ・タグの列を大きく組み替える：前と違う絵になりやすいが、前の絵で合っていた所も変わることがある
 ・タグを減らして短くする：指示どうしのぶつかりは減るが、コマの中身のうち描かれない所が出やすい
 ・タグを足して細かくする：狙いを細かく伝えられるが、モデルが一部のタグを無視しやすくなる"""  # i18n:prompt
+# AIらしい絵の避け方（決め打ちにしない。CLAUDE.md）
+_AI_LOOK = f"""この作品では、いかにもAIで作ったと見える絵は、コマの中身に合っていても採用されません。AIらしく見える所：{AI_LOOK_SIGNS}。
+品質と画風の言葉は、頼む人が決めてこのタグの列とは別に足します。避け方には次のような手があります。どれを使うか、使わないかは任せます。
+・画材や描き方を表すタグを入れる：手で描いた絵に寄りやすいが、渡す先のモデルが知らない言葉は無視されるか、絵が崩れる
+・光・つや・描き込みの多さを強めるタグを入れない：光沢と描き込みすぎを避けやすいが、絵が平たく見えることがある
+・人物の顔や体つきの特徴をコマの中身から拾ってタグにする：整いすぎた同じ顔を避けやすいが、タグが増えてほかのタグが効きにくくなる
+・何も足さない：コマの中身は伝わりやすいが、AIらしい絵になりやすい"""  # i18n:prompt
 
 
 def _head(panel_content: str, model_description: str) -> str:  # i18n:prompt
@@ -28,6 +36,8 @@ def _head(panel_content: str, model_description: str) -> str:  # i18n:prompt
 渡す先のモデル：{model_description}
 
 コマの中身：{panel_content}
+
+{_AI_LOOK}
 """
 
 

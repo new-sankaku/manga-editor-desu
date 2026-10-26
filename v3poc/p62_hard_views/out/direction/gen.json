@@ -1,0 +1,177 @@
+{
+ "union_type": "canny/lineart/anime_lineart/mlsd",
+ "canny": [
+  0.4,
+  0.8
+ ],
+ "runs": [
+  {
+   "view": "profile_walk",
+   "mode": "L6",
+   "seed": 2001,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L6",
+   "seed": 2002,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L6",
+   "seed": 2003,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L6",
+   "seed": 2004,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L6",
+   "seed": 2005,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L6",
+   "seed": 2006,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "profile_walk",
+   "mode": "L8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "L6",
+   "seed": 2001,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "two_profile",
+   "mode": "L6",
+   "seed": 2002,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "two_profile",
+   "mode": "L6",
+   "seed": 2003,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "two_profile",
+   "mode": "L6",
+   "seed": 2004,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "two_profile",
+   "mode": "L6",
+   "seed": 2005,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "two_profile",
+   "mode": "L6",
+   "seed": 2006,
+   "strength": 0.6,
+   "end": 0.6
+  },
+  {
+   "view": "two_profile",
+   "mode": "L8",
+   "seed": 2001,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "L8",
+   "seed": 2002,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "L8",
+   "seed": 2003,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "L8",
+   "seed": 2004,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "L8",
+   "seed": 2005,
+   "strength": 0.8,
+   "end": 0.8
+  },
+  {
+   "view": "two_profile",
+   "mode": "L8",
+   "seed": 2006,
+   "strength": 0.8,
+   "end": 0.8
+  }
+ ]
+}
