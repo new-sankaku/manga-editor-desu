@@ -15,6 +15,7 @@
 - バグの温床になるコードは避けてください。全てのコードを修正してプロパティを変更するのではなく、Eventトリガーの1か所に修正を入れるなど修正漏れ、テスト対象の拡大を防いでください。
 
 ## ドキュメント
+- `llm_doc/feature-map.md` - 機能からファイル・入口の関数を引くとき。カテゴリ別の機能と処理の一覧
 - `llm_doc/project-structure.md` - ファイルの場所が分からないとき。ディレクトリ構成、グローバル変数、script読み込み順
 - `llm_doc/ui-patterns.md` - UI部品の追加・修正時。EventDelegator、Toast、モーダル、CSS変数、i18n、永続化の使い方
 - `llm_doc/ai-system.md` - AI画像生成の修正時。プロバイダ構成、TaskQueue、ロール割り当て、ComfyUIワークフロー
