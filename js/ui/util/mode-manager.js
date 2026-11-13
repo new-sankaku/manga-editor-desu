@@ -9,6 +9,7 @@ MOVE_POINT:'movePoint',
 DELETE_POINT:'deletePoint',
 KNIFE:'knife',
 CROP:'crop',
+PART_SCALE:'partScale',
 PANEL_EDIT:'panelEdit',
 TONE:'Tone',
 TONE_NOISE:'ToneNoise',
@@ -404,6 +405,27 @@ return cropFrame!==null&&cropFrame!==undefined;
 }
 },
 
+// 範囲を拡大縮小の入り口。中身は part-scale.js の PartScale が持つ。
+// ESC・別モード・選択を外す、のどれで抜けても clearAll() → disable() を通り、確定前なら画像を元に戻す
+partScale:{
+enable:function(targetImage){
+ModeManager.change(ModeManager.MODE.PART_SCALE);
+PartScale.start(targetImage);
+if(!PartScale.isActive()){
+ModeManager.clearAll();
+}
+},
+
+disable:function(){
+if(typeof PartScale==='undefined')return;
+PartScale.cancel();
+},
+
+isActive:function(){
+return typeof PartScale!=='undefined'&&PartScale.isActive();
+}
+},
+
 pencil:{
 enable:function(type){
 ModeManager.change(type);
@@ -560,6 +582,7 @@ ModeManager.button.nonActiveClear();
 clearAll:function(){
 uiLogger.debug("ModeManager.clearAll start");
 ModeManager.crop.disable();
+ModeManager.partScale.disable();
 ModeManager.knife.disable();
 ModeManager.edit.clear();
 ModeManager.pencil.disable();

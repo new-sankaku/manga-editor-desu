@@ -388,10 +388,13 @@ shortcutFocusTrap=null;
 $('shortcutModal').style.display='none';
 }
 
-// bind enter key for crop completion
+// bind enter key for crop / part scale completion
 hotkeys('enter','all',function (e) {
 if (cropFrame) {
 completeCrop();
+e.preventDefault();
+}else if (ModeManager.partScale.isActive()) {
+PartScale.next();
 e.preventDefault();
 }
 });

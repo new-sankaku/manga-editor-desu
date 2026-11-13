@@ -22,6 +22,7 @@ var menuIconMap={
 "flipHorizontal":"flip",
 "flipVertical":"flip",
 "cropImage":"crop",
+"partScale":"zoom_out_map",
 "clearAllClipPaths":"content_cut",
 "clearTopClipPath":"content_cut",
 "clearBottomClipPath":"content_cut",
@@ -184,6 +185,7 @@ var clearLeftClipPath=createObjectMenuButton('clearLeftClipPath');
 var flipHorizontal=createObjectMenuButton('flipHorizontal');
 var flipVertical=createObjectMenuButton('flipVertical');
 var cropImage=createObjectMenuButton('cropImage');
+var partScale=createObjectMenuButton('partScale');
 
 var font=createObjectMenuDiv('fontSelectorMenu');
 
@@ -252,7 +254,7 @@ menuItems.push(createObjectMenuGroupHeader('menuGroupAI'));
 menuItems=menuItems.concat(aiItems);
 }
 menuItems.push(createObjectMenuGroupHeader('menuGroupTransform'));
-menuItems.push(flipHorizontal,flipVertical,cropImage);
+menuItems.push(flipHorizontal,flipVertical,cropImage,partScale);
 if(haveClipPath(activeObject)){
 var clippingSub=createObjectMenuSubmenu('menuClipping',[
 clearAllClipPaths,clearTopClipPath,clearBottomClipPath,clearRightClipPath,clearLeftClipPath
@@ -655,6 +657,11 @@ if(isImage(activeObject)){
 // startCropMode() を直接呼ぶと ModeManager.clearAll() を通らず、
 // 動いていたモード（トーン等）がそのまま残って案内文だけ奪われる（監査 #10）
 ModeManager.crop.enable(activeObject);
+}
+break;
+case 'partScale':
+if(isImage(activeObject)){
+ModeManager.partScale.enable(activeObject);
 }
 break;
 case 'boldOn':

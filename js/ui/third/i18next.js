@@ -10,6 +10,64 @@
 // },
 //マージされるので追加日ごとにyyyyMMddHHmmss_SSSをTopKeyに入れます。個別の翻訳はKey名・翻訳文を任意に付けてください。ただし被らないように。
 const resources = {
+"20261113120000_001":{
+"ja":{
+"partScale":"範囲を拡大縮小",
+"partScaleSelectHelpText":"拡大縮小する範囲に枠を合わせて Enter キーで決定",
+"partScaleTransformHelpText":"四隅をドラッグして拡大縮小し、Enter キーで確定（ESC で取り消し）",
+"partScaleOutside":"枠が画像の外にあります",
+"partScaleFailed":"範囲の拡大縮小を確定できませんでした"
+},
+"en":{
+"partScale":"Scale area",
+"partScaleSelectHelpText":"Fit the frame to the area to scale, then press Enter",
+"partScaleTransformHelpText":"Drag the corners to scale, then press Enter to apply (ESC to cancel)",
+"partScaleOutside":"The frame is outside the image",
+"partScaleFailed":"Could not apply the area scaling"
+},
+"ko":{
+"partScale":"범위 확대/축소",
+"partScaleSelectHelpText":"확대/축소할 범위에 틀을 맞추고 Enter 키로 결정",
+"partScaleTransformHelpText":"모서리를 드래그해 확대/축소하고 Enter 키로 확정 (ESC로 취소)",
+"partScaleOutside":"틀이 이미지 밖에 있습니다",
+"partScaleFailed":"범위 확대/축소를 확정하지 못했습니다"
+},
+"fr":{
+"partScale":"Redimensionner une zone",
+"partScaleSelectHelpText":"Ajustez le cadre à la zone, puis appuyez sur Enter",
+"partScaleTransformHelpText":"Faites glisser les coins pour redimensionner, puis Enter pour appliquer (ESC pour annuler)",
+"partScaleOutside":"Le cadre est hors de l'image",
+"partScaleFailed":"Impossible d'appliquer le redimensionnement"
+},
+"zh":{
+"partScale":"缩放区域",
+"partScaleSelectHelpText":"将框对准要缩放的区域，按 Enter 确定",
+"partScaleTransformHelpText":"拖动四角进行缩放，按 Enter 确认（ESC 取消）",
+"partScaleOutside":"框在图像之外",
+"partScaleFailed":"无法应用区域缩放"
+},
+"ru":{
+"partScale":"Масштаб области",
+"partScaleSelectHelpText":"Совместите рамку с областью и нажмите Enter",
+"partScaleTransformHelpText":"Тяните углы для масштабирования, Enter — применить (ESC — отмена)",
+"partScaleOutside":"Рамка вне изображения",
+"partScaleFailed":"Не удалось применить масштабирование области"
+},
+"es":{
+"partScale":"Escalar área",
+"partScaleSelectHelpText":"Ajuste el marco al área y presione Enter",
+"partScaleTransformHelpText":"Arrastre las esquinas para escalar y presione Enter para aplicar (ESC para cancelar)",
+"partScaleOutside":"El marco está fuera de la imagen",
+"partScaleFailed":"No se pudo aplicar el escalado del área"
+},
+"de":{
+"partScale":"Bereich skalieren",
+"partScaleSelectHelpText":"Rahmen an den Bereich anpassen und Enter drücken",
+"partScaleTransformHelpText":"Ecken ziehen zum Skalieren, Enter zum Übernehmen (ESC zum Abbrechen)",
+"partScaleOutside":"Der Rahmen liegt außerhalb des Bildes",
+"partScaleFailed":"Bereichsskalierung konnte nicht übernommen werden"
+}
+},
 "20260829150000_001":{
 "ja":{
 "missingValue":"ワークフローに、ComfyUI側に無い値を指している項目があります",
