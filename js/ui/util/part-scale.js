@@ -137,9 +137,16 @@ skewY:img.skewY,
 opacity:img.opacity,
 borderColor:'#36fd00',
 cornerColor:'green',
+// 回すと画素の並びに合わなくなり、確定のときに斜めの描き直しでぼやける。
+// 裏返しも同じ理由で止める（反転は右クリックの「左右反転」「上下反転」がある）
+lockRotation:true,
+lockScalingFlip:true,
+lockSkewingX:true,
+lockSkewingY:true,
 excludeFromLayerPanel:true,
 excludeFromExport:true
 });
+piece.setControlsVisibility({mtr:false});
 if(img.filters&&img.filters.length>0){
 piece.filters=img.filters.slice();
 piece.applyFilters();
@@ -163,35 +170,30 @@ var piece=PartScale._piece;
 var holed=PartScale._holedCanvas;
 var pieceCanvas=PartScale._pieceCanvas;
 
+// 部分の変形を画像の元の画素の座標へ写す。回転・裏返しは止めてあるので、倍率と位置だけになる
+var m=fabric.util.multiplyTransformMatrices(
+fabric.util.invertTransform(img.calcTransformMatrix()),
+piece.calcTransformMatrix()
+);
+// 位置と大きさを画素の境目にそろえる。端数のまま描くと、隣どうしの画素が混ざって線がにじむ
+var toW=Math.max(1,Math.round(pieceCanvas.width*m[0]));
+var toH=Math.max(1,Math.round(pieceCanvas.height*m[3]));
+var centerX=m[4]+img.width/2+(img.cropX||0);
+var centerY=m[5]+img.height/2+(img.cropY||0);
+var toLeft=Math.round(centerX-toW/2);
+var toTop=Math.round(centerY-toH/2);
+
+PartScale._committing=true;
+PartScale._resize(pieceCanvas,toW,toH).then(function(resized){
 var out=document.createElement('canvas');
 out.width=holed.width;
 out.height=holed.height;
 var ctx=out.getContext('2d');
 ctx.drawImage(holed,0,0);
-// 部分の変形を画像の元の画素の座標へ写して描く。画像からはみ出した所は捨てる（画像の大きさは変えない）
-var m=fabric.util.multiplyTransformMatrices(
-fabric.util.invertTransform(img.calcTransformMatrix()),
-piece.calcTransformMatrix()
-);
-ctx.setTransform(1,0,0,1,img.width/2+(img.cropX||0),img.height/2+(img.cropY||0));
-ctx.transform(m[0],m[1],m[2],m[3],m[4],m[5]);
-ctx.imageSmoothingEnabled=true;
-ctx.imageSmoothingQuality='high';
-ctx.drawImage(pieceCanvas,-pieceCanvas.width/2,-pieceCanvas.height/2);
-
-var dataUrl;
-try{
-dataUrl=out.toDataURL('image/png');
-}catch(e){
-uiLogger.error('PartScale commit failed',e);
-createToastError(getText('partScaleFailed'),String(e));
-ModeManager.clearAll();
-return;
-}
-PartScale._committing=true;
-// 画像の要素は HTMLImageElement に揃える（_element.src を読む処理がある）
-var el=new Image();
-el.onload=function(){
+// 等倍で整数の位置に置くので、ここでは描き直しが起きない。画像からはみ出した所は捨てる
+ctx.drawImage(resized,toLeft,toTop);
+return PartScale._toImageElement(out);
+}).then(function(el){
 var target=PartScale._image;
 var width=target.width;
 var height=target.height;
@@ -204,13 +206,40 @@ canvas.setActiveObject(target);
 canvas.requestRenderAll();
 commitHistory();
 updateLayerPanel();
-};
-el.onerror=function(){
-createToastError(getText('partScaleFailed'),"");
+}).catch(function(e){
+uiLogger.error('PartScale commit failed',e);
+createToastError(getText('partScaleFailed'),String(e));
 PartScale._committing=false;
 ModeManager.clearAll();
-};
-el.src=dataUrl;
+});
+},
+
+// 縮小・拡大は pica（third/pica/）の mks2013 で行う。
+// ブラウザの drawImage の縮小は方式が決まっておらず（imageSmoothingQuality の中身は仕様で定めていない）、
+// 細い線が薄くなる。mks2013 は pica の既定で、縮小と同時に軽く締める方式。
+// Web Worker は使わない。pica は Blob の URL から Worker を起こすが、file:// で動くかは未検証
+_pica:null,
+_resize:function(src,toW,toH){
+if(toW===src.width&&toH===src.height){
+return Promise.resolve(src);
+}
+if(!PartScale._pica){
+PartScale._pica=pica({features:['js','wasm']});
+}
+var dest=document.createElement('canvas');
+dest.width=toW;
+dest.height=toH;
+return PartScale._pica.resize(src,dest,{filter:'mks2013'});
+},
+
+// 画像の要素は HTMLImageElement に揃える（_element.src を読む処理がある）
+_toImageElement:function(canvasEl){
+return new Promise(function(resolve,reject){
+var el=new Image();
+el.onload=function(){resolve(el);};
+el.onerror=function(){reject(new Error('image load failed'));};
+el.src=canvasEl.toDataURL('image/png');
+});
 },
 
 // ModeManager.partScale.disable() からだけ呼ぶ。確定前なら画像を元に戻す
